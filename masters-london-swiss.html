@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masters London – Swiss Stage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      .swiss-wrap {
+        padding: 28px 16px 60px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      .swiss-bracket {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+      @media (max-width: 640px) {
+        .swiss-bracket { grid-template-columns: 1fr; }
+      }
+
+      .swiss-round {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .round-label {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding-bottom: 10px;
+        border-bottom: 1.5px solid rgba(255,255,255,0.1);
+      }
+
+      /* Group card */
+      .swiss-group {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        color: #111;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+      }
+
+      .group-hdr {
+        background: linear-gradient(135deg, #651eff 0%, #4500cc 100%);
+        color: #fff;
+        padding: 10px 14px;
+        text-align: center;
+      }
+      .group-hdr-record {
+        display: block;
+        font-size: 20px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      /* Match separator */
+      .match-sep {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 10px;
+        color: #aaa;
+        padding: 5px 10px 2px;
+        border-top: 1px solid #efefef;
+      }
+      .match-sep-detail {
+        font-size: 9px;
+        font-weight: 700;
+        color: #651eff;
+        text-decoration: none;
+        opacity: 0.7;
+        margin-left: auto;
+        letter-spacing: 0.03em;
+      }
+      .match-sep-detail:hover { opacity: 1; }
+
+      /* Match row */
+      .match-row {
+        display: flex;
+        min-height: 42px;
+      }
+      .admin-editable .match-row { cursor: pointer; }
+
+      .match-cell {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex: 1;
+        padding: 6px 9px;
+        transition: background 0.12s;
+        min-width: 0;
+      }
+      .match-cell.away { flex-direction: row-reverse; }
+
+      .match-cell img {
+        width: 26px; height: 26px;
+        object-fit: contain; flex-shrink: 0;
+      }
+      .cell-logo-ph {
+        width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(0,0,0,0.08); flex-shrink: 0;
+      }
+
+      .cell-name {
+        flex: 1; font-size: 11px; font-weight: 700;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        color: #222;
+      }
+      .cell-name.empty { opacity: 0.35; font-weight: 500; }
+
+      .cell-score {
+        font-size: 20px; font-weight: 900;
+        color: #111; min-width: 16px; text-align: center; line-height: 1;
+        flex-shrink: 0;
+      }
+      .cell-score.empty { font-size: 13px; color: #ccc; font-weight: 500; }
+
+      .score-sep {
+        width: 1px; background: rgba(0,0,0,0.1); align-self: stretch; flex-shrink: 0;
+      }
+
+      /* Winner/playoff colors */
+      .match-cell.result-green { background: rgba(0,185,90,0.18); }
+      .match-cell.result-blue  { background: rgba(101,30,255,0.18); }
+
+      .admin-editable .match-row:hover .match-cell:not(.result-green):not(.result-blue) {
+        background: rgba(0,0,0,0.04);
+      }
+
+      /* Legend */
+      .swiss-legend {
+        display: flex; align-items: center; gap: 20px;
+        justify-content: center; margin-top: 20px; flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 12px; color: rgba(255,255,255,0.5);
+      }
+      .legend-dot {
+        width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+      }
+      .legend-dot.green { background: rgba(0,185,90,0.8); }
+      .legend-dot.blue  { background: rgba(101,30,255,0.8); }
+
+      /* ── Match edit modal ──────────────────────────────── */
+      .sm-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
+      .sm-modal[hidden] { display: none !important; }
+      .sm-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.62); backdrop-filter: blur(6px); }
+      .sm-panel {
+        position: relative; z-index: 1;
+        width: min(540px, calc(100vw - 24px));
+        max-height: 90vh; overflow-y: auto;
+        background: #0d0819;
+        border: 1.5px solid rgba(101,30,255,0.35);
+        border-radius: 18px; padding: 24px;
+        animation: loginPanelIn 0.2s ease;
+      }
+      .sm-panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 3px; }
+      .sm-panel > p { font-size: 12px; opacity: 0.45; margin: 0 0 18px; }
+
+      .sm-team-section { margin-bottom: 18px; }
+      .sm-team-section h3 { font-size: 11px; font-weight: 700; opacity: 0.45; letter-spacing: 0.08em; margin: 0 0 8px; }
+      .sm-team-grid {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      }
+      .sm-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 8px 4px; border-radius: 8px;
+        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+        color: #fff; font-family: inherit; font-size: 10px; font-weight: 700; cursor: pointer;
+        transition: all 0.12s; text-align: center;
+      }
+      .sm-team-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .sm-team-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+      .sm-team-btn:hover { background: rgba(101,30,255,0.18); border-color: rgba(101,30,255,0.5); }
+      .sm-team-btn.selected { background: rgba(101,30,255,0.32); border-color: #651eff; }
+      .sm-team-btn:disabled { opacity: 0.28; pointer-events: none; }
+
+      .sm-score-section { margin-bottom: 20px; }
+      .sm-score-section h3 { font-size: 11px; font-weight: 700; opacity: 0.45; letter-spacing: 0.08em; margin: 0 0 10px; }
+      .sm-score-row { display: flex; align-items: center; gap: 12px; justify-content: center; }
+      .sm-score-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .sm-score-block label { font-size: 10px; font-weight: 700; opacity: 0.45; }
+      .sm-score-input {
+        width: 64px; text-align: center;
+        font-size: 28px; font-weight: 900;
+        background: rgba(255,255,255,0.07);
+        border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 8px; color: #fff; padding: 8px 0; font-family: inherit;
+      }
+      .sm-score-input:focus { outline: none; border-color: #651eff; }
+      .sm-score-vs { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.25); margin-top: 18px; }
+
+      .sm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .sm-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .sm-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .sm-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .sm-btn-save { background: #651eff; color: #fff; }
+      .sm-btn-save:hover { background: #7a3fff; }
+      .sm-btn-clear { background: rgba(255,80,80,0.14); color: #ff6060; border: 1px solid rgba(255,80,80,0.25); }
+      .sm-btn-clear:hover { background: rgba(255,80,80,0.26); }
+    </style>
+  </head>
+  <body class="league-page masters-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./masters-london.html">런던</a>
+    </header>
+
+    <main class="league-shell stage-shell">
+      <section class="stage-hero" aria-labelledby="stage-title">
+        <div>
+          <p class="eyebrow">VCT Masters 2026 · 런던</p>
+          <h1 id="stage-title">Swiss Stage</h1>
+          <p class="intro">
+            각 지역 2시드·3시드 8팀이 3라운드 Swiss 방식으로 경기해 4팀이 플레이오프에 진출합니다.
+          </p>
+        </div>
+        <div class="stage-summary" aria-label="Swiss Stage 정보">
+          <div><strong>8</strong><span>팀</span></div>
+          <div><strong>4</strong><span>진출</span></div>
+          <div><strong>10</strong><span>경기</span></div>
+        </div>
+      </section>
+
+      <div class="swiss-wrap">
+        <div class="swiss-bracket" id="swiss-bracket"></div>
+        <div class="swiss-legend">
+          <span class="legend-item"><span class="legend-dot green"></span>라운드 승리</span>
+          <span class="legend-item"><span class="legend-dot blue"></span>플레이오프 진출</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Match edit modal -->
+    <div class="sm-modal" id="sm-modal" hidden>
+      <div class="sm-backdrop" id="sm-backdrop"></div>
+      <div class="sm-panel" role="dialog" aria-modal="true">
+        <h2 id="sm-title">경기 편집</h2>
+        <p id="sm-sub"></p>
+        <div id="sm-body"></div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const STORAGE_KEY     = "masters_london_swiss";
+      const PARTICIPANTS_KEY = "masters_london_participants";
+
+      /* ── 그룹 정의 ─────────────────────────────────────── */
+      const GROUPS = [
+        { key: "r1",  record: "0-0", count: 4, winColor: "green", loseColor: "" },
+        { key: "r2w", record: "1-0", count: 2, winColor: "blue",  loseColor: "green" },
+        { key: "r2l", record: "0-1", count: 2, winColor: "green", loseColor: "" },
+        { key: "r3",  record: "1-1", count: 2, winColor: "blue",  loseColor: "" },
+      ];
+
+      /* ── 팀 데이터 ─────────────────────────────────────── */
+      const ALL_TEAMS = {
+        pacific: [
+          { name: "Paper Rex",          code: "PRX",  logo: "./assets/teams/prx.svg" },
+          { name: "Gen.G",              code: "GEN",  logo: "./assets/teams/gen.png" },
+          { name: "Kiwoom DRX",         code: "DRX",  logo: "./assets/teams/krx.svg" },
+          { name: "Rex Regum Qeon",     code: "RRQ",  logo: "./assets/teams/rrq.png" },
+          { name: "T1",                 code: "T1",   logo: "./assets/teams/t1.png" },
+          { name: "FULL SENSE",         code: "FS",   logo: "./assets/teams/fs.svg" },
+          { name: "Global Esports",     code: "GE",   logo: "./assets/teams/ge.webp" },
+          { name: "Team Secret",        code: "TS",   logo: "./assets/teams/ts.svg" },
+          { name: "ZETA DIVISION",      code: "ZETA", logo: "./assets/teams/zeta.png" },
+          { name: "DetonatioN FocusMe", code: "DFM",  logo: "./assets/teams/dfm.svg" },
+          { name: "Nongshim RedForce",  code: "NS",   logo: "./assets/teams/ns.svg" },
+          { name: "VARREL",             code: "VRL",  logo: "./assets/teams/vl.svg" },
+        ],
+        americas: [
+          { name: "Sentinels",     code: "SEN",  logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" },
+          { name: "G2 Esports",    code: "G2",   logo: "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" },
+          { name: "NRG",           code: "NRG",  logo: "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" },
+          { name: "100 Thieves",   code: "100T", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" },
+          { name: "Cloud9",        code: "C9",   logo: "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" },
+          { name: "MIBR",          code: "MIBR", logo: "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" },
+          { name: "LOUD",          code: "LOUD", logo: "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" },
+          { name: "FURIA",         code: "FUR",  logo: "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" },
+          { name: "KRÜ Esports",   code: "KRÜ",  logo: "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" },
+          { name: "Leviatán",      code: "LEV",  logo: "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" },
+          { name: "Evil Geniuses", code: "EG",   logo: "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" },
+          { name: "ENVY",          code: "ENVY", logo: "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" },
+        ],
+        cn: [
+          { name: "All Gamers",                      code: "AG",   logo: "https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp" },
+          { name: "JD Mall JDG Esports",             code: "JDG",  logo: "https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg" },
+          { name: "TYLOO",                           code: "TYL",  logo: "https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg" },
+          { name: "Wuxi Titan Esports Club",         code: "TEC",  logo: "https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg" },
+          { name: "Guangzhou Huadu Bilibili Gaming", code: "BLG",  logo: "https://dpm.lol/esport/teams/BLG.webp" },
+          { name: "FunPlus Phoenix",                 code: "FPX",  logo: "https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg" },
+          { name: "Xi Lai Gaming",                   code: "XLG",  logo: "https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg" },
+          { name: "EDward Gaming",                   code: "EDG",  logo: "https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png" },
+          { name: "Dragon Ranger Gaming",            code: "DRG",  logo: "https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp" },
+          { name: "Trace Esports",                   code: "TE",   logo: "https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg" },
+          { name: "Nova Esports",                    code: "NOVA", logo: "https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp" },
+          { name: "Wolves Esports",                  code: "WOL",  logo: "https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp" },
+        ],
+        emea: [
+          { name: "Gentle Mates",  code: "M8",   logo: "./assets/teams/gm.png" },
+          { name: "Team Liquid",   code: "TL",   logo: "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp" },
+          { name: "Team Heretics", code: "TH",   logo: "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg" },
+          { name: "NAVI",          code: "NAVI", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png" },
+          { name: "Karmine Corp",  code: "KC",   logo: "./assets/teams/kc.png" },
+          { name: "FUT Esports",   code: "FUT",  logo: "https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg" },
+          { name: "BBL Esports",   code: "BBL",  logo: "https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg" },
+          { name: "Fnatic",        code: "FNC",  logo: "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg" },
+          { name: "Team Vitality", code: "VIT",  logo: "https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg" },
+          { name: "GIANTX",        code: "GX",   logo: "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg" },
+          { name: "Eternal Fire",  code: "EF",   logo: "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg" },
+          { name: "PCIFIC Esports",code: "PCFC", logo: "https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" },
+        ],
+      };
+
+      const REGIONS = ["pacific", "americas", "cn", "emea"];
+
+      /* ── Swiss 참가 팀 목록 (2시드, 3시드 분리) ──────────── */
+      function getSwissTeamsBySeed() {
+        try {
+          const p = JSON.parse(localStorage.getItem(PARTICIPANTS_KEY) || "{}");
+          const seed2 = [], seed3 = [];
+          REGIONS.forEach((r) => {
+            const slots = p[r] || [];
+            if (slots[1]) seed2.push(slots[1]);
+            if (slots[2]) seed3.push(slots[2]);
+          });
+          if (seed2.length + seed3.length > 0) return { seed2, seed3, hasParticipants: true };
+        } catch {}
+        return { seed2: [], seed3: [], hasParticipants: false };
+      }
+      function getSwissTeams() {
+        const { seed2, seed3 } = getSwissTeamsBySeed();
+        return [...seed2, ...seed3];
+      }
+
+      function findTeam(name) {
+        for (const r of REGIONS) {
+          const t = ALL_TEAMS[r].find((t) => t.name === name);
+          if (t) return t;
+        }
+        return null;
+      }
+
+      /* ── Storage ────────────────────────────────────────── */
+      function emptyMatch() { return { home: "", away: "", hs: null, as: null }; }
+      function defaultData() {
+        return {
+          r1:  [emptyMatch(), emptyMatch(), emptyMatch(), emptyMatch()],
+          r2w: [emptyMatch(), emptyMatch()],
+          r2l: [emptyMatch(), emptyMatch()],
+          r3:  [emptyMatch(), emptyMatch()],
+        };
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const d = JSON.parse(raw), def = defaultData();
+            return { r1: d.r1||def.r1, r2w: d.r2w||def.r2w, r2l: d.r2l||def.r2l, r3: d.r3||def.r3 };
+          }
+        } catch {}
+        return defaultData();
+      }
+      function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+      const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+      /* ── 렌더링 ─────────────────────────────────────────── */
+      function winnerSide(m) {
+        if (m.hs === null || m.as === null || !m.home || !m.away) return null;
+        if (m.hs > m.as) return "home";
+        if (m.as > m.hs) return "away";
+        return null;
+      }
+
+      function matchDetailUrl(groupKey, matchIdx) {
+        return `./masters-match.html?from=swiss&tournament=london&group=${groupKey}&idx=${matchIdx}`;
+      }
+
+      function buildMatchRow(m, group, idx) {
+        const w = winnerSide(m);
+        const ht = m.home ? findTeam(m.home) : null;
+        const at = m.away ? findTeam(m.away) : null;
+
+        let homeClass = "", awayClass = "";
+        if (w === "home") {
+          homeClass = "result-" + group.winColor;
+          if (group.loseColor) awayClass = "result-" + group.loseColor;
+        } else if (w === "away") {
+          awayClass = "result-" + group.winColor;
+          if (group.loseColor) homeClass = "result-" + group.loseColor;
+        }
+
+        const logo = (t, name) => t
+          ? `<img src="${t.logo}" alt="${name}" />`
+          : `<span class="cell-logo-ph"></span>`;
+        const score = (s) => s !== null
+          ? `<span class="cell-score">${s}</span>`
+          : `<span class="cell-score empty">-</span>`;
+
+        const row = document.createElement("div");
+        row.className = "match-row";
+        row.innerHTML = `
+          <div class="match-cell home ${homeClass}">
+            ${logo(ht, m.home)}
+            <span class="cell-name${!m.home ? " empty" : ""}">${ht ? ht.code : "TBD"}</span>
+            ${score(m.hs)}
+          </div>
+          <div class="score-sep"></div>
+          <div class="match-cell away ${awayClass}">
+            ${logo(at, m.away)}
+            <span class="cell-name${!m.away ? " empty" : ""}">${at ? at.code : "TBD"}</span>
+            ${score(m.as)}
+          </div>
+        `;
+        if (isAdmin()) {
+          row.style.cursor = "pointer";
+          row.addEventListener("click", () => openModal(group.key, idx));
+        } else {
+          row.style.cursor = "pointer";
+          row.addEventListener("click", () => {
+            window.location.href = matchDetailUrl(group.key, idx);
+          });
+        }
+        return row;
+      }
+
+      function buildGroupCard(group, data) {
+        const card = document.createElement("div");
+        card.className = "swiss-group";
+        const hdr = document.createElement("div");
+        hdr.className = "group-hdr";
+        hdr.innerHTML = `<span class="group-hdr-record">${group.record}</span>`;
+        card.appendChild(hdr);
+        data[group.key].forEach((m, idx) => {
+          const sep = document.createElement("div");
+          sep.className = "match-sep";
+          sep.innerHTML = `${idx + 1}경기<a class="match-sep-detail" href="${matchDetailUrl(group.key, idx)}">상세 ↗</a>`;
+          card.appendChild(sep);
+          card.appendChild(buildMatchRow(m, group, idx));
+        });
+        return card;
+      }
+
+      /* ── 자동 전파: 이전 라운드 결과 → 다음 라운드 팀 배정 ── */
+      function matchWinner(m) {
+        if (!m.home || !m.away || m.hs === null || m.as === null) return null;
+        return m.hs > m.as ? m.home : m.as > m.hs ? m.away : null;
+      }
+      function matchLoser(m) {
+        if (!m.home || !m.away || m.hs === null || m.as === null) return null;
+        return m.hs > m.as ? m.away : m.as > m.hs ? m.home : null;
+      }
+
+      function autopropagate(data) {
+        let changed = false;
+        // r1 → r2w (승자), r2l (패자)
+        // [r1 매치 0,1] → r2w[0], r2l[0] / [r1 매치 2,3] → r2w[1], r2l[1]
+        [[0, 1], [2, 3]].forEach(([a, b], i) => {
+          const wA = matchWinner(data.r1[a]), wB = matchWinner(data.r1[b]);
+          const lA = matchLoser(data.r1[a]),  lB = matchLoser(data.r1[b]);
+          if (wA && !data.r2w[i].home) { data.r2w[i].home = wA; changed = true; }
+          if (wB && !data.r2w[i].away) { data.r2w[i].away = wB; changed = true; }
+          if (lA && !data.r2l[i].home) { data.r2l[i].home = lA; changed = true; }
+          if (lB && !data.r2l[i].away) { data.r2l[i].away = lB; changed = true; }
+        });
+        // r2w 패자 + r2l 승자 → r3
+        for (let i = 0; i < 2; i++) {
+          const r2wL = matchLoser(data.r2w[i]), r2lW = matchWinner(data.r2l[i]);
+          if (r2wL && !data.r3[i].home) { data.r3[i].home = r2wL; changed = true; }
+          if (r2lW && !data.r3[i].away) { data.r3[i].away = r2lW; changed = true; }
+        }
+        return changed;
+      }
+
+      function render() {
+        const data = load();
+        const bracket = document.getElementById("swiss-bracket");
+        bracket.innerHTML = "";
+        bracket.className = "swiss-bracket" + (isAdmin() ? " admin-editable" : "");
+
+        // col 1: 1라운드
+        const col1 = document.createElement("div");
+        col1.className = "swiss-round";
+        col1.innerHTML = `<div class="round-label">1라운드</div>`;
+        col1.appendChild(buildGroupCard(GROUPS[0], data));
+        bracket.appendChild(col1);
+
+        // col 2: 2라운드 (1-0 + 0-1)
+        const col2 = document.createElement("div");
+        col2.className = "swiss-round";
+        col2.innerHTML = `<div class="round-label">2라운드</div>`;
+        col2.appendChild(buildGroupCard(GROUPS[1], data));
+        col2.appendChild(buildGroupCard(GROUPS[2], data));
+        bracket.appendChild(col2);
+
+        // col 3: 3라운드
+        const col3 = document.createElement("div");
+        col3.className = "swiss-round";
+        col3.innerHTML = `<div class="round-label">3라운드</div>`;
+        col3.appendChild(buildGroupCard(GROUPS[3], data));
+        bracket.appendChild(col3);
+      }
+
+      /* ── Modal ──────────────────────────────────────────── */
+      let _ctx = null, _eHome = "", _eAway = "", _eHs = null, _eAs = null;
+
+      function openModal(groupKey, matchIdx) {
+        const data = load();
+        const m = data[groupKey][matchIdx];
+        const grp = GROUPS.find((g) => g.key === groupKey);
+        _ctx = { groupKey, matchIdx };
+        _eHome = m.home; _eAway = m.away; _eHs = m.hs; _eAs = m.as;
+        document.getElementById("sm-title").textContent = "경기 편집";
+        document.getElementById("sm-sub").textContent = `${grp.record} 그룹 · ${matchIdx + 1}경기`;
+        renderModalBody();
+        document.getElementById("sm-modal").hidden = false;
+      }
+
+      function getUsedTeams() {
+        if (_ctx.groupKey !== "r1") return new Set();
+        const data = load();
+        const used = new Set();
+        data.r1.forEach((m, idx) => {
+          if (idx === _ctx.matchIdx) return;
+          if (m.home) used.add(m.home);
+          if (m.away) used.add(m.away);
+        });
+        return used;
+      }
+
+      function getEligibleTeams(groupKey, side) {
+        const data = load();
+        if (groupKey === "r2w") return data.r1.map(matchWinner).filter(Boolean);
+        if (groupKey === "r2l") return data.r1.map(matchLoser).filter(Boolean);
+        if (groupKey === "r3") {
+          return [
+            ...data.r2w.map(matchLoser).filter(Boolean),
+            ...data.r2l.map(matchWinner).filter(Boolean),
+          ];
+        }
+        return [];
+      }
+
+      function renderModalBody() {
+        const { seed2, seed3, hasParticipants } = getSwissTeamsBySeed();
+        const body = document.getElementById("sm-body");
+        const groupKey = _ctx.groupKey;
+
+        if (groupKey === "r1" && !hasParticipants) {
+          body.innerHTML = `
+            <div style="text-align:center;padding:28px 0 20px;opacity:0.6;font-size:13px;line-height:1.8;">
+              참가팀이 설정되지 않았습니다.<br>
+              <a href="./masters-london.html" style="color:#651eff;font-weight:700;">← 참가팀 배정 페이지로 이동</a>
+            </div>
+            <div class="sm-actions">
+              <button class="sm-btn sm-btn-cancel" id="sm-cancel">닫기</button>
+            </div>`;
+          document.getElementById("sm-cancel").addEventListener("click", closeModal);
+          return;
+        }
+
+        function teamBtnsFromList(side, teamNames, label) {
+          const sel = side === "home" ? _eHome : _eAway;
+          const other = side === "home" ? _eAway : _eHome;
+          const allUsed = getUsedTeams(side);
+          let html = "";
+          if (label) html += `<div style="margin-bottom:6px;font-size:10px;font-weight:700;opacity:0.45;letter-spacing:0.07em;">${label}</div>`;
+          if (teamNames.length === 0) {
+            html += `<div style="text-align:center;padding:10px 0 12px;opacity:0.4;font-size:11px;">이전 라운드 결과를 먼저 입력하세요</div>`;
+          } else {
+            html += `<div class="sm-team-grid" style="margin-bottom:12px;">${teamNames.map((name) => {
+              const t = findTeam(name);
+              if (!t) return "";
+              const isSel = name === sel;
+              const isOther = name === other;
+              const isUsedElsewhere = !isSel && allUsed.has(name);
+              return `<button class="sm-team-btn${isSel ? " selected" : ""}"
+                data-name="${name}" data-side="${side}"
+                ${isOther || isUsedElsewhere ? "disabled" : ""}
+                ${isUsedElsewhere && !isOther ? 'style="opacity:0.28;"' : ""}>
+                <img src="${t.logo}" alt="${t.name}" /><span>${t.code}</span>
+              </button>`;
+            }).join("")}</div>`;
+          }
+          return html;
+        }
+
+        // Team picker rows
+        let pickerHTML = "";
+        ["home", "away"].forEach((side) => {
+          const label = side === "home" ? "HOME" : "AWAY";
+          pickerHTML += `<div class="sm-team-section"><h3>${label}</h3>`;
+          if (groupKey === "r1") {
+            pickerHTML += teamBtnsFromList(side, [...seed2, ...seed3], null);
+          } else {
+            const eligible = getEligibleTeams(groupKey, side);
+            pickerHTML += teamBtnsFromList(side, eligible, null);
+          }
+          pickerHTML += `</div>`;
+        });
+
+        body.innerHTML = pickerHTML + `
+          <div class="sm-score-section">
+            <h3>스코어</h3>
+            <div class="sm-score-row">
+              <div class="sm-score-block">
+                <label>HOME</label>
+                <input class="sm-score-input" id="sm-hs" type="number" min="0" max="5"
+                  value="${_eHs !== null ? _eHs : ""}" placeholder="-" />
+              </div>
+              <span class="sm-score-vs">:</span>
+              <div class="sm-score-block">
+                <label>AWAY</label>
+                <input class="sm-score-input" id="sm-as" type="number" min="0" max="5"
+                  value="${_eAs !== null ? _eAs : ""}" placeholder="-" />
+              </div>
+            </div>
+          </div>
+          <div class="sm-actions">
+            <button class="sm-btn sm-btn-clear" id="sm-clear">초기화</button>
+            <button class="sm-btn sm-btn-cancel" id="sm-cancel">취소</button>
+            <button class="sm-btn sm-btn-save" id="sm-save">저장</button>
+          </div>
+        `;
+
+        body.querySelectorAll(".sm-team-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const name = btn.dataset.name, side = btn.dataset.side;
+            if (side === "home") _eHome = name === _eHome ? "" : name;
+            else _eAway = name === _eAway ? "" : name;
+            renderModalBody();
+          });
+        });
+
+        document.getElementById("sm-hs").addEventListener("input", (e) => {
+          _eHs = e.target.value !== "" ? parseInt(e.target.value) : null;
+        });
+        document.getElementById("sm-as").addEventListener("input", (e) => {
+          _eAs = e.target.value !== "" ? parseInt(e.target.value) : null;
+        });
+
+        document.getElementById("sm-cancel").addEventListener("click", closeModal);
+        document.getElementById("sm-clear").addEventListener("click", () => {
+          const data = load();
+          data[_ctx.groupKey][_ctx.matchIdx] = emptyMatch();
+          save(data); closeModal(); render();
+        });
+        document.getElementById("sm-save").addEventListener("click", () => {
+          const hs = parseInt(document.getElementById("sm-hs").value);
+          const as = parseInt(document.getElementById("sm-as").value);
+          const data = load();
+          data[_ctx.groupKey][_ctx.matchIdx] = {
+            home: _eHome, away: _eAway,
+            hs: isNaN(hs) ? null : hs,
+            as: isNaN(as) ? null : as,
+          };
+          save(data); closeModal(); render();
+        });
+      }
+
+      function closeModal() {
+        document.getElementById("sm-modal").hidden = true;
+        _ctx = null;
+      }
+
+      document.getElementById("sm-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !document.getElementById("sm-modal").hidden) closeModal();
+      });
+
+      render();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

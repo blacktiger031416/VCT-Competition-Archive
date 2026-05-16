@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2026 챔피언스 플레이오프</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260509-0001" />
+    <style>
+      /* ── Champions playoff hero ──────────────────────────── */
+      .champions-page .playoff-hero {
+        background: linear-gradient(135deg, #c5b174 0%, #1a1400 100%);
+        color: #fff;
+      }
+      .champions-page .playoff-hero .eyebrow,
+      .champions-page .playoff-hero h1,
+      .champions-page .playoff-hero p { color: #fff; }
+      .champions-page .playoff-logo-lockup { border-right-color: rgba(255,255,255,0.18); }
+      .champions-page .playoff-board {
+        border-color: #c5b174;
+        box-shadow: 0 24px 48px rgba(197,177,116,0.14);
+      }
+      /* ── bracket colors ──────────────────────────────────── */
+      .champions-page .bracket-rounds span { color: #b89640; }
+      .champions-page .bracket-section-title { background: #c5b174; color: #1a1400; }
+      .champions-page .bracket-match { border-color: #c5b174; }
+      .champions-page .bracket-match h3 { background: #c5b174; color: #1a1400; }
+      .champions-page .bracket-match h3 span { color: rgba(26,20,0,0.6); }
+      .champions-page .bracket-match:hover { box-shadow: 0 10px 24px rgba(197,177,116,0.28); }
+      .champions-page .bracket-logo { border-color: rgba(197,177,116,0.32); color: #b89640; }
+      .champions-page .bracket-footer { background: #1a1400; }
+      /* ── grand finals card ───────────────────────────────── */
+      .champions-page .grand-final-card { border-color: #f5c518; }
+      .champions-page .grand-final-card h3 { background: #f5c518; color: #1a1400; }
+      .champions-page .grand-final-card h3 span { color: #5a4800; }
+      .champions-page .grand-final-card:hover { box-shadow: 0 10px 24px rgba(245,197,24,0.36); }
+      /* ── modal base ──────────────────────────────────────── */
+      .sm-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
+      .sm-modal[hidden] { display: none !important; }
+      .sm-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.62); backdrop-filter: blur(6px); }
+      .sm-panel {
+        position: relative; z-index: 1;
+        width: min(560px, calc(100vw - 24px));
+        max-height: 90vh; overflow-y: auto;
+        background: #1a1400;
+        border: 1.5px solid rgba(197,177,116,0.35);
+        border-radius: 18px; padding: 24px;
+        animation: loginPanelIn 0.2s ease;
+      }
+      .sm-panel h2 { font-size: 15px; font-weight: 700; margin: 0 0 3px; color: #fff; }
+      .sm-score-section { margin-bottom: 20px; }
+      .sm-score-section h3 { font-size: 11px; font-weight: 700; opacity: 0.45; letter-spacing: 0.08em; margin: 0 0 10px; color: #fff; }
+      .sm-score-row { display: flex; align-items: center; gap: 12px; justify-content: center; }
+      .sm-score-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .sm-score-block label { font-size: 10px; font-weight: 700; opacity: 0.45; color: #fff; }
+      .sm-score-input {
+        width: 64px; text-align: center;
+        font-size: 28px; font-weight: 900;
+        background: rgba(255,255,255,0.07);
+        border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 8px; color: #fff; padding: 8px 0; font-family: inherit;
+      }
+      .sm-score-input:focus { outline: none; border-color: #c5b174; }
+      .sm-score-vs { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.25); margin-top: 18px; }
+      .sm-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+      .sm-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .sm-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .sm-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .sm-btn-save { background: #c5b174; color: #1a1400; }
+      .sm-btn-save:hover { background: #d4c48a; }
+      .sm-btn-clear { background: rgba(255,80,80,0.14); color: #ff6060; border: 1px solid rgba(255,80,80,0.25); }
+      .sm-btn-clear:hover { background: rgba(255,80,80,0.26); }
+      /* ── team picker ─────────────────────────────────────── */
+      .pm-team-section { margin-bottom: 14px; }
+      .pm-team-section h3 { font-size: 11px; font-weight: 700; letter-spacing: .08em; margin: 0 0 6px; color: rgba(255,255,255,0.45); }
+      .pm-filter { width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 12px;
+        background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 8px; color: #fff; margin-bottom: 8px; font-family: inherit; }
+      .pm-filter::placeholder { color: rgba(255,255,255,0.3); }
+      .pm-filter:focus { outline: none; border-color: #c5b174; }
+      .pm-team-grid { display: flex; flex-wrap: wrap; gap: 5px; max-height: 120px; overflow-y: auto; }
+      .pm-team-btn { display: flex; flex-direction: column; align-items: center; gap: 3px;
+        padding: 6px 8px; border-radius: 8px;
+        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+        cursor: pointer; font-size: 10px; font-weight: 700; color: #fff; min-width: 46px; transition: .12s; }
+      .pm-team-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .pm-team-btn:hover { background: rgba(197,177,116,0.18); border-color: rgba(197,177,116,0.5); }
+      .pm-team-btn.selected { background: rgba(197,177,116,0.32); border-color: #c5b174; }
+      .pm-team-btn:disabled { opacity: .28; pointer-events: none; }
+      /* ── 상세 링크 ───────────────────────────────────────── */
+      .match-sep-detail {
+        font-size: 9px; font-weight: 700; color: #1a1400;
+        text-decoration: none; opacity: 0.65;
+        margin-left: 4px; letter-spacing: 0.03em;
+      }
+      .match-sep-detail:hover { opacity: 1; }
+      .champions-page .grand-final-card h3 .match-sep-detail { color: #1a1400; }
+      /* ── 슬롯 편집 (어드민) ─────────────────────────────── */
+      .champions-page .bracket-team { position: relative; }
+      .champions-page .bracket-team[data-team-name]:not([data-team-name=""]) strong { display: none !important; }
+      body:not(.view-only) .champions-page .bracket-team[data-slot] { cursor: pointer; transition: background 0.13s; }
+      body:not(.view-only) .champions-page .bracket-team[data-slot]:hover { background: rgba(197,177,116,0.12); border-radius: 6px; }
+      body:not(.view-only) .champions-page .bracket-team[data-slot]::after { content: "✎"; font-size: 10px; opacity: 0.4; position: absolute; bottom: 2px; right: 4px; }
+      /* ── 스코어 편집 버튼 ────────────────────────────────── */
+      .score-edit-btn { background: rgba(197,177,116,0.28); border: 1px solid rgba(197,177,116,0.5); color: #1a1400; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; margin-left: 4px; font-family: inherit; vertical-align: middle; }
+      .champions-page .grand-final-card h3 .score-edit-btn { color: #1a1400; background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.2); }
+    </style>
+  </head>
+  <body class="league-page stage-page champions-page playoff-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./champions.html">챔피언스</a>
+    </header>
+
+    <main class="playoff-shell">
+      <section class="playoff-hero" aria-labelledby="playoff-title">
+        <div class="playoff-logo-lockup">
+          <img src="./assets/vct-logo.png" alt="VCT Champions"
+            style="filter:brightness(0) invert(1);height:54px;width:auto;" />
+        </div>
+        <div>
+          <p class="eyebrow">VCT Champions 2026</p>
+          <h1 id="playoff-title">2026 발로란트 챔피언스</h1>
+          <p>플레이오프 대진표</p>
+        </div>
+      </section>
+
+      <section class="playoff-board" aria-label="챔피언스 플레이오프 대진표">
+        <div class="bracket-scroll">
+          <div class="bracket-rounds" aria-hidden="true">
+            <span>1라운드</span>
+            <span>2라운드</span>
+            <span>결승 직행전 / 하위조 준결승</span>
+            <span>결승 진출전 (Bo5)</span>
+            <span>결승 (Bo5)</span>
+          </div>
+
+          <!-- ── Upper Bracket ───────────────────────────────── -->
+          <h2 class="bracket-section-title">상위조 대진표</h2>
+          <div class="bracket-grid upper-bracket">
+
+            <!-- Column 1: Match 2, 4, 1, 3 -->
+            <div class="bracket-column">
+              <article class="bracket-match" data-mid="m2">
+                <h3>Match 2 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m4">
+                <h3>Match 4 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m1">
+                <h3>Match 1 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m3">
+                <h3>Match 3 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed"></span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 2: Match 7, 8 -->
+            <div class="bracket-column bracket-column-spaced">
+              <article class="bracket-match" data-mid="m7">
+                <h3>Match 7 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M2 승자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M4 승자 ↑</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m8">
+                <h3>Match 8 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M1 승자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M3 승자 ↑</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 3: Match 11 (UB Finals) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match" data-mid="m11">
+                <h3>Match 11 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M7 승자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M8 승자 ↑</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 4: arrow -->
+            <div class="bracket-column bracket-arrow-column" aria-hidden="true">
+              <span>→</span>
+            </div>
+
+            <!-- Column 5: Grand Finals -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match grand-final-card" data-mid="gf">
+                <h3>Grand Finals <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M11 승자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M13 승자 ↑</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- ── Lower Bracket ───────────────────────────────── -->
+          <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
+          <div class="bracket-grid lower-bracket">
+
+            <!-- Column 1: Match 6, 5 -->
+            <div class="bracket-column">
+              <article class="bracket-match" data-mid="m6">
+                <h3>Match 6 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M2 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M4 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m5">
+                <h3>Match 5 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M1 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M3 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 2: Match 10, 9 -->
+            <div class="bracket-column">
+              <article class="bracket-match" data-mid="m10">
+                <h3>Match 10 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M8 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M6 승자 →</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+              <article class="bracket-match" data-mid="m9">
+                <h3>Match 9 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M7 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M5 승자 →</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 3: Match 12 (LB Semis) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match" data-mid="m12">
+                <h3>Match 12 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M10 승자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M9 승자 ↑</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 4: Match 13 (LB Finals) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match" data-mid="m13">
+                <h3>Match 13 <span></span></h3>
+                <div class="bracket-team placeholder" data-slot="a">
+                  <span class="bracket-seed">M11 패자 ↓</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+                <div class="bracket-team placeholder" data-slot="b">
+                  <span class="bracket-seed">M12 승자 →</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong><em>-</em>
+                </div>
+              </article>
+            </div>
+
+            <!-- Column 5: empty -->
+            <div class="bracket-column bracket-empty" aria-hidden="true"></div>
+          </div>
+
+          <div class="bracket-footer">초록색: 라운드 승리 &nbsp;|&nbsp; 노란색: 챔피언스 우승</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="sm-modal" id="pm-modal" hidden>
+      <div class="sm-backdrop" id="pm-backdrop"></div>
+      <div class="sm-panel" role="dialog" aria-modal="true">
+        <h2 id="pm-title">경기 편집</h2>
+        <p id="pm-sub" style="margin:0 0 10px;font-size:12px;color:#888;"></p>
+        <div id="pm-body"></div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const STORAGE_KEY = "champions_playoffs";
+      const PARTICIPANTS_KEY = "champions_participants";
+      const PARTICIPANT_REGIONS = ["pacific", "americas", "cn", "emea"];
+
+      function getPlayoffTeams() {
+        try {
+          const p = JSON.parse(localStorage.getItem(PARTICIPANTS_KEY) || "{}");
+          const names = [];
+          let allSet = true;
+          PARTICIPANT_REGIONS.forEach((r) => {
+            const slots = (p[r] || []).filter(Boolean);
+            if (slots.length === 0) allSet = false;
+            slots.forEach(n => names.push(n));
+          });
+          if (allSet && names.length > 0) return { teams: names, hasParticipants: true };
+        } catch {}
+        return { teams: ALL_TEAMS.map(t => t.name), hasParticipants: false };
+      }
+
+      /* ── 전체 팀 목록 ──────────────────────────────────── */
+      const ALL_TEAMS = [
+        { name:"Paper Rex",                        code:"PRX",  logo:"./assets/teams/prx.svg" },
+        { name:"Gen.G",                            code:"GEN",  logo:"./assets/teams/gen.png" },
+        { name:"Kiwoom DRX",                       code:"DRX",  logo:"./assets/teams/krx.svg" },
+        { name:"Rex Regum Qeon",                   code:"RRQ",  logo:"./assets/teams/rrq.png" },
+        { name:"T1",                               code:"T1",   logo:"./assets/teams/t1.png" },
+        { name:"FULL SENSE",                       code:"FS",   logo:"./assets/teams/fs.svg" },
+        { name:"Global Esports",                   code:"GE",   logo:"./assets/teams/ge.webp" },
+        { name:"DetonatioN FocusMe",               code:"DFM",  logo:"./assets/teams/dfm.svg" },
+        { name:"Nongshim RedForce",                code:"NS",   logo:"./assets/teams/ns.svg" },
+        { name:"VARREL",                           code:"VRL",  logo:"./assets/teams/vl.svg" },
+        { name:"Team Secret",                      code:"TS",   logo:"./assets/teams/ts.svg" },
+        { name:"ZETA DIVISION",                    code:"ZETA", logo:"./assets/teams/zeta.png" },
+        { name:"Sentinels",                        code:"SEN",  logo:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" },
+        { name:"G2 Esports",                       code:"G2",   logo:"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" },
+        { name:"NRG",                              code:"NRG",  logo:"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" },
+        { name:"100 Thieves",                      code:"100T", logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" },
+        { name:"Cloud9",                           code:"C9",   logo:"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" },
+        { name:"MIBR",                             code:"MIBR", logo:"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" },
+        { name:"LOUD",                             code:"LOUD", logo:"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" },
+        { name:"FURIA",                            code:"FUR",  logo:"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" },
+        { name:"KRÜ Esports",                      code:"KRÜ",  logo:"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" },
+        { name:"Leviatán",                         code:"LEV",  logo:"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" },
+        { name:"Evil Geniuses",                    code:"EG",   logo:"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" },
+        { name:"ENVY",                             code:"ENVY", logo:"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" },
+        { name:"All Gamers",                       code:"AG",   logo:"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp" },
+        { name:"JD Mall JDG Esports",              code:"JDG",  logo:"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg" },
+        { name:"TYLOO",                            code:"TYL",  logo:"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg" },
+        { name:"Guangzhou Huadu Bilibili Gaming",  code:"BLG",  logo:"https://dpm.lol/esport/teams/BLG.webp" },
+        { name:"FunPlus Phoenix",                  code:"FPX",  logo:"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg" },
+        { name:"Wuxi Titan Esports Club",          code:"TEC",  logo:"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg" },
+        { name:"Xi Lai Gaming",                    code:"XLG",  logo:"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg" },
+        { name:"EDward Gaming",                    code:"EDG",  logo:"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png" },
+        { name:"Dragon Ranger Gaming",             code:"DRG",  logo:"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp" },
+        { name:"Trace Esports",                    code:"TE",   logo:"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg" },
+        { name:"Nova Esports",                     code:"NOVA", logo:"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp" },
+        { name:"Wolves Esports",                   code:"WOL",  logo:"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp" },
+        { name:"Gentle Mates",                     code:"M8",   logo:"./assets/teams/gm.png" },
+        { name:"Team Liquid",                      code:"TL",   logo:"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp" },
+        { name:"Team Heretics",                    code:"TH",   logo:"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg" },
+        { name:"NAVI",                             code:"NAVI", logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png" },
+        { name:"Karmine Corp",                     code:"KC",   logo:"./assets/teams/kc.png" },
+        { name:"PCIFIC Esports",                   code:"PCFC", logo:"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" },
+        { name:"FUT Esports",                      code:"FUT",  logo:"https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg" },
+        { name:"BBL Esports",                      code:"BBL",  logo:"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg" },
+        { name:"Fnatic",                           code:"FNC",  logo:"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg" },
+        { name:"Team Vitality",                    code:"VIT",  logo:"https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg" },
+        { name:"GIANTX",                           code:"GX",   logo:"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg" },
+        { name:"Eternal Fire",                     code:"EF",   logo:"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg" },
+        { name:"Movistar R7",                      code:"M7",   logo:"https://i.namu.wiki/i/ZTUcHX1RLVjEhW55FMopSmLUH4LBwl3HRFQYbCzH3Z9Wj9Fd2Pnf4wVt0V16sfJLHxQKsaF4kLF_OLzPBx4eg.webp" },
+      ];
+
+      /* ── match connections ─────────────────────────────── */
+      const LINKS = {
+        m7:  [{ m:"m2", r:"w" }, { m:"m4", r:"w" }],
+        m8:  [{ m:"m1", r:"w" }, { m:"m3", r:"w" }],
+        m11: [{ m:"m7", r:"w" }, { m:"m8", r:"w" }],
+        m5:  [{ m:"m1", r:"l" }, { m:"m3", r:"l" }],
+        m6:  [{ m:"m2", r:"l" }, { m:"m4", r:"l" }],
+        m9:  [{ m:"m7", r:"l" }, { m:"m5", r:"w" }],
+        m10: [{ m:"m8", r:"l" }, { m:"m6", r:"w" }],
+        m12: [{ m:"m10",r:"w" }, { m:"m9", r:"w" }],
+        m13: [{ m:"m11",r:"l" }, { m:"m12",r:"w" }],
+        gf:  [{ m:"m11",r:"w" }, { m:"m13",r:"w" }],
+      };
+      const PROCESS_ORDER = ["m1","m2","m3","m4","m5","m6","m7","m8","m9","m10","m11","m12","m13","gf"];
+      const MATCH_LABELS = { m1:"Match 1",m2:"Match 2",m3:"Match 3",m4:"Match 4",
+        m5:"Match 5",m6:"Match 6",m7:"Match 7",m8:"Match 8",m9:"Match 9",m10:"Match 10",
+        m11:"Match 11",m12:"Match 12",m13:"Match 13",gf:"Grand Finals" };
+      const IS_BO5 = { m11:true, m13:true, gf:true };
+
+      function isAdmin() { return typeof window.vctIsAdmin === "function" && window.vctIsAdmin(); }
+
+      function findTeam(name) {
+        return ALL_TEAMS.find(t => t.name === name || t.code === name);
+      }
+
+      /* ── storage ───────────────────────────────────────── */
+      function load() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+      }
+      function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+      function emptyMatch() { return { a:"", b:"", sa:null, sb:null, date:"" }; }
+
+      /* ── state computation ─────────────────────────────── */
+      function computeStates() {
+        const raw = load();
+        const states = {};
+        PROCESS_ORDER.forEach(mid => {
+          const stored = raw[mid] || {};
+          const links = LINKS[mid];
+          let a = stored.a || "";
+          let b = stored.b || "";
+          if (links) {
+            const [la, lb] = links;
+            if (!a && la) {
+              const prev = states[la.m];
+              if (prev) a = la.r === "w" ? prev.winner : prev.loser;
+            }
+            if (!b && lb) {
+              const prev = states[lb.m];
+              if (prev) b = lb.r === "w" ? prev.winner : prev.loser;
+            }
+          }
+          const sa = stored.sa ?? null;
+          const sb = stored.sb ?? null;
+          const hasResult = sa !== null && sb !== null && sa !== sb && a && b;
+          states[mid] = {
+            a, b, sa, sb,
+            date: stored.date || "",
+            winner: hasResult ? (sa > sb ? a : b) : "",
+            loser:  hasResult ? (sa > sb ? b : a) : "",
+          };
+        });
+        return states;
+      }
+
+      /* ── rendering ─────────────────────────────────────── */
+      function renderRow(row, teamName, score, isWinner, isChampion) {
+        const seed = row.querySelector(".bracket-seed");
+        let logo = row.querySelector(".bracket-logo");
+        const name = row.querySelector("strong");
+        const scoreEl = row.querySelector("em");
+        const t = findTeam(teamName);
+
+        row.dataset.teamName = teamName || "";
+        row.classList.toggle("winner", Boolean(isWinner));
+        row.classList.toggle("placeholder", !teamName);
+        if (!teamName && !isChampion) {
+          if (name) name.textContent = "TBD";
+          if (scoreEl) scoreEl.textContent = "-";
+          if (logo) logo.innerHTML = "";
+          return;
+        }
+        if (seed && teamName) seed.textContent = "";
+        if (logo) {
+          logo.innerHTML = t
+            ? `<img src="${t.logo}" alt="${t.name}" />`
+            : `<span>${(teamName||"").slice(0,3)}</span>`;
+        }
+        if (name) name.textContent = t ? t.code : (teamName || "TBD");
+        if (scoreEl) scoreEl.textContent = score !== null ? String(score) : "-";
+      }
+
+      function render() {
+        const states = computeStates();
+        document.querySelectorAll(".bracket-match").forEach(card => {
+          const mid = card.dataset.mid;
+          const st = states[mid];
+          if (!st) return;
+          const rows = card.querySelectorAll(".bracket-team");
+          const isGF = mid === "gf";
+          renderRow(rows[0], st.a, st.sa, st.winner && st.winner === st.a, isGF && Boolean(st.winner));
+          renderRow(rows[1], st.b, st.sb, st.winner && st.winner === st.b, isGF && Boolean(st.winner));
+
+          const h3 = card.querySelector("h3");
+          if (h3) {
+            const span = h3.querySelector("span");
+            if (span) {
+              const detailUrl = `./champions-match.html?from=playoffs&match=${mid}&tournament=champions`;
+              let spanHtml = st.date ? `(${st.date}) ` : "";
+              spanHtml += `<a class="match-sep-detail" href="${detailUrl}" onclick="event.stopPropagation()">상세 ↗</a>`;
+              if (isAdmin()) {
+                spanHtml += ` <button class="score-edit-btn">스코어</button>`;
+              }
+              span.innerHTML = spanHtml;
+              const scoreBtn = span.querySelector(".score-edit-btn");
+              if (scoreBtn) scoreBtn.onclick = (e) => { e.stopPropagation(); openScoreModal(mid); };
+            }
+          }
+
+          if (!isAdmin()) {
+            card.style.cursor = st.a && st.b ? "pointer" : "default";
+            card.onclick = st.a && st.b ? () => navigateToMatch(mid, st) : null;
+          } else {
+            card.style.cursor = "default";
+            card.onclick = null;
+          }
+
+          rows.forEach(row => {
+            const slot = row.dataset.slot;
+            if (!slot) return;
+            row.onclick = isAdmin()
+              ? (e) => { e.stopPropagation(); openSlotPicker(mid, slot); }
+              : null;
+          });
+        });
+      }
+
+      function navigateToMatch(mid, st) {
+        const params = new URLSearchParams({
+          from: "playoffs",
+          match: mid,
+          tournament: "champions",
+        });
+        window.location.href = `./champions-match.html?${params}`;
+      }
+
+      /* ── modal ─────────────────────────────────────────── */
+      let _modal = { mid: null, mode: null };
+      let _tmpTeam = "", _tmpSa = null, _tmpSb = null, _tmpDate = "", _filter = "";
+
+      function openSlotPicker(mid, slot) {
+        const raw = load();
+        const stored = raw[mid] || {};
+        const states = computeStates();
+        _modal = { mid, mode: slot };
+        _tmpTeam = (slot === "a" ? stored.a : stored.b)
+                || (slot === "a" ? states[mid]?.a : states[mid]?.b)
+                || "";
+        _filter = "";
+        document.getElementById("pm-title").textContent = `${MATCH_LABELS[mid]} · ${slot === "a" ? "A팀" : "B팀"} 선택`;
+        document.getElementById("pm-sub").textContent = "";
+        document.getElementById("pm-modal").hidden = false;
+        renderModalBody();
+      }
+
+      function openScoreModal(mid) {
+        const raw = load();
+        const stored = raw[mid] || {};
+        _modal = { mid, mode: "score" };
+        _tmpSa = stored.sa ?? null;
+        _tmpSb = stored.sb ?? null;
+        _tmpDate = stored.date || "";
+        document.getElementById("pm-title").textContent = `${MATCH_LABELS[mid]} · 스코어 편집`;
+        document.getElementById("pm-sub").textContent = IS_BO5[mid] ? "Bo5" : "Bo3";
+        document.getElementById("pm-modal").hidden = false;
+        renderModalBody();
+      }
+
+      function renderModalBody() {
+        const body = document.getElementById("pm-body");
+        const { mid, mode } = _modal;
+
+        if (mode === "score") {
+          const maxScore = IS_BO5[mid] ? 3 : 2;
+          const states = computeStates();
+          const st = states[mid];
+          const teamA = st?.a || "A팀";
+          const teamB = st?.b || "B팀";
+          body.innerHTML = `
+            <div style="text-align:center;margin:0 0 14px;font-size:12px;color:rgba(255,255,255,0.5);">
+              ${teamA} <span style="color:rgba(255,255,255,0.2)">vs</span> ${teamB}
+            </div>
+            <div class="sm-score-section">
+              <div class="sm-score-row">
+                <div class="sm-score-block">
+                  <label>${teamA}</label>
+                  <input class="sm-score-input" id="pm-sa" type="number" min="0" max="${maxScore}"
+                    value="${_tmpSa !== null ? _tmpSa : ""}" placeholder="-" />
+                </div>
+                <span class="sm-score-vs">:</span>
+                <div class="sm-score-block">
+                  <label>${teamB}</label>
+                  <input class="sm-score-input" id="pm-sb" type="number" min="0" max="${maxScore}"
+                    value="${_tmpSb !== null ? _tmpSb : ""}" placeholder="-" />
+                </div>
+              </div>
+            </div>
+            <div class="sm-score-section">
+              <h3>날짜 <span style="font-weight:400;color:#aaa;">(선택)</span></h3>
+              <input style="width:100%;box-sizing:border-box;padding:6px 8px;font-size:12px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-family:inherit;"
+                id="pm-date" type="text" placeholder="예: 3/16" value="${_tmpDate}" />
+            </div>
+            <div class="sm-actions">
+              <button class="sm-btn sm-btn-clear" id="pm-clear">초기화</button>
+              <button class="sm-btn sm-btn-cancel" id="pm-cancel">취소</button>
+              <button class="sm-btn sm-btn-save" id="pm-save">저장</button>
+            </div>`;
+          document.getElementById("pm-sa").addEventListener("input", e => { _tmpSa = e.target.value !== "" ? parseInt(e.target.value) : null; });
+          document.getElementById("pm-sb").addEventListener("input", e => { _tmpSb = e.target.value !== "" ? parseInt(e.target.value) : null; });
+          document.getElementById("pm-date").addEventListener("input", e => { _tmpDate = e.target.value; });
+          document.getElementById("pm-cancel").addEventListener("click", closeModal);
+          document.getElementById("pm-clear").addEventListener("click", () => {
+            const data = load();
+            if (!data[mid]) data[mid] = emptyMatch();
+            data[mid].sa = null; data[mid].sb = null; data[mid].date = "";
+            save(data); closeModal(); render();
+          });
+          document.getElementById("pm-save").addEventListener("click", () => {
+            const sa = parseInt(document.getElementById("pm-sa").value);
+            const sb = parseInt(document.getElementById("pm-sb").value);
+            const data = load();
+            if (!data[mid]) data[mid] = emptyMatch();
+            data[mid].sa = isNaN(sa) ? null : sa;
+            data[mid].sb = isNaN(sb) ? null : sb;
+            data[mid].date = document.getElementById("pm-date").value.trim();
+            save(data); closeModal(); render();
+          });
+
+        } else {
+          // Slot picker (mode = 'a' or 'b')
+          const { teams: participantNames } = getPlayoffTeams();
+
+          const states = computeStates();
+          const st = states[mid];
+          const raw = load();
+          const stored = raw[mid] || {};
+          const otherTeam = mode === "a"
+            ? (stored.b || st?.b || "")
+            : (stored.a || st?.a || "");
+          const filterLow = _filter.toLowerCase();
+          const candidateTeams = participantNames
+            .map(name => findTeam(name))
+            .filter(Boolean);
+          const teams = _filter
+            ? candidateTeams.filter(t => t.name.toLowerCase().includes(filterLow) || t.code.toLowerCase().includes(filterLow))
+            : candidateTeams;
+
+          let html = `<input class="pm-filter" id="pm-filter" type="text" placeholder="팀 검색..." value="${_filter}" />`;
+          html += `<div class="pm-team-grid" id="pm-team-grid">`;
+          teams.forEach(t => {
+            const isSel = t.name === _tmpTeam;
+            const isOther = t.name === otherTeam;
+            html += `<button class="pm-team-btn${isSel ? " selected" : ""}" data-name="${t.name}" ${isOther ? "disabled" : ""}>
+              <img src="${t.logo}" alt="${t.name}" /><span>${t.code}</span>
+            </button>`;
+          });
+          html += `</div>
+            <div class="sm-actions">
+              <button class="sm-btn sm-btn-clear" id="pm-clear">비우기</button>
+              <button class="sm-btn sm-btn-cancel" id="pm-cancel">취소</button>
+              <button class="sm-btn sm-btn-save" id="pm-save" ${_tmpTeam ? "" : "disabled"}>저장</button>
+            </div>`;
+          body.innerHTML = html;
+
+          document.getElementById("pm-filter").addEventListener("input", e => { _filter = e.target.value; renderModalBody(); });
+          body.querySelectorAll(".pm-team-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+              _tmpTeam = btn.dataset.name === _tmpTeam ? "" : btn.dataset.name;
+              renderModalBody();
+            });
+          });
+          document.getElementById("pm-cancel").addEventListener("click", closeModal);
+          document.getElementById("pm-clear").addEventListener("click", () => {
+            const data = load();
+            if (!data[mid]) data[mid] = emptyMatch();
+            if (mode === "a") data[mid].a = ""; else data[mid].b = "";
+            save(data); closeModal(); render();
+          });
+          document.getElementById("pm-save").addEventListener("click", () => {
+            const data = load();
+            if (!data[mid]) data[mid] = emptyMatch();
+            if (mode === "a") data[mid].a = _tmpTeam; else data[mid].b = _tmpTeam;
+            save(data); closeModal(); render();
+          });
+        }
+      }
+
+      function closeModal() {
+        document.getElementById("pm-modal").hidden = true;
+      }
+
+      document.getElementById("pm-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && !document.getElementById("pm-modal").hidden) closeModal();
+      });
+
+      render();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

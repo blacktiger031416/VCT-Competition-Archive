@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Americas 2026 Stage 1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      .group-assign-section { padding: 40px 20px 0; max-width: 900px; margin: 0 auto; }
+      .group-assign-section .section-heading { margin-bottom: 20px; }
+      .group-assign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
+      .group-assign-card { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; }
+      .group-assign-card h3 { font-size: 14px; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; }
+      .group-slots { display: flex; flex-direction: column; gap: 8px; }
+      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); min-height: 56px; transition: background 0.15s; }
+      .group-slot.has-team { border-color: rgba(255,87,12,0.35); background: rgba(255,87,12,0.07); }
+      .group-slot .slot-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .group-slot .slot-logo img { width: 44px; height: 44px; object-fit: contain; }
+      .group-slot .slot-name { font-size: 13px; font-weight: 700; flex: 1; }
+      .group-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
+      .group-slot .slot-rank { font-size: 11px; font-weight: 700; opacity: 0.4; margin-left: auto; }
+      body:not(.view-only) .group-slot { cursor: pointer; }
+      body:not(.view-only) .group-slot:hover { background: rgba(255,87,12,0.12); border-color: rgba(255,87,12,0.5); }
+      body:not(.view-only) .group-slot.has-team:hover { background: rgba(255,87,12,0.18); }
+      .ga-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
+      .ga-modal[hidden] { display: none !important; }
+      .ga-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
+      .ga-panel { position: relative; z-index: 1; width: min(520px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #1f1005; border: 1.5px solid rgba(255,87,12,0.25); border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease; }
+      .ga-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; color: #fff; }
+      .ga-panel p { font-size: 13px; opacity: 0.6; margin: 0 0 18px; color: #fff; }
+      .ga-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+      @media (max-width: 400px) { .ga-team-grid { grid-template-columns: repeat(2, 1fr); } }
+      .ga-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s; font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; }
+      .ga-team-btn img { width: 32px; height: 32px; object-fit: contain; }
+      .ga-team-btn .ga-team-code { font-size: 13px; font-weight: 900; }
+      .ga-team-btn:hover { background: rgba(255,87,12,0.12); border-color: rgba(255,87,12,0.5); }
+      .ga-team-btn.selected { background: rgba(255,87,12,0.25); border-color: #ff570c; box-shadow: 0 0 0 2px rgba(255,87,12,0.3); }
+      .ga-team-btn.in-other-group { opacity: 0.25; pointer-events: none; }
+      .ga-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .ga-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .ga-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .ga-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .ga-btn-save { background: #ff570c; color: #fff; }
+      .ga-btn-clear { background: rgba(255,80,80,0.15); color: #ff5050; border: 1px solid rgba(255,80,80,0.25); }
+      .ga-btn-clear:hover { background: rgba(255,80,80,0.28); }
+    </style>
+  </head>
+  <body class="league-page stage-page americas-page">
+    <header class="site-header"><a class="home-link" href="./index.html">VCT Archive</a><a class="back-link" href="./americas.html">Americas</a></header>
+    <main class="league-shell stage-shell">
+      <section class="stage-hero" aria-labelledby="stage-title"><div><p class="eyebrow">VCT Americas 2026</p><h1 id="stage-title">Stage 1 순위</h1><p class="intro">Americas Stage 1 그룹 스테이지의 순위와 주차별 경기를 정리한 페이지입니다. 경기 카드를 누르면 수동으로 상세 결과를 입력할 수 있습니다.</p></div><div class="stage-summary" aria-label="Stage 1 진행 방식"><div><strong>2</strong><span>그룹</span></div><div><strong>12</strong><span>팀</span></div><div><strong>8</strong><span>진출</span></div></div></section>
+
+      <!-- 그룹 배정 -->
+      <section class="group-assign-section" aria-labelledby="ga-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Group Assignment</p>
+            <h2 id="ga-title">그룹 팀 배정</h2>
+          </div>
+        </div>
+        <div class="group-assign-grid">
+          <div class="group-assign-card">
+            <h3>알파조 (α) — 상위 4팀 진출</h3>
+            <div class="group-slots" id="ga-alpha-slots"></div>
+          </div>
+          <div class="group-assign-card">
+            <h3>오메가조 (ω) — 상위 4팀 진출</h3>
+            <div class="group-slots" id="ga-omega-slots"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="week-section" aria-labelledby="weeks-title"><div class="section-heading"><div><p class="eyebrow">경기 목록</p><h2 id="weeks-title">주차별 경기</h2></div><a class="playoff-link" href="./americas-playoffs.html">PlayOff 대진표</a></div><div class="week-tabs"><input type="radio" name="week" id="week-1" checked /><input type="radio" name="week" id="week-2" /><input type="radio" name="week" id="week-3" /><input type="radio" name="week" id="week-4" /><input type="radio" name="week" id="week-5" /><div class="week-tab-list" aria-label="주차 선택"><label for="week-1">1주차</label><label for="week-2">2주차</label><label for="week-3">3주차</label><label for="week-4">4주차</label><label for="week-5">5주차</label></div><div class="week-panels"><div class="week-panel week-panel-1"><div class="week-meta"><strong>Week 1</strong><span>2026. 04. 10 - 04. 12</span></div><div class="match-grid"><article class="match-card upcoming"><span>04.10</span><strong aria-label="Sentinels"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></span><span>Sentinels</span></strong><em>0 : 2</em><strong aria-label="KRÜ Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></span><span>KRÜ Esports</span></strong></article>
+<article class="match-card upcoming"><span>04.10</span><strong aria-label="G2 Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></span><span>G2 Esports</span></strong><em>0 : 2</em><strong aria-label="MIBR"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></span><span>MIBR</span></strong></article>
+<article class="match-card upcoming"><span>04.11</span><strong aria-label="100 Thieves"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span><span>100 Thieves</span></strong><em>2 : 0</em><strong aria-label="Evil Geniuses"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></span><span>Evil Geniuses</span></strong></article>
+<article class="match-card upcoming"><span>04.11</span><strong aria-label="ENVY"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></span><span>ENVY</span></strong><em>1 : 2</em><strong aria-label="LOUD"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></span><span>LOUD</span></strong></article>
+<article class="match-card upcoming"><span>04.12</span><strong aria-label="Cloud9"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></span><span>Cloud9</span></strong><em>0 : 2</em><strong aria-label="Leviatán"><span class="match-team-mini-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></span><span>Leviatán</span></strong></article>
+<article class="match-card upcoming"><span>04.12</span><strong aria-label="FURIA"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></span><span>FURIA</span></strong><em>2 : 0</em><strong aria-label="NRG"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></span><span>NRG</span></strong></article></div></div>
+<div class="week-panel week-panel-2"><div class="week-meta"><strong>Week 2</strong><span>2026. 04. 17 - 04. 19</span></div><div class="match-grid"><article class="match-card upcoming"><span>04.17</span><strong aria-label="Cloud9"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></span><span>Cloud9</span></strong><em>1 : 2</em><strong aria-label="ENVY"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></span><span>ENVY</span></strong></article>
+<article class="match-card upcoming"><span>04.17</span><strong aria-label="FURIA"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></span><span>FURIA</span></strong><em>2 : 1</em><strong aria-label="Evil Geniuses"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></span><span>Evil Geniuses</span></strong></article>
+<article class="match-card upcoming"><span>04.18</span><strong aria-label="G2 Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></span><span>G2 Esports</span></strong><em>1 : 2</em><strong aria-label="Leviatán"><span class="match-team-mini-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></span><span>Leviatán</span></strong></article>
+<article class="match-card upcoming"><span>04.18</span><strong aria-label="MIBR"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></span><span>MIBR</span></strong><em>2 : 0</em><strong aria-label="LOUD"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></span><span>LOUD</span></strong></article>
+<article class="match-card upcoming"><span>04.19</span><strong aria-label="NRG"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></span><span>NRG</span></strong><em>0 : 2</em><strong aria-label="KRÜ Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></span><span>KRÜ Esports</span></strong></article>
+<article class="match-card upcoming"><span>04.19</span><strong aria-label="100 Thieves"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span><span>100 Thieves</span></strong><em>0 : 2</em><strong aria-label="Sentinels"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></span><span>Sentinels</span></strong></article></div></div>
+<div class="week-panel week-panel-3"><div class="week-meta"><strong>Week 3</strong><span>2026. 04. 24 - 04. 26</span></div><div class="match-grid"><article class="match-card upcoming"><span>04.24</span><strong aria-label="Leviatán"><span class="match-team-mini-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></span><span>Leviatán</span></strong><em>2 : 0</em><strong aria-label="ENVY"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></span><span>ENVY</span></strong></article>
+<article class="match-card upcoming"><span>04.24</span><strong aria-label="G2 Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></span><span>G2 Esports</span></strong><em>2 : 0</em><strong aria-label="LOUD"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></span><span>LOUD</span></strong></article>
+<article class="match-card upcoming"><span>04.25</span><strong aria-label="FURIA"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></span><span>FURIA</span></strong><em>0 : 2</em><strong aria-label="KRÜ Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></span><span>KRÜ Esports</span></strong></article>
+<article class="match-card upcoming"><span>04.25</span><strong aria-label="NRG"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></span><span>NRG</span></strong><em>2 : 1</em><strong aria-label="100 Thieves"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span><span>100 Thieves</span></strong></article>
+<article class="match-card upcoming"><span>04.26</span><strong aria-label="Evil Geniuses"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></span><span>Evil Geniuses</span></strong><em>0 : 2</em><strong aria-label="Sentinels"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></span><span>Sentinels</span></strong></article>
+<article class="match-card upcoming"><span>04.26</span><strong aria-label="MIBR"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></span><span>MIBR</span></strong><em>0 : 2</em><strong aria-label="Cloud9"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></span><span>Cloud9</span></strong></article></div></div>
+<div class="week-panel week-panel-4"><div class="week-meta"><strong>Week 4</strong><span>2026. 05. 01 - 05. 03</span></div><div class="match-grid"><article class="match-card upcoming"><span>05.01</span><strong aria-label="Evil Geniuses"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></span><span>Evil Geniuses</span></strong><em>0 : 2</em><strong aria-label="NRG"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></span><span>NRG</span></strong></article>
+<article class="match-card upcoming"><span>05.01</span><strong aria-label="Leviatán"><span class="match-team-mini-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></span><span>Leviatán</span></strong><em>0 : 2</em><strong aria-label="MIBR"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></span><span>MIBR</span></strong></article>
+<article class="match-card upcoming"><span>05.02</span><strong aria-label="Cloud9"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></span><span>Cloud9</span></strong><em>1 : 2</em><strong aria-label="LOUD"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></span><span>LOUD</span></strong></article>
+<article class="match-card upcoming"><span>05.02</span><strong aria-label="G2 Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></span><span>G2 Esports</span></strong><em>2 : 0</em><strong aria-label="ENVY"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></span><span>ENVY</span></strong></article>
+<article class="match-card upcoming"><span>05.03</span><strong aria-label="Sentinels"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></span><span>Sentinels</span></strong><em>1 : 2</em><strong aria-label="FURIA"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></span><span>FURIA</span></strong></article>
+<article class="match-card upcoming"><span>05.03</span><strong aria-label="KRÜ Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></span><span>KRÜ Esports</span></strong><em>1 : 2</em><strong aria-label="100 Thieves"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span><span>100 Thieves</span></strong></article></div></div>
+<div class="week-panel week-panel-5"><div class="week-meta"><strong>Week 5</strong><span>2026. 05. 08 - 05. 10</span></div><div class="match-grid"><article class="match-card upcoming"><span>05.08</span><strong aria-label="G2 Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></span><span>G2 Esports</span></strong><em>VS</em><strong aria-label="Cloud9"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></span><span>Cloud9</span></strong></article>
+<article class="match-card upcoming"><span>05.08</span><strong aria-label="ENVY"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></span><span>ENVY</span></strong><em>VS</em><strong aria-label="MIBR"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></span><span>MIBR</span></strong></article>
+<article class="match-card upcoming"><span>05.09</span><strong aria-label="LOUD"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></span><span>LOUD</span></strong><em>VS</em><strong aria-label="Leviatán"><span class="match-team-mini-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></span><span>Leviatán</span></strong></article>
+<article class="match-card upcoming"><span>05.09</span><strong aria-label="Sentinels"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></span><span>Sentinels</span></strong><em>VS</em><strong aria-label="NRG"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></span><span>NRG</span></strong></article>
+<article class="match-card upcoming"><span>05.10</span><strong aria-label="100 Thieves"><span class="match-team-mini-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span><span>100 Thieves</span></strong><em>VS</em><strong aria-label="FURIA"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></span><span>FURIA</span></strong></article>
+<article class="match-card upcoming"><span>05.10</span><strong aria-label="KRÜ Esports"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></span><span>KRÜ Esports</span></strong><em>VS</em><strong aria-label="Evil Geniuses"><span class="match-team-mini-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></span><span>Evil Geniuses</span></strong></article></div></div></div></div></section>
+      <section class="standings-section" aria-labelledby="groups-title"><div class="section-heading"><p class="eyebrow">순위표</p><h2 id="groups-title">그룹 순위</h2></div><div class="standings-grid"><article class="standings-card"><div class="standings-title"><h3>알파조</h3><span>상위 4팀 진출</span></div><div class="standings-table" role="table" aria-label="알파조 순위"><div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span></div><div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">1</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" alt="G2" /></div><div><strong>G2 Esports</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">2</div><div class="stage-team-logo"><img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" alt="LEV" /></div><div><strong>Leviatán</strong><span>아르헨티나</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">3</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" alt="C9" /></div><div><strong>Cloud9</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">4</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" alt="MIBR" /></div><div><strong>MIBR</strong><span>브라질</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">5</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" alt="LOUD" /></div><div><strong>LOUD</strong><span>브라질</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">6</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" alt="ENVY" /></div><div><strong>ENVY</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div></div></article><article class="standings-card"><div class="standings-title"><h3>오메가조</h3><span>상위 4팀 진출</span></div><div class="standings-table" role="table" aria-label="오메가조 순위"><div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span></div><div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">1</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" alt="KRU" /></div><div><strong>KRÜ Esports</strong><span>칠레</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">2</div><div class="stage-team-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" alt="SEN" /></div><div><strong>Sentinels</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">3</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" alt="NRG" /></div><div><strong>NRG</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">4</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" alt="FUR" /></div><div><strong>FURIA</strong><span>브라질</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">5</div><div class="stage-team-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></div><div><strong>100 Thieves</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+<div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">6</div><div class="stage-team-logo"><img src="https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" alt="EG" /></div><div><strong>Evil Geniuses</strong><span>미국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div></div></article></div></section>
+    </main>
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const americasTeamLogos = {
+        "SEN": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+        "G2": "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+        "NRG": "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+        "100T": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png",
+        "C9": "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+        "MIBR": "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+        "LOUD": "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+        "FUR": "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+        "KRU": "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+        "LEV": "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+        "EG": "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+        "ENVY": "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg"
+};
+      document.querySelectorAll('.americas-logo-text, .match-team-mini-logo.logo-text').forEach((logo) => {
+        const code = logo.textContent.trim();
+        const src = americasTeamLogos[code];
+        if (!src) return;
+        logo.classList.remove('americas-logo-text', 'logo-text');
+        logo.innerHTML = '<img src="' + src + '" alt="' + code + '" />';
+      });
+      function getStoredMatchScore(date, teamA, teamB, fallbackScore) {
+        try {
+          const stored = JSON.parse(localStorage.getItem(`result:${date}|${teamA}|${teamB}`) || "{}");
+          const scoreA = String(stored.scoreA ?? "").trim();
+          const scoreB = String(stored.scoreB ?? "").trim();
+          if (scoreA && scoreB && scoreA !== "-" && scoreB !== "-") return `${scoreA} : ${scoreB}`;
+        } catch {}
+        return fallbackScore;
+      }
+
+    const currentStandingsSeed = {
+      "MIBR": { country: "브라질", wins: 3, losses: 1, mapsWon: 6, mapsLost: 2, roundsWon: 105, roundsLost: 84 },
+      "Leviatán": { country: "아르헨티나", wins: 3, losses: 1, mapsWon: 6, mapsLost: 3, roundsWon: 105, roundsLost: 81 },
+      "G2 Esports": { country: "미국", wins: 1, losses: 2, mapsWon: 3, mapsLost: 4, roundsWon: 84, roundsLost: 81 },
+      "Cloud9": { country: "미국", wins: 1, losses: 2, mapsWon: 3, mapsLost: 4, roundsWon: 66, roundsLost: 87 },
+      "ENVY": { country: "미국", wins: 1, losses: 2, mapsWon: 3, mapsLost: 5, roundsWon: 77, roundsLost: 88 },
+      "LOUD": { country: "브라질", wins: 1, losses: 2, mapsWon: 2, mapsLost: 5, roundsWon: 68, roundsLost: 84 },
+      "KRÜ Esports": { country: "아르헨티나", wins: 3, losses: 0, mapsWon: 6, mapsLost: 0, roundsWon: 78, roundsLost: 49 },
+      "Sentinels": { country: "미국", wins: 2, losses: 1, mapsWon: 4, mapsLost: 2, roundsWon: 75, roundsLost: 71 },
+      "FURIA": { country: "브라질", wins: 2, losses: 1, mapsWon: 4, mapsLost: 3, roundsWon: 78, roundsLost: 72 },
+      "NRG": { country: "미국", wins: 2, losses: 2, mapsWon: 4, mapsLost: 5, roundsWon: 96, roundsLost: 94 },
+      "100 Thieves": { country: "미국", wins: 1, losses: 2, mapsWon: 3, mapsLost: 4, roundsWon: 78, roundsLost: 79 },
+      "Evil Geniuses": { country: "미국", wins: 0, losses: 4, mapsWon: 1, mapsLost: 8, roundsWon: 76, roundsLost: 116 }
+    };
+
+    const standingsTables = [...document.querySelectorAll(".standings-table")];
+      const standingsGroups = standingsTables.map((table) => {
+        return [...table.querySelectorAll(".standings-row:not(.standings-head)")].map((row) => {
+          const cells = [...row.children];
+          const team = row.querySelector(".team-cell strong")?.textContent.trim() || "";
+          const country = row.querySelector(".team-cell span")?.textContent.trim() || "";
+          const logo = row.querySelector(".stage-team-logo")?.innerHTML || "";
+          const [wins = 0, losses = 0] = (cells[1]?.textContent.match(/\d+/g) || []).map(Number);
+          const [mapsWon = 0, mapsLost = 0] = (cells[2]?.textContent.match(/\d+/g) || []).map(Number);
+          const [roundsWon = 0, roundsLost = 0] = (cells[3]?.textContent.match(/\d+/g) || []).map(Number);
+        const seed = currentStandingsSeed[team] || {};
+        return {
+          team,
+          country: seed.country ?? country,
+          logo,
+          wins: seed.wins ?? wins,
+          losses: seed.losses ?? losses,
+          mapsWon: seed.mapsWon ?? mapsWon,
+          mapsLost: seed.mapsLost ?? mapsLost,
+          roundsWon: seed.roundsWon ?? roundsWon,
+          roundsLost: seed.roundsLost ?? roundsLost
+        };
+        });
+      });
+
+      function parseScore(score) {
+        const parts = score.match(/\d+/g);
+        if (!parts || parts.length < 2) return null;
+        return { a: Number(parts[0]), b: Number(parts[1]) };
+      }
+
+      function fixtureKey(match) {
+        return `${match.date}|${match.teamA}|${match.teamB}`;
+      }
+
+      function getSavedSetRounds(match, originallyPending) {
+        if (!originallyPending) return { a: 0, b: 0 };
+        try {
+          const veto = JSON.parse(localStorage.getItem(`veto:${fixtureKey(match)}`) || "{}");
+          const maps = [veto.maps?.[2], veto.maps?.[3], veto.maps?.[6]].filter(Boolean);
+          return maps.reduce(
+            (total, mapName, index) => {
+              const saved = JSON.parse(localStorage.getItem(`set:${fixtureKey(match)}:${index}:${mapName}`) || "{}");
+              const aScore = Number(saved.stats?.aScore);
+              const bScore = Number(saved.stats?.bScore);
+              if (Number.isFinite(aScore) && Number.isFinite(bScore)) {
+                total.a += aScore;
+                total.b += bScore;
+              }
+              return total;
+            },
+            { a: 0, b: 0 },
+          );
+        } catch {
+          return { a: 0, b: 0 };
+        }
+      }
+
+      function collectFixtures() {
+        return [...document.querySelectorAll(".match-card")].map((card) => {
+          const date = card.querySelector(":scope > span")?.textContent.trim() || "";
+          const teams = [...card.querySelectorAll("strong")].map((team) => team.getAttribute("aria-label") || team.textContent.trim());
+          const fallbackScore = card.querySelector("em")?.textContent.trim() || "VS";
+          const score = getStoredMatchScore(date, teams[0] || "", teams[1] || "", fallbackScore);
+          return { date, teamA: teams[0] || "", teamB: teams[1] || "", score, originallyPending: card.dataset.originalScore === "VS" };
+        });
+      }
+
+      function rankGroup(rows, fixtures) {
+        const teamSet = new Set(rows.map((row) => row.team));
+        const stats = new Map(rows.map((row) => {
+          const seed = currentStandingsSeed[row.team] || {};
+          return [row.team, {
+            ...row,
+            wins: 0,
+            losses: 0,
+            mapsWon: 0,
+            mapsLost: 0,
+            roundsWon: seed.roundsWon ?? row.roundsWon ?? 0,
+            roundsLost: seed.roundsLost ?? row.roundsLost ?? 0,
+          }];
+        }));
+        const completed = fixtures
+          .map((match) => ({ ...match, parsed: parseScore(match.score) }))
+          .filter((match) => match.parsed && teamSet.has(match.teamA) && teamSet.has(match.teamB));
+
+        completed.forEach((match) => {
+          const a = stats.get(match.teamA);
+          const b = stats.get(match.teamB);
+          const score = match.parsed;
+          a.mapsWon += score.a;
+          a.mapsLost += score.b;
+          b.mapsWon += score.b;
+          b.mapsLost += score.a;
+          if (score.a > score.b) { a.wins += 1; b.losses += 1; }
+          else if (score.b > score.a) { b.wins += 1; a.losses += 1; }
+          const rounds = getSavedSetRounds(match, match.originallyPending);
+          a.roundsWon += rounds.a;
+          a.roundsLost += rounds.b;
+          b.roundsWon += rounds.b;
+          b.roundsLost += rounds.a;
+        });
+
+        const headToHead = (team, tiedTeams) => {
+          return completed.reduce(
+            (total, match) => {
+              if (!tiedTeams.has(match.teamA) || !tiedTeams.has(match.teamB)) return total;
+              if (match.teamA !== team && match.teamB !== team) return total;
+              const teamWon = (match.teamA === team && match.parsed.a > match.parsed.b) || (match.teamB === team && match.parsed.b > match.parsed.a);
+              const teamLost = (match.teamA === team && match.parsed.a < match.parsed.b) || (match.teamB === team && match.parsed.b < match.parsed.a);
+              if (teamWon) total.wins += 1;
+              if (teamLost) total.losses += 1;
+              return total;
+            },
+            { wins: 0, losses: 0 }
+          );
+        };
+
+        const baseSorted = [...stats.values()].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+        const ranked = [];
+        for (let i = 0; i < baseSorted.length; ) {
+          const tied = baseSorted.filter((team) => team.wins === baseSorted[i].wins && team.losses === baseSorted[i].losses);
+          const tiedTeams = new Set(tied.map((team) => team.team));
+          tied.sort((a, b) => {
+            const h2hA = headToHead(a.team, tiedTeams);
+            const h2hB = headToHead(b.team, tiedTeams);
+            const h2hOrder = h2hB.wins - h2hA.wins || h2hA.losses - h2hB.losses;
+            if (h2hOrder) return h2hOrder;
+            // 순환 승자승: 맵 격차 → 라운드 격차
+            return b.mapsWon - b.mapsLost - (a.mapsWon - a.mapsLost) || b.roundsWon - b.roundsLost - (a.roundsWon - a.roundsLost) || b.roundsWon - a.roundsWon;
+          });
+          ranked.push(...tied);
+          i += tied.length;
+        }
+        return ranked;
+      }
+
+      function classifyQualification(rows, fixtures) {
+        const teamSet = new Set(rows.map((row) => row.team));
+        const remaining = fixtures.filter((match) => !parseScore(match.score) && teamSet.has(match.teamA) && teamSet.has(match.teamB));
+        const outcomes = ["2 : 0", "2 : 1", "1 : 2", "0 : 2"];
+        const possibilities = new Map(rows.map((row) => [row.team, { top: false, bottom: false }]));
+
+        if (remaining.length > 8) {
+          rows.forEach((row) => possibilities.set(row.team, { top: true, bottom: true }));
+          return possibilities;
+        }
+
+        const recordScenario = (scenarioFixtures) => {
+          rankGroup(rows, scenarioFixtures).forEach((team, index) => {
+            const state = possibilities.get(team.team);
+            if (index < 4) state.top = true;
+            else state.bottom = true;
+          });
+        };
+
+        const explore = (index, scenarioFixtures) => {
+          if (index >= remaining.length) { recordScenario(scenarioFixtures); return; }
+          const match = remaining[index];
+          outcomes.forEach((score) => {
+            explore(index + 1, scenarioFixtures.map((f) => (f === match ? { ...f, score } : f)));
+          });
+        };
+
+        if (remaining.length) explore(0, fixtures);
+        else recordScenario(fixtures);
+        return possibilities;
+      }
+
+      function renderStandings() {
+        const fixtures = collectFixtures();
+        standingsGroups.forEach((rows, groupIndex) => {
+          const table = standingsTables[groupIndex];
+          const head = table.querySelector(".standings-head").outerHTML;
+          const qualification = classifyQualification(rows, fixtures);
+          table.innerHTML =
+            head +
+            rankGroup(rows, fixtures)
+              .map((team, index) => {
+                const diff = team.roundsWon - team.roundsLost;
+                const state = qualification.get(team.team);
+                const statusClass = state?.top && !state?.bottom ? " clinched" : !state?.top && state?.bottom ? " eliminated" : "";
+                return `
+                  <div class="standings-row ${index < 4 ? "advance" : "out"}${statusClass}" role="row">
+                    <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo">${team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
+                    <span>${team.wins} - ${team.losses}</span>
+                    <span>${team.mapsWon} / ${team.mapsLost}</span>
+                    <span>${team.roundsWon} / ${team.roundsLost}</span>
+                    <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
+                  </div>
+                `;
+              })
+              .join("");
+        });
+      }
+
+      document.querySelectorAll(".match-card").forEach((card) => {
+        const date = card.querySelector(":scope > span")?.textContent.trim() || "";
+        const teams = [...card.querySelectorAll("strong")].map((team) => team.getAttribute("aria-label") || team.textContent.trim());
+        const scoreElement = card.querySelector("em");
+        const originalScore = scoreElement?.textContent.trim() || "VS";
+        card.dataset.originalScore = originalScore;
+        const score = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
+        if (scoreElement) scoreElement.textContent = score;
+        if (score !== "VS") card.classList.remove("upcoming");
+        card.setAttribute("role", "link");
+        card.setAttribute("tabindex", "0");
+        card.addEventListener("click", () => {
+          const currentScore = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
+          const params = new URLSearchParams({ date, teamA: teams[0] || "", teamB: teams[1] || "", score: currentScore });
+          window.location.href = "./americas-match.html?" + params.toString();
+        });
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card.click(); }
+        });
+      });
+
+      renderStandings();
+        });
+    </script>
+    <!-- 그룹 팀 선택 모달 -->
+    <div class="ga-modal" id="ga-modal" hidden>
+      <div class="ga-backdrop" id="ga-backdrop"></div>
+      <div class="ga-panel" role="dialog" aria-modal="true">
+        <h2 id="ga-modal-title">팀 배정</h2>
+        <p>팀을 클릭해서 배정하세요.</p>
+        <div class="ga-team-grid" id="ga-team-grid"></div>
+        <div class="ga-actions" id="ga-actions"></div>
+      </div>
+    </div>
+    <script>
+    window.storageReady.then(function () {
+      const GA_KEY = "stage1_americas_groups";
+      const GA_TEAMS = [
+        "Sentinels","G2 Esports","NRG","100 Thieves",
+        "Cloud9","MIBR","LOUD","FURIA",
+        "KRÜ Esports","Leviatán","Evil Geniuses","ENVY",
+      ];
+      const GA_CODES = {
+        "Sentinels":"SEN","G2 Esports":"G2","NRG":"NRG","100 Thieves":"100T",
+        "Cloud9":"C9","MIBR":"MIBR","LOUD":"LOUD","FURIA":"FUR",
+        "KRÜ Esports":"KRÜ","Leviatán":"LEV","Evil Geniuses":"EG","ENVY":"ENVY",
+      };
+      const GA_LOGOS = {
+        "Sentinels":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+        "G2 Esports":"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+        "NRG":"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+        "100 Thieves":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png",
+        "Cloud9":"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+        "MIBR":"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+        "LOUD":"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+        "FURIA":"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+        "KRÜ Esports":"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+        "Leviatán":"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+        "Evil Geniuses":"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+        "ENVY":"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg",
+      };
+      const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+      function loadGroups() {
+        try { const r = localStorage.getItem(GA_KEY); if (r) return JSON.parse(r); } catch {}
+        return { alpha: Array(6).fill(""), omega: Array(6).fill("") };
+      }
+      function saveGroups(g) { localStorage.setItem(GA_KEY, JSON.stringify(g)); }
+      function renderGroupSlots() {
+        const groups = loadGroups();
+        ["alpha","omega"].forEach(grp => {
+          const el = document.getElementById("ga-" + grp + "-slots");
+          if (!el) return;
+          el.innerHTML = "";
+          groups[grp].forEach((team, i) => {
+            const slot = document.createElement("div");
+            slot.className = "group-slot" + (team ? " has-team" : " empty");
+            const logo = team && GA_LOGOS[team] ? `<img src="${GA_LOGOS[team]}" alt="${team}" style="width:44px;height:44px;object-fit:contain;" />` : "";
+            slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${team || "팀 선택"}</span><span class="slot-rank">${i+1}번 슬롯</span>`;
+            if (isAdmin()) slot.addEventListener("click", () => openPicker(grp, i));
+            el.appendChild(slot);
+          });
+        });
+      }
+      let _ctx = null;
+      function openPicker(grp, idx) {
+        _ctx = { grp, idx };
+        const groups = loadGroups();
+        const used = new Set([...groups.alpha, ...groups.omega].filter(Boolean));
+        const current = groups[grp][idx];
+        document.getElementById("ga-modal-title").textContent = (grp === "alpha" ? "알파조" : "오메가조") + " " + (idx+1) + "번 슬롯 배정";
+        const grid = document.getElementById("ga-team-grid");
+        grid.innerHTML = GA_TEAMS.map(t => {
+          const isUsed = used.has(t) && t !== current;
+          const logo = GA_LOGOS[t] ? `<img src="${GA_LOGOS[t]}" alt="${t}" />` : "";
+          return `<button class="ga-team-btn${t === current ? " selected" : ""}${isUsed ? " in-other-group" : ""}" data-team="${t}">${logo}<span class="ga-team-code">${GA_CODES[t] || t.slice(0,3)}</span><span>${t}</span></button>`;
+        }).join("");
+        grid.querySelectorAll(".ga-team-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const g = loadGroups(); g[_ctx.grp][_ctx.idx] = btn.dataset.team;
+            saveGroups(g); closeModal(); renderGroupSlots();
+          });
+        });
+        document.getElementById("ga-actions").innerHTML = `<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button><button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>`;
+        document.getElementById("ga-cancel").addEventListener("click", closeModal);
+        document.getElementById("ga-clear").addEventListener("click", () => {
+          const g = loadGroups(); g[_ctx.grp][_ctx.idx] = ""; saveGroups(g); closeModal(); renderGroupSlots();
+        });
+        document.getElementById("ga-modal").hidden = false;
+      }
+      function closeModal() { document.getElementById("ga-modal").hidden = true; _ctx = null; }
+      document.getElementById("ga-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("ga-modal").hidden) closeModal(); });
+      renderGroupSlots();
+    });
+    </script>
+  <script src="./auth.js"></script>
+</body>
+</html>

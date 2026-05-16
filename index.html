@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Match Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero" aria-labelledby="site-title">
+        <div class="hero-copy">
+          <img class="vct-logo" src="./assets/vct-logo.png" alt="VCT" />
+          <p class="eyebrow">VALORANT Champions Tour</p>
+          <h1 id="site-title">VCT 경기 결과 아카이브</h1>
+          <p class="intro">
+            Pacific, CN, Americas, EMEA 네 리그의 경기 결과와 맵별 기록을
+            한눈에 정리하는 개인 VCT 리포트 사이트입니다.
+          </p>
+        </div>
+
+        <nav class="league-grid" aria-label="VCT 리그 선택">
+          <a class="league-card pacific" href="./pacific.html" aria-label="VCT Pacific 보기" data-pacific-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-pacific.webp" alt="" />
+            </span>
+            <span class="league-name">Pacific</span>
+            <span class="league-action">리그 보기</span>
+          </a>
+
+          <a class="league-card cn" href="./cn.html" aria-label="VCT CN 보기" data-cn-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-cn.webp" alt="" />
+            </span>
+            <span class="league-name">CN</span>
+            <span class="league-action">리그 보기</span>
+          </a>
+
+          <a class="league-card americas" href="./americas.html" aria-label="VCT Americas 보기" data-americas-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-americas.png" alt="" />
+            </span>
+            <span class="league-name">Americas</span>
+            <span class="league-action">리그 보기</span>
+          </a>
+
+          <a class="league-card emea" href="./emea.html" aria-label="VCT EMEA 보기" data-emea-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-emea.webp" alt="" />
+            </span>
+            <span class="league-name">EMEA</span>
+            <span class="league-action">리그 보기</span>
+          </a>
+
+          <a class="league-card masters" href="./masters.html" aria-label="VCT Masters 보기" data-masters-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-logo.png" alt="" />
+            </span>
+            <span class="league-name">Masters</span>
+            <span class="league-action">대회 보기</span>
+          </a>
+
+          <a class="league-card champions" href="./champions.html" aria-label="VCT Champions 보기" data-champions-enter>
+            <span class="league-logo-wrap">
+              <img src="./assets/vct-logo.png" alt="" />
+            </span>
+            <span class="league-name">Champions</span>
+            <span class="league-action">대회 보기</span>
+          </a>
+        </nav>
+      </section>
+    </main>
+    <div class="pacific-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-pacific.webp" alt="" />
+    </div>
+    <div class="emea-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-emea.webp" alt="" />
+    </div>
+    <div class="cn-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-cn.webp" alt="" />
+    </div>
+    <div class="americas-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-americas.png" alt="" />
+    </div>
+    <div class="masters-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-logo.png" alt="" />
+    </div>
+    <div class="champions-enter-transition" aria-hidden="true">
+      <img src="./assets/vct-logo.png" alt="" />
+    </div>
+    <script>
+      const pacificLink = document.querySelector("[data-pacific-enter]");
+      pacificLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-pacific");
+        window.setTimeout(() => {
+          window.location.href = pacificLink.href;
+        }, 620);
+      });
+
+      const emeaLink = document.querySelector("[data-emea-enter]");
+      emeaLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-emea");
+        window.setTimeout(() => {
+          window.location.href = emeaLink.href;
+        }, 620);
+      });
+
+      const cnLink = document.querySelector("[data-cn-enter]");
+      cnLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-cn");
+        window.setTimeout(() => {
+          window.location.href = cnLink.href;
+        }, 620);
+      });
+
+      const americasLink = document.querySelector("[data-americas-enter]");
+      americasLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-americas");
+        window.setTimeout(() => {
+          window.location.href = americasLink.href;
+        }, 620);
+      });
+
+      const mastersLink = document.querySelector("[data-masters-enter]");
+      mastersLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-masters");
+        window.setTimeout(() => {
+          window.location.href = mastersLink.href;
+        }, 620);
+      });
+
+      const championsLink = document.querySelector("[data-champions-enter]");
+      championsLink?.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        document.body.classList.add("entering-champions");
+        window.setTimeout(() => {
+          window.location.href = championsLink.href;
+        }, 620);
+      });
+    </script>
+  <script src="./auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT EMEA 2026 Stage 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      /* ── Stage 2 전용 스타일 ─────────────────────────── */
+
+      /* 그룹 배정 섹션 */
+      .group-assign-section { padding: 40px 20px 0; max-width: 900px; margin: 0 auto; }
+      .group-assign-section .section-heading { margin-bottom: 20px; }
+      .group-assign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
+
+      .group-assign-card { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; }
+      .group-assign-card h3 { font-size: 14px; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; }
+      .group-slots { display: flex; flex-direction: column; gap: 8px; }
+
+      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); min-height: 56px; transition: background 0.15s; }
+      .group-slot.has-team { border-color: rgba(213,255,29,0.3); background: rgba(213,255,29,0.06); }
+      .group-slot .slot-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .group-slot .slot-logo img { width: 44px; height: 44px; object-fit: contain; }
+      .group-slot .slot-name { font-size: 13px; font-weight: 700; flex: 1; }
+      .group-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
+      .group-slot .slot-rank { font-size: 11px; font-weight: 700; opacity: 0.4; margin-left: auto; }
+
+      /* 어드민 모드: 슬롯 클릭 가능 */
+      body:not(.view-only) .group-slot { cursor: pointer; }
+      body:not(.view-only) .group-slot:hover { background: rgba(213,255,29,0.12); border-color: rgba(213,255,29,0.5); }
+      body:not(.view-only) .group-slot.has-team:hover { background: rgba(213,255,29,0.18); }
+
+      /* match-card 편집 버튼 */
+      .match-card { position: relative; }
+      .match-card-edit-btn {
+        display: none;
+        position: absolute; top: 6px; right: 6px;
+        background: rgba(213,255,29,0.18); border: 1px solid rgba(213,255,29,0.4);
+        color: #d5ff1d; border-radius: 6px; padding: 3px 7px;
+        font-size: 11px; font-weight: 700; cursor: pointer; line-height: 1.4;
+        z-index: 2;
+      }
+      body:not(.view-only) .match-card-edit-btn { display: block; }
+      body:not(.view-only) .match-card-edit-btn:hover { background: rgba(213,255,29,0.35); }
+
+      /* 팀 미설정 매치카드 */
+      .match-card.no-teams { opacity: 0.55; }
+      .match-card.no-teams strong { font-style: italic; opacity: 0.6; }
+      body:not(.view-only) .match-card.no-teams { opacity: 1; cursor: default; }
+
+      /* ── 팀 선택 모달 ─────────────────────────────────── */
+      .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
+      .ts-modal[hidden] { display: none !important; }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
+      .ts-panel {
+        position: relative; z-index: 1;
+        width: min(520px, calc(100vw - 24px));
+        max-height: 90vh; overflow-y: auto;
+        background: #111f0f; border: 1.5px solid rgba(213,255,29,0.25);
+        border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease;
+      }
+      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+      .ts-panel p { font-size: 13px; opacity: 0.6; margin: 0 0 18px; }
+      .ts-team-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+        margin-bottom: 18px;
+      }
+      @media (max-width: 400px) { .ts-team-grid { grid-template-columns: repeat(2, 1fr); } }
+
+      .ts-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 12px 8px; border-radius: 10px;
+        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+        color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s;
+        font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center;
+      }
+      .ts-team-btn img { width: 32px; height: 32px; object-fit: contain; }
+      .ts-team-btn .ts-team-code { font-size: 13px; font-weight: 900; }
+      .ts-team-btn:hover { background: rgba(213,255,29,0.12); border-color: rgba(213,255,29,0.5); }
+      .ts-team-btn.selected-a { background: rgba(213,255,29,0.25); border-color: #d5ff1d; box-shadow: 0 0 0 2px rgba(213,255,29,0.3); }
+      .ts-team-btn.selected-b { background: rgba(255,180,0,0.2); border-color: #ffb400; box-shadow: 0 0 0 2px rgba(255,180,0,0.25); }
+      .ts-team-btn.in-other-group { opacity: 0.25; pointer-events: none; }
+
+      .ts-match-step { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+      .ts-step-badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+      .ts-step-badge.step-a { background: rgba(213,255,29,0.2); color: #d5ff1d; }
+      .ts-step-badge.step-b { background: rgba(255,180,0,0.15); color: #ffb400; }
+
+      .ts-date-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+      .ts-date-row label { font-size: 12px; opacity: 0.6; white-space: nowrap; }
+      .ts-date-input {
+        flex: 1; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15);
+        color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-family: inherit;
+      }
+      .ts-date-input:focus { outline: none; border-color: #d5ff1d; }
+
+      .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .ts-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .ts-btn-save { background: #d5ff1d; color: #0f1a00; }
+      .ts-btn-save:hover { background: #e8ff5a; }
+      .ts-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+      .ts-btn-clear { background: rgba(255,80,80,0.15); color: #ff5050; border: 1px solid rgba(255,80,80,0.25); }
+      .ts-btn-clear:hover { background: rgba(255,80,80,0.28); }
+    </style>
+  </head>
+  <body class="league-page stage-page emea-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./emea.html">EMEA</a>
+    </header>
+
+    <main class="league-shell stage-shell">
+      <!-- 히어로 -->
+      <section class="stage-hero" aria-labelledby="stage-title">
+        <div>
+          <p class="eyebrow">VCT EMEA 2026</p>
+          <h1 id="stage-title">Stage 2 순위</h1>
+          <p class="intro">
+            Alpha와 Omega 두 그룹의 순위를 정리한 페이지입니다. 각 그룹 상위
+            4팀은 플레이오프에 진출하고, 하위 2팀은 탈락합니다.
+          </p>
+        </div>
+        <div class="stage-summary" aria-label="Stage 2 진행 방식">
+          <div><strong>2</strong><span>그룹</span></div>
+          <div><strong>12</strong><span>팀</span></div>
+          <div><strong>8</strong><span>진출</span></div>
+        </div>
+      </section>
+
+      <!-- 그룹 배정 -->
+      <section class="group-assign-section" aria-labelledby="group-assign-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Group Assignment</p>
+            <h2 id="group-assign-title">그룹 팀 배정</h2>
+          </div>
+        </div>
+        <div class="group-assign-grid">
+          <div class="group-assign-card">
+            <h3>알파조 (α) — 상위 4팀 진출</h3>
+            <div class="group-slots" id="alpha-slots"></div>
+          </div>
+          <div class="group-assign-card">
+            <h3>오메가조 (ω) — 상위 4팀 진출</h3>
+            <div class="group-slots" id="omega-slots"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 경기 / 순위 -->
+      <section class="week-section" aria-labelledby="weeks-title" id="fixtures-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">경기 목록</p>
+            <h2 id="weeks-title">주차별 경기</h2>
+          </div>
+          <a class="playoff-link" href="./emea-stage2-playoffs.html">PlayOff 대진표</a>
+        </div>
+
+        <div class="week-tabs">
+          <input type="radio" name="week" id="week-1" checked />
+          <input type="radio" name="week" id="week-2" />
+          <input type="radio" name="week" id="week-3" />
+          <input type="radio" name="week" id="week-4" />
+          <input type="radio" name="week" id="week-5" />
+
+          <div class="week-tab-list" aria-label="주차 선택">
+            <label for="week-1">1주차</label>
+            <label for="week-2">2주차</label>
+            <label for="week-3">3주차</label>
+            <label for="week-4">4주차</label>
+            <label for="week-5">5주차</label>
+          </div>
+
+          <div class="week-panels" id="week-panels"></div>
+        </div>
+      </section>
+
+      <!-- 순위표 -->
+      <section class="standings-section" id="standings-section" aria-labelledby="standings-title">
+        <div class="section-heading">
+          <p class="eyebrow">순위</p>
+          <h2 id="standings-title">그룹 스테이지 순위</h2>
+        </div>
+        <div class="standings-grid" id="standings-grid"></div>
+      </section>
+    </main>
+
+    <!-- 팀 선택 모달 -->
+    <div class="ts-modal" id="ts-modal" hidden>
+      <div class="ts-backdrop" id="ts-backdrop"></div>
+      <div class="ts-panel" role="dialog" aria-modal="true" aria-labelledby="ts-title">
+        <h2 id="ts-title">팀 선택</h2>
+        <p id="ts-subtitle"></p>
+        <div id="ts-match-step-indicator"></div>
+        <div id="ts-date-row-container"></div>
+        <div class="ts-team-grid" id="ts-team-grid"></div>
+        <div class="ts-actions" id="ts-actions"></div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      /* ── 팀 데이터 ──────────────────────────────────── */
+      const TEAMS = [
+        "Gentle Mates",
+        "Team Liquid",
+        "Team Heretics",
+        "NAVI",
+        "Karmine Corp",
+        "FUT Esports",
+        "BBL Esports",
+        "Fnatic",
+        "Team Vitality",
+        "GIANTX",
+        "Eternal Fire",
+        "PCIFIC Esports",
+      ];
+
+      const teamCodes = {
+        "Gentle Mates":  "GM",
+        "Team Liquid":   "TL",
+        "Team Heretics": "HER",
+        "NAVI":          "NAVI",
+        "Karmine Corp":  "KC",
+        "FUT Esports":   "FUT",
+        "BBL Esports":   "BBL",
+        "Fnatic":        "FNC",
+        "Team Vitality": "VIT",
+        "GIANTX":        "GX",
+        "Eternal Fire":  "EF",
+        "PCIFIC Esports":"PCF",
+      };
+
+      const teamLogos = {
+        "Gentle Mates":  "./assets/teams/gm.png",
+        "Team Liquid":   "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp",
+        "Team Heretics": "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",
+        "NAVI":          "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+        "Karmine Corp":  "./assets/teams/kc.png",
+        "FUT Esports":   "https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg",
+        "BBL Esports":   "https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg",
+        "Fnatic":        "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",
+        "Team Vitality": "https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg",
+        "GIANTX":        "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",
+        "Eternal Fire":  "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",
+        "PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg",
+      };
+
+      const teamNationality = {
+        "Gentle Mates":  "프랑스",
+        "Team Liquid":   "네덜란드",
+        "Team Heretics": "스페인",
+        "NAVI":          "우크라이나",
+        "Karmine Corp":  "프랑스",
+        "FUT Esports":   "튀르키예",
+        "BBL Esports":   "튀르키예",
+        "Fnatic":        "영국",
+        "Team Vitality": "프랑스",
+        "GIANTX":        "스페인",
+        "Eternal Fire":  "튀르키예",
+        "PCIFIC Esports":"튀르키예",
+      };
+
+      /* ── 저장소 키 ──────────────────────────────────── */
+      const GROUPS_KEY = "stage2_emea_groups";
+      const matchKey = (w, m) => `stage2_emea_w${w}_m${m}`;
+
+      /* ── 상태 ───────────────────────────────────────── */
+      function loadGroups() {
+        try {
+          const raw = localStorage.getItem(GROUPS_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch {}
+        return { alpha: Array(6).fill(""), omega: Array(6).fill("") };
+      }
+
+      function saveGroups(groups) {
+        localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+      }
+
+      function loadMatch(w, m) {
+        try {
+          const raw = localStorage.getItem(matchKey(w, m));
+          if (raw) return JSON.parse(raw);
+        } catch {}
+        return { teamA: "", teamB: "", date: "" };
+      }
+
+      function saveMatch(w, m, data) {
+        localStorage.setItem(matchKey(w, m), JSON.stringify(data));
+      }
+
+      function getStoredMatchScore(date, teamA, teamB) {
+        if (!teamA || !teamB) return "VS";
+        try {
+          const stored = JSON.parse(localStorage.getItem(`result:${date}|${teamA}|${teamB}`) || "{}");
+          const sa = String(stored.scoreA ?? "").trim();
+          const sb = String(stored.scoreB ?? "").trim();
+          if (sa && sb && sa !== "-" && sb !== "-") return `${sa} : ${sb}`;
+        } catch {}
+        return "VS";
+      }
+
+      /* ── 팀 로고 HTML ───────────────────────────────── */
+      function logoHtml(teamName, size) {
+        const src = teamLogos[teamName];
+        if (!src) return "";
+        const style = size ? ` style="width:${size}px;height:${size}px;object-fit:contain;"` : "";
+        return `<img src="${src}" alt="${teamName}"${style} />`;
+      }
+
+      /* ══════════════════════════════════════════════════
+         그룹 슬롯 렌더링
+      ══════════════════════════════════════════════════ */
+      const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+      function renderGroupSlots() {
+        const groups = loadGroups();
+        ["alpha", "omega"].forEach((grp) => {
+          const container = document.getElementById(grp + "-slots");
+          if (!container) return;
+          container.innerHTML = "";
+          const teams = groups[grp];
+          for (let i = 0; i < 6; i++) {
+            const team = teams[i] || "";
+            const slot = document.createElement("div");
+            slot.className = "group-slot" + (team ? " has-team" : " empty");
+            slot.dataset.group = grp;
+            slot.dataset.index = i;
+            slot.innerHTML = `
+              <div class="slot-logo">${team ? logoHtml(team, 44) : ""}</div>
+              <span class="slot-name">${team || "팀 선택"}</span>
+              <span class="slot-rank">${i + 1}번 슬롯</span>
+            `;
+            if (isAdmin()) {
+              slot.addEventListener("click", () => openGroupSlotPicker(grp, i));
+            }
+            container.appendChild(slot);
+          }
+        });
+      }
+
+      /* ══════════════════════════════════════════════════
+         주차별 경기 렌더링
+      ══════════════════════════════════════════════════ */
+      const WEEK_DATES = [
+        "07.16 - 07.18",
+        "07.23 - 07.25",
+        "07.30 - 08.01",
+        "08.06 - 08.08",
+        "08.13 - 08.15",
+      ];
+
+      function renderWeekPanels() {
+        const panelsContainer = document.getElementById("week-panels");
+        if (!panelsContainer) return;
+        panelsContainer.innerHTML = "";
+
+        for (let w = 1; w <= 5; w++) {
+          const panel = document.createElement("div");
+          panel.className = `week-panel week-panel-${w}`;
+
+          const meta = document.createElement("div");
+          meta.className = "week-meta";
+          meta.innerHTML = `<strong>Week ${w}</strong><span>2026. ${WEEK_DATES[w - 1]}</span>`;
+          panel.appendChild(meta);
+
+          const grid = document.createElement("div");
+          grid.className = "match-grid";
+
+          for (let m = 0; m < 6; m++) {
+            const md = loadMatch(w, m);
+            const { teamA, teamB, date } = md;
+            const displayDate = date || `W${w}`;
+            const score = getStoredMatchScore(date || `stage2_emea_w${w}_m${m}`, teamA, teamB);
+            const hasTeams = teamA && teamB;
+
+            const card = document.createElement("article");
+            card.className = "match-card" + (hasTeams ? "" : " no-teams");
+            card.dataset.week = w;
+            card.dataset.match = m;
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "match-card-edit-btn";
+            editBtn.textContent = "✎ 편집";
+            editBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openMatchPicker(w, m);
+            });
+
+            const dateSpan = document.createElement("span");
+            dateSpan.textContent = displayDate;
+
+            const teamAEl = document.createElement("strong");
+            if (teamA) {
+              teamAEl.innerHTML = `
+                <img class="match-team-mini-logo" src="${teamLogos[teamA] || ""}" alt="" />
+                <span>${teamA}</span>`;
+              teamAEl.setAttribute("aria-label", teamA);
+            } else {
+              teamAEl.textContent = "미정";
+            }
+
+            const scoreEl = document.createElement("em");
+            scoreEl.textContent = score;
+
+            const teamBEl = document.createElement("strong");
+            if (teamB) {
+              teamBEl.innerHTML = `
+                <img class="match-team-mini-logo" src="${teamLogos[teamB] || ""}" alt="" />
+                <span>${teamB}</span>`;
+              teamBEl.setAttribute("aria-label", teamB);
+            } else {
+              teamBEl.textContent = "미정";
+            }
+
+            card.appendChild(editBtn);
+            card.appendChild(dateSpan);
+            card.appendChild(teamAEl);
+            card.appendChild(scoreEl);
+            card.appendChild(teamBEl);
+
+            if (hasTeams) {
+              card.setAttribute("role", "link");
+              card.setAttribute("tabindex", "0");
+              card.addEventListener("click", () => {
+                const params = new URLSearchParams({
+                  date: date || `stage2_emea_w${w}_m${m}`,
+                  teamA,
+                  teamB,
+                  score,
+                  from: "stage2",
+                });
+                window.location.href = `./emea-match.html?${params.toString()}`;
+              });
+              card.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
+              });
+            }
+
+            grid.appendChild(card);
+          }
+
+          panel.appendChild(grid);
+          panelsContainer.appendChild(panel);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════
+         순위표 렌더링
+      ══════════════════════════════════════════════════ */
+      function collectAllFixtures() {
+        const fixtures = [];
+        for (let w = 1; w <= 5; w++) {
+          for (let m = 0; m < 6; m++) {
+            const md = loadMatch(w, m);
+            if (!md.teamA || !md.teamB) continue;
+            const key = md.date || `stage2_emea_w${w}_m${m}`;
+            const score = getStoredMatchScore(key, md.teamA, md.teamB);
+            fixtures.push({ date: key, teamA: md.teamA, teamB: md.teamB, score });
+          }
+        }
+        return fixtures;
+      }
+
+      function parseScore(score) {
+        const p = (score || "").match(/(\d+)\s*:\s*(\d+)/);
+        if (!p) return null;
+        return { a: Number(p[1]), b: Number(p[2]) };
+      }
+
+      function getSavedSetRounds(dateKey, teamA, teamB) {
+        try {
+          const fk = `${dateKey}|${teamA}|${teamB}`;
+          const veto = JSON.parse(localStorage.getItem(`veto:${fk}`) || "{}");
+          const maps = [veto.maps?.[2], veto.maps?.[3], veto.maps?.[6]].filter(Boolean);
+          return maps.reduce((total, mapName, index) => {
+            const saved = JSON.parse(localStorage.getItem(`set:${fk}:${index}:${mapName}`) || "{}");
+            const aScore = Number(saved.stats?.aScore);
+            const bScore = Number(saved.stats?.bScore);
+            if (Number.isFinite(aScore) && Number.isFinite(bScore)) {
+              total.a += aScore;
+              total.b += bScore;
+            }
+            return total;
+          }, { a: 0, b: 0 });
+        } catch {
+          return { a: 0, b: 0 };
+        }
+      }
+
+      function rankGroup(teams, fixtures) {
+        const stats = new Map(teams.filter(Boolean).map((t) => [t, { team: t, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0 }]));
+        const teamSet = new Set(teams.filter(Boolean));
+
+        fixtures.filter((f) => teamSet.has(f.teamA) && teamSet.has(f.teamB)).forEach((f) => {
+          const p = parseScore(f.score);
+          if (!p) return;
+          const a = stats.get(f.teamA);
+          const b = stats.get(f.teamB);
+          if (!a || !b) return;
+          a.mapsWon += p.a; a.mapsLost += p.b;
+          b.mapsWon += p.b; b.mapsLost += p.a;
+          if (p.a > p.b) { a.wins++; b.losses++; }
+          else if (p.b > p.a) { b.wins++; a.losses++; }
+          const rounds = getSavedSetRounds(f.date, f.teamA, f.teamB);
+          a.roundsWon += rounds.a; a.roundsLost += rounds.b;
+          b.roundsWon += rounds.b; b.roundsLost += rounds.a;
+        });
+
+        return [...stats.values()].sort((a, b) =>
+          b.wins - a.wins || a.losses - b.losses ||
+          (b.mapsWon - b.mapsLost) - (a.mapsWon - a.mapsLost) ||
+          (b.roundsWon - b.roundsLost) - (a.roundsWon - a.roundsLost)
+        );
+      }
+
+      function renderStandings() {
+        const grid = document.getElementById("standings-grid");
+        if (!grid) return;
+        const groups = loadGroups();
+        const fixtures = collectAllFixtures();
+
+        ["alpha", "omega"].forEach((grp) => {
+          const teams = groups[grp].filter(Boolean);
+          const label = grp === "alpha" ? "알파조 (α)" : "오메가조 (ω)";
+
+          let card = grid.querySelector(`[data-grp="${grp}"]`);
+          if (!card) {
+            card = document.createElement("article");
+            card.className = "standings-card";
+            card.dataset.grp = grp;
+            grid.appendChild(card);
+          }
+
+          if (teams.length === 0) {
+            card.innerHTML = `
+              <div class="standings-title"><h3>${label}</h3><span>팀 배정 대기 중</span></div>
+              <div class="standings-table" role="table">
+                <div class="standings-row standings-head" role="row">
+                  <span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span>
+                </div>
+                <div class="standings-row" style="opacity:.45;padding:16px;font-size:13px;">그룹 팀을 배정하면 순위가 표시됩니다.</div>
+              </div>`;
+            return;
+          }
+
+          const ranked = rankGroup(teams, fixtures);
+          const rows = ranked.map((s, i) => {
+            const diff = s.mapsWon - s.mapsLost;
+            return `
+              <div class="standings-row ${i < 4 ? "advance" : "out"}" role="row">
+                <div class="team-cell">
+                  <div class="rank-badge">${i + 1}</div>
+                  <div class="stage-team-logo">${logoHtml(s.team)}</div>
+                  <div><strong>${s.team}</strong><span>${teamNationality[s.team] || ""}</span></div>
+                </div>
+                <span>${s.wins} - ${s.losses}</span>
+                <span>${s.mapsWon} / ${s.mapsLost}</span>
+                <span>${s.roundsWon} / ${s.roundsLost}</span>
+                <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
+              </div>`;
+          }).join("");
+
+          card.innerHTML = `
+            <div class="standings-title"><h3>${label}</h3><span>상위 4팀 진출</span></div>
+            <div class="standings-table" role="table">
+              <div class="standings-row standings-head" role="row">
+                <span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span>
+              </div>
+              ${rows}
+            </div>`;
+        });
+      }
+
+      /* ══════════════════════════════════════════════════
+         팀 선택 모달
+      ══════════════════════════════════════════════════ */
+      let _modalMode = null;
+      let _modalCtx  = null;
+
+      function openModal() { document.getElementById("ts-modal").hidden = false; }
+      function closeModal() {
+        document.getElementById("ts-modal").hidden = true;
+        _modalMode = null; _modalCtx = null;
+      }
+
+      /* 그룹 슬롯 팀 선택 */
+      function openGroupSlotPicker(grp, idx) {
+        _modalMode = "group";
+        _modalCtx  = { grp, idx };
+
+        const groups = loadGroups();
+        const used = new Set([...groups.alpha, ...groups.omega].filter(Boolean));
+        const current = groups[grp][idx];
+
+        document.getElementById("ts-title").textContent = `팀 배정 — ${grp === "alpha" ? "알파조" : "오메가조"} ${idx + 1}번 슬롯`;
+        document.getElementById("ts-subtitle").textContent = "팀을 클릭해서 배정하세요.";
+        document.getElementById("ts-match-step-indicator").innerHTML = "";
+        document.getElementById("ts-date-row-container").innerHTML = "";
+
+        const grid = document.getElementById("ts-team-grid");
+        grid.innerHTML = TEAMS.map((t) => {
+          const isUsed = used.has(t) && t !== current;
+          return `<button class="ts-team-btn${t === current ? " selected-a" : ""}${isUsed ? " in-other-group" : ""}" data-team="${t}">
+            ${teamLogos[t] ? `<img src="${teamLogos[t]}" alt="${t}" />` : ""}
+            <span class="ts-team-code">${teamCodes[t] || t.slice(0,3)}</span>
+            <span>${t}</span>
+          </button>`;
+        }).join("");
+
+        grid.querySelectorAll(".ts-team-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const team = btn.dataset.team;
+            const groups = loadGroups();
+            groups[_modalCtx.grp][_modalCtx.idx] = team;
+            saveGroups(groups);
+            closeModal();
+            renderGroupSlots();
+            renderWeekPanels();
+            renderStandings();
+          });
+        });
+
+        document.getElementById("ts-actions").innerHTML = `
+          <button class="ts-btn ts-btn-clear" id="ts-clear-btn">비우기</button>
+          <button class="ts-btn ts-btn-cancel" id="ts-cancel-btn">취소</button>`;
+        document.getElementById("ts-cancel-btn").addEventListener("click", closeModal);
+        document.getElementById("ts-clear-btn").addEventListener("click", () => {
+          const groups = loadGroups();
+          groups[_modalCtx.grp][_modalCtx.idx] = "";
+          saveGroups(groups);
+          closeModal();
+          renderGroupSlots();
+          renderWeekPanels();
+          renderStandings();
+        });
+
+        openModal();
+      }
+
+      /* 경기 팀 선택 */
+      function openMatchPicker(w, m) {
+        _modalMode = "match";
+        _modalCtx  = { w, m, selectedA: "", selectedB: "" };
+
+        const md = loadMatch(w, m);
+        _modalCtx.selectedA = md.teamA || "";
+        _modalCtx.selectedB = md.teamB || "";
+        let currentDate = md.date || "";
+
+        document.getElementById("ts-title").textContent = `경기 설정 — Week ${w} · Match ${m + 1}`;
+        document.getElementById("ts-subtitle").textContent = "두 팀을 선택하고 날짜를 입력하세요.";
+
+        document.getElementById("ts-match-step-indicator").innerHTML = `
+          <div class="ts-match-step">
+            <span class="ts-step-badge step-a">팀 A</span>
+            <span id="ts-selected-a" style="font-size:13px;font-weight:700;">${_modalCtx.selectedA || "미선택"}</span>
+            <span style="margin:0 6px;opacity:.4;">vs</span>
+            <span class="ts-step-badge step-b">팀 B</span>
+            <span id="ts-selected-b" style="font-size:13px;font-weight:700;">${_modalCtx.selectedB || "미선택"}</span>
+          </div>`;
+
+        document.getElementById("ts-date-row-container").innerHTML = `
+          <div class="ts-date-row">
+            <label for="ts-date-input">날짜</label>
+            <input class="ts-date-input" id="ts-date-input" type="text" placeholder="예: 07.17" value="${currentDate}" />
+          </div>`;
+
+        function refreshGrid() {
+          const grid = document.getElementById("ts-team-grid");
+          grid.innerHTML = TEAMS.map((t) => {
+            let cls = "ts-team-btn";
+            if (t === _modalCtx.selectedA) cls += " selected-a";
+            else if (t === _modalCtx.selectedB) cls += " selected-b";
+            return `<button class="${cls}" data-team="${t}">
+              ${teamLogos[t] ? `<img src="${teamLogos[t]}" alt="${t}" />` : ""}
+              <span class="ts-team-code">${teamCodes[t] || t.slice(0,3)}</span>
+              <span>${t}</span>
+            </button>`;
+          }).join("");
+
+          grid.querySelectorAll(".ts-team-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const t = btn.dataset.team;
+              if (t === _modalCtx.selectedA) { _modalCtx.selectedA = ""; }
+              else if (t === _modalCtx.selectedB) { _modalCtx.selectedB = ""; }
+              else if (!_modalCtx.selectedA) { _modalCtx.selectedA = t; }
+              else if (!_modalCtx.selectedB) { _modalCtx.selectedB = t; }
+              else { _modalCtx.selectedB = t; }
+
+              document.getElementById("ts-selected-a").textContent = _modalCtx.selectedA || "미선택";
+              document.getElementById("ts-selected-b").textContent = _modalCtx.selectedB || "미선택";
+              const saveBtn = document.getElementById("ts-save-btn");
+              if (saveBtn) saveBtn.disabled = !(_modalCtx.selectedA && _modalCtx.selectedB);
+              refreshGrid();
+            });
+          });
+        }
+        refreshGrid();
+
+        document.getElementById("ts-actions").innerHTML = `
+          <button class="ts-btn ts-btn-clear" id="ts-clear-btn">초기화</button>
+          <button class="ts-btn ts-btn-cancel" id="ts-cancel-btn">취소</button>
+          <button class="ts-btn ts-btn-save" id="ts-save-btn" ${_modalCtx.selectedA && _modalCtx.selectedB ? "" : "disabled"}>저장</button>`;
+
+        document.getElementById("ts-cancel-btn").addEventListener("click", closeModal);
+        document.getElementById("ts-clear-btn").addEventListener("click", () => {
+          saveMatch(_modalCtx.w, _modalCtx.m, { teamA: "", teamB: "", date: "" });
+          closeModal();
+          renderWeekPanels();
+          renderStandings();
+        });
+        document.getElementById("ts-save-btn").addEventListener("click", () => {
+          const date = document.getElementById("ts-date-input")?.value.trim() || "";
+          saveMatch(_modalCtx.w, _modalCtx.m, {
+            teamA: _modalCtx.selectedA,
+            teamB: _modalCtx.selectedB,
+            date,
+          });
+          closeModal();
+          renderWeekPanels();
+          renderStandings();
+        });
+
+        openModal();
+      }
+
+      /* 배경 클릭 / ESC 닫기 */
+      document.getElementById("ts-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !document.getElementById("ts-modal").hidden) closeModal();
+      });
+
+      /* ── 초기 렌더 ──────────────────────────────────── */
+      renderGroupSlots();
+      renderWeekPanels();
+      renderStandings();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

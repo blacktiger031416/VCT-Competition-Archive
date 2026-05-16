@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Champions 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      /* ── Champions 테마 오버라이드 ─────────────────────── */
+      .champions-page .back-link { border-color: rgba(197,177,116,0.3); color: #7a6028; }
+      .champions-page .home-link { color: #5c4618; }
+      .champions-page .eyebrow { color: #b89640; }
+      .champions-page .league-mark {
+        border-color: rgba(197,177,116,0.35);
+        background: linear-gradient(145deg, rgba(197,177,116,0.22), rgba(255,255,255,0.76)), rgba(255,255,255,0.82);
+        box-shadow: 0 22px 50px rgba(140,110,30,0.14);
+      }
+      .champions-page .league-mark img {
+        filter: brightness(0) saturate(100%) invert(75%) sepia(38%) saturate(600%) hue-rotate(8deg) brightness(98%);
+      }
+      .champions-page .tournament-card { border-color: rgba(197,177,116,0.22); }
+      .champions-page .tournament-card:hover { border-color: rgba(197,177,116,0.6); background: rgba(197,177,116,0.09); }
+      .champions-page .tournament-card strong { color: #7a6028; }
+      .champions-page .section-heading h2 { color: #c5b174; }
+
+      /* ── 참가팀 배정 섹션 ─────────────────────────────── */
+      .participants-section {
+        padding: 40px 20px 60px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .participants-section .section-heading { margin-bottom: 24px; }
+
+      .participants-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      @media (max-width: 660px) { .participants-grid { grid-template-columns: 1fr; } }
+
+      .region-card {
+        background: rgba(255,255,255,0.08);
+        border: 1.5px solid rgba(255,255,255,0.14);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      .region-card.pacific  { border-color: rgba(1,210,215,0.3);  background: rgba(1,210,215,0.06); }
+      .region-card.americas { border-color: rgba(255,87,12,0.3);  background: rgba(255,87,12,0.06); }
+      .region-card.cn       { border-color: rgba(251,38,89,0.3);  background: rgba(251,38,89,0.06); }
+      .region-card.emea     { border-color: rgba(212,255,31,0.3); background: rgba(212,255,31,0.06); }
+
+      .region-header {
+        display: flex; align-items: center; gap: 12px;
+        margin-bottom: 16px; padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .region-card.pacific  .region-header { border-color: rgba(1,210,215,0.18); }
+      .region-card.americas .region-header { border-color: rgba(255,87,12,0.18); }
+      .region-card.cn       .region-header { border-color: rgba(251,38,89,0.18); }
+      .region-card.emea     .region-header { border-color: rgba(212,255,31,0.18); }
+
+      .region-header img { width: 36px; height: 36px; object-fit: contain; }
+      .region-header h3 { font-size: 15px; font-weight: 900; margin: 0; letter-spacing: 0.02em; }
+      .region-accent-dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
+      .region-card.pacific  .region-accent-dot { background: #01d2d7; }
+      .region-card.americas .region-accent-dot { background: #ff570c; }
+      .region-card.cn       .region-accent-dot { background: #fb2659; }
+      .region-card.emea     .region-accent-dot { background: #d4ff1f; }
+
+      .seed-slots { display: flex; flex-direction: column; gap: 8px; }
+
+      .seed-slot {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; border-radius: 10px;
+        background: rgba(255,255,255,0.07);
+        border: 1.5px solid rgba(255,255,255,0.12);
+        min-height: 54px; transition: background 0.14s, border-color 0.14s;
+      }
+      .seed-slot.has-team { background: rgba(197,177,116,0.08); border-color: rgba(197,177,116,0.3); }
+      .seed-slot .slot-logo { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .seed-slot .slot-logo img { width: 38px; height: 38px; object-fit: contain; }
+      .seed-slot .slot-info { flex: 1; min-width: 0; }
+      .seed-slot .slot-seed { font-size: 10px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+      .seed-slot .slot-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .seed-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
+
+      body:not(.view-only) .seed-slot { cursor: pointer; }
+      body:not(.view-only) .seed-slot:hover { background: rgba(197,177,116,0.14); border-color: rgba(197,177,116,0.5); }
+
+      /* ── 팀 선택 모달 ─────────────────────────────────── */
+      .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
+      .ts-modal[hidden] { display: none !important; }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
+      .ts-panel {
+        position: relative; z-index: 1;
+        width: min(560px, calc(100vw - 24px));
+        max-height: 88vh; overflow-y: auto;
+        background: #1a1400;
+        border: 1.5px solid rgba(197,177,116,0.35);
+        border-radius: 18px; padding: 24px;
+        animation: loginPanelIn 0.2s ease;
+      }
+      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+      .ts-panel p  { font-size: 13px; opacity: 0.55; margin: 0 0 18px; }
+
+      .ts-region-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+      .ts-region-tab {
+        padding: 5px 14px; border-radius: 999px;
+        font-size: 12px; font-weight: 700; cursor: pointer;
+        border: 1.5px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.6); transition: all 0.13s; font-family: inherit;
+      }
+      .ts-region-tab:hover { background: rgba(255,255,255,0.12); color: #fff; }
+      .ts-region-tab.active { border-color: #c5b174; background: rgba(197,177,116,0.22); color: #fff; }
+      .ts-region-tab[data-r="pacific"].active  { border-color: #01d2d7; background: rgba(1,210,215,0.2); }
+      .ts-region-tab[data-r="americas"].active { border-color: #ff570c; background: rgba(255,87,12,0.2); }
+      .ts-region-tab[data-r="cn"].active       { border-color: #fb2659; background: rgba(251,38,89,0.2); }
+      .ts-region-tab[data-r="emea"].active     { border-color: #d4ff1f; background: rgba(212,255,31,0.2); color: #000; }
+
+      .ts-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+      @media (max-width: 400px) { .ts-team-grid { grid-template-columns: repeat(2, 1fr); } }
+
+      .ts-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 5px;
+        padding: 10px 6px; border-radius: 10px;
+        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+        color: #fff; font-family: inherit; cursor: pointer;
+        transition: all 0.13s; font-size: 10px; font-weight: 700; text-align: center;
+      }
+      .ts-team-btn img { width: 30px; height: 30px; object-fit: contain; }
+      .ts-team-btn .ts-code { font-size: 12px; font-weight: 900; }
+      .ts-team-btn:hover { background: rgba(197,177,116,0.18); border-color: rgba(197,177,116,0.6); }
+      .ts-team-btn.selected { background: rgba(197,177,116,0.32); border-color: #c5b174; box-shadow: 0 0 0 2px rgba(197,177,116,0.3); }
+
+      .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .ts-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .ts-btn-save { background: #c5b174; color: #1a1000; }
+      .ts-btn-save:hover { background: #d4c48a; }
+      .ts-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+      .ts-btn-clear { background: rgba(255,80,80,0.14); color: #ff6060; border: 1px solid rgba(255,80,80,0.25); }
+      .ts-btn-clear:hover { background: rgba(255,80,80,0.26); }
+    </style>
+  </head>
+  <body class="league-page champions-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./index.html">홈으로</a>
+    </header>
+
+    <main class="league-shell">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div>
+          <p class="eyebrow">VCT 2026</p>
+          <h1 id="league-title">Champions</h1>
+          <p class="intro">
+            2026 VCT Champions는 한 해의 모든 국제 대회를 마무리하는 최종 월드 챔피언십입니다.
+            전 세계 최강 팀들이 한 자리에 모여 챔피언을 가립니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/vct-logo.png" alt="VCT Champions" />
+        </div>
+      </section>
+
+      <!-- 대회 선택 -->
+      <section class="tournament-section" aria-labelledby="champions-tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournaments</p>
+          <h2 id="champions-tournament-title">대회 선택</h2>
+        </div>
+        <div class="tournament-grid">
+          <a class="tournament-card" href="./champions-group.html">
+            <span class="tournament-kicker">Champions 2026</span>
+            <strong>그룹 스테이지</strong>
+            <span>16팀 · 4그룹 · 8진출</span>
+          </a>
+          <a class="tournament-card" href="./champions-playoffs.html">
+            <span class="tournament-kicker">Champions 2026</span>
+            <strong>PlayOff</strong>
+            <span>더블 엘리미네이션 · 16팀</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="participants-section" aria-labelledby="participants-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Participants</p>
+            <h2 id="participants-title">참가팀 배정</h2>
+          </div>
+          <p style="font-size:13px;opacity:0.5;margin:4px 0 0;">각 지역 1~4시드를 배정하세요. 총 16팀.</p>
+        </div>
+        <div class="participants-grid">
+          <div class="region-card pacific">
+            <div class="region-header">
+              <img src="./assets/vct-pacific.webp" alt="Pacific" />
+              <h3>Pacific</h3>
+              <span class="region-accent-dot"></span>
+            </div>
+            <div class="seed-slots" id="pacific-slots"></div>
+          </div>
+          <div class="region-card americas">
+            <div class="region-header">
+              <img src="./assets/vct-americas.png" alt="Americas" />
+              <h3>Americas</h3>
+              <span class="region-accent-dot"></span>
+            </div>
+            <div class="seed-slots" id="americas-slots"></div>
+          </div>
+          <div class="region-card cn">
+            <div class="region-header">
+              <img src="./assets/vct-cn.webp" alt="CN" />
+              <h3>CN</h3>
+              <span class="region-accent-dot"></span>
+            </div>
+            <div class="seed-slots" id="cn-slots"></div>
+          </div>
+          <div class="region-card emea">
+            <div class="region-header">
+              <img src="./assets/vct-emea.webp" alt="EMEA" />
+              <h3>EMEA</h3>
+              <span class="region-accent-dot"></span>
+            </div>
+            <div class="seed-slots" id="emea-slots"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 팀 선택 모달 -->
+    <div class="ts-modal" id="ts-modal" hidden>
+      <div class="ts-backdrop" id="ts-backdrop"></div>
+      <div class="ts-panel" role="dialog" aria-modal="true" aria-labelledby="ts-title">
+        <h2 id="ts-title">팀 선택</h2>
+        <p id="ts-subtitle"></p>
+        <div class="ts-region-tabs" id="ts-region-tabs"></div>
+        <div class="ts-team-grid" id="ts-team-grid"></div>
+        <div class="ts-actions" id="ts-actions"></div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const STORAGE_KEY = "champions_participants";
+
+      /* ── 팀 데이터 ─────────────────────────────────────── */
+      const ALL_TEAMS = {
+        pacific: [
+          { name: "Paper Rex",          code: "PRX",  logo: "./assets/teams/prx.svg" },
+          { name: "Gen.G",              code: "GEN",  logo: "./assets/teams/gen.png" },
+          { name: "Kiwoom DRX",         code: "DRX",  logo: "./assets/teams/krx.svg" },
+          { name: "Rex Regum Qeon",     code: "RRQ",  logo: "./assets/teams/rrq.png" },
+          { name: "T1",                 code: "T1",   logo: "./assets/teams/t1.png" },
+          { name: "FULL SENSE",         code: "FS",   logo: "./assets/teams/fs.svg" },
+          { name: "Global Esports",     code: "GE",   logo: "./assets/teams/ge.webp" },
+          { name: "Team Secret",        code: "TS",   logo: "./assets/teams/ts.svg" },
+          { name: "ZETA DIVISION",      code: "ZETA", logo: "./assets/teams/zeta.png" },
+          { name: "DetonatioN FocusMe", code: "DFM",  logo: "./assets/teams/dfm.svg" },
+          { name: "Nongshim RedForce",  code: "NS",   logo: "./assets/teams/ns.svg" },
+          { name: "VARREL",             code: "VRL",  logo: "./assets/teams/vl.svg" },
+        ],
+        americas: [
+          { name: "Sentinels",     code: "SEN",  logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" },
+          { name: "G2 Esports",    code: "G2",   logo: "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" },
+          { name: "NRG",           code: "NRG",  logo: "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" },
+          { name: "100 Thieves",   code: "100T", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" },
+          { name: "Cloud9",        code: "C9",   logo: "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" },
+          { name: "MIBR",          code: "MIBR", logo: "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" },
+          { name: "LOUD",          code: "LOUD", logo: "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" },
+          { name: "FURIA",         code: "FUR",  logo: "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" },
+          { name: "KRÜ Esports",   code: "KRÜ",  logo: "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" },
+          { name: "Leviatán",      code: "LEV",  logo: "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" },
+          { name: "Evil Geniuses", code: "EG",   logo: "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" },
+          { name: "ENVY",          code: "ENVY", logo: "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" },
+        ],
+        cn: [
+          { name: "All Gamers",                      code: "AG",   logo: "https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp" },
+          { name: "JD Mall JDG Esports",             code: "JDG",  logo: "https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg" },
+          { name: "TYLOO",                           code: "TYL",  logo: "https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg" },
+          { name: "Wuxi Titan Esports Club",         code: "TEC",  logo: "https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg" },
+          { name: "Guangzhou Huadu Bilibili Gaming", code: "BLG",  logo: "https://dpm.lol/esport/teams/BLG.webp" },
+          { name: "FunPlus Phoenix",                 code: "FPX",  logo: "https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg" },
+          { name: "Xi Lai Gaming",                   code: "XLG",  logo: "https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg" },
+          { name: "EDward Gaming",                   code: "EDG",  logo: "https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png" },
+          { name: "Dragon Ranger Gaming",            code: "DRG",  logo: "https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp" },
+          { name: "Trace Esports",                   code: "TE",   logo: "https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg" },
+          { name: "Nova Esports",                    code: "NOVA", logo: "https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp" },
+          { name: "Wolves Esports",                  code: "WOL",  logo: "https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp" },
+        ],
+        emea: [
+          { name: "Gentle Mates",  code: "M8",   logo: "./assets/teams/gm.png" },
+          { name: "Team Liquid",   code: "TL",   logo: "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp" },
+          { name: "Team Heretics", code: "TH",   logo: "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg" },
+          { name: "NAVI",          code: "NAVI", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png" },
+          { name: "Karmine Corp",  code: "KC",   logo: "./assets/teams/kc.png" },
+          { name: "FUT Esports",   code: "FUT",  logo: "https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg" },
+          { name: "BBL Esports",   code: "BBL",  logo: "https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg" },
+          { name: "Fnatic",        code: "FNC",  logo: "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg" },
+          { name: "Team Vitality", code: "VIT",  logo: "https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg" },
+          { name: "GIANTX",        code: "GX",   logo: "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg" },
+          { name: "Eternal Fire",  code: "EF",   logo: "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg" },
+          { name: "PCIFIC Esports",code: "PCFC", logo: "https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" },
+        ],
+      };
+
+      const REGIONS = ["pacific", "americas", "cn", "emea"];
+      const REGION_LABELS = { pacific: "Pacific", americas: "Americas", cn: "CN", emea: "EMEA" };
+      const SEEDS = 4;
+
+      /* ── 스토리지 ───────────────────────────────────────── */
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch {}
+        return { pacific: ["","","",""], americas: ["","","",""], cn: ["","","",""], emea: ["","","",""] };
+      }
+      function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+      function findTeam(name) {
+        for (const region of REGIONS) {
+          const t = ALL_TEAMS[region].find(t => t.name === name);
+          if (t) return t;
+        }
+        return null;
+      }
+
+      const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+      /* ── 슬롯 렌더링 ────────────────────────────────────── */
+      function renderSlots() {
+        const data = load();
+        REGIONS.forEach(region => {
+          const container = document.getElementById(region + "-slots");
+          if (!container) return;
+          container.innerHTML = "";
+          for (let i = 0; i < SEEDS; i++) {
+            const teamName = data[region][i] || "";
+            const team = teamName ? findTeam(teamName) : null;
+            const slot = document.createElement("div");
+            slot.className = "seed-slot" + (teamName ? " has-team" : " empty");
+            slot.innerHTML = `
+              <div class="slot-logo">${team ? `<img src="${team.logo}" alt="${team.name}" />` : ""}</div>
+              <div class="slot-info">
+                <div class="slot-seed">${i + 1}시드</div>
+                <div class="slot-name">${teamName || "미정"}</div>
+              </div>
+            `;
+            if (isAdmin()) {
+              slot.addEventListener("click", () => openPicker(region, i));
+            }
+            container.appendChild(slot);
+          }
+        });
+      }
+
+      /* ── 팀 선택 모달 ───────────────────────────────────── */
+      let _ctx = null, _activeTab = "pacific", _selected = "";
+
+      function openPicker(region, seedIdx) {
+        _ctx = { region, seedIdx };
+        _activeTab = region;
+        const data = load();
+        _selected = data[region][seedIdx] || "";
+        document.getElementById("ts-title").textContent = "팀 선택";
+        document.getElementById("ts-subtitle").textContent = `${REGION_LABELS[region]} ${seedIdx + 1}시드 팀을 선택하세요.`;
+        renderTabs();
+        renderTeamGrid();
+        renderActions();
+        document.getElementById("ts-modal").hidden = false;
+      }
+
+      function renderTabs() {
+        const container = document.getElementById("ts-region-tabs");
+        container.innerHTML = REGIONS.map(r =>
+          `<button class="ts-region-tab${r === _activeTab ? " active" : ""}" data-r="${r}">${REGION_LABELS[r]}</button>`
+        ).join("");
+        container.querySelectorAll(".ts-region-tab").forEach(btn => {
+          btn.addEventListener("click", () => {
+            _activeTab = btn.dataset.r;
+            renderTabs();
+            renderTeamGrid();
+          });
+        });
+      }
+
+      function renderTeamGrid() {
+        const data = load();
+        const usedByOthers = new Set();
+        REGIONS.forEach(r => {
+          data[r].forEach((name, idx) => {
+            if (name && !(r === _ctx.region && idx === _ctx.seedIdx)) {
+              usedByOthers.add(name);
+            }
+          });
+        });
+
+        const grid = document.getElementById("ts-team-grid");
+        grid.innerHTML = ALL_TEAMS[_activeTab].map(t => {
+          const isSelected = t.name === _selected;
+          const isUsed = usedByOthers.has(t.name);
+          return `<button
+            class="ts-team-btn${isSelected ? " selected" : ""}"
+            data-name="${t.name}"
+            ${isUsed ? 'style="opacity:0.3;pointer-events:none;"' : ""}
+          >
+            <img src="${t.logo}" alt="${t.name}" />
+            <span class="ts-code">${t.code}</span>
+            <span>${t.name}</span>
+          </button>`;
+        }).join("");
+        grid.querySelectorAll(".ts-team-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            _selected = btn.dataset.name === _selected ? "" : btn.dataset.name;
+            renderTeamGrid();
+            document.getElementById("ts-save-btn").disabled = !_selected;
+          });
+        });
+      }
+
+      function renderActions() {
+        document.getElementById("ts-actions").innerHTML = `
+          <button class="ts-btn ts-btn-clear" id="ts-clear-btn">비우기</button>
+          <button class="ts-btn ts-btn-cancel" id="ts-cancel-btn">취소</button>
+          <button class="ts-btn ts-btn-save" id="ts-save-btn" ${_selected ? "" : "disabled"}>저장</button>
+        `;
+        document.getElementById("ts-cancel-btn").addEventListener("click", closeModal);
+        document.getElementById("ts-clear-btn").addEventListener("click", () => {
+          const data = load();
+          data[_ctx.region][_ctx.seedIdx] = "";
+          save(data); closeModal(); renderSlots();
+        });
+        document.getElementById("ts-save-btn").addEventListener("click", () => {
+          if (!_selected) return;
+          const data = load();
+          data[_ctx.region][_ctx.seedIdx] = _selected;
+          save(data); closeModal(); renderSlots();
+        });
+      }
+
+      function closeModal() {
+        document.getElementById("ts-modal").hidden = true;
+        _ctx = null; _selected = "";
+      }
+
+      document.getElementById("ts-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && !document.getElementById("ts-modal").hidden) closeModal();
+      });
+
+      renderSlots();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

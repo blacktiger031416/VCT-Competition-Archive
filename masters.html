@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Masters 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      .masters-page .back-link {
+        border-color: rgba(101, 30, 255, 0.24);
+        color: #3a1a99;
+      }
+      .masters-page .home-link { color: #2a1066; }
+      .masters-page .tournament-card {
+        border-color: rgba(101, 30, 255, 0.18);
+      }
+      .masters-page .tournament-card:hover {
+        border-color: rgba(101, 30, 255, 0.55);
+        background: rgba(101, 30, 255, 0.07);
+      }
+      .masters-page .tournament-card strong { color: #3a1a99; }
+      .masters-page .eyebrow { color: #651eff; }
+
+      .masters-page .league-mark {
+        border-color: rgba(101, 30, 255, 0.28);
+        background:
+          linear-gradient(145deg, rgba(101, 30, 255, 0.18), rgba(255, 255, 255, 0.76)),
+          rgba(255, 255, 255, 0.82);
+        box-shadow: 0 22px 50px rgba(60, 10, 180, 0.14);
+      }
+      .masters-page .league-mark img {
+        filter:
+          brightness(0) saturate(100%)
+          invert(26%) sepia(89%) saturate(5000%) hue-rotate(252deg) brightness(105%);
+        drop-shadow(0 22px 34px rgba(101, 30, 255, 0.36));
+      }
+    </style>
+  </head>
+  <body class="league-page masters-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./index.html">홈으로</a>
+    </header>
+    <main class="league-shell">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div>
+          <p class="eyebrow">VCT 2026</p>
+          <h1 id="league-title">Masters</h1>
+          <p class="intro">
+            2026 VCT Masters는 전 세계 4개 리그의 상위 팀들이 참가하는 국제 대회입니다.
+            Masters Santiago와 Masters London 두 대회 결과를 이곳에서 확인하세요.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/vct-logo.png" alt="VCT Masters" />
+        </div>
+      </section>
+
+      <section class="tournament-section" aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournaments</p>
+          <h2 id="tournament-title">대회 선택</h2>
+        </div>
+        <div class="tournament-grid">
+          <a class="tournament-card" href="./masters-santiago.html">
+            <span class="tournament-kicker">2026 Masters</span>
+            <strong>Masters Santiago</strong>
+            <span>4월 - 5월</span>
+          </a>
+          <a class="tournament-card" href="./masters-london.html">
+            <span class="tournament-kicker">2026 Masters</span>
+            <strong>Masters London</strong>
+            <span>8월 - 9월</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <div class="card-transition-overlay" aria-hidden="true"></div>
+    <script>
+      (function () {
+        const overlay = document.querySelector(".card-transition-overlay");
+        document.querySelectorAll(".tournament-card").forEach(function (card) {
+          const href = card.getAttribute("href");
+          if (!href || href === "#") return;
+          card.addEventListener("click", function (e) {
+            e.preventDefault();
+            const rect = card.getBoundingClientRect();
+            const cx = ((rect.left + rect.width / 2) / window.innerWidth * 100).toFixed(1) + "%";
+            const cy = ((rect.top + rect.height / 2) / window.innerHeight * 100).toFixed(1) + "%";
+            overlay.style.setProperty("--cx", cx);
+            overlay.style.setProperty("--cy", cy);
+            card.classList.add("selected");
+            document.body.classList.add("card-transitioning");
+            setTimeout(function () { window.location.href = href; }, 460);
+          });
+        });
+      })();
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

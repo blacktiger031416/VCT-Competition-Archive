@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Pacific Match</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+  </head>
+  <body class="league-page match-page pacific-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" id="back-link" href="./pacific-stage1.html">Stage 1</a>
+    </header>
+
+    <main class="match-shell">
+      <section class="match-hero-board" aria-labelledby="match-title">
+        <div class="match-team match-team-a">
+          <div class="match-team-name" id="team-a-name">Team A</div>
+          <div class="match-team-logo" id="team-a-logo">A</div>
+        </div>
+        <div class="match-team match-team-b">
+          <div class="match-team-name" id="team-b-name">Team B</div>
+          <div class="match-team-logo" id="team-b-logo">B</div>
+        </div>
+      </section>
+
+      <section class="match-result-panel" aria-labelledby="match-title">
+        <p class="eyebrow">VCT Pacific 2026</p>
+        <h1 id="match-title">Stage 1 Group Stage</h1>
+        <p id="match-date" class="match-date">2026. 04.</p>
+
+        <div class="set-board">
+          <div class="set-team">
+            <strong id="set-team-a">Team A</strong>
+            <div class="set-marks" id="team-a-marks"></div>
+            <span id="team-a-record">-</span>
+          </div>
+          <div class="set-score">
+            <button class="inline-edit set-score-button" id="score-a" type="button" data-result-edit="scoreA">0</button>
+            <button class="inline-edit set-score-button" id="score-b" type="button" data-result-edit="scoreB">0</button>
+            <span>결과</span>
+          </div>
+          <div class="set-team">
+            <strong id="set-team-b">Team B</strong>
+            <div class="set-marks" id="team-b-marks"></div>
+            <span id="team-b-record">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="prediction-panel" aria-labelledby="prediction-title">
+        <div class="prediction-head">
+          <p class="eyebrow">Stage 1 그룹 스테이지</p>
+          <h2 id="prediction-title">시청자 승부 예측</h2>
+        </div>
+        <div class="prediction-board" id="prediction-board"></div>
+      </section>
+
+      <section class="veto-board" aria-labelledby="veto-title">
+        <div class="veto-heading">
+          <h2 id="veto-title">맵 밴픽</h2>
+        </div>
+        <div class="veto-grid" id="veto-grid"></div>
+      </section>
+
+      <section class="map-report-section" aria-labelledby="map-report-title">
+        <div class="section-heading">
+          <p class="eyebrow">맵 상세</p>
+          <h2 id="map-report-title">맵별 결과</h2>
+        </div>
+        <div class="map-report-grid" id="map-report-grid"></div>
+      </section>
+    </main>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const params = new URLSearchParams(window.location.search);
+      const isBo5 = params.get("bo5") === "1";
+      const isGF = params.get("gf") === "1";
+      if (isBo5) document.body.classList.add("bo5");
+
+      // 뒤로가기 링크: from 파라미터로 동적 설정
+      const fromMap = {
+        kickoff:       { href: "./pacific-kickoff.html",           label: "KickOff" },
+        stage1:        { href: "./pacific-stage1.html",            label: "Stage 1" },
+        playoffs:      { href: "./pacific-playoffs.html",          label: "PlayOff" },
+        stage2:        { href: "./pacific-stage2.html",            label: "Stage 2" },
+        stage2playoffs:{ href: "./pacific-stage2-playoffs.html",   label: "Stage 2 PlayOff" },
+      };
+      const fromKey = params.get("from") || "stage1";
+      const fromInfo = fromMap[fromKey] || fromMap.stage1;
+      const backLink = document.getElementById("back-link");
+      backLink.href = fromInfo.href;
+      backLink.textContent = fromInfo.label;
+
+      const match = {
+        date: params.get("date") || "04.26",
+        teamA: params.get("teamA") || "Nongshim RedForce",
+        teamB: params.get("teamB") || "Team Secret",
+        score: params.get("score") || "2 : 1",
+      };
+
+      const teamCodes = {
+        "DetonatioN FocusMe": "DFM",
+        "Global Esports": "GE",
+        "Kiwoom DRX": "KRX",
+        "Nongshim RedForce": "NS",
+        "Paper Rex": "PRX",
+        "Rex Regum Qeon": "RRQ",
+        "Team Secret": "TS",
+        "ZETA DIVISION": "ZETA",
+        "FULL SENSE": "FS",
+        "Gen.G": "GEN",
+        "VARREL": "VL",
+        T1: "T1",
+      };
+      const teamLogos = {
+        "DetonatioN FocusMe": "./assets/teams/dfm.svg",
+        "Global Esports": "./assets/teams/ge.webp",
+        "Kiwoom DRX": "./assets/teams/krx.svg",
+        "Nongshim RedForce": "./assets/teams/ns.svg",
+        "Paper Rex": "./assets/teams/prx.svg",
+        "Rex Regum Qeon": "./assets/teams/rrq.png",
+        "Team Secret": "./assets/teams/ts.svg",
+        "ZETA DIVISION": "./assets/teams/zeta.png",
+        "FULL SENSE": "./assets/teams/fs.svg",
+        "Gen.G": "./assets/teams/gen.png",
+        "VARREL": "./assets/teams/vl.svg",
+        T1: "./assets/teams/t1.png",
+      };
+      const teamBrandColors = {
+        "DetonatioN FocusMe": "#2b53ff",
+        "Global Esports": "linear-gradient(135deg, #1c4891, #e12c30)",
+        "Kiwoom DRX": "#1f2f5e",
+        "Nongshim RedForce": "#e2012d",
+        "Paper Rex": "#8c52ff",
+        "Rex Regum Qeon": "#ffa100",
+        "Team Secret": "#000000",
+        "ZETA DIVISION": "#15b24a",
+        "FULL SENSE": "#ff751f",
+        "Gen.G": "#d2b985",
+        "VARREL": "#3ee1ac",
+        T1: "#ec1b24",
+      };
+
+      function teamBrandStyle(teamName, fallback) {
+        return teamBrandColors[teamName] || fallback;
+      }
+
+      /* ── Round Tracker constants ── */
+      const ROUND_ICONS = {
+        attack_kill:  "https://i.namu.wiki/i/2HzXFlpPqbCrvNAWI2OHRa2u-JALPot7wduUxYcPfeEumaj-SZJkUrPLK1Rl3-BeEe366TRvkFbIwWxjiCjjMw.webp",
+        attack_spike: "https://i.namu.wiki/i/ajIg_CyyD4llgPqI9hOcZiZ18R7FWZ4wlCrkhIDt6edJB3pHVnWcfNXEPE48ja-4R5Vnm-TNkGwFAJhSW4TtBA.webp",
+        def_defuse:   "https://i.namu.wiki/i/Gfp58Gjca8ZKvh4_2Xoc7PgflWYzgpBCzwCEHv7PADKx9JSJidp5h2B-b4X-6V-ISybYgaRDB8hPEeM8oUxODA.webp",
+        def_timeout:  "https://i.namu.wiki/i/HSBaof7zZiqX2qTQH0QJFb7yW3Srvpsy_piWynlRK5gAgfSXocwM8J_z00Zha9KoZBRlC9zhBabvd5t5KfyuGw.webp",
+        def_kill:     "https://i.namu.wiki/i/s-NVXbU32Y4z7AbeIRe-IyEYBGMXhM-33dsQB2sWVx4ImV5XkoqGGEopZP1vYDGBdBJvgYRzjt4DWXH2FTyV5w.webp",
+      };
+      const ROUND_ICON_LABELS = {
+        attack_kill:  "공격 처치",
+        attack_spike: "스파이크 폭파",
+        def_defuse:   "스파이크 해체",
+        def_timeout:  "설치 실패",
+        def_kill:     "수비 처치",
+      };
+      const ATK_TYPES = ["attack_kill", "attack_spike"];
+      const DEF_TYPES = ["def_defuse", "def_timeout", "def_kill"];
+
+      function roundIsAttacking(side, roundIdx, firstAttacker) {
+        if (!firstAttacker) return null;
+        const n = roundIdx + 1;
+        let faAtks;
+        if (n <= 12) faAtks = true;
+        else if (n <= 24) faAtks = false;
+        else {
+          const otRound = n - 24;
+          faAtks = (otRound % 2 === 1);
+        }
+        return faAtks ? (firstAttacker === side) : (firstAttacker !== side);
+      }
+
+      function renderRoundTracker(state) {
+        const aScore = parseInt(state.stats && state.stats.aScore) || 0;
+        const bScore = parseInt(state.stats && state.stats.bScore) || 0;
+        const totalRounds = Math.max(24, aScore + bScore);
+        const fa = state.firstAttacker || null;
+        const rounds = state.rounds || [];
+        const numBlocks = Math.ceil(totalRounds / 24);
+
+        const logoA = teamLogos[match.teamA]
+          ? `<img src="${teamLogos[match.teamA]}" alt="${match.teamA}" />`
+          : `<span>${match.teamA.substring(0, 3)}</span>`;
+        const logoB = teamLogos[match.teamB]
+          ? `<img src="${teamLogos[match.teamB]}" alt="${match.teamB}" />`
+          : `<span>${match.teamB.substring(0, 3)}</span>`;
+
+        function renderCell(side, i) {
+          const r = rounds[i] || {};
+          const won = r.winner === side;
+          const attacking = roundIsAttacking(side, i, fa);
+          let cls = "round-cell";
+          if (i === 11) cls += " round-halftime";
+          if (won) cls += attacking ? " rc-atk" : " rc-def";
+          else if (r.winner) cls += " rc-lost";
+          const iconUrl = won && r.type ? ROUND_ICONS[r.type] : "";
+          return `<div class="${cls}" data-round-cell="${i}">${iconUrl ? `<img src="${iconUrl}" alt="" />` : ""}</div>`;
+        }
+
+        let blocksHtml = "";
+        for (let b = 0; b < numBlocks; b++) {
+          const start = b * 24;
+          const end = Math.min(start + 24, totalRounds);
+          let numRow = "", cellsA = "", cellsB = "";
+          for (let i = start; i < end; i++) {
+            const htCls = i === 11 ? " round-halftime" : "";
+            numRow  += `<div class="round-num-label${htCls}">${i + 1}</div>`;
+            cellsA  += renderCell("a", i);
+            cellsB  += renderCell("b", i);
+          }
+          blocksHtml += `
+          <div class="round-block">
+            <div class="round-tracker-team-col">
+              <div class="round-num-spacer"></div>
+              <div class="round-tracker-team-logo">${logoA}</div>
+              <div class="round-tracker-team-logo">${logoB}</div>
+            </div>
+            <div class="round-tracker-grid">
+              <div class="round-num-row">${numRow}</div>
+              <div class="round-tracker-row">${cellsA}</div>
+              <div class="round-tracker-row">${cellsB}</div>
+            </div>
+          </div>`;
+        }
+
+        return `
+          <div class="round-tracker">
+            <div class="round-tracker-top">
+              <span class="round-tracker-label">라운드 결과</span>
+            </div>
+            ${blocksHtml}
+          </div>`;
+      }
+      function openRoundPicker(card, state, mapName, index, roundIdx) {
+        document.querySelector(".round-picker")?.remove();
+        const fa = state.firstAttacker || null;
+        const aAtks = roundIsAttacking("a", roundIdx, fa);
+        const r = (state.rounds || [])[roundIdx] || {};
+        const roundNum = roundIdx + 1;
+
+        const aTypes = fa ? (aAtks ? ATK_TYPES : DEF_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+        const bTypes = fa ? (aAtks ? DEF_TYPES : ATK_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+
+        function iconGroup(winner, types, label) {
+          return `<div class="rp-team-section">
+            <div class="rp-team-label">${label}</div>
+            <div class="rp-icons">
+              ${types.map((t) => `
+                <button class="rp-icon-btn${r.winner === winner && r.type === t ? " selected" : ""}"
+                  data-rp-winner="${winner}" data-rp-type="${t}">
+                  <img src="${ROUND_ICONS[t]}" alt="" />
+                  ${ROUND_ICON_LABELS[t]}
+                </button>`).join("")}
+            </div>
+          </div>`;
+        }
+
+        const aLabel = match.teamA + (fa ? (aAtks ? " (공격)" : " (수비)") : "");
+        const bLabel = match.teamB + (fa ? (aAtks ? " (수비)" : " (공격)") : "");
+
+        const picker = document.createElement("div");
+        picker.className = "round-picker";
+        picker.innerHTML = `
+          <div class="round-picker-panel">
+            <div class="round-picker-head">
+              <strong>라운드 ${roundNum}</strong>
+              <div class="round-picker-head-actions">
+                ${r.winner ? `<button class="rp-clear-btn" data-rp-clear>초기화</button>` : ""}
+                <button class="rp-close-btn" data-rp-close>닫기</button>
+              </div>
+            </div>
+            <div class="round-picker-body">
+              ${iconGroup("a", aTypes, aLabel)}
+              ${iconGroup("b", bTypes, bLabel)}
+            </div>
+          </div>`;
+        document.body.appendChild(picker);
+
+        picker.addEventListener("click", (e) => {
+          if (e.target === picker || e.target.closest("[data-rp-close]")) {
+            picker.remove();
+            return;
+          }
+          if (e.target.closest("[data-rp-clear]")) {
+            if (!state.rounds) state.rounds = [];
+            state.rounds[roundIdx] = { winner: null, type: null };
+            saveSetState(mapName, index, state);
+            renderSetView(card, state);
+            picker.remove();
+            return;
+          }
+          const btn = e.target.closest("[data-rp-winner]");
+          if (btn) {
+            if (!state.rounds) state.rounds = [];
+            while (state.rounds.length <= roundIdx) state.rounds.push({ winner: null, type: null });
+            state.rounds[roundIdx] = { winner: btn.dataset.rpWinner, type: btn.dataset.rpType };
+            saveSetState(mapName, index, state);
+            renderSetView(card, state);
+            picker.remove();
+          }
+        });
+      }
+
+      function teamPredictionColor(teamName, fallback, side = "left") {
+        const style = teamBrandStyle(teamName, fallback);
+        const colors = String(style).match(/#[0-9a-fA-F]{3,8}/g);
+        if (colors?.length) return side === "right" ? colors[colors.length - 1] : colors[0];
+        return style;
+      }
+
+      const teamCapsules = {
+        "DetonatioN FocusMe": "https://static.wikia.nocookie.net/valorant/images/5/57/Banner_VCT26_x_DFM.png/revision/latest?cb=20260107151419",
+        "Global Esports": "https://static.wikia.nocookie.net/valorant/images/6/6c/Banner_VCT26_x_GE.png/revision/latest?cb=20260107151433",
+        "Kiwoom DRX": "https://static.wikia.nocookie.net/valorant/images/a/a7/Banner_VCT26_x_DRX.png/revision/latest?cb=20260107151422",
+        "Nongshim RedForce": "https://static.wikia.nocookie.net/valorant/images/7/70/Banner_VCT26_x_NS.png/revision/latest?cb=20260107151449",
+        "Paper Rex": "https://static.wikia.nocookie.net/valorant/images/3/37/Banner_VCT26_x_PRX.png/revision/latest?cb=20260107151451",
+        "Rex Regum Qeon": "https://static.wikia.nocookie.net/valorant/images/0/02/Banner_VCT26_x_RRQ.png/revision/latest?cb=20260107151452",
+        "Team Secret": "https://static.wikia.nocookie.net/valorant/images/8/8b/Banner_VCT26_x_TS.png/revision/latest?cb=20260107151501",
+        "ZETA DIVISION": "https://static.wikia.nocookie.net/valorant/images/f/f2/Banner_VCT26_x_ZETA.png/revision/latest?cb=20260107151530",
+        "FULL SENSE": "https://static.wikia.nocookie.net/valorant/images/5/54/Banner_VCT26_x_FS.png/revision/latest?cb=20260401113809",
+        "Gen.G": "https://static.wikia.nocookie.net/valorant/images/9/92/Banner_VCT26_x_GEN.png/revision/latest?cb=20260107151434",
+        "VARREL": "https://static.wikia.nocookie.net/valorant/images/f/f9/Banner_VCT26_x_VL.png/revision/latest?cb=20260401113814",
+        T1: "https://static.wikia.nocookie.net/valorant/images/8/8e/Banner_VCT26_x_T1.png/revision/latest?cb=20260107151455",
+      };
+
+      function teamCapsuleSrc(teamName) {
+        return teamCapsules[teamName] || "";
+      }
+
+      const teamRosters = {
+        "DetonatioN FocusMe": ["Meiy", "SSeeS", "yatsuka", "Caedye", "Akame"],
+        "Global Esports":     ["PatMen", "UdoTan", "Kr1stal", "xavi8k", "Autumn"],
+        "Kiwoom DRX":         ["MaKo", "Hermes", "yong", "free1ng", "HYUNMIN", "BeYN", "Flicker"],
+        "Nongshim RedForce":  ["Rb", "Xross", "Francis", "Dambi", "Ivy"],
+        "Paper Rex":          ["Jinggg", "invy", "f0rsakeN", "d4v41", "something"],
+        "Rex Regum Qeon":     ["crazyguy", "Monyet", "xffero", "Jemkin", "Kushy"],
+        "Team Secret":        ["JessieVash", "kellyS", "Sylvan", "BerserX", "Rimuru", "Zeus"],
+        "ZETA DIVISION":      ["eKo", "Absol", "SyouTa", "SugarZ3ro", "Xdll"],
+        "FULL SENSE":         ["Crws", "Killua", "primmie", "JitBoyS", "Leviathan", "seph1roth", "thyy"],
+        "Gen.G":              ["Lakia", "Ash", "Karon", "t3xture", "KiTae", "Xiesta", "ZynX"],
+        "VARREL":             ["C1ndeR", "Klaus", "XuNa", "oonzmlp", "Zexy"],
+        "T1":                 ["stax", "BuZz", "Munchkin", "Meteor", "iZu"],
+      };
+
+      function getTeamRoster(teamName) {
+        try {
+          const s = localStorage.getItem("vct_roster_pacific_" + teamName);
+          if (s) return JSON.parse(s);
+        } catch (e) {}
+        return teamRosters[teamName] || [];
+      }
+
+      const agents = [
+        "제트",
+        "네온",
+        "게코",
+        "데드록",
+        "레이나",
+        "레이즈",
+        "믹스",
+        "바이스",
+        "바이퍼",
+        "브리치",
+        "브림스톤",
+        "비토",
+        "사이퍼",
+        "세이지",
+        "소바",
+        "스카이",
+        "아스트라",
+        "아이소",
+        "오멘",
+        "요루",
+        "웨이레이",
+        "체임버",
+        "케이오",
+        "클로브",
+        "킬조이",
+        "테호",
+        "페이드",
+        "피닉스",
+        "하버",
+      ];
+      const agentAliases = {
+        Astra: "아스트라",
+        Breach: "브리치",
+        Brimstone: "브림스톤",
+        Chamber: "체임버",
+        Clove: "클로브",
+        Cypher: "사이퍼",
+        Deadlock: "데드록",
+        Fade: "페이드",
+        Gekko: "게코",
+        Harbor: "하버",
+        Iso: "아이소",
+        Jett: "제트",
+        "KAY/O": "케이오",
+        Killjoy: "킬조이",
+        Neon: "네온",
+        Omen: "오멘",
+        Phoenix: "피닉스",
+        Raze: "레이즈",
+        Reyna: "레이나",
+        Sage: "세이지",
+        Skye: "스카이",
+        Sova: "소바",
+        Tejo: "테호",
+        Viper: "바이퍼",
+        Vyse: "바이스",
+        Yoru: "요루",
+      };
+      const agentImages = {
+        게코: "https://c-valorant-api.op.gg/Assets/Characters/E370FA57-4757-3604-3648-499E1F642D3F_small.png",
+        네온: "https://i.namu.wiki/i/4ogqg4lB9_G5JKxp145jlSjbzSxRhhXDpUJeoMqSuUnkHrNsHUNj969wyGMvKuYhkd-gDucOmRVlGYFBdHyU2w.webp",
+        데드록: "https://i.namu.wiki/i/7-QoPRINetjBCUblJjq6oPK_4HHAtH10nsD5vATNG3hwqMxCLRa0GJTZOM_us3WvSHK91b965Eo7VoF7hXEpew.webp",
+        레이나: "https://i.namu.wiki/i/THZZ8MlhetJzmWZNYTsHi69SPcjCnuQwkbgkHoM8SF7cbgXpvNg2gXSlEpPec_SXHX08Y3gDP2llILTFdRRbdQ.webp",
+        레이즈: "https://i.namu.wiki/i/14BBGZHNg2x0JYMy6x87Oo2Qlg3jp7GqxhMhGFJ5uYg2vspQXtK7vxJpcak1uFZ_k9vPr6znt6KJcihHw3L_bg.webp",
+        믹스: "https://i.namu.wiki/i/u_CwGnSZJSLW7tsqGYzZZ9VqPM8vXa4tmmbLElugjV5pOZaoZLrHyBvoWk4mCMtLZGf3CorG6g_N12ZrWjLIPg.webp",
+        바이스: "https://i.namu.wiki/i/RoVLjmYPHlDcLzy3QwkUOV4MsxdnKFAQAUY_s6H8nB4N_RStAD_TQlSW0RNpkRuCgmY24qQPICqu4fiCVApKcg.webp",
+        바이퍼: "https://i.namu.wiki/i/Vqp-AY0l-Xe8qK7Ef4FVmjYnOQ99Gj0M1ozbDZjmxibcEJocsbDGUDtEr4FNsTpTq_SyjjWVdJxHWOYgAxywew.webp",
+        브리치: "https://i.namu.wiki/i/situ_MvKaWMojZasDwAzJ2jN-5Rp__8FRbWxmFuBjDfvVfK0xZ2ER_9fYNluAsUd_h5cFYkufQSuTNH_DKVuJQ.webp",
+        브림스톤: "https://i.namu.wiki/i/UvL7SmnIwxyZuVEHFnHlwPpMTQlD0RhmAlm-gIfTyctIrb3Vnmor4A_nRiKCQlYMxIxi7G73NITfwQIt27Xvzw.webp",
+        비토: "https://i.namu.wiki/i/k7MZL2YWWu7DT9fcrySpYk2HioLYi80nJjgYHB2l24XiupY3Oebneq9aMJIXe7UqAL9sMd51Z7m_3hZOeSx7jQ.webp",
+        사이퍼: "https://i.namu.wiki/i/-XPO1Vou13Z8Feqn27wFFqHLg9Olt4vEAt9VB8b8Gfwx7MZugISCbWmekrWjnaI5PONSHtu0zZitKXUb8jZI9w.webp",
+        세이지: "https://i.namu.wiki/i/jqodeZWsC3MyJzJ8DwABim3K0uuZ37PgksNux_GREfl65HoYrX0L2XIs4cTdm0cpwP7Db1z73YnbpHMctb6hiQ.webp",
+        소바: "https://c-valorant-api.op.gg/Assets/Characters/320B2A48-4D9B-A075-30F1-1F93A9B638FA_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+        스카이: "https://i.namu.wiki/i/GfJ7jOzMvNyDGYYCGcmB69dMe2StOUhtsS1jVJzZ3Ul_vht-RwymHwQm2znxrdKGOgnOzxq66ygZupY2bwYetg.webp",
+        아스트라: "https://c-valorant-api.op.gg/Assets/Characters/41FB69C1-4189-7B37-F117-BCAF1E96F1BF_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+        아이소: "https://i.namu.wiki/i/JrF8spBoOI0_cV6S3URHYZ9g2EpLqbugUcxNkW6Vbp60Ig6FZdXDDLNisS7suS92OrcRxH3muHmBDrhuAtrIsQ.webp",
+        오멘: "https://i.namu.wiki/i/8LpnTIlczZAC81pGY3gcZeLs_6e8C-s43OZR7o2F6JucSs60HPDxnQ_vs4Fk_8HDq1VlGIK8WvjJhZDdQmsfwQ.webp",
+        요루: "https://i.namu.wiki/i/O8_5nw3EgYWhLraoQ5qj2ooaTQGqhTNhVou0an9A2A4o5Uy7SSr3O8C7nwmub1jzssrRziii5qcwjq8-ACZwkA.webp",
+        웨이레이: "https://i.namu.wiki/i/Kj83E8_P6KTeg8NR0oXc5HiK9bo8_nnHymVoTvrwv8XgUhKrQH8Mf-mCAOaOYBYYbY3NtxbOtnU4rioCjjIafg.webp",
+        제트: "https://i.namu.wiki/i/_ScoZkw_dp5eGn66y8GXGqzGRHAUQiZD-AEGqpt0FQTpO3sLAdALfP37rzLppNRUFUK505MkSXf31Es-p2hE0g.webp",
+        체임버: "https://i.namu.wiki/i/kH9bgltG2hlwvNGUr64utZLO7V03cYI0itwIpVwR0H3GLeQ0v1lWeSgZr3QnLzJLaq5OChM9jZ20vSEO-UXysA.webp",
+        케이오: "https://valorantinfo.com/images/kr/kayo_valorant_icon_3589.webp",
+        클로브: "https://i.namu.wiki/i/l-OTVsdNYqe6PE3GsUHe4gzw7YbMcLtX831Y7ofn0Ta5gyMdFNqFJp8VVSsoqocBJMit8HFGz_If4e8cnQZbnw.webp",
+        킬조이: "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png",
+        테호: "https://i.namu.wiki/i/DczhNjwRqUiOwhoL-DPhCm9EzpbQU3JkqmZzbwz3DF_nkuyFNtbB4sxAaY_bFm3D0h8ZuMre85zAwX7C50UVgA.webp",
+        페이드: "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png",
+        피닉스: "https://valorantinfo.com/images/kr/phoenix_valorant_icon_3596.webp",
+        하버: "https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
+      };
+      const mapKo = {
+        Ascent: "어센트",
+        Abyss: "어비스",
+        Bind: "바인드",
+        Breeze: "브리즈",
+        Corrode: "코로드",
+        Fracture: "프랙처",
+        Haven: "헤이븐",
+        Icebox: "아이스박스",
+        Lotus: "로터스",
+        Pearl: "펄",
+        Split: "스플릿",
+        Sunset: "선셋",
+      };
+      const mapImages = {
+        Abyss: "https://cdn.gametoc.co.kr/news/photo/202407/82622_252333_233.jpg",
+        Ascent: "https://c-valorant-api.op.gg/Assets/Maps/7EAECC1B-4337-BBF6-6AB9-04B8F06B3319_splash.png?image=q_auto:good,f_webp&v=1776341444&image=q_auto:good,f_webp&v=1776341444",
+        Bind: "https://c-valorant-api.op.gg/Assets/Maps/2C9D57EC-4431-9C5E-2939-8F9EF6DD5CBA_splash.png?image=q_auto:good,f_webp&v=1776341444&image=q_auto:good,f_webp&v=1776341444",
+        Breeze: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL",
+        Corrode: "https://imguscdn.gamespress.com/cdn/files/RiotGames/2025/06/162048-b9066559/Corrode_AtkSpawn_02.png?w=750&mode=max&otf=y&quality=90&format=png&bgcolor=transparent&sky=0d3b51cd617ed54f196ded7a2c1536385363da533268f782df0af6c7ce386a92",
+        Fracture: "https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp",
+        Haven: "https://preview.redd.it/haven-is-unplayable-v0-byso61a598061.png?width=1920&format=png&auto=webp&s=7217f389892a41efefc7b5a95f6a58d5fb493e32",
+        Icebox: "https://i.namu.wiki/i/peG6xUXfvFn1BWUDgMXsU_7iL6e7bvVPuxvvPKAc4GSA_wI4sII4K_lsi7Ys_-Gv3rvHCcAPJ3b42Pop3pq5ag.webp",
+        Lotus: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/df5c6e7629733f801b7059f7d0ed8d286cbdbc1e-1920x1080.jpg?accountingTag=VAL",
+        Pearl: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center",
+        Split: "https://i.namu.wiki/i/-XO2LXy5LNAajpm4M8cT7kzmljZbJVf7q5d1c1fuhCJpEiMGs7DkKGxaC68Yx0h6hSmqjm-QJ_aAky82A2cFWA.webp",
+        Sunset: "https://c-valorant-api.op.gg/Assets/Maps/92584FBE-486A-B1B2-9FAA-39B0F486B498_splash.png?image=q_auto:good,f_webp&v=1776341444&image=q_auto:good,f_webp&v=1776341444",
+      };
+      const mapPositions = {
+        Abyss: "center 58%",
+        Ascent: "center 55%",
+        Bind: "center 54%",
+        Breeze: "center 72%",
+        Corrode: "center 55%",
+        Fracture: "center 58%",
+        Haven: "center 54%",
+        Icebox: "center 56%",
+        Lotus: "center 58%",
+        Pearl: "center 58%",
+        Split: "center 58%",
+        Sunset: "center 58%",
+      };
+
+      function mapBackgroundStyle(mapName) {
+        return `--map-image: url('${mapImages[mapName] || ""}'); --map-position: ${mapPositions[mapName] || "center"}`;
+      }
+
+      function agentLabel(agent) {
+        return agentAliases[agent] || agent;
+      }
+
+      function agentImage(agent) {
+        return agentImages[agentLabel(agent)] || "";
+      }
+
+      function renderAgentButton(agent, side, rowIndex) {
+        const label = agentLabel(agent || "요원");
+        const image = agentImage(agent);
+        const sideClass = side === "b" ? " right" : "";
+        return `
+          <button class="agent-chip${sideClass}" type="button" data-agent-row="${rowIndex}" data-agent-side="${side}" aria-label="${label}">
+            ${image ? `<img src="${image}" alt="" />` : `<span>${label}</span>`}
+          </button>
+        `;
+      }
+
+      const mapData = {
+        "04.03|Gen.G|Global Esports": ["Bind 8-13", "Split 4-13"],
+        "04.03|T1|VARREL": ["Haven 13-11", "Pearl 13-4"],
+        "04.04|Nongshim RedForce|Paper Rex": ["Fracture 15-13", "Split 10-13", "Lotus 6-13"],
+        "04.04|FULL SENSE|DetonatioN FocusMe": ["Pearl 13-6", "Bind 13-8"],
+        "04.05|Team Secret|Kiwoom DRX": ["Pearl 5-13", "Fracture 13-15"],
+        "04.05|Rex Regum Qeon|ZETA DIVISION": ["Split 7-13", "Fracture 13-6", "Haven 13-11"],
+        "04.10|DetonatioN FocusMe|T1": ["Pearl 13-15", "Lotus 13-6"],
+        "04.10|Nongshim RedForce|Kiwoom DRX": ["Haven 11-13", "Fracture 15-13", "Lotus 10-13"],
+        "04.11|Team Secret|Global Esports": ["Split 9-13", "Lotus 9-13"],
+        "04.11|Rex Regum Qeon|VARREL": ["Bind 13-11", "Split 16-14"],
+        "04.12|FULL SENSE|ZETA DIVISION": ["Fracture 13-6", "Split 13-7"],
+        "04.12|Gen.G|Paper Rex": ["Haven 17-15", "Fracture 3-13", "Lotus 13-3"],
+        "04.17|FULL SENSE|VARREL": ["Haven 13-5", "Lotus 14-12"],
+        "04.17|Team Secret|Paper Rex": ["Breeze 4-13", "Split 16-18"],
+        "04.18|Kiwoom DRX|Global Esports": ["Fracture 13-8", "Haven 13-9"],
+        "04.18|ZETA DIVISION|DetonatioN FocusMe": ["Bind 13-10", "Lotus 7-13", "Pearl 5-13"],
+        "04.19|Rex Regum Qeon|T1": ["Pearl 8-13", "Bind 10-13"],
+        "04.19|Nongshim RedForce|Gen.G": ["Pearl 13-8", "Breeze 13-3"],
+        "04.24|Rex Regum Qeon|FULL SENSE": ["Pearl 9-13", "Haven 13-10", "Fracture 13-3"],
+        "04.24|Paper Rex|Global Esports": ["Split 13-3", "Pearl 13-8"],
+        "04.25|Gen.G|Kiwoom DRX": ["Haven 13-3", "Pearl 10-13", "Lotus 17-19"],
+        "04.25|DetonatioN FocusMe|VARREL": ["Lotus 13-11", "Haven 10-13", "Fracture 13-9"],
+        "04.26|T1|ZETA DIVISION": ["Haven 13-6", "Lotus 13-7"],
+        "04.26|Nongshim RedForce|Team Secret": ["Breeze 13-8", "Fracture 8-13", "Pearl 13-5"],
+      };
+
+      const matchResults = [
+        ["04.03", "Gen.G", "Global Esports", "0 : 2"],
+        ["04.03", "T1", "VARREL", "2 : 0"],
+        ["04.04", "Nongshim RedForce", "Paper Rex", "1 : 2"],
+        ["04.04", "FULL SENSE", "DetonatioN FocusMe", "2 : 0"],
+        ["04.05", "Team Secret", "Kiwoom DRX", "0 : 2"],
+        ["04.05", "Rex Regum Qeon", "ZETA DIVISION", "2 : 1"],
+        ["04.10", "DetonatioN FocusMe", "T1", "0 : 2"],
+        ["04.10", "Nongshim RedForce", "Kiwoom DRX", "1 : 2"],
+        ["04.11", "Team Secret", "Global Esports", "0 : 2"],
+        ["04.11", "Rex Regum Qeon", "VARREL", "2 : 0"],
+        ["04.12", "FULL SENSE", "ZETA DIVISION", "2 : 0"],
+        ["04.12", "Gen.G", "Paper Rex", "2 : 1"],
+        ["04.17", "FULL SENSE", "VARREL", "2 : 0"],
+        ["04.17", "Team Secret", "Paper Rex", "0 : 2"],
+        ["04.18", "Kiwoom DRX", "Global Esports", "2 : 0"],
+        ["04.18", "ZETA DIVISION", "DetonatioN FocusMe", "1 : 2"],
+        ["04.19", "Rex Regum Qeon", "T1", "0 : 2"],
+        ["04.19", "Nongshim RedForce", "Gen.G", "2 : 0"],
+        ["04.24", "Rex Regum Qeon", "FULL SENSE", "2 : 1"],
+        ["04.24", "Paper Rex", "Global Esports", "2 : 0"],
+        ["04.25", "Gen.G", "Kiwoom DRX", "1 : 2"],
+        ["04.25", "DetonatioN FocusMe", "VARREL", "2 : 1"],
+        ["04.26", "T1", "ZETA DIVISION", "2 : 0"],
+        ["04.26", "Nongshim RedForce", "Team Secret", "2 : 1"],
+      ];
+
+      const nsTsPlayers = {
+        Breeze: [
+          ["Xross", "19/9/0", "226", "Sylvan", "20/16/4", "246"],
+          ["Dambi", "20/14/3", "255", "BerserX", "14/16/8", "198"],
+          ["Rb", "13/9/9", "162", "Zeus", "12/17/8", "196"],
+          ["Francis", "17/15/6", "243", "JessieVash", "6/14/3", "89"],
+          ["Ivy", "10/11/5", "141", "kellyS", "6/16/11", "116"],
+        ],
+        Fracture: [
+          ["Xross", "15/15/5", "194", "Sylvan", "20/11/16", "284"],
+          ["Francis", "16/18/4", "229", "JessieVash", "14/11/7", "171"],
+          ["Ivy", "14/17/4", "203", "BerserX", "16/13/3", "197"],
+          ["Rb", "11/13/1", "144", "Zeus", "16/15/6", "225"],
+          ["Dambi", "11/16/5", "159", "kellyS", "13/17/12", "175"],
+        ],
+        Pearl: [
+          ["Dambi", "17/10/11", "275", "BerserX", "14/14/2", "220"],
+          ["Xross", "18/10/5", "281", "kellyS", "12/13/5", "199"],
+          ["Rb", "11/9/11", "166", "Zeus", "10/17/6", "189"],
+          ["Ivy", "13/12/1", "190", "Sylvan", "8/15/1", "147"],
+          ["Francis", "14/14/3", "221", "JessieVash", "10/14/7", "138"],
+        ],
+      };
+
+      const [scoreA, scoreB] = match.score.includes(":")
+        ? match.score.split(":").map((part) => part.trim())
+        : ["0", "0"];
+      const key = `${match.date}|${match.teamA}|${match.teamB}`;
+      const maps = mapData[key] || [];
+      const isUpcoming = match.score === "VS";
+      const resultStorageKey = `result:${key}`;
+      const predictionStorageKey = `prediction:${key}`;
+
+      document.title = `${match.teamA} vs ${match.teamB}`;
+      document.getElementById("team-a-name").textContent = match.teamA;
+      document.getElementById("team-b-name").textContent = match.teamB;
+      document.getElementById("team-a-name").style.background = teamBrandStyle(match.teamA, "#01a9d6");
+      document.getElementById("team-b-name").style.background = teamBrandStyle(match.teamB, "#071111");
+      function renderHeroLogo(elementId, teamName) {
+        const logo = teamLogos[teamName];
+        const element = document.getElementById(elementId);
+        element.innerHTML = logo
+          ? `<img src="${logo}" alt="${teamName}" />`
+          : `<span>${teamCodes[teamName] || teamName.slice(0, 2)}</span>`;
+      }
+
+      renderHeroLogo("team-a-logo", match.teamA);
+      renderHeroLogo("team-b-logo", match.teamB);
+      document.getElementById("set-team-a").textContent = match.teamA;
+      document.getElementById("set-team-b").textContent = match.teamB;
+      document.getElementById("set-team-a").style.background = teamBrandStyle(match.teamA, "#01a9d6");
+      document.getElementById("set-team-b").style.background = teamBrandStyle(match.teamB, "#071111");
+      document.getElementById("match-title").textContent = `${match.teamA} vs ${match.teamB}`;
+
+      function renderMarks(target, marks, side) {
+        const markCount = isBo5 ? 5 : 3;
+        const paddedMarks = [...marks];
+        while (paddedMarks.length < markCount) paddedMarks.push("");
+        target.innerHTML = paddedMarks
+          .slice(0, markCount)
+          .map(
+            (mark, index) =>
+              `<span><button class="inline-edit mark-edit-button" type="button" data-result-edit="mark" data-side="${side}" data-mark-index="${index}">${mark || ""}</button></span>`,
+          )
+          .join("");
+      }
+
+      function setMarksFromMaps() {
+        return maps.map((map) => {
+          const score = map.split(" ")[1] || "";
+          const [a, b] = score.split("-").map((part) => Number(part));
+          return a > b ? ["O", "X"] : ["X", "O"];
+        });
+      }
+
+      function recordsThroughCurrentMatch() {
+        const records = {};
+        const ensure = (team) => {
+          if (!records[team]) records[team] = { wins: 0, losses: 0 };
+          return records[team];
+        };
+
+        for (const [date, teamA, teamB, result] of matchResults) {
+          const [a, b] = result.split(":").map((part) => Number(part.trim()));
+          if (a > b) {
+            ensure(teamA).wins += 1;
+            ensure(teamB).losses += 1;
+          } else {
+            ensure(teamB).wins += 1;
+            ensure(teamA).losses += 1;
+          }
+
+          if (date === match.date && teamA === match.teamA && teamB === match.teamB) {
+            break;
+          }
+        }
+
+        return records;
+      }
+
+      function defaultResultState() {
+        const defaultState = {
+          date: `2026. ${match.date.replace(".", ". ")}`,
+          scoreA: isUpcoming ? "0" : scoreA,
+          scoreB: isUpcoming ? "0" : scoreB,
+          marksA: isUpcoming ? (isBo5 ? ["", "", "", "", ""] : ["", "", ""]) : [],
+          marksB: isUpcoming ? (isBo5 ? ["", "", "", "", ""] : ["", "", ""]) : [],
+          recordA: isUpcoming ? "-승 -패" : "-",
+          recordB: isUpcoming ? "-승 -패" : "-",
+        };
+
+        if (!isUpcoming) {
+          const setMarks = setMarksFromMaps();
+          defaultState.marksA = setMarks.map(([teamAMark]) => teamAMark);
+          defaultState.marksB = setMarks.map(([, teamBMark]) => teamBMark);
+          const records = recordsThroughCurrentMatch();
+          const teamARecord = records[match.teamA] || { wins: 0, losses: 0 };
+          const teamBRecord = records[match.teamB] || { wins: 0, losses: 0 };
+          defaultState.recordA = `${teamARecord.wins}승 ${teamARecord.losses}패`;
+          defaultState.recordB = `${teamBRecord.wins}승 ${teamBRecord.losses}패`;
+        }
+
+        return defaultState;
+      }
+
+      function loadResultState() {
+        const defaults = defaultResultState();
+        try {
+          const stored = JSON.parse(localStorage.getItem(resultStorageKey) || "{}");
+          return {
+            ...defaults,
+            ...stored,
+            marksA: Array.isArray(stored.marksA) ? stored.marksA : defaults.marksA,
+            marksB: Array.isArray(stored.marksB) ? stored.marksB : defaults.marksB,
+          };
+        } catch {
+          return defaults;
+        }
+      }
+
+      let resultState = loadResultState();
+
+      function saveResultState() {
+        localStorage.setItem(resultStorageKey, JSON.stringify(resultState));
+      }
+
+      function loadPredictionState() {
+        try {
+          return { oddsA: "", oddsB: "", ...JSON.parse(localStorage.getItem(predictionStorageKey) || "{}") };
+        } catch {
+          return { oddsA: "", oddsB: "" };
+        }
+      }
+
+      let predictionState = loadPredictionState();
+
+      function savePredictionState() {
+        localStorage.setItem(predictionStorageKey, JSON.stringify(predictionState));
+      }
+
+      function parseOdds(value) {
+        const odds = Number(String(value || "").replace(",", "."));
+        return Number.isFinite(odds) && odds > 1 ? odds : null;
+      }
+
+      function predictionPercentages() {
+        const oddsA = parseOdds(predictionState.oddsA);
+        const oddsB = parseOdds(predictionState.oddsB);
+        if (!oddsA || !oddsB) return { a: 50, b: 50, ready: false };
+        const impliedA = 1 / oddsA;
+        const impliedB = 1 / oddsB;
+        const pctA = Math.round((impliedA / (impliedA + impliedB)) * 100);
+        return { a: pctA, b: 100 - pctA, ready: true };
+      }
+
+      function teamPredictionLogo(teamName, side) {
+        const logo = teamLogos[teamName];
+        if (!logo) return `<span class="prediction-logo-text">${teamCodes[teamName] || teamName.slice(0, 2)}</span>`;
+        const extraClass = teamCodes[teamName] === "FUT" ? " fut-logo" : "";
+        return `<img class="${side === "b" ? "right" : ""}${extraClass}" src="${logo}" alt="" />`;
+      }
+
+      function renderPredictionBoard() {
+        const prediction = predictionPercentages();
+        const board = document.getElementById("prediction-board");
+        board.style.setProperty("--prediction-a", `${prediction.a}%`);
+        board.style.setProperty("--prediction-left-color", teamPredictionColor(match.teamA, "#01d2d7", "left"));
+        board.style.setProperty("--prediction-right-color", teamPredictionColor(match.teamB, "#071111", "right"));
+        board.innerHTML = `
+          <div class="prediction-side prediction-side-a" style="--team-color:${teamBrandStyle(match.teamA, "#01d2d7")}">
+            <div class="prediction-logo">${teamPredictionLogo(match.teamA, "a")}</div>
+            <strong>${match.teamA}</strong>
+            <span>${prediction.ready ? `${prediction.a}%` : "50%"}</span>
+            <button class="inline-edit prediction-odds" type="button" data-odds-side="A">${predictionState.oddsA || "배당률"}</button>
+          </div>
+          <div class="prediction-divider"></div>
+          <div class="prediction-side prediction-side-b" style="--team-color:${teamBrandStyle(match.teamB, "#071111")}">
+            <div class="prediction-logo">${teamPredictionLogo(match.teamB, "b")}</div>
+            <strong>${match.teamB}</strong>
+            <span>${prediction.ready ? `${prediction.b}%` : "50%"}</span>
+            <button class="inline-edit prediction-odds" type="button" data-odds-side="B">${predictionState.oddsB || "배당률"}</button>
+          </div>
+        `;
+      }
+
+      function openOddsEditor(side) {
+        document.querySelector(".agent-picker")?.remove();
+        const key = side === "A" ? "oddsA" : "oddsB";
+        const teamName = side === "A" ? match.teamA : match.teamB;
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head">
+              <strong>${teamName} 배당률</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            <form class="value-editor-form">
+              <input inputmode="decimal" value="${predictionState[key] || ""}" placeholder="예: 1.27" autofocus />
+              <button type="submit">적용</button>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(picker);
+        const close = () => picker.remove();
+        picker.addEventListener("click", (event) => {
+          if (event.target === picker || event.target.dataset.agentClose !== undefined) close();
+        });
+        picker.querySelector("form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          predictionState[key] = event.currentTarget.querySelector("input").value.trim();
+          savePredictionState();
+          renderPredictionBoard();
+          close();
+        });
+        picker.querySelector("input").focus();
+      }
+
+      function renderResultBoard() {
+        document.getElementById("match-date").innerHTML =
+          `<button class="inline-edit result-date-button" type="button" data-result-edit="date">${resultState.date}</button>`;
+        document.getElementById("score-a").textContent = resultState.scoreA;
+        document.getElementById("score-b").textContent = resultState.scoreB;
+        document.getElementById("team-a-record").innerHTML =
+          `<button class="inline-edit result-record-button" type="button" data-result-edit="recordA">${resultState.recordA}</button>`;
+        document.getElementById("team-b-record").innerHTML =
+          `<button class="inline-edit result-record-button" type="button" data-result-edit="recordB">${resultState.recordB}</button>`;
+        renderMarks(document.getElementById("team-a-marks"), resultState.marksA, "a");
+        renderMarks(document.getElementById("team-b-marks"), resultState.marksB, "b");
+      }
+
+      function openResultEditor(options) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head">
+              <strong>${options.title}</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            ${
+              options.choices
+                ? `<div class="agent-picker-grid result-choice-grid">
+                    ${options.choices
+                      .map((choice) => `<button type="button" data-value="${choice.value}">${choice.label}</button>`)
+                      .join("")}
+                  </div>`
+                : `<form class="value-editor-form">
+                    <input value="${options.value || ""}" placeholder="${options.placeholder || "-"}" autofocus />
+                    <button type="submit">적용</button>
+                  </form>`
+            }
+          </div>
+        `;
+        document.body.appendChild(picker);
+        const close = () => picker.remove();
+        const apply = (value) => {
+          options.apply(value);
+          saveResultState();
+          renderResultBoard();
+          close();
+        };
+        picker.addEventListener("click", (event) => {
+          if (event.target === picker || event.target.dataset.agentClose !== undefined) close();
+          if (event.target.dataset.value !== undefined) apply(event.target.dataset.value);
+        });
+        picker.querySelector("form")?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          apply(event.currentTarget.querySelector("input").value.trim());
+        });
+        picker.querySelector("input")?.focus();
+      }
+
+      function editResultField(trigger) {
+        const field = trigger.dataset.resultEdit;
+        if (field === "mark") {
+          const side = trigger.dataset.side;
+          const index = Number(trigger.dataset.markIndex);
+          const key = side === "a" ? "marksA" : "marksB";
+          openResultEditor({
+            title: `${index + 1}세트 결과`,
+            choices: [
+              { label: "O", value: "O" },
+              { label: "X", value: "X" },
+              { label: "빈칸", value: "" },
+            ],
+            apply(value) {
+              resultState[key][index] = value;
+            },
+          });
+          return;
+        }
+
+        const labels = {
+          date: "경기 날짜",
+          scoreA: `${match.teamA} 세트 승`,
+          scoreB: `${match.teamB} 세트 승`,
+          recordA: `${match.teamA} 당시 승패`,
+          recordB: `${match.teamB} 당시 승패`,
+        };
+
+        openResultEditor({
+          title: labels[field],
+          value: resultState[field],
+          placeholder: field === "date" ? "2026. 04. 03" : "-",
+          apply(value) {
+            resultState[field] = value || "-";
+          },
+        });
+      }
+
+      document.querySelector(".match-result-panel").addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-result-edit]");
+        if (!trigger) return;
+        editResultField(trigger);
+      });
+
+      renderResultBoard();
+      renderPredictionBoard();
+
+      document.querySelector(".prediction-panel").addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-odds-side]");
+        if (!trigger) return;
+        openOddsEditor(trigger.dataset.oddsSide);
+      });
+
+      const mapNames = ["Pearl", "Fracture", "Breeze", "Split", "Lotus", "Haven", "Bind", "Ascent", "Icebox", "Sunset", "Corrode", "Abyss"];
+      const vetoGrid = document.getElementById("veto-grid");
+      const vetoStorageKey = `veto:${key}`;
+      const teamOptions = [
+        { value: "A", label: `${teamCodes[match.teamA] || match.teamA} (${match.teamA})` },
+        { value: "B", label: `${teamCodes[match.teamB] || match.teamB} (${match.teamB})` },
+      ];
+      const vetoSteps = isBo5 ? [
+        { type: "ban",     name: "1맵 밴" },
+        { type: "ban",     name: "2맵 밴" },
+        { type: "pick",    name: "3맵 선택",    mapIndex: 0 },
+        { type: "pick",    name: "4맵 선택",    mapIndex: 1 },
+        { type: "pick",    name: "5맵 선택",    mapIndex: 2 },
+        { type: "pick",    name: "6맵 선택",    mapIndex: 3 },
+        { type: "decider", name: "7맵 디사이더", mapIndex: 4 },
+      ] : [
+        { type: "ban",     name: "1맵 밴" },
+        { type: "ban",     name: "2맵 밴" },
+        { type: "pick",    name: "3맵 선택",    mapIndex: 0 },
+        { type: "pick",    name: "4맵 선택",    mapIndex: 1 },
+        { type: "ban",     name: "5맵 밴" },
+        { type: "ban",     name: "6맵 밴" },
+        { type: "decider", name: "7맵 디사이더", mapIndex: 2 },
+      ];
+
+      function sideLabel(value) {
+        return value === "attack" ? "선 공격" : "선 수비";
+      }
+
+      function sideChooserForStep(stepIndex, firstBan) {
+        const orderTeam = stepTeam(stepIndex, firstBan);
+        if (vetoSteps[stepIndex].type === "pick") return orderTeam === "A" ? "B" : "A";
+        if (vetoSteps[stepIndex].type === "decider") return sideChooserForStep(isGF ? 5 : (isBo5 ? 5 : 3), firstBan);
+        return "";
+      }
+
+      function teamNameByCode(code) {
+        return code === "A" ? match.teamA : match.teamB;
+      }
+
+      function teamShortByCode(code) {
+        return teamCodes[teamNameByCode(code)] || teamNameByCode(code);
+      }
+
+      function oppositeTeam(code) {
+        return code === "A" ? "B" : "A";
+      }
+
+      function stepTeam(index, firstBan) {
+        if (isGF) {
+          const lb = firstBan === "A" ? "B" : "A";
+          if (index <= 1) return firstBan;
+          if (index === 2 || index === 4) return firstBan;
+          if (index === 3 || index === 5) return lb;
+          return "";
+        }
+        return index % 2 === 0 ? firstBan : oppositeTeam(firstBan);
+      }
+
+      function defaultVetoState() {
+        const playedMapNames = maps.map((map) => map.split(" ")[0]);
+        const remainingMaps = mapNames.filter((mapName) => !playedMapNames.includes(mapName));
+        if (isBo5) {
+          return {
+            firstBan: "A",
+            maps: [
+              remainingMaps[0] || "Pearl",
+              remainingMaps[1] || "Fracture",
+              playedMapNames[0] || remainingMaps[2] || "Breeze",
+              playedMapNames[1] || remainingMaps[3] || "Split",
+              playedMapNames[2] || remainingMaps[4] || "Lotus",
+              playedMapNames[3] || remainingMaps[5] || "Haven",
+              playedMapNames[4] || remainingMaps[6] || "Bind",
+            ],
+            sides: { 2: "defense", 3: "defense", 4: "defense", 5: "defense", 6: "defense" },
+          };
+        }
+        return {
+          firstBan: "A",
+          maps: [
+            remainingMaps[0] || "Pearl",
+            remainingMaps[1] || "Fracture",
+            playedMapNames[0] || remainingMaps[2] || "Breeze",
+            playedMapNames[1] || remainingMaps[3] || "Split",
+            remainingMaps[2] || "Lotus",
+            remainingMaps[3] || "Haven",
+            playedMapNames[2] || remainingMaps[4] || "Bind",
+          ],
+          sides: {
+            2: "defense",
+            3: "defense",
+            6: "defense",
+          },
+        };
+      }
+
+      function loadVetoState() {
+        try {
+          return { ...defaultVetoState(), ...JSON.parse(localStorage.getItem(vetoStorageKey) || "{}") };
+        } catch {
+          return defaultVetoState();
+        }
+      }
+
+      function saveVetoState(state) {
+        localStorage.setItem(vetoStorageKey, JSON.stringify(state));
+      }
+
+      function playableMapsFromVeto(state) {
+        const playableIndices = isBo5 ? [2, 3, 4, 5, 6] : [2, 3, 6];
+        return playableIndices.map((stepIndex, mapIndex) => {
+          const mapName = state.maps[stepIndex] || maps[mapIndex]?.split(" ")[0] || mapNames[mapIndex];
+          const fallbackScore = maps[mapIndex]?.split(" ")[1] || "-";
+          return `${mapName} ${fallbackScore}`;
+        });
+      }
+
+      function renderVeto(state) {
+        vetoGrid.innerHTML = vetoSteps
+          .map((step, index) => {
+            const orderTeam = stepTeam(index, state.firstBan);
+            const mapName = state.maps[index] || mapNames[index];
+            const isPlayable = step.type === "pick" || step.type === "decider";
+            const sideChooser = isPlayable ? sideChooserForStep(index, state.firstBan) : "";
+            const side = state.sides[index] || "defense";
+            const title =
+              step.type === "ban"
+                ? `${teamShortByCode(orderTeam)} 거부`
+                : step.type === "pick"
+                  ? `${teamShortByCode(orderTeam)} 선택`
+                  : "디사이더";
+            const sideText = isPlayable
+              ? `${teamShortByCode(sideChooser)} 선택<br>${sideLabel(side)}`
+              : "";
+            return `
+              <article class="veto-card ${step.type}" data-veto-step="${index}">
+                <strong>${title}<small>${mapKo[mapName] || mapName}</small></strong>
+                <button type="button" data-veto-map-button="${index}" style="${mapBackgroundStyle(mapName)}">${mapKo[mapName] || mapName}</button>
+                ${isPlayable ? `<em>${sideText}</em>` : ""}
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      let vetoState = loadVetoState();
+      renderVeto(vetoState);
+
+      function openVetoPicker(stepIndex) {
+        document.querySelector(".agent-picker")?.remove();
+        const step = vetoSteps[stepIndex];
+        const isPlayable = step.type === "pick" || step.type === "decider";
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel map-picker-panel">
+            <div class="agent-picker-head">
+              <strong>${step.name}</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            <div class="veto-quick-form">
+              ${
+                stepIndex === 0
+                  ? `<label>${isGF ? "UB 팀 (어드밴티지)" : "첫 밴 팀"}<select data-quick-first-ban>${teamOptions
+                      .map((option) => `<option value="${option.value}" ${vetoState.firstBan === option.value ? "selected" : ""}>${option.label}</option>`)
+                      .join("")}</select></label>`
+                  : ""
+              }
+              ${
+                isPlayable
+                  ? `<label>진영 선택<select data-quick-side>
+                      <option value="attack" ${vetoState.sides[stepIndex] === "attack" ? "selected" : ""}>선 공격</option>
+                      <option value="defense" ${vetoState.sides[stepIndex] === "defense" ? "selected" : ""}>선 수비</option>
+                    </select></label>`
+                  : ""
+              }
+              <div class="map-picker-grid">
+                ${mapNames
+                  .map(
+                    (mapName) => `
+                      <button class="${vetoState.maps[stepIndex] === mapName ? "active" : ""}" type="button" data-quick-map="${mapName}" style="${mapBackgroundStyle(mapName)}" aria-label="${mapKo[mapName] || mapName}"></button>
+                    `,
+                  )
+                  .join("")}
+              </div>
+              <div class="veto-quick-actions">
+                <button type="button" data-veto-reset>초기화</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(picker);
+        picker.addEventListener("change", (event) => {
+          if (event.target.matches("[data-quick-first-ban]")) {
+            vetoState.firstBan = event.target.value;
+            saveVetoState(vetoState);
+            renderVeto(vetoState);
+            renderMapReports();
+          }
+          if (event.target.matches("[data-quick-side]")) {
+            vetoState.sides[stepIndex] = event.target.value;
+            saveVetoState(vetoState);
+            renderVeto(vetoState);
+            renderMapReports();
+          }
+        });
+        picker.addEventListener("click", (event) => {
+          if (event.target === picker || event.target.dataset.agentClose !== undefined) picker.remove();
+          if (event.target.dataset.vetoReset !== undefined) {
+            localStorage.removeItem(vetoStorageKey);
+            vetoState = defaultVetoState();
+            saveVetoState(vetoState);
+            renderVeto(vetoState);
+            renderMapReports();
+            picker.remove();
+          }
+          const mapButton = event.target.closest("[data-quick-map]");
+          if (!mapButton) return;
+          const firstBan = picker.querySelector("[data-quick-first-ban]");
+          const side = picker.querySelector("[data-quick-side]");
+          if (firstBan) vetoState.firstBan = firstBan.value;
+          vetoState.maps[stepIndex] = mapButton.dataset.quickMap;
+          if (side) vetoState.sides[stepIndex] = side.value;
+          saveVetoState(vetoState);
+          renderVeto(vetoState);
+          renderMapReports();
+          picker.remove();
+        });
+      }
+
+      vetoGrid.addEventListener("click", (event) => {
+        const card = event.target.closest("[data-veto-step]");
+        if (!card) return;
+        openVetoPicker(Number(card.dataset.vetoStep));
+      });
+
+      function optionList(items, selected = "") {
+        return items
+          .map((item) => `<option value="${item}" ${item === selected ? "selected" : ""}>${item}</option>`)
+          .join("");
+      }
+
+      function defaultSetState(mapName, mapScore, index, players) {
+        const rows = Array.from({ length: 5 }, (_, rowIndex) => ({
+          aPlayer: players?.[rowIndex]?.[0] || getTeamRoster(match.teamA)?.[rowIndex] || "",
+          aAgent: "",
+          aKda: players?.[rowIndex]?.[1] || "",
+          aAcs: players?.[rowIndex]?.[2] || "",
+          bPlayer: players?.[rowIndex]?.[3] || getTeamRoster(match.teamB)?.[rowIndex] || "",
+          bAgent: "",
+          bKda: players?.[rowIndex]?.[4] || "",
+          bAcs: players?.[rowIndex]?.[5] || "",
+        }));
+        const [aScore = "", bScore = ""] = mapScore.split("-");
+        return {
+          mapName,
+          mapScore,
+          title: `Map ${index + 1} ${mapKo[mapName] || mapName}`,
+          rows,
+          stats: {
+            aScore,
+            bScore,
+            firstKillsA: "",
+            firstKillsB: "",
+            thriftyA: "",
+            thriftyB: "",
+            postPlantA: "",
+            postPlantB: "",
+            clutchA: "",
+            clutchB: "",
+          },
+        };
+      }
+
+      function setStorageKey(mapName, index) {
+        return `set:${key}:${index}:${mapName}`;
+      }
+
+      function loadSetState(mapName, mapScore, index, players) {
+        const defaults = defaultSetState(mapName, mapScore, index, players);
+        try {
+          const saved = JSON.parse(localStorage.getItem(setStorageKey(mapName, index)) || "{}");
+          return {
+            ...defaults,
+            ...saved,
+            rows: saved.rows || defaults.rows,
+            stats: { ...defaults.stats, ...(saved.stats || {}) },
+          };
+        } catch {
+          return defaults;
+        }
+      }
+
+      function saveSetState(mapName, index, state) {
+        localStorage.setItem(setStorageKey(mapName, index), JSON.stringify(state));
+      }
+
+      function syncMapScore(state) {
+        state.mapScore = `${state.stats.aScore || "-"}-${state.stats.bScore || "-"}`;
+      }
+
+      function renderMapCardHero(card, state) {
+        card.querySelector(".map-report-hero strong").textContent = state.mapScore;
+        card.querySelector(".map-report-hero h3").textContent = mapKo[state.mapName] || state.mapName;
+      }
+
+      function renderSetView(card, state) {
+        renderMapCardHero(card, state);
+        const view = card.querySelector(".set-detail-view");
+        view.innerHTML = `
+          <div class="set-detail-banner">
+            <span>${state.title}</span>
+            <strong>${state.mapScore}</strong>
+          </div>
+          <div class="set-player-grid">
+            <div class="set-team-title" style="background: ${teamBrandStyle(match.teamA, "#0cab82")}">${match.teamA}</div>
+            <div class="set-team-title right" style="background: ${teamBrandStyle(match.teamB, "#ff2638")}">${match.teamB}</div>
+            ${state.rows
+              .map(
+                (row) => `
+                  <div class="set-player-row">
+                    ${renderAgentButton(row.aAgent, "a", state.rows.indexOf(row))}
+                    <div>
+                      <button class="inline-edit player-name" type="button" data-row="${state.rows.indexOf(row)}" data-side="a" data-edit="player">${row.aPlayer || "-"}</button>
+                      <span>
+                        <button class="inline-edit" type="button" data-row="${state.rows.indexOf(row)}" data-side="a" data-edit="kda">${row.aKda || "-"}</button>
+                        (<button class="inline-edit" type="button" data-row="${state.rows.indexOf(row)}" data-side="a" data-edit="acs">${row.aAcs || "-"}</button>)
+                      </span>
+                    </div>
+                    <div>
+                      <button class="inline-edit player-name" type="button" data-row="${state.rows.indexOf(row)}" data-side="b" data-edit="player">${row.bPlayer || "-"}</button>
+                      <span>
+                        <button class="inline-edit" type="button" data-row="${state.rows.indexOf(row)}" data-side="b" data-edit="kda">${row.bKda || "-"}</button>
+                        (<button class="inline-edit" type="button" data-row="${state.rows.indexOf(row)}" data-side="b" data-edit="acs">${row.bAcs || "-"}</button>)
+                      </span>
+                    </div>
+                    ${renderAgentButton(row.bAgent, "b", state.rows.indexOf(row))}
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+          ${renderRoundTracker(state)}
+          <div class="capsule-stats-v2">
+            <div class="capsule-stats-head-v2">
+              <strong>${match.teamA}</strong>
+              <button class="inline-edit stat-value" type="button" data-stat="aScore">${state.stats.aScore || "-"}</button>
+              <span>스코어</span>
+              <button class="inline-edit stat-value" type="button" data-stat="bScore">${state.stats.bScore || "-"}</button>
+              <strong>${match.teamB}</strong>
+            </div>
+            <div class="capsule-stats-body-v2">
+              <div class="capsule-art-v2">${teamCapsuleSrc(match.teamA) ? `<img src="${teamCapsuleSrc(match.teamA)}" alt="" />` : ""}</div>
+              <div class="capsule-center-v2">
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="firstKillsA">${state.stats.firstKillsA || "-"}</button><span>첫킬</span><button class="inline-edit stat-value" type="button" data-stat="firstKillsB">${state.stats.firstKillsB || "-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="thriftyA">${state.stats.thriftyA || "-"}</button><span>절약왕</span><button class="inline-edit stat-value" type="button" data-stat="thriftyB">${state.stats.thriftyB || "-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="postPlantA">${state.stats.postPlantA || "-"}</button><span>포스트 플랜트</span><button class="inline-edit stat-value" type="button" data-stat="postPlantB">${state.stats.postPlantB || "-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="clutchA">${state.stats.clutchA || "-"}</button><span>클러치</span><button class="inline-edit stat-value" type="button" data-stat="clutchB">${state.stats.clutchB || "-"}</button></div>
+                <div class="capsule-pacific-v2"><img src="./assets/vct-pacific.webp" alt="" /></div>
+              </div>
+              <div class="capsule-art-v2">${teamCapsuleSrc(match.teamB) ? `<img src="${teamCapsuleSrc(match.teamB)}" alt="" />` : ""}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function openAgentPicker(card, state, mapName, index, rowIndex, side) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel">
+            <div class="agent-picker-head">
+              <strong>요원 선택</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            <div class="agent-picker-grid agent-image-grid">
+              ${agents
+                .map(
+                  (agent, agentIndex) => `
+                    <button type="button" data-agent-index="${agentIndex}" aria-label="${agent}">
+                      <img src="${agentImage(agent)}" alt="" />
+                    </button>
+                  `,
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+        document.body.appendChild(picker);
+        picker.addEventListener("click", (event) => {
+          if (event.target === picker || event.target.dataset.agentClose !== undefined) {
+            picker.remove();
+            return;
+          }
+          const agentButton = event.target.closest("[data-agent-index]");
+          if (!agentButton) return;
+          const agent = agents[Number(agentButton.dataset.agentIndex)];
+          state.rows[rowIndex][`${side}Agent`] = agent;
+          saveSetState(mapName, index, state);
+          renderSetView(card, state);
+          picker.remove();
+        });
+      }
+
+      function openValueEditor(card, state, mapName, index, options) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        const isPlayer = options.kind === "player";
+        const roster = options.side === "a" ? getTeamRoster(match.teamA) : getTeamRoster(match.teamB);
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head">
+              <strong>${options.title}</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            ${
+              isPlayer
+                ? `<div class="agent-picker-grid">${roster.map((player) => `<button type="button" data-value="${player}">${player}</button>`).join("")}</div>`
+                : `<form class="value-editor-form">
+                    <input value="${options.value || ""}" placeholder="${options.placeholder || "-"}" autofocus />
+                    <button type="submit">적용</button>
+                  </form>`
+            }
+          </div>
+        `;
+        document.body.appendChild(picker);
+        const close = () => picker.remove();
+        const apply = (value) => {
+          options.apply(value);
+          if (options.syncScore) syncMapScore(state);
+          saveSetState(mapName, index, state);
+          renderSetView(card, state);
+          close();
+        };
+        picker.addEventListener("click", (event) => {
+          if (event.target === picker || event.target.dataset.agentClose !== undefined) close();
+          if (event.target.dataset.value !== undefined) apply(event.target.dataset.value);
+        });
+        picker.querySelector("form")?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          apply(event.currentTarget.querySelector("input").value.trim());
+        });
+        picker.querySelector("input")?.focus();
+      }
+
+      const reportGrid = document.getElementById("map-report-grid");
+
+      const mapCountKey = `mapCount:${key}`;
+      function loadActiveMapCount(max) {
+        try { const s = localStorage.getItem(mapCountKey); if (s !== null) return Math.max(1, Math.min(max, parseInt(s))); } catch (e) {}
+        return max;
+      }
+      function saveActiveMapCount(n) { try { localStorage.setItem(mapCountKey, String(n)); } catch (e) {} }
+
+      function confirmMapRemove(onConfirm) {
+        const backdrop = document.createElement("div");
+        backdrop.className = "map-remove-confirm-backdrop";
+        backdrop.innerHTML = `
+          <div class="map-remove-confirm-panel">
+            <p>맵 창을 삭제하겠습니까?<small>입력된 데이터는 유지됩니다.</small></p>
+            <div class="map-remove-confirm-actions">
+              <button class="map-remove-confirm-cancel" data-cancel>취소</button>
+              <button class="map-remove-confirm-ok" data-ok>삭제</button>
+            </div>
+          </div>`;
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener("click", e => {
+          if (e.target.dataset.cancel !== undefined || e.target === backdrop) backdrop.remove();
+          if (e.target.dataset.ok !== undefined) { backdrop.remove(); onConfirm(); }
+        });
+      }
+
+      function getFirstAttackerFromVeto(mapIndex) {
+        const playableIndices = isBo5 ? [2, 3, 4, 5, 6] : [2, 3, 6];
+        const stepIndex = playableIndices[mapIndex];
+        if (stepIndex === undefined) return null;
+        const chooser = sideChooserForStep(stepIndex, vetoState.firstBan);
+        const chosenSide = vetoState.sides[stepIndex] || "defense";
+        return chosenSide === "attack" ? (chooser === "A" ? "a" : "b") : (chooser === "A" ? "b" : "a");
+      }
+      function renderMapReports() {
+        const allMaps = playableMapsFromVeto(vetoState);
+        const maxMaps = allMaps.length;
+        const isAdmin = !document.body.classList.contains("view-only");
+        const activeCount = loadActiveMapCount(maxMaps);
+
+        let ctrl = document.getElementById("map-count-ctrl");
+        if (isAdmin) {
+          if (!ctrl) {
+            ctrl = document.createElement("div");
+            ctrl.id = "map-count-ctrl";
+            ctrl.className = "map-count-ctrl";
+            reportGrid.parentElement.insertBefore(ctrl, reportGrid);
+          }
+          ctrl.innerHTML = `
+            <button type="button" class="map-count-btn" id="mcb-minus" ${activeCount <= 1 ? "disabled" : ""}>−</button>
+            <span>${activeCount} / ${maxMaps}</span>
+            <button type="button" class="map-count-btn" id="mcb-plus" ${activeCount >= maxMaps ? "disabled" : ""}>+</button>`;
+          document.getElementById("mcb-minus").onclick = () => {
+            const c = loadActiveMapCount(maxMaps);
+            if (c > 1) confirmMapRemove(() => { saveActiveMapCount(c - 1); renderMapReports(); });
+          };
+          document.getElementById("mcb-plus").onclick = () => {
+            const c = loadActiveMapCount(maxMaps);
+            if (c < maxMaps) { saveActiveMapCount(c + 1); renderMapReports(); }
+          };
+        } else if (ctrl) {
+          ctrl.remove();
+        }
+
+        const reportMaps = allMaps.slice(0, activeCount);
+        reportGrid.innerHTML = reportMaps
+          .map((mapText, index) => {
+            const [mapName, mapScore] = mapText.split(" ");
+            const players = key === "04.26|Nongshim RedForce|Team Secret" ? nsTsPlayers[mapName] : null;
+            return `
+              <article class="map-report-card set-card" data-map-index="${index}">
+                <div class="map-report-hero" style="${mapBackgroundStyle(mapName)}">
+                  <span>Map ${index + 1}</span>
+                  <h3>${mapKo[mapName] || mapName}</h3>
+                  <strong>${mapScore}</strong>
+                </div>
+                <div class="set-detail-view"></div>
+              </article>
+            `;
+          })
+          .join("");
+
+        document.querySelectorAll(".set-card").forEach((card, index) => {
+          const [mapName, mapScore] = reportMaps[index].split(" ");
+          const players = key === "04.26|Nongshim RedForce|Team Secret" ? nsTsPlayers[mapName] : null;
+          const state = loadSetState(mapName, mapScore, index, players);
+          state.mapName = mapName;
+          state.mapScore = state.stats.aScore || state.stats.bScore ? `${state.stats.aScore || "-"}-${state.stats.bScore || "-"}` : mapScore;
+          state.title = `Map ${index + 1} ${mapKo[mapName] || mapName}`;
+          state.firstAttacker = getFirstAttackerFromVeto(index);
+          renderSetView(card, state);
+          card.addEventListener("click", (event) => {
+            const chip = event.target.closest("[data-agent-row]");
+            if (chip) {
+              openAgentPicker(card, state, mapName, index, Number(chip.dataset.agentRow), chip.dataset.agentSide);
+              return;
+            }
+            const roundCell = event.target.closest("[data-round-cell]");
+            if (roundCell) {
+              if (!document.body.classList.contains("view-only"))
+                openRoundPicker(card, state, mapName, index, Number(roundCell.dataset.roundCell));
+              return;
+            }
+            const editable = event.target.closest("[data-edit], [data-stat]");
+            if (!editable) return;
+            const rowIndex = Number(editable.dataset.row);
+            const side = editable.dataset.side;
+            const edit = editable.dataset.edit;
+            const stat = editable.dataset.stat;
+            if (edit === "player") {
+              openValueEditor(card, state, mapName, index, {
+                kind: "player",
+                side,
+                title: "선수 선택",
+                apply: (value) => {
+                  state.rows[rowIndex][`${side}Player`] = value;
+                },
+              });
+            } else if (edit === "kda" || edit === "acs") {
+              openValueEditor(card, state, mapName, index, {
+                title: edit === "kda" ? "K/D/A 입력" : "ACS 입력",
+                value: state.rows[rowIndex][`${side}${edit === "kda" ? "Kda" : "Acs"}`],
+                placeholder: edit === "kda" ? "예: 21/20/3" : "예: 230",
+                apply: (value) => {
+                  state.rows[rowIndex][`${side}${edit === "kda" ? "Kda" : "Acs"}`] = value;
+                },
+              });
+            } else if (stat) {
+              openValueEditor(card, state, mapName, index, {
+                title: "지표 입력",
+                value: state.stats[stat],
+                placeholder: "-",
+                syncScore: stat === "aScore" || stat === "bScore",
+                apply: (value) => {
+                  state.stats[stat] = value;
+                },
+              });
+            }
+          });
+        });
+      }
+
+      renderMapReports();
+        });
+    </script>
+  <script src="./auth.js"></script>
+</body>
+</html>

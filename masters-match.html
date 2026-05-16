@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Masters Match</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+  </head>
+  <body class="league-page match-page masters-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" id="back-link" href="./masters-santiago-swiss.html">Swiss Stage</a>
+    </header>
+
+    <main class="match-shell">
+      <section class="match-hero-board" aria-labelledby="match-title">
+        <div class="match-team match-team-a">
+          <div class="match-team-name" id="team-a-name">Team A</div>
+          <div class="match-team-logo" id="team-a-logo">A</div>
+        </div>
+        <div class="match-team match-team-b">
+          <div class="match-team-name" id="team-b-name">Team B</div>
+          <div class="match-team-logo" id="team-b-logo">B</div>
+        </div>
+      </section>
+
+      <section class="match-result-panel" aria-labelledby="match-title">
+        <p class="eyebrow">VCT Masters 2026</p>
+        <h1 id="match-title">Swiss Stage</h1>
+        <p id="match-date" class="match-date">2026.</p>
+
+        <div class="set-board">
+          <div class="set-team">
+            <strong id="set-team-a">Team A</strong>
+            <div class="set-marks" id="team-a-marks"></div>
+            <span id="team-a-record">-</span>
+          </div>
+          <div class="set-score">
+            <button class="inline-edit set-score-button" id="score-a" type="button" data-result-edit="scoreA">0</button>
+            <button class="inline-edit set-score-button" id="score-b" type="button" data-result-edit="scoreB">0</button>
+            <span>결과</span>
+          </div>
+          <div class="set-team">
+            <strong id="set-team-b">Team B</strong>
+            <div class="set-marks" id="team-b-marks"></div>
+            <span id="team-b-record">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="prediction-panel" aria-labelledby="prediction-title">
+        <div class="prediction-head">
+          <p class="eyebrow">Swiss Stage</p>
+          <h2 id="prediction-title">시청자 승부 예측</h2>
+        </div>
+        <div class="prediction-board" id="prediction-board"></div>
+      </section>
+
+      <section class="veto-board" aria-labelledby="veto-title">
+        <div class="veto-heading">
+          <h2 id="veto-title">맵 밴픽</h2>
+        </div>
+        <div class="veto-grid" id="veto-grid"></div>
+      </section>
+
+      <section class="map-report-section" aria-labelledby="map-report-title">
+        <div class="section-heading">
+          <p class="eyebrow">맵 상세</p>
+          <h2 id="map-report-title">맵별 결과</h2>
+        </div>
+        <div class="map-report-grid" id="map-report-grid"></div>
+      </section>
+    </main>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const params = new URLSearchParams(window.location.search);
+      const fromKey  = params.get("from")  || "swiss";
+      const group    = params.get("group") || "r1";
+      const idx      = parseInt(params.get("idx") || "0");
+
+      /* ── 대회 컨텍스트 ─────────────────────────────────── */
+      const tournament = params.get("tournament") || params.get("t") || "santiago";
+
+      /* ── 뒤로가기 링크 ─────────────────────────────────── */
+      const fromMap = {
+        swiss:    { href: `./masters-${tournament}-swiss.html`,    label: "Swiss Stage" },
+        playoffs: { href: `./masters-${tournament}-playoffs.html`, label: "PlayOff" },
+      };
+      const fromInfo = fromMap[fromKey] || fromMap.swiss;
+      const backLink = document.getElementById("back-link");
+      backLink.href = fromInfo.href;
+      backLink.textContent = fromInfo.label;
+      const swissStorageKey = tournament === "london"
+        ? "masters_london_swiss"
+        : "masters_santiago_swiss";
+      const matchId = params.get("match") || null;
+      const isGF = fromKey === "playoffs" && matchId === "gf";
+      const matchKeyPrefix = fromKey === "playoffs" && matchId
+        ? `masters_${tournament}_playoffs_${matchId}`
+        : `masters_${tournament}_${fromKey}_${group}_${idx}`;
+
+      /* ── 팀 데이터 (전 리전) ────────────────────────────── */
+      const TEAM_DATA = {
+        "Paper Rex":          { code: "PRX",  logo: "./assets/teams/prx.svg",  color: "#8c52ff" },
+        "Gen.G":              { code: "GEN",  logo: "./assets/teams/gen.png",  color: "#d2b985" },
+        "Kiwoom DRX":         { code: "DRX",  logo: "./assets/teams/krx.svg",  color: "#1f2f5e" },
+        "Rex Regum Qeon":     { code: "RRQ",  logo: "./assets/teams/rrq.png",  color: "#ffa100" },
+        "T1":                 { code: "T1",   logo: "./assets/teams/t1.png",   color: "#ec1b24" },
+        "FULL SENSE":         { code: "FS",   logo: "./assets/teams/fs.svg",   color: "#ff751f" },
+        "Global Esports":     { code: "GE",   logo: "./assets/teams/ge.webp",  color: "linear-gradient(135deg, #1c4891, #e12c30)" },
+        "Team Secret":        { code: "TS",   logo: "./assets/teams/ts.svg",   color: "#000000" },
+        "ZETA DIVISION":      { code: "ZETA", logo: "./assets/teams/zeta.png", color: "#15b24a" },
+        "DetonatioN FocusMe": { code: "DFM",  logo: "./assets/teams/dfm.svg",  color: "#2b53ff" },
+        "Nongshim RedForce":  { code: "NS",   logo: "./assets/teams/ns.svg",   color: "#e2012d" },
+        "VARREL":             { code: "VRL",  logo: "./assets/teams/vl.svg",   color: "#3ee1ac" },
+        "Sentinels":          { code: "SEN",  logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg", color: "#CE0037" },
+        "G2 Esports":         { code: "G2",   logo: "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg", color: "#8400CB" },
+        "NRG":                { code: "NRG",  logo: "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg", color: "#F63D0A" },
+        "100 Thieves":        { code: "100T", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png", color: "linear-gradient(135deg, #EA3031, #000000)" },
+        "Cloud9":             { code: "C9",   logo: "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp", color: "#03AAF5" },
+        "MIBR":               { code: "MIBR", logo: "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg", color: "#0EC8DB" },
+        "LOUD":               { code: "LOUD", logo: "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg", color: "#13FF00" },
+        "FURIA":              { code: "FUR",  logo: "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg", color: "#000000" },
+        "KRÜ Esports":        { code: "KRÜ",  logo: "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg", color: "#FF319C" },
+        "Leviatán":           { code: "LEV",  logo: "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618", color: "#6BA6DE" },
+        "Evil Geniuses":      { code: "EG",   logo: "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg", color: "#2E268D" },
+        "ENVY":               { code: "ENVY", logo: "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg", color: "#3727F1" },
+        "All Gamers":         { code: "AG",   logo: "https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp", color: "#d6323c" },
+        "JD Mall JDG Esports":{ code: "JDG",  logo: "https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg", color: "#da202d" },
+        "TYLOO":              { code: "TYL",  logo: "https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg", color: "#cc3a32" },
+        "Wuxi Titan Esports Club":         { code: "TEC",  logo: "https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg", color: "#f7553e" },
+        "Guangzhou Huadu Bilibili Gaming": { code: "BLG",  logo: "https://dpm.lol/esport/teams/BLG.webp", color: "#24c8e8" },
+        "FunPlus Phoenix":    { code: "FPX",  logo: "https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg", color: "#fb1000" },
+        "Xi Lai Gaming":      { code: "XLG",  logo: "https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg", color: "linear-gradient(135deg, #206189, #367a8f)" },
+        "EDward Gaming":      { code: "EDG",  logo: "https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png", color: "#442a1e" },
+        "Dragon Ranger Gaming":{ code: "DRG", logo: "https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp", color: "#4b78ff" },
+        "Trace Esports":      { code: "TE",   logo: "https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg", color: "#5a80c5" },
+        "Nova Esports":       { code: "NOVA", logo: "https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp", color: "#b262d7" },
+        "Wolves Esports":     { code: "WOL",  logo: "https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp", color: "#fbb900" },
+        "Gentle Mates":       { code: "M8",   logo: "./assets/teams/gm.png",  color: "#ff72f9" },
+        "Team Liquid":        { code: "TL",   logo: "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp", color: "#142e60" },
+        "Team Heretics":      { code: "TH",   logo: "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg", color: "#dca710" },
+        "NAVI":               { code: "NAVI", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png", color: "linear-gradient(135deg, #fdf135, #000000)" },
+        "Karmine Corp":       { code: "KC",   logo: "./assets/teams/kc.png",  color: "#01ccff" },
+        "FUT Esports":        { code: "FUT",  logo: "https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg", color: "#21efc4" },
+        "BBL Esports":        { code: "BBL",  logo: "https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg", color: "#cb9803" },
+        "Fnatic":             { code: "FNC",  logo: "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg", color: "#ff5900" },
+        "Team Vitality":      { code: "VIT",  logo: "https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg", color: "#f8ff04" },
+        "GIANTX":             { code: "GX",   logo: "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg", color: "#28b8ff" },
+        "Eternal Fire":       { code: "EF",   logo: "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg", color: "#9c8d69" },
+        "PCIFIC Esports":     { code: "PCFC", logo: "https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg", color: "#41c0dc" },
+      };
+
+      const teamRosters = {
+        // Pacific
+        "DetonatioN FocusMe": ["Meiy", "SSeeS", "yatsuka", "Caedye", "Akame"],
+        "Global Esports":     ["PatMen", "UdoTan", "Kr1stal", "xavi8k", "Autumn"],
+        "Kiwoom DRX":         ["MaKo", "Hermes", "yong", "free1ng", "HYUNMIN", "BeYN", "Flicker"],
+        "Nongshim RedForce":  ["Rb", "Xross", "Francis", "Dambi", "Ivy"],
+        "Paper Rex":          ["Jinggg", "invy", "f0rsakeN", "d4v41", "something"],
+        "Rex Regum Qeon":     ["crazyguy", "Monyet", "xffero", "Jemkin", "Kushy"],
+        "Team Secret":        ["JessieVash", "kellyS", "Sylvan", "BerserX", "Rimuru", "Zeus"],
+        "ZETA DIVISION":      ["eKo", "Absol", "SyouTa", "SugarZ3ro", "Xdll"],
+        "FULL SENSE":         ["Crws", "Killua", "primmie", "JitBoyS", "Leviathan", "seph1roth", "thyy"],
+        "Gen.G":              ["Lakia", "Ash", "Karon", "t3xture", "KiTae", "Xiesta", "ZynX"],
+        "VARREL":             ["C1ndeR", "Klaus", "XuNa", "oonzmlp", "Zexy"],
+        "T1":                 ["stax", "BuZz", "Munchkin", "Meteor", "iZu"],
+        // Americas
+        "Sentinels":          ["johnqt", "Reduxx", "Jerrwin", "cortezia", "JonahP"],
+        "G2 Esports":         ["valyn", "jawgemo", "BABYBAY", "trent", "leaf"],
+        "NRG":                ["Ethan", "keiko", "brawk", "mada", "skuba"],
+        "100 Thieves":        ["vora", "Cryocells", "Asuna", "Timotino", "bang"],
+        "Cloud9":             ["Xeppa", "v1c", "Zellsis", "penny", "OXY", "Jackk"],
+        "MIBR":               ["zekken", "tex", "Mazino", "Verno", "aspas"],
+        "LOUD":               ["lukxo", "Darker", "Virtyy", "erde", "cauanzin", "pANcada"],
+        "FURIA":              ["artzin", "nerve", "eeiu", "koalanoob", "alym"],
+        "KRÜ Esports":        ["saadhak", "mwzera", "silentzz", "Less", "Dantedeu5"],
+        "Leviatán":           ["kiNgg", "spike", "blowz", "Neon", "Sato"],
+        "Evil Geniuses":      ["C0M", "supamen", "bao", "Okeanos", "dgzin"],
+        "ENVY":               ["P0PPIN", "Eggsterr", "Demon1", "Rossy", "keznit", "ion", "Inspire"],
+        // EMEA
+        "Gentle Mates":       ["starxo", "bipo", "marteen", "GLYPH", "Minny"],
+        "Team Liquid":        ["nAts", "purp0", "wayne", "MiniBoo", "kamo"],
+        "Team Heretics":      ["Boo", "koshmaras", "Wo0t", "RieNs", "benjyfishy"],
+        "NAVI":               ["Filu", "chloric", "ExiT", "Ruxic", "hiro", "ComeBack"],
+        "Karmine Corp":       ["dos9", "LewN", "Avez", "SUYGETSU", "N4RRATE"],
+        "FUT Esports":        ["MrFaliN", "xeus", "yetujey", "KROSTALY", "baha"],
+        "BBL Esports":        ["Crewen", "Lar0k", "Loita", "Rosé", "lovers rock"],
+        "Fnatic":             ["crashies", "Boaster", "kaajak", "Cyv0ph", "Veqaj", "Alfajer"],
+        "Team Vitality":      ["Jamppi", "PROFEK", "Derke", "Chronicle", "Sayonara"],
+        "GIANTX":             ["Cloud", "grubinho", "westside", "Flickless", "ara"],
+        "Eternal Fire":       ["nekky", "Izzy", "audaz", "Favian", "echo"],
+        "PCIFIC Esports":     ["qpert", "al0rante", "cNed", "NINJA", "seven"],
+        // CN
+        "All Gamers":                     ["Septem7", "Shr1mp", "Youze", "K1ra", "f4ngeer", "iamgrq", "Au1"],
+        "JD Mall JDG Esports":            ["stew", "jkuro", "zhe", "Yuicaw", "coconut"],
+        "TYLOO":                          ["splash", "Scales", "Erv", "sword9", "slowly"],
+        "Wuxi Titan Esports Club":        ["Haodong", "lucas", "Spitfires", "Dynamite", "Coco"],
+        "Guangzhou Huadu Bilibili Gaming":["whyz", "rushia", "nephh", "yilai", "Knight", "bud", "Levius"],
+        "FunPlus Phoenix":                ["BerLIN", "AAAAY", "Ben1Ley", "KovaQ", "Setrod", "XII"],
+        "Xi Lai Gaming":                  ["WsLeo", "Lysoar", "NoMan", "Rarga", "happywei"],
+        "EDward Gaming":                  ["nobody", "ZmjjKK", "CHICHOO", "Smoggy", "Jieni7", "zjc", "cb"],
+        "Dragon Ranger Gaming":           ["Nicc", "Flex1n", "Life", "vo0kashu", "Akeman", "SpiritZ1"],
+        "Trace Esports":                  ["LuoK1ng", "Kai", "Xlele", "Abo", "Viva", "deLb", "FengF"],
+        "Nova Esports":                   ["qiutiaN", "kodeth", "OBONE", "Ezeir", "GREEN", "GuanG", "swagzor"],
+        "Wolves Esports":                 ["SiuFatBB", "glacier", "jowa", "yosemite", "Spring"],
+      };
+      function getTeamRoster(teamName) {
+        try {
+          const s = localStorage.getItem("vct_roster_masters_" + teamName);
+          if (s) return JSON.parse(s);
+        } catch (e) {}
+        return teamRosters[teamName] || [];
+      }
+
+      function teamInfo(name) { return TEAM_DATA[name] || { code: name?.slice(0,3) || "TBD", logo: "", color: "#444" }; }
+      function teamColor(name) { return teamInfo(name).color; }
+      function teamCode(name)  { return teamInfo(name).code; }
+      function teamLogo(name)  { return teamInfo(name).logo; }
+
+      const B = "https://static.wikia.nocookie.net/valorant/images";
+      const teamCapsules = {
+        // Pacific
+        "Paper Rex":          `${B}/3/37/Banner_VCT26_x_PRX.png/revision/latest`,
+        "Gen.G":              `${B}/9/92/Banner_VCT26_x_GEN.png/revision/latest`,
+        "Kiwoom DRX":         `${B}/a/a7/Banner_VCT26_x_DRX.png/revision/latest`,
+        "Rex Regum Qeon":     `${B}/0/02/Banner_VCT26_x_RRQ.png/revision/latest`,
+        "T1":                 `${B}/8/8e/Banner_VCT26_x_T1.png/revision/latest`,
+        "FULL SENSE":         `${B}/5/54/Banner_VCT26_x_FS.png/revision/latest`,
+        "Global Esports":     `${B}/6/6c/Banner_VCT26_x_GE.png/revision/latest`,
+        "Team Secret":        `${B}/8/8b/Banner_VCT26_x_TS.png/revision/latest`,
+        "ZETA DIVISION":      `${B}/f/f2/Banner_VCT26_x_ZETA.png/revision/latest`,
+        "DetonatioN FocusMe": `${B}/5/57/Banner_VCT26_x_DFM.png/revision/latest`,
+        "Nongshim RedForce":  `${B}/7/70/Banner_VCT26_x_NS.png/revision/latest`,
+        "VARREL":             `${B}/f/f9/Banner_VCT26_x_VRL.png/revision/latest`,
+        // Americas
+        "Sentinels":          `${B}/e/e4/Banner_VCT26_x_SEN.png/revision/latest`,
+        "G2 Esports":         `${B}/d/dd/Banner_VCT26_x_G2.png/revision/latest`,
+        "NRG":                `${B}/8/89/Banner_VCT26_x_NRG.png/revision/latest`,
+        "100 Thieves":        `${B}/5/5c/Banner_VCT26_x_100T.png/revision/latest`,
+        "Cloud9":             `${B}/4/4e/Banner_VCT26_x_C9.png/revision/latest`,
+        "MIBR":               `${B}/3/3a/Banner_VCT26_x_MIBR.png/revision/latest`,
+        "LOUD":               `${B}/1/1c/Banner_VCT26_x_LOUD.png/revision/latest`,
+        "FURIA":              `${B}/f/fa/Banner_VCT26_x_FUR.png/revision/latest`,
+        "KRÜ Esports":        `${B}/6/6a/Banner_VCT26_x_KRU.png/revision/latest`,
+        "Leviatán":           `${B}/9/94/Banner_VCT26_x_LEV.png/revision/latest`,
+        "Evil Geniuses":      `${B}/8/8d/Banner_VCT26_x_EG.png/revision/latest`,
+        "ENVY":               `${B}/5/54/Banner_VCT26_x_ENVY.png/revision/latest`,
+        // EMEA
+        "Gentle Mates":       `${B}/d/d1/Banner_VCT26_x_M8.png/revision/latest`,
+        "Team Liquid":        `${B}/1/1a/Banner_VCT26_x_TL.png/revision/latest`,
+        "Team Heretics":      `${B}/f/f1/Banner_VCT26_x_TH.png/revision/latest`,
+        "NAVI":               `${B}/c/cf/Banner_VCT26_x_NAVI.png/revision/latest`,
+        "Karmine Corp":       `${B}/6/62/Banner_VCT26_x_KC.png/revision/latest`,
+        "FUT Esports":        `${B}/0/0c/Banner_VCT26_x_FUT.png/revision/latest`,
+        "BBL Esports":        `${B}/9/98/Banner_VCT26_x_BBL.png/revision/latest`,
+        "Fnatic":             `${B}/6/60/Banner_VCT26_x_FNC.png/revision/latest`,
+        "Team Vitality":      `${B}/5/58/Banner_VCT26_x_VIT.png/revision/latest`,
+        "GIANTX":             `${B}/0/04/Banner_VCT26_x_GX.png/revision/latest`,
+        "Eternal Fire":       "https://static.wikia.nocookie.net/valorant/images/f/fe/Bundle_VCT26_Team_Capsules.png/revision/latest",
+        "PCIFIC Esports":     `${B}/3/34/Banner_VCT26_x_PCFC.png/revision/latest`,
+        // CN
+        "All Gamers":                    `${B}/c/c8/Banner_VCT26_x_AG.png/revision/latest`,
+        "Guangzhou Huadu Bilibili Gaming": `${B}/4/47/Banner_VCT26_x_BLG.png/revision/latest`,
+        "Dragon Ranger Gaming":          `${B}/c/cb/Banner_VCT26_x_DRG.png/revision/latest`,
+        "EDward Gaming":                 `${B}/b/b8/Banner_VCT26_x_EDG.png/revision/latest`,
+        "FunPlus Phoenix":               `${B}/2/20/Banner_VCT26_x_FPX.png/revision/latest`,
+        "JD Mall JDG Esports":           `${B}/f/f2/Banner_VCT26_x_JDG.png/revision/latest`,
+        "Nova Esports":                  `${B}/3/36/Banner_VCT26_x_NOVA.png/revision/latest`,
+        "Wuxi Titan Esports Club":       `${B}/1/10/Banner_VCT26_x_TEC.png/revision/latest`,
+        "Trace Esports":                 `${B}/7/7d/Banner_VCT26_x_TE.png/revision/latest`,
+        "TYLOO":                         `${B}/9/94/Banner_VCT26_x_TYL.png/revision/latest`,
+        "Wolves Esports":                `${B}/1/18/Banner_VCT26_x_WOL.png/revision/latest`,
+        "Xi Lai Gaming":                 `${B}/7/7e/Banner_VCT26_x_XLG.png/revision/latest`,
+      };
+      function teamCapsuleSrc(name) { return teamCapsules[name] || ""; }
+      function teamCapsuleClass(name) {
+        if (name === "Eternal Fire") return ' style="object-fit:cover;object-position:center;"';
+        return "";
+      }
+      function colorExtract(style, side) {
+        const colors = String(style).match(/#[0-9a-fA-F]{3,8}/g);
+        if (colors?.length) return side === "right" ? colors[colors.length - 1] : colors[0];
+        return style;
+      }
+
+      /* ── Storage에서 팀 읽기 ────────────────────────────── */
+      let teamA = "Team A", teamB = "Team B", seriesScoreA = "0", seriesScoreB = "0";
+      let matchTitle = "Match";
+
+      if (fromKey === "playoffs") {
+        const matchId = params.get("match") || "m1";
+        const playoffKey = tournament === "london"
+          ? "masters_london_playoffs"
+          : "masters_santiago_playoffs";
+        try {
+          const pData = JSON.parse(localStorage.getItem(playoffKey) || "{}");
+
+          /* LINKS 체인으로 자동전파 팀 계산 */
+          const LINKS = {
+            m7:  [{ m:"m2", r:"w" }, { m:"m4", r:"w" }],
+            m8:  [{ m:"m1", r:"w" }, { m:"m3", r:"w" }],
+            m11: [{ m:"m7", r:"w" }, { m:"m8", r:"w" }],
+            m5:  [{ m:"m1", r:"l" }, { m:"m3", r:"l" }],
+            m6:  [{ m:"m2", r:"l" }, { m:"m4", r:"l" }],
+            m9:  [{ m:"m7", r:"l" }, { m:"m5", r:"w" }],
+            m10: [{ m:"m8", r:"l" }, { m:"m6", r:"w" }],
+            m12: [{ m:"m10",r:"w" }, { m:"m9", r:"w" }],
+            m13: [{ m:"m11",r:"l" }, { m:"m12",r:"w" }],
+            gf:  [{ m:"m11",r:"w" }, { m:"m13",r:"w" }],
+          };
+          const PROCESS_ORDER = ["m1","m2","m3","m4","m5","m6","m7","m8","m9","m10","m11","m12","m13","gf"];
+          const states = {};
+          PROCESS_ORDER.forEach(mid => {
+            const stored = pData[mid] || {};
+            let a = stored.a || "", b = stored.b || "";
+            const links = LINKS[mid];
+            if (links) {
+              const [la, lb] = links;
+              if (!a && la) { const prev = states[la.m]; if (prev) a = la.r === "w" ? prev.winner : prev.loser; }
+              if (!b && lb) { const prev = states[lb.m]; if (prev) b = lb.r === "w" ? prev.winner : prev.loser; }
+            }
+            const sa = stored.sa ?? null, sb = stored.sb ?? null;
+            const hasResult = sa !== null && sb !== null && sa !== sb && a && b;
+            states[mid] = {
+              a, b, sa, sb,
+              winner: hasResult ? (sa > sb ? a : b) : "",
+              loser:  hasResult ? (sa > sb ? b : a) : "",
+            };
+          });
+
+          const m = states[matchId] || {};
+          if (m.a) teamA = m.a;
+          if (m.b) teamB = m.b;
+          if (m.sa !== null && m.sa !== undefined) seriesScoreA = String(m.sa);
+          if (m.sb !== null && m.sb !== undefined) seriesScoreB = String(m.sb);
+        } catch {}
+        const MATCH_LABELS = {
+          m1:"Match 1",m2:"Match 2",m3:"Match 3",m4:"Match 4",
+          m5:"Match 5",m6:"Match 6",m7:"Match 7",m8:"Match 8",m9:"Match 9",
+          m10:"Match 10",m11:"Match 11",m12:"Match 12",m13:"Match 13",gf:"Grand Finals"
+        };
+        matchTitle = `PlayOff · ${MATCH_LABELS[matchId] || matchId}`;
+      } else {
+        try {
+          const swissData = JSON.parse(localStorage.getItem(swissStorageKey) || "{}");
+          const groupMatches = swissData[group] || [];
+          const m = groupMatches[idx] || {};
+          if (m.home) teamA = m.home;
+          if (m.away) teamB = m.away;
+          if (m.hs !== null && m.hs !== undefined) seriesScoreA = String(m.hs);
+          if (m.as !== null && m.as !== undefined) seriesScoreB = String(m.as);
+        } catch {}
+        const groupLabels = { r1: "0-0 Round", r2w: "1-0 Round", r2l: "0-1 Round", r3: "1-1 Round" };
+        matchTitle = `Swiss Stage · ${groupLabels[group] || group} · ${idx + 1}경기`;
+      }
+
+      const isUpcoming = seriesScoreA === "0" && seriesScoreB === "0";
+
+      /* ── 요원 데이터 ────────────────────────────────────── */
+      const agents = ["제트","네온","게코","데드록","레이나","레이즈","믹스","바이스","바이퍼","브리치","브림스톤","비토","사이퍼","세이지","소바","스카이","아스트라","아이소","오멘","요루","웨이레이","체임버","케이오","클로브","킬조이","테호","페이드","피닉스","하버"];
+      const agentAliases = { Astra:"아스트라",Breach:"브리치",Brimstone:"브림스톤",Chamber:"체임버",Clove:"클로브",Cypher:"사이퍼",Deadlock:"데드록",Fade:"페이드",Gekko:"게코",Harbor:"하버",Iso:"아이소",Jett:"제트","KAY/O":"케이오",Killjoy:"킬조이",Neon:"네온",Omen:"오멘",Phoenix:"피닉스",Raze:"레이즈",Reyna:"레이나",Sage:"세이지",Skye:"스카이",Sova:"소바",Tejo:"테호",Viper:"바이퍼",Vyse:"바이스",Yoru:"요루" };
+      const agentImages = {
+        게코:"https://c-valorant-api.op.gg/Assets/Characters/E370FA57-4757-3604-3648-499E1F642D3F_small.png",
+        네온:"https://i.namu.wiki/i/4ogqg4lB9_G5JKxp145jlSjbzSxRhhXDpUJeoMqSuUnkHrNsHUNj969wyGMvKuYhkd-gDucOmRVlGYFBdHyU2w.webp",
+        데드록:"https://i.namu.wiki/i/7-QoPRINetjBCUblJjq6oPK_4HHAtH10nsD5vATNG3hwqMxCLRa0GJTZOM_us3WvSHK91b965Eo7VoF7hXEpew.webp",
+        레이나:"https://i.namu.wiki/i/THZZ8MlhetJzmWZNYTsHi69SPcjCnuQwkbgkHoM8SF7cbgXpvNg2gXSlEpPec_SXHX08Y3gDP2llILTFdRRbdQ.webp",
+        레이즈:"https://i.namu.wiki/i/14BBGZHNg2x0JYMy6x87Oo2Qlg3jp7GqxhMhGFJ5uYg2vspQXtK7vxJpcak1uFZ_k9vPr6znt6KJcihHw3L_bg.webp",
+        믹스:"https://i.namu.wiki/i/u_CwGnSZJSLW7tsqGYzZZ9VqPM8vXa4tmmbLElugjV5pOZaoZLrHyBvoWk4mCMtLZGf3CorG6g_N12ZrWjLIPg.webp",
+        바이스:"https://i.namu.wiki/i/RoVLjmYPHlDcLzy3QwkUOV4MsxdnKFAQAUY_s6H8nB4N_RStAD_TQlSW0RNpkRuCgmY24qQPICqu4fiCVApKcg.webp",
+        바이퍼:"https://i.namu.wiki/i/Vqp-AY0l-Xe8qK7Ef4FVmjYnOQ99Gj0M1ozbDZjmxibcEJocsbDGUDtEr4FNsTpTq_SyjjWVdJxHWOYgAxywew.webp",
+        브리치:"https://i.namu.wiki/i/situ_MvKaWMojZasDwAzJ2jN-5Rp__8FRbWxmFuBjDfvVfK0xZ2ER_9fYNluAsUd_h5cFYkufQSuTNH_DKVuJQ.webp",
+        브림스톤:"https://i.namu.wiki/i/UvL7SmnIwxyZuVEHFnHlwPpMTQlD0RhmAlm-gIfTyctIrb3Vnmor4A_nRiKCQlYMxIxi7G73NITfwQIt27Xvzw.webp",
+        비토:"https://i.namu.wiki/i/k7MZL2YWWu7DT9fcrySpYk2HioLYi80nJjgYHB2l24XiupY3Oebneq9aMJIXe7UqAL9sMd51Z7m_3hZOeSx7jQ.webp",
+        사이퍼:"https://i.namu.wiki/i/-XPO1Vou13Z8Feqn27wFFqHLg9Olt4vEAt9VB8b8Gfwx7MZugISCbWmekrWjnaI5PONSHtu0zZitKXUb8jZI9w.webp",
+        세이지:"https://i.namu.wiki/i/jqodeZWsC3MyJzJ8DwABim3K0uuZ37PgksNux_GREfl65HoYrX0L2XIs4cTdm0cpwP7Db1z73YnbpHMctb6hiQ.webp",
+        소바:"https://c-valorant-api.op.gg/Assets/Characters/320B2A48-4D9B-A075-30F1-1F93A9B638FA_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+        스카이:"https://i.namu.wiki/i/GfJ7jOzMvNyDGYYCGcmB69dMe2StOUhtsS1jVJzZ3Ul_vht-RwymHwQm2znxrdKGOgnOzxq66ygZupY2bwYetg.webp",
+        아스트라:"https://c-valorant-api.op.gg/Assets/Characters/41FB69C1-4189-7B37-F117-BCAF1E96F1BF_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+        아이소:"https://i.namu.wiki/i/JrF8spBoOI0_cV6S3URHYZ9g2EpLqbugUcxNkW6Vbp60Ig6FZdXDDLNisS7suS92OrcRxH3muHmBDrhuAtrIsQ.webp",
+        오멘:"https://i.namu.wiki/i/8LpnTIlczZAC81pGY3gcZeLs_6e8C-s43OZR7o2F6JucSs60HPDxnQ_vs4Fk_8HDq1VlGIK8WvjJhZDdQmsfwQ.webp",
+        요루:"https://i.namu.wiki/i/O8_5nw3EgYWhLraoQ5qj2ooaTQGqhTNhVou0an9A2A4o5Uy7SSr3O8C7nwmub1jzssrRziii5qcwjq8-ACZwkA.webp",
+        웨이레이:"https://i.namu.wiki/i/Kj83E8_P6KTeg8NR0oXc5HiK9bo8_nnHymVoTvrwv8XgUhKrQH8Mf-mCAOaOYBYYbY3NtxbOtnU4rioCjjIafg.webp",
+        제트:"https://i.namu.wiki/i/_ScoZkw_dp5eGn66y8GXGqzGRHAUQiZD-AEGqpt0FQTpO3sLAdALfP37rzLppNRUFUK505MkSXf31Es-p2hE0g.webp",
+        체임버:"https://i.namu.wiki/i/kH9bgltG2hlwvNGUr64utZLO7V03cYI0itwIpVwR0H3GLeQ0v1lWeSgZr3QnLzJLaq5OChM9jZ20vSEO-UXysA.webp",
+        케이오:"https://valorantinfo.com/images/kr/kayo_valorant_icon_3589.webp",
+        클로브:"https://i.namu.wiki/i/l-OTVsdNYqe6PE3GsUHe4gzw7YbMcLtX831Y7ofn0Ta5gyMdFNqFJp8VVSsoqocBJMit8HFGz_If4e8cnQZbnw.webp",
+        킬조이:"https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png",
+        테호:"https://i.namu.wiki/i/DczhNjwRqUiOwhoL-DPhCm9EzpbQU3JkqmZzbwz3DF_nkuyFNtbB4sxAaY_bFm3D0h8ZuMre85zAwX7C50UVgA.webp",
+        페이드:"https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png",
+        피닉스:"https://valorantinfo.com/images/kr/phoenix_valorant_icon_3596.webp",
+        하버:"https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
+      };
+
+      /* ── 맵 데이터 ──────────────────────────────────────── */
+      const mapKo = { Ascent:"어센트",Abyss:"어비스",Bind:"바인드",Breeze:"브리즈",Corrode:"코로드",Fracture:"프랙처",Haven:"헤이븐",Icebox:"아이스박스",Lotus:"로터스",Pearl:"펄",Split:"스플릿",Sunset:"선셋" };
+      const mapImages = {
+        Abyss:"https://cdn.gametoc.co.kr/news/photo/202407/82622_252333_233.jpg",
+        Ascent:"https://c-valorant-api.op.gg/Assets/Maps/7EAECC1B-4337-BBF6-6AB9-04B8F06B3319_splash.png?image=q_auto:good,f_webp&v=1776341444",
+        Bind:"https://c-valorant-api.op.gg/Assets/Maps/2C9D57EC-4431-9C5E-2939-8F9EF6DD5CBA_splash.png?image=q_auto:good,f_webp&v=1776341444",
+        Breeze:"https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL",
+        Corrode:"https://imguscdn.gamespress.com/cdn/files/RiotGames/2025/06/162048-b9066559/Corrode_AtkSpawn_02.png?w=750&mode=max&otf=y&quality=90&format=png&bgcolor=transparent&sky=0d3b51cd617ed54f196ded7a2c1536385363da533268f782df0af6c7ce386a92",
+        Fracture:"https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp",
+        Haven:"https://preview.redd.it/haven-is-unplayable-v0-byso61a598061.png?width=1920&format=png&auto=webp&s=7217f389892a41efefc7b5a95f6a58d5fb493e32",
+        Icebox:"https://i.namu.wiki/i/peG6xUXfvFn1BWUDgMXsU_7iL6e7bvVPuxvvPKAc4GSA_wI4sII4K_lsi7Ys_-Gv3rvHCcAPJ3b42Pop3pq5ag.webp",
+        Lotus:"https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/df5c6e7629733f801b7059f7d0ed8d286cbdbc1e-1920x1080.jpg?accountingTag=VAL",
+        Pearl:"https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center",
+        Split:"https://i.namu.wiki/i/-XO2LXy5LNAajpm4M8cT7kzmljZbJVf7q5d1c1fuhCJpEiMGs7DkKGxaC68Yx0h6hSmqjm-QJ_aAky82A2cFWA.webp",
+        Sunset:"https://c-valorant-api.op.gg/Assets/Maps/92584FBE-486A-B1B2-9FAA-39B0F486B498_splash.png?image=q_auto:good,f_webp&v=1776341444",
+      };
+      const mapPositions = { Abyss:"center 58%",Ascent:"center 55%",Bind:"center 54%",Breeze:"center 72%",Corrode:"center 55%",Fracture:"center 58%",Haven:"center 54%",Icebox:"center 56%",Lotus:"center 58%",Pearl:"center 58%",Split:"center 58%",Sunset:"center 58%" };
+      const mapNames = ["Pearl","Fracture","Breeze","Split","Lotus","Haven","Bind","Ascent","Icebox","Sunset","Corrode","Abyss"];
+
+      function mapBgStyle(mapName) {
+        return `--map-image: url('${mapImages[mapName]||""}'); --map-position: ${mapPositions[mapName]||"center"}`;
+      }
+      function agentLabel(a) { return agentAliases[a] || a; }
+      function agentImage(a) { return agentImages[agentLabel(a)] || ""; }
+
+      /* ── 페이지 초기화 ─────────────────────────────────── */
+      document.title = `${teamA} vs ${teamB}`;
+
+      function renderHeroLogo(elId, name) {
+        const el = document.getElementById(elId);
+        const logo = teamLogo(name);
+        el.innerHTML = logo ? `<img src="${logo}" alt="${name}" />` : `<span>${teamCode(name)}</span>`;
+      }
+
+      document.getElementById("team-a-name").textContent = teamA;
+      document.getElementById("team-b-name").textContent = teamB;
+      document.getElementById("team-a-name").style.background = teamColor(teamA);
+      document.getElementById("team-b-name").style.background = teamColor(teamB);
+      renderHeroLogo("team-a-logo", teamA);
+      renderHeroLogo("team-b-logo", teamB);
+
+      function hexToRgba(hex, alpha) {
+        let h = String(hex).replace("#", "");
+        if (h.length === 3) h = h.split("").map(c => c + c).join("");
+        const r = parseInt(h.slice(0,2), 16);
+        const g = parseInt(h.slice(2,4), 16);
+        const b = parseInt(h.slice(4,6), 16);
+        if (isNaN(r)) return `rgba(101,30,255,${alpha})`;
+        return `rgba(${r},${g},${b},${alpha})`;
+      }
+      const colorA = colorExtract(teamColor(teamA), "left");
+      const colorB = colorExtract(teamColor(teamB), "right");
+      document.body.style.setProperty("--team-a-color", colorA);
+      document.body.style.setProperty("--team-b-color", colorB);
+      document.getElementById("team-a-logo").style.background =
+        `radial-gradient(circle at 50% 40%, ${hexToRgba(colorA, 0.18)}, transparent 38%), #fff`;
+      document.getElementById("team-b-logo").style.background =
+        `radial-gradient(circle at 50% 40%, ${hexToRgba(colorB, 0.18)}, transparent 38%), #fff`;
+
+      document.getElementById("set-team-a").textContent = teamA;
+      document.getElementById("set-team-b").textContent = teamB;
+      document.getElementById("set-team-a").style.background = teamColor(teamA);
+      document.getElementById("set-team-b").style.background = teamColor(teamB);
+      document.getElementById("match-title").textContent = matchTitle;
+
+      /* ── 결과 스테이트 ─────────────────────────────────── */
+      const resultKey = `result:${matchKeyPrefix}`;
+      const predictionKey = `prediction:${matchKeyPrefix}`;
+
+      function defaultResultState() {
+        return {
+          date: "2026.",
+          scoreA: seriesScoreA,
+          scoreB: seriesScoreB,
+          marksA: ["","",""],
+          marksB: ["","",""],
+          recordA: "0승 0패",
+          recordB: "0승 0패",
+        };
+      }
+
+      function loadResultState() {
+        const d = defaultResultState();
+        try {
+          const s = JSON.parse(localStorage.getItem(resultKey) || "{}");
+          return { ...d, ...s, marksA: Array.isArray(s.marksA) ? s.marksA : d.marksA, marksB: Array.isArray(s.marksB) ? s.marksB : d.marksB };
+        } catch { return d; }
+      }
+      function saveResultState() { localStorage.setItem(resultKey, JSON.stringify(resultState)); }
+
+      let resultState = loadResultState();
+
+      function renderMarks(target, marks, side) {
+        target.innerHTML = marks.slice(0,3).map((mark, i) =>
+          `<span><button class="inline-edit mark-edit-button" type="button" data-result-edit="mark" data-side="${side}" data-mark-index="${i}">${mark||""}</button></span>`
+        ).join("");
+      }
+
+      function renderResultBoard() {
+        document.getElementById("match-date").innerHTML =
+          `<button class="inline-edit result-date-button" type="button" data-result-edit="date">${resultState.date}</button>`;
+        document.getElementById("score-a").textContent = resultState.scoreA;
+        document.getElementById("score-b").textContent = resultState.scoreB;
+        document.getElementById("team-a-record").innerHTML =
+          `<button class="inline-edit result-record-button" type="button" data-result-edit="recordA">${resultState.recordA}</button>`;
+        document.getElementById("team-b-record").innerHTML =
+          `<button class="inline-edit result-record-button" type="button" data-result-edit="recordB">${resultState.recordB}</button>`;
+        renderMarks(document.getElementById("team-a-marks"), resultState.marksA, "a");
+        renderMarks(document.getElementById("team-b-marks"), resultState.marksB, "b");
+      }
+
+      function openResultEditor(options) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head">
+              <strong>${options.title}</strong>
+              <button type="button" data-agent-close>닫기</button>
+            </div>
+            ${options.choices
+              ? `<div class="agent-picker-grid result-choice-grid">
+                  ${options.choices.map(c=>`<button type="button" data-value="${c.value}">${c.label}</button>`).join("")}
+                 </div>`
+              : `<form class="value-editor-form">
+                  <input value="${options.value||""}" placeholder="${options.placeholder||"-"}" autofocus />
+                  <button type="submit">적용</button>
+                 </form>`}
+          </div>`;
+        document.body.appendChild(picker);
+        const close = () => picker.remove();
+        const apply = (v) => { options.apply(v); saveResultState(); renderResultBoard(); close(); };
+        picker.addEventListener("click", e => {
+          if (e.target===picker || e.target.dataset.agentClose!==undefined) close();
+          if (e.target.dataset.value!==undefined) apply(e.target.dataset.value);
+        });
+        picker.querySelector("form")?.addEventListener("submit", e => { e.preventDefault(); apply(e.currentTarget.querySelector("input").value.trim()); });
+        picker.querySelector("input")?.focus();
+      }
+
+      function editResultField(trigger) {
+        const field = trigger.dataset.resultEdit;
+        if (field === "mark") {
+          const side = trigger.dataset.side;
+          const i = Number(trigger.dataset.markIndex);
+          const k = side === "a" ? "marksA" : "marksB";
+          openResultEditor({ title:`${i+1}세트 결과`, choices:[{label:"O",value:"O"},{label:"X",value:"X"},{label:"빈칸",value:""}], apply(v){resultState[k][i]=v;} });
+          return;
+        }
+        const labels = { date:"경기 날짜", scoreA:`${teamA} 세트 승`, scoreB:`${teamB} 세트 승`, recordA:`${teamA} 당시 승패`, recordB:`${teamB} 당시 승패` };
+        openResultEditor({ title:labels[field], value:resultState[field], placeholder:field==="date"?"2026. 05.":"-", apply(v){resultState[field]=v||"-";} });
+      }
+
+      document.querySelector(".match-result-panel").addEventListener("click", e => {
+        const t = e.target.closest("[data-result-edit]");
+        if (t) editResultField(t);
+      });
+
+      renderResultBoard();
+
+      /* ── 예측 패널 ─────────────────────────────────────── */
+      function loadPredictionState() {
+        try { return { oddsA:"", oddsB:"", ...JSON.parse(localStorage.getItem(predictionKey)||"{}") }; }
+        catch { return { oddsA:"", oddsB:"" }; }
+      }
+      function savePredictionState() { localStorage.setItem(predictionKey, JSON.stringify(predictionState)); }
+      function parseOdds(v) { const n = Number(String(v||"").replace(",",".")); return Number.isFinite(n)&&n>1?n:null; }
+
+      let predictionState = loadPredictionState();
+
+      function predPct() {
+        const a = parseOdds(predictionState.oddsA), b = parseOdds(predictionState.oddsB);
+        if (!a||!b) return {a:50,b:50,ready:false};
+        const ia=1/a,ib=1/b,pa=Math.round(ia/(ia+ib)*100);
+        return {a:pa,b:100-pa,ready:true};
+      }
+
+      function predLogo(name, side) {
+        const logo = teamLogo(name);
+        if (!logo) return `<span class="prediction-logo-text">${teamCode(name)}</span>`;
+        return `<img class="${side==="b"?"right":""}" src="${logo}" alt="" />`;
+      }
+
+      function renderPredictionBoard() {
+        const p = predPct();
+        const board = document.getElementById("prediction-board");
+        board.style.setProperty("--prediction-a", `${p.a}%`);
+        board.style.setProperty("--prediction-left-color", colorExtract(teamColor(teamA),"left"));
+        board.style.setProperty("--prediction-right-color", colorExtract(teamColor(teamB),"right"));
+        board.innerHTML = `
+          <div class="prediction-side prediction-side-a" style="--team-color:${teamColor(teamA)}">
+            <div class="prediction-logo">${predLogo(teamA,"a")}</div>
+            <strong>${teamA}</strong>
+            <span>${p.ready?`${p.a}%`:"50%"}</span>
+            <button class="inline-edit prediction-odds" type="button" data-odds-side="A">${predictionState.oddsA||"배당률"}</button>
+          </div>
+          <div class="prediction-divider"></div>
+          <div class="prediction-side prediction-side-b" style="--team-color:${teamColor(teamB)}">
+            <div class="prediction-logo">${predLogo(teamB,"b")}</div>
+            <strong>${teamB}</strong>
+            <span>${p.ready?`${p.b}%`:"50%"}</span>
+            <button class="inline-edit prediction-odds" type="button" data-odds-side="B">${predictionState.oddsB||"배당률"}</button>
+          </div>`;
+      }
+
+      function openOddsEditor(side) {
+        document.querySelector(".agent-picker")?.remove();
+        const k = side==="A"?"oddsA":"oddsB";
+        const name = side==="A"?teamA:teamB;
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head"><strong>${name} 배당률</strong><button type="button" data-agent-close>닫기</button></div>
+            <form class="value-editor-form">
+              <input inputmode="decimal" value="${predictionState[k]||""}" placeholder="예: 1.27" autofocus />
+              <button type="submit">적용</button>
+            </form>
+          </div>`;
+        document.body.appendChild(picker);
+        picker.addEventListener("click", e => { if(e.target===picker||e.target.dataset.agentClose!==undefined) picker.remove(); });
+        picker.querySelector("form").addEventListener("submit", e => {
+          e.preventDefault();
+          predictionState[k] = e.currentTarget.querySelector("input").value.trim();
+          savePredictionState(); renderPredictionBoard(); picker.remove();
+        });
+        picker.querySelector("input").focus();
+      }
+
+      document.querySelector(".prediction-panel").addEventListener("click", e => {
+        const t = e.target.closest("[data-odds-side]");
+        if (t) openOddsEditor(t.dataset.oddsSide);
+      });
+
+      renderPredictionBoard();
+
+      /* ── 밴픽 (BO3 고정) ────────────────────────────────── */
+      const vetoKey = `veto:${matchKeyPrefix}`;
+      const teamOptions = [
+        { value:"A", label:`${teamCode(teamA)} (${teamA})` },
+        { value:"B", label:`${teamCode(teamB)} (${teamB})` },
+      ];
+      const vetoSteps = isGF
+        ? [
+            {type:"ban",name:"1맵 밴"},
+            {type:"ban",name:"2맵 밴"},
+            {type:"pick",name:"3맵 선택",mapIndex:0},
+            {type:"pick",name:"4맵 선택",mapIndex:1},
+            {type:"pick",name:"5맵 선택",mapIndex:2},
+            {type:"pick",name:"6맵 선택",mapIndex:3},
+            {type:"decider",name:"7맵 디사이더",mapIndex:4},
+          ]
+        : [
+            {type:"ban",name:"1맵 밴"},{type:"ban",name:"2맵 밴"},
+            {type:"pick",name:"3맵 선택",mapIndex:0},{type:"pick",name:"4맵 선택",mapIndex:1},
+            {type:"ban",name:"5맵 밴"},{type:"ban",name:"6맵 밴"},
+            {type:"decider",name:"7맵 디사이더",mapIndex:2},
+          ];
+
+      function sideLabel(v) { return v==="attack"?"선 공격":"선 수비"; }
+      function teamShortByCode(code) { return code==="A"?teamCode(teamA):teamCode(teamB); }
+      function teamNameByCode(code) { return code==="A"?teamA:teamB; }
+      function stepTeam(i, firstBan) {
+        if (isGF) {
+          const lb = firstBan==="A"?"B":"A";
+          if (i<=1) return firstBan;
+          if (i===2||i===4) return firstBan;
+          if (i===3||i===5) return lb;
+          return "";
+        }
+        return i%2===0?firstBan:(firstBan==="A"?"B":"A");
+      }
+      function sideChooserForStep(i, firstBan) {
+        if(vetoSteps[i].type==="pick") { const t=stepTeam(i,firstBan); return t==="A"?"B":"A"; }
+        if(vetoSteps[i].type==="decider") return sideChooserForStep(isGF?5:3,firstBan);
+        return "";
+      }
+
+      function defaultVetoState() {
+        const sides = isGF
+          ? {2:"defense",3:"defense",4:"defense",5:"defense",6:"defense"}
+          : {2:"defense",3:"defense",6:"defense"};
+        return { firstBan:"A", maps:mapNames.slice(0,7), sides };
+      }
+      function loadVetoState() {
+        try { return {...defaultVetoState(),...JSON.parse(localStorage.getItem(vetoKey)||"{}")}; }
+        catch { return defaultVetoState(); }
+      }
+      function saveVetoState(s) { localStorage.setItem(vetoKey, JSON.stringify(s)); }
+      function playableMaps(s) {
+        const idx = isGF ? [2,3,4,5,6] : [2,3,6];
+        return idx.map(si => `${s.maps[si]||mapNames[si]} -`);
+      }
+
+      const vetoGrid = document.getElementById("veto-grid");
+      let vetoState = loadVetoState();
+
+      function renderVeto(s) {
+        vetoGrid.innerHTML = vetoSteps.map((step, i) => {
+          const orderTeam = stepTeam(i, s.firstBan);
+          const mapName = s.maps[i]||mapNames[i];
+          const isPlayable = step.type==="pick"||step.type==="decider";
+          const sc = isPlayable?sideChooserForStep(i,s.firstBan):"";
+          const side = s.sides[i]||"defense";
+          const title = step.type==="ban"?`${teamShortByCode(orderTeam)} 거부`:step.type==="pick"?`${teamShortByCode(orderTeam)} 선택`:"디사이더";
+          const sideText = isPlayable?`${teamShortByCode(sc)} 선택<br>${sideLabel(side)}`:"";
+          return `<article class="veto-card ${step.type}" data-veto-step="${i}">
+            <strong>${title}<small>${mapKo[mapName]||mapName}</small></strong>
+            <button type="button" data-veto-map-button="${i}" style="${mapBgStyle(mapName)}">${mapKo[mapName]||mapName}</button>
+            ${isPlayable?`<em>${sideText}</em>`:""}
+          </article>`;
+        }).join("");
+      }
+
+      renderVeto(vetoState);
+
+      function openVetoPicker(si) {
+        document.querySelector(".agent-picker")?.remove();
+        const step = vetoSteps[si];
+        const isPlayable = step.type==="pick"||step.type==="decider";
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel map-picker-panel">
+            <div class="agent-picker-head"><strong>${step.name}</strong><button type="button" data-agent-close>닫기</button></div>
+            <div class="veto-quick-form">
+              ${si===0?`<label>${isGF?"UB 팀 (어드밴티지)":"첫 밴 팀"}<select data-quick-first-ban>${teamOptions.map(o=>`<option value="${o.value}"${vetoState.firstBan===o.value?" selected":""}>${o.label}</option>`).join("")}</select></label>`:""}
+              ${isPlayable?`<label>진영<select data-quick-side>
+                <option value="attack"${vetoState.sides[si]==="attack"?" selected":""}>선 공격</option>
+                <option value="defense"${vetoState.sides[si]==="defense"?" selected":""}>선 수비</option>
+              </select></label>`:""}
+              <div class="map-picker-grid">
+                ${mapNames.map(m=>`<button class="${vetoState.maps[si]===m?"active":""}" type="button" data-quick-map="${m}" style="${mapBgStyle(m)}" aria-label="${mapKo[m]||m}"></button>`).join("")}
+              </div>
+              <div class="veto-quick-actions"><button type="button" data-veto-reset>초기화</button></div>
+            </div>
+          </div>`;
+        document.body.appendChild(picker);
+        picker.addEventListener("change", e => {
+          if(e.target.matches("[data-quick-first-ban]")) { vetoState.firstBan=e.target.value; saveVetoState(vetoState); renderVeto(vetoState); renderMapReports(); }
+          if(e.target.matches("[data-quick-side]")) { vetoState.sides[si]=e.target.value; saveVetoState(vetoState); renderVeto(vetoState); renderMapReports(); }
+        });
+        picker.addEventListener("click", e => {
+          if(e.target===picker||e.target.dataset.agentClose!==undefined) picker.remove();
+          if(e.target.dataset.vetoReset!==undefined) { localStorage.removeItem(vetoKey); vetoState=defaultVetoState(); saveVetoState(vetoState); renderVeto(vetoState); renderMapReports(); picker.remove(); }
+          const mb = e.target.closest("[data-quick-map]");
+          if(!mb) return;
+          const fb = picker.querySelector("[data-quick-first-ban]");
+          const sv = picker.querySelector("[data-quick-side]");
+          if(fb) vetoState.firstBan=fb.value;
+          vetoState.maps[si]=mb.dataset.quickMap;
+          if(sv) vetoState.sides[si]=sv.value;
+          saveVetoState(vetoState); renderVeto(vetoState); renderMapReports(); picker.remove();
+        });
+      }
+
+      vetoGrid.addEventListener("click", e => {
+        const card = e.target.closest("[data-veto-step]");
+        if(card) openVetoPicker(Number(card.dataset.vetoStep));
+      });
+
+      /* ── 맵 리포트 ─────────────────────────────────────── */
+      function setStorageKey(mapName, i) { return `set:${matchKeyPrefix}:${i}:${mapName}`; }
+
+      function defaultSetState(mapName, i) {
+        const rows = Array.from({length:5},()=>({ aPlayer:"",aAgent:"",aKda:"",aAcs:"",bPlayer:"",bAgent:"",bKda:"",bAcs:"" }));
+        return { mapName, mapScore:"-", title:`Map ${i+1} ${mapKo[mapName]||mapName}`, rows,
+          stats:{aScore:"",bScore:"",firstKillsA:"",firstKillsB:"",thriftyA:"",thriftyB:"",postPlantA:"",postPlantB:"",clutchA:"",clutchB:""} };
+      }
+
+      function loadSetState(mapName, i) {
+        const d = defaultSetState(mapName, i);
+        try {
+          const s = JSON.parse(localStorage.getItem(setStorageKey(mapName,i))||"{}");
+          return {...d,...s,rows:s.rows||d.rows,stats:{...d.stats,...(s.stats||{})}};
+        } catch { return d; }
+      }
+      function saveSetState(mapName, i, state) { localStorage.setItem(setStorageKey(mapName,i),JSON.stringify(state)); }
+      function syncMapScore(state) { state.mapScore=`${state.stats.aScore||"-"}-${state.stats.bScore||"-"}`; }
+
+      /* ── Round Tracker constants ── */
+      const ROUND_ICONS = {
+        attack_kill:  "https://i.namu.wiki/i/2HzXFlpPqbCrvNAWI2OHRa2u-JALPot7wduUxYcPfeEumaj-SZJkUrPLK1Rl3-BeEe366TRvkFbIwWxjiCjjMw.webp",
+        attack_spike: "https://i.namu.wiki/i/ajIg_CyyD4llgPqI9hOcZiZ18R7FWZ4wlCrkhIDt6edJB3pHVnWcfNXEPE48ja-4R5Vnm-TNkGwFAJhSW4TtBA.webp",
+        def_defuse:   "https://i.namu.wiki/i/Gfp58Gjca8ZKvh4_2Xoc7PgflWYzgpBCzwCEHv7PADKx9JSJidp5h2B-b4X-6V-ISybYgaRDB8hPEeM8oUxODA.webp",
+        def_timeout:  "https://i.namu.wiki/i/HSBaof7zZiqX2qTQH0QJFb7yW3Srvpsy_piWynlRK5gAgfSXocwM8J_z00Zha9KoZBRlC9zhBabvd5t5KfyuGw.webp",
+        def_kill:     "https://i.namu.wiki/i/s-NVXbU32Y4z7AbeIRe-IyEYBGMXhM-33dsQB2sWVx4ImV5XkoqGGEopZP1vYDGBdBJvgYRzjt4DWXH2FTyV5w.webp",
+      };
+      const ROUND_ICON_LABELS = {
+        attack_kill:  "공격 처치",
+        attack_spike: "스파이크 폭파",
+        def_defuse:   "스파이크 해체",
+        def_timeout:  "설치 실패",
+        def_kill:     "수비 처치",
+      };
+      const ATK_TYPES = ["attack_kill", "attack_spike"];
+      const DEF_TYPES = ["def_defuse", "def_timeout", "def_kill"];
+
+      function roundIsAttacking(side, roundIdx, firstAttacker) {
+        if (!firstAttacker) return null;
+        const n = roundIdx + 1;
+        let faAtks;
+        if (n <= 12) faAtks = true;
+        else if (n <= 24) faAtks = false;
+        else { const otRound = n - 24; faAtks = (otRound % 2 === 1); }
+        return faAtks ? (firstAttacker === side) : (firstAttacker !== side);
+      }
+
+      function renderRoundTracker(state) {
+        const aScore = parseInt(state.stats && state.stats.aScore) || 0;
+        const bScore = parseInt(state.stats && state.stats.bScore) || 0;
+        const totalRounds = Math.max(24, aScore + bScore);
+        const fa = state.firstAttacker || null;
+        const rounds = state.rounds || [];
+        const numBlocks = Math.ceil(totalRounds / 24);
+        const logoSrcA = teamLogo(teamA), logoSrcB = teamLogo(teamB);
+        const logoA = logoSrcA ? `<img src="${logoSrcA}" alt="${teamA}" />` : `<span>${teamA.substring(0,3)}</span>`;
+        const logoB = logoSrcB ? `<img src="${logoSrcB}" alt="${teamB}" />` : `<span>${teamB.substring(0,3)}</span>`;
+        function renderCell(side, i) {
+          const r = rounds[i] || {};
+          const won = r.winner === side;
+          const attacking = roundIsAttacking(side, i, fa);
+          let cls = "round-cell";
+          if (i === 11) cls += " round-halftime";
+          if (won) cls += attacking ? " rc-atk" : " rc-def";
+          else if (r.winner) cls += " rc-lost";
+          const iconUrl = won && r.type ? ROUND_ICONS[r.type] : "";
+          return `<div class="${cls}" data-round-cell="${i}">${iconUrl ? `<img src="${iconUrl}" alt="" />` : ""}</div>`;
+        }
+        let blocksHtml = "";
+        for (let b = 0; b < numBlocks; b++) {
+          const start = b * 24;
+          const end = Math.min(start + 24, totalRounds);
+          let numRow = "", cellsA = "", cellsB = "";
+          for (let i = start; i < end; i++) {
+            const htCls = i === 11 ? " round-halftime" : "";
+            numRow += `<div class="round-num-label${htCls}">${i + 1}</div>`;
+            cellsA += renderCell("a", i);
+            cellsB += renderCell("b", i);
+          }
+          blocksHtml += `
+          <div class="round-block">
+            <div class="round-tracker-team-col">
+              <div class="round-num-spacer"></div>
+              <div class="round-tracker-team-logo">${logoA}</div>
+              <div class="round-tracker-team-logo">${logoB}</div>
+            </div>
+            <div class="round-tracker-grid">
+              <div class="round-num-row">${numRow}</div>
+              <div class="round-tracker-row">${cellsA}</div>
+              <div class="round-tracker-row">${cellsB}</div>
+            </div>
+          </div>`;
+        }
+        return `
+          <div class="round-tracker">
+            <div class="round-tracker-top">
+              <span class="round-tracker-label">라운드 결과</span>
+            </div>
+            ${blocksHtml}
+          </div>`;
+      }
+      function openRoundPicker(card, state, mapName, i, roundIdx) {
+        document.querySelector(".round-picker")?.remove();
+        const fa = state.firstAttacker || null;
+        const aAtks = roundIsAttacking("a", roundIdx, fa);
+        const r = (state.rounds || [])[roundIdx] || {};
+        const roundNum = roundIdx + 1;
+        const aTypes = fa ? (aAtks ? ATK_TYPES : DEF_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+        const bTypes = fa ? (aAtks ? DEF_TYPES : ATK_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+        function iconGroup(winner, types, label) {
+          return `<div class="rp-team-section">
+            <div class="rp-team-label">${label}</div>
+            <div class="rp-icons">
+              ${types.map((t) => `
+                <button class="rp-icon-btn${r.winner === winner && r.type === t ? " selected" : ""}"
+                  data-rp-winner="${winner}" data-rp-type="${t}">
+                  <img src="${ROUND_ICONS[t]}" alt="" />${ROUND_ICON_LABELS[t]}
+                </button>`).join("")}
+            </div>
+          </div>`;
+        }
+        const aLabel = teamA + (fa ? (aAtks ? " (공격)" : " (수비)") : "");
+        const bLabel = teamB + (fa ? (aAtks ? " (수비)" : " (공격)") : "");
+        const picker = document.createElement("div");
+        picker.className = "round-picker";
+        picker.innerHTML = `
+          <div class="round-picker-panel">
+            <div class="round-picker-head">
+              <strong>라운드 ${roundNum}</strong>
+              <div class="round-picker-head-actions">
+                ${r.winner ? `<button class="rp-clear-btn" data-rp-clear>초기화</button>` : ""}
+                <button class="rp-close-btn" data-rp-close>닫기</button>
+              </div>
+            </div>
+            <div class="round-picker-body">
+              ${iconGroup("a", aTypes, aLabel)}
+              ${iconGroup("b", bTypes, bLabel)}
+            </div>
+          </div>`;
+        document.body.appendChild(picker);
+        picker.addEventListener("click", (e) => {
+          if (e.target === picker || e.target.closest("[data-rp-close]")) { picker.remove(); return; }
+          if (e.target.closest("[data-rp-clear]")) {
+            if (!state.rounds) state.rounds = [];
+            state.rounds[roundIdx] = { winner: null, type: null };
+            saveSetState(mapName, i, state); renderSetView(card, state); picker.remove(); return;
+          }
+          const btn = e.target.closest("[data-rp-winner]");
+          if (btn) {
+            if (!state.rounds) state.rounds = [];
+            while (state.rounds.length <= roundIdx) state.rounds.push({ winner: null, type: null });
+            state.rounds[roundIdx] = { winner: btn.dataset.rpWinner, type: btn.dataset.rpType };
+            saveSetState(mapName, i, state); renderSetView(card, state); picker.remove();
+          }
+        });
+      }
+
+      function renderAgentButton(agent, side, rowIdx) {
+        const label = agentLabel(agent||"요원");
+        const img = agentImage(agent);
+        return `<button class="agent-chip${side==="b"?" right":""}" type="button" data-agent-row="${rowIdx}" data-agent-side="${side}" aria-label="${label}">
+          ${img?`<img src="${img}" alt="" />`:`<span>${label}</span>`}
+        </button>`;
+      }
+
+      function renderSetView(card, state) {
+        card.querySelector(".map-report-hero strong").textContent = state.mapScore;
+        card.querySelector(".map-report-hero h3").textContent = mapKo[state.mapName]||state.mapName;
+        card.querySelector(".set-detail-view").innerHTML = `
+          <div class="set-detail-banner"><span>${state.title}</span><strong>${state.mapScore}</strong></div>
+          <div class="set-player-grid">
+            <div class="set-team-title" style="background:${teamColor(teamA)}">${teamA}</div>
+            <div class="set-team-title right" style="background:${teamColor(teamB)}">${teamB}</div>
+            ${state.rows.map((row,ri)=>`
+              <div class="set-player-row">
+                ${renderAgentButton(row.aAgent,"a",ri)}
+                <div>
+                  <button class="inline-edit player-name" type="button" data-row="${ri}" data-side="a" data-edit="player">${row.aPlayer||"-"}</button>
+                  <span>
+                    <button class="inline-edit" type="button" data-row="${ri}" data-side="a" data-edit="kda">${row.aKda||"-"}</button>
+                    (<button class="inline-edit" type="button" data-row="${ri}" data-side="a" data-edit="acs">${row.aAcs||"-"}</button>)
+                  </span>
+                </div>
+                <div>
+                  <button class="inline-edit player-name" type="button" data-row="${ri}" data-side="b" data-edit="player">${row.bPlayer||"-"}</button>
+                  <span>
+                    <button class="inline-edit" type="button" data-row="${ri}" data-side="b" data-edit="kda">${row.bKda||"-"}</button>
+                    (<button class="inline-edit" type="button" data-row="${ri}" data-side="b" data-edit="acs">${row.bAcs||"-"}</button>)
+                  </span>
+                </div>
+                ${renderAgentButton(row.bAgent,"b",ri)}
+              </div>`).join("")}
+          </div>
+          ${renderRoundTracker(state)}
+          <div class="capsule-stats-v2">
+            <div class="capsule-stats-head-v2">
+              <strong>${teamA}</strong>
+              <button class="inline-edit stat-value" type="button" data-stat="aScore">${state.stats.aScore||"-"}</button>
+              <span>스코어</span>
+              <button class="inline-edit stat-value" type="button" data-stat="bScore">${state.stats.bScore||"-"}</button>
+              <strong>${teamB}</strong>
+            </div>
+            <div class="capsule-stats-body-v2">
+              <div class="capsule-art-v2">${teamCapsuleSrc(teamA) ? `<img${teamCapsuleClass(teamA)} src="${teamCapsuleSrc(teamA)}" alt="" />` : ""}</div>
+              <div class="capsule-center-v2">
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="firstKillsA">${state.stats.firstKillsA||"-"}</button><span>첫킬</span><button class="inline-edit stat-value" type="button" data-stat="firstKillsB">${state.stats.firstKillsB||"-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="thriftyA">${state.stats.thriftyA||"-"}</button><span>절약왕</span><button class="inline-edit stat-value" type="button" data-stat="thriftyB">${state.stats.thriftyB||"-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="postPlantA">${state.stats.postPlantA||"-"}</button><span>포스트 플랜트</span><button class="inline-edit stat-value" type="button" data-stat="postPlantB">${state.stats.postPlantB||"-"}</button></div>
+                <div class="capsule-stat-line-v2"><button class="inline-edit stat-value" type="button" data-stat="clutchA">${state.stats.clutchA||"-"}</button><span>클러치</span><button class="inline-edit stat-value" type="button" data-stat="clutchB">${state.stats.clutchB||"-"}</button></div>
+                <div class="capsule-pacific-v2"><img src="./assets/vct-logo.png" alt="" style="filter:brightness(0) saturate(100%) invert(26%) sepia(89%) saturate(5000%) hue-rotate(252deg) brightness(105%)" /></div>
+              </div>
+              <div class="capsule-art-v2">${teamCapsuleSrc(teamB) ? `<img${teamCapsuleClass(teamB)} src="${teamCapsuleSrc(teamB)}" alt="" />` : ""}</div>
+            </div>
+          </div>`;
+      }
+
+      function openAgentPicker(card, state, mapName, i, rowIdx, side) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        picker.innerHTML = `
+          <div class="agent-picker-panel">
+            <div class="agent-picker-head"><strong>요원 선택</strong><button type="button" data-agent-close>닫기</button></div>
+            <div class="agent-picker-grid agent-image-grid">
+              ${agents.map((a,ai)=>`<button type="button" data-agent-index="${ai}" aria-label="${a}"><img src="${agentImage(a)}" alt="" /></button>`).join("")}
+            </div>
+          </div>`;
+        document.body.appendChild(picker);
+        picker.addEventListener("click", e => {
+          if(e.target===picker||e.target.dataset.agentClose!==undefined){picker.remove();return;}
+          const ab = e.target.closest("[data-agent-index]");
+          if(!ab)return;
+          state.rows[rowIdx][`${side}Agent`] = agents[Number(ab.dataset.agentIndex)];
+          saveSetState(mapName,i,state); renderSetView(card,state); picker.remove();
+        });
+      }
+
+      function openValueEditor(card, state, mapName, i, options) {
+        document.querySelector(".agent-picker")?.remove();
+        const picker = document.createElement("div");
+        picker.className = "agent-picker";
+        const isPlayer = options.kind === "player";
+        const roster = isPlayer ? (options.side === "a" ? getTeamRoster(teamA) : getTeamRoster(teamB)) : [];
+        picker.innerHTML = `
+          <div class="agent-picker-panel compact">
+            <div class="agent-picker-head"><strong>${options.title}</strong><button type="button" data-agent-close>닫기</button></div>
+            ${isPlayer
+              ? `<div class="agent-picker-grid">${roster.map(p=>`<button type="button" data-value="${p}">${p}</button>`).join("")}</div>`
+              : `<form class="value-editor-form">
+                  <input value="${options.value||""}" placeholder="${options.placeholder||"-"}" autofocus />
+                  <button type="submit">적용</button>
+                </form>`}
+          </div>`;
+        document.body.appendChild(picker);
+        const close = () => picker.remove();
+        const apply = v => {
+          options.apply(v);
+          if(options.syncScore) syncMapScore(state);
+          saveSetState(mapName,i,state); renderSetView(card,state); close();
+        };
+        picker.addEventListener("click", e => {
+          if(e.target===picker||e.target.dataset.agentClose!==undefined) close();
+          if(e.target.dataset.value!==undefined) apply(e.target.dataset.value);
+        });
+        picker.querySelector("form")?.addEventListener("submit", e => { e.preventDefault(); apply(e.currentTarget.querySelector("input").value.trim()); });
+        picker.querySelector("input")?.focus();
+      }
+
+      const reportGrid = document.getElementById("map-report-grid");
+
+      const mapCountKey = `mapCount:${matchKeyPrefix}`;
+      function loadActiveMapCount(max) {
+        try { const s = localStorage.getItem(mapCountKey); if (s !== null) return Math.max(1, Math.min(max, parseInt(s))); } catch (e) {}
+        return max;
+      }
+      function saveActiveMapCount(n) { try { localStorage.setItem(mapCountKey, String(n)); } catch (e) {} }
+
+      function confirmMapRemove(onConfirm) {
+        const backdrop = document.createElement("div");
+        backdrop.className = "map-remove-confirm-backdrop";
+        backdrop.innerHTML = `
+          <div class="map-remove-confirm-panel">
+            <p>맵 창을 삭제하겠습니까?<small>입력된 데이터는 유지됩니다.</small></p>
+            <div class="map-remove-confirm-actions">
+              <button class="map-remove-confirm-cancel" data-cancel>취소</button>
+              <button class="map-remove-confirm-ok" data-ok>삭제</button>
+            </div>
+          </div>`;
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener("click", e => {
+          if (e.target.dataset.cancel !== undefined || e.target === backdrop) backdrop.remove();
+          if (e.target.dataset.ok !== undefined) { backdrop.remove(); onConfirm(); }
+        });
+      }
+
+      function getFirstAttackerFromVeto(mapIndex) {
+        const playableIndices = isGF ? [2, 3, 4, 5, 6] : [2, 3, 6];
+        const stepIndex = playableIndices[mapIndex];
+        if (stepIndex === undefined) return null;
+        const chooser = sideChooserForStep(stepIndex, vetoState.firstBan);
+        const chosenSide = vetoState.sides[stepIndex] || "defense";
+        return chosenSide === "attack" ? (chooser === "A" ? "a" : "b") : (chooser === "A" ? "b" : "a");
+      }
+      function renderMapReports() {
+        const allMaps = playableMaps(vetoState);
+        const maxMaps = allMaps.length;
+        const isAdmin = !document.body.classList.contains("view-only");
+        const activeCount = loadActiveMapCount(maxMaps);
+
+        let ctrl = document.getElementById("map-count-ctrl");
+        if (isAdmin) {
+          if (!ctrl) {
+            ctrl = document.createElement("div");
+            ctrl.id = "map-count-ctrl";
+            ctrl.className = "map-count-ctrl";
+            reportGrid.parentElement.insertBefore(ctrl, reportGrid);
+          }
+          ctrl.innerHTML = `
+            <button type="button" class="map-count-btn" id="mcb-minus" ${activeCount <= 1 ? "disabled" : ""}>−</button>
+            <span>${activeCount} / ${maxMaps}</span>
+            <button type="button" class="map-count-btn" id="mcb-plus" ${activeCount >= maxMaps ? "disabled" : ""}>+</button>`;
+          document.getElementById("mcb-minus").onclick = () => {
+            const c = loadActiveMapCount(maxMaps);
+            if (c > 1) confirmMapRemove(() => { saveActiveMapCount(c - 1); renderMapReports(); });
+          };
+          document.getElementById("mcb-plus").onclick = () => {
+            const c = loadActiveMapCount(maxMaps);
+            if (c < maxMaps) { saveActiveMapCount(c + 1); renderMapReports(); }
+          };
+        } else if (ctrl) {
+          ctrl.remove();
+        }
+
+        const maps = allMaps.slice(0, activeCount);
+        reportGrid.innerHTML = maps.map((mt,i) => {
+          const [mapName] = mt.split(" ");
+          return `<article class="map-report-card set-card" data-map-index="${i}">
+            <div class="map-report-hero" style="${mapBgStyle(mapName)}">
+              <span>Map ${i+1}</span>
+              <h3>${mapKo[mapName]||mapName}</h3>
+              <strong>-</strong>
+            </div>
+            <div class="set-detail-view"></div>
+          </article>`;
+        }).join("");
+
+        document.querySelectorAll(".set-card").forEach((card, i) => {
+          const [mapName] = maps[i].split(" ");
+          const state = loadSetState(mapName, i);
+          state.mapName = mapName;
+          state.mapScore = (state.stats.aScore||state.stats.bScore)
+            ? `${state.stats.aScore||"-"}-${state.stats.bScore||"-"}`
+            : "-";
+          state.title = `Map ${i+1} ${mapKo[mapName]||mapName}`;
+          state.firstAttacker = getFirstAttackerFromVeto(i);
+          renderSetView(card, state);
+
+          card.addEventListener("click", e => {
+            const chip = e.target.closest("[data-agent-row]");
+            if(chip){openAgentPicker(card,state,mapName,i,Number(chip.dataset.agentRow),chip.dataset.agentSide);return;}
+            const roundCell = e.target.closest("[data-round-cell]");
+            if(roundCell){if(!document.body.classList.contains("view-only"))openRoundPicker(card,state,mapName,i,Number(roundCell.dataset.roundCell));return;}
+            const ed = e.target.closest("[data-edit],[data-stat]");
+            if(!ed)return;
+            const ri=Number(ed.dataset.row),side=ed.dataset.side,edit=ed.dataset.edit,stat=ed.dataset.stat;
+            if(edit==="player"){
+              openValueEditor(card,state,mapName,i,{title:"선수 이름",kind:"player",side,value:state.rows[ri][`${side}Player`],placeholder:"선수명",apply:v=>{state.rows[ri][`${side}Player`]=v;}});
+            }else if(edit==="kda"||edit==="acs"){
+              const fk=`${side}${edit==="kda"?"Kda":"Acs"}`;
+              openValueEditor(card,state,mapName,i,{title:edit==="kda"?"K/D/A 입력":"ACS 입력",value:state.rows[ri][fk],placeholder:edit==="kda"?"예: 21/20/3":"예: 230",apply:v=>{state.rows[ri][fk]=v;}});
+            }else if(stat){
+              openValueEditor(card,state,mapName,i,{title:"지표 입력",value:state.stats[stat],placeholder:"-",syncScore:stat==="aScore"||stat==="bScore",apply:v=>{state.stats[stat]=v;}});
+            }
+          });
+        });
+      }
+
+      renderMapReports();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

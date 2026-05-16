@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Americas 2026 Stage 2 PlayOff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <style>
+      /* ── 시드 슬롯 편집 (어드민) ─────────────────────── */
+      .bracket-team.is-seed { position: relative; }
+      body:not(.view-only) .bracket-team.is-seed { cursor: pointer; transition: background 0.15s; }
+      body:not(.view-only) .bracket-team.is-seed:hover { background: rgba(255,87,12,0.12); border-radius: 8px; }
+      body:not(.view-only) .bracket-team.is-seed::after {
+        content: "✎";
+        font-size: 10px; opacity: 0.45;
+        position: absolute; bottom: 2px; right: 4px;
+      }
+      .bracket-team[data-team-name]:not([data-team-name=""]) strong { display: none !important; }
+
+      /* ── 팀 선택 모달 ─────────────────────────────────── */
+      .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
+      .ts-modal[hidden] { display: none !important; }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
+      .ts-panel {
+        position: relative; z-index: 1;
+        width: min(480px, calc(100vw - 24px));
+        max-height: 90vh; overflow-y: auto;
+        background: #1a0d05; border: 1.5px solid rgba(255,87,12,0.28);
+        border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease;
+      }
+      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+      .ts-panel p  { font-size: 13px; opacity: 0.6; margin: 0 0 16px; }
+      .ts-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+      .ts-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 11px 6px; border-radius: 10px;
+        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+        color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s;
+        font-size: 10px; font-weight: 700; text-align: center;
+      }
+      .ts-team-btn img { width: 28px; height: 28px; object-fit: contain; }
+      .ts-team-btn .ts-code { font-size: 13px; font-weight: 900; }
+      .ts-team-btn:hover { background: rgba(255,87,12,0.14); border-color: rgba(255,87,12,0.55); }
+      .ts-team-btn.selected { background: rgba(255,87,12,0.28); border-color: #ff570c; }
+      .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .ts-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .ts-btn-save { background: #ff570c; color: #fff; }
+      .ts-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+      .ts-btn-clear { background: rgba(255,80,80,0.12); color: #ff5050; border: 1px solid rgba(255,80,80,0.2); }
+    </style>
+  </head>
+  <body class="league-page stage-page americas-page playoff-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./americas-stage2.html">Stage 2</a>
+    </header>
+
+    <main class="playoff-shell">
+      <section class="playoff-hero" aria-labelledby="playoff-title">
+        <div class="playoff-logo-lockup">
+          <img src="./assets/vct-americas.png" alt="VCT Americas" />
+        </div>
+        <div>
+          <p class="eyebrow">VCT Americas 2026</p>
+          <h1 id="playoff-title">2026 VCT Americas Stage 2</h1>
+          <p>플레이오프 대진표</p>
+        </div>
+      </section>
+
+      <section class="playoff-board" aria-label="Americas Stage 2 플레이오프 대진표">
+        <div class="bracket-scroll">
+          <div class="bracket-rounds" aria-hidden="true">
+            <span>1라운드</span>
+            <span>2라운드</span>
+            <span>준결승</span>
+            <span>결승 진출전 (Bo5)</span>
+            <span>결승전 (Bo5)</span>
+          </div>
+
+          <h2 class="bracket-section-title">상위조 대진표</h2>
+          <div class="bracket-grid upper-bracket">
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 1 <span>(TBD)</span></h3>
+                <div class="bracket-team is-seed" data-seed="omega-2">
+                  <span class="bracket-seed">ω 2위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+                <div class="bracket-team is-seed" data-seed="alpha-3">
+                  <span class="bracket-seed">α 3위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 2 <span>(TBD)</span></h3>
+                <div class="bracket-team is-seed" data-seed="alpha-2">
+                  <span class="bracket-seed">α 2위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+                <div class="bracket-team is-seed" data-seed="omega-3">
+                  <span class="bracket-seed">ω 3위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+              </article>
+            </div>
+
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 3 <span>(TBD)</span></h3>
+                <div class="bracket-team is-seed" data-seed="alpha-1">
+                  <span class="bracket-seed">α 1위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+                <div class="bracket-team placeholder">
+                  <span>↗</span><strong>로고</strong><em>0</em>
+                </div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 4 <span>(TBD)</span></h3>
+                <div class="bracket-team is-seed" data-seed="omega-1">
+                  <span class="bracket-seed">ω 1위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+                <div class="bracket-team placeholder">
+                  <span>↗</span><strong>로고</strong><em>0</em>
+                </div>
+              </article>
+            </div>
+
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match">
+                <h3>Match 9 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <div class="bracket-column bracket-arrow-column" aria-hidden="true"><span>→</span></div>
+
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match grand-final-card">
+                <h3>Grand Finals <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+          </div>
+
+          <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
+          <div class="bracket-grid lower-bracket">
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 5 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>M1 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team is-seed" data-seed="omega-4">
+                  <span class="bracket-seed">ω 4위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 6 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>M2 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team is-seed" data-seed="alpha-4">
+                  <span class="bracket-seed">α 4위</span>
+                  <span class="bracket-logo"></span>
+                  <strong>TBD</strong>
+                  <em>0</em>
+                </div>
+              </article>
+            </div>
+
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 7 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>M4 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>→</span><strong>로고</strong><em>0</em></div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 8 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>M3 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>→</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match">
+                <h3>Match 10 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match grand-final-card">
+                <h3>Match 11 <span>(TBD)</span></h3>
+                <div class="bracket-team placeholder"><span>M9 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span>→</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <div class="bracket-column bracket-empty" aria-hidden="true"></div>
+          </div>
+
+          <div class="bracket-footer">연두색: 라운드 승리 | 노란색: 우승</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="ts-modal" id="ts-modal" hidden>
+      <div class="ts-backdrop" id="ts-backdrop"></div>
+      <div class="ts-panel" role="dialog" aria-modal="true" aria-labelledby="ts-title">
+        <h2 id="ts-title">시드 팀 선택</h2>
+        <p id="ts-subtitle"></p>
+        <div class="ts-team-grid" id="ts-team-grid"></div>
+        <div class="ts-actions" id="ts-actions"></div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+
+      const TEAMS = [
+        "Sentinels","G2 Esports","NRG","100 Thieves",
+        "Cloud9","MIBR","LOUD","FURIA",
+        "KRÜ Esports","Leviatán","Evil Geniuses","ENVY",
+      ];
+      const teamCodes = {
+        "Sentinels":"SEN","G2 Esports":"G2","NRG":"NRG","100 Thieves":"100T",
+        "Cloud9":"C9","MIBR":"MIBR","LOUD":"LOUD","FURIA":"FUR",
+        "KRÜ Esports":"KRÜ","Leviatán":"LEV","Evil Geniuses":"EG","ENVY":"ENVY",
+      };
+      const teamLogos = {
+        "Sentinels":     "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+        "G2 Esports":    "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+        "NRG":           "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+        "100 Thieves":   "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png",
+        "Cloud9":        "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+        "MIBR":          "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+        "LOUD":          "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+        "FURIA":         "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+        "KRÜ Esports":  "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+        "Leviatán":      "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+        "Evil Geniuses": "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+        "ENVY":          "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg",
+      };
+
+      const SEEDS_KEY = "stage2_americas_playoff_seeds";
+      function loadSeeds() { try { const r = localStorage.getItem(SEEDS_KEY); if (r) return JSON.parse(r); } catch {} return {}; }
+      function saveSeeds(seeds) { localStorage.setItem(SEEDS_KEY, JSON.stringify(seeds)); }
+      function teamCode(name) { return teamCodes[name] || (name ? name.slice(0,3).toUpperCase() : ""); }
+      function teamLogo(name) { return teamLogos[name] || ""; }
+
+      const seededMatchSlots = {
+        1: ["omega-2","alpha-3"], 2: ["alpha-2","omega-3"],
+        3: ["alpha-1",null],      4: ["omega-1",null],
+        5: [null,"omega-4"],      6: [null,"alpha-4"],
+      };
+      const matchLinks = {
+        3:  [null,{match:1,result:"winner"}],
+        4:  [null,{match:2,result:"winner"}],
+        5:  [{match:1,result:"loser"},null],
+        6:  [{match:2,result:"loser"},null],
+        7:  [{match:4,result:"loser"},{match:5,result:"winner"}],
+        8:  [{match:3,result:"loser"},{match:6,result:"winner"}],
+        9:  [{match:3,result:"winner"},{match:4,result:"winner"}],
+        10: [{match:7,result:"winner"},{match:8,result:"winner"}],
+        11: [{match:9,result:"loser"},{match:10,result:"winner"}],
+        "Grand Finals": [{match:9,result:"winner"},{match:11,result:"winner"}],
+      };
+
+      function normalizeScore(v) { const n = Number(String(v ?? "0").trim()); return Number.isFinite(n) ? n : 0; }
+
+      function readStoredResult(matchId, teams) {
+        try {
+          const raw = localStorage.getItem(`result:Match ${matchId}|${teams[0] || "미정"}|${teams[1] || "미정"}`);
+          if (raw) { const s = JSON.parse(raw); return { scoreA: normalizeScore(s.scoreA), scoreB: normalizeScore(s.scoreB) }; }
+        } catch {}
+        return { scoreA: 0, scoreB: 0 };
+      }
+
+      function resolveTeams(matchId, states, seeds) {
+        const seedSlots = seededMatchSlots[matchId] || [null,null];
+        const links = matchLinks[matchId] || [null,null];
+        return [0,1].map((i) => {
+          if (seedSlots[i]) return seeds[seedSlots[i]] || "";
+          if (links[i]) return states[links[i].match]?.[links[i].result] || "";
+          return "";
+        });
+      }
+
+      function resolveBracketState(seeds) {
+        const states = {};
+        [1,2,3,4,5,6,7,8,9,10,11,"Grand Finals"].forEach((matchId) => {
+          const teams = resolveTeams(matchId, states, seeds);
+          const score = readStoredResult(matchId, teams);
+          const hasWinner = teams[0] && teams[1] && score.scoreA !== score.scoreB;
+          states[matchId] = {
+            teams, score,
+            winner: hasWinner ? teams[score.scoreA > score.scoreB ? 0 : 1] : "",
+            loser:  hasWinner ? teams[score.scoreA > score.scoreB ? 1 : 0] : "",
+          };
+        });
+        return states;
+      }
+
+      function cardMatchId(card) {
+        const label = card.querySelector("h3")?.childNodes?.[0]?.textContent?.trim() || "";
+        const n = label.match(/\d+/)?.[0];
+        return n ? Number(n) : "Grand Finals";
+      }
+
+      function renderRow(row, teamName, score, isWinner) {
+        const logoSpan = row.querySelector(".bracket-logo");
+        const nameEl   = row.querySelector("strong");
+        const scoreEl  = row.querySelector("em");
+        row.dataset.teamName = teamName || "";
+        row.classList.toggle("winner", Boolean(isWinner));
+        row.classList.toggle("empty", !teamName);
+        if (!row.classList.contains("placeholder")) row.classList.toggle("placeholder", !teamName);
+        if (logoSpan) {
+          const src = teamLogo(teamName);
+          logoSpan.innerHTML = teamName ? (src ? `<img src="${src}" alt="${teamName}" />` : teamCode(teamName)) : "";
+        }
+        if (nameEl) nameEl.textContent = teamName ? teamCode(teamName) : "TBD";
+        if (scoreEl) scoreEl.textContent = String(score);
+      }
+
+      function renderPlayoffBracket() {
+        const seeds  = loadSeeds();
+        const states = resolveBracketState(seeds);
+        document.querySelectorAll(".bracket-match").forEach((card) => {
+          const matchId = cardMatchId(card);
+          const state   = states[matchId];
+          const rows    = card.querySelectorAll(".bracket-team");
+          const [teamA, teamB] = state.teams;
+          const { scoreA, scoreB } = state.score;
+          renderRow(rows[0], teamA, scoreA, state.winner && state.winner === teamA);
+          renderRow(rows[1], teamB, scoreB, state.winner && state.winner === teamB);
+          card.tabIndex = 0;
+          card.setAttribute("role", "link");
+          card.dataset.matchId = String(matchId);
+        });
+
+        if (typeof window.vctIsAdmin === "function" && window.vctIsAdmin()) {
+          document.querySelectorAll(".bracket-team.is-seed").forEach((row) => {
+            row.style.cursor = "pointer";
+            row.addEventListener("click", (e) => { e.stopPropagation(); openSeedPicker(row.dataset.seed); });
+          });
+        }
+
+        document.querySelectorAll(".bracket-match").forEach((card) => {
+          card.addEventListener("click", () => {
+            const matchId = card.dataset.matchId;
+            const state   = states[matchId];
+            const [teamA, teamB] = state.teams;
+            if (!teamA || !teamB) return;
+            const score  = `${state.score.scoreA} : ${state.score.scoreB}`;
+            const isBo5  = card.classList.contains("grand-final-card");
+            const params = new URLSearchParams({
+              date: `Match ${matchId}`, teamA, teamB, score,
+              from: "stage2playoffs",
+              ...(isBo5 ? { bo5: "1" } : {}),
+            });
+            window.location.href = `./americas-match.html?${params.toString()}`;
+          });
+          card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
+          });
+        });
+      }
+
+      let _currentSeed = null, _selectedTeam = "";
+
+      function openSeedPicker(seedKey) {
+        _currentSeed  = seedKey;
+        _selectedTeam = loadSeeds()[seedKey] || "";
+        const labels = {
+          "alpha-1":"α 1위","alpha-2":"α 2위","alpha-3":"α 3위","alpha-4":"α 4위",
+          "omega-1":"ω 1위","omega-2":"ω 2위","omega-3":"ω 3위","omega-4":"ω 4위",
+        };
+        document.getElementById("ts-title").textContent = "시드 팀 선택";
+        document.getElementById("ts-subtitle").textContent = `${labels[seedKey] || seedKey} 자리에 들어갈 팀을 선택하세요.`;
+        const grid = document.getElementById("ts-team-grid");
+        function refreshGrid() {
+          grid.innerHTML = TEAMS.map((t) => `<button class="ts-team-btn${t === _selectedTeam ? " selected" : ""}" data-team="${t}">
+            ${teamLogos[t] ? `<img src="${teamLogos[t]}" alt="${t}" />` : ""}
+            <span class="ts-code">${teamCodes[t] || t.slice(0,3)}</span>
+            <span>${t}</span>
+          </button>`).join("");
+          grid.querySelectorAll(".ts-team-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              _selectedTeam = btn.dataset.team === _selectedTeam ? "" : btn.dataset.team;
+              const saveBtn = document.getElementById("ts-save-btn");
+              if (saveBtn) saveBtn.disabled = !_selectedTeam;
+              refreshGrid();
+            });
+          });
+        }
+        refreshGrid();
+        document.getElementById("ts-actions").innerHTML = `
+          <button class="ts-btn ts-btn-clear" id="ts-clear-btn">비우기</button>
+          <button class="ts-btn ts-btn-cancel" id="ts-cancel-btn">취소</button>
+          <button class="ts-btn ts-btn-save" id="ts-save-btn" ${_selectedTeam ? "" : "disabled"}>저장</button>`;
+        document.getElementById("ts-cancel-btn").addEventListener("click", closeModal);
+        document.getElementById("ts-clear-btn").addEventListener("click", () => {
+          const seeds = loadSeeds(); delete seeds[_currentSeed]; saveSeeds(seeds);
+          closeModal(); renderPlayoffBracket();
+        });
+        document.getElementById("ts-save-btn").addEventListener("click", () => {
+          const seeds = loadSeeds(); seeds[_currentSeed] = _selectedTeam; saveSeeds(seeds);
+          closeModal(); renderPlayoffBracket();
+        });
+        document.getElementById("ts-modal").hidden = false;
+      }
+
+      function closeModal() { document.getElementById("ts-modal").hidden = true; }
+      document.getElementById("ts-backdrop").addEventListener("click", closeModal);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !document.getElementById("ts-modal").hidden) closeModal();
+      });
+
+      renderPlayoffBracket();
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>
