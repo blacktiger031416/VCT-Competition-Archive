@@ -56,24 +56,23 @@
     })
     .then(function (data) {
       var dbKeys = Object.keys(data);
+      var dbKeySet = {};
+      dbKeys.forEach(function (key) { dbKeySet[key] = true; });
 
-      /* DB → localStorage: localStorage에 없는 키만 채움 (새 기기 지원) */
-      dbKeys.forEach(function (key) {
-        if (localStorage.getItem(key) === null) {
-          _origSet(key, data[key]);
-        }
-      });
-
-      /* localStorage → DB: DB와 값이 다른 키를 재동기화
-         (서버 슬립 중 POST 실패로 누락된 저장 자동 복구) */
+      /* localStorage → DB: DB에 없는 키만 올려줌 (로컬에서 생성된 키 보호) */
       Object.keys(localStorage).forEach(function (key) {
-        if (!isLocalOnly(key) && data[key] !== localStorage.getItem(key)) {
+        if (!isLocalOnly(key) && !dbKeySet[key]) {
           fetch("/api/data/" + encodeURIComponent(key), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ value: localStorage.getItem(key) }),
           }).catch(function () {});
         }
+      });
+
+      /* DB → localStorage: DB가 항상 우선 (크로스 디바이스 동기화) */
+      dbKeys.forEach(function (key) {
+        _origSet(key, data[key]);
       });
 
       console.log("[storage] loaded " + dbKeys.length + " keys from DB");
