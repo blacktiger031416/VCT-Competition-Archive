@@ -3490,8 +3490,9 @@ function applyScoreClasses(mapId) {
   if (!elL || !elR) return;
   elL.textContent = s.l;
   elR.textContent = s.r;
-  elL.className = "sb-score-diamond-l" + (s.l < s.r ? " lose" : "");
-  elR.className = "sb-score-diamond-r" + (s.r > s.l ? " win"  : "");
+  var nL = Number(s.l), nR = Number(s.r);
+  elL.className = "sb-score-diamond-l" + (nL < nR ? " lose" : "");
+  elR.className = "sb-score-diamond-r" + (nR > nL ? " win"  : "");
   elL.style.cursor = "pointer";
   elR.style.cursor = "pointer";
 }
