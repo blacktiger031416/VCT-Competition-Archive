@@ -2609,6 +2609,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
 (window.storageReady || Promise.resolve()).then(function() {
   migrateFromWhiteMode();
   maps.forEach(function(m, i) { loadPlayersSync(i); });
+  maps.forEach(function(m, i) { loadRoundState(i); });
   maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
   maps.forEach(function(m, i) { renderMap(m, i); });
   maps.forEach(function(m, i) { renderRoundTracker(m, i); });
@@ -2777,6 +2778,7 @@ function openRoundPicker(container, m, mapIdx, roundIdx) {
     if (e.target.closest("[data-rp-clear]")) {
       if (!state.rounds) state.rounds = [];
       state.rounds[roundIdx] = { winner: null, type: null };
+      saveRoundState(mapIdx);
       renderRoundTracker(m, mapIdx);
       picker.remove(); return;
     }
@@ -2785,10 +2787,28 @@ function openRoundPicker(container, m, mapIdx, roundIdx) {
       if (!state.rounds) state.rounds = [];
       while (state.rounds.length <= roundIdx) state.rounds.push({ winner: null, type: null });
       state.rounds[roundIdx] = { winner: btn.dataset.rpWinner, type: btn.dataset.rpType };
+      saveRoundState(mapIdx);
       renderRoundTracker(m, mapIdx);
       picker.remove();
     }
   });
+}
+
+function saveRoundState(mapIdx) {
+  try {
+    var key = 'rounds:' + MATCH_KEY + ':' + mapIdx;
+    localStorage.setItem(key, JSON.stringify(maps[mapIdx].rtState.rounds || []));
+  } catch(e) {}
+}
+
+function loadRoundState(mapIdx) {
+  try {
+    var key = 'rounds:' + MATCH_KEY + ':' + mapIdx;
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var rounds = JSON.parse(raw);
+    if (Array.isArray(rounds)) maps[mapIdx].rtState.rounds = rounds;
+  } catch(e) {}
 }
 
 // ── 팀 스탯 렌더링 ────────────────────────────────────────────
