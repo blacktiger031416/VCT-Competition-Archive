@@ -2610,6 +2610,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   migrateFromWhiteMode();
   maps.forEach(function(m, i) { loadPlayersSync(i); });
   maps.forEach(function(m, i) { loadRoundState(i); });
+  loadDiamondState();
   maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
   maps.forEach(function(m, i) { renderMap(m, i); });
   maps.forEach(function(m, i) { renderRoundTracker(m, i); });
@@ -3529,6 +3530,36 @@ function openScoreEditor(mapId, side) {
 
 function toggleDiamond(el) {
   el.classList.toggle("filled");
+  saveDiamondState();
+}
+
+function saveDiamondState() {
+  try {
+    var state = {};
+    document.querySelectorAll('.sb-diamonds').forEach(function(wrap) {
+      if (!wrap.id) return;
+      state[wrap.id] = Array.from(wrap.querySelectorAll('.sb-diamond')).map(function(d) {
+        return d.classList.contains('filled');
+      });
+    });
+    localStorage.setItem('diamonds:' + MATCH_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadDiamondState() {
+  try {
+    var raw = localStorage.getItem('diamonds:' + MATCH_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+    Object.keys(state).forEach(function(id) {
+      var wrap = document.getElementById(id);
+      if (!wrap) return;
+      var diamonds = wrap.querySelectorAll('.sb-diamond');
+      state[id].forEach(function(filled, i) {
+        if (diamonds[i]) diamonds[i].classList.toggle('filled', filled);
+      });
+    });
+  } catch(e) {}
 }
 
 function toggleMode() {
