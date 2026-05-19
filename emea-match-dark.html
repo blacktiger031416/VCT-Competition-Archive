@@ -1698,7 +1698,7 @@ var MATCH_KEY   = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
 var _TC = { "Gentle Mates":"M8","Team Liquid":"TL","Team Heretics":"TH","Natus Vincere":"NAVI","Karmine Corp":"KC","FUT Esports":"FUT","BBL Esports":"BBL","Fnatic":"FNC","Team Vitality":"VIT","GIANTX":"GX","Eternal Fire":"EF","PCIFIC Esports":"PCF","ULF Esports":"ULF" };
 var _TL = { "Gentle Mates":"./assets/teams/gm.png","Team Liquid":"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp","Team Heretics":"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg","Natus Vincere":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png","Karmine Corp":"./assets/teams/kc.png","FUT Esports":"https://specs.gg/assets/img/teams/fut-esports.webp","BBL Esports":"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg","Fnatic":"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg","Team Vitality":"https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png","GIANTX":"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg","Eternal Fire":"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg","PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg","ULF Esports":"https://i.namu.wiki/i/EKmHVjvPqN3x6yN6lHSKBDOoSp5X8dQS3Y9y_hj1y13zoCwWAtaRIiuGxG3C6b7TItP0n6ZsnYqwXpxg_KKoJA.webp" };
 var _TCo = { "Gentle Mates":"#f05a28","Team Liquid":"#0098d1","Team Heretics":"#111111","Natus Vincere":"#f4e700","Karmine Corp":"#0047ab","FUT Esports":"#e8432d","BBL Esports":"#c8102e","Fnatic":"#f77f00","Team Vitality":"#f7d000","GIANTX":"#15b24a","Eternal Fire":"#e8432d","PCIFIC Esports":"#0a5ea8","ULF Esports":"#888888" };
-var _TW  = { "GIANTX": true, "Gentle Mates": true, "Team Liquid": true };
+var _TW  = { "GIANTX": true, "Gentle Mates": true, "Team Liquid": true, "ULF Esports": true };
 
 var TEAM_A_CODE  = _TC[MATCH_TEAM_A]  || MATCH_TEAM_A.substring(0,3).toUpperCase();
 var TEAM_B_CODE  = _TC[MATCH_TEAM_B]  || MATCH_TEAM_B.substring(0,3).toUpperCase();
@@ -1745,7 +1745,7 @@ function createBlankMapData(mapIdx) {
     teamA: TEAM_A_CODE, teamB: TEAM_B_CODE,
     colorA: TEAM_A_COLOR, colorB: TEAM_B_COLOR,
     logoA: TEAM_A_LOGO, logoAWhite: TEAM_A_LOGO_WHITE,
-    logoB: TEAM_B_LOGO,
+    logoB: TEAM_B_LOGO, logoBWhite: TEAM_B_LOGO_WHITE,
     mapImg: "",
     rtState: { rounds: [], firstAttacker: null, stats: { aScore: "-", bScore: "-" } },
     tsId: "ts-" + mapIdx,
@@ -2685,7 +2685,7 @@ function renderRoundTracker(m, mapIdx) {
       </div>
       <div class="rt-team-row">
         <div class="rt-accent" style="background:${m.colorB}"></div>
-        <img class="rt-logo" src="${m.logoB}" />
+        <img class="rt-logo${m.logoBWhite ? ' rt-logo-white' : ''}" src="${m.logoB}" />
         <span class="rt-team-name">${m.teamB}</span>
       </div>
     </div>`;
@@ -2872,7 +2872,7 @@ function renderTeamStats(m, mapIdx) {
   const logoAFilter = m.logoAWhite ? 'filter:brightness(0) invert(1)' : '';
   wrap.innerHTML = `
     <img class="ts-bg-logo ts-bg-logo-a" src="${m.logoA}" style="${logoAFilter}" />
-    <img class="ts-bg-logo ts-bg-logo-b" src="${m.logoB}" />
+    <img class="ts-bg-logo ts-bg-logo-b" src="${m.logoB}" style="${m.logoBWhite ? 'filter:brightness(0) invert(1)' : ''}" />
     <div class="ts-header">
       <span class="ts-team-label">${m.teamA}</span>
       <span class="ts-center-head">팀 스탯</span>
