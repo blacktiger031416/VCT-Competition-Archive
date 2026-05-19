@@ -2615,15 +2615,7 @@ maps.forEach(function(m, i) { renderRoundTracker(m, i); });
 maps.forEach(function(m, i) { renderTeamStats(m, i); });
 
 (window.storageReady || Promise.resolve()).then(function() {
-  migrateFromWhiteMode();
-  maps.forEach(function(m, i) { loadPlayersSync(i); });
-  maps.forEach(function(m, i) { loadRoundState(i); });
-  loadDiamondState();
-  maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
-  maps.forEach(function(m, i) { renderMap(m, i); });
-  maps.forEach(function(m, i) { renderRoundTracker(m, i); });
-  maps.forEach(function(m, i) { renderTeamStats(m, i); });
-
+  // ① Bo 상태 먼저 결정
   var boVal = localStorage.getItem('vct_bo:' + MATCH_KEY);
   if (boVal === '5') {
     currentBo = 5;
@@ -2635,10 +2627,39 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
     VETO_MAP_SLOT = [2, 3, 4, 5, 6];
   }
 
-  // 맵 4~5: maps[] 정의 이후에 안전하게 초기화
+  // ② 맵 4~5 데이터 구조 미리 생성 (데이터 로드 전)
   for (var _mi = 4; _mi <= Math.min(activeMapCount, currentBo); _mi++) {
-    initMapCard(_mi);
+    if (!maps[_mi - 1]) {
+      maps[_mi - 1] = createBlankMapData(_mi - 1);
+      scoreState['m' + _mi] = { l: '-', r: '-' };
+    }
   }
+
+  // ③ 전체 맵 데이터 로드 (맵 4~5 포함)
+  migrateFromWhiteMode();
+  maps.forEach(function(m, i) { loadPlayersSync(i); });
+  maps.forEach(function(m, i) { loadRoundState(i); });
+  loadDiamondState();
+  maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
+  maps.forEach(function(m, i) { renderMap(m, i); });
+  maps.forEach(function(m, i) { renderRoundTracker(m, i); });
+  maps.forEach(function(m, i) { renderTeamStats(m, i); });
+
+  // ④ 맵 4~5 HTML 빌드 (데이터 로드 완료 후)
+  for (var _mi2 = 4; _mi2 <= Math.min(activeMapCount, currentBo); _mi2++) {
+    if (!initializedMaps[_mi2]) {
+      initializedMaps[_mi2] = true;
+      var _card = document.getElementById('map-' + _mi2);
+      if (_card) {
+        _card.classList.remove('map-card-empty');
+        _card.innerHTML = buildMapCardHtml(_mi2);
+        renderMap(maps[_mi2 - 1], _mi2 - 1);
+        renderRoundTracker(maps[_mi2 - 1], _mi2 - 1);
+        renderTeamStats(maps[_mi2 - 1], _mi2 - 1);
+      }
+    }
+  }
+
   updateMapCards();
   updateDiamonds();
 
