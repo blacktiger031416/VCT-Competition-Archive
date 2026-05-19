@@ -6,50 +6,507 @@
     <title>VCT Pacific 2026 Stage 1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
-      .group-assign-section { padding: 40px 20px 0; max-width: 900px; margin: 0 auto; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #0d1520;
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(13,21,32,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        transition: color 0.15s;
+        margin-left: auto;
+      }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+
+      /* ── EYEBROW / SHARED TEXT ──────────────── */
+      .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #e8432d;
+        margin-bottom: 8px;
+      }
+
+      /* ── PAGE SHELL ─────────────────────────── */
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 40px 80px; }
+      @media (max-width: 600px) { .league-shell { padding: 0 16px 60px; } }
+
+      /* ── STAGE HERO ─────────────────────────── */
+      .stage-hero {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) minmax(240px,360px);
+        gap: 28px;
+        align-items: end;
+        padding: 48px 0 52px;
+        animation: rise-in 520ms ease both;
+      }
+      @media (max-width: 680px) { .stage-hero { grid-template-columns: 1fr; } }
+      .stage-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(40px, 6vw, 72px);
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        line-height: 1;
+        color: #fff;
+        margin-bottom: 14px;
+      }
+      .stage-hero p.intro {
+        font-size: 14px;
+        color: rgba(255,255,255,0.45);
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 500;
+        line-height: 1.7;
+        max-width: 540px;
+      }
+      .stage-summary {
+        display: grid;
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 10px;
+      }
+      .stage-summary div {
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        animation: pop-in 520ms ease both;
+      }
+      .stage-summary div:nth-child(2) { animation-delay: 80ms; }
+      .stage-summary div:nth-child(3) { animation-delay: 160ms; }
+      .stage-summary strong {
+        color: #fff;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 42px;
+        line-height: 1;
+        font-weight: 900;
+      }
+      .stage-summary span {
+        margin-top: 8px;
+        color: rgba(255,255,255,0.4);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* ── SECTION HEADING ────────────────────── */
+      .section-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .section-heading h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1.1;
+      }
+
+      /* ── PLAYOFF LINK ───────────────────────── */
+      .playoff-link {
+        flex-shrink: 0;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border: 1px solid rgba(232,67,45,0.4);
+        border-radius: 8px;
+        color: #e8432d;
+        background: rgba(232,67,45,0.07);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      .playoff-link:hover { background: rgba(232,67,45,0.14); border-color: rgba(232,67,45,0.7); }
+
+      /* ── GROUP ASSIGN ───────────────────────── */
+      .group-assign-section { padding: 40px 0 0; }
       .group-assign-section .section-heading { margin-bottom: 20px; }
       .group-assign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
       @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
-      .group-assign-card { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; }
-      .group-assign-card h3 { font-size: 14px; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; }
+      .group-assign-card { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 18px; }
+      .group-assign-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 0 0 14px; }
       .group-slots { display: flex; flex-direction: column; gap: 8px; }
-      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); min-height: 56px; transition: background 0.15s; }
-      .group-slot.has-team { border-color: rgba(1,210,215,0.3); background: rgba(1,210,215,0.06); }
-      .group-slot .slot-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-      .group-slot .slot-logo img { width: 44px; height: 44px; object-fit: contain; }
-      .group-slot .slot-name { font-size: 13px; font-weight: 700; flex: 1; }
+      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.07); min-height: 52px; transition: background 0.15s; }
+      .group-slot.has-team { border-color: rgba(232,67,45,0.35); background: rgba(232,67,45,0.06); }
+      .group-slot .slot-logo { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .group-slot .slot-logo img { width: 40px; height: 40px; object-fit: contain; }
+      .group-slot .slot-logo img.logo-white { filter: brightness(0) invert(1); }
+      .group-slot .slot-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; flex: 1; color: rgba(255,255,255,0.85); }
       .group-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
-      .group-slot .slot-rank { font-size: 11px; font-weight: 700; opacity: 0.4; margin-left: auto; }
+      .group-slot .slot-rank { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.25); margin-left: auto; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.06em; }
       body:not(.view-only) .group-slot { cursor: pointer; }
-      body:not(.view-only) .group-slot:hover { background: rgba(1,210,215,0.12); border-color: rgba(1,210,215,0.5); }
-      body:not(.view-only) .group-slot.has-team:hover { background: rgba(1,210,215,0.18); }
+      body:not(.view-only) .group-slot:hover { background: rgba(232,67,45,0.1); border-color: rgba(232,67,45,0.5); }
+      body:not(.view-only) .group-slot.has-team:hover { background: rgba(232,67,45,0.16); }
+
+      /* ── PICKER MODAL ───────────────────────── */
       .ga-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
       .ga-modal[hidden] { display: none !important; }
-      .ga-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
-      .ga-panel { position: relative; z-index: 1; width: min(520px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #0f1f20; border: 1.5px solid rgba(1,210,215,0.25); border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease; }
-      .ga-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; color: #fff; }
-      .ga-panel p { font-size: 13px; opacity: 0.6; margin: 0 0 18px; color: #fff; }
+      .ga-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
+      .ga-panel { position: relative; z-index: 1; width: min(520px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #121b2a; border: 1.5px solid rgba(232,67,45,0.25); border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease; }
+      @keyframes loginPanelIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+      .ga-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 4px; color: #fff; }
+      .ga-panel p { font-size: 13px; opacity: 0.5; margin: 0 0 18px; color: #fff; font-family: 'Noto Sans KR', sans-serif; }
       .ga-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
       @media (max-width: 400px) { .ga-team-grid { grid-template-columns: repeat(2, 1fr); } }
-      .ga-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s; font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; }
+      .ga-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09); color: #fff; font-family: 'Barlow Condensed', sans-serif; cursor: pointer; transition: all 0.14s; font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; }
       .ga-team-btn img { width: 32px; height: 32px; object-fit: contain; }
-      .ga-team-btn .ga-team-code { font-size: 13px; font-weight: 900; }
-      .ga-team-btn:hover { background: rgba(1,210,215,0.12); border-color: rgba(1,210,215,0.5); }
-      .ga-team-btn.selected { background: rgba(1,210,215,0.25); border-color: #01d2d7; box-shadow: 0 0 0 2px rgba(1,210,215,0.3); }
-      .ga-team-btn.in-other-group { opacity: 0.25; pointer-events: none; }
+      .ga-team-btn img.logo-white { filter: brightness(0) invert(1); }
+      .ga-team-btn .ga-team-code { font-size: 13px; font-weight: 900; letter-spacing: 0.06em; }
+      .ga-team-btn:hover { background: rgba(232,67,45,0.1); border-color: rgba(232,67,45,0.5); }
+      .ga-team-btn.selected { background: rgba(232,67,45,0.2); border-color: #e8432d; box-shadow: 0 0 0 2px rgba(232,67,45,0.25); }
+      .ga-team-btn.in-other-group { opacity: 0.22; pointer-events: none; }
       .ga-actions { display: flex; gap: 10px; justify-content: flex-end; }
-      .ga-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .ga-btn { padding: 9px 20px; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border: none; }
       .ga-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
       .ga-btn-cancel:hover { background: rgba(255,255,255,0.14); }
-      .ga-btn-save { background: #01d2d7; color: #071111; }
-      .ga-btn-clear { background: rgba(255,80,80,0.15); color: #ff5050; border: 1px solid rgba(255,80,80,0.25); }
-      .ga-btn-clear:hover { background: rgba(255,80,80,0.28); }
+      .ga-btn-save { background: #e8432d; color: #fff; }
+      .ga-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+      .ga-btn-clear:hover { background: rgba(255,80,80,0.24); }
+
+      /* ── WEEK TABS ──────────────────────────── */
+      .week-section { margin: 48px 0; animation: rise-in 560ms ease both; }
+      .week-tabs > input { position: absolute; opacity: 0; pointer-events: none; }
+      .week-tab-list {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0,1fr));
+        gap: 8px;
+        padding: 8px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 10px;
+      }
+      .week-tab-list label {
+        min-height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 7px;
+        background: transparent;
+        border: 1px solid transparent;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.4);
+        cursor: pointer;
+        transition: color 0.14s, background 0.14s, border-color 0.14s;
+      }
+      .week-tab-list label:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.1); }
+      #week-1:checked ~ .week-tab-list label[for="week-1"],
+      #week-2:checked ~ .week-tab-list label[for="week-2"],
+      #week-3:checked ~ .week-tab-list label[for="week-3"],
+      #week-4:checked ~ .week-tab-list label[for="week-4"],
+      #week-5:checked ~ .week-tab-list label[for="week-5"] {
+        color: #fff;
+        background: rgba(232,67,45,0.12);
+        border-color: rgba(232,67,45,0.35);
+      }
+      .week-panels { margin-top: 12px; }
+      .week-panel {
+        display: none;
+        overflow: hidden;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 10px;
+      }
+      #week-1:checked ~ .week-panels .week-panel-1,
+      #week-2:checked ~ .week-panels .week-panel-2,
+      #week-3:checked ~ .week-panels .week-panel-3,
+      #week-4:checked ~ .week-panels .week-panel-4,
+      #week-5:checked ~ .week-panels .week-panel-5 { display: block; animation: panel-in 360ms ease both; }
+      @keyframes panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      .week-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .week-meta strong { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; color: #fff; }
+      .week-meta span { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
+
+      /* ── MATCH CARD ─────────────────────────── */
+      .match-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 1px;
+        background: rgba(255,255,255,0.06);
+      }
+      @media (max-width: 600px) { .match-grid { grid-template-columns: 1fr; } }
+      .match-card {
+        position: relative;
+        min-height: 140px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 10px;
+        padding: 22px 16px 18px;
+        background: #0d1520;
+        cursor: pointer;
+        transition: background 0.18s;
+        overflow: hidden;
+      }
+      .match-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #e8432d, rgba(232,67,45,0.3));
+        transform: translateX(-100%);
+        transition: transform 320ms ease;
+      }
+      .match-card:hover { background: #111a28; }
+      .match-card:hover::before { transform: translateX(0); }
+      .match-card > span {
+        position: absolute;
+        top: 10px; left: 14px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.3);
+      }
+      .match-card strong {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 900;
+      }
+      .match-card strong span {
+        position: absolute;
+        width: 1px; height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      .match-card strong .match-team-mini-logo {
+        position: static;
+        width: 56px; height: 56px;
+        overflow: visible; clip: auto; white-space: normal;
+      }
+      .match-team-mini-logo {
+        width: 56px; height: 56px;
+        display: block; flex: 0 0 auto;
+        object-fit: contain;
+      }
+      .match-team-mini-logo img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      /* White filter for dark logos in match cards */
+      .match-team-mini-logo img[alt="PRX"],
+      .match-team-mini-logo img[alt="TS"],
+      .match-team-mini-logo img[alt="ZETA"],
+      .match-team-mini-logo img[alt="VL"] { filter: brightness(0) invert(1); }
+      .match-card em {
+        position: relative;
+        z-index: 1;
+        min-width: 52px;
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.85);
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 900;
+        font-family: 'Barlow Condensed', sans-serif;
+        transition: transform 0.18s;
+      }
+      .match-card:hover em { transform: scale(1.06); }
+      .match-card.upcoming em {
+        color: rgba(255,255,255,0.5);
+        background: rgba(232,67,45,0.08);
+        border-color: rgba(232,67,45,0.25);
+        animation: vs-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes vs-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.55; }
+      }
+      @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+      @keyframes pop-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+      @keyframes row-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+
+      /* ── STANDINGS ──────────────────────────── */
+      .standings-section { margin-top: 16px; animation: rise-in 680ms ease 120ms both; }
+      .standings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+      @media (max-width: 680px) { .standings-grid { grid-template-columns: 1fr; } }
+      .standings-card {
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.02);
+      }
+      .standings-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px 20px;
+        background: rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .standings-title h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
+      .standings-title span {
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(232,67,45,0.1);
+        border: 1px solid rgba(232,67,45,0.25);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #e8432d;
+        white-space: nowrap;
+      }
+      .standings-table { width: 100%; }
+      .standings-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(220px,1fr) 64px 64px 96px 56px;
+        align-items: stretch;
+        min-height: 88px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        color: rgba(255,255,255,0.85);
+      }
+      .standings-row::before {
+        position: absolute;
+        top: 0; bottom: 0; left: 0;
+        width: 4px;
+        content: '';
+        background: rgba(255,255,255,0.06);
+      }
+      .standings-row.advance::before { background: rgba(232,67,45,0.45); }
+      .standings-row.out::before { background: rgba(255,255,255,0.06); }
+      .standings-row.clinched { background: rgba(61,220,132,0.06); }
+      .standings-row.clinched::before { background: #3ddc84; animation: advance-pulse 2.4s ease-in-out infinite; }
+      @keyframes advance-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+      .standings-row.eliminated { background: rgba(239,74,94,0.06); }
+      .standings-row.eliminated::before { background: #ef4a5e; }
+      .standings-row:not(.standings-head) { animation: row-in 420ms ease both; }
+      .standings-row:nth-child(2) { animation-delay: 40ms; }
+      .standings-row:nth-child(3) { animation-delay: 90ms; }
+      .standings-row:nth-child(4) { animation-delay: 140ms; }
+      .standings-row:nth-child(5) { animation-delay: 190ms; }
+      .standings-row:nth-child(6) { animation-delay: 240ms; }
+      .standings-row:nth-child(7) { animation-delay: 290ms; }
+      .standings-head {
+        min-height: 48px;
+        background: rgba(255,255,255,0.025);
+        color: rgba(255,255,255,0.3);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .standings-head::before { display: none; }
+      .standings-row > span, .team-cell {
+        display: flex;
+        align-items: center;
+        border-left: 1px solid rgba(255,255,255,0.05);
+      }
+      .standings-row > span { justify-content: center; padding: 0 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-align: center; }
+      .standings-head > span { font-size: 11px; }
+      .standings-row > span:first-child { justify-content: flex-start; }
+      .team-cell { gap: 12px; min-width: 0; padding: 14px 16px; border-left: 0; }
+      .rank-badge {
+        width: 26px; height: 26px;
+        display: flex; flex: 0 0 auto;
+        align-items: center; justify-content: center;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 900;
+        color: rgba(255,255,255,0.7);
+      }
+      .stage-team-logo {
+        width: 50px; height: 50px;
+        display: flex; flex: 0 0 auto;
+        align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 7px;
+        overflow: hidden;
+      }
+      .stage-team-logo img { width: 36px; height: 36px; object-fit: contain; display: block; }
+      .stage-team-logo img[src$="krx.svg"] { width: 28px; height: 28px; }
+      .stage-team-logo img.logo-white { filter: brightness(0) invert(1); }
+      .team-cell strong, .team-cell span { display: block; }
+      .team-cell strong { font-family: 'Barlow', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; word-break: break-word; }
+      .team-cell span { margin-top: 3px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; }
+      .delta.plus { color: #3ddc84; }
+      .delta.minus { color: #ff6b6b; }
     </style>
   </head>
   <body class="league-page stage-page pacific-page">
@@ -58,29 +515,17 @@
       <a class="back-link" href="./pacific.html">Pacific</a>
     </header>
 
-    <main class="league-shell stage-shell">
+    <main class="league-shell">
       <section class="stage-hero" aria-labelledby="stage-title">
         <div>
           <p class="eyebrow">VCT Pacific 2026</p>
           <h1 id="stage-title">Stage 1 순위</h1>
-          <p class="intro">
-            Alpha와 Omega 두 그룹의 순위를 정리한 페이지입니다. 각 그룹 상위
-            4팀은 플레이오프에 진출하고, 하위 2팀은 탈락합니다.
-          </p>
+          <p class="intro">Pacific Stage 1 그룹 스테이지의 순위와 주차별 경기를 정리한 페이지입니다. 경기 카드를 누르면 수동으로 상세 결과를 입력할 수 있습니다.</p>
         </div>
         <div class="stage-summary" aria-label="Stage 1 진행 방식">
-          <div>
-            <strong>2</strong>
-            <span>그룹</span>
-          </div>
-          <div>
-            <strong>12</strong>
-            <span>팀</span>
-          </div>
-          <div>
-            <strong>8</strong>
-            <span>진출</span>
-          </div>
+          <div><strong>2</strong><span>그룹</span></div>
+          <div><strong>12</strong><span>팀</span></div>
+          <div><strong>8</strong><span>진출</span></div>
         </div>
       </section>
 
@@ -110,16 +555,14 @@
             <p class="eyebrow">경기 목록</p>
             <h2 id="weeks-title">주차별 경기</h2>
           </div>
-          <a class="playoff-link" href="./pacific-playoffs.html">PlayOff 대진표</a>
+          <a class="playoff-link" href="./pacific-stage1-playoffs.html">PlayOff 대진표</a>
         </div>
-
         <div class="week-tabs">
           <input type="radio" name="week" id="week-1" checked />
           <input type="radio" name="week" id="week-2" />
           <input type="radio" name="week" id="week-3" />
           <input type="radio" name="week" id="week-4" />
           <input type="radio" name="week" id="week-5" />
-
           <div class="week-tab-list" aria-label="주차 선택">
             <label for="week-1">1주차</label>
             <label for="week-2">2주차</label>
@@ -127,80 +570,60 @@
             <label for="week-4">4주차</label>
             <label for="week-5">5주차</label>
           </div>
-
           <div class="week-panels">
             <div class="week-panel week-panel-1">
-              <div class="week-meta">
-                <strong>Week 1</strong>
-                <span>2026. 04. 03 - 04. 05</span>
-              </div>
+              <div class="week-meta"><strong>Week 1</strong><span>2026. 04. 03 - 04. 05</span></div>
               <div class="match-grid">
-                <article class="match-card"><span>04.03</span><strong>Gen.G</strong><em>0 : 2</em><strong>Global Esports</strong></article>
-                <article class="match-card"><span>04.03</span><strong>T1</strong><em>2 : 0</em><strong>VARREL</strong></article>
-                <article class="match-card"><span>04.04</span><strong>Nongshim RedForce</strong><em>1 : 2</em><strong>Paper Rex</strong></article>
-                <article class="match-card"><span>04.04</span><strong>FULL SENSE</strong><em>2 : 0</em><strong>DetonatioN FocusMe</strong></article>
-                <article class="match-card"><span>04.05</span><strong>Team Secret</strong><em>0 : 2</em><strong>Kiwoom DRX</strong></article>
-                <article class="match-card"><span>04.05</span><strong>Rex Regum Qeon</strong><em>2 : 1</em><strong>ZETA DIVISION</strong></article>
+                <article class="match-card upcoming"><span>04.03</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
+                <article class="match-card upcoming"><span>04.03</span><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
+                <article class="match-card upcoming"><span>04.04</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
+                <article class="match-card upcoming"><span>04.04</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
+                <article class="match-card upcoming"><span>04.05</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
+                <article class="match-card upcoming"><span>04.05</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
               </div>
             </div>
-
             <div class="week-panel week-panel-2">
-              <div class="week-meta">
-                <strong>Week 2</strong>
-                <span>2026. 04. 10 - 04. 12</span>
-              </div>
+              <div class="week-meta"><strong>Week 2</strong><span>2026. 04. 10 - 04. 12</span></div>
               <div class="match-grid">
-                <article class="match-card"><span>04.10</span><strong>DetonatioN FocusMe</strong><em>0 : 2</em><strong>T1</strong></article>
-                <article class="match-card"><span>04.10</span><strong>Nongshim RedForce</strong><em>1 : 2</em><strong>Kiwoom DRX</strong></article>
-                <article class="match-card"><span>04.11</span><strong>Team Secret</strong><em>0 : 2</em><strong>Global Esports</strong></article>
-                <article class="match-card"><span>04.11</span><strong>Rex Regum Qeon</strong><em>2 : 0</em><strong>VARREL</strong></article>
-                <article class="match-card"><span>04.12</span><strong>FULL SENSE</strong><em>2 : 0</em><strong>ZETA DIVISION</strong></article>
-                <article class="match-card"><span>04.12</span><strong>Gen.G</strong><em>2 : 1</em><strong>Paper Rex</strong></article>
+                <article class="match-card upcoming"><span>04.10</span><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
+                <article class="match-card upcoming"><span>04.10</span><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
+                <article class="match-card upcoming"><span>04.11</span><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong><em>VS</em><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong></article>
+                <article class="match-card upcoming"><span>04.11</span><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong><em>VS</em><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong></article>
+                <article class="match-card upcoming"><span>04.12</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong></article>
+                <article class="match-card upcoming"><span>04.12</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
               </div>
             </div>
-
             <div class="week-panel week-panel-3">
-              <div class="week-meta">
-                <strong>Week 3</strong>
-                <span>2026. 04. 17 - 04. 19</span>
-              </div>
+              <div class="week-meta"><strong>Week 3</strong><span>2026. 04. 17 - 04. 19</span></div>
               <div class="match-grid">
-                <article class="match-card"><span>04.17</span><strong>FULL SENSE</strong><em>2 : 0</em><strong>VARREL</strong></article>
-                <article class="match-card"><span>04.17</span><strong>Team Secret</strong><em>0 : 2</em><strong>Paper Rex</strong></article>
-                <article class="match-card"><span>04.18</span><strong>Kiwoom DRX</strong><em>2 : 0</em><strong>Global Esports</strong></article>
-                <article class="match-card"><span>04.18</span><strong>ZETA DIVISION</strong><em>1 : 2</em><strong>DetonatioN FocusMe</strong></article>
-                <article class="match-card"><span>04.19</span><strong>Rex Regum Qeon</strong><em>0 : 2</em><strong>T1</strong></article>
-                <article class="match-card"><span>04.19</span><strong>Nongshim RedForce</strong><em>2 : 0</em><strong>Gen.G</strong></article>
+                <article class="match-card upcoming"><span>04.17</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
+                <article class="match-card upcoming"><span>04.17</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
+                <article class="match-card upcoming"><span>04.18</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong></article>
+                <article class="match-card upcoming"><span>04.18</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
+                <article class="match-card upcoming"><span>04.19</span><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
+                <article class="match-card upcoming"><span>04.19</span><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
               </div>
             </div>
-
             <div class="week-panel week-panel-4">
-              <div class="week-meta">
-                <strong>Week 4</strong>
-                <span>2026. 04. 24 - 04. 26</span>
-              </div>
+              <div class="week-meta"><strong>Week 4</strong><span>2026. 04. 24 - 04. 26</span></div>
               <div class="match-grid">
-                <article class="match-card"><span>04.24</span><strong>Rex Regum Qeon</strong><em>2 : 1</em><strong>FULL SENSE</strong></article>
-                <article class="match-card"><span>04.24</span><strong>Paper Rex</strong><em>2 : 0</em><strong>Global Esports</strong></article>
-                <article class="match-card"><span>04.25</span><strong>Gen.G</strong><em>1 : 2</em><strong>Kiwoom DRX</strong></article>
-                <article class="match-card"><span>04.25</span><strong>DetonatioN FocusMe</strong><em>2 : 1</em><strong>VARREL</strong></article>
-                <article class="match-card"><span>04.26</span><strong>T1</strong><em>2 : 0</em><strong>ZETA DIVISION</strong></article>
-                <article class="match-card"><span>04.26</span><strong>Nongshim RedForce</strong><em>2 : 1</em><strong>Team Secret</strong></article>
+                <article class="match-card upcoming"><span>04.24</span><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
+                <article class="match-card upcoming"><span>04.24</span><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
+                <article class="match-card upcoming"><span>04.25</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
+                <article class="match-card upcoming"><span>04.25</span><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
+                <article class="match-card upcoming"><span>04.26</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong></article>
+                <article class="match-card upcoming"><span>04.26</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong></article>
               </div>
             </div>
-
             <div class="week-panel week-panel-5">
-              <div class="week-meta">
-                <strong>Week 5</strong>
-                <span>2026. 05. 01 - 05. 03</span>
-              </div>
+              <div class="week-meta"><strong>Week 5</strong><span>2026. 05. 15 - 05. 17</span></div>
               <div class="match-grid">
-                <article class="match-card"><span>05.01</span><strong>Gen.G</strong><em>VS</em><strong>Team Secret</strong></article>
-                <article class="match-card"><span>05.01</span><strong>VARREL</strong><em>VS</em><strong>ZETA DIVISION</strong></article>
-                <article class="match-card"><span>05.02</span><strong>T1</strong><em>VS</em><strong>FULL SENSE</strong></article>
-                <article class="match-card"><span>05.02</span><strong>Nongshim RedForce</strong><em>VS</em><strong>Global Esports</strong></article>
-                <article class="match-card"><span>05.03</span><strong>Paper Rex</strong><em>VS</em><strong>Kiwoom DRX</strong></article>
-                <article class="match-card"><span>05.03</span><strong>Rex Regum Qeon</strong><em>VS</em><strong>DetonatioN FocusMe</strong></article>
+                <article class="match-card upcoming"><span>05.15</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
+                <article class="match-card upcoming"><span>05.15</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
+                <article class="match-card upcoming"><span>05.16</span><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong><em>VS</em><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong></article>
+                <article class="match-card upcoming"><span>05.16</span><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong><em>VS</em><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong></article>
+                <article class="match-card upcoming"><span>05.17</span><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong><em>VS</em><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong></article>
+                <article class="match-card upcoming"><span>05.17</span><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
               </div>
             </div>
           </div>
@@ -212,7 +635,6 @@
           <p class="eyebrow">순위표</p>
           <h2 id="groups-title">그룹 순위</h2>
         </div>
-
         <div class="standings-grid">
           <article class="standings-card">
             <div class="standings-title">
@@ -220,259 +642,49 @@
               <span>상위 4팀 진출</span>
             </div>
             <div class="standings-table" role="table" aria-label="알파조 순위">
-              <div class="standings-row standings-head" role="row">
-                <span>팀</span>
-                <span>승패</span>
-                <span>맵</span>
-                <span>라운드</span>
-                <span>득실</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">1</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/krx.svg" alt="Kiwoom DRX" /></div>
-                  <div>
-                    <strong>Kiwoom DRX</strong>
-                    <span>대한민국</span>
-                  </div>
-                </div>
-                <span>4 - 0</span>
-                <span>8 / 2</span>
-                <span>128 / 111</span>
-                <span class="delta plus">+17</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">2</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/prx.svg" alt="Paper Rex" /></div>
-                  <div>
-                    <strong>Paper Rex</strong>
-                    <span>싱가포르</span>
-                  </div>
-                </div>
-                <span>3 - 1</span>
-                <span>7 / 3</span>
-                <span>127 / 95</span>
-                <span class="delta plus">+32</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">3</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/ns.svg" alt="Nongshim RedForce" /></div>
-                  <div>
-                    <strong>Nongshim RedForce</strong>
-                    <span>대한민국</span>
-                  </div>
-                </div>
-                <span>2 - 2</span>
-                <span>6 / 5</span>
-                <span>127 / 115</span>
-                <span class="delta plus">+12</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">4</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/ge.webp" alt="Global Esports" /></div>
-                  <div>
-                    <strong>Global Esports</strong>
-                    <span>인도</span>
-                  </div>
-                </div>
-                <span>2 - 2</span>
-                <span>4 / 4</span>
-                <span>80 / 82</span>
-                <span class="delta minus">-2</span>
-              </div>
-
-              <div class="standings-row out" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">5</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/gen.png" alt="Gen.G" /></div>
-                  <div>
-                    <strong>Gen.G</strong>
-                    <span>대한민국</span>
-                  </div>
-                </div>
-                <span>1 - 3</span>
-                <span>3 / 7</span>
-                <span>96 / 118</span>
-                <span class="delta minus">-22</span>
-              </div>
-
-              <div class="standings-row out" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">6</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/ts.svg" alt="Team Secret" /></div>
-                  <div>
-                    <strong>Team Secret</strong>
-                    <span>필리핀</span>
-                  </div>
-                </div>
-                <span>0 - 4</span>
-                <span>1 / 8</span>
-                <span>82 / 119</span>
-                <span class="delta minus">-37</span>
-              </div>
+              <div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">1</div><div class="stage-team-logo"><img src="./assets/teams/prx.svg" alt="PRX" class="logo-white" /></div><div><strong>Paper Rex</strong><span>싱가포르</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">2</div><div class="stage-team-logo"><img src="./assets/teams/gen.png" alt="GEN" /></div><div><strong>Gen.G</strong><span>대한민국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">3</div><div class="stage-team-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></div><div><strong>Kiwoom DRX</strong><span>대한민국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">4</div><div class="stage-team-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></div><div><strong>Rex Regum Qeon</strong><span>인도네시아</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">5</div><div class="stage-team-logo"><img src="./assets/teams/t1.png" alt="T1" /></div><div><strong>T1</strong><span>대한민국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">6</div><div class="stage-team-logo"><img src="./assets/teams/fs.svg" alt="FS" /></div><div><strong>FULL SENSE</strong><span>태국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
             </div>
           </article>
-
           <article class="standings-card">
             <div class="standings-title">
               <h3>오메가조</h3>
               <span>상위 4팀 진출</span>
             </div>
             <div class="standings-table" role="table" aria-label="오메가조 순위">
-              <div class="standings-row standings-head" role="row">
-                <span>팀</span>
-                <span>승패</span>
-                <span>맵</span>
-                <span>라운드</span>
-                <span>득실</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">1</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/t1.png" alt="T1" /></div>
-                  <div>
-                    <strong>T1</strong>
-                    <span>대한민국</span>
-                  </div>
-                </div>
-                <span>4 - 0</span>
-                <span>8 / 0</span>
-                <span>106 / 65</span>
-                <span class="delta plus">+41</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">2</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/rrq.png" alt="Rex Regum Qeon" /></div>
-                  <div>
-                    <strong>Rex Regum Qeon</strong>
-                    <span>인도네시아</span>
-                  </div>
-                </div>
-                <span>3 - 1</span>
-                <span>6 / 4</span>
-                <span>115 / 107</span>
-                <span class="delta plus">+8</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">3</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/fs.svg" alt="FULL SENSE" /></div>
-                  <div>
-                    <strong>FULL SENSE</strong>
-                    <span>태국</span>
-                  </div>
-                </div>
-                <span>3 - 1</span>
-                <span>7 / 2</span>
-                <span>105 / 79</span>
-                <span class="delta plus">+26</span>
-              </div>
-
-              <div class="standings-row advance" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">4</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/dfm.svg" alt="DetonatioN FocusMe" /></div>
-                  <div>
-                    <strong>DetonatioN FocusMe</strong>
-                    <span>일본</span>
-                  </div>
-                </div>
-                <span>2 - 2</span>
-                <span>4 / 6</span>
-                <span>105 / 112</span>
-                <span class="delta minus">-7</span>
-              </div>
-
-              <div class="standings-row out" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">5</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/zeta.png" alt="ZETA DIVISION" /></div>
-                  <div>
-                    <strong>ZETA DIVISION</strong>
-                    <span>일본</span>
-                  </div>
-                </div>
-                <span>0 - 4</span>
-                <span>2 / 8</span>
-                <span>81 / 121</span>
-                <span class="delta minus">-40</span>
-              </div>
-
-              <div class="standings-row out" role="row">
-                <div class="team-cell">
-                  <div class="rank-badge">6</div>
-                  <div class="stage-team-logo"><img src="./assets/teams/vl.svg" alt="VARREL" /></div>
-                  <div>
-                    <strong>VARREL</strong>
-                    <span>일본</span>
-                  </div>
-                </div>
-                <span>0 - 4</span>
-                <span>1 / 8</span>
-                <span>90 / 118</span>
-                <span class="delta minus">-28</span>
-              </div>
+              <div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>라운드</span><span>득실</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">1</div><div class="stage-team-logo"><img src="./assets/teams/ge.webp" alt="GE" /></div><div><strong>Global Esports</strong><span>인도</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">2</div><div class="stage-team-logo"><img src="./assets/teams/ts.svg" alt="TS" class="logo-white" /></div><div><strong>Team Secret</strong><span>필리핀</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">3</div><div class="stage-team-logo"><img src="./assets/teams/zeta.png" alt="ZETA" class="logo-white" /></div><div><strong>ZETA DIVISION</strong><span>일본</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row advance" role="row"><div class="team-cell"><div class="rank-badge">4</div><div class="stage-team-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></div><div><strong>DetonatioN FocusMe</strong><span>일본</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">5</div><div class="stage-team-logo"><img src="./assets/teams/ns.svg" alt="NS" /></div><div><strong>Nongshim RedForce</strong><span>대한민국</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
+              <div class="standings-row out" role="row"><div class="team-cell"><div class="rank-badge">6</div><div class="stage-team-logo"><img src="./assets/teams/vl.svg" alt="VL" class="logo-white" /></div><div><strong>VARREL</strong><span>일본</span></div></div><span>0 - 0</span><span>0 / 0</span><span>0 / 0</span><span class="delta plus">0</span></div>
             </div>
           </article>
         </div>
       </section>
     </main>
+
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {
-
-      const stageTeamLogos = {
-        "DetonatioN FocusMe": "./assets/teams/dfm.svg",
-        "Global Esports": "./assets/teams/ge.webp",
-        "Kiwoom DRX": "./assets/teams/krx.svg",
-        "Nongshim RedForce": "./assets/teams/ns.svg",
-        "Paper Rex": "./assets/teams/prx.svg",
-        "Rex Regum Qeon": "./assets/teams/rrq.png",
-        "Team Secret": "./assets/teams/ts.svg",
-        "ZETA DIVISION": "./assets/teams/zeta.png",
-        "FULL SENSE": "./assets/teams/fs.svg",
-        "Gen.G": "./assets/teams/gen.png",
-        "VARREL": "./assets/teams/vl.svg",
-        T1: "./assets/teams/t1.png",
-      };
-
-      document.querySelectorAll(".match-card strong").forEach((teamNameElement) => {
-        const teamName = teamNameElement.textContent.trim();
-        const logo = stageTeamLogos[teamName];
-
-        if (!logo) return;
-
-        teamNameElement.setAttribute("aria-label", teamName);
-        teamNameElement.innerHTML = `
-          <img class="match-team-mini-logo" src="${logo}" alt="" />
-          <span>${teamName}</span>
-        `;
-      });
 
       function getStoredMatchScore(date, teamA, teamB, fallbackScore) {
         try {
           const stored = JSON.parse(localStorage.getItem(`result:${date}|${teamA}|${teamB}`) || "{}");
           const scoreA = String(stored.scoreA ?? "").trim();
           const scoreB = String(stored.scoreB ?? "").trim();
-          if (scoreA && scoreB && scoreA !== "-" && scoreB !== "-") {
-            return `${scoreA} : ${scoreB}`;
-          }
-        } catch (error) {
-          return fallbackScore;
-        }
+          if (scoreA && scoreB && scoreA !== "-" && scoreB !== "-") return `${scoreA} : ${scoreB}`;
+        } catch {}
         return fallbackScore;
       }
+
+      const currentStandingsSeed = {};
 
       const standingsTables = [...document.querySelectorAll(".standings-table")];
       const standingsGroups = standingsTables.map((table) => {
@@ -484,7 +696,18 @@
           const [wins = 0, losses = 0] = (cells[1]?.textContent.match(/\d+/g) || []).map(Number);
           const [mapsWon = 0, mapsLost = 0] = (cells[2]?.textContent.match(/\d+/g) || []).map(Number);
           const [roundsWon = 0, roundsLost = 0] = (cells[3]?.textContent.match(/\d+/g) || []).map(Number);
-          return { team, country, logo, wins, losses, mapsWon, mapsLost, roundsWon, roundsLost };
+          const seed = currentStandingsSeed[team] || {};
+          return {
+            team,
+            country: seed.country ?? country,
+            logo,
+            wins: seed.wins ?? wins,
+            losses: seed.losses ?? losses,
+            mapsWon: seed.mapsWon ?? mapsWon,
+            mapsLost: seed.mapsLost ?? mapsLost,
+            roundsWon: seed.roundsWon ?? roundsWon,
+            roundsLost: seed.roundsLost ?? roundsLost
+          };
         });
       });
 
@@ -514,7 +737,7 @@
               }
               return total;
             },
-            { a: 0, b: 0 },
+            { a: 0, b: 0 }
           );
         } catch {
           return { a: 0, b: 0 };
@@ -533,12 +756,18 @@
 
       function rankGroup(rows, fixtures) {
         const teamSet = new Set(rows.map((row) => row.team));
-        const stats = new Map(
-          rows.map((row) => [
-            row.team,
-            { ...row, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0 },
-          ]),
-        );
+        const stats = new Map(rows.map((row) => {
+          const seed = currentStandingsSeed[row.team] || {};
+          return [row.team, {
+            ...row,
+            wins: 0,
+            losses: 0,
+            mapsWon: 0,
+            mapsLost: 0,
+            roundsWon: seed.roundsWon ?? row.roundsWon ?? 0,
+            roundsLost: seed.roundsLost ?? row.roundsLost ?? 0,
+          }];
+        }));
         const completed = fixtures
           .map((match) => ({ ...match, parsed: parseScore(match.score) }))
           .filter((match) => match.parsed && teamSet.has(match.teamA) && teamSet.has(match.teamB));
@@ -551,13 +780,8 @@
           a.mapsLost += score.b;
           b.mapsWon += score.b;
           b.mapsLost += score.a;
-          if (score.a > score.b) {
-            a.wins += 1;
-            b.losses += 1;
-          } else if (score.b > score.a) {
-            b.wins += 1;
-            a.losses += 1;
-          }
+          if (score.a > score.b) { a.wins += 1; b.losses += 1; }
+          else if (score.b > score.a) { b.wins += 1; a.losses += 1; }
           const rounds = getSavedSetRounds(match, match.originallyPending);
           a.roundsWon += rounds.a;
           a.roundsLost += rounds.b;
@@ -576,7 +800,7 @@
               if (teamLost) total.losses += 1;
               return total;
             },
-            { wins: 0, losses: 0 },
+            { wins: 0, losses: 0 }
           );
         };
 
@@ -618,23 +842,15 @@
         };
 
         const explore = (index, scenarioFixtures) => {
-          if (index >= remaining.length) {
-            recordScenario(scenarioFixtures);
-            return;
-          }
-
+          if (index >= remaining.length) { recordScenario(scenarioFixtures); return; }
           const match = remaining[index];
           outcomes.forEach((score) => {
-            explore(
-              index + 1,
-              scenarioFixtures.map((fixture) => (fixture === match ? { ...fixture, score } : fixture)),
-            );
+            explore(index + 1, scenarioFixtures.map((f) => (f === match ? { ...f, score } : f)));
           });
         };
 
         if (remaining.length) explore(0, fixtures);
         else recordScenario(fixtures);
-
         return possibilities;
       }
 
@@ -667,37 +883,29 @@
 
       document.querySelectorAll(".match-card").forEach((card) => {
         const date = card.querySelector(":scope > span")?.textContent.trim() || "";
-        const teams = [...card.querySelectorAll("strong")].map((team) => {
-          return team.getAttribute("aria-label") || team.textContent.trim();
-        });
+        const teams = [...card.querySelectorAll("strong")].map((team) => team.getAttribute("aria-label") || team.textContent.trim());
         const scoreElement = card.querySelector("em");
         const originalScore = scoreElement?.textContent.trim() || "VS";
         card.dataset.originalScore = originalScore;
         const score = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
         if (scoreElement) scoreElement.textContent = score;
         if (score !== "VS") card.classList.remove("upcoming");
-
         card.setAttribute("role", "link");
         card.setAttribute("tabindex", "0");
         card.addEventListener("click", () => {
-          const params = new URLSearchParams({
-            date,
-            teamA: teams[0] || "",
-            teamB: teams[1] || "",
-            score,
-          });
-          window.location.href = `./pacific-match.html?${params.toString()}`;
+          const currentScore = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
+          const params = new URLSearchParams({ date, teamA: teams[0] || "", teamB: teams[1] || "", score: currentScore, from: "stage1" });
+          window.location.href = "./pacific-match.html?" + params.toString();
         });
         card.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            card.click();
-          }
+          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card.click(); }
         });
       });
+
       renderStandings();
-        });
+    });
     </script>
+
     <!-- 그룹 팀 선택 모달 -->
     <div class="ga-modal" id="ga-modal" hidden>
       <div class="ga-backdrop" id="ga-backdrop"></div>
@@ -712,36 +920,39 @@
     window.storageReady.then(function () {
       const GA_KEY = "stage1_pacific_groups";
       const GA_TEAMS = [
-        "DetonatioN FocusMe","Global Esports","Kiwoom DRX","Nongshim RedForce",
-        "Paper Rex","Rex Regum Qeon","Team Secret","ZETA DIVISION",
-        "FULL SENSE","Gen.G","VARREL","T1",
+        "Paper Rex","Gen.G","Kiwoom DRX","Rex Regum Qeon",
+        "T1","FULL SENSE","Global Esports","Team Secret",
+        "ZETA DIVISION","DetonatioN FocusMe","Nongshim RedForce","VARREL",
       ];
       const GA_CODES = {
-        "DetonatioN FocusMe":"DFM","Global Esports":"GE","Kiwoom DRX":"KRX",
-        "Nongshim RedForce":"NS","Paper Rex":"PRX","Rex Regum Qeon":"RRQ",
-        "Team Secret":"TS","ZETA DIVISION":"ZETA","FULL SENSE":"FS",
-        "Gen.G":"GEN","VARREL":"VL","T1":"T1",
+        "Paper Rex":"PRX","Gen.G":"GEN","Kiwoom DRX":"DRX","Rex Regum Qeon":"RRQ",
+        "T1":"T1","FULL SENSE":"FS","Global Esports":"GE","Team Secret":"TS",
+        "ZETA DIVISION":"ZETA","DetonatioN FocusMe":"DFM","Nongshim RedForce":"NS","VARREL":"VL",
       };
       const GA_LOGOS = {
-        "DetonatioN FocusMe":"./assets/teams/dfm.svg",
-        "Global Esports":"./assets/teams/ge.webp",
-        "Kiwoom DRX":"./assets/teams/krx.svg",
-        "Nongshim RedForce":"./assets/teams/ns.svg",
         "Paper Rex":"./assets/teams/prx.svg",
+        "Gen.G":"./assets/teams/gen.png",
+        "Kiwoom DRX":"./assets/teams/krx.svg",
         "Rex Regum Qeon":"./assets/teams/rrq.png",
+        "T1":"./assets/teams/t1.png",
+        "FULL SENSE":"./assets/teams/fs.svg",
+        "Global Esports":"./assets/teams/ge.webp",
         "Team Secret":"./assets/teams/ts.svg",
         "ZETA DIVISION":"./assets/teams/zeta.png",
-        "FULL SENSE":"./assets/teams/fs.svg",
-        "Gen.G":"./assets/teams/gen.png",
+        "DetonatioN FocusMe":"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png",
+        "Nongshim RedForce":"./assets/teams/ns.svg",
         "VARREL":"./assets/teams/vl.svg",
-        "T1":"./assets/teams/t1.png",
       };
+      const GA_WHITE = new Set(["Paper Rex","Team Secret","ZETA DIVISION","VARREL"]);
+
       const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
       function loadGroups() {
         try { const r = localStorage.getItem(GA_KEY); if (r) return JSON.parse(r); } catch {}
         return { alpha: Array(6).fill(""), omega: Array(6).fill("") };
       }
       function saveGroups(g) { localStorage.setItem(GA_KEY, JSON.stringify(g)); }
+
       function renderGroupSlots() {
         const groups = loadGroups();
         ["alpha","omega"].forEach(grp => {
@@ -751,13 +962,17 @@
           groups[grp].forEach((team, i) => {
             const slot = document.createElement("div");
             slot.className = "group-slot" + (team ? " has-team" : " empty");
-            const logo = team && GA_LOGOS[team] ? `<img src="${GA_LOGOS[team]}" alt="${team}" style="width:44px;height:44px;object-fit:contain;" />` : "";
+            const isWhite = team && GA_WHITE.has(team);
+            const logo = team && GA_LOGOS[team]
+              ? `<img src="${GA_LOGOS[team]}" alt="${team}"${isWhite ? ' class="logo-white"' : ""} style="width:40px;height:40px;object-fit:contain;" />`
+              : "";
             slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${team || "팀 선택"}</span><span class="slot-rank">${i+1}번 슬롯</span>`;
             if (isAdmin()) slot.addEventListener("click", () => openPicker(grp, i));
             el.appendChild(slot);
           });
         });
       }
+
       let _ctx = null;
       function openPicker(grp, idx) {
         _ctx = { grp, idx };
@@ -768,13 +983,13 @@
         const grid = document.getElementById("ga-team-grid");
         grid.innerHTML = GA_TEAMS.map(t => {
           const isUsed = used.has(t) && t !== current;
-          const logo = GA_LOGOS[t] ? `<img src="${GA_LOGOS[t]}" alt="${t}" />` : "";
+          const isWhite = GA_WHITE.has(t);
+          const logo = GA_LOGOS[t] ? `<img src="${GA_LOGOS[t]}" alt="${t}"${isWhite ? ' class="logo-white"' : ""} />` : "";
           return `<button class="ga-team-btn${t === current ? " selected" : ""}${isUsed ? " in-other-group" : ""}" data-team="${t}">${logo}<span class="ga-team-code">${GA_CODES[t] || t.slice(0,3)}</span><span>${t}</span></button>`;
         }).join("");
         grid.querySelectorAll(".ga-team-btn").forEach(btn => {
           btn.addEventListener("click", () => {
-            const g = loadGroups();
-            g[_ctx.grp][_ctx.idx] = btn.dataset.team;
+            const g = loadGroups(); g[_ctx.grp][_ctx.idx] = btn.dataset.team;
             saveGroups(g); closeModal(); renderGroupSlots();
           });
         });
@@ -791,6 +1006,6 @@
       renderGroupSlots();
     });
     </script>
-  <script src="./auth.js"></script>
-</body>
+    <script src="./auth.js"></script>
+  </body>
 </html>

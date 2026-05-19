@@ -1411,35 +1411,39 @@
     body.white-mode .kda-a { font-size: 15px; }
     body.white-mode .kda-sep { font-size: 15px; font-weight: 700; }
 
+    /* 헤더 auth 버튼은 KickOff 바로 옆에 붙도록 margin-left 제거 */
+    .site-header .auth-header-btn { margin-left: 0; }
+
   </style>
 </head>
 <body>
 
   <!-- ── NAV HEADER ──────────────────────────────── -->
-  <header style="
-    width: min(1280px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 20px 0 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  <header class="site-header" style="
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,21,32,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0 32px; height: 56px;
+    display: flex; align-items: center; gap: 20px;
   ">
     <a href="./index.html" style="
       font-family:'Barlow Condensed',sans-serif;
-      font-weight:900; font-size:18px;
+      font-weight:700; font-size:15px;
+      letter-spacing:0.12em; text-transform:uppercase;
       color:rgba(255,255,255,0.55);
       text-decoration:none;
-      letter-spacing:0.04em;
+      transition: color 0.15s;
     ">VCT Archive</a>
     <a id="nav-back-link" href="./pacific-kickoff.html" style="
       font-family:'Barlow Condensed',sans-serif;
-      font-weight:700; font-size:14px;
-      color:rgba(255,255,255,0.75);
+      font-weight:600; font-size:13px;
+      letter-spacing:0.1em; text-transform:uppercase;
+      color:rgba(255,255,255,0.4);
       text-decoration:none;
-      padding: 6px 18px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
+      margin-left: auto;
+      transition: color 0.15s;
     ">–</a>
   </header>
 
@@ -2645,6 +2649,14 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
     var el = document.getElementById(id);
     if (el) el.addEventListener('change', saveSharedResult);
   });
+
+  /* view-only: 스코어 input readonly 처리 */
+  if (!window.vctIsAdmin || !window.vctIsAdmin()) {
+    document.querySelectorAll('.mo-score-num').forEach(function(el) {
+      el.readOnly = true;
+      el.style.pointerEvents = 'none';
+    });
+  }
 });
 
 // ── 라운드 트래커 렌더링 ──────────────────────────────────────
@@ -3571,5 +3583,6 @@ function toggleMode() {
 }
 
 </script>
+<script src="./auth.js"></script>
 </body>
 </html>
