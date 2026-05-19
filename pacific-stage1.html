@@ -507,6 +507,56 @@
       .team-cell span { margin-top: 3px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; }
       .delta.plus { color: #3ddc84; }
       .delta.minus { color: #ff6b6b; }
+
+      /* ── FIXTURE SLOTS ─────────────────────── */
+      .fixture-slot { min-height: 110px; }
+      .fixture-empty {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 8px; min-height: 110px;
+        background: rgba(255,255,255,0.02); border: 1.5px dashed rgba(255,255,255,0.1);
+        border-radius: 8px; transition: border-color 0.15s, background 0.15s;
+      }
+      .fixture-empty.clickable { cursor: pointer; }
+      .fixture-empty.clickable:hover { border-color: rgba(232,67,45,0.4); background: rgba(232,67,45,0.04); }
+      .fixture-date-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); }
+      .fixture-add-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(232,67,45,0.55); background: none; border: 1px solid rgba(232,67,45,0.25); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+      .fixture-tbd { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+      .match-card .fixture-edit-btn { position: absolute; top: 5px; right: 8px; font-size: 10px; color: rgba(255,255,255,0.2); background: none; border: none; cursor: pointer; padding: 2px; line-height: 1; }
+      .match-card .fixture-edit-btn:hover { color: rgba(232,67,45,0.7); }
+      .match-card { position: relative; }
+
+      /* ── FIXTURE PICKER MODAL ──────────────── */
+      .fp-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
+      .fp-modal[hidden] { display: none !important; }
+      .fp-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
+      .fp-panel {
+        position: relative; z-index: 1;
+        width: min(560px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto;
+        background: #121b2a; border: 1.5px solid rgba(232,67,45,0.22);
+        border-radius: 18px; padding: 24px; animation: panelIn 0.2s ease;
+      }
+      @keyframes panelIn { from { opacity:0; transform: translateY(12px) scale(0.97); } to { opacity:1; transform: none; } }
+      .fp-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin: 0 0 4px; }
+      .fp-step-label { font-size: 12px; color: rgba(255,255,255,0.4); font-family: 'Noto Sans KR', sans-serif; margin: 0 0 16px; }
+      .fp-team-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
+      .fp-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 5px;
+        padding: 10px 6px; border-radius: 10px;
+        background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09);
+        color: #fff; font-family: 'Barlow Condensed', sans-serif;
+        cursor: pointer; transition: all 0.14s; font-size: 10px; font-weight: 700; text-align: center;
+      }
+      .fp-team-btn img { width: 28px; height: 28px; object-fit: contain; }
+      .fp-team-btn .fp-code { font-size: 13px; font-weight: 900; letter-spacing: 0.05em; }
+      .fp-team-btn:hover { background: rgba(232,67,45,0.1); border-color: rgba(232,67,45,0.45); }
+      .fp-team-btn.selected { background: rgba(232,67,45,0.2); border-color: #e8432d; }
+      .fp-team-btn:disabled { opacity: 0.3; pointer-events: none; }
+      .fp-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+      .fp-btn { padding: 9px 20px; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border: none; }
+      .fp-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
+      .fp-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .fp-btn-clear { background: rgba(255,80,80,0.1); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+      .fp-btn-clear:hover { background: rgba(255,80,80,0.22); }
     </style>
   </head>
   <body class="league-page stage-page pacific-page">
@@ -574,56 +624,56 @@
             <div class="week-panel week-panel-1">
               <div class="week-meta"><strong>Week 1</strong><span>2026. 04. 03 - 04. 05</span></div>
               <div class="match-grid">
-                <article class="match-card upcoming"><span>04.03</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
-                <article class="match-card upcoming"><span>04.03</span><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
-                <article class="match-card upcoming"><span>04.04</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
-                <article class="match-card upcoming"><span>04.04</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
-                <article class="match-card upcoming"><span>04.05</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
-                <article class="match-card upcoming"><span>04.05</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
+                <div class="fixture-slot" data-week="1" data-slot="0" data-date="04.03"></div>
+                <div class="fixture-slot" data-week="1" data-slot="1" data-date="04.03"></div>
+                <div class="fixture-slot" data-week="1" data-slot="2" data-date="04.04"></div>
+                <div class="fixture-slot" data-week="1" data-slot="3" data-date="04.04"></div>
+                <div class="fixture-slot" data-week="1" data-slot="4" data-date="04.05"></div>
+                <div class="fixture-slot" data-week="1" data-slot="5" data-date="04.05"></div>
               </div>
             </div>
             <div class="week-panel week-panel-2">
               <div class="week-meta"><strong>Week 2</strong><span>2026. 04. 10 - 04. 12</span></div>
               <div class="match-grid">
-                <article class="match-card upcoming"><span>04.10</span><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
-                <article class="match-card upcoming"><span>04.10</span><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
-                <article class="match-card upcoming"><span>04.11</span><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong><em>VS</em><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong></article>
-                <article class="match-card upcoming"><span>04.11</span><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong><em>VS</em><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong></article>
-                <article class="match-card upcoming"><span>04.12</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong></article>
-                <article class="match-card upcoming"><span>04.12</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
+                <div class="fixture-slot" data-week="2" data-slot="0" data-date="04.10"></div>
+                <div class="fixture-slot" data-week="2" data-slot="1" data-date="04.10"></div>
+                <div class="fixture-slot" data-week="2" data-slot="2" data-date="04.11"></div>
+                <div class="fixture-slot" data-week="2" data-slot="3" data-date="04.11"></div>
+                <div class="fixture-slot" data-week="2" data-slot="4" data-date="04.12"></div>
+                <div class="fixture-slot" data-week="2" data-slot="5" data-date="04.12"></div>
               </div>
             </div>
             <div class="week-panel week-panel-3">
               <div class="week-meta"><strong>Week 3</strong><span>2026. 04. 17 - 04. 19</span></div>
               <div class="match-grid">
-                <article class="match-card upcoming"><span>04.17</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
-                <article class="match-card upcoming"><span>04.17</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
-                <article class="match-card upcoming"><span>04.18</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong></article>
-                <article class="match-card upcoming"><span>04.18</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
-                <article class="match-card upcoming"><span>04.19</span><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
-                <article class="match-card upcoming"><span>04.19</span><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
+                <div class="fixture-slot" data-week="3" data-slot="0" data-date="04.17"></div>
+                <div class="fixture-slot" data-week="3" data-slot="1" data-date="04.17"></div>
+                <div class="fixture-slot" data-week="3" data-slot="2" data-date="04.18"></div>
+                <div class="fixture-slot" data-week="3" data-slot="3" data-date="04.18"></div>
+                <div class="fixture-slot" data-week="3" data-slot="4" data-date="04.19"></div>
+                <div class="fixture-slot" data-week="3" data-slot="5" data-date="04.19"></div>
               </div>
             </div>
             <div class="week-panel week-panel-4">
               <div class="week-meta"><strong>Week 4</strong><span>2026. 04. 24 - 04. 26</span></div>
               <div class="match-grid">
-                <article class="match-card upcoming"><span>04.24</span><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong><em>VS</em><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong></article>
-                <article class="match-card upcoming"><span>04.24</span><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong><em>VS</em><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong></article>
-                <article class="match-card upcoming"><span>04.25</span><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong><em>VS</em><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong></article>
-                <article class="match-card upcoming"><span>04.25</span><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong><em>VS</em><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong></article>
-                <article class="match-card upcoming"><span>04.26</span><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong><em>VS</em><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong></article>
-                <article class="match-card upcoming"><span>04.26</span><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong><em>VS</em><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong></article>
+                <div class="fixture-slot" data-week="4" data-slot="0" data-date="04.24"></div>
+                <div class="fixture-slot" data-week="4" data-slot="1" data-date="04.24"></div>
+                <div class="fixture-slot" data-week="4" data-slot="2" data-date="04.25"></div>
+                <div class="fixture-slot" data-week="4" data-slot="3" data-date="04.25"></div>
+                <div class="fixture-slot" data-week="4" data-slot="4" data-date="04.26"></div>
+                <div class="fixture-slot" data-week="4" data-slot="5" data-date="04.26"></div>
               </div>
             </div>
             <div class="week-panel week-panel-5">
               <div class="week-meta"><strong>Week 5</strong><span>2026. 05. 15 - 05. 17</span></div>
               <div class="match-grid">
-                <article class="match-card upcoming"><span>05.15</span><strong aria-label="Kiwoom DRX"><span class="match-team-mini-logo"><img src="./assets/teams/krx.svg" alt="DRX" /></span><span>Kiwoom DRX</span></strong><em>VS</em><strong aria-label="FULL SENSE"><span class="match-team-mini-logo"><img src="./assets/teams/fs.svg" alt="FS" /></span><span>FULL SENSE</span></strong></article>
-                <article class="match-card upcoming"><span>05.15</span><strong aria-label="ZETA DIVISION"><span class="match-team-mini-logo"><img src="./assets/teams/zeta.png" alt="ZETA" /></span><span>ZETA DIVISION</span></strong><em>VS</em><strong aria-label="VARREL"><span class="match-team-mini-logo"><img src="./assets/teams/vl.svg" alt="VL" /></span><span>VARREL</span></strong></article>
-                <article class="match-card upcoming"><span>05.16</span><strong aria-label="Rex Regum Qeon"><span class="match-team-mini-logo"><img src="./assets/teams/rrq.png" alt="RRQ" /></span><span>Rex Regum Qeon</span></strong><em>VS</em><strong aria-label="Gen.G"><span class="match-team-mini-logo"><img src="./assets/teams/gen.png" alt="GEN" /></span><span>Gen.G</span></strong></article>
-                <article class="match-card upcoming"><span>05.16</span><strong aria-label="DetonatioN FocusMe"><span class="match-team-mini-logo"><img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" /></span><span>DetonatioN FocusMe</span></strong><em>VS</em><strong aria-label="Team Secret"><span class="match-team-mini-logo"><img src="./assets/teams/ts.svg" alt="TS" /></span><span>Team Secret</span></strong></article>
-                <article class="match-card upcoming"><span>05.17</span><strong aria-label="T1"><span class="match-team-mini-logo"><img src="./assets/teams/t1.png" alt="T1" /></span><span>T1</span></strong><em>VS</em><strong aria-label="Paper Rex"><span class="match-team-mini-logo"><img src="./assets/teams/prx.svg" alt="PRX" /></span><span>Paper Rex</span></strong></article>
-                <article class="match-card upcoming"><span>05.17</span><strong aria-label="Nongshim RedForce"><span class="match-team-mini-logo"><img src="./assets/teams/ns.svg" alt="NS" /></span><span>Nongshim RedForce</span></strong><em>VS</em><strong aria-label="Global Esports"><span class="match-team-mini-logo"><img src="./assets/teams/ge.webp" alt="GE" /></span><span>Global Esports</span></strong></article>
+                <div class="fixture-slot" data-week="5" data-slot="0" data-date="05.15"></div>
+                <div class="fixture-slot" data-week="5" data-slot="1" data-date="05.15"></div>
+                <div class="fixture-slot" data-week="5" data-slot="2" data-date="05.16"></div>
+                <div class="fixture-slot" data-week="5" data-slot="3" data-date="05.16"></div>
+                <div class="fixture-slot" data-week="5" data-slot="4" data-date="05.17"></div>
+                <div class="fixture-slot" data-week="5" data-slot="5" data-date="05.17"></div>
               </div>
             </div>
           </div>
@@ -670,48 +720,54 @@
       </section>
     </main>
 
+    <!-- 경기 대진 설정 모달 -->
+    <div class="fp-modal" id="fp-modal" hidden>
+      <div class="fp-backdrop" id="fp-backdrop"></div>
+      <div class="fp-panel" role="dialog" aria-modal="true">
+        <h2 id="fp-modal-title">대진 설정</h2>
+        <p class="fp-step-label" id="fp-step-label">팀을 선택하세요</p>
+        <div class="fp-team-grid" id="fp-team-grid"></div>
+        <div class="fp-actions" id="fp-actions"></div>
+      </div>
+    </div>
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {
 
-      function getStoredMatchScore(date, teamA, teamB, fallbackScore) {
-        try {
-          const stored = JSON.parse(localStorage.getItem(`result:${date}|${teamA}|${teamB}`) || "{}");
-          const scoreA = String(stored.scoreA ?? "").trim();
-          const scoreB = String(stored.scoreB ?? "").trim();
-          if (scoreA && scoreB && scoreA !== "-" && scoreB !== "-") return `${scoreA} : ${scoreB}`;
-        } catch {}
-        return fallbackScore;
-      }
-
-      const standingsTables = [...document.querySelectorAll(".standings-table")];
+      const FIXTURES_KEY = "fixtures:stage1:pacific";
+      const FROM_PARAM = "stage1";
 
       const TEAM_INFO = {
-        "Paper Rex":          { logo: '<img src="./assets/teams/prx.svg" alt="PRX" class="logo-white" />', country: "싱가포르" },
-        "Gen.G":              { logo: '<img src="./assets/teams/gen.png" alt="GEN" />', country: "대한민국" },
-        "Kiwoom DRX":         { logo: '<img src="./assets/teams/krx.svg" alt="DRX" />', country: "대한민국" },
-        "Rex Regum Qeon":     { logo: '<img src="./assets/teams/rrq.png" alt="RRQ" />', country: "인도네시아" },
-        "T1":                 { logo: '<img src="./assets/teams/t1.png" alt="T1" />', country: "대한민국" },
-        "FULL SENSE":         { logo: '<img src="./assets/teams/fs.svg" alt="FS" />', country: "태국" },
-        "Global Esports":     { logo: '<img src="./assets/teams/ge.webp" alt="GE" />', country: "인도" },
-        "Team Secret":        { logo: '<img src="./assets/teams/ts.svg" alt="TS" class="logo-white" />', country: "필리핀" },
-        "ZETA DIVISION":      { logo: '<img src="./assets/teams/zeta.png" alt="ZETA" class="logo-white" />', country: "일본" },
-        "DetonatioN FocusMe": { logo: '<img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" />', country: "일본" },
-        "Nongshim RedForce":  { logo: '<img src="./assets/teams/ns.svg" alt="NS" />', country: "대한민국" },
-        "VARREL":             { logo: '<img src="./assets/teams/vl.svg" alt="VL" class="logo-white" />', country: "일본" },
+        "Paper Rex":          { src: "./assets/teams/prx.svg",  white: true,  code: "PRX",  country: "싱가포르" },
+        "Gen.G":              { src: "./assets/teams/gen.png",  white: false, code: "GEN",  country: "대한민국" },
+        "Kiwoom DRX":         { src: "./assets/teams/krx.svg",  white: false, code: "DRX",  country: "대한민국" },
+        "Rex Regum Qeon":     { src: "./assets/teams/rrq.png",  white: false, code: "RRQ",  country: "인도네시아" },
+        "T1":                 { src: "./assets/teams/t1.png",   white: false, code: "T1",   country: "대한민국" },
+        "FULL SENSE":         { src: "./assets/teams/fs.svg",   white: false, code: "FS",   country: "태국" },
+        "Global Esports":     { src: "./assets/teams/ge.webp",  white: false, code: "GE",   country: "인도" },
+        "Team Secret":        { src: "./assets/teams/ts.svg",   white: true,  code: "TS",   country: "필리핀" },
+        "ZETA DIVISION":      { src: "./assets/teams/zeta.png", white: true,  code: "ZETA", country: "일본" },
+        "DetonatioN FocusMe": { src: "https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png", white: false, code: "DFM", country: "일본" },
+        "Nongshim RedForce":  { src: "./assets/teams/ns.svg",   white: false, code: "NS",   country: "대한민국" },
+        "VARREL":             { src: "./assets/teams/vl.svg",   white: true,  code: "VL",   country: "일본" },
       };
+      const ALL_TEAMS = Object.keys(TEAM_INFO);
+
+      const standingsTables = [...document.querySelectorAll(".standings-table")];
 
       function buildStandingsGroups() {
         let groups;
         try { groups = JSON.parse(localStorage.getItem("stage1_pacific_groups") || "null"); } catch {}
         if (groups && groups.alpha?.some(t => t) && groups.omega?.some(t => t)) {
           return ["alpha", "omega"].map(grp =>
-            groups[grp].filter(t => t).map(teamName => ({
-              team: teamName,
-              country: TEAM_INFO[teamName]?.country || "",
-              logo: TEAM_INFO[teamName]?.logo || "",
-              wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0,
-            }))
+            groups[grp].filter(t => t).map(teamName => {
+              const info = TEAM_INFO[teamName] || {};
+              return {
+                team: teamName, country: info.country || "",
+                logo: info.src ? `<img src="${info.src}" alt="${info.code}"${info.white ? ' class="logo-white"' : ""} />` : "",
+                wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0,
+              };
+            })
           );
         }
         return standingsTables.map(table =>
@@ -724,145 +780,159 @@
         );
       }
 
+      const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+      /* ── Fixture storage ─────────────────── */
+      function loadFixtures() { try { return JSON.parse(localStorage.getItem(FIXTURES_KEY) || "{}"); } catch { return {}; } }
+      function saveFixtures(f) { localStorage.setItem(FIXTURES_KEY, JSON.stringify(f)); }
+
+      /* ── Team logo HTML helpers ──────────── */
+      function miniLogoHtml(teamName) {
+        const info = TEAM_INFO[teamName];
+        if (!info) return "";
+        return `<span class="match-team-mini-logo"><img src="${info.src}" alt="${info.code}"${info.white ? ' style="filter:brightness(0) invert(1)"' : ""} /></span>`;
+      }
+      function standingsLogoHtml(teamName) {
+        const info = TEAM_INFO[teamName];
+        if (!info) return "";
+        return `<img src="${info.src}" alt="${info.code}"${info.white ? ' class="logo-white"' : ""} />`;
+      }
+
+      /* ── Score helpers ───────────────────── */
+      function getStoredMatchScore(date, teamA, teamB, fallback) {
+        try {
+          const stored = JSON.parse(localStorage.getItem(`result:${date}|${teamA}|${teamB}`) || "{}");
+          const sa = String(stored.scoreA ?? "").trim();
+          const sb = String(stored.scoreB ?? "").trim();
+          if (sa && sb && sa !== "-" && sb !== "-") return `${sa} : ${sb}`;
+        } catch {}
+        return fallback;
+      }
+
+      /* ── Render fixture slots ────────────── */
+      function renderAllFixtures() {
+        const fixtures = loadFixtures();
+        document.querySelectorAll(".fixture-slot").forEach(slot => {
+          const week = slot.dataset.week;
+          const slotIdx = slot.dataset.slot;
+          const date = slot.dataset.date;
+          const key = `${week}:${slotIdx}`;
+          const f = fixtures[key];
+
+          if (f && f.teamA && f.teamB) {
+            const score = getStoredMatchScore(date, f.teamA, f.teamB, "VS");
+            const hasScore = score !== "VS";
+            slot.innerHTML = `<article class="match-card${hasScore ? "" : " upcoming"}" data-fixture-key="${key}" tabindex="0" role="link">
+              <span>${date}</span>
+              <strong aria-label="${f.teamA}">${miniLogoHtml(f.teamA)}<span>${f.teamA}</span></strong>
+              <em>${score}</em>
+              <strong aria-label="${f.teamB}">${miniLogoHtml(f.teamB)}<span>${f.teamB}</span></strong>
+              ${isAdmin() ? '<button class="fixture-edit-btn" title="대진 수정">✎</button>' : ""}
+            </article>`;
+            const card = slot.querySelector(".match-card");
+            const editBtn = slot.querySelector(".fixture-edit-btn");
+            if (editBtn) {
+              editBtn.addEventListener("click", e => { e.stopPropagation(); openFixturePicker(key, date, f); });
+            }
+            card.addEventListener("click", () => {
+              const currentScore = getStoredMatchScore(date, f.teamA, f.teamB, "VS");
+              const params = new URLSearchParams({ date, teamA: f.teamA, teamB: f.teamB, score: currentScore, from: FROM_PARAM });
+              window.location.href = `./pacific-match.html?${params}`;
+            });
+            card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); } });
+          } else {
+            if (isAdmin()) {
+              slot.innerHTML = `<div class="fixture-empty clickable"><span class="fixture-date-label">${date}</span><button class="fixture-add-btn">+ 팀 설정</button></div>`;
+              slot.querySelector(".fixture-empty").addEventListener("click", () => openFixturePicker(key, date, null));
+            } else {
+              slot.innerHTML = `<div class="fixture-empty"><span class="fixture-date-label">${date}</span><span class="fixture-tbd">미정</span></div>`;
+            }
+          }
+        });
+      }
+
+      /* ── Collect fixtures for standings ─── */
+      function collectFixtures() {
+        const fixtures = loadFixtures();
+        return Object.entries(fixtures).map(([key, f]) => {
+          if (!f || !f.teamA || !f.teamB) return null;
+          const slot = document.querySelector(`.fixture-slot[data-week="${key.split(":")[0]}"][data-slot="${key.split(":")[1]}"]`);
+          const date = slot?.dataset.date || "";
+          const score = getStoredMatchScore(date, f.teamA, f.teamB, "VS");
+          return { date, teamA: f.teamA, teamB: f.teamB, score, originallyPending: true };
+        }).filter(Boolean);
+      }
+
+      /* ── Standings helpers ───────────────── */
+      function getSavedSetRounds(match, originallyPending) {
+        if (!originallyPending) return { a: 0, b: 0 };
+        try {
+          const key = `${match.date}|${match.teamA}|${match.teamB}`;
+          const veto = JSON.parse(localStorage.getItem(`veto:${key}`) || "{}");
+          const maps = [veto.maps?.[2], veto.maps?.[3], veto.maps?.[6]].filter(Boolean);
+          return maps.reduce((total, mapName, index) => {
+            const saved = JSON.parse(localStorage.getItem(`set:${key}:${index}:${mapName}`) || "{}");
+            const aScore = Number(saved.stats?.aScore); const bScore = Number(saved.stats?.bScore);
+            if (Number.isFinite(aScore) && Number.isFinite(bScore)) { total.a += aScore; total.b += bScore; }
+            return total;
+          }, { a: 0, b: 0 });
+        } catch { return { a: 0, b: 0 }; }
+      }
+
       function parseScore(score) {
         const parts = score.match(/\d+/g);
         if (!parts || parts.length < 2) return null;
         return { a: Number(parts[0]), b: Number(parts[1]) };
       }
 
-      function fixtureKey(match) {
-        return `${match.date}|${match.teamA}|${match.teamB}`;
-      }
-
-      function getSavedSetRounds(match, originallyPending) {
-        if (!originallyPending) return { a: 0, b: 0 };
-        try {
-          const veto = JSON.parse(localStorage.getItem(`veto:${fixtureKey(match)}`) || "{}");
-          const maps = [veto.maps?.[2], veto.maps?.[3], veto.maps?.[6]].filter(Boolean);
-          return maps.reduce(
-            (total, mapName, index) => {
-              const saved = JSON.parse(localStorage.getItem(`set:${fixtureKey(match)}:${index}:${mapName}`) || "{}");
-              const aScore = Number(saved.stats?.aScore);
-              const bScore = Number(saved.stats?.bScore);
-              if (Number.isFinite(aScore) && Number.isFinite(bScore)) {
-                total.a += aScore;
-                total.b += bScore;
-              }
-              return total;
-            },
-            { a: 0, b: 0 }
-          );
-        } catch {
-          return { a: 0, b: 0 };
-        }
-      }
-
-      function collectFixtures() {
-        return [...document.querySelectorAll(".match-card")].map((card) => {
-          const date = card.querySelector(":scope > span")?.textContent.trim() || "";
-          const teams = [...card.querySelectorAll("strong")].map((team) => team.getAttribute("aria-label") || team.textContent.trim());
-          const fallbackScore = card.querySelector("em")?.textContent.trim() || "VS";
-          const score = getStoredMatchScore(date, teams[0] || "", teams[1] || "", fallbackScore);
-          return { date, teamA: teams[0] || "", teamB: teams[1] || "", score, originallyPending: card.dataset.originalScore === "VS" };
-        });
-      }
-
       function rankGroup(rows, fixtures) {
-        const teamSet = new Set(rows.map((row) => row.team));
-        const stats = new Map(rows.map((row) => {
-          return [row.team, {
-            ...row,
-            wins: 0,
-            losses: 0,
-            mapsWon: 0,
-            mapsLost: 0,
-            roundsWon: row.roundsWon ?? 0,
-            roundsLost: row.roundsLost ?? 0,
-          }];
-        }));
-        const completed = fixtures
-          .map((match) => ({ ...match, parsed: parseScore(match.score) }))
-          .filter((match) => match.parsed && teamSet.has(match.teamA) && teamSet.has(match.teamB));
-
-        completed.forEach((match) => {
-          const a = stats.get(match.teamA);
-          const b = stats.get(match.teamB);
-          const score = match.parsed;
-          a.mapsWon += score.a;
-          a.mapsLost += score.b;
-          b.mapsWon += score.b;
-          b.mapsLost += score.a;
-          if (score.a > score.b) { a.wins += 1; b.losses += 1; }
-          else if (score.b > score.a) { b.wins += 1; a.losses += 1; }
+        const teamSet = new Set(rows.map(r => r.team));
+        const stats = new Map(rows.map(r => [r.team, { ...r, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: r.roundsWon ?? 0, roundsLost: r.roundsLost ?? 0 }]));
+        const completed = fixtures.map(m => ({ ...m, parsed: parseScore(m.score) })).filter(m => m.parsed && teamSet.has(m.teamA) && teamSet.has(m.teamB));
+        completed.forEach(match => {
+          const a = stats.get(match.teamA); const b = stats.get(match.teamB); const score = match.parsed;
+          a.mapsWon += score.a; a.mapsLost += score.b; b.mapsWon += score.b; b.mapsLost += score.a;
+          if (score.a > score.b) { a.wins++; b.losses++; } else if (score.b > score.a) { b.wins++; a.losses++; }
           const rounds = getSavedSetRounds(match, match.originallyPending);
-          a.roundsWon += rounds.a;
-          a.roundsLost += rounds.b;
-          b.roundsWon += rounds.b;
-          b.roundsLost += rounds.a;
+          a.roundsWon += rounds.a; a.roundsLost += rounds.b; b.roundsWon += rounds.b; b.roundsLost += rounds.a;
         });
-
-        const headToHead = (team, tiedTeams) => {
-          return completed.reduce(
-            (total, match) => {
-              if (!tiedTeams.has(match.teamA) || !tiedTeams.has(match.teamB)) return total;
-              if (match.teamA !== team && match.teamB !== team) return total;
-              const teamWon = (match.teamA === team && match.parsed.a > match.parsed.b) || (match.teamB === team && match.parsed.b > match.parsed.a);
-              const teamLost = (match.teamA === team && match.parsed.a < match.parsed.b) || (match.teamB === team && match.parsed.b < match.parsed.a);
-              if (teamWon) total.wins += 1;
-              if (teamLost) total.losses += 1;
-              return total;
-            },
-            { wins: 0, losses: 0 }
-          );
-        };
-
+        const headToHead = (team, tiedTeams) => completed.reduce((total, match) => {
+          if (!tiedTeams.has(match.teamA) || !tiedTeams.has(match.teamB)) return total;
+          if (match.teamA !== team && match.teamB !== team) return total;
+          const won = (match.teamA === team && match.parsed.a > match.parsed.b) || (match.teamB === team && match.parsed.b > match.parsed.a);
+          const lost = (match.teamA === team && match.parsed.a < match.parsed.b) || (match.teamB === team && match.parsed.b < match.parsed.a);
+          if (won) total.wins++; if (lost) total.losses++;
+          return total;
+        }, { wins: 0, losses: 0 });
         const baseSorted = [...stats.values()].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
         const ranked = [];
-        for (let i = 0; i < baseSorted.length; ) {
-          const tied = baseSorted.filter((team) => team.wins === baseSorted[i].wins && team.losses === baseSorted[i].losses);
-          const tiedTeams = new Set(tied.map((team) => team.team));
+        for (let i = 0; i < baseSorted.length;) {
+          const tied = baseSorted.filter(t => t.wins === baseSorted[i].wins && t.losses === baseSorted[i].losses);
+          const tiedTeams = new Set(tied.map(t => t.team));
           tied.sort((a, b) => {
-            const h2hA = headToHead(a.team, tiedTeams);
-            const h2hB = headToHead(b.team, tiedTeams);
+            const h2hA = headToHead(a.team, tiedTeams); const h2hB = headToHead(b.team, tiedTeams);
             const h2hOrder = h2hB.wins - h2hA.wins || h2hA.losses - h2hB.losses;
             if (h2hOrder) return h2hOrder;
-            return b.mapsWon - b.mapsLost - (a.mapsWon - a.mapsLost) || b.roundsWon - b.roundsLost - (a.roundsWon - a.roundsLost) || b.roundsWon - a.roundsWon;
+            return (b.mapsWon - b.mapsLost) - (a.mapsWon - a.mapsLost) || (b.roundsWon - b.roundsLost) - (a.roundsWon - a.roundsLost) || b.roundsWon - a.roundsWon;
           });
-          ranked.push(...tied);
-          i += tied.length;
+          ranked.push(...tied); i += tied.length;
         }
         return ranked;
       }
 
       function classifyQualification(rows, fixtures) {
-        const teamSet = new Set(rows.map((row) => row.team));
-        const remaining = fixtures.filter((match) => !parseScore(match.score) && teamSet.has(match.teamA) && teamSet.has(match.teamB));
-        const outcomes = ["2 : 0", "2 : 1", "1 : 2", "0 : 2"];
-        const possibilities = new Map(rows.map((row) => [row.team, { top: false, bottom: false }]));
-
-        if (remaining.length > 8) {
-          rows.forEach((row) => possibilities.set(row.team, { top: true, bottom: true }));
-          return possibilities;
-        }
-
-        const recordScenario = (scenarioFixtures) => {
-          rankGroup(rows, scenarioFixtures).forEach((team, index) => {
-            const state = possibilities.get(team.team);
-            if (index < 4) state.top = true;
-            else state.bottom = true;
-          });
-        };
-
-        const explore = (index, scenarioFixtures) => {
-          if (index >= remaining.length) { recordScenario(scenarioFixtures); return; }
+        const teamSet = new Set(rows.map(r => r.team));
+        const remaining = fixtures.filter(m => !parseScore(m.score) && teamSet.has(m.teamA) && teamSet.has(m.teamB));
+        const outcomes = ["2 : 0","2 : 1","1 : 2","0 : 2"];
+        const possibilities = new Map(rows.map(r => [r.team, { top: false, bottom: false }]));
+        if (remaining.length > 8) { rows.forEach(r => possibilities.set(r.team, { top: true, bottom: true })); return possibilities; }
+        const recordScenario = sf => rankGroup(rows, sf).forEach((t, i) => { const s = possibilities.get(t.team); if (i < 4) s.top = true; else s.bottom = true; });
+        const explore = (index, sf) => {
+          if (index >= remaining.length) { recordScenario(sf); return; }
           const match = remaining[index];
-          outcomes.forEach((score) => {
-            explore(index + 1, scenarioFixtures.map((f) => (f === match ? { ...f, score } : f)));
-          });
+          outcomes.forEach(score => explore(index + 1, sf.map(f => f === match ? { ...f, score } : f)));
         };
-
-        if (remaining.length) explore(0, fixtures);
-        else recordScenario(fixtures);
+        if (remaining.length) explore(0, fixtures); else recordScenario(fixtures);
         return possibilities;
       }
 
@@ -870,51 +940,98 @@
         const fixtures = collectFixtures();
         buildStandingsGroups().forEach((rows, groupIndex) => {
           const table = standingsTables[groupIndex];
+          if (!table) return;
           const head = table.querySelector(".standings-head").outerHTML;
           const qualification = classifyQualification(rows, fixtures);
-          table.innerHTML =
-            head +
-            rankGroup(rows, fixtures)
-              .map((team, index) => {
-                const diff = team.roundsWon - team.roundsLost;
-                const state = qualification.get(team.team);
-                const statusClass = state?.top && !state?.bottom ? " clinched" : !state?.top && state?.bottom ? " eliminated" : "";
-                return `
-                  <div class="standings-row ${index < 4 ? "advance" : "out"}${statusClass}" role="row">
-                    <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo">${team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
-                    <span>${team.wins} - ${team.losses}</span>
-                    <span>${team.mapsWon} / ${team.mapsLost}</span>
-                    <span>${team.roundsWon} / ${team.roundsLost}</span>
-                    <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
-                  </div>
-                `;
-              })
-              .join("");
+          table.innerHTML = head + rankGroup(rows, fixtures).map((team, index) => {
+            const diff = team.roundsWon - team.roundsLost;
+            const state = qualification.get(team.team);
+            const statusClass = state?.top && !state?.bottom ? " clinched" : !state?.top && state?.bottom ? " eliminated" : "";
+            return `<div class="standings-row ${index < 4 ? "advance" : "out"}${statusClass}" role="row">
+              <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo">${standingsLogoHtml(team.team) || team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
+              <span>${team.wins} - ${team.losses}</span><span>${team.mapsWon} / ${team.mapsLost}</span>
+              <span>${team.roundsWon} / ${team.roundsLost}</span>
+              <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
+            </div>`;
+          }).join("");
         });
       }
 
-      document.querySelectorAll(".match-card").forEach((card) => {
-        const date = card.querySelector(":scope > span")?.textContent.trim() || "";
-        const teams = [...card.querySelectorAll("strong")].map((team) => team.getAttribute("aria-label") || team.textContent.trim());
-        const scoreElement = card.querySelector("em");
-        const originalScore = scoreElement?.textContent.trim() || "VS";
-        card.dataset.originalScore = originalScore;
-        const score = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
-        if (scoreElement) scoreElement.textContent = score;
-        if (score !== "VS") card.classList.remove("upcoming");
-        card.setAttribute("role", "link");
-        card.setAttribute("tabindex", "0");
-        card.addEventListener("click", () => {
-          const currentScore = getStoredMatchScore(date, teams[0] || "", teams[1] || "", originalScore);
-          const params = new URLSearchParams({ date, teamA: teams[0] || "", teamB: teams[1] || "", score: currentScore, from: "stage1" });
-          window.location.href = "./pacific-match.html?" + params.toString();
-        });
-        card.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card.click(); }
-        });
-      });
+      /* ── Fixture Picker Modal ────────────── */
+      let _fpKey = null, _fpDate = null, _fpExisting = null, _fpStep = 0, _fpTeamA = null;
 
+      function openFixturePicker(key, date, existing) {
+        _fpKey = key; _fpDate = date; _fpExisting = existing;
+        _fpStep = 0; _fpTeamA = null;
+        renderFpStep();
+        document.getElementById("fp-modal").hidden = false;
+      }
+
+      function closeFpModal() {
+        document.getElementById("fp-modal").hidden = true;
+        _fpKey = null;
+      }
+
+      function renderFpStep() {
+        const already = _fpExisting;
+        document.getElementById("fp-modal-title").textContent = _fpDate + " 경기 대진 설정";
+        document.getElementById("fp-step-label").textContent = _fpStep === 0 ? "1팀 선택" : `1팀: ${_fpTeamA} — 2팀 선택`;
+
+        const grid = document.getElementById("fp-team-grid");
+        grid.innerHTML = ALL_TEAMS.map(t => {
+          const info = TEAM_INFO[t];
+          const disabled = _fpStep === 1 && t === _fpTeamA ? "disabled" : "";
+          return `<button class="fp-team-btn" data-team="${t}" ${disabled}>
+            <img src="${info.src}" alt="${info.code}"${info.white ? ' style="filter:brightness(0) invert(1)"' : ""} />
+            <span class="fp-code">${info.code}</span>
+          </button>`;
+        }).join("");
+
+        grid.querySelectorAll(".fp-team-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            if (_fpStep === 0) {
+              _fpTeamA = btn.dataset.team; _fpStep = 1; renderFpStep();
+            } else {
+              const teamB = btn.dataset.team;
+              const fixtures = loadFixtures();
+              fixtures[_fpKey] = { teamA: _fpTeamA, teamB };
+              saveFixtures(fixtures);
+              closeFpModal();
+              renderAllFixtures();
+              renderStandings();
+            }
+          });
+        });
+
+        const actions = document.getElementById("fp-actions");
+        actions.innerHTML = "";
+        if (already) {
+          const clearBtn = document.createElement("button");
+          clearBtn.className = "fp-btn fp-btn-clear"; clearBtn.textContent = "대진 초기화";
+          clearBtn.addEventListener("click", () => {
+            const fixtures = loadFixtures(); delete fixtures[_fpKey]; saveFixtures(fixtures);
+            closeFpModal(); renderAllFixtures(); renderStandings();
+          });
+          actions.appendChild(clearBtn);
+        }
+        if (_fpStep === 1) {
+          const backBtn = document.createElement("button");
+          backBtn.className = "fp-btn fp-btn-cancel"; backBtn.textContent = "← 다시 선택";
+          backBtn.addEventListener("click", () => { _fpStep = 0; _fpTeamA = null; renderFpStep(); });
+          actions.appendChild(backBtn);
+        }
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "fp-btn fp-btn-cancel"; cancelBtn.textContent = "취소";
+        cancelBtn.addEventListener("click", closeFpModal);
+        actions.appendChild(cancelBtn);
+      }
+
+      document.getElementById("fp-backdrop").addEventListener("click", closeFpModal);
+      document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("fp-modal").hidden) closeFpModal(); });
+
+      /* ── Init ────────────────────────────── */
       window._renderStandings = renderStandings;
+      renderAllFixtures();
       renderStandings();
     });
     </script>
