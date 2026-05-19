@@ -3,130 +3,392 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VCT EMEA 2026 Stage 1 Playoffs</title>
+    <title>VCT EMEA 2026 Stage 1 PlayOff</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #0d1520; color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      body {
+        background: #0d1520;
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
+      }
 
       /* ── HEADER ─────────────────────────────── */
-      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(13,21,32,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(13,21,32,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.55); text-decoration: none;
+        transition: color 0.15s;
+      }
       .home-link:hover { color: #fff; }
-      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.15s; margin-left: auto; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: rgba(255,255,255,0.4); text-decoration: none;
+        transition: color 0.15s;
+        margin-left: auto;
+      }
       .back-link:hover { color: rgba(255,255,255,0.8); }
       .site-header .auth-header-btn { margin-left: 0; }
 
-      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #1464f6; margin-bottom: 6px; }
+      /* ── HERO ───────────────────────────────── */
+      .playoff-shell { padding-bottom: 60px; }
+      .playoff-hero {
+        display: flex; align-items: center; gap: 24px;
+        padding: 48px 48px 40px; max-width: 1200px; margin: 0 auto;
+      }
+      .playoff-logo-lockup img {
+        width: 72px; height: 72px; object-fit: contain;
+        filter: brightness(0) invert(1); opacity: 0.75;
+      }
+      .playoff-hero .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+        text-transform: uppercase; color: #1464f6; margin-bottom: 6px;
+      }
+      .playoff-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(26px, 4vw, 42px); font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        color: #fff; line-height: 1; margin-bottom: 6px;
+      }
+      .playoff-hero p { font-size: 13px; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; font-weight: 500; }
 
-      /* ── PLAYOFF SHELL ──────────────────────── */
-      .playoff-shell { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
-      .playoff-hero { display: flex; align-items: center; gap: 24px; padding: 48px 0 36px; }
-      .playoff-logo-lockup img { width: 72px; height: 72px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.7; }
-      .playoff-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1; margin-bottom: 6px; }
-      .playoff-hero p { font-size: 13px; color: rgba(255,255,255,0.4); font-family: 'Noto Sans KR', sans-serif; }
+      /* ── BRACKET SHELL ──────────────────────── */
+      .playoff-board { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+      .bracket-scroll { overflow-x: auto; padding-bottom: 20px; }
 
-      /* ── BRACKET ────────────────────────────── */
-      .playoff-board { overflow: hidden; }
-      .bracket-scroll { overflow-x: auto; padding-bottom: 16px; }
+      /* ── ROUND LABELS ───────────────────────── */
+      .bracket-rounds {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(160px, 1fr));
+        gap: 8px; min-width: 820px; margin-bottom: 4px;
+      }
+      .bracket-rounds span {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: rgba(255,255,255,0.28); text-align: center;
+        padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      }
 
-      .bracket-col-labels { display: grid; grid-template-columns: repeat(5, minmax(170px,1fr)); min-width: 860px; gap: 0; margin-bottom: 4px; }
-      .bracket-col-labels span { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 6px 8px; text-align: center; }
+      /* ── SECTION TITLE ──────────────────────── */
+      .bracket-section-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.22em; text-transform: uppercase;
+        color: #1464f6; padding: 24px 0 10px 12px;
+        border-left: 3px solid #1464f6; margin: 8px 0 6px;
+      }
+      .bracket-section-title.lower-title { padding-top: 16px; }
 
-      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(170px,1fr)); min-width: 860px; gap: 0; border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+      /* ── BRACKET GRID ───────────────────────── */
+      .bracket-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(160px, 1fr));
+        gap: 8px; min-width: 820px; margin-bottom: 6px;
+      }
+      .upper-bracket  { min-height: 340px; }
+      .lower-bracket  { min-height: 280px; }
 
-      .bracket-col { display: flex; flex-direction: column; justify-content: space-around; padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.05); gap: 8px; }
-      .bracket-col:last-child { border-right: none; }
-      .bracket-col.col-upper { min-height: 560px; }
-      .bracket-col.col-lower { min-height: 320px; }
-      .bracket-col.col-center { justify-content: center; }
-      .bracket-col.col-gf { justify-content: center; }
+      /* ── BRACKET COLUMN ─────────────────────── */
+      .bracket-column {
+        display: flex; flex-direction: column;
+        justify-content: space-around; gap: 8px;
+      }
+      .bracket-arrow-column {
+        justify-content: center; align-items: center;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 20px; color: rgba(255,255,255,0.18);
+      }
+      .bracket-column-center { justify-content: center; }
+      .bracket-empty {}
 
-      .bracket-match { background: #111a28; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, transform 0.12s; outline: none; }
-      .bracket-match:hover { border-color: rgba(20,100,246,0.4); transform: translateY(-1px); }
-      .bracket-match:focus-visible { border-color: #1464f6; }
-      .bracket-match h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 6px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-      .bracket-match h3 span { font-weight: 400; }
-      .grand-final { border-color: rgba(20,100,246,0.3); box-shadow: 0 0 20px rgba(20,100,246,0.1); }
+      /* ── MATCH CARD ─────────────────────────── */
+      .bracket-match {
+        background: #111a28;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 4px; overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.18s, background 0.18s;
+      }
+      .bracket-match:hover { border-color: rgba(255,255,255,0.18); background: #152030; }
+      .bracket-match:focus-visible { outline: 2px solid #1464f6; outline-offset: 2px; }
+      .bracket-match h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+        text-transform: uppercase; color: rgba(255,255,255,0.28);
+        padding: 6px 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex; align-items: center; gap: 5px;
+      }
+      .bracket-match h3 span { color: rgba(255,255,255,0.16); font-weight: 500; letter-spacing: 0.05em; }
+      .grand-final-card { border-color: rgba(20,100,246,0.3); box-shadow: 0 0 20px rgba(20,100,246,0.08); }
+      .grand-final-card h3 { color: rgba(20,100,246,0.7); border-bottom-color: rgba(20,100,246,0.15); }
 
-      .bracket-team { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-      .bracket-team:last-child { border-bottom: none; }
-      .bracket-team.tbd { opacity: 0.4; }
-      .bt-seed { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); min-width: 22px; flex-shrink: 0; }
-      .bt-logo { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-      .bt-logo img { width: 100%; height: 100%; object-fit: contain; }
-      .bt-logo img.logo-white { filter: brightness(0) invert(1); }
-      .bt-name { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .bt-score { font-style: normal; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.4); flex-shrink: 0; min-width: 14px; text-align: right; }
+      /* ── TEAM ROW ───────────────────────────── */
+      .bracket-team {
+        display: flex; align-items: center;
+        gap: 6px; padding: 7px 10px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+      }
+      .bracket-match .bracket-team:first-of-type { border-top: none; }
+      .bracket-seed {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 9px; font-weight: 600;
+        letter-spacing: 0.05em; color: rgba(255,255,255,0.22);
+        min-width: 36px; flex-shrink: 0;
+      }
+      .bracket-logo {
+        width: 20px; height: 20px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .bracket-logo img { width: 20px; height: 20px; object-fit: contain; }
+      .bracket-team strong {
+        flex: 1; font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: rgba(255,255,255,0.45);
+      }
+      .bracket-team em {
+        font-style: normal; font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 900;
+        color: rgba(255,255,255,0.3); min-width: 14px; text-align: right; flex-shrink: 0;
+      }
+      .bracket-team.winner { background: rgba(255,255,255,0.03); }
+      .bracket-team.winner strong { color: #fff; }
+      .bracket-team.winner em { color: rgba(255,255,255,0.9); }
+      .bracket-team.qualifier { background: rgba(20,100,246,0.1); }
+      .bracket-team.qualifier strong { color: #7fb3ff; }
+      .bracket-team.qualifier em { color: #7fb3ff; }
+      .bracket-team.placeholder strong { color: rgba(255,255,255,0.2); }
+      .bracket-team.placeholder em { color: rgba(255,255,255,0.15); }
 
-      /* ── SEED PICKER ────────────────────────── */
+      /* Editable seed slot hint for admin */
+      body:not(.view-only) .bracket-team[data-seed-slot] { cursor: pointer; }
+      body:not(.view-only) .bracket-team[data-seed-slot]:hover { background: rgba(20,100,246,0.08); }
+
+      /* ── FOOTER LEGEND ──────────────────────── */
+      .bracket-footer { padding: 24px 0 8px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; }
+      .kickoff-legend { display: flex; gap: 24px; justify-content: center; align-items: center; }
+      .kickoff-legend span {
+        display: flex; align-items: center; gap: 7px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+        text-transform: uppercase; color: rgba(255,255,255,0.35);
+      }
+      .legend-pip { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+      .legend-pip.win-pip  { background: rgba(255,255,255,0.35); }
+      .legend-pip.qual-pip { background: rgba(20,100,246,0.75); }
+
+      /* ── SEED PICKER MODAL ──────────────────── */
       .seed-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
       .seed-modal[hidden] { display: none !important; }
       .seed-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
-      .seed-panel { position: relative; z-index: 1; width: min(540px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #121b2a; border: 1.5px solid rgba(20,100,246,0.25); border-radius: 18px; padding: 24px; }
-      .seed-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; margin: 0 0 4px; }
-      .seed-panel p { font-size: 13px; color: rgba(255,255,255,0.45); font-family: 'Noto Sans KR', sans-serif; margin: 0 0 16px; }
-      .seed-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
-      .seed-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09); color: #fff; font-family: 'Barlow Condensed', sans-serif; cursor: pointer; transition: all 0.14s; font-size: 10px; font-weight: 700; text-align: center; }
-      .seed-btn img { width: 26px; height: 26px; object-fit: contain; }
-      .seed-btn img.logo-white { filter: brightness(0) invert(1); }
-      .seed-btn .seed-code { font-size: 12px; font-weight: 900; letter-spacing: 0.05em; }
-      .seed-btn:hover { background: rgba(20,100,246,0.1); border-color: rgba(20,100,246,0.45); }
-      .seed-btn.selected { background: rgba(20,100,246,0.2); border-color: #1464f6; }
-      .seed-btn:disabled { opacity: 0.3; pointer-events: none; }
+      .seed-panel {
+        position: relative; z-index: 1;
+        width: min(520px, calc(100vw - 24px));
+        max-height: 90vh; overflow-y: auto;
+        background: #121b2a; border: 1.5px solid rgba(20,100,246,0.25);
+        border-radius: 18px; padding: 24px;
+        animation: panelIn 0.2s ease;
+      }
+      @keyframes panelIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+      .seed-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; margin: 0 0 4px; }
+      .seed-panel p { font-size: 13px; color: rgba(255,255,255,0.45); margin: 0 0 18px; font-family: 'Noto Sans KR', sans-serif; }
+      .seed-team-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+      .seed-team-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 12px 8px; border-radius: 10px;
+        background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09);
+        color: #fff; font-family: 'Barlow Condensed', sans-serif;
+        cursor: pointer; transition: all 0.14s;
+        font-size: 11px; font-weight: 700; text-align: center;
+      }
+      .seed-team-btn img { width: 32px; height: 32px; object-fit: contain; }
+      .seed-team-btn img.logo-white { filter: brightness(0) invert(1); }
+      .seed-team-btn .seed-code { font-size: 14px; font-weight: 900; letter-spacing: 0.06em; }
+      .seed-team-btn:hover { background: rgba(20,100,246,0.1); border-color: rgba(20,100,246,0.5); }
+      .seed-team-btn.selected { background: rgba(20,100,246,0.2); border-color: #1464f6; box-shadow: 0 0 0 2px rgba(20,100,246,0.25); }
       .seed-actions { display: flex; gap: 10px; justify-content: flex-end; }
-      .seed-act-btn { padding: 9px 20px; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border: none; }
-      .seed-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
-      .seed-cancel:hover { background: rgba(255,255,255,0.14); }
-      .seed-clear { background: rgba(255,80,80,0.1); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
-      .seed-clear:hover { background: rgba(255,80,80,0.22); }
+      .seed-btn { padding: 9px 20px; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border: none; }
+      .seed-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .seed-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .seed-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+      .seed-btn-clear:hover { background: rgba(255,80,80,0.24); }
     </style>
   </head>
-  <body class="league-page stage-page emea-page playoff-page">
+  <body>
     <header class="site-header">
       <a class="home-link" href="./index.html">VCT Archive</a>
       <a class="back-link" href="./emea-stage1.html">Stage 1</a>
     </header>
 
     <main class="playoff-shell">
-      <section class="playoff-hero" aria-labelledby="po-title">
+      <section class="playoff-hero" aria-labelledby="playoff-title">
         <div class="playoff-logo-lockup">
           <img src="./assets/vct-emea.webp" alt="VCT EMEA" />
         </div>
         <div>
           <p class="eyebrow">VCT EMEA 2026</p>
-          <h1 id="po-title">Stage 1 Playoffs</h1>
-          <p>더블 엘리미네이션 · 8팀 · Masters 산티아고 진출</p>
+          <h1 id="playoff-title">2026 VCT EMEA Stage 1</h1>
+          <p>플레이오프 대진표 · 더블 엘리미네이션 · 8팀 · Masters 산티아고 진출</p>
         </div>
       </section>
 
-      <section class="playoff-board" aria-label="Stage 1 Playoffs 대진표">
-        <!-- Column labels -->
-        <div class="bracket-col-labels" aria-hidden="true">
-          <span>UB Round 1</span>
-          <span>UB Semis</span>
-          <span>UB Final</span>
-          <span>LB / Grand Finals</span>
-          <span>Grand Finals</span>
-        </div>
-
+      <section class="playoff-board" aria-label="EMEA Stage 1 플레이오프 대진표">
         <div class="bracket-scroll">
-          <div class="bracket-grid" id="bracket-grid">
-            <!-- rendered by JS -->
+          <div class="bracket-rounds" aria-hidden="true">
+            <span>UB Round 1</span>
+            <span>UB Semis</span>
+            <span>UB Final</span>
+            <span>LB Final</span>
+            <span>Grand Finals</span>
+          </div>
+
+          <!-- ====== 상위조 ====== -->
+          <h2 class="bracket-section-title">상위조 대진표</h2>
+          <div class="bracket-grid upper-bracket">
+
+            <!-- Col 1: UB R1 M1, M2 -->
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 1 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">α 1위</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">ω 4위</span><strong>로고</strong><em>0</em></div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 2 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">ω 1위</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">α 4위</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 2: UB Semis M3, M4 -->
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 3 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">α 2위</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 4 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">ω 2위</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 3: UB Final M9 (center) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match">
+                <h3>Match 9 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 4: arrow -->
+            <div class="bracket-column bracket-arrow-column" aria-hidden="true"><span>→</span></div>
+
+            <!-- Col 5: Grand Finals (center) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match grand-final-card">
+                <h3>Grand Finals <span>(Bo5)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+          </div>
+
+          <!-- ====== 하위조 ====== -->
+          <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
+          <div class="bracket-grid lower-bracket">
+
+            <!-- Col 1: LB R1 M5, M6 -->
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 5 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">M1 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">α 3위</span><strong>로고</strong><em>0</em></div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 6 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">M2 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">ω 3위</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 2: LB R2 M7, M8 -->
+            <div class="bracket-column">
+              <article class="bracket-match">
+                <h3>Match 7 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">M4 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">→</span><strong>로고</strong><em>0</em></div>
+              </article>
+              <article class="bracket-match">
+                <h3>Match 8 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">M3 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">→</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 3: LB SF M10 (center) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match">
+                <h3>Match 10 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 4: LB Final M11 (center) -->
+            <div class="bracket-column bracket-column-center">
+              <article class="bracket-match">
+                <h3>Match 11 <span>(?/?)</span></h3>
+                <div class="bracket-team placeholder"><span class="bracket-seed">M9 패자</span><strong>로고</strong><em>0</em></div>
+                <div class="bracket-team placeholder"><span class="bracket-seed">→</span><strong>로고</strong><em>0</em></div>
+              </article>
+            </div>
+
+            <!-- Col 5: empty -->
+            <div class="bracket-column bracket-empty" aria-hidden="true"></div>
+          </div>
+
+          <div class="bracket-footer">
+            <div class="kickoff-legend">
+              <span><span class="legend-pip win-pip"></span>다음 라운드 진출</span>
+              <span><span class="legend-pip qual-pip"></span>Masters 산티아고 진출</span>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Seed Picker Modal -->
+    <!-- 시드 팀 선택 모달 -->
     <div class="seed-modal" id="seed-modal" hidden>
       <div class="seed-backdrop" id="seed-backdrop"></div>
       <div class="seed-panel" role="dialog" aria-modal="true">
-        <h2 id="seed-modal-title">시드 배정</h2>
-        <p id="seed-modal-desc">팀을 선택하세요</p>
-        <div class="seed-grid" id="seed-grid"></div>
+        <h2 id="seed-modal-title">팀 배치</h2>
+        <p>슬롯에 배치할 팀을 선택하세요.</p>
+        <div class="seed-team-grid" id="seed-team-grid"></div>
         <div class="seed-actions" id="seed-actions"></div>
       </div>
     </div>
@@ -134,275 +396,227 @@
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {
+
       const SEEDS_KEY = "emea_s1_playoffs_seeds";
-      const FROM_PARAM = "stage1playoffs";
-      const MATCH_PAGE = "./emea-match-dark.html";
 
-      const TEAM_INFO = {
-        "Fnatic":         { code: "FNC",  src: "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",  white: true },
-        "Eternal Fire":   { code: "EF",   src: "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",  white: true },
-        "GIANTX":         { code: "GX",   src: "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",  white: true },
-        "Team Vitality":  { code: "VIT",  src: "https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png",                                                           white: true },
-        "FUT Esports":    { code: "FUT",  src: "https://specs.gg/assets/img/teams/fut-esports.webp",  white: true },
-        "Team Liquid":    { code: "TL",   src: "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp", white: false },
-        "Team Heretics":  { code: "TH",   src: "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",  white: true },
-        "Gentle Mates":   { code: "M8",   src: "./assets/teams/gm.png",                                                                                                           white: false },
+      const teamLogos = {
+        "Fnatic":         { src: "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",  white: true  },
+        "Eternal Fire":   { src: "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",  white: true  },
+        "Team Heretics":  { src: "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",  white: true  },
+        "Team Liquid":    { src: "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp", white: true  },
+        "FUT Esports":    { src: "https://specs.gg/assets/img/teams/fut-esports.webp",                                                                           white: false },
+        "GIANTX":         { src: "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",  white: true  },
+        "Team Vitality":  { src: "https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png",                                                        white: true  },
+        "Gentle Mates":   { src: "./assets/teams/gm.png",                                                                                                        white: true  },
       };
-      const ALL_SEEDS = Object.keys(TEAM_INFO);
 
-      // matchLinks: which seeds fill each slot
-      // match: { teamA: seed|null, teamB: seed|null }
-      // matchLinks: for match N, where do teamA and teamB come from?
+      const teamCodes = {
+        "Fnatic":"FNC","Eternal Fire":"EF","Team Heretics":"TH","Team Liquid":"TL",
+        "FUT Esports":"FUT","GIANTX":"GX","Team Vitality":"VIT","Gentle Mates":"M8",
+      };
+
+      const allTeams = Object.keys(teamLogos);
+
+      function teamCode(name) { return teamCodes[name] || (name ? name.slice(0,3).toUpperCase() : ""); }
+      function teamSrc(name)  { return teamLogos[name]?.src || ""; }
+      function teamWhite(name){ return teamLogos[name]?.white || false; }
+
+      /* ── 시드 저장 ─────────────────────────── */
+      function loadSeeds() { try { return JSON.parse(localStorage.getItem(SEEDS_KEY) || "{}"); } catch { return {}; } }
+      function saveSeeds(s) { localStorage.setItem(SEEDS_KEY, JSON.stringify(s)); }
+      let seeds = loadSeeds();
+
+      /* ── 매치 연결 ─────────────────────────── */
       const matchLinks = {
-        3: [null, { match: 1, result: "winner" }],
-        4: [null, { match: 2, result: "winner" }],
-        5: [{ match: 1, result: "loser" }, null],
-        6: [{ match: 2, result: "loser" }, null],
-        7: [{ match: 4, result: "loser" }, { match: 5, result: "winner" }],
-        8: [{ match: 3, result: "loser" }, { match: 6, result: "winner" }],
-        9: [{ match: 3, result: "winner" }, { match: 4, result: "winner" }],
-        10: [{ match: 7, result: "winner" }, { match: 8, result: "winner" }],
+        3:  [null,                          { match: 1,  result: "winner" }],
+        4:  [null,                          { match: 2,  result: "winner" }],
+        5:  [{ match: 1, result: "loser" }, null                          ],
+        6:  [{ match: 2, result: "loser" }, null                          ],
+        7:  [{ match: 4, result: "loser" }, { match: 5,  result: "winner" }],
+        8:  [{ match: 3, result: "loser" }, { match: 6,  result: "winner" }],
+        9:  [{ match: 3, result: "winner"}, { match: 4,  result: "winner" }],
+        10: [{ match: 7, result: "winner"}, { match: 8,  result: "winner" }],
         11: [{ match: 9, result: "loser" }, { match: 10, result: "winner" }],
         "Grand Finals": [{ match: 9, result: "winner" }, { match: 11, result: "winner" }],
       };
 
+      function isSeeded(matchId, slotIdx) {
+        const links = matchLinks[matchId] || [null, null];
+        return links[slotIdx] === null || links[slotIdx] === undefined;
+      }
+
+      /* ── 팀 결정 ─────────────────────────── */
+      function resolveTeams(matchId, states) {
+        const links = matchLinks[matchId] || [null, null];
+        return [0, 1].map(i => {
+          const sk = `${matchId}_${i}`;
+          if (seeds[sk]) return seeds[sk];
+          const link = links[i];
+          if (link) return states[link.match]?.[link.result] || "";
+          return "";
+        });
+      }
+
+      /* ── 결과 읽기 ───────────────────────── */
+      function normalizeScore(v) {
+        const n = Number(String(v ?? "0").trim());
+        return Number.isFinite(n) ? n : 0;
+      }
+      function resultKey(matchId, teams) {
+        return `result:Match ${matchId}|${teams[0]||"미정"}|${teams[1]||"미정"}`;
+      }
+      function readStoredResult(matchId, teams) {
+        try {
+          const norm = teams.map(t => t || "미정");
+          const code = norm.map(t => teamCode(t) || t);
+          const candidates = [
+            resultKey(matchId, norm),
+            resultKey(matchId, code),
+            resultKey(matchId, [norm[0], code[1]]),
+            resultKey(matchId, [code[0], norm[1]]),
+          ];
+          for (const k of candidates) {
+            const raw = localStorage.getItem(k);
+            if (!raw) continue;
+            const saved = JSON.parse(raw);
+            return { scoreA: normalizeScore(saved.scoreA), scoreB: normalizeScore(saved.scoreB) };
+          }
+        } catch {}
+        return { scoreA: 0, scoreB: 0 };
+      }
+
+      /* ── 브래킷 상태 계산 ───────────────── */
+      function resolveBracketState() {
+        const states = {};
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, "Grand Finals"].forEach(mid => {
+          const teams = resolveTeams(mid, states);
+          const score = readStoredResult(mid, teams);
+          const hasWinner = teams[0] && teams[1] && score.scoreA !== score.scoreB;
+          states[mid] = {
+            teams, score,
+            winner: hasWinner ? teams[score.scoreA > score.scoreB ? 0 : 1] : "",
+            loser:  hasWinner ? teams[score.scoreA > score.scoreB ? 1 : 0] : "",
+          };
+        });
+        return states;
+      }
+
+      /* ── 행 렌더링 ───────────────────────── */
+      function cardMatchId(card) {
+        const label = card.querySelector("h3")?.childNodes?.[0]?.textContent?.trim() || "";
+        const num = label.match(/\d+/)?.[0];
+        return num ? Number(num) : "Grand Finals";
+      }
+
+      function rowTeamName(row) { return row.dataset.teamName || ""; }
+
+      function renderRow(row, teamName, score, isWinner) {
+        let logo = row.querySelector(".bracket-logo");
+        const seedSpan = row.querySelector(".bracket-seed");
+        const nameEl = row.querySelector("strong");
+        const scoreEl = row.querySelector("em");
+
+        row.dataset.teamName = teamName || "";
+        row.classList.toggle("winner", Boolean(isWinner && teamName));
+        row.classList.toggle("placeholder", !teamName);
+
+        if (teamName) {
+          const src = teamSrc(teamName);
+          const white = teamWhite(teamName);
+          if (!logo) {
+            logo = document.createElement("span");
+            logo.className = "bracket-logo";
+            if (seedSpan) seedSpan.insertAdjacentElement("afterend", logo);
+            else row.prepend(logo);
+          }
+          logo.innerHTML = src
+            ? `<img src="${src}" alt="${teamCode(teamName)}"${white ? ' style="filter:brightness(0) invert(1)"' : ""} />`
+            : `<span style="font-family:'Barlow Condensed';font-size:11px;font-weight:700;color:rgba(255,255,255,0.5)">${teamCode(teamName)}</span>`;
+          if (nameEl) nameEl.style.display = "none";
+        } else {
+          if (logo) { logo.remove(); }
+          if (nameEl) { nameEl.style.display = ""; nameEl.textContent = "로고"; }
+        }
+
+        if (scoreEl) scoreEl.textContent = String(score);
+      }
+
+      /* ── 브래킷 렌더링 ───────────────────── */
       const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
 
-      function loadSeeds() {
-        try { const r = localStorage.getItem(SEEDS_KEY); if (r) return JSON.parse(r); } catch {}
-        return {};
-      }
-      function saveSeeds(s) { localStorage.setItem(SEEDS_KEY, JSON.stringify(s)); }
-
-      function getMatchResult(matchId) {
-        const seeds = loadSeeds();
-        const m1a = seeds[1] || null;
-        const m1b = seeds[2] || null;
-        const m2a = seeds[3] || null;
-        const m2b = seeds[4] || null;
-        // Match 1: seed1 vs seed8, Match 2: seed2 vs seed7, etc.
-        const matchSeeds = {
-          1: { teamA: seeds[1] || null, teamB: seeds[8] || null },
-          2: { teamA: seeds[2] || null, teamB: seeds[7] || null },
-          3: { teamA: seeds[3] || null, teamB: seeds[6] || null },
-          4: { teamA: seeds[4] || null, teamB: seeds[5] || null },
-        };
-        return matchSeeds[matchId] || null;
-      }
-
-      // Resolve what team is in a slot, following matchLinks
-      function resolveSlot(matchId, slot) {
-        // slot 0 = teamA (index 0), slot 1 = teamB (index 1)
-        const seeds = loadSeeds();
-
-        // Direct seed matches (1-4)
-        if (matchId === 1) return slot === 0 ? (seeds[1] || null) : (seeds[8] || null);
-        if (matchId === 2) return slot === 0 ? (seeds[2] || null) : (seeds[7] || null);
-        if (matchId === 3) return slot === 0 ? (seeds[3] || null) : (seeds[6] || null);
-        if (matchId === 4) return slot === 0 ? (seeds[4] || null) : (seeds[5] || null);
-
-        const links = matchLinks[matchId];
-        if (!links) return null;
-        const link = links[slot];
-        if (!link) return null;
-        return getMatchWinner(link.match, link.result);
-      }
-
-      function getStoredScore(matchId) {
-        const teamA = resolveSlot(matchId, 0);
-        const teamB = resolveSlot(matchId, 1);
-        if (!teamA || !teamB) return null;
-        const dateKey = `Match ${matchId}`;
-        try {
-          const stored = JSON.parse(localStorage.getItem(`result:${dateKey}|${teamA}|${teamB}`) || "{}");
-          const sa = String(stored.scoreA ?? "").trim();
-          const sb = String(stored.scoreB ?? "").trim();
-          if (sa && sb && sa !== "-" && sb !== "-") return { sa, sb };
-        } catch {}
-        return null;
-      }
-
-      function getMatchWinner(matchId, result) {
-        const teamA = resolveSlot(matchId, 0);
-        const teamB = resolveSlot(matchId, 1);
-        if (!teamA || !teamB) return null;
-        const score = getStoredScore(matchId);
-        if (!score) return null;
-        const a = parseInt(score.sa); const b = parseInt(score.sb);
-        if (isNaN(a) || isNaN(b)) return null;
-        if (result === "winner") return a > b ? teamA : b > a ? teamB : null;
-        if (result === "loser") return a > b ? teamB : b > a ? teamA : null;
-        return null;
-      }
-
-      function logoHtml(teamName, size) {
-        if (!teamName) return "";
-        const info = TEAM_INFO[teamName];
-        if (!info) return "";
-        return `<img src="${info.src}" alt="${info.code}" ${info.white ? 'class="logo-white"' : ""} style="width:${size}px;height:${size}px;object-fit:contain;" />`;
-      }
-
-      function renderTeamRow(matchId, slot, seedLabel) {
-        const teamName = resolveSlot(matchId, slot);
-        const score = getStoredScore(matchId);
-        const scoreVal = score ? (slot === 0 ? score.sa : score.sb) : "";
-        if (!teamName) {
-          return `<div class="bracket-team tbd">
-            <span class="bt-seed">${seedLabel}</span>
-            <span class="bt-logo"></span>
-            <span class="bt-name">미정</span>
-            <span class="bt-score"></span>
-          </div>`;
-        }
-        const info = TEAM_INFO[teamName] || {};
-        return `<div class="bracket-team">
-          <span class="bt-seed">${seedLabel}</span>
-          <span class="bt-logo">${logoHtml(teamName, 22)}</span>
-          <span class="bt-name">${info.code || teamName}</span>
-          <span class="bt-score">${scoreVal}</span>
-        </div>`;
-      }
-
-      function renderMatch(matchId, labelA, labelB) {
-        const isBo5 = (matchId === "Grand Finals");
-        const teamA = resolveSlot(matchId, 0);
-        const teamB = resolveSlot(matchId, 1);
-        const score = getStoredScore(matchId);
-        const div = document.createElement("article");
-        div.className = "bracket-match" + (isBo5 ? " grand-final" : "");
-        div.dataset.matchId = String(matchId);
-        div.tabIndex = 0;
-        div.setAttribute("role", "link");
-        div.setAttribute("aria-label", `Match ${matchId} 상세 보기`);
-        div.innerHTML = `
-          <h3>Match ${matchId}${isBo5 ? " <span>(Bo5)</span>" : ""}</h3>
-          ${renderTeamRow(matchId, 0, labelA)}
-          ${renderTeamRow(matchId, 1, labelB)}`;
-
-        div.addEventListener("click", () => {
-          const tA = resolveSlot(matchId, 0) || "미정";
-          const tB = resolveSlot(matchId, 1) || "미정";
-          const sc = getStoredScore(matchId);
-          const scoreStr = sc ? `${sc.sa} : ${sc.sb}` : "VS";
-          const params = new URLSearchParams({ date: `Match ${matchId}`, teamA: tA, teamB: tB, score: scoreStr, from: FROM_PARAM, ...(isBo5 ? { bo5: "1" } : {}) });
-          window.location.href = `${MATCH_PAGE}?${params}`;
+      function renderPlayoffBracket() {
+        const states = resolveBracketState();
+        document.querySelectorAll(".bracket-match").forEach(card => {
+          const matchId = cardMatchId(card);
+          const state = states[matchId];
+          if (!state) return;
+          const rows = card.querySelectorAll(".bracket-team");
+          const [teamA, teamB] = state.teams;
+          const { scoreA, scoreB } = state.score;
+          renderRow(rows[0], teamA, scoreA, state.winner && state.winner === teamA);
+          renderRow(rows[1], teamB, scoreB, state.winner && state.winner === teamB);
+          card.tabIndex = 0;
+          card.setAttribute("role", "link");
+          card.dataset.matchId = String(matchId);
+          [rows[0], rows[1]].forEach((row, i) => {
+            if (isAdmin() && isSeeded(matchId, i)) {
+              row.dataset.seedSlot = `${matchId}_${i}`;
+            } else {
+              delete row.dataset.seedSlot;
+            }
+          });
         });
-        div.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); div.click(); } });
-        return div;
+        // Grand Finals: qualifier style for winner
+        const gfCard = document.querySelector(".grand-final-card");
+        if (gfCard) {
+          const gfState = states["Grand Finals"];
+          const gfRows = gfCard.querySelectorAll(".bracket-team");
+          if (gfState?.winner) {
+            gfRows.forEach(row => {
+              row.classList.toggle("qualifier", row.dataset.teamName === gfState.winner);
+            });
+          }
+        }
       }
 
-      function renderBracket() {
-        const grid = document.getElementById("bracket-grid");
-        grid.innerHTML = "";
+      /* ── 시드 피커 ───────────────────────── */
+      let _seedSlot = null;
 
-        // Col 1: UB R1 — M1, M2, M3, M4
-        const col1 = document.createElement("div");
-        col1.className = "bracket-col col-upper";
-        col1.appendChild(renderMatch(1, "#1", "#8"));
-        col1.appendChild(renderMatch(2, "#2", "#7"));
-        col1.appendChild(renderMatch(3, "#3", "#6"));
-        col1.appendChild(renderMatch(4, "#4", "#5"));
-        grid.appendChild(col1);
-
-        // Col 2: UB Semis — M5(LB),M6(LB) upper / actually UB QF winners
-        // M5 = M1w vs M2w, M6 = M3w vs M4w... wait, looking at matchLinks:
-        // matchLinks says M3=[null, M1w], M4=[null, M2w] — so these ARE UB semis with seeded byes
-        // Actually re-reading: M3 teamA = seed 3, teamB = M1 winner... etc.
-        // Let me re-read the matchLinks from pacific-stage1-playoffs template:
-        // 3: [null, {match:1, winner}] — so M3 teamA is from seeds, teamB is M1 winner
-        // This means col1 has M1,M2 (1v8, 2v7), col2 has M3,M4 (3 vs M1w, 4 vs M2w?)
-        // Actually the bracket used is:
-        // Col1: M1(1v8), M2(2v7) | Col2: M3(3v M1w), M4(4 vs M2w)? No...
-        // Looking at matchLinks: M3 = [null, M1w], M4 = [null, M2w]
-        // And M5 = [M1L, null], M6 = [M2L, null]
-        // M9 = [M3w, M4w] — UB Final
-        // This means: UB bracket is M1->M3->M9, M2->M4->M9
-        // LB bracket: M1L->M5, M2L->M6, M4L->M7, M3L->M8, M7w+M8w->M10, M10w+M9L->M11, M11w vs M9w = GF
-
-        // Re-doing column layout:
-        // Col1: M1, M2 (UB R1)
-        // Col2: M3, M4 (UB QF - seeded byes), M5,M6 are LB R1
-        // Col3: M9 (UB Final), M7,M8 (LB R2)
-        // Col4: M10,M11 (LB QF + LB SF)
-        // Col5: Grand Finals
-
-        // This is complex. Let me use a simpler 5-col layout matching pacific-stage1-playoffs:
-        // Upper: M1,M2 | M3,M4 | M9 | → | GF
-        // Lower:        | M5,M6 | M7,M8 | M10,M11 |
-
-        // Actually let me just lay it out properly using divs matching the Pacific template structure
-
-        const col2 = document.createElement("div");
-        col2.className = "bracket-col col-upper";
-        col2.appendChild(renderMatch(3, "#3", "M1↑"));
-        col2.appendChild(renderMatch(4, "#4", "M2↑"));
-        // Lower bracket R1
-        col2.appendChild(renderMatch(5, "M1↓", "#?"));
-        col2.appendChild(renderMatch(6, "M2↓", "#?"));
-        grid.appendChild(col2);
-
-        // Col 3: UB Final + LB R2
-        const col3 = document.createElement("div");
-        col3.className = "bracket-col col-upper";
-        col3.appendChild(renderMatch(9, "M3↑", "M4↑"));
-        col3.appendChild(renderMatch(7, "M4↓", "M5↑"));
-        col3.appendChild(renderMatch(8, "M3↓", "M6↑"));
-        grid.appendChild(col3);
-
-        // Col 4: LB SF + LB Final
-        const col4 = document.createElement("div");
-        col4.className = "bracket-col col-upper";
-        col4.appendChild(renderMatch(10, "M7↑", "M8↑"));
-        col4.appendChild(renderMatch(11, "M9↓", "M10↑"));
-        grid.appendChild(col4);
-
-        // Col 5: Grand Finals
-        const col5 = document.createElement("div");
-        col5.className = "bracket-col col-gf";
-        col5.appendChild(renderMatch("Grand Finals", "M9↑", "M11↑"));
-        grid.appendChild(col5);
-      }
-
-      /* ── Seed Picker ─────────────────────── */
-      let _seedCtx = null;
-
-      function openSeedPicker(seedNum) {
-        if (!isAdmin()) return;
-        _seedCtx = seedNum;
-        const seeds = loadSeeds();
-        const taken = new Set(Object.entries(seeds).filter(([k, v]) => Number(k) !== seedNum && v).map(([, v]) => v));
-        document.getElementById("seed-modal-title").textContent = `시드 ${seedNum} 팀 배정`;
-        document.getElementById("seed-modal-desc").textContent = "팀을 클릭해서 배정하세요.";
-        const grid = document.getElementById("seed-grid");
-        grid.innerHTML = ALL_SEEDS.map(t => {
-          const info = TEAM_INFO[t];
-          const isTaken = taken.has(t);
-          const isCur = seeds[seedNum] === t;
-          return `<button class="seed-btn${isCur ? " selected" : ""}" data-team="${t}" ${isTaken ? "disabled" : ""}>
-            <img src="${info.src}" alt="${info.code}" ${info.white ? 'class="logo-white"' : ""} />
-            <span class="seed-code">${info.code}</span>
-            <span style="font-size:9px;opacity:.6;">${t}</span>
-          </button>`;
+      function openSeedPicker(slotKey) {
+        _seedSlot = slotKey;
+        const current = seeds[slotKey] || "";
+        document.getElementById("seed-modal-title").textContent = slotKey + " 슬롯 팀 배치";
+        const grid = document.getElementById("seed-team-grid");
+        grid.innerHTML = allTeams.map(t => {
+          const { src, white } = teamLogos[t] || {};
+          const logoHtml = src ? `<img src="${src}" alt="${teamCode(t)}"${white ? ' class="logo-white"' : ""} />` : "";
+          return `<button class="seed-team-btn${t === current ? " selected" : ""}" data-team="${t}">${logoHtml}<span class="seed-code">${teamCode(t)}</span><span>${t}</span></button>`;
         }).join("");
-        grid.querySelectorAll(".seed-btn").forEach(btn => {
+        grid.querySelectorAll(".seed-team-btn").forEach(btn => {
           btn.addEventListener("click", () => {
-            const s = loadSeeds();
-            s[_seedCtx] = btn.dataset.team;
-            saveSeeds(s);
+            seeds[_seedSlot] = btn.dataset.team;
+            saveSeeds(seeds);
             closeSeedModal();
-            renderBracket();
+            renderPlayoffBracket();
           });
         });
         const actions = document.getElementById("seed-actions");
         actions.innerHTML = "";
-        const clearBtn = document.createElement("button");
-        clearBtn.className = "seed-act-btn seed-clear"; clearBtn.textContent = "비우기";
-        clearBtn.addEventListener("click", () => {
-          const s = loadSeeds(); delete s[_seedCtx]; saveSeeds(s); closeSeedModal(); renderBracket();
-        });
-        actions.appendChild(clearBtn);
+        if (current) {
+          const clearBtn = document.createElement("button");
+          clearBtn.className = "seed-btn seed-btn-clear";
+          clearBtn.textContent = "배치 초기화";
+          clearBtn.addEventListener("click", () => {
+            delete seeds[_seedSlot];
+            saveSeeds(seeds);
+            closeSeedModal();
+            renderPlayoffBracket();
+          });
+          actions.appendChild(clearBtn);
+        }
         const cancelBtn = document.createElement("button");
-        cancelBtn.className = "seed-act-btn seed-cancel"; cancelBtn.textContent = "취소";
+        cancelBtn.className = "seed-btn seed-btn-cancel";
+        cancelBtn.textContent = "취소";
         cancelBtn.addEventListener("click", closeSeedModal);
         actions.appendChild(cancelBtn);
         document.getElementById("seed-modal").hidden = false;
@@ -410,35 +624,49 @@
 
       function closeSeedModal() {
         document.getElementById("seed-modal").hidden = true;
-        _seedCtx = null;
+        _seedSlot = null;
       }
 
       document.getElementById("seed-backdrop").addEventListener("click", closeSeedModal);
-      document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("seed-modal").hidden) closeSeedModal(); });
-
-      renderBracket();
-
-      // Admin: click on seed number in bracket title to open seed picker
-      document.getElementById("bracket-grid").addEventListener("click", e => {
-        if (!isAdmin()) return;
-        // Seed assignment: double click on the bracket column header area or seed badge
-        const seedBadge = e.target.closest(".bt-seed");
-        if (!seedBadge) return;
-        const matchDiv = seedBadge.closest(".bracket-match");
-        if (!matchDiv) return;
-        const matchId = matchDiv.dataset.matchId;
-        const rows = matchDiv.querySelectorAll(".bracket-team");
-        const rowIndex = [...rows].indexOf(seedBadge.closest(".bracket-team"));
-        // Only allow editing first-round direct seed matches (1-4)
-        const numId = Number(matchId);
-        if (numId >= 1 && numId <= 4) {
-          const seedNum = rowIndex === 0
-            ? (numId === 1 ? 1 : numId === 2 ? 2 : numId === 3 ? 3 : 4)
-            : (numId === 1 ? 8 : numId === 2 ? 7 : numId === 3 ? 6 : 5);
-          e.stopPropagation();
-          openSeedPicker(seedNum);
-        }
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && !document.getElementById("seed-modal").hidden) closeSeedModal();
       });
+
+      /* ── 매치 상세 이동 ──────────────────── */
+      function openMatchDetail(card) {
+        const matchId = card.dataset.matchId;
+        const rows = card.querySelectorAll(".bracket-team");
+        const teamA = rowTeamName(rows[0]) || "미정";
+        const teamB = rowTeamName(rows[1]) || "미정";
+        const scoreA = rows[0]?.querySelector("em")?.textContent?.trim() || "0";
+        const scoreB = rows[1]?.querySelector("em")?.textContent?.trim() || "0";
+        const isBo5 = matchId === "Grand Finals" || matchId === "11";
+        const isGrandFinal = matchId === "Grand Finals";
+        const query = new URLSearchParams({
+          date: `Match ${matchId}`, teamA, teamB,
+          score: `${scoreA} : ${scoreB}`, from: "stage1playoffs",
+          ...(isBo5 ? { bo5: "1" } : {}),
+          ...(isGrandFinal ? { gf: "1" } : {}),
+        });
+        window.location.href = `./emea-match-dark.html?${query.toString()}`;
+      }
+
+      /* ── Init ────────────────────────────── */
+      renderPlayoffBracket();
+
+      document.querySelectorAll(".bracket-match").forEach(card => {
+        card.addEventListener("click", e => {
+          if (isAdmin()) {
+            const row = e.target.closest(".bracket-team[data-seed-slot]");
+            if (row?.dataset.seedSlot) { openSeedPicker(row.dataset.seedSlot); return; }
+          }
+          openMatchDetail(card);
+        });
+        card.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMatchDetail(card); }
+        });
+      });
+
     });
     </script>
     <script src="./auth.js"></script>
