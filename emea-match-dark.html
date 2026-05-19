@@ -2250,6 +2250,22 @@ const maps = [
   createBlankMapData(2),
 ];
 
+// ── Bo5: 맵 4~5를 동기적으로 즉시 빌드 (서버 슬립 중에도 플레이스홀더 안 보이도록) ──
+(function() {
+  var maxSync = Math.min(activeMapCount, currentBo);
+  for (var si = 4; si <= maxSync; si++) {
+    if (initializedMaps[si]) continue;
+    initializedMaps[si] = true;
+    var sidx = si - 1;
+    maps[sidx] = createBlankMapData(sidx);
+    var scard = document.getElementById('map-' + si);
+    if (scard) {
+      scard.classList.remove('map-card-empty');
+      scard.innerHTML = buildMapCardHtml(si);
+    }
+  }
+}());
+
 // ── 렌더링 ────────────────────────────────────────────────────
 function kdaHtml(p, mapIdx, playerIdx) {
   let k = p.k, d = p.d, a = p.a;
@@ -2628,12 +2644,10 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
     VETO_MAP_SLOT = [2, 3, 4, 5, 6];
   }
 
-  // ② 맵 4~5 데이터 구조 미리 생성 (데이터 로드 전)
+  // ② 맵 4~5 scoreState 초기화 (maps 데이터는 이미 sync에서 생성됨)
   for (var _mi = 4; _mi <= Math.min(activeMapCount, currentBo); _mi++) {
-    if (!maps[_mi - 1]) {
-      maps[_mi - 1] = createBlankMapData(_mi - 1);
-      scoreState['m' + _mi] = { l: '-', r: '-' };
-    }
+    if (!maps[_mi - 1]) maps[_mi - 1] = createBlankMapData(_mi - 1);
+    if (!scoreState['m' + _mi]) scoreState['m' + _mi] = { l: '-', r: '-' };
   }
 
   // ③ 전체 맵 데이터 로드 (맵 4~5 포함)
