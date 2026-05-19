@@ -7,51 +7,89 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
     <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0f0a0b; color: #f0f0f0; font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 32px; height: 56px; background: rgba(15,10,11,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #fff; }
+      .back-link { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.15s; margin-left: auto; }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #e84057; margin-bottom: 6px; }
+
+      /* ── PLAYOFF SHELL ──────────────────────── */
+      .playoff-shell { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+      .playoff-hero { display: flex; align-items: center; gap: 24px; padding: 48px 0 36px; }
+      .playoff-logo-lockup img { width: 72px; height: 72px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.7; }
+      .playoff-hero h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: #fff; line-height: 1; margin-bottom: 6px; }
+      .playoff-hero p { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+      /* ── BRACKET ────────────────────────────── */
+      .playoff-board { overflow: hidden; }
+      .bracket-scroll { overflow-x: auto; padding-bottom: 16px; }
+      .bracket-section-title { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin: 32px 0 12px; border-left: 3px solid #e84057; padding-left: 12px; }
+      .bracket-section-title.lower-title { margin-top: 48px; }
+      .bracket-rounds { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); min-width: 800px; gap: 0; margin-bottom: 4px; }
+      .bracket-rounds span { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 6px 8px; text-align: center; }
+      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); min-width: 800px; gap: 0; border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+      .upper-bracket { min-height: 640px; }
+      .lower-bracket { min-height: 380px; }
+      .bracket-column { display: flex; flex-direction: column; justify-content: space-around; padding: 12px 6px; border-right: 1px solid rgba(255,255,255,0.05); gap: 12px; }
+      .bracket-column:last-child { border-right: none; }
+      .bracket-column-spaced { justify-content: space-around; }
+      .bracket-column-center { justify-content: center; }
+      .bracket-arrow-column { justify-content: center; align-items: center; color: rgba(255,255,255,0.2); font-size: 24px; }
+      .bracket-empty { background: rgba(255,255,255,0.01); }
+      .bracket-match { background: #140a0d; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, transform 0.12s; outline: none; }
+      .bracket-match:hover { border-color: rgba(232,64,87,0.4); transform: translateY(-1px); }
+      .bracket-match:focus-visible { border-color: #e84057; }
+      .bracket-match h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 6px 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .bracket-match h3 span { font-weight: 400; }
+      .grand-final-card { border-color: rgba(232,64,87,0.25); box-shadow: 0 0 16px rgba(232,64,87,0.08); }
+      .bracket-team { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.12s; }
+      .bracket-team:last-child { border-bottom: none; }
+      .bracket-team.winner { background: rgba(0,180,90,0.09); }
+      .bracket-team.qualifier { background: rgba(232,64,87,0.14); }
+      .bracket-team.placeholder { opacity: 0.5; }
+      .bracket-team.empty { opacity: 0.35; }
+      .bracket-seed { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.25); min-width: 36px; flex-shrink: 0; }
+      .bracket-logo { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); }
+      .bracket-logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6)); }
+      .bracket-team strong { flex: 1; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bracket-team em { font-style: normal; font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.55); flex-shrink: 0; }
+      .bracket-team.winner em { color: #fff; }
+      .bracket-footer { margin-top: 24px; padding: 16px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; font-size: 12px; color: rgba(255,255,255,0.35); }
+
       /* ── 시드 슬롯 편집 (어드민) ─────────────────────── */
       .bracket-team.is-seed { position: relative; }
       body:not(.view-only) .bracket-team.is-seed { cursor: pointer; transition: background 0.15s; }
-      body:not(.view-only) .bracket-team.is-seed:hover { background: rgba(251,38,89,0.12); border-radius: 8px; }
-      body:not(.view-only) .bracket-team.is-seed::after {
-        content: "✎";
-        font-size: 10px; opacity: 0.45;
-        position: absolute; bottom: 2px; right: 4px;
-      }
+      body:not(.view-only) .bracket-team.is-seed:hover { background: rgba(232,64,87,0.12); border-radius: 8px; }
+      body:not(.view-only) .bracket-team.is-seed::after { content: "✎"; font-size: 10px; opacity: 0.45; position: absolute; bottom: 2px; right: 4px; }
       .bracket-team[data-team-name]:not([data-team-name=""]) strong { display: none !important; }
 
       /* ── 팀 선택 모달 ─────────────────────────────────── */
       .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
       .ts-modal[hidden] { display: none !important; }
-      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
-      .ts-panel {
-        position: relative; z-index: 1;
-        width: min(500px, calc(100vw - 24px));
-        max-height: 90vh; overflow-y: auto;
-        background: #0d0508; border: 1.5px solid rgba(251,38,89,0.28);
-        border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease;
-      }
-      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
-      .ts-panel p  { font-size: 13px; opacity: 0.6; margin: 0 0 16px; }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
+      .ts-panel { position: relative; z-index: 1; width: min(500px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #1a0508; border: 1.5px solid rgba(232,64,87,0.25); border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease; }
+      @keyframes loginPanelIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; color: #fff; }
+      .ts-panel p { font-size: 13px; opacity: 0.5; margin: 0 0 16px; color: #fff; }
       .ts-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
-      .ts-team-btn {
-        display: flex; flex-direction: column; align-items: center; gap: 6px;
-        padding: 11px 6px; border-radius: 10px;
-        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
-        color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s;
-        font-size: 10px; font-weight: 700; text-align: center;
-      }
+      .ts-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 11px 6px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09); color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s; font-size: 10px; font-weight: 700; text-align: center; }
       .ts-team-btn img { width: 28px; height: 28px; object-fit: contain; }
       .ts-team-btn .ts-code { font-size: 13px; font-weight: 900; }
-      .ts-team-btn:hover { background: rgba(251,38,89,0.14); border-color: rgba(251,38,89,0.55); }
-      .ts-team-btn.selected { background: rgba(251,38,89,0.28); border-color: #fb2659; }
+      .ts-team-btn:hover { background: rgba(232,64,87,0.12); border-color: rgba(232,64,87,0.5); }
+      .ts-team-btn.selected { background: rgba(232,64,87,0.22); border-color: #e84057; }
       .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
       .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
       .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
       .ts-btn-cancel:hover { background: rgba(255,255,255,0.14); }
-      .ts-btn-save { background: #fb2659; color: #fff; }
+      .ts-btn-save { background: #e84057; color: #fff; }
       .ts-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
-      .ts-btn-clear { background: rgba(255,80,80,0.12); color: #ff5050; border: 1px solid rgba(255,80,80,0.2); }
+      .ts-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.2); }
     </style>
   </head>
   <body class="league-page stage-page cn-page playoff-page">
