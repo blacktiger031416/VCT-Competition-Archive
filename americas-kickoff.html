@@ -3,35 +3,283 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VCT Americas KickOff 2026</title>
+    <title>VCT Americas 2026 KickOff</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
-      .kickoff-page .bracket-rounds { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .kickoff-page .bracket-grid {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        background:
-          repeating-linear-gradient(
-            90deg,
-            transparent 0,
-            transparent calc(16.6667% - 1px),
-            rgba(7, 17, 17, 0.14) calc(16.6667% - 1px),
-            rgba(7, 17, 17, 0.14) 16.6667%
-          ),
-          #fff;
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #0d1520;
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
       }
-      .kickoff-page .upper-bracket,
-      .kickoff-page .middle-bracket { min-height: 720px; }
-      .kickoff-page .lower-bracket  { min-height: 364px; }
-      .bracket-team.winner    { background: rgba(0, 180, 90, 0.11); }
-      .bracket-team.qualifier { background: rgba(80, 140, 255, 0.20); }
-      .kickoff-legend { display: flex; gap: 28px; justify-content: center; align-items: center; }
-      .kickoff-legend span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #fff; }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(13,21,32,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        transition: color 0.15s;
+        margin-left: auto;
+      }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .site-header .auth-header-btn { margin-left: 0; }
+
+      /* ── EYEBROW ─────────────────────────────── */
+      .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #ff570c;
+        margin-bottom: 6px;
+      }
+
+      /* ── PLAYOFF SHELL ──────────────────────── */
+      .playoff-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 80px;
+      }
+      .playoff-hero {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 48px 0 36px;
+      }
+      .playoff-logo-lockup img {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        opacity: 0.7;
+      }
+      .playoff-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .playoff-hero p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.4);
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+
+      /* ── BRACKET SCROLL ─────────────────────── */
+      .playoff-board { overflow: hidden; }
+      .bracket-scroll { overflow-x: auto; padding-bottom: 16px; }
+
+      .bracket-section-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.6);
+        margin: 32px 0 12px;
+        border-left: 3px solid #ff570c;
+        padding-left: 12px;
+      }
+      .bracket-section-title.lower-title { margin-top: 48px; }
+
+      /* ── BRACKET ROUNDS HEADER ──────────────── */
+      .bracket-rounds {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        min-width: 900px;
+        gap: 0;
+        margin-bottom: 4px;
+      }
+      .bracket-rounds span {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        padding: 6px 8px;
+        text-align: center;
+      }
+
+      /* ── BRACKET GRID ───────────────────────── */
+      .bracket-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        min-width: 900px;
+        gap: 0;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .upper-bracket, .middle-bracket { min-height: 720px; }
+      .lower-bracket { min-height: 364px; }
+
+      /* ── BRACKET COLUMN ─────────────────────── */
+      .bracket-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 12px 6px;
+        border-right: 1px solid rgba(255,255,255,0.05);
+        gap: 12px;
+      }
+      .bracket-column:last-child { border-right: none; }
+      .bracket-arrow-column {
+        justify-content: center;
+        align-items: center;
+        color: rgba(255,255,255,0.2);
+        font-size: 24px;
+      }
+      .bracket-empty { background: rgba(255,255,255,0.01); }
+      .bracket-column-center { justify-content: center; }
+
+      /* ── BRACKET MATCH CARD ─────────────────── */
+      .bracket-match {
+        background: #111a28;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.18s, transform 0.12s;
+        outline: none;
+      }
+      .bracket-match:hover { border-color: rgba(255,87,12,0.4); transform: translateY(-1px); }
+      .bracket-match:focus-visible { border-color: #ff570c; }
+      .bracket-match h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.35);
+        padding: 6px 8px 4px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+      .bracket-match h3 span { font-weight: 400; }
+      .grand-final-card {
+        border-color: rgba(255,87,12,0.25);
+        box-shadow: 0 0 16px rgba(255,87,12,0.08);
+      }
+
+      /* ── BRACKET TEAM ROW ───────────────────── */
+      .bracket-team {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.12s;
+      }
+      .bracket-team:last-child { border-bottom: none; }
+      .bracket-team.winner { background: rgba(0,180,90,0.09); }
+      .bracket-team.qualifier { background: rgba(255,87,12,0.14); }
+
+      .bracket-seed {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.25);
+        min-width: 28px;
+        flex-shrink: 0;
+      }
+      .bracket-logo {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .bracket-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+      }
+      /* 흰색으로 표시할 로고 */
+      .bracket-logo img[alt="MIBR"],
+      .bracket-logo img[alt="ENVY"],
+      .bracket-logo img[alt="EG"] {
+        filter: brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+      }
+      .bracket-team strong {
+        flex: 1;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: rgba(255,255,255,0.85);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bracket-team em {
+        font-style: normal;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        color: rgba(255,255,255,0.55);
+        flex-shrink: 0;
+      }
+      .bracket-team.winner em { color: #fff; }
+
+      /* ── LEGEND ─────────────────────────────── */
+      .bracket-footer {
+        margin-top: 24px;
+        padding: 16px 0;
+        border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      .kickoff-legend {
+        display: flex; gap: 28px; justify-content: center; align-items: center;
+      }
+      .kickoff-legend span {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.6);
+        font-family: 'Barlow Condensed', sans-serif;
+        letter-spacing: 0.08em;
+      }
       .legend-pip { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
-      .legend-pip.win-pip  { background: rgba(0, 180, 90, 0.8); }
-      .legend-pip.qual-pip { background: rgba(80, 140, 255, 0.85); }
+      .legend-pip.win-pip  { background: rgba(0,180,90,0.8); }
+      .legend-pip.qual-pip { background: rgba(255,87,12,0.85); }
     </style>
   </head>
   <body class="league-page stage-page americas-page kickoff-page playoff-page">
@@ -48,7 +296,7 @@
         <div>
           <p class="eyebrow">VCT Americas 2026</p>
           <h1 id="kickoff-title">2026 VCT Americas KickOff</h1>
-          <p>플레이오프 대진표</p>
+          <p>토너먼트 대진표</p>
         </div>
       </section>
 
@@ -122,7 +370,7 @@
                 <h3>Match 4 <span>(1/17)</span></h3>
                 <div class="bracket-team winner" data-team-name="100 Thieves">
                   <span class="bracket-seed">#7</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>2</em>
                 </div>
@@ -135,7 +383,7 @@
               </article>
             </div>
 
-            <!-- Col 2 : 2R (M5~M8) — 상위 시드 진입 -->
+            <!-- Col 2 : 2R (M5~M8) -->
             <div class="bracket-column">
               <article class="bracket-match">
                 <h3>Match 5 <span>(1/18)</span></h3>
@@ -195,7 +443,7 @@
                 </div>
                 <div class="bracket-team" data-team-name="100 Thieves">
                   <span class="bracket-seed">M4↑</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>1</em>
                 </div>
@@ -264,7 +512,7 @@
           </div>
 
           <!-- ===================== 중위조 ===================== -->
-          <h2 class="bracket-section-title">중위조 대진표</h2>
+          <h2 class="bracket-section-title lower-title">중위조 대진표</h2>
           <div class="bracket-grid middle-bracket">
 
             <!-- Col 1 : MB 1R (M9~M12) -->
@@ -273,7 +521,7 @@
                 <h3>Match 9 <span>(1/24)</span></h3>
                 <div class="bracket-team winner" data-team-name="100 Thieves">
                   <span class="bracket-seed">M8↓</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>2</em>
                 </div>
@@ -340,7 +588,7 @@
                 <h3>Match 13 <span>(1/26)</span></h3>
                 <div class="bracket-team winner" data-team-name="100 Thieves">
                   <span class="bracket-seed">M9↑</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>2</em>
                 </div>
@@ -369,7 +617,7 @@
               </article>
             </div>
 
-            <!-- Col 3 : MB 3R (M17, M18) — UB 3R 탈락팀 진입 -->
+            <!-- Col 3 : MB 3R (M17, M18) -->
             <div class="bracket-column">
               <article class="bracket-match">
                 <h3>Match 17 <span>(2/2)</span></h3>
@@ -381,7 +629,7 @@
                 </div>
                 <div class="bracket-team" data-team-name="100 Thieves">
                   <span class="bracket-seed">M13↑</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>0</em>
                 </div>
@@ -426,7 +674,7 @@
               </article>
             </div>
 
-            <!-- Col 6 : M27 (Bo5) — UB Finals 탈락팀 진입 -->
+            <!-- Col 6 : M27 (Bo5) -->
             <div class="bracket-column bracket-column-center">
               <article class="bracket-match grand-final-card">
                 <h3>Match 27 <span>(2/15)</span></h3>
@@ -485,7 +733,7 @@
               </article>
             </div>
 
-            <!-- Col 2 : LB 2R (M21, M22) — MB 2R 탈락팀 진입 -->
+            <!-- Col 2 : LB 2R (M21, M22) -->
             <div class="bracket-column">
               <article class="bracket-match">
                 <h3>Match 21 <span>(2/7)</span></h3>
@@ -520,13 +768,13 @@
               </article>
             </div>
 
-            <!-- Col 3 : LB 3R (M23, M24) — MB 3R 탈락팀 진입 -->
+            <!-- Col 3 : LB 3R (M23, M24) -->
             <div class="bracket-column">
               <article class="bracket-match">
                 <h3>Match 23 <span>(2/8)</span></h3>
                 <div class="bracket-team winner" data-team-name="100 Thieves">
                   <span class="bracket-seed">M17↓</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>2</em>
                 </div>
@@ -561,7 +809,7 @@
                 <h3>Match 28 <span>(2/14)</span></h3>
                 <div class="bracket-team winner" data-team-name="100 Thieves">
                   <span class="bracket-seed">M23↑</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>2</em>
                 </div>
@@ -574,7 +822,7 @@
               </article>
             </div>
 
-            <!-- Col 5 : M29 — MB Finals 탈락팀 진입 -->
+            <!-- Col 5 : M29 -->
             <div class="bracket-column bracket-column-center">
               <article class="bracket-match">
                 <h3>Match 29 <span>(2/15)</span></h3>
@@ -586,7 +834,7 @@
                 </div>
                 <div class="bracket-team" data-team-name="100 Thieves">
                   <span class="bracket-seed">M28↑</span>
-                  <span class="bracket-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" alt="100T" /></span>
+                  <span class="bracket-logo"><img src="https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" alt="100T" /></span>
                   <strong>100T</strong>
                   <em>0</em>
                 </div>
@@ -644,7 +892,6 @@
         Object.entries(teamCodes).map(([name, code]) => [code, name])
       );
 
-      function fullTeamName(name) { return codeTeamNames[name] || name || ""; }
       function rowTeamName(row) {
         return row.dataset.teamName || row.querySelector("strong")?.textContent?.trim() || "";
       }
@@ -671,7 +918,7 @@
           from: "kickoff",
           ...(isBo5 ? { bo5: "1" } : {}),
         });
-        window.location.href = `./americas-match.html?${query.toString()}`;
+        window.location.href = `./americas-match-dark.html?${query.toString()}`;
       }
 
       document.querySelectorAll(".bracket-match").forEach((card) => {
@@ -685,6 +932,7 @@
         });
       });
     </script>
-  <script src="./auth.js"></script>
-</body>
+    <script src="./storage.js"></script>
+    <script src="./auth.js"></script>
+  </body>
 </html>
