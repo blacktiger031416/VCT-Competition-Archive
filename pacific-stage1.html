@@ -684,32 +684,45 @@
         return fallbackScore;
       }
 
-      const currentStandingsSeed = {};
-
       const standingsTables = [...document.querySelectorAll(".standings-table")];
-      const standingsGroups = standingsTables.map((table) => {
-        return [...table.querySelectorAll(".standings-row:not(.standings-head)")].map((row) => {
-          const cells = [...row.children];
-          const team = row.querySelector(".team-cell strong")?.textContent.trim() || "";
-          const country = row.querySelector(".team-cell span")?.textContent.trim() || "";
-          const logo = row.querySelector(".stage-team-logo")?.innerHTML || "";
-          const [wins = 0, losses = 0] = (cells[1]?.textContent.match(/\d+/g) || []).map(Number);
-          const [mapsWon = 0, mapsLost = 0] = (cells[2]?.textContent.match(/\d+/g) || []).map(Number);
-          const [roundsWon = 0, roundsLost = 0] = (cells[3]?.textContent.match(/\d+/g) || []).map(Number);
-          const seed = currentStandingsSeed[team] || {};
-          return {
-            team,
-            country: seed.country ?? country,
-            logo,
-            wins: seed.wins ?? wins,
-            losses: seed.losses ?? losses,
-            mapsWon: seed.mapsWon ?? mapsWon,
-            mapsLost: seed.mapsLost ?? mapsLost,
-            roundsWon: seed.roundsWon ?? roundsWon,
-            roundsLost: seed.roundsLost ?? roundsLost
-          };
-        });
-      });
+
+      const TEAM_INFO = {
+        "Paper Rex":          { logo: '<img src="./assets/teams/prx.svg" alt="PRX" class="logo-white" />', country: "싱가포르" },
+        "Gen.G":              { logo: '<img src="./assets/teams/gen.png" alt="GEN" />', country: "대한민국" },
+        "Kiwoom DRX":         { logo: '<img src="./assets/teams/krx.svg" alt="DRX" />', country: "대한민국" },
+        "Rex Regum Qeon":     { logo: '<img src="./assets/teams/rrq.png" alt="RRQ" />', country: "인도네시아" },
+        "T1":                 { logo: '<img src="./assets/teams/t1.png" alt="T1" />', country: "대한민국" },
+        "FULL SENSE":         { logo: '<img src="./assets/teams/fs.svg" alt="FS" />', country: "태국" },
+        "Global Esports":     { logo: '<img src="./assets/teams/ge.webp" alt="GE" />', country: "인도" },
+        "Team Secret":        { logo: '<img src="./assets/teams/ts.svg" alt="TS" class="logo-white" />', country: "필리핀" },
+        "ZETA DIVISION":      { logo: '<img src="./assets/teams/zeta.png" alt="ZETA" class="logo-white" />', country: "일본" },
+        "DetonatioN FocusMe": { logo: '<img src="https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" alt="DFM" />', country: "일본" },
+        "Nongshim RedForce":  { logo: '<img src="./assets/teams/ns.svg" alt="NS" />', country: "대한민국" },
+        "VARREL":             { logo: '<img src="./assets/teams/vl.svg" alt="VL" class="logo-white" />', country: "일본" },
+      };
+
+      function buildStandingsGroups() {
+        let groups;
+        try { groups = JSON.parse(localStorage.getItem("stage1_pacific_groups") || "null"); } catch {}
+        if (groups && groups.alpha?.some(t => t) && groups.omega?.some(t => t)) {
+          return ["alpha", "omega"].map(grp =>
+            groups[grp].filter(t => t).map(teamName => ({
+              team: teamName,
+              country: TEAM_INFO[teamName]?.country || "",
+              logo: TEAM_INFO[teamName]?.logo || "",
+              wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0,
+            }))
+          );
+        }
+        return standingsTables.map(table =>
+          [...table.querySelectorAll(".standings-row:not(.standings-head)")].map(row => {
+            const team = row.querySelector(".team-cell strong")?.textContent.trim() || "";
+            const country = row.querySelector(".team-cell span")?.textContent.trim() || "";
+            const logo = row.querySelector(".stage-team-logo")?.innerHTML || "";
+            return { team, country, logo, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0 };
+          })
+        );
+      }
 
       function parseScore(score) {
         const parts = score.match(/\d+/g);
@@ -757,15 +770,14 @@
       function rankGroup(rows, fixtures) {
         const teamSet = new Set(rows.map((row) => row.team));
         const stats = new Map(rows.map((row) => {
-          const seed = currentStandingsSeed[row.team] || {};
           return [row.team, {
             ...row,
             wins: 0,
             losses: 0,
             mapsWon: 0,
             mapsLost: 0,
-            roundsWon: seed.roundsWon ?? row.roundsWon ?? 0,
-            roundsLost: seed.roundsLost ?? row.roundsLost ?? 0,
+            roundsWon: row.roundsWon ?? 0,
+            roundsLost: row.roundsLost ?? 0,
           }];
         }));
         const completed = fixtures
@@ -856,7 +868,7 @@
 
       function renderStandings() {
         const fixtures = collectFixtures();
-        standingsGroups.forEach((rows, groupIndex) => {
+        buildStandingsGroups().forEach((rows, groupIndex) => {
           const table = standingsTables[groupIndex];
           const head = table.querySelector(".standings-head").outerHTML;
           const qualification = classifyQualification(rows, fixtures);
@@ -902,6 +914,7 @@
         });
       });
 
+      window._renderStandings = renderStandings;
       renderStandings();
     });
     </script>
@@ -951,7 +964,7 @@
         try { const r = localStorage.getItem(GA_KEY); if (r) return JSON.parse(r); } catch {}
         return { alpha: Array(6).fill(""), omega: Array(6).fill("") };
       }
-      function saveGroups(g) { localStorage.setItem(GA_KEY, JSON.stringify(g)); }
+      function saveGroups(g) { localStorage.setItem(GA_KEY, JSON.stringify(g)); window._renderStandings?.(); }
 
       function renderGroupSlots() {
         const groups = loadGroups();
