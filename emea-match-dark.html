@@ -1728,7 +1728,8 @@ var currentBo = MATCH_BO5 ? 5 : 3;
 var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
 var initializedMaps = (function() {
   var m = {};
-  for (var i = 1; i <= activeMapCount; i++) m[i] = true;
+  // 맵 1~3은 static HTML 존재, 맵 4~5는 initMapCard()로 동적 생성 필요
+  for (var i = 1; i <= Math.min(activeMapCount, 3); i++) m[i] = true;
   return m;
 }());
 
@@ -1829,7 +1830,10 @@ function updateMapCards() {
   var maxMaps = currentBo;
   for (var i = 1; i <= 5; i++) {
     var card = document.getElementById("map-" + i);
-    if (card) card.style.display = (i <= activeMapCount && i <= maxMaps) ? "" : "none";
+    if (!card) continue;
+    var shouldShow = (i <= activeMapCount && i <= maxMaps);
+    if (shouldShow && i >= 4) initMapCard(i); // 맵 4~5는 동적 HTML 빌드
+    card.style.display = shouldShow ? "" : "none";
   }
   var label = document.getElementById("map-count-label");
   if (label) label.textContent = activeMapCount + " / " + maxMaps;
