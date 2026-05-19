@@ -185,6 +185,19 @@
       .team-cell span { margin-top: 3px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; }
       .delta.plus { color: #3ddc84; }
       .delta.minus { color: #ff6b6b; }
+
+      /* 흰색으로 표시할 팀 로고 */
+      .stage-team-logo img[alt="Gentle Mates"],
+      .stage-team-logo img[alt="GIANTX"],
+      .stage-team-logo img[alt="Team Liquid"],
+      .slot-logo img[alt="Gentle Mates"],
+      .slot-logo img[alt="GIANTX"],
+      .slot-logo img[alt="Team Liquid"],
+      .ga-team-btn img[alt="Gentle Mates"],
+      .ga-team-btn img[alt="GIANTX"],
+      .ga-team-btn img[alt="Team Liquid"] {
+        filter: brightness(0) invert(1);
+      }
     </style>
   </head>
   <body class="league-page stage-page emea-page">
@@ -759,6 +772,9 @@
         "PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg",
       };
       const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+      // 코드→풀네임 변환 (구버전 localStorage 호환)
+      const GA_CODEMAP = Object.fromEntries(GA_TEAMS.map(t => [GA_CODES[t], t]));
+      function normalizeTeam(t) { return GA_CODEMAP[t] || t; }
       function loadGroups() {
         try { const r = localStorage.getItem(GA_KEY); if (r) return JSON.parse(r); } catch {}
         return { alpha: Array(6).fill(""), omega: Array(6).fill("") };
@@ -771,10 +787,11 @@
           if (!el) return;
           el.innerHTML = "";
           groups[grp].forEach((team, i) => {
+            const displayTeam = normalizeTeam(team);
             const slot = document.createElement("div");
-            slot.className = "group-slot" + (team ? " has-team" : " empty");
-            const logo = team && GA_LOGOS[team] ? `<img src="${GA_LOGOS[team]}" alt="${team}" style="width:44px;height:44px;object-fit:contain;" />` : "";
-            slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${team || "팀 선택"}</span><span class="slot-rank">${i+1}번 슬롯</span>`;
+            slot.className = "group-slot" + (displayTeam ? " has-team" : " empty");
+            const logo = displayTeam && GA_LOGOS[displayTeam] ? `<img src="${GA_LOGOS[displayTeam]}" alt="${displayTeam}" style="width:44px;height:44px;object-fit:contain;" />` : "";
+            slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${displayTeam || "팀 선택"}</span><span class="slot-rank">${i+1}번 슬롯</span>`;
             if (isAdmin()) slot.addEventListener("click", () => openPicker(grp, i));
             el.appendChild(slot);
           });
