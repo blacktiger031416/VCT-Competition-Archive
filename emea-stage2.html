@@ -6,107 +6,160 @@
     <title>VCT EMEA 2026 Stage 2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
-      /* ── Stage 2 전용 스타일 ─────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0d1520; color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
-      /* 그룹 배정 섹션 */
-      .group-assign-section { padding: 40px 20px 0; max-width: 900px; margin: 0 auto; }
+      /* ── HEADER ─────────────────────────────── */
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(13,21,32,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #fff; }
+      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.15s; margin-left: auto; }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .site-header .auth-header-btn { margin-left: 0; }
+
+      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #1464f6; margin-bottom: 8px; }
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 40px 80px; }
+      @media (max-width: 600px) { .league-shell { padding: 0 16px 60px; } }
+
+      .stage-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(240px,360px); gap: 28px; align-items: end; padding: 48px 0 52px; }
+      @media (max-width: 680px) { .stage-hero { grid-template-columns: 1fr; } }
+      .stage-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40px, 6vw, 72px); font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1; color: #fff; margin-bottom: 14px; }
+      .stage-hero p.intro { font-size: 14px; color: rgba(255,255,255,0.45); font-family: 'Noto Sans KR', sans-serif; font-weight: 500; line-height: 1.7; max-width: 540px; }
+      .stage-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+      .stage-summary div { min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; background: rgba(255,255,255,0.03); }
+      .stage-summary strong { color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 42px; line-height: 1; font-weight: 900; }
+      .stage-summary span { margin-top: 8px; color: rgba(255,255,255,0.4); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+
+      .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+      .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(22px, 3vw, 30px); font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1.1; }
+      .playoff-link { flex-shrink: 0; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid rgba(20,100,246,0.4); border-radius: 8px; color: #1464f6; background: rgba(20,100,246,0.07); font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; transition: background 0.15s, border-color 0.15s; }
+      .playoff-link:hover { background: rgba(20,100,246,0.14); border-color: rgba(20,100,246,0.7); }
+
+      /* ── GROUP ASSIGN ─────────────────────── */
+      .group-assign-section { padding: 40px 0 0; }
       .group-assign-section .section-heading { margin-bottom: 20px; }
       .group-assign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
       @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
-
-      .group-assign-card { background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px; }
-      .group-assign-card h3 { font-size: 14px; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 14px; }
+      .group-assign-card { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 18px; }
+      .group-assign-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 0 0 14px; }
       .group-slots { display: flex; flex-direction: column; gap: 8px; }
-
-      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); min-height: 56px; transition: background 0.15s; }
-      .group-slot.has-team { border-color: rgba(213,255,29,0.3); background: rgba(213,255,29,0.06); }
-      .group-slot .slot-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-      .group-slot .slot-logo img { width: 44px; height: 44px; object-fit: contain; }
-      .group-slot .slot-name { font-size: 13px; font-weight: 700; flex: 1; }
+      .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.07); min-height: 52px; transition: background 0.15s; }
+      .group-slot.has-team { border-color: rgba(20,100,246,0.35); background: rgba(20,100,246,0.06); }
+      .group-slot .slot-logo { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .group-slot .slot-logo img { width: 40px; height: 40px; object-fit: contain; }
+      .group-slot .slot-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; flex: 1; color: rgba(255,255,255,0.85); }
       .group-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
-      .group-slot .slot-rank { font-size: 11px; font-weight: 700; opacity: 0.4; margin-left: auto; }
-
-      /* 어드민 모드: 슬롯 클릭 가능 */
+      .group-slot .slot-rank { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.25); margin-left: auto; font-family: 'Barlow Condensed', sans-serif; }
       body:not(.view-only) .group-slot { cursor: pointer; }
-      body:not(.view-only) .group-slot:hover { background: rgba(213,255,29,0.12); border-color: rgba(213,255,29,0.5); }
-      body:not(.view-only) .group-slot.has-team:hover { background: rgba(213,255,29,0.18); }
+      body:not(.view-only) .group-slot:hover { background: rgba(20,100,246,0.1); border-color: rgba(20,100,246,0.5); }
+      body:not(.view-only) .group-slot.has-team:hover { background: rgba(20,100,246,0.16); }
 
       /* match-card 편집 버튼 */
       .match-card { position: relative; }
-      .match-card-edit-btn {
-        display: none;
-        position: absolute; top: 6px; right: 6px;
-        background: rgba(213,255,29,0.18); border: 1px solid rgba(213,255,29,0.4);
-        color: #d5ff1d; border-radius: 6px; padding: 3px 7px;
-        font-size: 11px; font-weight: 700; cursor: pointer; line-height: 1.4;
-        z-index: 2;
-      }
+      .match-card-edit-btn { display: none; position: absolute; top: 6px; right: 6px; background: rgba(20,100,246,0.18); border: 1px solid rgba(20,100,246,0.4); color: #1464f6; border-radius: 6px; padding: 3px 7px; font-size: 11px; font-weight: 700; cursor: pointer; line-height: 1.4; z-index: 2; }
       body:not(.view-only) .match-card-edit-btn { display: block; }
-      body:not(.view-only) .match-card-edit-btn:hover { background: rgba(213,255,29,0.35); }
-
-      /* 팀 미설정 매치카드 */
+      body:not(.view-only) .match-card-edit-btn:hover { background: rgba(20,100,246,0.35); }
       .match-card.no-teams { opacity: 0.55; }
       .match-card.no-teams strong { font-style: italic; opacity: 0.6; }
       body:not(.view-only) .match-card.no-teams { opacity: 1; cursor: default; }
 
-      /* ── 팀 선택 모달 ─────────────────────────────────── */
+      /* ── WEEK TABS ──────────────────────────── */
+      .week-section { margin: 48px 0; }
+      .week-tabs > input { position: absolute; opacity: 0; pointer-events: none; }
+      .week-tab-list { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
+      .week-tab-list label { min-height: 46px; display: grid; place-items: center; border-radius: 7px; background: transparent; border: 1px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.14s, background 0.14s, border-color 0.14s; }
+      .week-tab-list label:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.1); }
+      #week-1:checked ~ .week-tab-list label[for="week-1"],
+      #week-2:checked ~ .week-tab-list label[for="week-2"],
+      #week-3:checked ~ .week-tab-list label[for="week-3"],
+      #week-4:checked ~ .week-tab-list label[for="week-4"],
+      #week-5:checked ~ .week-tab-list label[for="week-5"] { color: #fff; background: rgba(20,100,246,0.12); border-color: rgba(20,100,246,0.35); }
+      .week-panels { margin-top: 12px; }
+      .week-panel { display: none; overflow: hidden; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
+      #week-1:checked ~ .week-panels .week-panel-1,
+      #week-2:checked ~ .week-panels .week-panel-2,
+      #week-3:checked ~ .week-panels .week-panel-3,
+      #week-4:checked ~ .week-panels .week-panel-4,
+      #week-5:checked ~ .week-panels .week-panel-5 { display: block; }
+      .week-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .week-meta strong { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; color: #fff; }
+      .week-meta span { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
+
+      /* ── MATCH CARD ─────────────────────────── */
+      .match-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; background: rgba(255,255,255,0.06); }
+      @media (max-width: 600px) { .match-grid { grid-template-columns: 1fr; } }
+      .match-card { min-height: 140px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 22px 16px 18px; background: #0d1520; cursor: pointer; transition: background 0.18s; overflow: hidden; }
+      .match-card:hover { background: #111a28; }
+      .match-card > span { position: absolute; top: 10px; left: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); }
+      .match-card strong { position: relative; z-index: 1; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: #fff; font-weight: 900; }
+      .match-team-mini-logo { width: 40px; height: 40px; object-fit: contain; display: block; flex: 0 0 auto; }
+      .match-card em { min-width: 52px; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); font-size: 16px; font-style: normal; font-weight: 900; font-family: 'Barlow Condensed', sans-serif; }
+
+      /* ── STANDINGS ──────────────────────────── */
+      .standings-section { margin-top: 16px; }
+      .standings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+      @media (max-width: 680px) { .standings-grid { grid-template-columns: 1fr; } }
+      .standings-card { overflow: hidden; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; background: rgba(255,255,255,0.02); }
+      .standings-title { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .standings-title h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
+      .standings-title span { min-height: 26px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 999px; background: rgba(20,100,246,0.1); border: 1px solid rgba(20,100,246,0.25); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1464f6; white-space: nowrap; }
+      .standings-table { width: 100%; }
+      .standings-row { position: relative; display: grid; grid-template-columns: minmax(220px,1fr) 64px 64px 96px 56px; align-items: stretch; min-height: 88px; border-top: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); }
+      .standings-row::before { position: absolute; top: 0; bottom: 0; left: 0; width: 4px; content: ''; background: rgba(255,255,255,0.06); }
+      .standings-row.advance::before { background: rgba(20,100,246,0.45); }
+      .standings-row.out::before { background: rgba(255,255,255,0.06); }
+      .standings-head { min-height: 48px; background: rgba(255,255,255,0.025); color: rgba(255,255,255,0.3); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+      .standings-head::before { display: none; }
+      .standings-row > span, .team-cell { display: flex; align-items: center; border-left: 1px solid rgba(255,255,255,0.05); }
+      .standings-row > span { justify-content: center; padding: 0 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-align: center; }
+      .standings-head > span { font-size: 11px; }
+      .standings-row > span:first-child { justify-content: flex-start; }
+      .team-cell { gap: 12px; min-width: 0; padding: 14px 16px; border-left: 0; }
+      .rank-badge { width: 26px; height: 26px; display: flex; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 999px; background: rgba(255,255,255,0.08); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; color: rgba(255,255,255,0.7); }
+      .stage-team-logo { width: 50px; height: 50px; display: flex; flex: 0 0 auto; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
+      .stage-team-logo img { width: 36px; height: 36px; object-fit: contain; display: block; }
+      .team-cell strong, .team-cell span { display: block; }
+      .team-cell strong { font-family: 'Barlow', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; word-break: break-word; }
+      .team-cell span { margin-top: 3px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; }
+      .delta.plus { color: #3ddc84; }
+      .delta.minus { color: #ff6b6b; }
+
+      /* ── TEAM SELECTION MODAL ────────────── */
       .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
       .ts-modal[hidden] { display: none !important; }
-      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
-      .ts-panel {
-        position: relative; z-index: 1;
-        width: min(520px, calc(100vw - 24px));
-        max-height: 90vh; overflow-y: auto;
-        background: #111f0f; border: 1.5px solid rgba(213,255,29,0.25);
-        border-radius: 18px; padding: 24px; animation: loginPanelIn 0.2s ease;
-      }
-      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
-      .ts-panel p { font-size: 13px; opacity: 0.6; margin: 0 0 18px; }
-      .ts-team-grid {
-        display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-        margin-bottom: 18px;
-      }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
+      .ts-panel { position: relative; z-index: 1; width: min(520px, calc(100vw - 24px)); max-height: 90vh; overflow-y: auto; background: #121b2a; border: 1.5px solid rgba(20,100,246,0.25); border-radius: 18px; padding: 24px; animation: panelIn 0.2s ease; }
+      @keyframes panelIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+      .ts-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 4px; color: #fff; }
+      .ts-panel p { font-size: 13px; opacity: 0.5; margin: 0 0 18px; color: #fff; font-family: 'Noto Sans KR', sans-serif; }
+      .ts-team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
       @media (max-width: 400px) { .ts-team-grid { grid-template-columns: repeat(2, 1fr); } }
-
-      .ts-team-btn {
-        display: flex; flex-direction: column; align-items: center; gap: 6px;
-        padding: 12px 8px; border-radius: 10px;
-        background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
-        color: #fff; font-family: inherit; cursor: pointer; transition: all 0.14s;
-        font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center;
-      }
+      .ts-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.09); color: #fff; font-family: 'Barlow Condensed', sans-serif; cursor: pointer; transition: all 0.14s; font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; }
       .ts-team-btn img { width: 32px; height: 32px; object-fit: contain; }
       .ts-team-btn .ts-team-code { font-size: 13px; font-weight: 900; }
-      .ts-team-btn:hover { background: rgba(213,255,29,0.12); border-color: rgba(213,255,29,0.5); }
-      .ts-team-btn.selected-a { background: rgba(213,255,29,0.25); border-color: #d5ff1d; box-shadow: 0 0 0 2px rgba(213,255,29,0.3); }
+      .ts-team-btn:hover { background: rgba(20,100,246,0.1); border-color: rgba(20,100,246,0.5); }
+      .ts-team-btn.selected-a { background: rgba(20,100,246,0.25); border-color: #1464f6; box-shadow: 0 0 0 2px rgba(20,100,246,0.3); }
       .ts-team-btn.selected-b { background: rgba(255,180,0,0.2); border-color: #ffb400; box-shadow: 0 0 0 2px rgba(255,180,0,0.25); }
       .ts-team-btn.in-other-group { opacity: 0.25; pointer-events: none; }
-
       .ts-match-step { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
       .ts-step-badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-      .ts-step-badge.step-a { background: rgba(213,255,29,0.2); color: #d5ff1d; }
+      .ts-step-badge.step-a { background: rgba(20,100,246,0.2); color: #1464f6; }
       .ts-step-badge.step-b { background: rgba(255,180,0,0.15); color: #ffb400; }
-
       .ts-date-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
       .ts-date-row label { font-size: 12px; opacity: 0.6; white-space: nowrap; }
-      .ts-date-input {
-        flex: 1; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15);
-        color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-family: inherit;
-      }
-      .ts-date-input:focus { outline: none; border-color: #d5ff1d; }
-
+      .ts-date-input { flex: 1; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-family: inherit; }
+      .ts-date-input:focus { outline: none; border-color: #1464f6; }
       .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
       .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
       .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
       .ts-btn-cancel:hover { background: rgba(255,255,255,0.14); }
-      .ts-btn-save { background: #d5ff1d; color: #0f1a00; }
-      .ts-btn-save:hover { background: #e8ff5a; }
+      .ts-btn-save { background: #1464f6; color: #fff; }
+      .ts-btn-save:hover { background: #2070ff; }
       .ts-btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
-      .ts-btn-clear { background: rgba(255,80,80,0.15); color: #ff5050; border: 1px solid rgba(255,80,80,0.25); }
-      .ts-btn-clear:hover { background: rgba(255,80,80,0.28); }
+      .ts-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+      .ts-btn-clear:hover { background: rgba(255,80,80,0.24); }
     </style>
   </head>
   <body class="league-page stage-page emea-page">
@@ -115,7 +168,7 @@
       <a class="back-link" href="./emea.html">EMEA</a>
     </header>
 
-    <main class="league-shell stage-shell">
+    <main class="league-shell">
       <!-- 히어로 -->
       <section class="stage-hero" aria-labelledby="stage-title">
         <div>
@@ -440,7 +493,7 @@
                   score,
                   from: "stage2",
                 });
-                window.location.href = `./emea-match.html?${params.toString()}`;
+                window.location.href = `./emea-match-dark.html?${params.toString()}`;
               });
               card.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
