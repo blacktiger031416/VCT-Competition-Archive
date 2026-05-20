@@ -417,8 +417,12 @@
         return null;
       }
 
-      function matchDetailUrl(groupKey, matchIdx) {
-        return `./masters-match-dark.html?from=swiss&group=${groupKey}&idx=${matchIdx}`;
+      function matchDetailUrl(groupKey, matchIdx, m) {
+        const _p = new URLSearchParams({ from: 'swiss', tournament: 'santiago', group: groupKey, idx: matchIdx });
+        if (m && m.home) _p.set('teamA', m.home);
+        if (m && m.away) _p.set('teamB', m.away);
+        if (m && m.hs != null && m.as != null) _p.set('score', m.hs + ':' + m.as);
+        return './masters-match-dark.html?' + _p.toString();
       }
 
       function buildMatchRow(m, group, idx) {
@@ -463,7 +467,7 @@
         } else {
           row.style.cursor = "pointer";
           row.addEventListener("click", () => {
-            window.location.href = matchDetailUrl(group.key, idx);
+            window.location.href = matchDetailUrl(group.key, idx, m);
           });
         }
         return row;
@@ -479,7 +483,7 @@
         data[group.key].forEach((m, idx) => {
           const sep = document.createElement("div");
           sep.className = "match-sep";
-          sep.innerHTML = `${idx + 1}경기<a class="match-sep-detail" href="${matchDetailUrl(group.key, idx)}">상세 ↗</a>`;
+          sep.innerHTML = `${idx + 1}경기<a class="match-sep-detail" href="${matchDetailUrl(group.key, idx, m)}">상세 ↗</a>`;
           card.appendChild(sep);
           card.appendChild(buildMatchRow(m, group, idx));
         });
