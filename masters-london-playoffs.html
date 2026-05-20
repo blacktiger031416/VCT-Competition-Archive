@@ -7,35 +7,65 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260509-0001" />
     <style>
+      /* ── Global Reset ── */
+      body { background: #0c0818; color: #fff; font-family: "Noto Sans KR", sans-serif; }
+      * { box-sizing: border-box; }
+      a { text-decoration: none; }
+
+      /* ── Header ── */
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(12,8,24,0.95); border-bottom: 1px solid rgba(101,30,255,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+      .home-link:hover { color: #fff; }
+      .back-link { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #651eff; border: 1.5px solid rgba(101,30,255,0.4); border-radius: 99px; padding: 4px 14px; margin-left: auto; transition: background 0.15s; }
+      .back-link:hover { background: rgba(101,30,255,0.15); }
+      .admin-badge { position: fixed; top: 12px; right: 24px; z-index: 200; padding: 5px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,220,100,0.12); border: 1.5px solid rgba(0,220,100,0.4); color: #00dc64; }
+
+      /* ── Playoff Layout ── */
+      .playoff-page { min-width: 0; overflow-x: hidden; }
+      .playoff-shell { width: min(100%, 1120px); margin: 0 auto; padding: 0 10px 18px; }
+
+      /* ── Playoff Hero ── */
+      .playoff-hero { display: grid; grid-template-columns: minmax(230px,30%) 1fr; align-items: center; min-height: 88px; margin: 6px 0 0; background: linear-gradient(135deg, #651eff 0%, #1c1c2e 100%); color: #fff; }
+      .playoff-logo-lockup { height: 68px; display: grid; place-items: center; border-right: 2px solid rgba(255,255,255,0.18); }
+      .playoff-logo-lockup img { max-width: 118px; max-height: 60px; object-fit: contain; filter: brightness(0) invert(1); }
+      .playoff-hero .eyebrow { margin: 0 0 4px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+      .playoff-hero h1 { margin: 0; font-size: 25px; line-height: 1.1; font-weight: 900; color: #fff; }
+      .playoff-hero p:last-child { margin: 4px 0 0; font-size: 18px; font-weight: 900; color: #fff; }
+
+      /* ── Playoff Board ── */
+      .playoff-board { border: 3px solid #651eff; border-top: 0; background: #120930; box-shadow: 0 24px 48px rgba(101,30,255,0.18); }
+      .bracket-scroll { width: 100%; min-width: 0; overflow: visible; }
+      .bracket-rounds { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); border-bottom: 2px solid rgba(255,255,255,0.1); background: #0d0722; }
+      .bracket-rounds span { min-height: 28px; display: grid; place-items: center; border-right: 2px solid rgba(255,255,255,0.1); color: #9b6dff; font-size: 16px; font-weight: 900; }
+      .bracket-rounds span:last-child { border-right: 0; }
+      .bracket-section-title { margin: 0; min-height: 30px; display: grid; place-items: center; background: #651eff; color: #fff; font-size: 16px; font-weight: 900; }
+      .lower-title { margin-top: 0; }
+      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); min-height: 336px; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(20% - 1px), rgba(255,255,255,0.06) calc(20% - 1px), rgba(255,255,255,0.06) 20%), #120930; }
+      .lower-bracket { min-height: 184px; }
+      .bracket-column { display: flex; flex-direction: column; align-items: center; justify-content: space-around; gap: 5px; padding: 5px 6px; }
+      .bracket-column-spaced { justify-content: center; gap: 92px; }
+      .bracket-column-center { justify-content: center; }
+      .bracket-arrow-column { align-items: center; justify-content: center; color: #fff; font-size: 30px; font-weight: 900; }
+      .bracket-empty { pointer-events: none; }
+      .bracket-match { width: min(100%,150px); border: 2px solid #651eff; background: #1a0c45; cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease; }
+      .bracket-match:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(101,30,255,0.36); }
+      .bracket-match h3 { margin: 0; min-height: 22px; display: grid; place-items: center; background: #651eff; color: #fff; font-size: 13px; line-height: 1; font-weight: 900; }
+      .bracket-match h3 span { color: inherit; }
+      .bracket-team { min-height: 78px; display: grid; grid-template-columns: 28px 88px 28px; justify-content: center; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); background: #1a0c45; }
+      .bracket-team:first-of-type { border-top: 0; }
+      .bracket-seed, .bracket-team.placeholder span { display: grid; place-items: center; height: 100%; border-right: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); font-size: 9px; font-weight: 900; text-align: center; }
+      .bracket-logo { width: 82px; height: 70px; display: grid; place-items: center; grid-column: 2; justify-self: center; overflow: hidden; border: 1px solid rgba(101,30,255,0.4); border-radius: 5px; background: #12093a; color: rgba(255,255,255,0.4); font-size: 9px; line-height: 0; }
+      .bracket-logo img { width: auto; height: auto; max-width: 74px; max-height: 60px; object-fit: contain; object-position: center; display: block; }
+      .bracket-team strong { display: none; min-width: 0; overflow: hidden; color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+      .bracket-team em { grid-column: 3; display: grid; place-items: center; height: 100%; border-left: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 18px; font-style: normal; font-weight: 900; }
+      .bracket-team.placeholder { grid-template-columns: 28px 84px 28px; justify-content: center; }
+      .bracket-team.placeholder strong { display: block; color: rgba(255,255,255,0.28); text-align: center; }
+      .bracket-team.winner { background: linear-gradient(90deg, rgba(0,200,80,0.18), #1a0c45 58%); }
+      .bracket-team.empty { opacity: 0.55; }
+      .grand-final-card { transform: translateY(42px); }
+      .bracket-footer { min-height: 26px; display: grid; place-items: center; background: #0a0620; color: #fff; font-size: 13px; font-weight: 900; }
       /* ── Masters playoff hero ────────────────────────── */
-      .masters-page .playoff-hero {
-        background: linear-gradient(135deg, #651eff 0%, #1c1c2e 100%);
-        color: #fff;
-      }
-      .masters-page .playoff-hero .eyebrow,
-      .masters-page .playoff-hero h1,
-      .masters-page .playoff-hero p { color: #fff; }
-      .masters-page .playoff-logo-lockup { border-right-color: rgba(255,255,255,0.18); }
-      .masters-page .playoff-board {
-        border-color: #651eff;
-        box-shadow: 0 24px 48px rgba(101,30,255,0.14);
-      }
-      /* ── bracket colors ──────────────────────────────── */
-      .masters-page .bracket-rounds span { color: #4a00cc; }
-      .masters-page .bracket-section-title { background: #651eff; color: #fff; }
-      .masters-page .bracket-match { border-color: #651eff; }
-      .masters-page .bracket-match h3 { background: #651eff; color: #fff; }
-      .masters-page .bracket-match h3 span { color: rgba(255,255,255,0.7); }
-      .masters-page .bracket-match:hover { box-shadow: 0 10px 24px rgba(101,30,255,0.28); }
-      .masters-page .bracket-logo { border-color: rgba(101,30,255,0.32); color: #4a00cc; }
-      .masters-page .bracket-footer { background: #1c1c2e; }
-      /* ── grand finals card ───────────────────────────── */
-      .masters-page .grand-final-card { border-color: #f5c518; }
-      .masters-page .grand-final-card h3 { background: #f5c518; color: #1c1c2e; }
-      .masters-page .grand-final-card h3 span { color: #5a4800; }
-      .masters-page .grand-final-card:hover { box-shadow: 0 10px 24px rgba(245,197,24,0.36); }
       /* ── modal base ──────────────────────────────────── */
       .sm-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
       .sm-modal[hidden] { display: none !important; }
@@ -409,30 +439,30 @@
 
       /* ── 전체 팀 목록 ──────────────────────────────────── */
       const ALL_TEAMS = [
-        { name:"Paper Rex",                        code:"PRX",  logo:"./assets/teams/prx.svg" },
+        { name:"Paper Rex",                        code:"PRX",  logo:"./assets/teams/prx.svg", white: true },
         { name:"Gen.G",                            code:"GEN",  logo:"./assets/teams/gen.png" },
         { name:"Kiwoom DRX",                       code:"DRX",  logo:"./assets/teams/krx.svg" },
         { name:"Rex Regum Qeon",                   code:"RRQ",  logo:"./assets/teams/rrq.png" },
         { name:"T1",                               code:"T1",   logo:"./assets/teams/t1.png" },
         { name:"FULL SENSE",                       code:"FS",   logo:"./assets/teams/fs.svg" },
         { name:"Global Esports",                   code:"GE",   logo:"./assets/teams/ge.webp" },
-        { name:"DetonatioN FocusMe",               code:"DFM",  logo:"./assets/teams/dfm.svg" },
+        { name:"DetonatioN FocusMe",               code:"DFM",  logo:"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png", white: true },
         { name:"Nongshim RedForce",                code:"NS",   logo:"./assets/teams/ns.svg" },
-        { name:"VARREL",                           code:"VRL",  logo:"./assets/teams/vl.svg" },
-        { name:"Team Secret",                      code:"TS",   logo:"./assets/teams/ts.svg" },
-        { name:"ZETA DIVISION",                    code:"ZETA", logo:"./assets/teams/zeta.png" },
+        { name:"VARREL",                           code:"VL",   logo:"./assets/teams/vl.svg", white: true },
+        { name:"Team Secret",                      code:"TS",   logo:"./assets/teams/ts.svg", white: true },
+        { name:"ZETA DIVISION",                    code:"ZETA", logo:"./assets/teams/zeta.png", white: true },
         { name:"Sentinels",                        code:"SEN",  logo:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" },
         { name:"G2 Esports",                       code:"G2",   logo:"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" },
         { name:"NRG",                              code:"NRG",  logo:"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" },
-        { name:"100 Thieves",                      code:"100T", logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/100_Thieves_logo.svg/1280px-100_Thieves_logo.svg.png" },
+        { name:"100 Thieves",                      code:"100T", logo:"https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp" },
         { name:"Cloud9",                           code:"C9",   logo:"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" },
-        { name:"MIBR",                             code:"MIBR", logo:"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg" },
+        { name:"MIBR",                             code:"MIBR", logo:"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg", white: true },
         { name:"LOUD",                             code:"LOUD", logo:"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" },
         { name:"FURIA",                            code:"FUR",  logo:"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" },
         { name:"KRÜ Esports",                      code:"KRÜ",  logo:"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" },
         { name:"Leviatán",                         code:"LEV",  logo:"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" },
-        { name:"Evil Geniuses",                    code:"EG",   logo:"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" },
-        { name:"ENVY",                             code:"ENVY", logo:"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg" },
+        { name:"Evil Geniuses",                    code:"EG",   logo:"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg", white: true },
+        { name:"ENVY",                             code:"ENVY", logo:"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg", white: true },
         { name:"All Gamers",                       code:"AG",   logo:"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp" },
         { name:"JD Mall JDG Esports",              code:"JDG",  logo:"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg" },
         { name:"TYLOO",                            code:"TYL",  logo:"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg" },
@@ -445,17 +475,17 @@
         { name:"Trace Esports",                    code:"TE",   logo:"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg" },
         { name:"Nova Esports",                     code:"NOVA", logo:"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp" },
         { name:"Wolves Esports",                   code:"WOL",  logo:"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp" },
-        { name:"Gentle Mates",                     code:"M8",   logo:"./assets/teams/gm.png" },
-        { name:"Team Liquid",                      code:"TL",   logo:"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp" },
+        { name:"Gentle Mates",                     code:"M8",   logo:"./assets/teams/gm.png", white: true },
+        { name:"Team Liquid",                      code:"TL",   logo:"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp", white: true },
         { name:"Team Heretics",                    code:"TH",   logo:"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg" },
         { name:"NAVI",                             code:"NAVI", logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png" },
         { name:"Karmine Corp",                     code:"KC",   logo:"./assets/teams/kc.png" },
         { name:"PCIFIC Esports",                   code:"PCFC", logo:"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" },
-        { name:"FUT Esports",                      code:"FUT",  logo:"https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg" },
+        { name:"FUT Esports",                      code:"FUT",  logo:"https://specs.gg/assets/img/teams/fut-esports.webp" },
         { name:"BBL Esports",                      code:"BBL",  logo:"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg" },
         { name:"Fnatic",                           code:"FNC",  logo:"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg" },
         { name:"Team Vitality",                    code:"VIT",  logo:"https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg" },
-        { name:"GIANTX",                           code:"GX",   logo:"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg" },
+        { name:"GIANTX",                           code:"GX",   logo:"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg", white: true },
         { name:"Eternal Fire",                     code:"EF",   logo:"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg" },
         { name:"Movistar R7",                      code:"M7",   logo:"https://i.namu.wiki/i/ZTUcHX1RLVjEhW55FMopSmLUH4LBwl3HRFQYbCzH3Z9Wj9Fd2Pnf4wVt0V16sfJLHxQKsaF4kLF_OLzPBx4eg.webp" },
       ];
@@ -545,7 +575,7 @@
         if (seed && teamName) seed.textContent = "";
         if (logo) {
           logo.innerHTML = t
-            ? `<img src="${t.logo}" alt="${t.name}" />`
+            ? `<img src="${t.logo}" alt="${t.name}"${t.white ? ' style="filter:brightness(0)invert(1)"' : ''} />`
             : `<span>${(teamName||"").slice(0,3)}</span>`;
         }
         if (name) name.textContent = t ? t.code : (teamName || "TBD");
@@ -735,7 +765,7 @@
             const isSel = t.name === _tmpTeam;
             const isOther = t.name === otherTeam;
             html += `<button class="pm-team-btn${isSel ? " selected" : ""}" data-name="${t.name}" ${isOther ? "disabled" : ""}>
-              <img src="${t.logo}" alt="${t.name}" /><span>${t.code}</span>
+              <img src="${t.logo}" alt="${t.name}"${t.white ? ' style="filter:brightness(0)invert(1)"' : ''} /><span>${t.code}</span>
             </button>`;
           });
           html += `</div>
