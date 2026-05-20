@@ -7,36 +7,52 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
     <style>
-      .masters-page .back-link {
-        border-color: rgba(101, 30, 255, 0.24);
-        color: #3a1a99;
-      }
-      .masters-page .home-link { color: #2a1066; }
-      .masters-page .tournament-card {
-        border-color: rgba(101, 30, 255, 0.18);
-      }
-      .masters-page .tournament-card:hover {
-        border-color: rgba(101, 30, 255, 0.55);
-        background: rgba(101, 30, 255, 0.07);
-      }
-      .masters-page .tournament-card strong { color: #3a1a99; }
-      .masters-page .eyebrow { color: #651eff; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0c0818; color: #f0ecff; font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
-      .masters-page .league-mark {
-        border-color: rgba(101, 30, 255, 0.28);
-        background:
-          linear-gradient(145deg, rgba(101, 30, 255, 0.18), rgba(255, 255, 255, 0.76)),
-          rgba(255, 255, 255, 0.82);
-        box-shadow: 0 22px 50px rgba(60, 10, 180, 0.14);
-      }
-      .masters-page .league-mark img {
-        filter:
-          brightness(0) saturate(100%)
-          invert(26%) sepia(89%) saturate(5000%) hue-rotate(252deg) brightness(105%);
-        drop-shadow(0 22px 34px rgba(101, 30, 255, 0.36));
-      }
+      /* ── HEADER ── */
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(12,8,24,0.95); border-bottom: 1px solid rgba(101,30,255,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #fff; }
+      .back-link { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #651eff; text-decoration: none; border: 1.5px solid rgba(101,30,255,0.4); border-radius: 99px; padding: 4px 14px; margin-left: auto; transition: background 0.15s; }
+      .back-link:hover { background: rgba(101,30,255,0.15); }
+
+      /* ── SHELL ── */
+      .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #651eff; margin-bottom: 8px; }
+      .league-shell { max-width: 1280px; margin: 0 auto; padding: 0 40px 80px; }
+      @media (max-width: 600px) { .league-shell { padding: 0 16px 60px; } }
+
+      /* ── HERO ── */
+      .league-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,320px); gap: 32px; align-items: center; padding: 52px 0 56px; }
+      @media (max-width: 680px) { .league-hero { grid-template-columns: 1fr; } }
+      .league-hero h1 { font-size: clamp(44px,6vw,84px); font-weight: 900; line-height: 1.04; color: #fff; margin: 0 0 18px; letter-spacing: -0.02em; }
+      .intro { font-size: 15px; line-height: 1.7; color: rgba(240,236,255,0.6); max-width: 520px; }
+
+      /* ── LEAGUE MARK ── */
+      .league-mark { width: 100%; aspect-ratio: 1; background: linear-gradient(145deg, rgba(101,30,255,0.22), rgba(18,10,44,0.9)); border: 1.5px solid rgba(101,30,255,0.32); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 24px 60px rgba(60,10,180,0.22); }
+      .league-mark img { width: 55%; filter: brightness(0) saturate(100%) invert(26%) sepia(89%) saturate(5000%) hue-rotate(252deg) brightness(130%); }
+
+      /* ── SECTION HEADING ── */
+      .section-heading { margin-bottom: 20px; }
+      .section-heading h2 { font-size: 26px; font-weight: 900; color: #fff; }
+
+      /* ── TOURNAMENT GRID ── */
+      .tournament-section { padding: 0 0 60px; }
+      .tournament-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+      .tournament-card { display: flex; flex-direction: column; gap: 6px; padding: 28px 24px; border-radius: 16px; border: 1.5px solid rgba(101,30,255,0.2); background: rgba(101,30,255,0.07); text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s, transform 0.15s; }
+      .tournament-card:hover { border-color: rgba(101,30,255,0.55); background: rgba(101,30,255,0.14); transform: translateY(-2px); }
+      .tournament-card.selected { border-color: #651eff; background: rgba(101,30,255,0.2); }
+      .tournament-kicker { font-size: 11px; font-weight: 700; color: rgba(240,236,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
+      .tournament-card strong { font-size: 22px; font-weight: 900; color: #fff; }
+      .tournament-card > span:last-child { font-size: 13px; color: rgba(240,236,255,0.45); }
+
+      /* ── TRANSITION OVERLAY ── */
+      .card-transition-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: radial-gradient(circle at var(--cx,50%) var(--cy,50%), rgba(101,30,255,0.97) 0%, rgba(12,8,24,0.95) 70%); opacity: 0; transform: scale(0); transform-origin: var(--cx,50%) var(--cy,50%); transition: transform 0.48s cubic-bezier(0.4,0,0.2,1), opacity 0.48s ease; }
+      body.card-transitioning .card-transition-overlay { transform: scale(12); opacity: 1; }
+
+      /* ── AUTH ── */
+      .admin-badge { position: fixed; top: 12px; right: 24px; z-index: 200; padding: 5px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,220,100,0.12); border: 1.5px solid rgba(0,220,100,0.4); color: #00dc64; }
     </style>
   </head>
   <body class="league-page masters-page">

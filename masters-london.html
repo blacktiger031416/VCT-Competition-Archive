@@ -7,151 +7,105 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
     <style>
-      /* ── 참가팀 배정 섹션 ─────────────────────────────── */
-      .participants-section {
-        padding: 40px 20px 0;
-        max-width: 1000px;
-        margin: 0 auto;
-      }
-      .participants-section .section-heading { margin-bottom: 24px; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0c0818; color: #f0ecff; font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
-      .participants-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-      }
+      /* ── HEADER ── */
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(12,8,24,0.95); border-bottom: 1px solid rgba(101,30,255,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #fff; }
+      .back-link { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #651eff; text-decoration: none; border: 1.5px solid rgba(101,30,255,0.4); border-radius: 99px; padding: 4px 14px; margin-left: auto; transition: background 0.15s; }
+      .back-link:hover { background: rgba(101,30,255,0.15); }
+
+      /* ── SHELL ── */
+      .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #651eff; margin-bottom: 8px; }
+      .league-shell { max-width: 1280px; margin: 0 auto; padding: 0 40px 80px; }
+      .stage-shell { max-width: 1280px; margin: 0 auto; padding: 0 40px 80px; }
+      @media (max-width: 600px) { .league-shell, .stage-shell { padding: 0 16px 60px; } }
+
+      /* ── STAGE HERO ── */
+      .stage-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(240px,340px); gap: 32px; align-items: center; padding: 52px 0 48px; }
+      @media (max-width: 680px) { .stage-hero { grid-template-columns: 1fr; } }
+      .stage-hero h1 { font-size: clamp(36px,5vw,68px); font-weight: 900; line-height: 1.06; color: #fff; margin: 0 0 14px; letter-spacing: -0.02em; }
+      .intro { font-size: 15px; line-height: 1.7; color: rgba(240,236,255,0.6); max-width: 520px; }
+      .stage-summary { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+      .stage-summary div { background: rgba(101,30,255,0.1); border: 1.5px solid rgba(101,30,255,0.28); border-radius: 14px; padding: 22px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .stage-summary strong { font-size: 42px; font-weight: 900; color: #fff; line-height: 1; }
+      .stage-summary span { font-size: 12px; color: rgba(240,236,255,0.5); margin-top: 4px; }
+
+      /* ── SECTION HEADING ── */
+      .section-heading { margin-bottom: 20px; }
+      .section-heading h2 { font-size: 26px; font-weight: 900; color: #fff; }
+
+      /* ── TOURNAMENT GRID ── */
+      .tournament-section { padding: 0 0 48px; }
+      .tournament-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+      .tournament-card { display: flex; flex-direction: column; gap: 6px; padding: 28px 24px; border-radius: 16px; border: 1.5px solid rgba(101,30,255,0.2); background: rgba(101,30,255,0.07); text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s, transform 0.15s; }
+      .tournament-card:hover { border-color: rgba(101,30,255,0.55); background: rgba(101,30,255,0.14); transform: translateY(-2px); }
+      .tournament-kicker { font-size: 11px; font-weight: 700; color: rgba(240,236,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
+      .tournament-card strong { font-size: 22px; font-weight: 900; color: #fff; }
+      .tournament-card > span:last-child { font-size: 13px; color: rgba(240,236,255,0.45); }
+
+      /* ── 참가팀 배정 섹션 ── */
+      .participants-section { padding: 0 0 80px; max-width: 100%; }
+      .participants-section .section-heading { margin-bottom: 24px; }
+      .participants-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
       @media (max-width: 660px) { .participants-grid { grid-template-columns: 1fr; } }
 
-      .region-card {
-        background: rgba(255,255,255,0.08);
-        border: 1.5px solid rgba(255,255,255,0.14);
-        border-radius: 16px;
-        padding: 20px;
-      }
-
-      .region-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding-bottom: 14px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-      }
+      .region-card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; }
+      .region-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
       .region-header img { width: 36px; height: 36px; object-fit: contain; }
-      .region-header h3 {
-        font-size: 15px; font-weight: 900;
-        margin: 0; letter-spacing: 0.02em;
-      }
-      .region-accent-dot {
-        width: 8px; height: 8px; border-radius: 50%;
-        margin-left: auto; flex-shrink: 0;
-      }
+      .region-header h3 { font-size: 15px; font-weight: 900; margin: 0; letter-spacing: 0.02em; color: #fff; }
+      .region-accent-dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
 
-      /* 리전별 카드 색상 */
-      .region-card.pacific  { border-color: rgba(1,210,215,0.3); background: rgba(1,210,215,0.06); }
-      .region-card.americas { border-color: rgba(255,87,12,0.3); background: rgba(255,87,12,0.06); }
-      .region-card.cn       { border-color: rgba(251,38,89,0.3); background: rgba(251,38,89,0.06); }
-      .region-card.emea     { border-color: rgba(212,255,31,0.3); background: rgba(212,255,31,0.06); }
-
-      .region-card.pacific  .region-header { border-color: rgba(1,210,215,0.18); }
-      .region-card.americas .region-header { border-color: rgba(255,87,12,0.18); }
-      .region-card.cn       .region-header { border-color: rgba(251,38,89,0.18); }
-      .region-card.emea     .region-header { border-color: rgba(212,255,31,0.18); }
-
+      .region-card.pacific  { border-color: rgba(1,210,215,0.3);  background: rgba(1,210,215,0.05); }
+      .region-card.americas { border-color: rgba(255,87,12,0.3);  background: rgba(255,87,12,0.05); }
+      .region-card.cn       { border-color: rgba(251,38,89,0.3);  background: rgba(251,38,89,0.05); }
+      .region-card.emea     { border-color: rgba(212,255,31,0.3); background: rgba(212,255,31,0.04); }
+      .region-card.pacific  .region-header { border-color: rgba(1,210,215,0.15); }
+      .region-card.americas .region-header { border-color: rgba(255,87,12,0.15); }
+      .region-card.cn       .region-header { border-color: rgba(251,38,89,0.15); }
+      .region-card.emea     .region-header { border-color: rgba(212,255,31,0.15); }
       .region-card.pacific  .region-accent-dot { background: #01d2d7; }
       .region-card.americas .region-accent-dot { background: #ff570c; }
       .region-card.cn       .region-accent-dot { background: #fb2659; }
       .region-card.emea     .region-accent-dot { background: #d4ff1f; }
 
-      /* 시드 슬롯 */
       .seed-slots { display: flex; flex-direction: column; gap: 8px; }
-
-      .seed-slot {
-        display: flex; align-items: center; gap: 12px;
-        padding: 10px 14px; border-radius: 10px;
-        background: rgba(255,255,255,0.07);
-        border: 1.5px solid rgba(255,255,255,0.12);
-        min-height: 54px; transition: background 0.14s, border-color 0.14s;
-      }
-      .seed-slot.has-team { background: rgba(101,30,255,0.07); border-color: rgba(101,30,255,0.3); }
-      .seed-slot .slot-logo {
-        width: 38px; height: 38px;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      }
+      .seed-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); min-height: 54px; transition: background 0.14s, border-color 0.14s; }
+      .seed-slot.has-team { background: rgba(101,30,255,0.1); border-color: rgba(101,30,255,0.35); }
+      .seed-slot .slot-logo { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
       .seed-slot .slot-logo img { width: 38px; height: 38px; object-fit: contain; }
       .seed-slot .slot-info { flex: 1; min-width: 0; }
-      .seed-slot .slot-seed {
-        font-size: 10px; font-weight: 700; opacity: 0.5;
-        text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px;
-      }
-      .seed-slot .slot-name {
-        font-size: 13px; font-weight: 700;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .seed-slot.empty .slot-name { opacity: 0.35; font-weight: 500; }
-
+      .seed-slot .slot-seed { font-size: 10px; font-weight: 700; opacity: 0.45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+      .seed-slot .slot-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #f0ecff; }
+      .seed-slot.empty .slot-name { opacity: 0.3; font-weight: 500; }
       body:not(.view-only) .seed-slot { cursor: pointer; }
-      body:not(.view-only) .seed-slot:hover {
-        background: rgba(101,30,255,0.13);
-        border-color: rgba(101,30,255,0.5);
-      }
+      body:not(.view-only) .seed-slot:hover { background: rgba(101,30,255,0.16); border-color: rgba(101,30,255,0.55); }
 
-      /* ── 팀 선택 모달 ─────────────────────────────────── */
+      /* ── 팀 선택 모달 ── */
       .ts-modal { position: fixed; inset: 0; z-index: 9800; display: flex; align-items: center; justify-content: center; }
       .ts-modal[hidden] { display: none !important; }
-      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.6); backdrop-filter: blur(6px); }
-      .ts-panel {
-        position: relative; z-index: 1;
-        width: min(560px, calc(100vw - 24px));
-        max-height: 88vh; overflow-y: auto;
-        background: #0d0819;
-        border: 1.5px solid rgba(101,30,255,0.3);
-        border-radius: 18px; padding: 24px;
-        animation: loginPanelIn 0.2s ease;
-      }
-      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
-      .ts-panel p  { font-size: 13px; opacity: 0.55; margin: 0 0 18px; }
-
-      .ts-region-tabs {
-        display: flex; gap: 6px; margin-bottom: 16px;
-        flex-wrap: wrap;
-      }
-      .ts-region-tab {
-        padding: 5px 14px; border-radius: 999px;
-        font-size: 12px; font-weight: 700; cursor: pointer;
-        border: 1.5px solid rgba(255,255,255,0.15);
-        background: rgba(255,255,255,0.06);
-        color: rgba(255,255,255,0.6); transition: all 0.13s;
-        font-family: inherit;
-      }
+      .ts-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.65); backdrop-filter: blur(6px); }
+      .ts-panel { position: relative; z-index: 1; width: min(560px,calc(100vw - 24px)); max-height: 88vh; overflow-y: auto; background: #0d0819; border: 1.5px solid rgba(101,30,255,0.35); border-radius: 18px; padding: 24px; }
+      .ts-panel h2 { font-size: 16px; font-weight: 700; margin: 0 0 4px; color: #fff; }
+      .ts-panel p  { font-size: 13px; opacity: 0.5; margin: 0 0 18px; }
+      .ts-region-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+      .ts-region-tab { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); transition: all 0.13s; font-family: inherit; }
       .ts-region-tab:hover { background: rgba(255,255,255,0.12); color: #fff; }
       .ts-region-tab.active { border-color: #651eff; background: rgba(101,30,255,0.22); color: #fff; }
       .ts-region-tab[data-r="pacific"].active  { border-color: #01d2d7; background: rgba(1,210,215,0.2); }
       .ts-region-tab[data-r="americas"].active { border-color: #ff570c; background: rgba(255,87,12,0.2); }
       .ts-region-tab[data-r="cn"].active       { border-color: #fb2659; background: rgba(251,38,89,0.2); }
       .ts-region-tab[data-r="emea"].active     { border-color: #d4ff1f; background: rgba(212,255,31,0.2); color: #000; }
-
-      .ts-team-grid {
-        display: grid; grid-template-columns: repeat(3, 1fr);
-        gap: 8px; margin-bottom: 18px;
-      }
-      @media (max-width: 400px) { .ts-team-grid { grid-template-columns: repeat(2, 1fr); } }
-
-      .ts-team-btn {
-        display: flex; flex-direction: column; align-items: center; gap: 5px;
-        padding: 10px 6px; border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: 1.5px solid rgba(255,255,255,0.1);
-        color: #fff; font-family: inherit; cursor: pointer;
-        transition: all 0.13s; font-size: 10px; font-weight: 700; text-align: center;
-      }
+      .ts-team-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+      @media (max-width: 400px) { .ts-team-grid { grid-template-columns: repeat(2,1fr); } }
+      .ts-team-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); color: #fff; font-family: inherit; cursor: pointer; transition: all 0.13s; font-size: 10px; font-weight: 700; text-align: center; }
       .ts-team-btn img { width: 30px; height: 30px; object-fit: contain; }
       .ts-team-btn .ts-code { font-size: 12px; font-weight: 900; }
       .ts-team-btn:hover { background: rgba(101,30,255,0.18); border-color: rgba(101,30,255,0.6); }
       .ts-team-btn.selected { background: rgba(101,30,255,0.32); border-color: #651eff; box-shadow: 0 0 0 2px rgba(101,30,255,0.3); }
-
       .ts-actions { display: flex; gap: 10px; justify-content: flex-end; }
       .ts-btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
       .ts-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
@@ -160,6 +114,9 @@
       .ts-btn-save:hover { background: #7a3fff; }
       .ts-btn-clear { background: rgba(255,80,80,0.14); color: #ff6060; border: 1px solid rgba(255,80,80,0.25); }
       .ts-btn-clear:hover { background: rgba(255,80,80,0.26); }
+
+      /* ── AUTH ── */
+      .admin-badge { position: fixed; top: 12px; right: 24px; z-index: 200; padding: 5px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,220,100,0.12); border: 1.5px solid rgba(0,220,100,0.4); color: #00dc64; }
     </style>
   </head>
   <body class="league-page masters-page">
