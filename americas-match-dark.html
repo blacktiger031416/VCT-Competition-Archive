@@ -1825,6 +1825,7 @@ function initMapCard(n) {
   renderTeamStats(maps[mapIdx], mapIdx);
   syncVetoMaps();
   applyMatchUI();
+  loadDiamondState();
 }
 
 function updateMapCards() {
@@ -1857,6 +1858,7 @@ function updateDiamonds() {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
+  loadDiamondState();
 }
 
 function renderSlots() {
@@ -3026,11 +3028,12 @@ function openStatEditor(mapIdx, statKey, side) {
   document.body.appendChild(popup);
   const inp = document.getElementById("inp-stat");
   inp.focus(); inp.select();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-stat-save').click(); } });
   document.getElementById("btn-stat-cancel").onclick = () => popup.remove();
   popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
   document.getElementById("btn-stat-save").onclick = () => {
     const raw = inp.value.trim();
-    const val = raw.includes("/") ? raw : (parseFloat(raw) || 0);
+    const val = (raw === '' || raw === '-') ? '-' : (raw.includes('/') ? raw : (parseFloat(raw) || 0));
     if (statKey === 'score') {
       if (side === 'a') {
         m.rtState.stats.aScore = val;
