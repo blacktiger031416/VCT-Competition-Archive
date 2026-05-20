@@ -9,63 +9,75 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
       /* ── Global Reset ── */
-      body { background: #0c0818; color: #fff; font-family: "Noto Sans KR", sans-serif; }
-      * { box-sizing: border-box; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0d1520; color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
       a { text-decoration: none; }
 
       /* ── Header ── */
-      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(12,8,24,0.95); border-bottom: 1px solid rgba(101,30,255,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(13,21,32,0.9); border-bottom: 1px solid rgba(255,255,255,0.06); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); transition: color 0.15s; }
       .home-link:hover { color: #fff; }
-      .back-link { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #651eff; border: 1.5px solid rgba(101,30,255,0.4); border-radius: 99px; padding: 4px 14px; margin-left: auto; transition: background 0.15s; }
-      .back-link:hover { background: rgba(101,30,255,0.15); }
+      .back-link { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-left: auto; transition: color 0.15s; }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
       .admin-badge { position: fixed; top: 12px; right: 24px; z-index: 200; padding: 5px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,220,100,0.12); border: 1.5px solid rgba(0,220,100,0.4); color: #00dc64; }
 
-      /* ── Playoff Layout ── */
-      .playoff-page { min-width: 0; overflow-x: hidden; }
-      .playoff-shell { width: min(100%, 1120px); margin: 0 auto; padding: 0 10px 18px; }
-
       /* ── Playoff Hero ── */
-      .playoff-hero { display: grid; grid-template-columns: minmax(230px,30%) 1fr; align-items: center; min-height: 88px; margin: 6px 0 0; background: linear-gradient(135deg, #651eff 0%, #1c1c2e 100%); color: #fff; }
-      .playoff-logo-lockup { height: 68px; display: grid; place-items: center; border-right: 2px solid rgba(255,255,255,0.18); }
-      .playoff-logo-lockup img { max-width: 118px; max-height: 60px; object-fit: contain; filter: brightness(0) invert(1); }
-      .playoff-hero .eyebrow { margin: 0 0 4px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
-      .playoff-hero h1 { margin: 0; font-size: 25px; line-height: 1.1; font-weight: 900; color: #fff; }
-      .playoff-hero p:last-child { margin: 4px 0 0; font-size: 18px; font-weight: 900; color: #fff; }
+      .playoff-shell { padding-bottom: 60px; }
+      .playoff-hero { display: flex; align-items: center; gap: 24px; padding: 48px 48px 40px; max-width: 1200px; margin: 0 auto; }
+      .playoff-logo-lockup img { width: 72px; height: 72px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.75; }
+      .playoff-hero .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #651eff; margin-bottom: 6px; }
+      .playoff-hero h1 { font-size: clamp(26px,4vw,42px); font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1; margin-bottom: 6px; }
+      .playoff-hero p { font-size: 13px; color: rgba(255,255,255,0.35); font-weight: 500; }
 
-      /* ── Playoff Board ── */
-      .playoff-board { border: 3px solid #651eff; border-top: 0; background: #120930; box-shadow: 0 24px 48px rgba(101,30,255,0.18); }
-      .bracket-scroll { width: 100%; min-width: 0; overflow: visible; }
-      .bracket-rounds { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); border-bottom: 2px solid rgba(255,255,255,0.1); background: #0d0722; }
-      .bracket-rounds span { min-height: 28px; display: grid; place-items: center; border-right: 2px solid rgba(255,255,255,0.1); color: #9b6dff; font-size: 16px; font-weight: 900; }
-      .bracket-rounds span:last-child { border-right: 0; }
-      .bracket-section-title { margin: 0; min-height: 30px; display: grid; place-items: center; background: #651eff; color: #fff; font-size: 16px; font-weight: 900; }
-      .lower-title { margin-top: 0; }
-      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); min-height: 336px; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(20% - 1px), rgba(255,255,255,0.06) calc(20% - 1px), rgba(255,255,255,0.06) 20%), #120930; }
-      .lower-bracket { min-height: 184px; }
-      .bracket-column { display: flex; flex-direction: column; align-items: center; justify-content: space-around; gap: 5px; padding: 5px 6px; }
-      .bracket-column-spaced { justify-content: center; gap: 92px; }
+      /* ── Board & Scroll ── */
+      .playoff-board { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+      .bracket-scroll { overflow-x: auto; padding-bottom: 20px; }
+
+      /* ── Round Labels ── */
+      .bracket-rounds { display: grid; grid-template-columns: repeat(5, minmax(160px,1fr)); gap: 8px; min-width: 820px; margin-bottom: 4px; }
+      .bracket-rounds span { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.28); text-align: center; padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+
+      /* ── Section Title ── */
+      .bracket-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #651eff; padding: 24px 0 10px 12px; border-left: 3px solid #651eff; margin: 8px 0 6px; }
+      .bracket-section-title.lower-title { padding-top: 16px; }
+
+      /* ── Bracket Grid ── */
+      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(160px,1fr)); gap: 8px; min-width: 820px; margin-bottom: 6px; }
+      .upper-bracket { min-height: 340px; }
+      .lower-bracket { min-height: 280px; }
+
+      /* ── Bracket Column ── */
+      .bracket-column { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+      .bracket-arrow-column { justify-content: center; align-items: center; font-size: 20px; color: rgba(255,255,255,0.18); }
       .bracket-column-center { justify-content: center; }
-      .bracket-arrow-column { align-items: center; justify-content: center; color: #fff; font-size: 30px; font-weight: 900; }
-      .bracket-empty { pointer-events: none; }
-      .bracket-match { width: min(100%,150px); border: 2px solid #651eff; background: #1a0c45; cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease; }
-      .bracket-match:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(101,30,255,0.36); }
-      .bracket-match h3 { margin: 0; min-height: 22px; display: grid; place-items: center; background: #651eff; color: #fff; font-size: 13px; line-height: 1; font-weight: 900; }
-      .bracket-match h3 span { color: inherit; }
-      .bracket-team { min-height: 78px; display: grid; grid-template-columns: 28px 88px 28px; justify-content: center; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); background: #1a0c45; }
-      .bracket-team:first-of-type { border-top: 0; }
-      .bracket-seed, .bracket-team.placeholder span { display: grid; place-items: center; height: 100%; border-right: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); font-size: 9px; font-weight: 900; text-align: center; }
-      .bracket-logo { width: 82px; height: 70px; display: grid; place-items: center; grid-column: 2; justify-self: center; overflow: hidden; border: 1px solid rgba(101,30,255,0.4); border-radius: 5px; background: #12093a; color: rgba(255,255,255,0.4); font-size: 9px; line-height: 0; }
-      .bracket-logo img { width: auto; height: auto; max-width: 74px; max-height: 60px; object-fit: contain; object-position: center; display: block; }
-      .bracket-team strong { display: none; min-width: 0; overflow: hidden; color: rgba(255,255,255,0.8); font-size: 10px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
-      .bracket-team em { grid-column: 3; display: grid; place-items: center; height: 100%; border-left: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 18px; font-style: normal; font-weight: 900; }
-      .bracket-team.placeholder { grid-template-columns: 28px 84px 28px; justify-content: center; }
-      .bracket-team.placeholder strong { display: block; color: rgba(255,255,255,0.28); text-align: center; }
-      .bracket-team.winner { background: linear-gradient(90deg, rgba(0,200,80,0.18), #1a0c45 58%); }
-      .bracket-team.empty { opacity: 0.55; }
-      .grand-final-card { transform: translateY(42px); }
-      .bracket-footer { min-height: 26px; display: grid; place-items: center; background: #0a0620; color: #fff; font-size: 13px; font-weight: 900; }
-      /* ── Masters playoff hero ────────────────────────── */
+      .bracket-column-spaced { justify-content: center; gap: 92px; }
+      .bracket-empty {}
+
+      /* ── Match Card ── */
+      .bracket-match { background: #111a28; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
+      .bracket-match:hover { border-color: rgba(101,30,255,0.35); background: #152030; }
+      .bracket-match h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 6px 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 5px; margin: 0; }
+      .bracket-match h3 span { color: rgba(255,255,255,0.16); font-weight: 500; letter-spacing: 0.05em; }
+      .grand-final-card { border-color: rgba(101,30,255,0.3); }
+      .grand-final-card h3 { color: rgba(101,30,255,0.7); border-bottom-color: rgba(101,30,255,0.15); }
+
+      /* ── Team Row ── */
+      .bracket-team { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-top: 1px solid rgba(255,255,255,0.04); }
+      .bracket-match .bracket-team:first-of-type { border-top: none; }
+      .bracket-seed { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; color: rgba(255,255,255,0.22); min-width: 36px; flex-shrink: 0; }
+      .bracket-logo { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .bracket-logo img { width: 20px; height: 20px; object-fit: contain; }
+      .bracket-team strong { flex: 1; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .bracket-team em { font-style: normal; font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.3); min-width: 14px; text-align: right; flex-shrink: 0; }
+      .bracket-team.winner { background: rgba(255,255,255,0.03); }
+      .bracket-team.winner strong { color: #fff; }
+      .bracket-team.winner em { color: rgba(255,255,255,0.9); }
+      .bracket-team.placeholder strong { color: rgba(255,255,255,0.2); }
+      .bracket-team.placeholder em { color: rgba(255,255,255,0.15); }
+      body:not(.view-only) .bracket-team[data-slot]:hover { background: rgba(101,30,255,0.08); }
+
+      /* ── Footer ── */
+      .bracket-footer { padding: 16px 0 8px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; color: rgba(255,255,255,0.35); font-size: 12px; text-align: center; font-weight: 700; letter-spacing: 0.08em; }
       /* ── modal base ──────────────────────────────────── */
       .sm-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
       .sm-modal[hidden] { display: none !important; }
@@ -129,10 +141,6 @@
       .masters-page .grand-final-card h3 .match-sep-detail { color: #1c1c2e; }
       /* ── 슬롯 편집 (어드민) ─────────────────────────────── */
       .masters-page .bracket-team { position: relative; }
-      .masters-page .bracket-team[data-team-name]:not([data-team-name=""]) strong { display: none !important; }
-      body:not(.view-only) .masters-page .bracket-team[data-slot] { cursor: pointer; transition: background 0.13s; }
-      body:not(.view-only) .masters-page .bracket-team[data-slot]:hover { background: rgba(101,30,255,0.12); border-radius: 6px; }
-      body:not(.view-only) .masters-page .bracket-team[data-slot]::after { content: "✎"; font-size: 10px; opacity: 0.4; position: absolute; bottom: 2px; right: 4px; }
       /* ── 스코어 편집 버튼 ────────────────────────────────── */
       .score-edit-btn { background: rgba(101,30,255,0.28); border: 1px solid rgba(101,30,255,0.5); color: #fff; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; margin-left: 4px; font-family: inherit; vertical-align: middle; }
       .masters-page .grand-final-card h3 .score-edit-btn { color: #1c1c2e; background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.2); }
