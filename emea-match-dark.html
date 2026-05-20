@@ -1814,6 +1814,7 @@ function initMapCard(n) {
   maps[mapIdx].players.forEach(function(p) { applyAgentData(p); });
   loadPlayersSync(mapIdx);
   loadRoundState(mapIdx);   // 라운드 스코어·스탯 로드
+  loadStatsState(mapIdx);
   maps[mapIdx].players.forEach(function(p) { applyAgentData(p); });
 
   var card = document.getElementById("map-" + n);
@@ -2656,6 +2657,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   migrateFromWhiteMode();
   maps.forEach(function(m, i) { loadPlayersSync(i); });
   maps.forEach(function(m, i) { loadRoundState(i); });
+  maps.forEach(function(m, i) { loadStatsState(i); });
   loadDiamondState();
   maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
   maps.forEach(function(m, i) { renderMap(m, i); });
@@ -2860,6 +2862,42 @@ function openRoundPicker(container, m, mapIdx, roundIdx) {
   });
 }
 
+
+function saveStatsState(mapIdx) {
+  try {
+    var key = 'stats:' + MATCH_KEY + ':' + mapIdx;
+    var m = maps[mapIdx];
+    localStorage.setItem(key, JSON.stringify({
+      aScore: m.rtState.stats.aScore,
+      bScore: m.rtState.stats.bScore,
+      teamStats: m.teamStats.map(function(ts) { return { label: ts.label, a: ts.a, b: ts.b }; })
+    }));
+  } catch(e) {}
+}
+
+function loadStatsState(mapIdx) {
+  try {
+    var key = 'stats:' + MATCH_KEY + ':' + mapIdx;
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var saved = JSON.parse(raw);
+    var m = maps[mapIdx];
+    var scoreId = ['m1','m2','m3','m4','m5'][mapIdx];
+    if (saved.aScore != null) {
+      m.rtState.stats.aScore = saved.aScore;
+      if (scoreState[scoreId]) { scoreState[scoreId].l = saved.aScore; applyScoreClasses(scoreId); }
+    }
+    if (saved.bScore != null) {
+      m.rtState.stats.bScore = saved.bScore;
+      if (scoreState[scoreId]) { scoreState[scoreId].r = saved.bScore; applyScoreClasses(scoreId); }
+    }
+    if (Array.isArray(saved.teamStats)) {
+      saved.teamStats.forEach(function(ts, i) {
+        if (m.teamStats[i]) { m.teamStats[i].a = ts.a; m.teamStats[i].b = ts.b; }
+      });
+    }
+  } catch(e) {}
+}
 function saveRoundState(mapIdx) {
   try {
     var key = 'rounds:' + MATCH_KEY + ':' + mapIdx;
@@ -3050,6 +3088,7 @@ function openStatEditor(mapIdx, statKey, side) {
       m.teamStats[statKey][side] = val;
     }
     renderTeamStats(m, mapIdx);
+    saveStatsState(mapIdx);
     popup.remove();
   };
 }
@@ -3586,10 +3625,12 @@ function openScoreEditor(mapId, side) {
     scoreState[mapId][side] = val;
     applyScoreClasses(mapId);
     // 라운드 트래커도 동기화
-    var mapIdx = mapId === "m1" ? 0 : 1;
+    var mapIdx = parseInt(mapId.slice(1)) - 1;
     maps[mapIdx].rtState.stats.aScore = scoreState[mapId].l;
     maps[mapIdx].rtState.stats.bScore = scoreState[mapId].r;
     renderRoundTracker(maps[mapIdx], mapIdx);
+    renderTeamStats(maps[mapIdx], mapIdx);
+    saveStatsState(mapIdx);
     popup.remove();
   });
   popup.querySelector("input").focus();
