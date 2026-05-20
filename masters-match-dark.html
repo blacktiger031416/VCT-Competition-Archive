@@ -1,0 +1,3716 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VCT Masters 경기 상세</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Russo+One&display=swap" rel="stylesheet" />
+  <script src="./storage.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0c0818;
+      color: #e8e4e0;
+      font-family: 'Barlow', sans-serif;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+
+    /* ── MAP CARD ─────────────────────────────── */
+    .map-card {
+      background: #0c0818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── SCOREBOARD ─────────────────────────────── */
+    .map-scoreboard {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      height: 160px;
+      background: linear-gradient(135deg, #0c1522 0%, #111a28 50%, #0c1522 100%);
+    }
+
+    .scoreboard-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
+      display: block;
+    }
+
+    /* 이미지 위 오버레이 */
+    .scoreboard-overlay {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* 팀 이름 (절대 위치) */
+    .sb-team-name {
+      position: absolute;
+      top: 42%;
+      transform: translateY(-50%);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(14px, 3vw, 22px);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    }
+    /* 팀 로고+이름 묶음 */
+    .sb-team-block {
+      position: absolute;
+      top: 42%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sb-team-block-l { left: 24%; transform: translate(-100%, -50%); gap: 18px; }
+    .sb-team-block-r { left: 76%; transform: translateY(-50%); gap: 28px; }
+
+    .sb-team-logo.sb-team-logo-white {
+      filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.8));
+    }
+    .sb-team-logo {
+      width: clamp(48px, 7vw, 80px);
+      height: clamp(48px, 7vw, 80px);
+      object-fit: contain;
+      filter: drop-shadow(0 1px 4px rgba(0,0,0,0.8));
+      margin-right: 4px;
+    }
+    .sb-team-name-l, .sb-team-name-r {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(14px, 3vw, 22px);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    }
+
+    /* 센터 맵 패널 */
+    .sb-center {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150px;
+      height: 94px;
+      border: 1px solid rgba(255,255,255,0.28);
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.4);
+    }
+    .sb-map-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      display: block;
+    }
+    .sb-map-name {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 4px 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      text-align: center;
+    }
+
+    /* 다이아몬드 위 스코어 (절대 위치) */
+    .sb-score-diamond-l,
+    .sb-score-diamond-r {
+      position: absolute;
+      top: 42%;
+      font-family: Impact, 'Russo One', sans-serif;
+      font-size: clamp(34px, 6vw, 64px);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.95);
+      line-height: 1;
+    }
+    .sb-score-diamond-l {
+      left: 29%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+    }
+    .sb-score-diamond-r {
+      left: 71%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.4);
+    }
+    .sb-score-diamond-l.lose { color: rgba(255,255,255,0.4); }
+    .sb-score-diamond-r.win  { color: #fff; }
+
+    /* 클릭 가능한 다이아몬드 오버레이 */
+    .sb-diamonds {
+      position: absolute;
+      top: calc(78% - 13px);
+      display: flex; gap: 10px; align-items: center;
+      transform: translateY(-50%);
+    }
+    .sb-diamonds-l { left: 28.5%; transform: translate(calc(-50% + 10px), -50%); }
+    .sb-diamonds-r { left: 70%; transform: translate(calc(-50% + 3px), -50%); }
+    .sb-diamond {
+      width: 13px; height: 13px;
+      border: 1.5px solid rgba(255,255,255,0.55);
+      transform: rotate(45deg);
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+    }
+    .sb-diamond:hover { border-color: rgba(255,255,255,0.9); }
+    .sb-diamond.filled { background: rgba(255,255,255,0.88); border-color: #fff; }
+
+    /* ── ROUND TRACKER ───────────────────────── */
+    .rt-wrap {
+      display: flex;
+      align-items: stretch;
+      background: #0c1116;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      overflow: hidden;
+    }
+    .rt-left {
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .rt-left-spacer {
+      height: 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .rt-team-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px 0 14px;
+      height: 34px;
+      position: relative;
+    }
+    .rt-team-row + .rt-team-row {
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .rt-accent {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+    .rt-logo { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+    .rt-logo-white { filter: brightness(0) invert(1); }
+    .rt-team-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: #fff; min-width: 26px;
+    }
+    .rt-sides { display: flex; flex-direction: column; gap: 2px; margin-left: 2px; }
+    .rt-side-box {
+      width: 9px; height: 9px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+    }
+    .rt-grid-wrap { flex: 1; overflow-x: auto; }
+    .rt-grid { display: flex; flex-direction: column; min-width: max-content; }
+    .rt-block { display: flex; flex-direction: column; }
+    .rt-block + .rt-block {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin-top: 2px;
+    }
+    .rt-block + .rt-block .rt-num { color: rgba(255,165,60,0.85); } /* OT 라운드 번호 주황색 */
+    .rt-row { display: flex; align-items: center; gap: 3px; padding: 0 6px; }
+    .rt-row.num-row  { height: 20px; padding-top: 4px; }
+    .rt-row.cell-row { height: 34px; padding-bottom: 3px; }
+    .rt-row.cell-row + .rt-row.cell-row { padding-top: 0; padding-bottom: 6px; }
+    .rt-num {
+      width: 28px; flex-shrink: 0; text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rt-cell {
+      width: 28px; height: 26px; flex-shrink: 0;
+      background: #1a2030;
+      border: 1px solid rgba(255,255,255,0.35);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.1s;
+    }
+    .rt-cell:hover { background: rgba(255,255,255,0.12); }
+    .rt-cell.win-atk { background: rgba(208,53,53,0.35); }
+    .rt-cell.win-def { background: rgba(0,196,176,0.35); }
+    .rt-cell img    { width: 14px; height: 14px; object-fit: contain; display: block; }
+    .rt-sep     { width: 6px; flex-shrink: 0; }
+    .rt-sep-num { width: 6px; flex-shrink: 0; }
+
+    /* ── ROUND PICKER MODAL ──────────────────── */
+    .round-picker {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 2000; display: grid; place-items: center;
+    }
+    .round-picker-panel {
+      background: #fff; border-radius: 10px;
+      min-width: 280px; max-width: 460px; width: 90vw;
+      overflow: hidden; box-shadow: 0 14px 48px rgba(0,0,0,0.5);
+    }
+    .round-picker-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid rgba(7,17,17,0.12);
+    }
+    .round-picker-head strong { font-size: 16px; font-weight: 900; color: #111; }
+    .round-picker-head-actions { display: flex; gap: 8px; }
+    .rp-clear-btn, .rp-close-btn {
+      padding: 4px 10px; border: 1px solid rgba(7,17,17,0.22);
+      border-radius: 5px; background: transparent;
+      font-size: 13px; cursor: pointer; transition: background 120ms;
+    }
+    .rp-clear-btn:hover, .rp-close-btn:hover { background: rgba(7,17,17,0.07); }
+    .round-picker-body { display: grid; grid-template-columns: 1fr 1fr; }
+    .rp-team-section { padding: 12px; border-right: 1px solid rgba(7,17,17,0.1); }
+    .rp-team-section:last-child { border-right: 0; }
+    .rp-team-label { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: rgba(7,17,17,0.6); }
+    .rp-icons { display: flex; flex-direction: column; gap: 3px; }
+    .rp-icon-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 7px; border: 1.5px solid transparent;
+      border-radius: 6px; background: transparent; cursor: pointer;
+      transition: background 110ms, border-color 110ms;
+      width: 100%; text-align: left; font-size: 11px; color: rgba(7,17,17,0.7);
+    }
+    .rp-icon-btn:hover { background: rgba(7,17,17,0.06); }
+    .rp-icon-btn.selected { background: rgba(7,17,17,0.09); border-color: rgba(7,17,17,0.28); }
+    .rp-icon-btn img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+
+    /* ── PLAYER TABLE ─────────────────────────── */
+    .player-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+      padding: 4px 6px 6px;
+    }
+
+    /* 컬럼: [skills-l][ult-l][player-l] | div | [player-r][ult-r][skills-r] */
+    .player-table colgroup col:nth-child(1) { width: 96px; }   /* left skills */
+    .player-table colgroup col:nth-child(2) { width: 50px; }   /* left ult */
+    .player-table colgroup col:nth-child(3) { width: auto; }   /* left player cell */
+    .player-table colgroup col:nth-child(4) { width: 1px;  }   /* divider */
+    .player-table colgroup col:nth-child(5) { width: auto; }   /* right player cell */
+    .player-table colgroup col:nth-child(6) { width: 52px; }   /* right ult */
+    .player-table colgroup col:nth-child(7) { width: 96px; }   /* right skills */
+
+    /* ── PLAYER CELL ── */
+    .player-cell {
+      border: 1px solid rgba(255,255,255,0.35);
+      padding: 0 !important;
+      vertical-align: top;
+    }
+    /* 이미지 + 텍스트 영역을 stretch로 */
+    .pc-inner {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 54px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    /* 요원 이미지 래퍼 */
+    .pc-agent {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .pc-agent .agent-portrait {
+      width: 54px;
+      height: 54px;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      border: none;
+    }
+    /* 이름+KDA 텍스트 영역 */
+    .pc-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      flex: 1;
+    }
+    /* 왼팀: ACS+KDA 묶음을 오른쪽 끝으로 */
+    .player-cell-l .pc-stats { margin-left: auto; }
+    /* 오른팀: 이름 오른쪽으로 밀고, 이미지 오른쪽 끝 */
+    .player-cell-r .pc-name { margin-left: auto; }
+
+    /* ACS+KDA 묶음 */
+    .pc-stats {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .pc-acs {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    /* 오른팀 요원 사진 좌우 반전 */
+    .player-cell-r .agent-portrait { transform: scaleX(-1); }
+
+    /* Header row */
+    .player-table thead th {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .player-table thead th.col-kda-l { text-align: right; }
+    .player-table thead th.col-kda-r { text-align: left;  }
+    .player-table thead th.col-name-l { text-align: left;  padding-left: 10px; }
+    .player-table thead th.col-name-r { text-align: right; padding-right: 10px; }
+    .player-table thead th.col-div { background: transparent; }
+
+    /* Data rows */
+    .player-table tbody tr { height: 56px; transition: background 0.1s; }
+    .player-table tbody tr:hover .player-cell { background: rgba(255,255,255,0.04) !important; }
+
+    .player-table tbody td {
+      padding: 7px 8px;
+      vertical-align: middle;
+    }
+
+    /* Skills column — 가로로 3칸 나란히 */
+    .cell-skills { text-align: center; padding: 0 !important; vertical-align: top; }
+    .skill-stack {
+      display: flex;
+      flex-direction: row;
+      width: 84px;
+      height: 56px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 0;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .skill-box {
+      flex: 1;
+      background: #1a2030;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: hidden;
+      padding: 3px 2px 11px;
+      gap: 3px;
+    }
+    .skill-box img {
+      width: 100%;
+      max-height: 36px;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+    .skill-charges {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .skill-charge {
+      width: 7px;
+      height: 2.5px;
+      background: rgba(255,255,255,0.75);
+    }
+
+    /* ── 체임버 특수 레이아웃 ──────────────────────── */
+    .chamber-q-charges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      justify-content: center;
+      width: calc(4 * 3px + 3 * 2px);
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+    .chamber-q-charges .skill-charge {
+      width: 3px;
+    }
+    .chamber-skill-box {
+      justify-content: flex-end !important;
+      padding-bottom: 11px !important;
+    }
+
+    /* ── 아스트라 특수 스킬 레이아웃 ───────────────── */
+    .astra-skills-row {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+    }
+    .astra-gage-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 3px 3px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+      background: #1a2030;
+    }
+    .astra-gage-row img {
+      width: 9px;
+      height: 9px;
+      object-fit: contain;
+      display: block;
+    }
+    .astra-skills-row .skill-box {
+      justify-content: flex-start;
+      padding-top: 5px;
+      padding-bottom: 3px;
+    }
+
+    /* ── 레이나 특수 스킬 레이아웃 ─────────────────── */
+    .reyna-eq {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      background: #1a2030;
+      overflow: hidden;
+    }
+    .reyna-eq-imgs {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .reyna-eq-imgs .skill-box {
+      border-right: none;
+      justify-content: flex-end;
+      padding-bottom: 5px;
+    }
+    .reyna-shared-charges {
+      display: flex;
+      gap: 2px;
+      padding: 2px 3px 3px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .reyna-shared-charge {
+      flex: 1;
+      height: 2.5px;
+      background: rgba(255,255,255,0.75);
+    }
+
+    /* Ultimate column */
+    .cell-ult { padding: 0 !important; vertical-align: top; }
+    .cell-ult-l { padding-right: 4px !important; }
+    .cell-ult-r { padding-left: 4px !important; }
+    .ult-box {
+      width: 48px; height: 56px;
+      background: #1a2030;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 0;
+      margin: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .ult-ring-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .ult-icon-img {
+      position: relative;
+      z-index: 1;
+      width: 38%;
+      height: 38%;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    /* Agent portrait */
+    .cell-agent {
+      text-align: center;
+      padding: 5px 4px !important;
+    }
+    .agent-portrait {
+      width: 54px;
+      height: 54px;
+      border-radius: 0;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      border: none;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .agent-placeholder {
+      width: 48px;
+      min-height: 42px;
+      border-radius: 0;
+      background: #1a2030;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+
+    /* Player name */
+    .cell-name-l { text-align: left;  padding-left: 10px !important; }
+    .cell-name-r { text-align: right; padding-right: 10px !important; }
+    .player-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #fff;
+    }
+    .player-sub {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 1px;
+    }
+
+    /* K/D/A */
+    .cell-kda-l { text-align: right; }
+    .cell-kda-r { text-align: left;  }
+
+    .kda-display {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 2px;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .kda-k { font-size: 20px; font-weight: 900; color: #fff; }
+    .kda-sep { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.3); }
+    .kda-d { font-size: 20px; font-weight: 900; color: #fff; }
+    .kda-a { font-size: 20px; font-weight: 900; color: #fff; }
+
+    /* MVP / highlight row */
+    .row-mvp .player-name { color: #ffd700; }
+    .row-mvp .kda-k       { color: #ffd700; }
+
+    /* Center divider column */
+    .cell-div {
+      background: transparent;
+      width: 1px;
+      padding: 0 !important;
+    }
+
+    /* Inline edit (click to edit KDA) */
+    .kda-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: inherit;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: background 0.1s;
+      display: inline-flex;
+    }
+    .kda-btn:hover { background: rgba(255,255,255,0.08); }
+
+    /* Edit popup */
+    .kda-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.6);
+    }
+    .kda-popup-panel {
+      background: #1a2535;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 20px 24px;
+      min-width: 240px;
+    }
+    .kda-popup-panel h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 14px;
+    }
+    .kda-popup-panel .kda-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kda-popup-panel input {
+      width: 60px;
+      background: #0a1018;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      padding: 6px 4px;
+    }
+    .kda-popup-panel input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
+    .kda-popup-sep {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      color: rgba(255,255,255,0.3);
+    }
+    .kda-popup-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .kda-popup-actions button {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 3px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .btn-save   { background: #651eff; color: #fff; }
+    .btn-cancel:hover { background: rgba(255,255,255,0.14); }
+    .btn-save:hover   { background: #e03344; }
+
+    /* ── TEAM STATS ──────────────────────────── */
+    .team-stats-wrap {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      background: #0c1116;
+      padding: 6px 10px 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ts-bg-logo {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      opacity: 0.13;
+      pointer-events: none;
+    }
+    .ts-bg-logo-a { left: 20px; }
+    .ts-bg-logo-b { right: 20px; }
+    .ts-header {
+      display: flex;
+      align-items: center;
+      padding: 4px 6px 6px;
+    }
+    .ts-team-label {
+      flex: 1;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .ts-team-label-r { text-align: right; }
+    .ts-center-head {
+      width: 140px;
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .ts-row {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      border-radius: 2px;
+      transition: background 0.1s;
+    }
+    .ts-row:hover { background: rgba(255,255,255,0.03); }
+    .ts-val {
+      flex: 1;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    .ts-val-a {
+      text-align: right;
+      padding-right: 20px;
+      color: rgba(255,255,255,0.9);
+    }
+    .ts-val-b {
+      text-align: left;
+      padding-left: 20px;
+      color: rgba(255,255,255,0.9);
+    }
+    .ts-val-a.ts-win { color: #fff; }
+    .ts-val-b.ts-win { color: #fff; }
+    .ts-val-a.ts-lose, .ts-val-b.ts-lose { color: rgba(255,255,255,0.55); }
+    .ts-label-wrap {
+      width: 140px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .ts-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .ts-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.05);
+      margin: 2px 6px;
+    }
+
+    /* ── MATCH OVERVIEW ─────────────────────────── */
+    .overview-card {
+      background: #0c0818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-top: none;
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto 24px;
+    }
+    /* 팀 헤더 */
+    .mo-header {
+      display: flex;
+      align-items: stretch;
+      height: 90px;
+    }
+    .mo-team-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mo-team-side-a {
+      background: linear-gradient(to right, rgba(var(--color-a-rgb),0.20) 0%, transparent 100%);
+      border-right: 2px solid var(--color-a);
+    }
+    .mo-team-side-b {
+      background: linear-gradient(to left, rgba(var(--color-b-rgb),0.18) 0%, transparent 100%);
+      justify-content: flex-end;
+      border-left: 2px solid var(--color-b);
+    }
+    .mo-team-accent {
+      position: absolute; top: 0; bottom: 0; width: 3px;
+    }
+    .mo-team-accent-a { left: 0; background: var(--color-a); }
+    .mo-team-accent-b { right: 0; background: var(--color-b); }
+    .mo-team-logo-sm {
+      width: 48px; height: 48px;
+      object-fit: contain; flex-shrink: 0;
+    }
+    .mo-logo-white { filter: brightness(0) invert(1); }
+    .mo-team-name-lg {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; font-weight: 900;
+      letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+    }
+    .mo-header-center {
+      width: 160px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+    }
+    .mo-league-tag {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+    }
+    .mo-vs-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; color: rgba(255,255,255,0.2);
+    }
+    .mo-match-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 600;
+      color: rgba(255,255,255,0.18);
+    }
+    /* 맵 결과 */
+    .mo-results {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: #0c1116;
+      display: flex; align-items: center;
+      padding: 14px 24px;
+    }
+    .mo-results-team {
+      flex: 1; display: flex; align-items: center; gap: 12px;
+    }
+    .mo-results-team-b { justify-content: flex-end; }
+    .mo-record {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.32); white-space: nowrap;
+    }
+    .mo-map-icons { display: flex; gap: 5px; }
+    /* 맵 결과 슬롯: 클릭으로 빈→O→X→빈 순환 */
+    .mo-map-slot {
+      width: 34px; height: 34px; border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900; line-height: 1;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: #1a2030;
+      cursor: pointer; user-select: none;
+      color: transparent;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .mo-map-slot[data-v="O"].side-a {
+      background: rgba(14,147,129,0.25); border-color: rgba(14,147,129,0.5); color: #0e9381;
+    }
+    .mo-map-slot[data-v="O"].side-b {
+      background: rgba(14,147,129,0.25); border-color: rgba(14,147,129,0.5); color: #0e9381;
+    }
+    .mo-map-slot[data-v="X"].side-a {
+      background: rgba(241,23,46,0.15); border-color: rgba(241,23,46,0.3); color: rgba(241,23,46,0.6);
+    }
+    .mo-map-slot[data-v="X"].side-b {
+      background: rgba(241,23,46,0.15); border-color: rgba(241,23,46,0.3); color: rgba(241,23,46,0.6);
+    }
+    .mo-score-center {
+      width: 140px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .mo-score-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 44px; font-weight: 900; line-height: 1; color: #fff;
+      width: 44px; text-align: center;
+      background: transparent; border: none; outline: none;
+      cursor: text;
+    }
+    .mo-score-num:focus {
+      background: rgba(255,255,255,0.05); border-radius: 3px;
+    }
+    .mo-score-sep {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; color: rgba(255,255,255,0.18);
+    }
+    /* 시청자 예측 */
+    .mo-prediction { border-top: 1px solid rgba(255,255,255,0.06); }
+    .mo-pred-title {
+      text-align: center; padding: 8px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+    .mo-pred-bar { display: flex; height: 68px; }
+    .mo-pred-side {
+      display: flex; align-items: center;
+      gap: 12px; padding: 0 20px; overflow: hidden;
+    }
+    .mo-pred-a {
+      background: linear-gradient(to right, rgba(var(--color-a-rgb),0.30), rgba(var(--color-a-rgb),0.06));
+      border-top: 1px solid rgba(var(--color-a-rgb),0.25);
+    }
+    .mo-pred-b {
+      background: linear-gradient(to left, rgba(var(--color-b-rgb),0.30), rgba(var(--color-b-rgb),0.06));
+      border-top: 1px solid rgba(var(--color-b-rgb),0.25);
+      justify-content: flex-end;
+    }
+    .mo-pred-logo {
+      width: 34px; height: 34px;
+      object-fit: contain; flex-shrink: 0; opacity: 0.85;
+    }
+    .mo-pred-info { display: flex; flex-direction: column; gap: 1px; }
+    .mo-pred-pct {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; font-weight: 900; color: #fff; line-height: 1;
+    }
+    .mo-pred-odds {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.9); letter-spacing: 0.04em;
+      cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.4);
+    }
+    .mo-pred-odds:hover { color: #fff; }
+    .mo-pred-sep { width: 1px; background: rgba(255,255,255,0.07); flex-shrink: 0; }
+    /* 배당률 입력 팝업 */
+    .odds-popup {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 3000; display: grid; place-items: center;
+    }
+    .odds-popup-panel {
+      background: #1a2030; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; width: 280px; overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    }
+    .odds-popup-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .odds-popup-head strong { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+    .odds-popup-head button {
+      background: transparent; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6); border-radius: 4px; padding: 3px 10px;
+      font-size: 12px; cursor: pointer;
+    }
+    .odds-popup-form { display: flex; gap: 8px; padding: 14px 16px; }
+    .odds-popup-form input {
+      flex: 1; background: #0c0818; border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 4px; color: #fff; font-size: 15px; padding: 7px 10px; outline: none;
+    }
+    .odds-popup-form input:focus { border-color: rgba(255,255,255,0.45); }
+    .odds-popup-form button {
+      background: #0e9381; border: none; border-radius: 4px;
+      color: #fff; font-size: 13px; font-weight: 700; padding: 7px 14px; cursor: pointer;
+    }
+    /* 맵 밴픽 */
+    .mo-veto { border-top: 1px solid rgba(255,255,255,0.06); }
+    .mo-veto-title {
+      padding: 8px 12px 6px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+    .mo-veto-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; padding: 0 8px 10px;
+    }
+    .mo-veto-cell {
+      display: flex; flex-direction: column;
+      border-radius: 3px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .mo-veto-top {
+      padding: 4px 5px; background: #0c1116; text-align: center;
+    }
+    .mo-veto-action {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .mo-veto-action.ban     { color: rgba(255,100,100,0.75); }
+    .mo-veto-action.pick    { color: rgba(100,220,180,0.9); }
+    .mo-veto-action.decider { color: rgba(255,200,60,0.85); }
+    .mo-veto-who {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 8px; font-weight: 600;
+      color: rgba(255,255,255,0.3); margin-top: 1px;
+    }
+    .mo-veto-img-wrap { position: relative; height: 130px; overflow: hidden; }
+    .mo-veto-img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .mo-veto-cell.banned .mo-veto-img { filter: grayscale(100%) brightness(0.4); }
+    .mo-veto-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: flex-end; padding: 5px;
+      background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);
+    }
+    .mo-veto-mapname {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 900;
+      color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.9); line-height: 1;
+    }
+    .mo-veto-cell.banned .mo-veto-mapname { color: rgba(255,255,255,0.45); }
+    .mo-veto-bottom {
+      padding: 3px 5px 4px; background: #0c1116; text-align: center;
+    }
+    .mo-veto-side {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 8px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .mo-veto-cell.pick-a .mo-veto-top    { background: rgba(14,147,129,0.15); }
+    .mo-veto-cell.pick-a .mo-veto-bottom { background: rgba(14,147,129,0.18); }
+    .mo-veto-cell.pick-a .mo-veto-side   { color: #0e9381; }
+    .mo-veto-cell.pick-b .mo-veto-top    { background: rgba(241,23,46,0.15); }
+    .mo-veto-cell.pick-b .mo-veto-bottom { background: rgba(241,23,46,0.18); }
+    .mo-veto-cell.pick-b .mo-veto-side   { color: #f1172e; }
+    .mo-veto-cell.decider-cell .mo-veto-top    { background: rgba(255,200,60,0.1); }
+    .mo-veto-cell.decider-cell .mo-veto-bottom { background: rgba(255,200,60,0.1); }
+    .mo-veto-cell.decider-cell .mo-veto-side   { color: rgba(255,200,60,0.8); }
+
+    /* 밴픽 편집 팝업 */
+    .veto-popup {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      z-index: 3000; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .veto-popup-panel {
+      background: #131c28; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; width: 560px; max-width: 96vw; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    }
+    .veto-popup-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky; top: 0; background: #131c28; z-index: 1;
+    }
+    .veto-popup-head strong { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; color:#fff; letter-spacing:.06em; text-transform:uppercase; }
+    .veto-popup-head button { background:transparent; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.6); border-radius:4px; padding:4px 12px; font-size:12px; cursor:pointer; }
+    .veto-popup-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .veto-popup-row label { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .veto-popup-row select {
+      flex:1; background:#0c0818; border:1px solid rgba(255,255,255,0.18);
+      border-radius:4px; color:#fff; font-size:14px; padding:6px 10px; outline:none; cursor:pointer;
+    }
+    .vp-map-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px; padding: 14px 18px 18px;
+    }
+    .vp-map-btn {
+      position: relative; border-radius: 4px; overflow: hidden;
+      border: 2px solid transparent; cursor: pointer;
+      background: #1a2030; aspect-ratio: 16/9;
+      display: flex; flex-direction: column;
+      transition: border-color 0.12s;
+    }
+    .vp-map-btn img { width:100%; height:100%; object-fit:cover; display:block; }
+    .vp-map-btn span {
+      position: absolute; bottom:0; left:0; right:0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+      color:#fff; text-align:center; padding:4px 2px 3px; letter-spacing:.06em;
+    }
+    .vp-map-btn.active { border-color: #0e9381; }
+    .vp-map-btn:hover { border-color: rgba(255,255,255,0.35); }
+
+    /* ── BO TOGGLE ──────────────────────────────── */
+    .bo-toggle-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; padding: 6px 0 0;
+    }
+    .bo-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 4px 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: transparent; color: rgba(255,255,255,0.35);
+      cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    .bo-btn:first-child { border-radius: 3px 0 0 3px; border-right: none; }
+    .bo-btn:last-child  { border-radius: 0 3px 3px 0; }
+    .bo-btn.active {
+      background: rgba(255,255,255,0.12); color: #fff;
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    /* ── MAP COUNT CONTROLS ──────────────────────── */
+    .map-count-bar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 10px; padding: 8px 0;
+      max-width: 900px; margin: 0 auto 10px;
+    }
+    .map-count-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.45);
+    }
+    .map-count-btn {
+      width: 30px; height: 30px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05); color: #fff;
+      font-size: 18px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s;
+    }
+    .map-count-btn:hover { background: rgba(255,255,255,0.12); }
+    .map-count-btn:disabled { opacity: 0.3; cursor: default; }
+    .map-card-empty { min-height: 120px; display: flex; align-items: center; justify-content: center; }
+    .map-empty-placeholder {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700;
+      letter-spacing: 0.2em; color: rgba(255,255,255,0.15); text-transform: uppercase;
+    }
+
+    /* ── GENERIC DARK MODAL ──────────────────────── */
+    .edit-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 3000; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .edit-modal-panel {
+      background: #141d2b;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 20px 24px;
+      min-width: 280px; max-width: 480px; width: 90vw;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    }
+    .edit-modal-panel h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); margin-bottom: 14px;
+    }
+    .edit-modal-actions {
+      display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;
+    }
+    .edit-modal-actions button {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 7px 18px; border-radius: 3px;
+      border: none; cursor: pointer;
+    }
+    .em-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .em-save   { background: #651eff; color: #fff; }
+    .em-cancel:hover { background: rgba(255,255,255,0.14); }
+    .em-save:hover   { background: #e03344; }
+
+    .edit-modal-input {
+      width: 100%; background: #0a1018;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px; font-weight: 700;
+      padding: 8px 12px;
+    }
+    .edit-modal-input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
+
+    .edit-modal-select {
+      width: 100%; background: #0a1018;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 600;
+      padding: 8px 10px; margin-bottom: 10px;
+      appearance: none; -webkit-appearance: none;
+    }
+    .edit-modal-select:focus { outline: none; border-color: rgba(255,255,255,0.4); }
+
+    /* ── AGENT PICKER GRID ───────────────────────── */
+    .agent-picker-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 6px; margin-top: 8px;
+      max-height: 320px; overflow-y: auto;
+    }
+    .agent-picker-btn {
+      background: #1a2030; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; padding: 5px 3px 4px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .agent-picker-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+    .agent-picker-btn.selected { background: rgba(101,30,255,0.2); border-color: #651eff; }
+    .agent-picker-btn img { width: 44px; height: 44px; object-fit: cover; object-position: top; display: block; }
+    .agent-picker-btn span {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.04em; color: rgba(255,255,255,0.55);
+      margin-top: 3px; text-align: center;
+    }
+
+    /* ── ROSTER PICKER ───────────────────────────── */
+    .roster-picker-wrap {
+      display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px;
+    }
+    .roster-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.05em;
+      padding: 6px 14px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: #1a2030; color: rgba(255,255,255,0.75);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .roster-btn:hover { background: rgba(255,255,255,0.1); }
+    .roster-btn.selected { background: rgba(101,30,255,0.22); border-color: #651eff; color: #fff; }
+    .roster-manual-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+      margin-bottom: 6px; display: block;
+    }
+
+    /* ── VETO CELL clickable ─────────────────────── */
+    .mo-veto-cell { cursor: pointer; }
+    .mo-veto-cell:hover { opacity: 0.85; }
+
+    /* ── EDITABLE FIELDS ─────────────────────────── */
+    .editable-field {
+      cursor: pointer; border-radius: 2px;
+      transition: background 0.1s;
+      display: inline-block;
+    }
+    .editable-field:hover { background: rgba(255,255,255,0.08); }
+    .pc-agent { cursor: pointer; }
+    .pc-agent:hover { opacity: 0.8; }
+
+    /* ── VETO MAP PICKER ─────────────────────────── */
+    .veto-map-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px; margin-top: 10px;
+    }
+    .veto-map-btn {
+      position: relative; border-radius: 4px; overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.1); cursor: pointer;
+      background: #1a2030; height: 60px;
+      transition: border-color 0.12s;
+    }
+    .veto-map-btn:hover { border-color: rgba(255,255,255,0.4); }
+    .veto-map-btn.selected { border-color: #651eff; }
+    .veto-map-btn img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.7; }
+    .veto-map-btn span {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 900;
+      text-align: center; color: #fff;
+      background: rgba(0,0,0,0.6); padding: 2px 0;
+    }
+
+    /* ── MODE TOGGLE ──────────────────────────────── */
+    .mode-toggle-btn {
+      position: absolute; top: 20px; right: 20px; z-index: 9000;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 16px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.7);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .mode-toggle-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    body.white-mode .mode-toggle-btn {
+      border-color: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.06);
+      color: rgba(0,0,0,0.6);
+    }
+    body.white-mode .mode-toggle-btn:hover { background: rgba(0,0,0,0.12); color: #111; }
+
+    /* ── WHITE MODE OVERRIDES ─────────────────────── */
+    body.white-mode {
+      background: #f4f4f4;
+      color: #111;
+    }
+    body.white-mode .map-card,
+    body.white-mode .overview-card {
+      background: #fff;
+      border-color: rgba(0,0,0,0.10);
+    }
+    body.white-mode .player-cell {
+      border-color: rgba(0,0,0,0.14);
+    }
+    body.white-mode .skill-stack {
+      border-color: rgba(0,0,0,0.14);
+    }
+    body.white-mode .skill-box {
+      background: #ececec;
+    }
+    body.white-mode .astra-gage-row { background: #ececec; }
+    body.white-mode .ult-box {
+      background: #ececec;
+      border-color: rgba(0,0,0,0.14);
+    }
+    body.white-mode .rt-wrap { background: #ececec; border-bottom-color: rgba(0,0,0,0.07); }
+    body.white-mode .rt-left { border-right-color: rgba(0,0,0,0.1); }
+    body.white-mode .rt-left-spacer { border-bottom-color: rgba(0,0,0,0.07); }
+    body.white-mode .rt-team-row + .rt-team-row { border-top-color: rgba(0,0,0,0.07); }
+    body.white-mode .rt-cell {
+      background: #ddd;
+      border-color: rgba(0,0,0,0.2);
+    }
+    body.white-mode .rt-cell:hover { background: rgba(0,0,0,0.12); }
+    body.white-mode .rt-team-name { color: #111; }
+    body.white-mode .player-name { color: #111; }
+    body.white-mode .kda-k { color: #111; }
+    body.white-mode .kda-d { color: #111; }
+    body.white-mode .kda-a { color: #111; }
+    body.white-mode .kda-sep { color: rgba(0,0,0,0.3); }
+    body.white-mode .pc-acs { color: rgba(0,0,0,0.45); }
+    body.white-mode .player-table thead th { color: rgba(0,0,0,0.35); border-bottom-color: rgba(0,0,0,0.06); }
+    body.white-mode .player-table tbody tr:hover .player-cell { background: rgba(0,0,0,0.03) !important; }
+    body.white-mode .team-stats-wrap { background: #ececec; border-top-color: rgba(0,0,0,0.06); }
+    body.white-mode .ts-val-a, body.white-mode .ts-val-b { color: rgba(0,0,0,0.8); }
+    body.white-mode .ts-val-a.ts-win, body.white-mode .ts-val-b.ts-win { color: #111; }
+    body.white-mode .ts-val-a.ts-lose, body.white-mode .ts-val-b.ts-lose { color: rgba(0,0,0,0.4); }
+    body.white-mode .ts-label { color: rgba(0,0,0,0.5); }
+    body.white-mode .ts-team-label { color: rgba(0,0,0,0.5); }
+    body.white-mode .ts-center-head { color: rgba(0,0,0,0.35); }
+    body.white-mode .ts-divider { background: rgba(0,0,0,0.05); }
+    body.white-mode .mo-results { background: #ececec; border-top-color: rgba(0,0,0,0.06); }
+    body.white-mode .mo-score-num { color: #111; }
+
+    /* TS 로고 다크모드에서 흰색 */
+    /* ts.svg white filter removed — handled dynamically via TEAM_B_LOGO_WHITE */
+    body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
+    body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
+    body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
+    body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
+    body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
+    body.white-mode .mo-veto-top { background: #e4e4e4; }
+    body.white-mode .mo-veto-bottom { background: #e4e4e4; }
+    body.white-mode .mo-veto-img-wrap { }
+    body.white-mode .mo-prediction { border-top-color: rgba(0,0,0,0.06); }
+    body.white-mode .mo-pred-title { color: rgba(0,0,0,0.25); }
+    body.white-mode .kda-btn:hover { background: rgba(0,0,0,0.06); }
+    body.white-mode .skill-charge { background: rgba(0,0,0,0.45); }
+    body.white-mode .reyna-shared-charge { background: rgba(0,0,0,0.45); }
+    body.white-mode .bo-btn { border-color: rgba(0,0,0,0.18); color: rgba(0,0,0,0.35); }
+    body.white-mode .bo-btn.active { background: rgba(0,0,0,0.1); color: #111; border-color: rgba(0,0,0,0.4); }
+    body.white-mode .map-count-btn { border-color: rgba(0,0,0,0.2); background: rgba(0,0,0,0.05); color: #111; }
+    body.white-mode .map-count-btn:hover { background: rgba(0,0,0,0.1); }
+    body.white-mode .map-count-label { color: rgba(0,0,0,0.45); }
+    body.white-mode .sb-score-diamond-l, body.white-mode .sb-score-diamond-r { text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+    /* white mode KDA: compact single-string style */
+    body.white-mode .kda-display {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+      gap: 0;
+    }
+    body.white-mode .kda-k { font-size: 15px; }
+    body.white-mode .kda-d { font-size: 15px; }
+    body.white-mode .kda-a { font-size: 15px; }
+    body.white-mode .kda-sep { font-size: 15px; font-weight: 700; }
+
+    /* 헤더 auth 버튼은 KickOff 바로 옆에 붙도록 margin-left 제거 */
+    .site-header .auth-header-btn { margin-left: 0; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV HEADER ──────────────────────────────── -->
+  <header class="site-header" style="
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,21,32,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0 32px; height: 56px;
+    display: flex; align-items: center; gap: 20px;
+  ">
+    <a href="./index.html" style="
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:700; font-size:15px;
+      letter-spacing:0.12em; text-transform:uppercase;
+      color:rgba(255,255,255,0.55);
+      text-decoration:none;
+      transition: color 0.15s;
+    ">VCT Archive</a>
+    <a id="nav-back-link" href="./masters-santiago-swiss.html" style="
+      font-family:'Barlow Condensed',sans-serif;
+      font-weight:600; font-size:13px;
+      letter-spacing:0.1em; text-transform:uppercase;
+      color:rgba(255,255,255,0.4);
+      text-decoration:none;
+      margin-left: auto;
+      transition: color 0.15s;
+    ">–</a>
+  </header>
+
+  <!-- ── MATCH OVERVIEW ──────────────────────────── -->
+
+  <div class="overview-card">
+
+    <!-- 팀 헤더 -->
+    <div class="mo-header">
+      <div class="mo-team-side mo-team-side-a">
+        <div class="mo-team-accent mo-team-accent-a"></div>
+        <img class="mo-team-logo-sm" id="mo-logo-a" src="" alt="" />
+        <span class="mo-team-name-lg" id="mo-name-a">–</span>
+      </div>
+      <div class="mo-header-center">
+        <span class="mo-league-tag">VCT Masters 2026</span>
+        <span class="mo-vs-text">VS</span>
+        <span class="mo-match-sub" id="mo-match-sub">–</span>
+      </div>
+      <div class="mo-team-side mo-team-side-b">
+        <span class="mo-team-name-lg" id="mo-name-b">–</span>
+        <img class="mo-team-logo-sm" id="mo-logo-b" src="" alt="" />
+        <div class="mo-team-accent mo-team-accent-b"></div>
+      </div>
+    </div>
+
+    <!-- 맵 결과 & 스코어 -->
+    <div class="mo-results">
+      <div class="mo-results-team">
+        <div class="mo-map-icons" id="slots-a">
+          <div class="mo-map-slot side-a" data-v="" data-idx="0" onclick="toggleSlot(this,'a')"></div>
+          <div class="mo-map-slot side-a" data-v="" data-idx="1" onclick="toggleSlot(this,'a')"></div>
+          <div class="mo-map-slot side-a" data-v="" data-idx="2" onclick="toggleSlot(this,'a')"></div>
+        </div>
+      </div>
+      <div class="mo-score-center">
+        <input class="mo-score-num" id="score-a" type="text" value="-" maxlength="2" />
+        <span class="mo-score-sep">:</span>
+        <input class="mo-score-num" id="score-b" type="text" value="-" maxlength="2" />
+      </div>
+      <div class="mo-results-team mo-results-team-b">
+        <div class="mo-map-icons" id="slots-b">
+          <div class="mo-map-slot side-b" data-v="" data-idx="0" onclick="toggleSlot(this,'b')"></div>
+          <div class="mo-map-slot side-b" data-v="" data-idx="1" onclick="toggleSlot(this,'b')"></div>
+          <div class="mo-map-slot side-b" data-v="" data-idx="2" onclick="toggleSlot(this,'b')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 시청자 승부 예측 -->
+    <div class="mo-prediction">
+      <div class="mo-pred-title">시청자 승부 예측</div>
+      <div class="mo-pred-bar" id="pred-bar"></div>
+    </div>
+
+    <!-- 맵 밴픽 -->
+    <div class="mo-veto">
+      <div class="mo-veto-title">맵 밴픽</div>
+      <div class="mo-veto-grid" id="veto-grid"></div>
+    </div>
+
+  </div>
+
+  <!-- MAP COUNT CONTROLS -->
+  <div class="map-count-bar" id="map-count-bar">
+    <button class="map-count-btn" id="btn-map-minus" onclick="changeMapCount(-1)">−</button>
+    <span class="map-count-label" id="map-count-label">1 / 3</span>
+    <button class="map-count-btn" id="btn-map-plus"  onclick="changeMapCount(+1)">+</button>
+  </div>
+
+  <!-- MAP CARDS CONTAINER -->
+  <div id="map-cards-container">
+
+  <!-- MAP 1 -->
+  <div class="map-card" id="map-1">
+    <div class="map-scoreboard">
+      <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
+      <div class="scoreboard-overlay">
+        <div class="sb-team-block sb-team-block-l">
+          <img class="sb-team-logo sb-logo-a" src="" alt="" />
+          <span class="sb-team-name-l sb-name-a">–</span>
+        </div>
+        <div class="sb-center">
+          <img class="sb-map-img" id="m1-sb-map-img" src="https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL" alt="브리즈" />
+          <div class="sb-map-name" id="m1-sb-map-name">브리즈</div>
+        </div>
+        <div class="sb-team-block sb-team-block-r">
+          <span class="sb-team-name-r sb-name-b">–</span>
+          <img class="sb-team-logo sb-logo-b" src="" alt="" />
+        </div>
+        <div class="sb-score-diamond-l" id="m1-score-l" onclick="openScoreEditor('m1','l')" style="cursor:pointer">-</div>
+        <div class="sb-score-diamond-r" id="m1-score-r" onclick="openScoreEditor('m1','r')" style="cursor:pointer">-</div>
+        <div class="sb-diamonds sb-diamonds-l" id="m1-diamonds-l">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+        <div class="sb-diamonds sb-diamonds-r" id="m1-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rt-wrap" id="rt-0"></div>
+
+    <table class="player-table">
+      <colgroup>
+        <col /><col /><col />
+        <col />
+        <col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th><th></th>
+          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+          <th class="col-div"></th>
+          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="m1-rows"></tbody>
+    </table>
+    <div class="team-stats-wrap" id="ts-0"></div>
+  </div>
+
+  <!-- MAP 2 -->
+  <div class="map-card" id="map-2">
+    <div class="map-scoreboard">
+      <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
+      <div class="scoreboard-overlay">
+        <div class="sb-team-block sb-team-block-l">
+          <img class="sb-team-logo sb-logo-a" src="" alt="" />
+          <span class="sb-team-name-l sb-name-a">–</span>
+        </div>
+        <div class="sb-center">
+          <img class="sb-map-img" id="m2-sb-map-img" src="https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp" alt="프랙처" />
+          <div class="sb-map-name" id="m2-sb-map-name">프랙처</div>
+        </div>
+        <div class="sb-team-block sb-team-block-r">
+          <span class="sb-team-name-r sb-name-b">–</span>
+          <img class="sb-team-logo sb-logo-b" src="" alt="" />
+        </div>
+        <div class="sb-score-diamond-l" id="m2-score-l" onclick="openScoreEditor('m2','l')" style="cursor:pointer">-</div>
+        <div class="sb-score-diamond-r" id="m2-score-r" onclick="openScoreEditor('m2','r')" style="cursor:pointer">-</div>
+        <div class="sb-diamonds sb-diamonds-l" id="m2-diamonds-l">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+        <div class="sb-diamonds sb-diamonds-r" id="m2-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rt-wrap" id="rt-1"></div>
+
+    <table class="player-table">
+      <colgroup>
+        <col /><col /><col />
+        <col />
+        <col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th><th></th>
+          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+          <th class="col-div"></th>
+          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="m2-rows"></tbody>
+    </table>
+    <div class="team-stats-wrap" id="ts-1"></div>
+  </div>
+
+  <!-- MAP 3 -->
+  <div class="map-card" id="map-3">
+    <div class="map-scoreboard">
+      <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
+      <div class="scoreboard-overlay">
+        <div class="sb-team-block sb-team-block-l">
+          <img class="sb-team-logo sb-logo-a" src="" alt="" />
+          <span class="sb-team-name-l sb-name-a">–</span>
+        </div>
+        <div class="sb-center">
+          <img class="sb-map-img" id="m3-sb-map-img" src="https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center" alt="펄" />
+          <div class="sb-map-name" id="m3-sb-map-name">펄</div>
+        </div>
+        <div class="sb-team-block sb-team-block-r">
+          <span class="sb-team-name-r sb-name-b">–</span>
+          <img class="sb-team-logo sb-logo-b" src="" alt="" />
+        </div>
+        <div class="sb-score-diamond-l" id="m3-score-l" onclick="openScoreEditor('m3','l')" style="cursor:pointer">-</div>
+        <div class="sb-score-diamond-r" id="m3-score-r" onclick="openScoreEditor('m3','r')" style="cursor:pointer">-</div>
+        <div class="sb-diamonds sb-diamonds-l" id="m3-diamonds-l">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+        <div class="sb-diamonds sb-diamonds-r" id="m3-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rt-wrap" id="rt-2"></div>
+
+    <table class="player-table">
+      <colgroup>
+        <col /><col /><col />
+        <col />
+        <col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th><th></th>
+          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+          <th class="col-div"></th>
+          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="m3-rows"></tbody>
+    </table>
+    <div class="team-stats-wrap" id="ts-2"></div>
+  </div>
+
+  <!-- MAP 4 (hidden by default) -->
+  <div class="map-card map-card-empty" id="map-4" style="display:none">
+    <div class="map-empty-placeholder">MAP 4</div>
+  </div>
+  <!-- MAP 5 (hidden by default) -->
+  <div class="map-card map-card-empty" id="map-5" style="display:none">
+    <div class="map-empty-placeholder">MAP 5</div>
+  </div>
+
+  </div><!-- end #map-cards-container -->
+
+<script>
+// ── URL 파라미터로 매치 설정 ──────────────────────────────────────
+var _params   = new URLSearchParams(window.location.search);
+var MATCH_DATE  = _params.get('date')   || '04.26';
+var MATCH_TEAM_A = _params.get('teamA') || 'Paper Rex';
+var MATCH_TEAM_B = _params.get('teamB') || 'Sentinels';
+var MATCH_FROM  = _params.get('from')   || 'swiss';
+var MATCH_BO5   = _params.get('bo5') === '1';
+var MATCH_SCORE = _params.get('score')  || '- : -';
+var MATCH_KEY   = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+
+var _TC = { "Paper Rex":"PRX","Gen.G":"GEN","Kiwoom DRX":"DRX","Rex Regum Qeon":"RRQ","T1":"T1","FULL SENSE":"FS","Global Esports":"GE","Team Secret":"TS","ZETA DIVISION":"ZETA","DetonatioN FocusMe":"DFM","Nongshim RedForce":"NS","VARREL":"VL","Sentinels":"SEN","G2 Esports":"G2","NRG":"NRG","100 Thieves":"100T","Cloud9":"C9","MIBR":"MIBR","LOUD":"LOUD","FURIA":"FUR","KRÜ Esports":"KRU","Leviatán":"LEV","Evil Geniuses":"EG","ENVY":"ENVY","All Gamers":"AG","JD Mall JDG Esports":"JDG","TYLOO":"TYL","Wuxi Titan Esports Club":"TEC","Guangzhou Huadu Bilibili Gaming":"BLG","FunPlus Phoenix":"FPX","Xi Lai Gaming":"XLG","EDward Gaming":"EDG","Dragon Ranger Gaming":"DRG","Trace Esports":"TE","Nova Esports":"NOVA","Wolves Esports":"WOL","Gentle Mates":"M8","Team Liquid":"TL","Team Heretics":"TH","NAVI":"NAVI","Karmine Corp":"KC","FUT Esports":"FUT","BBL Esports":"BBL","Fnatic":"FNC","Team Vitality":"VIT","GIANTX":"GX","Eternal Fire":"EF","PCIFIC Esports":"PCFC" };
+var _TL = { "Paper Rex":"./assets/teams/prx.svg","Gen.G":"./assets/teams/gen.png","Kiwoom DRX":"./assets/teams/krx.svg","Rex Regum Qeon":"./assets/teams/rrq.png","T1":"./assets/teams/t1.png","FULL SENSE":"./assets/teams/fs.svg","Global Esports":"./assets/teams/ge.webp","Team Secret":"./assets/teams/ts.svg","ZETA DIVISION":"./assets/teams/zeta.png","DetonatioN FocusMe":"./assets/teams/dfm.svg","Nongshim RedForce":"./assets/teams/ns.svg","VARREL":"./assets/teams/vl.svg","Sentinels":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg","G2 Esports":"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg","NRG":"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg","100 Thieves":"https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp","Cloud9":"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp","MIBR":"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg","LOUD":"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg","FURIA":"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg","KRÜ Esports":"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg","Leviatán":"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618","Evil Geniuses":"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg","ENVY":"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg","All Gamers":"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp","JD Mall JDG Esports":"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg","TYLOO":"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg","Wuxi Titan Esports Club":"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg","Guangzhou Huadu Bilibili Gaming":"https://dpm.lol/esport/teams/BLG.webp","FunPlus Phoenix":"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg","Xi Lai Gaming":"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg","EDward Gaming":"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png","Dragon Ranger Gaming":"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp","Trace Esports":"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg","Nova Esports":"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp","Wolves Esports":"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp","Gentle Mates":"./assets/teams/gm.png","Team Liquid":"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp","Team Heretics":"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg","NAVI":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png","Karmine Corp":"./assets/teams/kc.png","FUT Esports":"https://i.namu.wiki/i/9lZ0EJstoQ655GoWZ8P5eenoKyKINvPzQg6Mwn0y2CLE8Q00lsO-HrUsl6uvWARe6A2TwJgXm5DQjue0SJ_XWA.svg","BBL Esports":"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg","Fnatic":"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg","Team Vitality":"https://upload.wikimedia.org/wikipedia/en/4/49/Team_Vitality_logo.svg","GIANTX":"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg","Eternal Fire":"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg","PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" };
+var _TCo = { "Paper Rex":"#8c52ff","Gen.G":"#d2b985","Kiwoom DRX":"#1f2f5e","Rex Regum Qeon":"#ffa100","T1":"#ec1b24","FULL SENSE":"#ff751f","Global Esports":"#1c4891","Team Secret":"#444444","ZETA DIVISION":"#15b24a","DetonatioN FocusMe":"#2b53ff","Nongshim RedForce":"#e2012d","VARREL":"#3ee1ac","Sentinels":"#CE0037","G2 Esports":"#8400CB","NRG":"#F63D0A","100 Thieves":"#EA3031","Cloud9":"#03AAF5","MIBR":"#0EC8DB","LOUD":"#13FF00","FURIA":"#888888","KRÜ Esports":"#FF319C","Leviatán":"#6BA6DE","Evil Geniuses":"#2E268D","ENVY":"#3727F1","All Gamers":"#d6323c","JD Mall JDG Esports":"#da202d","TYLOO":"#cc3a32","Wuxi Titan Esports Club":"#f7553e","Guangzhou Huadu Bilibili Gaming":"#24c8e8","FunPlus Phoenix":"#fb1000","Xi Lai Gaming":"#206189","EDward Gaming":"#442a1e","Dragon Ranger Gaming":"#4b78ff","Trace Esports":"#5a80c5","Nova Esports":"#b262d7","Wolves Esports":"#fbb900","Gentle Mates":"#ff72f9","Team Liquid":"#142e60","Team Heretics":"#dca710","NAVI":"#fdf135","Karmine Corp":"#01ccff","FUT Esports":"#21efc4","BBL Esports":"#cb9803","Fnatic":"#ff5900","Team Vitality":"#f8ff04","GIANTX":"#28b8ff","Eternal Fire":"#9c8d69","PCIFIC Esports":"#41c0dc" };
+var _TW  = { "MIBR": true, "ENVY": true, "Evil Geniuses": true, "Gentle Mates": true, "Team Liquid": true, "GIANTX": true, "Paper Rex": true, "Team Secret": true, "ZETA DIVISION": true, "VARREL": true };
+
+var TEAM_A_CODE  = _TC[MATCH_TEAM_A]  || MATCH_TEAM_A.substring(0,3).toUpperCase();
+var TEAM_B_CODE  = _TC[MATCH_TEAM_B]  || MATCH_TEAM_B.substring(0,3).toUpperCase();
+var TEAM_A_LOGO  = _TL[MATCH_TEAM_A]  || '';
+var TEAM_B_LOGO  = _TL[MATCH_TEAM_B]  || '';
+var TEAM_A_COLOR = _TCo[MATCH_TEAM_A] || '#888';
+var TEAM_B_COLOR = _TCo[MATCH_TEAM_B] || '#888';
+var TEAM_A_LOGO_WHITE = !!_TW[MATCH_TEAM_A];
+var TEAM_B_LOGO_WHITE = !!_TW[MATCH_TEAM_B];
+
+var _sp = MATCH_SCORE.split(':');
+var _sA = parseInt((_sp[0]||'').trim()) || 0;
+var _sB = parseInt((_sp[1]||'').trim()) || 0;
+
+var _tournament = _params.get('tournament') || _params.get('t') || 'santiago';
+var _fromMap = {
+  swiss:    { href: './masters-' + _tournament + '-swiss.html',    label: 'Swiss Stage' },
+  playoffs: { href: './masters-' + _tournament + '-playoffs.html', label: 'PlayOff' },
+};
+var _fromDefault = { href: './masters-' + _tournament + '-swiss.html', label: 'Swiss Stage' };
+var _fromInfo = _fromMap[MATCH_FROM] || _fromDefault;
+
+// ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
+var currentBo = MATCH_BO5 ? 5 : 3;
+var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
+var initializedMaps = (function() {
+  var m = {};
+  // 맵 1~3은 static HTML 존재, 맵 4~5는 initMapCard()로 동적 생성 필요
+  for (var i = 1; i <= Math.min(activeMapCount, 3); i++) m[i] = true;
+  return m;
+}());
+
+function createBlankMapData(mapIdx) {
+  var n = mapIdx + 1;
+  var blank5 = function(side) {
+    return [0,1,2,3,4].map(function() {
+      return { side: side, name: "-", agent: "제트", k: "-", d: "-", a: "-", acs: "-" };
+    });
+  };
+  return {
+    tbodyId: "m" + n + "-rows",
+    rtId: "rt-" + mapIdx,
+    teamA: TEAM_A_CODE, teamB: TEAM_B_CODE,
+    colorA: TEAM_A_COLOR, colorB: TEAM_B_COLOR,
+    logoA: TEAM_A_LOGO, logoAWhite: TEAM_A_LOGO_WHITE,
+    logoB: TEAM_B_LOGO, logoBWhite: TEAM_B_LOGO_WHITE,
+    mapImg: "",
+    rtState: { rounds: [], firstAttacker: null, stats: { aScore: "-", bScore: "-" } },
+    tsId: "ts-" + mapIdx,
+    teamStats: [
+      { label: "첫킬",        a: "-", b: "-" },
+      { label: "절약왕",      a: "-", b: "-" },
+      { label: "포스트 플랜트", a: "-", b: "-" },
+      { label: "클러치",      a: "-", b: "-" },
+    ],
+    players: blank5("a").concat(blank5("b")),
+  };
+}
+
+function buildMapCardHtml(n) {
+  var mid = "m" + n;
+  var rtId = "rt-" + (n - 1);
+  var tsId = "ts-" + (n - 1);
+  var diagCount = currentBo === 5 ? 3 : 2;
+  var diag = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>'.repeat(diagCount);
+  return `
+    <div class="map-scoreboard">
+      <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
+      <div class="scoreboard-overlay">
+        <div class="sb-team-block sb-team-block-l">
+          <img class="sb-team-logo sb-logo-a" src="" alt="" />
+          <span class="sb-team-name-l sb-name-a">–</span>
+        </div>
+        <div class="sb-center">
+          <img class="sb-map-img" id="${mid}-sb-map-img" src="" alt="" />
+          <div class="sb-map-name" id="${mid}-sb-map-name">-</div>
+        </div>
+        <div class="sb-team-block sb-team-block-r">
+          <span class="sb-team-name-r sb-name-b">–</span>
+          <img class="sb-team-logo sb-logo-b" src="" alt="" />
+        </div>
+        <div class="sb-score-diamond-l" id="${mid}-score-l" onclick="openScoreEditor('${mid}','l')" style="cursor:pointer">-</div>
+        <div class="sb-score-diamond-r" id="${mid}-score-r" onclick="openScoreEditor('${mid}','r')" style="cursor:pointer">-</div>
+        <div class="sb-diamonds sb-diamonds-l" id="${mid}-diamonds-l">${diag}</div>
+        <div class="sb-diamonds sb-diamonds-r" id="${mid}-diamonds-r">${diag}</div>
+      </div>
+    </div>
+    <div class="rt-wrap" id="${rtId}"></div>
+    <table class="player-table">
+      <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
+      <thead>
+        <tr>
+          <th></th><th></th>
+          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+          <th class="col-div"></th>
+          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+          <th></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="${mid}-rows"></tbody>
+    </table>
+    <div class="team-stats-wrap" id="${tsId}"></div>`;
+}
+
+function initMapCard(n) {
+  if (initializedMaps[n]) return;
+  initializedMaps[n] = true;
+  var mapIdx = n - 1;
+  maps[mapIdx] = createBlankMapData(mapIdx);
+  scoreState["m" + n] = { l: "-", r: "-" };
+  maps[mapIdx].players.forEach(function(p) { applyAgentData(p); });
+  loadPlayersSync(mapIdx);
+  loadRoundState(mapIdx);   // 라운드 스코어·스탯 로드
+  loadStatsState(mapIdx);
+  maps[mapIdx].players.forEach(function(p) { applyAgentData(p); });
+
+  var card = document.getElementById("map-" + n);
+  card.classList.remove("map-card-empty");
+  card.innerHTML = buildMapCardHtml(n);
+
+  renderMap(maps[mapIdx], mapIdx);
+  renderRoundTracker(maps[mapIdx], mapIdx);
+  renderTeamStats(maps[mapIdx], mapIdx);
+  syncVetoMaps();
+  applyMatchUI();
+  loadDiamondState();
+}
+
+function updateMapCards() {
+  var maxMaps = currentBo;
+  for (var i = 1; i <= 5; i++) {
+    var card = document.getElementById("map-" + i);
+    if (!card) continue;
+    card.style.display = (i <= activeMapCount && i <= maxMaps) ? "" : "none";
+  }
+  var label = document.getElementById("map-count-label");
+  if (label) label.textContent = activeMapCount + " / " + maxMaps;
+  var btnMinus = document.getElementById("btn-map-minus");
+  var btnPlus  = document.getElementById("btn-map-plus");
+  if (btnMinus) btnMinus.disabled = activeMapCount <= 1;
+  if (btnPlus)  btnPlus.disabled  = activeMapCount >= maxMaps;
+}
+
+function changeMapCount(delta) {
+  var maxMaps = currentBo;
+  activeMapCount = Math.min(maxMaps, Math.max(1, activeMapCount + delta));
+  if (delta > 0) initMapCard(activeMapCount);
+  updateMapCards();
+}
+
+function updateDiamonds() {
+  var count = currentBo === 5 ? 3 : 2;
+  var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
+  var html = diamond.repeat(count);
+  ["m1-diamonds-l","m1-diamonds-r","m2-diamonds-l","m2-diamonds-r","m3-diamonds-l","m3-diamonds-r"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+  loadDiamondState();
+}
+
+function renderSlots() {
+  ['a', 'b'].forEach(function(side) {
+    var el = document.getElementById('slots-' + side);
+    if (!el) return;
+    el.innerHTML = Array.from({length: currentBo}, function(_, i) {
+      return '<div class="mo-map-slot side-' + side + '" data-v="" data-idx="' + i + '" onclick="toggleSlot(this,\'' + side + '\')"></div>';
+    }).join('');
+  });
+}
+
+function setBo(n) {
+  currentBo = n;
+  activeMapCount = Math.min(activeMapCount, n);
+  VETO_STEPS    = n === 5 ? VETO_STEPS_BO5 : VETO_STEPS_BO3;
+  VETO_MAP_SLOT = n === 5 ? [2, 3, 4, 5, 6] : [2, 3, 6];
+  renderSlots();
+  renderVeto();
+  updateMapCards();
+  updateDiamonds();
+}
+
+updateMapCards();
+
+// ── 라운드 트래커 상수 ─────────────────────────────────────────
+const ROUND_ICONS = {
+  attack_kill:  "https://i.ibb.co/9HcDhzQ4/image.webp",
+  attack_spike: "https://i.ibb.co/k2hrj8Dp/image.webp",
+  def_defuse:   "https://i.ibb.co/TMjk5drN/image.webp",
+  def_timeout:  "https://i.ibb.co/DXqXggC/image.webp",
+  def_kill:     "https://i.ibb.co/4RLQmnjG/image.webp",
+};
+const ROUND_ICON_LABELS = {
+  attack_kill:  "공격 처치",
+  attack_spike: "스파이크 폭파",
+  def_defuse:   "스파이크 해체",
+  def_timeout:  "설치 실패",
+  def_kill:     "수비 처치",
+};
+const ATK_TYPES = ["attack_kill", "attack_spike"];
+const DEF_TYPES = ["def_defuse", "def_timeout", "def_kill"];
+
+function roundIsAttacking(side, roundIdx, firstAttacker) {
+  if (!firstAttacker) return null;
+  const n = roundIdx + 1;
+  let faAtks;
+  if (n <= 12)       faAtks = true;
+  else if (n <= 24)  faAtks = false;
+  else { const ot = n - 24; faAtks = (ot % 2 === 1); }
+  return faAtks ? (firstAttacker === side) : (firstAttacker !== side);
+}
+
+// ── 샘플 데이터 ──────────────────────────────────────────────
+const agentImages = {
+  게코:    "https://c-valorant-api.op.gg/Assets/Characters/E370FA57-4757-3604-3648-499E1F642D3F_small.png",
+  네온:    "https://i.namu.wiki/i/4ogqg4lB9_G5JKxp145jlSjbzSxRhhXDpUJeoMqSuUnkHrNsHUNj969wyGMvKuYhkd-gDucOmRVlGYFBdHyU2w.webp",
+  데드록:  "https://i.namu.wiki/i/7-QoPRINetjBCUblJjq6oPK_4HHAtH10nsD5vATNG3hwqMxCLRa0GJTZOM_us3WvSHK91b965Eo7VoF7hXEpew.webp",
+  레이나:  "https://i.namu.wiki/i/THZZ8MlhetJzmWZNYTsHi69SPcjCnuQwkbgkHoM8SF7cbgXpvNg2gXSlEpPec_SXHX08Y3gDP2llILTFdRRbdQ.webp",
+  레이즈:  "https://i.namu.wiki/i/14BBGZHNg2x0JYMy6x87Oo2Qlg3jp7GqxhMhGFJ5uYg2vspQXtK7vxJpcak1uFZ_k9vPr6znt6KJcihHw3L_bg.webp",
+  믹스:    "https://i.namu.wiki/i/u_CwGnSZJSLW7tsqGYzZZ9VqPM8vXa4tmmbLElugjV5pOZaoZLrHyBvoWk4mCMtLZGf3CorG6g_N12ZrWjLIPg.webp",
+  바이스:  "https://i.namu.wiki/i/RoVLjmYPHlDcLzy3QwkUOV4MsxdnKFAQAUY_s6H8nB4N_RStAD_TQlSW0RNpkRuCgmY24qQPICqu4fiCVApKcg.webp",
+  바이퍼:  "https://i.namu.wiki/i/Vqp-AY0l-Xe8qK7Ef4FVmjYnOQ99Gj0M1ozbDZjmxibcEJocsbDGUDtEr4FNsTpTq_SyjjWVdJxHWOYgAxywew.webp",
+  브리치:  "https://i.namu.wiki/i/situ_MvKaWMojZasDwAzJ2jN-5Rp__8FRbWxmFuBjDfvVfK0xZ2ER_9fYNluAsUd_h5cFYkufQSuTNH_DKVuJQ.webp",
+  브림스톤: "https://i.namu.wiki/i/UvL7SmnIwxyZuVEHFnHlwPpMTQlD0RhmAlm-gIfTyctIrb3Vnmor4A_nRiKCQlYMxIxi7G73NITfwQIt27Xvzw.webp",
+  비토:    "https://i.namu.wiki/i/k7MZL2YWWu7DT9fcrySpYk2HioLYi80nJjgYHB2l24XiupY3Oebneq9aMJIXe7UqAL9sMd51Z7m_3hZOeSx7jQ.webp",
+  사이퍼:  "https://i.namu.wiki/i/-XPO1Vou13Z8Feqn27wFFqHLg9Olt4vEAt9VB8b8Gfwx7MZugISCbWmekrWjnaI5PONSHtu0zZitKXUb8jZI9w.webp",
+  세이지:  "https://i.namu.wiki/i/jqodeZWsC3MyJzJ8DwABim3K0uuZ37PgksNux_GREfl65HoYrX0L2XIs4cTdm0cpwP7Db1z73YnbpHMctb6hiQ.webp",
+  소바:    "https://c-valorant-api.op.gg/Assets/Characters/320B2A48-4D9B-A075-30F1-1F93A9B638FA_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+  스카이:  "https://i.namu.wiki/i/GfJ7jOzMvNyDGYYCGcmB69dMe2StOUhtsS1jVJzZ3Ul_vht-RwymHwQm2znxrdKGOgnOzxq66ygZupY2bwYetg.webp",
+  아스트라: "https://c-valorant-api.op.gg/Assets/Characters/41FB69C1-4189-7B37-F117-BCAF1E96F1BF_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+  아이소:  "https://i.namu.wiki/i/JrF8spBoOI0_cV6S3URHYZ9g2EpLqbugUcxNkW6Vbp60Ig6FZdXDDLNisS7suS92OrcRxH3muHmBDrhuAtrIsQ.webp",
+  오멘:    "https://i.namu.wiki/i/8LpnTIlczZAC81pGY3gcZeLs_6e8C-s43OZR7o2F6JucSs60HPDxnQ_vs4Fk_8HDq1VlGIK8WvjJhZDdQmsfwQ.webp",
+  요루:    "https://i.namu.wiki/i/O8_5nw3EgYWhLraoQ5qj2ooaTQGqhTNhVou0an9A2A4o5Uy7SSr3O8C7nwmub1jzssrRziii5qcwjq8-ACZwkA.webp",
+  웨이레이: "https://i.namu.wiki/i/Kj83E8_P6KTeg8NR0oXc5HiK9bo8_nnHymVoTvrwv8XgUhKrQH8Mf-mCAOaOYBYYbY3NtxbOtnU4rioCjjIafg.webp",
+  제트:    "https://i.namu.wiki/i/_ScoZkw_dp5eGn66y8GXGqzGRHAUQiZD-AEGqpt0FQTpO3sLAdALfP37rzLppNRUFUK505MkSXf31Es-p2hE0g.webp",
+  체임버:  "https://i.namu.wiki/i/kH9bgltG2hlwvNGUr64utZLO7V03cYI0itwIpVwR0H3GLeQ0v1lWeSgZr3QnLzJLaq5OChM9jZ20vSEO-UXysA.webp",
+  케이오:  "https://valorantinfo.com/images/kr/kayo_valorant_icon_3589.webp",
+  클로브:  "https://i.namu.wiki/i/l-OTVsdNYqe6PE3GsUHe4gzw7YbMcLtX831Y7ofn0Ta5gyMdFNqFJp8VVSsoqocBJMit8HFGz_If4e8cnQZbnw.webp",
+  킬조이:  "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png",
+  테호:    "https://i.namu.wiki/i/DczhNjwRqUiOwhoL-DPhCm9EzpbQU3JkqmZzbwz3DF_nkuyFNtbB4sxAaY_bFm3D0h8ZuMre85zAwX7C50UVgA.webp",
+  페이드:  "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png",
+  피닉스:  "https://valorantinfo.com/images/kr/phoenix_valorant_icon_3596.webp",
+  하버:    "https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
+};
+const agents = Object.keys(agentImages);
+
+// ── 요원별 스킬/궁 데이터 ─────────────────────────────────────
+// skills 순서: [E, C, Q] / charges: 각 스킬 게이지 수 / ultCharges: 궁극기 포인트 칸 수
+const AGENT_DATA = {
+  "제트": {
+    ult:        "images/jett_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/jett_e.png", charges: 1 },
+      { src: "images/jett_c.webp", charges: 2 },
+      { src: "images/jett_q.png", charges: 1 },
+    ],
+  },
+  "레이즈": {
+    ult:        "images/raze_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/raze_e.webp", charges: 1 },
+      { src: "images/raze_c.webp", charges: 1 },
+      { src: "images/raze_q.png",  charges: 2 },
+    ],
+  },
+  "게코": {
+    ult:        "images/geko_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/geko_e.webp", charges: 1 },
+      { src: "images/geko_c.webp", charges: 1 },
+      { src: "images/geko_q.webp",  charges: 1 },
+    ],
+  },
+  "네온": {
+    ult:        "images/neon_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/neon_e.webp", charges: 1 },
+      { src: "images/neon_c.webp", charges: 1 },
+      { src: "images/neon_q.webp", charges: 1 },
+    ],
+  },
+  "데드록": {
+    ult:        "images/deadlock_ult.webp",
+    ultCharges: 7,
+    skills: [
+      { src: "images/deadlock_e.webp", charges: 1 },
+      { src: "images/deadlock_c.webp", charges: 1 },
+      { src: "images/deadlock_q.webp", charges: 2 },
+    ],
+  },
+  "하버": {
+    ult:        "images/harbor_ult.webp",
+    ultCharges: 7,
+    skills: [
+      { src: "images/harbor_e.webp", charges: 1 },
+      { src: "images/harbor_c.webp", charges: 1 },
+      { src: "images/harbor_q.webp", charges: 1 },
+    ],
+  },
+  "피닉스": {
+    ult:        "images/phoenix_ult.webp",
+    ultCharges: 6,
+    skills: [
+      { src: "images/phoenix_e.webp", charges: 2 },
+      { src: "images/phoenix_c.webp", charges: 1 },
+      { src: "images/phoenix_q.webp", charges: 1 },
+    ],
+  },
+  "페이드": {
+    ult:        "images/fade_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/fade_e.webp", charges: 1 },
+      { src: "images/fade_c.webp", charges: 2 },
+      { src: "images/fade_q.webp", charges: 1 },
+    ],
+  },
+  "테호": {
+    ult:        "images/tejo_ult.webp",
+    ultCharges: 9,
+    skills: [
+      { src: "images/tejo_e.webp", charges: 2 },
+      { src: "images/tejo_c.webp", charges: 1 },
+      { src: "images/tejo_q.webp", charges: 1 },
+    ],
+  },
+  "킬조이": {
+    ult:        "images/killjoy_ult.webp",
+    ultCharges: 9,
+    skills: [
+      { src: "images/killjoy_e.webp", charges: 1 },
+      { src: "images/killjoy_c.webp", charges: 2 },
+      { src: "images/killjoy_q.webp", charges: 1 },
+    ],
+  },
+  "클로브": {
+    ult:        "images/clove_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/clove_e.webp", charges: 2 },
+      { src: "images/clove_c.webp", charges: 1 },
+      { src: "images/clove_q.webp", charges: 1 },
+    ],
+  },
+  "케이오": {
+    ult:        "images/kay:o_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/kay:o_e.webp", charges: 1 },
+      { src: "images/kay:o_c.webp", charges: 1 },
+      { src: "images/kay:o_q.webp", charges: 2 },
+    ],
+  },
+  "체임버": {
+    ult:        "images/chamber_ult.webp",
+    ultCharges: 8,
+    layout:     "chamber",
+    skills: [
+      { src: "images/chamber_e.webp", charges: 1 },
+      { src: "images/chamber_c.webp", charges: 1 },
+      { src: "images/chamber_q.webp", charges: 8 },
+    ],
+  },
+  "웨이레이": {
+    ult:        "images/waylay_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/waylay_e.webp", charges: 1 },
+      { src: "images/waylay_c.webp", charges: 1 },
+      { src: "images/waylay_q.webp", charges: 1 },
+    ],
+  },
+  "요루": {
+    ult:        "images/yoru_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/yoru_e.webp", charges: 2 },
+      { src: "images/yoru_c.webp", charges: 1 },
+      { src: "images/yoru_q.webp", charges: 1 },
+    ],
+  },
+  "오멘": {
+    ult:        "images/omen_ult.webp",
+    ultCharges: 7,
+    skills: [
+      { src: "images/omen_e.webp", charges: 2 },
+      { src: "images/omen_c.webp", charges: 2 },
+      { src: "images/omen_q.webp", charges: 1 },
+    ],
+  },
+  "아이소": {
+    ult:        "images/iso_ult.webp",
+    ultCharges: 7,
+    skills: [
+      { src: "images/iso_e.webp",  charges: 1 },
+      { src: "images/iso_c.webp",   charges: 1 },
+      { src: "images/iso_q.webp",   charges: 1 },
+    ],
+  },
+  "아스트라": {
+    ult:        "images/astra_ult.webp",
+    ultCharges: 7,
+    layout:     "astra",
+    gageImg:    "images/astra_gage.webp",
+    skills: [
+      { src: "images/astra_e.webp", charges: 0 },
+      { src: "images/astra_c.webp", charges: 0 },
+      { src: "images/astra_q.webp", charges: 0 },
+    ],
+  },
+  "스카이": {
+    ult:        "images/skye_ult.png",
+    ultCharges: 8,
+    skills: [
+      { src: "images/skye_e.webp", charges: 2 },
+      { src: "images/skye_c.webp",  charges: 1 },
+      { src: "images/skye_q.webp", charges: 1 },
+    ],
+  },
+  "소바": {
+    ult:        "images/sova_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/sova_e.png", charges: 1 },
+      { src: "images/sova_c.png", charges: 1 },
+      { src: "images/sova_q.webp", charges: 2 },
+    ],
+  },
+  "세이지": {
+    ult:        "images/sage_ult.png",
+    ultCharges: 7,
+    skills: [
+      { src: "images/sage_e.png",  charges: 1 },
+      { src: "images/sage_c.webp", charges: 1 },
+      { src: "images/sage_q.png",  charges: 2 },
+    ],
+  },
+  "사이퍼": {
+    ult:        "images/cyper_ult.png",
+    ultCharges: 7,
+    skills: [
+      { src: "images/cyper_e.png",  charges: 1 },
+      { src: "images/cyper_c.png",  charges: 2 },
+      { src: "images/cyper_q.webp", charges: 2 },
+    ],
+  },
+  "비토": {
+    ult:        "images/veto_ult.webp",
+    ultCharges: 7,
+    skills: [
+      { src: "images/veto_e.webp", charges: 1 },
+      { src: "images/veto_c.webp", charges: 2 },
+      { src: "images/veto_q.webp", charges: 1 },
+    ],
+  },
+  "브림스톤": {
+    ult:        "images/brimstone_ult.png",
+    ultCharges: 8,
+    skills: [
+      { src: "images/brimstone_e.webp", charges: 3 },
+      { src: "images/brimstone_c.png",  charges: 1 },
+      { src: "images/brimstone_q.webp", charges: 1 },
+    ],
+  },
+  "브리치": {
+    ult:        "images/breach_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/breach_e.webp", charges: 1 },
+      { src: "images/breach_c.webp", charges: 1 },
+      { src: "images/breach_q.webp", charges: 2 },
+    ],
+  },
+  "바이퍼": {
+    ult:        "images/viper_ult.webp",
+    ultCharges: 9,
+    skills: [
+      { src: "images/viper_e.webp", charges: 1 },
+      { src: "images/viper_c.webp", charges: 1 },
+      { src: "images/viper_q.png",  charges: 1 },
+    ],
+  },
+  "바이스": {
+    ult:        "images/vise_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/vise_e.webp", charges: 1 },
+      { src: "images/vise_c.webp", charges: 2 },
+      { src: "images/vise_q.webp", charges: 1 },
+    ],
+  },
+  "믹스": {
+    ult:        "images/mix_ult.webp",
+    ultCharges: 8,
+    skills: [
+      { src: "images/mix_e.webp", charges: 2 },
+      { src: "images/mix_c.webp", charges: 2 },
+      { src: "images/mix_q.webp", charges: 1 },
+    ],
+  },
+  "레이나": {
+    ult:          "images/rayna_ult.webp",
+    ultCharges:   7,
+    layout:       "reyna",
+    sharedCharges: 2,
+    skills: [
+      { src: "images/rayna_e.webp", charges: 0 },
+      { src: "images/rayna_q.webp", charges: 0 },
+      { src: "images/rayna_c.webp", charges: 2 },
+    ],
+  },
+};
+
+function applyAgentData(p) {
+  var data = AGENT_DATA[p.agent];
+  if (!data) return;
+  p.ult        = data.ult;
+  p.ultCharges = data.ultCharges;
+  p.ultFilled  = 0;
+  p.skills     = data.skills.map(function(s) { return { src: s.src, charges: s.charges }; });
+}
+
+// ── 팀별 로스터 ────────────────────────────────────────────────
+var _ALL_ROSTERS = {
+  "DetonatioN FocusMe": ["Meiy", "SSeeS", "yatsuka", "Caedye", "Akame"],
+  "Global Esports":     ["PatMen", "UdoTan", "Kr1stal", "xavi8k", "Autumn"],
+  "Kiwoom DRX":         ["MaKo", "Hermes", "yong", "free1ng", "HYUNMIN", "BeYN", "Flicker"],
+  "Nongshim RedForce":  ["Rb", "Xross", "Francis", "Dambi", "Ivy"],
+  "Paper Rex":          ["Jinggg", "invy", "f0rsakeN", "d4v41", "something"],
+  "Rex Regum Qeon":     ["crazyguy", "Monyet", "xffero", "Jemkin", "Kushy"],
+  "Team Secret":        ["JessieVash", "kellyS", "Sylvan", "BerserX", "Rimuru", "Zeus"],
+  "ZETA DIVISION":      ["eKo", "Absol", "SyouTa", "SugarZ3ro", "Xdll"],
+  "FULL SENSE":         ["Crws", "Killua", "primmie", "JitBoyS", "Leviathan", "seph1roth", "thyy"],
+  "Gen.G":              ["Lakia", "Ash", "Karon", "t3xture", "KiTae", "Xiesta", "ZynX"],
+  "VARREL":             ["C1ndeR", "Klaus", "XuNa", "oonzmlp", "Zexy"],
+  "T1":                 ["stax", "BuZz", "Munchkin", "Meteor", "iZu"],
+  "Sentinels":          ["johnqt", "Reduxx", "Jerrwin", "cortezia", "JonahP"],
+  "G2 Esports":         ["valyn", "jawgemo", "BABYBAY", "trent", "leaf"],
+  "NRG":                ["Ethan", "keiko", "brawk", "mada", "skuba"],
+  "100 Thieves":        ["vora", "Cryocells", "Asuna", "Timotino", "bang"],
+  "Cloud9":             ["Xeppa", "v1c", "Zellsis", "penny", "OXY", "Jackk"],
+  "MIBR":               ["zekken", "tex", "Mazino", "Verno", "aspas"],
+  "LOUD":               ["lukxo", "Darker", "Virtyy", "erde", "cauanzin", "pANcada"],
+  "FURIA":              ["artzin", "nerve", "eeiu", "koalanoob", "alym"],
+  "KRÜ Esports":        ["saadhak", "mwzera", "silentzz", "Less", "Dantedeu5"],
+  "Leviatán":           ["kiNgg", "spike", "blowz", "Neon", "Sato"],
+  "Evil Geniuses":      ["C0M", "supamen", "bao", "Okeanos", "dgzin"],
+  "ENVY":               ["P0PPIN", "Eggsterr", "Demon1", "Rossy", "keznit", "ion", "Inspire"],
+  "Gentle Mates":       ["starxo", "bipo", "marteen", "GLYPH", "Minny"],
+  "Team Liquid":        ["nAts", "purp0", "wayne", "MiniBoo", "kamo"],
+  "Team Heretics":      ["Boo", "koshmaras", "Wo0t", "RieNs", "benjyfishy"],
+  "NAVI":               ["Filu", "chloric", "ExiT", "Ruxic", "hiro", "ComeBack"],
+  "Karmine Corp":       ["dos9", "LewN", "Avez", "SUYGETSU", "N4RRATE"],
+  "FUT Esports":        ["MrFaliN", "xeus", "yetujey", "KROSTALY", "baha"],
+  "BBL Esports":        ["Crewen", "Lar0k", "Loita", "Rosé", "lovers rock"],
+  "Fnatic":             ["crashies", "Boaster", "kaajak", "Cyv0ph", "Veqaj", "Alfajer"],
+  "Team Vitality":      ["Jamppi", "PROFEK", "Derke", "Chronicle", "Sayonara"],
+  "GIANTX":             ["Cloud", "grubinho", "westside", "Flickless", "ara"],
+  "Eternal Fire":       ["nekky", "Izzy", "audaz", "Favian", "echo"],
+  "PCIFIC Esports":     ["qpert", "al0rante", "cNed", "NINJA", "seven"],
+  "All Gamers":                     ["Septem7", "Shr1mp", "Youze", "K1ra", "f4ngeer", "iamgrq", "Au1"],
+  "JD Mall JDG Esports":            ["stew", "jkuro", "zhe", "Yuicaw", "coconut"],
+  "TYLOO":                          ["splash", "Scales", "Erv", "sword9", "slowly"],
+  "Wuxi Titan Esports Club":        ["Haodong", "lucas", "Spitfires", "Dynamite", "Coco"],
+  "Guangzhou Huadu Bilibili Gaming":["whyz", "rushia", "nephh", "yilai", "Knight", "bud", "Levius"],
+  "FunPlus Phoenix":                ["BerLIN", "AAAAY", "Ben1Ley", "KovaQ", "Setrod", "XII"],
+  "Xi Lai Gaming":                  ["WsLeo", "Lysoar", "NoMan", "Rarga", "happywei"],
+  "EDward Gaming":                  ["nobody", "ZmjjKK", "CHICHOO", "Smoggy", "Jieni7", "zjc", "cb"],
+  "Dragon Ranger Gaming":           ["Nicc", "Flex1n", "Life", "vo0kashu", "Akeman", "SpiritZ1"],
+  "Trace Esports":                  ["LuoK1ng", "Kai", "Xlele", "Abo", "Viva", "deLb", "FengF"],
+  "Nova Esports":                   ["qiutiaN", "kodeth", "OBONE", "Ezeir", "GREEN", "GuanG", "swagzor"],
+  "Wolves Esports":                 ["SiuFatBB", "glacier", "jowa", "yosemite", "Spring"],
+};
+var TEAM_ROSTERS = {};
+TEAM_ROSTERS[TEAM_A_CODE] = _ALL_ROSTERS[MATCH_TEAM_A] || [];
+TEAM_ROSTERS[TEAM_B_CODE] = _ALL_ROSTERS[MATCH_TEAM_B] || [];
+
+const maps = [
+  createBlankMapData(0),
+  createBlankMapData(1),
+  createBlankMapData(2),
+];
+
+// ── Bo5: 맵 4~5를 동기적으로 즉시 빌드 (서버 슬립 중에도 플레이스홀더 안 보이도록) ──
+(function() {
+  var maxSync = Math.min(activeMapCount, currentBo);
+  for (var si = 4; si <= maxSync; si++) {
+    if (initializedMaps[si]) continue;
+    initializedMaps[si] = true;
+    var sidx = si - 1;
+    maps[sidx] = createBlankMapData(sidx);
+    var scard = document.getElementById('map-' + si);
+    if (scard) {
+      scard.classList.remove('map-card-empty');
+      scard.innerHTML = buildMapCardHtml(si);
+    }
+  }
+}());
+
+// ── 렌더링 ────────────────────────────────────────────────────
+function kdaHtml(p, mapIdx, playerIdx) {
+  let k = p.k, d = p.d, a = p.a;
+  if (p.kda != null) {
+    const parts = String(p.kda).split("/");
+    k = parts[0] ?? 0;
+    d = parts[1] ?? 0;
+    a = parts[2] ?? 0;
+  }
+  const isWhite = document.body.classList.contains('white-mode');
+  if (isWhite) {
+    return `<button class="kda-btn" onclick="openKda(${mapIdx},${playerIdx})" title="KDA 수정">
+      <span class="kda-display"><span class="kda-k">${k}</span><span class="kda-sep">/</span><span class="kda-d">${d}</span><span class="kda-sep">/</span><span class="kda-a">${a}</span></span>
+    </button>`;
+  }
+  return `
+    <button class="kda-btn" onclick="openKda(${mapIdx},${playerIdx})" title="KDA 수정">
+      <span class="kda-display">
+        <span class="kda-k">${k}</span>
+        <span class="kda-sep">/</span>
+        <span class="kda-d">${d}</span>
+        <span class="kda-sep">/</span>
+        <span class="kda-a">${a}</span>
+      </span>
+    </button>`;
+}
+
+function agentCell(agent) {
+  const src = agentImages[agent];
+  if (src) return `<img class="agent-portrait" src="${src}" alt="${agent}" />`;
+  return `<div class="agent-placeholder">${agent.charAt(0)}</div>`;
+}
+
+function hexRgb(hex) {
+  const h = hex.replace("#","");
+  return `${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)}`;
+}
+
+function renderMap(mapData, mapIdx) {
+  const tbody = document.getElementById(mapData.tbodyId);
+  const sideA = mapData.players.filter(p => p.side === "a");
+  const sideB = mapData.players.filter(p => p.side === "b");
+  const rows  = Math.max(sideA.length, sideB.length);
+
+  const rA = hexRgb(mapData.colorA);
+  const rB = hexRgb(mapData.colorB);
+  // player-cell 전체가 하나의 칸 → 왼쪽 끝(요원 사진)부터 그라데이션
+  const gradA = `linear-gradient(to right, rgba(${rA},0.32) 0%, rgba(${rA},0.10) 45%, transparent 100%)`;
+  const gradB = `linear-gradient(to left,  rgba(${rB},0.32) 0%, rgba(${rB},0.10) 45%, transparent 100%)`;
+
+  function makeSkillStack(p) {
+    const s = p.skills || [];
+    const agentData = AGENT_DATA[p.agent];
+
+    // 아스트라 특수 레이아웃: 공유 게이지 아이콘 5개
+    if (agentData && agentData.layout === 'astra') {
+      function astraImg(i) {
+        const skill = s[i];
+        if (!skill) return '';
+        const src = typeof skill === 'string' ? skill : skill.src;
+        return src ? `<img src="${src}" alt="" />` : '';
+      }
+      const gageImg = agentData.gageImg || '';
+      const gages = gageImg
+        ? Array(5).fill(`<img src="${gageImg}" alt="" />`).join('')
+        : '';
+      return `<div class="skill-stack" style="flex-direction:column;background:#1a2030">
+        <div class="astra-skills-row">
+          <div class="skill-box">${astraImg(0)}</div>
+          <div class="skill-box">${astraImg(1)}</div>
+          <div class="skill-box">${astraImg(2)}</div>
+        </div>
+        <div class="astra-gage-row">${gages}</div>
+      </div>`;
+    }
+
+    // 체임버 특수 레이아웃: 스킬 이미지 위 정렬, 게이지 아래 정렬 (e/c: 4개, q: 4+4)
+    if (agentData && agentData.layout === 'chamber') {
+      function chamberBox(i) {
+        const skill = s[i];
+        if (!skill) return `<div class="skill-box chamber-skill-box"></div>`;
+        const src = typeof skill === 'string' ? skill : skill.src;
+        const charges = typeof skill === 'object' ? (skill.charges || 0) : 0;
+        const img = src ? `<img src="${src}" alt="" />` : '';
+        let bars = '';
+        if (charges === 1) {
+          bars = `<div style="display:flex;justify-content:center;align-items:center;flex-shrink:0;width:100%;height:7px"><div class="skill-charge" style="width:8px"></div></div>`;
+        } else if (charges > 1) {
+          bars = `<div class="chamber-q-charges">${'<div class="skill-charge"></div>'.repeat(charges)}</div>`;
+        }
+        return `<div class="skill-box chamber-skill-box">${img}${bars}</div>`;
+      }
+      return `<div class="skill-stack">
+        ${chamberBox(0)}${chamberBox(1)}${chamberBox(2)}
+      </div>`;
+    }
+
+    // 레이나 특수 레이아웃: E, Q 공유 게이지
+    if (agentData && agentData.layout === 'reyna') {
+      function skillImg(i) {
+        const skill = s[i];
+        if (!skill) return '';
+        const src = typeof skill === 'string' ? skill : skill.src;
+        return src ? `<img src="${src}" alt="" />` : '';
+      }
+      const eqCount = agentData.sharedCharges || 2;
+      const sharedBars = '<div class="reyna-shared-charge"></div>'.repeat(eqCount);
+      const cSkill = s[2];
+      const cSrc = cSkill ? (typeof cSkill === 'string' ? cSkill : cSkill.src) : '';
+      const cCharges = cSkill && typeof cSkill === 'object' ? (cSkill.charges || 0) : 0;
+      const cBars = cCharges > 0
+        ? `<div class="skill-charges">${'<div class="skill-charge"></div>'.repeat(cCharges)}</div>`
+        : '';
+      return `<div class="skill-stack">
+        <div class="reyna-eq">
+          <div class="reyna-eq-imgs">
+            <div class="skill-box">${skillImg(0)}</div>
+            <div class="skill-box">${skillImg(1)}</div>
+          </div>
+          <div class="reyna-shared-charges">${sharedBars}</div>
+        </div>
+        <div class="skill-box">${cSrc ? `<img src="${cSrc}" alt="" />` : ''}${cBars}</div>
+      </div>`;
+    }
+
+    // 기본 레이아웃
+    const boxes = [0,1,2].map(i => {
+      const skill = s[i];
+      if (!skill) return `<div class="skill-box"></div>`;
+      const src     = typeof skill === 'string' ? skill : skill.src;
+      const charges = typeof skill === 'object'  ? (skill.charges || 0) : 0;
+      const img     = src ? `<img src="${src}" alt="" />` : '';
+      const bars    = charges > 0
+        ? `<div class="skill-charges">${'<div class="skill-charge"></div>'.repeat(charges)}</div>`
+        : '';
+      return `<div class="skill-box">${img}${bars}</div>`;
+    }).join("");
+    return `<div class="skill-stack">${boxes}</div>`;
+  }
+
+  /* 문자열 시드 → 0 이상 1 미만 결정론적 값 (새로고침해도 같음) */
+  function seededRand(seed) {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+      h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+    }
+    return (h >>> 0) / 0xFFFFFFFF;
+  }
+
+  function makeUltRingSvg(charges, filled) {
+    const cx = 24, cy = 28, r = 18, sw = 4.2, gapDeg = 9;
+    const segDeg = (360 / charges) - gapDeg;
+    const isWhite = document.body.classList.contains('white-mode');
+    const filledCol = isWhite ? 'rgba(0,0,0,0.70)' : 'rgba(255,255,255,0.88)';
+    const emptyCol  = isWhite ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.16)';
+
+    function pt(angleDeg) {
+      const rad = (angleDeg - 90) * Math.PI / 180;
+      return [
+        (cx + r * Math.cos(rad)).toFixed(2),
+        (cy + r * Math.sin(rad)).toFixed(2)
+      ];
+    }
+
+    let paths = '';
+    for (let i = 0; i < charges; i++) {
+      const startDeg = (360 / charges) * i + gapDeg / 2;
+      const endDeg   = startDeg + segDeg;
+      const [x1, y1] = pt(startDeg);
+      const [x2, y2] = pt(endDeg);
+      const largeArc = segDeg > 180 ? 1 : 0;
+      const col = i < filled ? filledCol : emptyCol;
+      paths += `<path d="M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2}"
+        fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="butt"/>`;
+    }
+    return `<svg class="ult-ring-svg" viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+  }
+
+  function makeUltBox(p, mapIdx, pIdx) {
+    const charges = (p.ultCharges != null) ? p.ultCharges : 6;
+    if (p.ultFilled == null) {
+      p.ultFilled = Math.floor(seededRand(p.name + p.agent) * (charges + 1));
+    }
+    const filled = p.ultFilled;
+    const ring   = makeUltRingSvg(charges, filled);
+    const icon   = p.ult ? `<img class="ult-icon-img" src="${p.ult}" alt="" />` : '';
+    const click  = (mapIdx != null && pIdx != null)
+      ? `onclick="clickUlt(${mapIdx},${pIdx})"` : '';
+    return `<div class="ult-box" ${click} style="cursor:pointer">${ring}${icon}</div>`;
+  }
+
+
+  let html = "";
+  for (let i = 0; i < rows; i++) {
+    const a  = sideA[i];
+    const b  = sideB[i];
+    const ai = a ? mapData.players.indexOf(a) : -1;
+    const bi = b ? mapData.players.indexOf(b) : -1;
+
+    const agentA = a ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${ai})">${agentCell(a.agent)}</div>` : "";
+    const agentB = b ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${bi})">${agentCell(b.agent)}</div>` : "";
+
+    html += `<tr>
+      <td class="cell-skills">${a ? makeSkillStack(a) : ""}</td>
+      <td class="cell-ult cell-ult-l">${a ? makeUltBox(a, mapIdx, ai) : ""}</td>
+      <td class="player-cell player-cell-l" style="background:${gradA}">
+        <div class="pc-inner">
+          ${agentA}
+          <div class="pc-text">
+            <span class="player-name" style="${a ? 'cursor:pointer' : ''}" onclick="${a ? `openRosterPicker(${mapIdx},${ai})` : ''}">${a ? a.name : ""}</span>
+            <div class="pc-stats">
+              ${a && a.acs != null ? `<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor(${mapIdx},${ai})">(${a.acs})</span>` : ""}
+              <div class="pc-kda">${a ? kdaHtml(a, mapIdx, ai) : ""}</div>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td class="cell-div"></td>
+      <td class="player-cell player-cell-r" style="background:${gradB}">
+        <div class="pc-inner">
+          <div class="pc-text">
+            <div class="pc-stats">
+              <div class="pc-kda">${b ? kdaHtml(b, mapIdx, bi) : ""}</div>
+              ${b && b.acs != null ? `<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor(${mapIdx},${bi})">(${b.acs})</span>` : ""}
+            </div>
+            <span class="player-name pc-name" style="${b ? 'cursor:pointer' : ''}" onclick="${b ? `openRosterPicker(${mapIdx},${bi})` : ''}">${b ? b.name : ""}</span>
+          </div>
+          ${agentB}
+        </div>
+      </td>
+      <td class="cell-ult cell-ult-r">${b ? makeUltBox(b, mapIdx, bi) : ""}</td>
+      <td class="cell-skills">${b ? makeSkillStack(b) : ""}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+function clickUlt(mapIdx, pIdx) {
+  const p = maps[mapIdx].players[pIdx];
+  const charges = (p.ultCharges != null) ? p.ultCharges : 6;
+  p.ultFilled = (p.ultFilled + 1) % (charges + 1);
+  renderMap(maps[mapIdx], mapIdx);
+}
+
+// ── 화이트 모드 DB 데이터 마이그레이션 ──────────────────────────
+function applyWhiteModeSetState(mapIdx, data) {
+  var m = maps[mapIdx];
+  if (!m) return;
+
+  if (Array.isArray(data.rows)) {
+    var sideA = m.players.filter(function(p) { return p.side === 'a'; });
+    var sideB = m.players.filter(function(p) { return p.side === 'b'; });
+    data.rows.forEach(function(row, i) {
+      var pa = sideA[i];
+      var pb = sideB[i];
+      if (pa) {
+        if (row.aAgent) pa.agent = row.aAgent;
+        if (row.aKda && String(row.aKda).indexOf('/') !== -1) {
+          pa.kda = row.aKda;
+          var pts = String(row.aKda).split('/');
+          pa.k = parseInt(pts[0]) || 0;
+          pa.d = parseInt(pts[1]) || 0;
+          pa.a = parseInt(pts[2]) || 0;
+        }
+        if (row.aAcs != null) pa.acs = row.aAcs;
+        if (row.aPlayer) pa.name = row.aPlayer;
+      }
+      if (pb) {
+        if (row.bAgent) pb.agent = row.bAgent;
+        if (row.bKda && String(row.bKda).indexOf('/') !== -1) {
+          pb.kda = row.bKda;
+          var pts = String(row.bKda).split('/');
+          pb.k = parseInt(pts[0]) || 0;
+          pb.d = parseInt(pts[1]) || 0;
+          pb.a = parseInt(pts[2]) || 0;
+        }
+        if (row.bAcs != null) pb.acs = row.bAcs;
+        if (row.bPlayer) pb.name = row.bPlayer;
+      }
+    });
+  }
+
+  if (data.stats) {
+    var s = data.stats;
+    var ts = m.teamStats;
+    if (ts[0]) { if (s.firstKillsA != null) ts[0].a = s.firstKillsA; if (s.firstKillsB != null) ts[0].b = s.firstKillsB; }
+    if (ts[1]) { if (s.thriftyA != null)    ts[1].a = s.thriftyA;    if (s.thriftyB != null)    ts[1].b = s.thriftyB; }
+    if (ts[2]) { if (s.postPlantA != null)  ts[2].a = s.postPlantA;  if (s.postPlantB != null)  ts[2].b = s.postPlantB; }
+    if (ts[3]) { if (s.clutchA != null)     ts[3].a = s.clutchA;     if (s.clutchB != null)     ts[3].b = s.clutchB; }
+    var scoreId = ['m1','m2','m3'][mapIdx];
+    if (scoreId && scoreState[scoreId]) {
+      if (s.aScore != null) { m.rtState.stats.aScore = s.aScore; scoreState[scoreId].l = s.aScore; }
+      if (s.bScore != null) { m.rtState.stats.bScore = s.bScore; scoreState[scoreId].r = s.bScore; }
+    }
+  }
+}
+
+function migrateFromWhiteMode() {
+  var prefix = 'set:' + MATCH_KEY + ':';
+  Object.keys(localStorage).forEach(function(key) {
+    if (key.indexOf(prefix) !== 0) return;
+    var rest = key.slice(prefix.length);
+    var colonIdx = rest.indexOf(':');
+    if (colonIdx === -1) return;
+    var mapIdx = parseInt(rest.slice(0, colonIdx));
+    if (isNaN(mapIdx) || mapIdx < 0 || mapIdx >= maps.length) return;
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      applyWhiteModeSetState(mapIdx, data);
+    } catch(e) {}
+  });
+}
+
+// ── UI 팀 정보 적용 ────────────────────────────────────────────
+function applyMatchUI() {
+  // CSS 변수 설정 (팀 색상)
+  document.documentElement.style.setProperty('--color-a', TEAM_A_COLOR);
+  document.documentElement.style.setProperty('--color-b', TEAM_B_COLOR);
+  document.documentElement.style.setProperty('--color-a-rgb', hexRgb(TEAM_A_COLOR));
+  document.documentElement.style.setProperty('--color-b-rgb', hexRgb(TEAM_B_COLOR));
+
+  // 네비게이션 뒤로 링크
+  var navLink = document.getElementById('nav-back-link');
+  if (navLink) {
+    navLink.href = _fromInfo.href;
+    navLink.textContent = '← ' + _fromInfo.label;
+  }
+
+  // 매치 오버뷰
+  var moLogoA = document.getElementById('mo-logo-a');
+  var moNameA = document.getElementById('mo-name-a');
+  var moLogoB = document.getElementById('mo-logo-b');
+  var moNameB = document.getElementById('mo-name-b');
+  var moSub   = document.getElementById('mo-match-sub');
+  if (moLogoA) { moLogoA.src = TEAM_A_LOGO; moLogoA.alt = TEAM_A_CODE; if (TEAM_A_LOGO_WHITE) moLogoA.classList.add('mo-logo-white'); }
+  if (moNameA) { moNameA.textContent = MATCH_TEAM_A; var _la = MATCH_TEAM_A.length; moNameA.style.fontSize = _la > 25 ? '13px' : _la > 18 ? '17px' : ''; }
+  if (moLogoB) { moLogoB.src = TEAM_B_LOGO; moLogoB.alt = TEAM_B_CODE; if (TEAM_B_LOGO_WHITE) moLogoB.classList.add('mo-logo-white'); }
+  if (moNameB) { moNameB.textContent = MATCH_TEAM_B; var _lb = MATCH_TEAM_B.length; moNameB.style.fontSize = _lb > 25 ? '13px' : _lb > 18 ? '17px' : ''; }
+  if (moSub)   moSub.textContent   = MATCH_SCORE + (MATCH_BO5 ? '  ·  BO5' : '  ·  BO3');
+
+  // 스코어보드 로고·이름·테이블 헤더 (정적 map 1~3 + 동적으로 추가된 카드 포함)
+  document.querySelectorAll('.sb-logo-a').forEach(function(el) {
+    el.src = TEAM_A_LOGO; el.alt = TEAM_A_CODE;
+    if (TEAM_A_LOGO_WHITE) el.classList.add('sb-team-logo-white'); else el.classList.remove('sb-team-logo-white');
+  });
+  document.querySelectorAll('.sb-name-a').forEach(function(el) { el.textContent = TEAM_A_CODE; });
+  document.querySelectorAll('.sb-logo-b').forEach(function(el) {
+    el.src = TEAM_B_LOGO; el.alt = TEAM_B_CODE;
+    if (TEAM_B_LOGO_WHITE) el.classList.add('sb-team-logo-white'); else el.classList.remove('sb-team-logo-white');
+  });
+  document.querySelectorAll('.sb-name-b').forEach(function(el) { el.textContent = TEAM_B_CODE; });
+  document.querySelectorAll('.sb-th-a').forEach(function(el) { el.textContent = TEAM_A_CODE + ' · K / D / A'; });
+  document.querySelectorAll('.sb-th-b').forEach(function(el) { el.textContent = 'K / D / A · ' + TEAM_B_CODE; });
+}
+
+applyMatchUI();
+
+// ── 초기화 (storage.js DB 로드 완료 후 실행) ─────────────────────
+maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
+maps.forEach(function(m, i) { renderMap(m, i); });
+maps.forEach(function(m, i) { renderRoundTracker(m, i); });
+maps.forEach(function(m, i) { renderTeamStats(m, i); });
+
+(window.storageReady || Promise.resolve()).then(function() {
+  // ① Bo 상태 먼저 결정
+  var boVal = localStorage.getItem('vct_bo:' + MATCH_KEY);
+  if (boVal === '5') {
+    currentBo = 5;
+    VETO_STEPS    = VETO_STEPS_BO5;
+    VETO_MAP_SLOT = [2, 3, 4, 5, 6];
+  } else if (MATCH_BO5 && !boVal) {
+    currentBo = 5;
+    VETO_STEPS    = VETO_STEPS_BO5;
+    VETO_MAP_SLOT = [2, 3, 4, 5, 6];
+  }
+
+  // ② 맵 4~5 scoreState 초기화 (maps 데이터는 이미 sync에서 생성됨)
+  for (var _mi = 4; _mi <= Math.min(activeMapCount, currentBo); _mi++) {
+    if (!maps[_mi - 1]) maps[_mi - 1] = createBlankMapData(_mi - 1);
+    if (!scoreState['m' + _mi]) scoreState['m' + _mi] = { l: '-', r: '-' };
+  }
+
+  // ③ 전체 맵 데이터 로드 (맵 4~5 포함)
+  migrateFromWhiteMode();
+  maps.forEach(function(m, i) { loadPlayersSync(i); });
+  maps.forEach(function(m, i) { loadRoundState(i); });
+  maps.forEach(function(m, i) { loadStatsState(i); });
+  loadDiamondState();
+  maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
+  maps.forEach(function(m, i) { renderMap(m, i); });
+  maps.forEach(function(m, i) { renderRoundTracker(m, i); });
+  maps.forEach(function(m, i) { renderTeamStats(m, i); });
+
+  // ④ 맵 4~5 HTML 빌드 (데이터 로드 완료 후)
+  for (var _mi2 = 4; _mi2 <= Math.min(activeMapCount, currentBo); _mi2++) {
+    if (!initializedMaps[_mi2]) {
+      initializedMaps[_mi2] = true;
+      var _card = document.getElementById('map-' + _mi2);
+      if (_card) {
+        _card.classList.remove('map-card-empty');
+        _card.innerHTML = buildMapCardHtml(_mi2);
+        renderMap(maps[_mi2 - 1], _mi2 - 1);
+        renderRoundTracker(maps[_mi2 - 1], _mi2 - 1);
+        renderTeamStats(maps[_mi2 - 1], _mi2 - 1);
+      }
+    }
+  }
+
+  updateMapCards();
+  updateDiamonds();
+
+  var savedPred = loadPredState();
+  if (savedPred.oddsA !== undefined) predState.oddsA = savedPred.oddsA;
+  if (savedPred.oddsB !== undefined) predState.oddsB = savedPred.oddsB;
+
+  var savedVeto = loadVetoSyncState();
+  if (savedVeto.firstBan) vetoState.firstBan = savedVeto.firstBan;
+  if (Array.isArray(savedVeto.maps)) vetoState.maps = savedVeto.maps;
+  if (savedVeto.sides && typeof savedVeto.sides === 'object') vetoState.sides = savedVeto.sides;
+
+  renderSlots();
+  applySharedResult();
+  renderPredBar();
+  renderVeto();
+  syncVetoMaps();
+  applyScoreClasses('m1');
+  applyScoreClasses('m2');
+  applyScoreClasses('m3');
+
+  ['score-a', 'score-b'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', saveSharedResult);
+  });
+
+  /* view-only: 스코어 input readonly 처리 */
+  if (!window.vctIsAdmin || !window.vctIsAdmin()) {
+    document.querySelectorAll('.mo-score-num').forEach(function(el) {
+      el.readOnly = true;
+      el.style.pointerEvents = 'none';
+    });
+  }
+});
+
+// ── 라운드 트래커 렌더링 ──────────────────────────────────────
+function renderRoundTracker(m, mapIdx) {
+  const wrap = document.getElementById(m.rtId);
+  if (!wrap) return;
+
+  const state  = m.rtState;
+  const rounds = state.rounds || [];
+  const aScore = parseInt(state.stats && state.stats.aScore) || 0;
+  const bScore = parseInt(state.stats && state.stats.bScore) || 0;
+  const total  = Math.max(24, aScore + bScore);
+
+  function isSep(idx) { return idx === 12 || (idx > 12 && idx % 12 === 0 && idx < total); }
+
+  // 왼쪽 팀 패널
+  const leftHtml = `
+    <div class="rt-left">
+      <div class="rt-left-spacer"></div>
+      <div class="rt-team-row">
+        <div class="rt-accent" style="background:${m.colorA}"></div>
+        <img class="rt-logo${m.logoAWhite ? ' rt-logo-white' : ''}" src="${m.logoA}" />
+        <span class="rt-team-name">${m.teamA}</span>
+      </div>
+      <div class="rt-team-row">
+        <div class="rt-accent" style="background:${m.colorB}"></div>
+        <img class="rt-logo${m.logoBWhite ? ' rt-logo-white' : ''}" src="${m.logoB}" />
+        <span class="rt-team-name">${m.teamB}</span>
+      </div>
+    </div>`;
+
+  // 24라운드씩 블록으로 분할, 각 블록에 왼쪽 팀 패널 포함
+  const numBlocks = Math.ceil(total / 24);
+  let blocksHtml = '';
+  for (let b = 0; b < numBlocks; b++) {
+    const start = b * 24;
+    const end   = Math.min(start + 24, total);
+    let numCells = '', cellsA = '', cellsB = '';
+    for (let i = start; i < end; i++) {
+      if ((i - start) === 12) {
+        numCells += `<div class="rt-sep-num"></div>`;
+        cellsA   += `<div class="rt-sep"></div>`;
+        cellsB   += `<div class="rt-sep"></div>`;
+      }
+      numCells += `<div class="rt-num">${String(i + 1).padStart(2, '0')}</div>`;
+      const r    = rounds[i] || {};
+      const isAtk = ATK_TYPES.includes(r.type);
+      const winCls = r.winner ? (isAtk ? ' win-atk' : ' win-def') : '';
+      const clsA = r.winner === 'a' ? winCls : '';
+      const clsB = r.winner === 'b' ? winCls : '';
+      const iconA = (r.winner === 'a' && r.type) ? `<img src="${ROUND_ICONS[r.type]}" alt="" />` : '';
+      const iconB = (r.winner === 'b' && r.type) ? `<img src="${ROUND_ICONS[r.type]}" alt="" />` : '';
+      cellsA += `<div class="rt-cell${clsA}" data-map="${mapIdx}" data-round="${i}" data-side="a">${iconA}</div>`;
+      cellsB += `<div class="rt-cell${clsB}" data-map="${mapIdx}" data-round="${i}" data-side="b">${iconB}</div>`;
+    }
+    blocksHtml += `
+      <div class="rt-wrap">
+        ${leftHtml}
+        <div class="rt-grid-wrap">
+          <div class="rt-grid">
+            <div class="rt-block">
+              <div class="rt-row num-row">${numCells}</div>
+              <div class="rt-row cell-row">${cellsA}</div>
+              <div class="rt-row cell-row">${cellsB}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  wrap.innerHTML = blocksHtml;
+  wrap.style.flexDirection = 'column';
+
+  wrap.querySelectorAll('.rt-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      openRoundPicker(wrap, maps[+cell.dataset.map], +cell.dataset.map, +cell.dataset.round);
+    });
+  });
+}
+
+// ── 라운드 픽커 모달 ──────────────────────────────────────────
+function openRoundPicker(container, m, mapIdx, roundIdx) {
+  document.querySelector(".round-picker")?.remove();
+  const state = m.rtState;
+  const fa = state.firstAttacker || null;
+  const aAtks = roundIsAttacking("a", roundIdx, fa);
+  const r = (state.rounds || [])[roundIdx] || {};
+  const roundNum = roundIdx + 1;
+
+  const aTypes = fa ? (aAtks ? ATK_TYPES : DEF_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+  const bTypes = fa ? (aAtks ? DEF_TYPES : ATK_TYPES) : [...ATK_TYPES, ...DEF_TYPES];
+
+  function iconGroup(winner, types, label) {
+    return `<div class="rp-team-section">
+      <div class="rp-team-label">${label}</div>
+      <div class="rp-icons">
+        ${types.map(t => `
+          <button class="rp-icon-btn${r.winner === winner && r.type === t ? " selected" : ""}"
+            data-rp-winner="${winner}" data-rp-type="${t}">
+            <img src="${ROUND_ICONS[t]}" alt="" />
+            ${ROUND_ICON_LABELS[t]}
+          </button>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  const aLabel = m.teamA + (fa ? (aAtks ? " (공격)" : " (수비)") : "");
+  const bLabel = m.teamB + (fa ? (aAtks ? " (수비)" : " (공격)") : "");
+
+  const picker = document.createElement("div");
+  picker.className = "round-picker";
+  picker.innerHTML = `
+    <div class="round-picker-panel">
+      <div class="round-picker-head">
+        <strong>라운드 ${roundNum}</strong>
+        <div class="round-picker-head-actions">
+          ${r.winner ? `<button class="rp-clear-btn" data-rp-clear>초기화</button>` : ""}
+          <button class="rp-close-btn" data-rp-close>닫기</button>
+        </div>
+      </div>
+      <div class="round-picker-body">
+        ${iconGroup("a", aTypes, aLabel)}
+        ${iconGroup("b", bTypes, bLabel)}
+      </div>
+    </div>`;
+  document.body.appendChild(picker);
+
+  picker.addEventListener("click", e => {
+    if (e.target === picker || e.target.closest("[data-rp-close]")) {
+      picker.remove(); return;
+    }
+    if (e.target.closest("[data-rp-clear]")) {
+      if (!state.rounds) state.rounds = [];
+      state.rounds[roundIdx] = { winner: null, type: null };
+      saveRoundState(mapIdx);
+      renderRoundTracker(m, mapIdx);
+      picker.remove(); return;
+    }
+    const btn = e.target.closest("[data-rp-winner]");
+    if (btn) {
+      if (!state.rounds) state.rounds = [];
+      while (state.rounds.length <= roundIdx) state.rounds.push({ winner: null, type: null });
+      state.rounds[roundIdx] = { winner: btn.dataset.rpWinner, type: btn.dataset.rpType };
+      saveRoundState(mapIdx);
+      renderRoundTracker(m, mapIdx);
+      picker.remove();
+    }
+  });
+}
+
+
+function saveStatsState(mapIdx) {
+  try {
+    var key = 'stats:' + MATCH_KEY + ':' + mapIdx;
+    var m = maps[mapIdx];
+    localStorage.setItem(key, JSON.stringify({
+      aScore: m.rtState.stats.aScore,
+      bScore: m.rtState.stats.bScore,
+      teamStats: m.teamStats.map(function(ts) { return { label: ts.label, a: ts.a, b: ts.b }; })
+    }));
+  } catch(e) {}
+}
+
+function loadStatsState(mapIdx) {
+  try {
+    var key = 'stats:' + MATCH_KEY + ':' + mapIdx;
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var saved = JSON.parse(raw);
+    var m = maps[mapIdx];
+    var scoreId = ['m1','m2','m3','m4','m5'][mapIdx];
+    if (saved.aScore != null) {
+      m.rtState.stats.aScore = saved.aScore;
+      if (scoreState[scoreId]) { scoreState[scoreId].l = saved.aScore; applyScoreClasses(scoreId); }
+    }
+    if (saved.bScore != null) {
+      m.rtState.stats.bScore = saved.bScore;
+      if (scoreState[scoreId]) { scoreState[scoreId].r = saved.bScore; applyScoreClasses(scoreId); }
+    }
+    if (Array.isArray(saved.teamStats)) {
+      saved.teamStats.forEach(function(ts, i) {
+        if (m.teamStats[i]) { m.teamStats[i].a = ts.a; m.teamStats[i].b = ts.b; }
+      });
+    }
+  } catch(e) {}
+}
+function saveRoundState(mapIdx) {
+  try {
+    var key = 'rounds:' + MATCH_KEY + ':' + mapIdx;
+    localStorage.setItem(key, JSON.stringify(maps[mapIdx].rtState.rounds || []));
+  } catch(e) {}
+}
+
+function loadRoundState(mapIdx) {
+  try {
+    var key = 'rounds:' + MATCH_KEY + ':' + mapIdx;
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var rounds = JSON.parse(raw);
+    if (Array.isArray(rounds)) maps[mapIdx].rtState.rounds = rounds;
+  } catch(e) {}
+}
+
+// ── 팀 스탯 렌더링 ────────────────────────────────────────────
+function renderTeamStats(m, mapIdx) {
+  const wrap = document.getElementById(m.tsId);
+  if (!wrap || !m.teamStats) return;
+
+  const aScore = m.rtState.stats.aScore;
+  const bScore = m.rtState.stats.bScore;
+
+  /* 숫자 비교: "8/11" 같은 분수형은 분자로 비교 */
+  function toNum(v) { return parseFloat(String(v).split("/")[0]) || 0; }
+
+  function winClass(va, vb) {
+    const na = toNum(va), nb = toNum(vb);
+    if (na > nb) return ["ts-win", "ts-lose"];
+    if (nb > na) return ["ts-lose", "ts-win"];
+    return ["", ""];
+  }
+
+  /* 스코어 행 */
+  const [scA, scB] = winClass(aScore, bScore);
+  let rows = `
+    <div class="ts-row">
+      <span class="ts-val ts-val-a ${scA}" style="cursor:pointer"
+        onclick="openStatEditor(${mapIdx},'score','a')">${aScore}</span>
+      <div class="ts-label-wrap"><span class="ts-label">스코어</span></div>
+      <span class="ts-val ts-val-b ${scB}" style="cursor:pointer"
+        onclick="openStatEditor(${mapIdx},'score','b')">${bScore}</span>
+    </div>
+    <div class="ts-divider"></div>`;
+
+  m.teamStats.forEach((stat, i) => {
+    const [clsA, clsB] = winClass(stat.a, stat.b);
+    rows += `
+      <div class="ts-row">
+        <span class="ts-val ts-val-a ${clsA}" style="cursor:pointer"
+          onclick="openStatEditor(${mapIdx},${i},'a')">${stat.a}</span>
+        <div class="ts-label-wrap"><span class="ts-label">${stat.label}</span></div>
+        <span class="ts-val ts-val-b ${clsB}" style="cursor:pointer"
+          onclick="openStatEditor(${mapIdx},${i},'b')">${stat.b}</span>
+      </div>
+      ${i < m.teamStats.length - 1 ? '<div class="ts-divider"></div>' : ''}`;
+  });
+
+  const logoAFilter = m.logoAWhite ? 'filter:brightness(0) invert(1)' : '';
+  wrap.innerHTML = `
+    <img class="ts-bg-logo ts-bg-logo-a" src="${m.logoA}" style="${logoAFilter}" />
+    <img class="ts-bg-logo ts-bg-logo-b" src="${m.logoB}" style="${m.logoBWhite ? 'filter:brightness(0) invert(1)' : ''}" />
+    <div class="ts-header">
+      <span class="ts-team-label">${m.teamA}</span>
+      <span class="ts-center-head">팀 스탯</span>
+      <span class="ts-team-label ts-team-label-r">${m.teamB}</span>
+    </div>
+    ${rows}`;
+}
+
+// ── K/D/A 편집 팝업 ───────────────────────────────────────────
+function openKda(mapIdx, playerIdx) {
+  const p = maps[mapIdx].players[playerIdx];
+  const popup = document.createElement("div");
+  popup.className = "kda-popup";
+  popup.innerHTML = `
+    <div class="kda-popup-panel">
+      <h3>${p.name} — K / D / A</h3>
+      <div class="kda-inputs">
+        <input id="inp-k" type="number" min="0" max="99" value="${p.k}" />
+        <span class="kda-popup-sep">/</span>
+        <input id="inp-d" type="number" min="0" max="99" value="${p.d}" />
+        <span class="kda-popup-sep">/</span>
+        <input id="inp-a" type="number" min="0" max="99" value="${p.a}" />
+      </div>
+      <div class="kda-popup-actions">
+        <button class="btn-cancel" id="btn-cancel">취소</button>
+        <button class="btn-save"   id="btn-save">저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  document.getElementById("inp-k").focus();
+
+  document.getElementById("btn-cancel").onclick = () => popup.remove();
+  popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
+  document.getElementById("btn-save").onclick = () => {
+    p.k = parseInt(document.getElementById("inp-k").value) || 0;
+    p.d = parseInt(document.getElementById("inp-d").value) || 0;
+    p.a = parseInt(document.getElementById("inp-a").value) || 0;
+    p.kda = p.k + '/' + p.d + '/' + p.a;
+    saveFieldSync(mapIdx, playerIdx, 'kda', p.kda);
+    renderMap(maps[mapIdx], mapIdx);
+    popup.remove();
+  };
+}
+
+// ── ACS 편집 팝업 ─────────────────────────────────────────────
+function openAcsEditor(mapIdx, playerIdx) {
+  document.querySelector(".kda-popup.acs-popup")?.remove();
+  const p = maps[mapIdx].players[playerIdx];
+  const popup = document.createElement("div");
+  popup.className = "kda-popup acs-popup";
+  popup.innerHTML = `
+    <div class="kda-popup-panel">
+      <h3>${p.name} — ACS</h3>
+      <div class="kda-inputs">
+        <input id="inp-acs" type="number" min="0" max="999" value="${p.acs ?? ''}" />
+      </div>
+      <div class="kda-popup-actions">
+        <button class="btn-cancel" id="btn-acs-cancel">취소</button>
+        <button class="btn-save"   id="btn-acs-save">저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  document.getElementById("inp-acs").focus();
+  document.getElementById("btn-acs-cancel").onclick = () => popup.remove();
+  popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
+  document.getElementById("btn-acs-save").onclick = () => {
+    p.acs = parseInt(document.getElementById("inp-acs").value) || 0;
+    saveFieldSync(mapIdx, playerIdx, 'acs', p.acs);
+    renderMap(maps[mapIdx], mapIdx);
+    popup.remove();
+  };
+}
+
+// ── 팀 스탯 편집 팝업 ─────────────────────────────────────────
+function openStatEditor(mapIdx, statKey, side) {
+  document.querySelector(".stat-editor-popup")?.remove();
+  const m = maps[mapIdx];
+  let label, curVal;
+  if (statKey === 'score') {
+    label = '스코어';
+    const scoreId = ['m1','m2','m3','m4','m5'][mapIdx];
+    curVal = side === 'a' ? m.rtState.stats.aScore : m.rtState.stats.bScore;
+  } else {
+    label = m.teamStats[statKey].label;
+    curVal = m.teamStats[statKey][side];
+  }
+  const teamName = side === 'a' ? m.teamA : m.teamB;
+
+  const popup = document.createElement("div");
+  popup.className = "kda-popup stat-editor-popup";
+  popup.innerHTML = `
+    <div class="kda-popup-panel">
+      <h3>${teamName} — ${label}</h3>
+      <div class="kda-inputs">
+        <input id="inp-stat" type="text" value="${curVal}" autofocus
+          style="width:120px;text-align:center;font-size:20px;" />
+      </div>
+      <div class="kda-popup-actions">
+        <button class="btn-cancel" id="btn-stat-cancel">취소</button>
+        <button class="btn-save"   id="btn-stat-save">저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  const inp = document.getElementById("inp-stat");
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-stat-save').click(); } });
+  document.getElementById("btn-stat-cancel").onclick = () => popup.remove();
+  popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
+  document.getElementById("btn-stat-save").onclick = () => {
+    const raw = inp.value.trim();
+    const val = (raw === '' || raw === '-') ? '-' : (raw.includes('/') ? raw : (parseFloat(raw) || 0));
+    if (statKey === 'score') {
+      if (side === 'a') {
+        m.rtState.stats.aScore = val;
+        const scoreId = ['m1','m2','m3'][mapIdx];
+        if (scoreState[scoreId]) { scoreState[scoreId].l = val; applyScoreClasses(scoreId); }
+      } else {
+        m.rtState.stats.bScore = val;
+        const scoreId = ['m1','m2','m3'][mapIdx];
+        if (scoreState[scoreId]) { scoreState[scoreId].r = val; applyScoreClasses(scoreId); }
+      }
+      renderRoundTracker(m, mapIdx);
+    } else {
+      m.teamStats[statKey][side] = val;
+    }
+    renderTeamStats(m, mapIdx);
+    saveStatsState(mapIdx);
+    popup.remove();
+  };
+}
+
+// ── 로스터 선택 팝업 ──────────────────────────────────────────
+function openRosterPicker(mapIdx, playerIdx) {
+  document.querySelector(".roster-popup")?.remove();
+  const m = maps[mapIdx];
+  const p = m.players[playerIdx];
+  const teamCode = p.side === "a" ? m.teamA : m.teamB;
+  const roster   = TEAM_ROSTERS[teamCode] || [];
+
+  const popup = document.createElement("div");
+  popup.className = "kda-popup roster-popup";
+  popup.innerHTML = `
+    <div class="kda-popup-panel">
+      <h3>${teamCode} 선수 선택</h3>
+      <div class="roster-picker-wrap">
+        ${roster.map(name => `
+          <button class="roster-btn${p.name === name ? ' selected' : ''}"
+            data-name="${name}">${name}</button>`).join("")}
+      </div>
+      <div class="kda-popup-actions">
+        <button class="btn-cancel" id="btn-roster-cancel">취소</button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  document.getElementById("btn-roster-cancel").onclick = () => popup.remove();
+  popup.addEventListener("click", e => {
+    if (e.target === popup) { popup.remove(); return; }
+    const btn = e.target.closest("[data-name]");
+    if (btn) {
+      p.name = btn.dataset.name;
+      saveFieldSync(mapIdx, playerIdx, 'name', p.name);
+      renderMap(m, mapIdx);
+      popup.remove();
+    }
+  });
+}
+
+// ── 요원 선택 팝업 ────────────────────────────────────────────
+function openAgentPicker(mapIdx, playerIdx) {
+  document.querySelector(".agent-picker-popup")?.remove();
+  const m = maps[mapIdx];
+  const p = m.players[playerIdx];
+
+  const popup = document.createElement("div");
+  popup.className = "kda-popup agent-picker-popup";
+  popup.innerHTML = `
+    <div class="kda-popup-panel" style="max-width:520px">
+      <h3>${p.name} — 요원 선택</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;">
+        ${Object.keys(agentImages).map(name => `
+          <button data-agent="${name}" style="
+            display:flex;flex-direction:column;align-items:center;gap:4px;
+            background:${p.agent === name ? 'rgba(255,70,85,0.25)' : '#1a2030'};
+            border:1px solid ${p.agent === name ? '#651eff' : 'rgba(255,255,255,0.15)'};
+            border-radius:6px;padding:6px 8px;cursor:pointer;width:72px;">
+            <img src="${agentImages[name]}" alt="${name}"
+              style="width:44px;height:44px;object-fit:cover;border-radius:4px;" />
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;
+              font-weight:700;color:rgba(255,255,255,0.8);white-space:nowrap;">${name}</span>
+          </button>`).join("")}
+      </div>
+      <div class="kda-popup-actions">
+        <button class="btn-cancel" id="btn-agent-cancel">취소</button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  document.getElementById("btn-agent-cancel").onclick = () => popup.remove();
+  popup.addEventListener("click", e => {
+    if (e.target === popup) { popup.remove(); return; }
+    const btn = e.target.closest("[data-agent]");
+    if (btn) {
+      p.agent = btn.dataset.agent;
+      applyAgentData(p);
+      saveFieldSync(mapIdx, playerIdx, 'agent', p.agent);
+      renderMap(m, mapIdx);
+      popup.remove();
+    }
+  });
+}
+
+// ── 플레이어 스탯 공유 localStorage 동기화 (딕셔너리 방식) ──────
+var PLAYERS_MATCH_KEY = 'players:' + MATCH_KEY;
+
+function getPlayerSideKey(mapIdx, pIdx) {
+  var m = maps[mapIdx];
+  var p = m.players[pIdx];
+  var sideA = m.players.filter(function(q) { return q.side === 'a'; });
+  var sideB = m.players.filter(function(q) { return q.side === 'b'; });
+  var idx = (p.side === 'a' ? sideA : sideB).indexOf(p);
+  return p.side + idx;
+}
+
+function saveFieldSync(mapIdx, pIdx, field, value) {
+  var PKEY = PLAYERS_MATCH_KEY + ':' + mapIdx;
+  var data = {};
+  try { var raw = localStorage.getItem(PKEY); if (raw) { var p = JSON.parse(raw); if (!Array.isArray(p)) data = p; } } catch(e) {}
+  var pKey = getPlayerSideKey(mapIdx, pIdx);
+  if (!data[pKey]) data[pKey] = {};
+  data[pKey][field] = value;
+  try { localStorage.setItem(PKEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadPlayersSync(mapIdx) {
+  try {
+    var raw = localStorage.getItem(PLAYERS_MATCH_KEY + ':' + mapIdx);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (Array.isArray(data)) return;
+    var m = maps[mapIdx];
+    var sideA = m.players.filter(function(p) { return p.side === 'a'; });
+    var sideB = m.players.filter(function(p) { return p.side === 'b'; });
+    [sideA, sideB].forEach(function(side, si) {
+      var sideLetter = si === 0 ? 'a' : 'b';
+      side.forEach(function(p, i) {
+        var src = data[sideLetter + i];
+        if (!src) return;
+        if (src.name != null) p.name = src.name;
+        if (src.agent) p.agent = src.agent;
+        if (src.kda && src.kda.indexOf('/') !== -1) {
+          p.kda = src.kda;
+          var pts = src.kda.split('/');
+          p.k = isNaN(parseInt(pts[0])) ? (pts[0] || '-') : parseInt(pts[0]);
+          p.d = isNaN(parseInt(pts[1])) ? (pts[1] || '-') : parseInt(pts[1]);
+          p.a = isNaN(parseInt(pts[2])) ? (pts[2] || '-') : parseInt(pts[2]);
+        }
+        if (src.acs != null) p.acs = src.acs;
+      });
+    });
+  } catch(e) {}
+}
+
+/* ── 맵 밴픽 렌더 ──────────────────────────────────────── */
+/* 맵 이미지 URL 모음 */
+const MAP_IMGS = {
+  "어센트":  "https://c-valorant-api.op.gg/Assets/Maps/7EAECC1B-4337-BBF6-6AB9-04B8F06B3319_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "바인드":  "https://c-valorant-api.op.gg/Assets/Maps/2C9D57EC-4431-9C5E-2939-8F9EF6DD5CBA_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "코로드":  "https://imguscdn.gamespress.com/cdn/files/RiotGames/2025/06/162048-b9066559/Corrode_AtkSpawn_02.png?w=750&mode=max&otf=y&quality=90&format=png&bgcolor=transparent&sky=0d3b51cd617ed54f196ded7a2c1536385363da533268f782df0af6c7ce386a92",
+  "스플릿":  "https://i.namu.wiki/i/-XO2LXy5LNAajpm4M8cT7kzmljZbJVf7q5d1c1fuhCJpEiMGs7DkKGxaC68Yx0h6hSmqjm-QJ_aAky82A2cFWA.webp",
+  "선셋":    "https://c-valorant-api.op.gg/Assets/Maps/92584FBE-486A-B1B2-9FAA-39B0F486B498_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "어비스":  "https://cdn.gametoc.co.kr/news/photo/202407/82622_252333_233.jpg",
+  "펄":      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center",
+  "브리즈":  "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL",
+  "헤이븐":  "https://preview.redd.it/haven-is-unplayable-v0-byso61a598061.png?width=1920&format=png&auto=webp&s=7217f389892a41efefc7b5a95f6a58d5fb493e32",
+  "프랙처":  "https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp",
+  "로터스":  "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/df5c6e7629733f801b7059f7d0ed8d286cbdbc1e-1920x1080.jpg?accountingTag=VAL",
+  "아이스박스": "https://i.namu.wiki/i/peG6xUXfvFn1BWUDgMXsU_7iL6e7bvVPuxvvPKAc4GSA_wI4sII4K_lsi7Ys_-Gv3rvHCcAPJ3b42Pop3pq5ag.webp",
+  // 영어 이름 aliases (pacific-match.html과 공유)
+  "Ascent":   "https://c-valorant-api.op.gg/Assets/Maps/7EAECC1B-4337-BBF6-6AB9-04B8F06B3319_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "Bind":     "https://c-valorant-api.op.gg/Assets/Maps/2C9D57EC-4431-9C5E-2939-8F9EF6DD5CBA_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "Corrode":  "https://imguscdn.gamespress.com/cdn/files/RiotGames/2025/06/162048-b9066559/Corrode_AtkSpawn_02.png?w=750&mode=max&otf=y&quality=90&format=png&bgcolor=transparent&sky=0d3b51cd617ed54f196ded7a2c1536385363da533268f782df0af6c7ce386a92",
+  "Split":    "https://i.namu.wiki/i/-XO2LXy5LNAajpm4M8cT7kzmljZbJVf7q5d1c1fuhCJpEiMGs7DkKGxaC68Yx0h6hSmqjm-QJ_aAky82A2cFWA.webp",
+  "Sunset":   "https://c-valorant-api.op.gg/Assets/Maps/92584FBE-486A-B1B2-9FAA-39B0F486B498_splash.png?image=q_auto:good,f_webp&v=1776341444",
+  "Abyss":    "https://cdn.gametoc.co.kr/news/photo/202407/82622_252333_233.jpg",
+  "Pearl":    "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center",
+  "Breeze":   "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL",
+  "Haven":    "https://preview.redd.it/haven-is-unplayable-v0-byso61a598061.png?width=1920&format=png&auto=webp&s=7217f389892a41efefc7b5a95f6a58d5fb493e32",
+  "Fracture": "https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp",
+  "Lotus":    "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/df5c6e7629733f801b7059f7d0ed8d286cbdbc1e-1920x1080.jpg?accountingTag=VAL",
+  "Icebox":   "https://i.namu.wiki/i/peG6xUXfvFn1BWUDgMXsU_7iL6e7bvVPuxvvPKAc4GSA_wI4sII4K_lsi7Ys_-Gv3rvHCcAPJ3b42Pop3pq5ag.webp",
+};
+
+/* ── 맵 목록 ──────────────────────────────────────────── */
+const ALL_MAPS = ["어센트","바인드","브리즈","코로드","프랙처","헤이븐","아이스박스","로터스","펄","스플릿","선셋","어비스"];
+
+/* Bo3 고정 순서: ban ban pick pick ban ban decider */
+const VETO_STEPS_BO3 = [
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "pick",    label: "PICK",    mapIndex: 0 },
+  { type: "pick",    label: "PICK",    mapIndex: 1 },
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "decider", label: "DECIDER", mapIndex: 2 },
+];
+const VETO_STEPS_BO5 = [
+  { type: "ban",  label: "BAN" },
+  { type: "ban",  label: "BAN" },
+  { type: "pick", label: "PICK", mapIndex: 0 },
+  { type: "pick", label: "PICK", mapIndex: 1 },
+  { type: "pick", label: "PICK", mapIndex: 2 },
+  { type: "pick", label: "PICK", mapIndex: 3 },
+  { type: "pick", label: "PICK", mapIndex: 4 },
+];
+var VETO_STEPS = VETO_STEPS_BO3;
+
+/* 각 스텝에서 행동하는 팀 (A=Paper Rex / B=FULL SENSE) */
+function vetoStepTeam(idx, firstBan) {
+  return idx % 2 === 0 ? firstBan : (firstBan === "A" ? "B" : "A");
+}
+/* 픽/디사이더에서 진영을 "선택하는" 팀 = 픽한 상대 팀, 디사이더는 3번째픽(index 3) 진영선택팀과 동일 */
+function vetoSideChooser(idx, firstBan) {
+  const step = VETO_STEPS[idx];
+  if (step.type === "pick") {
+    const picker = vetoStepTeam(idx, firstBan);
+    return picker === "A" ? "B" : "A";
+  }
+  if (step.type === "decider") {
+    return vetoSideChooser(3, firstBan);
+  }
+  return "";
+}
+
+function vetoTeamName(code) { return code === "A" ? MATCH_TEAM_A : MATCH_TEAM_B; }
+function vetoTeamShort(code) { return code === "A" ? TEAM_A_CODE : TEAM_B_CODE; }
+
+/* 기본 vetoState */
+var vetoState = {
+  firstBan: "A",
+  maps: ["코로드", "펄", "어센트", "바인드", "어비스", "선셋", "브리즈"],
+  sides: { 2: "defense", 3: "defense", 6: "defense" },
+};
+
+/* ── 시청자 승부 예측 ────────────────────────────────── */
+var predState = { oddsA: "", oddsB: "" };
+
+function parsePredOdds(v) {
+  var n = Number(String(v || "").replace(",", "."));
+  return isFinite(n) && n > 1 ? n : null;
+}
+
+function renderPredBar() {
+  var bar = document.getElementById("pred-bar");
+  if (!bar) return;
+  var oA = parsePredOdds(predState.oddsA);
+  var oB = parsePredOdds(predState.oddsB);
+  var pctA = 50, pctB = 50;
+  if (oA && oB) {
+    var iA = 1 / oA, iB = 1 / oB;
+    pctA = Math.round(iA / (iA + iB) * 100);
+    pctB = 100 - pctA;
+  }
+  var oddsLabelA = predState.oddsA ? "배당률 " + predState.oddsA : "배당률 클릭 입력";
+  var oddsLabelB = predState.oddsB ? "배당률 " + predState.oddsB : "배당률 클릭 입력";
+  bar.innerHTML =
+    '<div class="mo-pred-side mo-pred-a" style="width:' + pctA + '%">' +
+      '<img class="mo-pred-logo' + (TEAM_A_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_A_LOGO + '" alt="' + TEAM_A_CODE + '" />' +
+      '<div class="mo-pred-info">' +
+        '<span class="mo-pred-pct">' + pctA + '%</span>' +
+        '<span class="mo-pred-odds" onclick="openOddsEditor(\'A\')">' + oddsLabelA + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="mo-pred-sep"></div>' +
+    '<div class="mo-pred-side mo-pred-b" style="width:' + pctB + '%">' +
+      '<div class="mo-pred-info" style="text-align:right">' +
+        '<span class="mo-pred-pct">' + pctB + '%</span>' +
+        '<span class="mo-pred-odds" onclick="openOddsEditor(\'B\')">' + oddsLabelB + '</span>' +
+      '</div>' +
+      '<img class="mo-pred-logo' + (TEAM_B_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_B_LOGO + '" alt="' + TEAM_B_CODE + '" />' +
+    '</div>';
+}
+
+function openOddsEditor(side) {
+  document.querySelector(".odds-popup")?.remove();
+  var key = side === "A" ? "oddsA" : "oddsB";
+  var teamName = side === "A" ? MATCH_TEAM_A : MATCH_TEAM_B;
+  var popup = document.createElement("div");
+  popup.className = "odds-popup";
+  popup.innerHTML =
+    '<div class="odds-popup-panel">' +
+      '<div class="odds-popup-head"><strong>' + teamName + ' 배당률</strong><button onclick="this.closest(\'.odds-popup\').remove()">닫기</button></div>' +
+      '<form class="odds-popup-form">' +
+        '<input type="text" inputmode="decimal" value="' + (predState[key] || "") + '" placeholder="예: 1.61" autofocus />' +
+        '<button type="submit">적용</button>' +
+      '</form>' +
+    '</div>';
+  document.body.appendChild(popup);
+  popup.addEventListener("click", function(e) { if (e.target === popup) popup.remove(); });
+  popup.querySelector("form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    predState[key] = e.currentTarget.querySelector("input").value.trim();
+    savePredState();
+    renderPredBar();
+    popup.remove();
+  });
+  popup.querySelector("input").focus();
+}
+
+renderPredBar();
+
+/* 맵 결과 슬롯 토글: 빈 → O → X → 빈 */
+// ── 화이트/다크 공유 동기화 ────────────────────────────────────
+var RESULT_KEY     = 'result:'     + MATCH_KEY;
+var PRED_KEY       = 'prediction:' + MATCH_KEY;
+var VETO_SYNC_KEY  = 'veto:'       + MATCH_KEY;
+
+function savePredState() {
+  try { localStorage.setItem(PRED_KEY, JSON.stringify(predState)); } catch(e) {}
+}
+function loadPredState() {
+  try { return JSON.parse(localStorage.getItem(PRED_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveVetoSyncState() {
+  try { localStorage.setItem(VETO_SYNC_KEY, JSON.stringify(vetoState)); } catch(e) {}
+}
+function loadVetoSyncState() {
+  try { return JSON.parse(localStorage.getItem(VETO_SYNC_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function loadSharedResult() {
+  try { return JSON.parse(localStorage.getItem(RESULT_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function saveSharedResult() {
+  var marksA = [], marksB = [];
+  document.querySelectorAll('#slots-a .mo-map-slot').forEach(function(el) { marksA.push(el.getAttribute('data-v') || ''); });
+  document.querySelectorAll('#slots-b .mo-map-slot').forEach(function(el) { marksB.push(el.getAttribute('data-v') || ''); });
+  var current = loadSharedResult();
+  current.marksA = marksA;
+  current.marksB = marksB;
+  current.scoreA = document.getElementById('score-a').value || '-';
+  current.scoreB = document.getElementById('score-b').value || '-';
+  localStorage.setItem(RESULT_KEY, JSON.stringify(current));
+}
+
+function applySharedResult() {
+  var data = loadSharedResult();
+  if (Array.isArray(data.marksA)) {
+    var slotsA = document.querySelectorAll('#slots-a .mo-map-slot');
+    data.marksA.forEach(function(v, i) {
+      if (slotsA[i]) { slotsA[i].setAttribute('data-v', v || ''); slotsA[i].textContent = v || ''; }
+    });
+  }
+  if (Array.isArray(data.marksB)) {
+    var slotsB = document.querySelectorAll('#slots-b .mo-map-slot');
+    data.marksB.forEach(function(v, i) {
+      if (slotsB[i]) { slotsB[i].setAttribute('data-v', v || ''); slotsB[i].textContent = v || ''; }
+    });
+  }
+  if (data.scoreA !== undefined) document.getElementById('score-a').value = data.scoreA;
+  if (data.scoreB !== undefined) document.getElementById('score-b').value = data.scoreB;
+}
+// ────────────────────────────────────────────────────────────────
+
+function toggleSlot(el, side) {
+  const cycle = ["", "O", "X"];
+  const cur = el.getAttribute("data-v") || "";
+  const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
+  el.setAttribute("data-v", next);
+  el.textContent = next;
+  saveSharedResult();
+}
+
+function renderVeto() {
+  const grid = document.getElementById("veto-grid");
+  if (!grid) return;
+  grid.innerHTML = VETO_STEPS.map(function(step, idx) {
+    const mapName  = vetoState.maps[idx] || ALL_MAPS[idx];
+    const imgSrc   = MAP_IMGS[mapName] || "";
+    const imgTag   = imgSrc
+      ? `<img class="mo-veto-img" src="${imgSrc}" alt="${mapName}" />`
+      : `<div style="width:100%;height:100%;background:#1a2030"></div>`;
+
+    let cellClass   = "mo-veto-cell";
+    let actionClass = step.type;
+    const teamCode  = vetoStepTeam(idx, vetoState.firstBan);
+
+    if (step.type === "ban") {
+      cellClass += " banned";
+    } else if (step.type === "pick") {
+      cellClass += teamCode === "A" ? " pick-a" : " pick-b";
+    } else {
+      cellClass += " decider-cell";
+    }
+
+    const whoLabel = step.type === "decider" ? "자동" : vetoTeamShort(teamCode);
+
+    let sideHtml = `<div class="mo-veto-side" style="opacity:0.3">—</div>`;
+    if (step.type === "pick" || step.type === "decider") {
+      const chooser   = vetoSideChooser(idx, vetoState.firstBan);
+      const sideVal   = vetoState.sides[idx] || "defense";
+      const sideText  = sideVal === "attack" ? "선 공격" : "선 수비";
+      sideHtml = `<div class="mo-veto-side">${vetoTeamShort(chooser)} ${sideText}</div>`;
+    }
+
+    return `<div class="${cellClass}" data-veto-idx="${idx}" onclick="openVetoPicker(${idx})">
+      <div class="mo-veto-top">
+        <div class="mo-veto-action ${actionClass}">${step.label}</div>
+        <div class="mo-veto-who">${whoLabel}</div>
+      </div>
+      <div class="mo-veto-img-wrap">
+        ${imgTag}
+        <div class="mo-veto-overlay">
+          <span class="mo-veto-mapname">${mapName}</span>
+        </div>
+      </div>
+      <div class="mo-veto-bottom">${sideHtml}</div>
+    </div>`;
+  }).join("");
+}
+
+function openVetoPicker(idx) {
+  document.querySelector(".veto-popup")?.remove();
+  const step      = VETO_STEPS[idx];
+  const isPlayable = step.type === "pick" || step.type === "decider";
+  const chooser    = isPlayable ? vetoSideChooser(idx, vetoState.firstBan) : "";
+  const curSide    = vetoState.sides[idx] || "defense";
+  const curMap     = vetoState.maps[idx] || "";
+
+  const firstBanOptions = idx === 0
+    ? `<div class="veto-popup-row">
+        <label>선 밴 팀</label>
+        <select id="vp-firstban">
+          <option value="A" ${vetoState.firstBan==="A"?"selected":""}>${MATCH_TEAM_A} (${TEAM_A_CODE})</option>
+          <option value="B" ${vetoState.firstBan==="B"?"selected":""}>${MATCH_TEAM_B} (${TEAM_B_CODE})</option>
+        </select>
+      </div>` : "";
+
+  const sideOptions = isPlayable
+    ? `<div class="veto-popup-row">
+        <label>${vetoTeamName(chooser)} 진영</label>
+        <select id="vp-side">
+          <option value="defense" ${curSide==="defense"?"selected":""}>선 수비</option>
+          <option value="attack"  ${curSide==="attack" ?"selected":""}>선 공격</option>
+        </select>
+      </div>` : "";
+
+  const mapButtons = ALL_MAPS.map(function(m) {
+    return `<button class="vp-map-btn${m===curMap?" active":""}" data-map="${m}">
+      <img src="${MAP_IMGS[m]||""}" alt="${m}" />
+      <span>${m}</span>
+    </button>`;
+  }).join("");
+
+  const popup = document.createElement("div");
+  popup.className = "veto-popup";
+  popup.innerHTML = `
+    <div class="veto-popup-panel">
+      <div class="veto-popup-head">
+        <strong>${step.label} — ${idx+1}번 스텝</strong>
+        <button onclick="this.closest('.veto-popup').remove()">닫기</button>
+      </div>
+      ${firstBanOptions}
+      ${sideOptions}
+      <div class="vp-map-grid">${mapButtons}</div>
+    </div>`;
+  document.body.appendChild(popup);
+
+  popup.addEventListener("click", function(e) {
+    if (e.target === popup) { popup.remove(); return; }
+    const btn = e.target.closest(".vp-map-btn");
+    if (btn) {
+      const fb  = popup.querySelector("#vp-firstban");
+      const sd  = popup.querySelector("#vp-side");
+      if (fb) { vetoState.firstBan = fb.value; }
+      vetoState.maps[idx] = btn.dataset.map;
+      if (sd) { vetoState.sides[idx] = sd.value; }
+      saveVetoSyncState();
+      renderVeto();
+      syncVetoMaps();
+      popup.remove();
+    }
+  });
+
+  popup.addEventListener("change", function(e) {
+    if (e.target.id === "vp-firstban") {
+      vetoState.firstBan = e.target.value;
+      saveVetoSyncState(); renderVeto(); syncVetoMaps();
+    }
+    if (e.target.id === "vp-side") {
+      vetoState.sides[idx] = e.target.value;
+      saveVetoSyncState(); renderVeto(); syncVetoMaps();
+    }
+  });
+}
+
+/* 밴픽 → 스코어보드 맵 이미지 자동 연동 */
+/* Bo3: 픽은 index 2, 3 / 디사이더 index 6 */
+var VETO_MAP_SLOT = [2, 3, 6]; /* Bo3: map-1, map-2, map-3 / Bo5: [2,3,4,5,6] */
+
+function syncVetoMaps() {
+  VETO_MAP_SLOT.forEach(function(stepIdx, i) {
+    var mapName  = vetoState.maps[stepIdx] || "";
+    var imgSrc   = MAP_IMGS[mapName] || "";
+    var imgEl    = document.getElementById("m" + (i+1) + "-sb-map-img");
+    var nameEl   = document.getElementById("m" + (i+1) + "-sb-map-name");
+    if (imgEl  && imgSrc)  { imgEl.src = imgSrc; imgEl.alt = mapName; }
+    if (nameEl && mapName) { nameEl.textContent = mapName; }
+
+    // 베토 사이드 → firstAttacker 자동 계산
+    var chooser = vetoSideChooser(stepIdx, vetoState.firstBan); // "A" or "B"
+    var side    = vetoState.sides[stepIdx] || "defense";         // chooser가 선택한 side
+    // chooser가 attack이면 그 팀이 먼저 공격, defense면 상대가 먼저 공격
+    var fa = null;
+    if (chooser === "A") fa = (side === "attack") ? "a" : "b";
+    if (chooser === "B") fa = (side === "attack") ? "b" : "a";
+    if (maps[i]) maps[i].rtState.firstAttacker = fa;
+  });
+}
+
+/* 스코어보드 숫자 클릭 편집 */
+var scoreState = {
+  m1: { l: "-", r: "-" },
+  m2: { l: "-", r: "-" },
+  m3: { l: "-", r: "-" },
+};
+
+function applyScoreClasses(mapId) {
+  var s   = scoreState[mapId];
+  var elL = document.getElementById(mapId + "-score-l");
+  var elR = document.getElementById(mapId + "-score-r");
+  if (!elL || !elR) return;
+  elL.textContent = s.l;
+  elR.textContent = s.r;
+  var nL = Number(s.l), nR = Number(s.r);
+  elL.className = "sb-score-diamond-l" + (nL < nR ? " lose" : "");
+  elR.className = "sb-score-diamond-r" + (nR > nL ? " win"  : "");
+  elL.style.cursor = "pointer";
+  elR.style.cursor = "pointer";
+}
+
+function openScoreEditor(mapId, side) {
+  document.querySelector(".score-popup")?.remove();
+  var label = side === "l" ? TEAM_A_CODE + " 라운드 수" : TEAM_B_CODE + " 라운드 수";
+  var cur   = scoreState[mapId][side];
+  var popup = document.createElement("div");
+  popup.className = "odds-popup score-popup";
+  popup.innerHTML =
+    '<div class="odds-popup-panel">' +
+      '<div class="odds-popup-head"><strong>' + label + '</strong>' +
+        '<button onclick="this.closest(\'.score-popup\').remove()">닫기</button></div>' +
+      '<form class="odds-popup-form">' +
+        '<input type="number" min="0" max="30" value="' + cur + '" autofocus />' +
+        '<button type="submit">적용</button>' +
+      '</form>' +
+    '</div>';
+  document.body.appendChild(popup);
+  popup.addEventListener("click", function(e) { if (e.target === popup) popup.remove(); });
+  popup.querySelector("form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var val = parseInt(e.currentTarget.querySelector("input").value) || 0;
+    scoreState[mapId][side] = val;
+    applyScoreClasses(mapId);
+    // 라운드 트래커도 동기화
+    var mapIdx = parseInt(mapId.slice(1)) - 1;
+    maps[mapIdx].rtState.stats.aScore = scoreState[mapId].l;
+    maps[mapIdx].rtState.stats.bScore = scoreState[mapId].r;
+    renderRoundTracker(maps[mapIdx], mapIdx);
+    renderTeamStats(maps[mapIdx], mapIdx);
+    saveStatsState(mapIdx);
+    popup.remove();
+  });
+  popup.querySelector("input").focus();
+}
+
+function toggleDiamond(el) {
+  el.classList.toggle("filled");
+  saveDiamondState();
+}
+
+function saveDiamondState() {
+  try {
+    var state = {};
+    document.querySelectorAll('.sb-diamonds').forEach(function(wrap) {
+      if (!wrap.id) return;
+      state[wrap.id] = Array.from(wrap.querySelectorAll('.sb-diamond')).map(function(d) {
+        return d.classList.contains('filled');
+      });
+    });
+    localStorage.setItem('diamonds:' + MATCH_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadDiamondState() {
+  try {
+    var raw = localStorage.getItem('diamonds:' + MATCH_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+    Object.keys(state).forEach(function(id) {
+      var wrap = document.getElementById(id);
+      if (!wrap) return;
+      var diamonds = wrap.querySelectorAll('.sb-diamond');
+      state[id].forEach(function(filled, i) {
+        if (diamonds[i]) diamonds[i].classList.toggle('filled', filled);
+      });
+    });
+  } catch(e) {}
+}
+
+function toggleMode() {
+  const isWhite = document.body.classList.toggle('white-mode');
+  const btn = document.getElementById('mode-toggle-btn');
+  if (btn) btn.textContent = isWhite ? '🌙 Dark' : '☀ White';
+  maps.forEach(function(m, i) { renderMap(m, i); });
+}
+
+</script>
+<script src="./auth.js"></script>
+</body>
+</html>
