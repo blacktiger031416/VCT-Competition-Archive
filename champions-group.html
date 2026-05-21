@@ -7,8 +7,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
     <style>
+      /* ── BASE DARK CSS (Champions gold theme) ─────────────────── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0a0800; color: #f0e6c8; font-family: "Noto Sans KR", sans-serif; min-height: 100vh; }
+      .site-header { display: flex; align-items: center; gap: 16px; padding: 0 32px; height: 56px; background: rgba(10,8,0,0.95); border-bottom: 1px solid rgba(201,168,76,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+      .site-header .auth-header-btn { margin-left: 0 !important; }
+      .home-link { font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.5); text-decoration: none; }
+      .back-link { margin-left: auto; padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border: 1.5px solid rgba(201,168,76,0.3); border-radius: 999px; color: #c9a84c; font-size: 13px; font-weight: 700; text-decoration: none; }
+      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; margin-bottom: 10px; }
+      .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      .section-heading h2 { font-size: 28px; font-weight: 900; color: #c9a84c; }
+      .league-shell, .stage-shell { max-width: 1280px; margin: 0 auto; padding: 0 20px 80px; }
+      .stage-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(240px,380px); gap: 32px; align-items: center; padding: 52px 0 48px; }
+      .stage-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+      .stage-summary div { background: rgba(201,168,76,0.1); border: 1.5px solid rgba(201,168,76,0.28); border-radius: 14px; padding: 22px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .stage-summary strong { font-size: 28px; font-weight: 900; color: #c9a84c; }
+      .stage-summary span { font-size: 12px; color: rgba(240,230,200,0.5); }
+      .intro { font-size: 15px; line-height: 1.7; color: rgba(240,230,200,0.6); }
+
       /* ── Champions 테마 오버라이드 ─────────────────── */
       .champions-page .back-link  { border-color: rgba(197,177,116,0.3); color: #7a6028; }
       .champions-page .home-link  { color: #5c4618; }
@@ -712,7 +729,7 @@
           date:  sc.date || "",
           label: `Match ${gk}${matchNum}`,
         });
-        return `./champions-match.html?${p.toString()}`;
+        return `./champions-match-dark.html?${p.toString()}`;
       }
 
       function navigateToMatch(gk, mk, teams, sc) {

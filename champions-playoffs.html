@@ -7,8 +7,38 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260509-0001" />
     <style>
+      /* ── BASE DARK CSS (Champions gold theme) ─────────────────── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0a0800; color: #f0e6c8; font-family: "Noto Sans KR", sans-serif; min-height: 100vh; }
+      .site-header { display: flex; align-items: center; gap: 16px; padding: 0 32px; height: 56px; background: rgba(10,8,0,0.95); border-bottom: 1px solid rgba(201,168,76,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+      .site-header .auth-header-btn { margin-left: 0 !important; }
+      .home-link { font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.5); text-decoration: none; }
+      .back-link { margin-left: auto; padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border: 1.5px solid rgba(201,168,76,0.3); border-radius: 999px; color: #c9a84c; font-size: 13px; font-weight: 700; text-decoration: none; }
+      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; margin-bottom: 10px; }
+      .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      .section-heading h2 { font-size: 28px; font-weight: 900; color: #c9a84c; }
+      .league-shell { max-width: 1280px; margin: 0 auto; padding: 0 20px 80px; }
+      .playoff-hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding: 40px 32px; background: linear-gradient(135deg, #1a1400 0%, #0a0800 100%); margin-bottom: 24px; }
+      .playoff-hero h1 { font-size: clamp(32px,6vw,56px); font-weight: 900; color: #f0e6c8; }
+      .playoff-hero p { color: rgba(240,230,200,0.6); }
+      .bracket-scroll { overflow-x: auto; padding: 0 20px 60px; }
+      .bracket-rounds { display: flex; gap: 8px; justify-content: flex-end; padding: 8px 0; margin-bottom: 8px; }
+      .bracket-rounds span { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #c9a84c; }
+      .bracket-grid { display: flex; gap: 16px; align-items: flex-start; }
+      .bracket-column { display: flex; flex-direction: column; gap: 16px; min-width: 200px; }
+      .bracket-match { background: #111a28; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
+      .bracket-match:hover { border-color: rgba(201,168,76,0.35); background: #1a1400; }
+      .bracket-match h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 6px 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 5px; margin: 0; background: #140f00; }
+      .bracket-team { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-top: 1px solid rgba(255,255,255,0.04); }
+      .bracket-logo { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .bracket-logo img { width: 20px; height: 20px; object-fit: contain; }
+      .bracket-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; padding: 24px 0 10px 12px; border-left: 3px solid #c9a84c; margin: 8px 0 6px; }
+      .grand-final-card { border-color: rgba(201,168,76,0.4); }
+      .bracket-seed { font-size: 10px; color: rgba(255,255,255,0.35); min-width: 16px; }
+      .bracket-name { font-size: 12px; font-weight: 700; color: #f0e6c8; }
+      .placeholder { opacity: 0.35; }
+
       /* ── Champions playoff hero ──────────────────────────── */
       .champions-page .playoff-hero {
         background: linear-gradient(135deg, #c5b174 0%, #1a1400 100%);
@@ -567,7 +597,7 @@
           if (h3) {
             const span = h3.querySelector("span");
             if (span) {
-              const detailUrl = `./champions-match.html?from=playoffs&match=${mid}&tournament=champions`;
+              const detailUrl = `./champions-match-dark.html?from=playoffs&match=${mid}&tournament=champions`;
               let spanHtml = st.date ? `(${st.date}) ` : "";
               spanHtml += `<a class="match-sep-detail" href="${detailUrl}" onclick="event.stopPropagation()">상세 ↗</a>`;
               if (isAdmin()) {
@@ -603,7 +633,7 @@
           match: mid,
           tournament: "champions",
         });
-        window.location.href = `./champions-match.html?${params}`;
+        window.location.href = `./champions-match-dark.html?${params}`;
       }
 
       /* ── modal ─────────────────────────────────────────── */

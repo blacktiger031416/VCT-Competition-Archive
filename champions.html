@@ -7,24 +7,40 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260502-0014" />
     <style>
-      /* ── Champions 테마 오버라이드 ─────────────────────── */
-      .champions-page .back-link { border-color: rgba(197,177,116,0.3); color: #7a6028; }
-      .champions-page .home-link { color: #5c4618; }
-      .champions-page .eyebrow { color: #b89640; }
-      .champions-page .league-mark {
-        border-color: rgba(197,177,116,0.35);
-        background: linear-gradient(145deg, rgba(197,177,116,0.22), rgba(255,255,255,0.76)), rgba(255,255,255,0.82);
-        box-shadow: 0 22px 50px rgba(140,110,30,0.14);
-      }
-      .champions-page .league-mark img {
-        filter: brightness(0) saturate(100%) invert(75%) sepia(38%) saturate(600%) hue-rotate(8deg) brightness(98%);
-      }
-      .champions-page .tournament-card { border-color: rgba(197,177,116,0.22); }
-      .champions-page .tournament-card:hover { border-color: rgba(197,177,116,0.6); background: rgba(197,177,116,0.09); }
-      .champions-page .tournament-card strong { color: #7a6028; }
-      .champions-page .section-heading h2 { color: #c5b174; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #0a0800; color: #f0e6c8; font-family: "Noto Sans KR", sans-serif; min-height: 100vh; }
+
+      /* ── HEADER ── */
+      .site-header { display: flex; align-items: center; gap: 16px; padding: 0 32px; height: 56px; background: rgba(10,8,0,0.95); border-bottom: 1px solid rgba(201,168,76,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+      .site-header .auth-header-btn { margin-left: 0 !important; }
+      .home-link { font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.5); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #f0e6c8; }
+      .back-link { margin-left: auto; padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border: 1.5px solid rgba(201,168,76,0.3); border-radius: 999px; color: #c9a84c; font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.15s; }
+      .back-link:hover { border-color: #c9a84c; background: rgba(201,168,76,0.1); }
+
+      /* ── LAYOUT ── */
+      .league-shell { max-width: 1000px; margin: 0 auto; padding: 0 20px 80px; }
+
+      /* ── HERO ── */
+      .league-hero { display: grid; grid-template-columns: 1fr minmax(200px,320px); gap: 32px; align-items: center; padding: 52px 0 48px; }
+      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; margin-bottom: 10px; }
+      .league-hero h1 { font-size: clamp(40px,7vw,72px); font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; color: #f0e6c8; margin-bottom: 16px; }
+      .intro { font-size: 15px; line-height: 1.7; color: rgba(240,230,200,0.6); }
+      .league-mark { border: 1.5px solid rgba(201,168,76,0.3); border-radius: 20px; background: rgba(201,168,76,0.06); padding: 28px; display: flex; align-items: center; justify-content: center; aspect-ratio: 1; }
+      .league-mark img { width: 100%; max-width: 180px; object-fit: contain; filter: brightness(0) saturate(100%) invert(75%) sepia(38%) saturate(600%) hue-rotate(8deg) brightness(98%); }
+
+      /* ── TOURNAMENT SECTION ── */
+      .tournament-section { padding: 0 0 48px; }
+      .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      .section-heading h2 { font-size: 28px; font-weight: 900; color: #c9a84c; }
+      .tournament-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      @media (max-width: 600px) { .tournament-grid { grid-template-columns: 1fr; } .league-hero { grid-template-columns: 1fr; } }
+      .tournament-card { display: flex; flex-direction: column; gap: 4px; padding: 24px; border: 1.5px solid rgba(201,168,76,0.22); border-radius: 14px; background: rgba(201,168,76,0.04); text-decoration: none; color: #f0e6c8; transition: all 0.18s; }
+      .tournament-card:hover { border-color: rgba(201,168,76,0.6); background: rgba(201,168,76,0.09); }
+      .tournament-kicker { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.45); }
+      .tournament-card strong { font-size: 22px; font-weight: 900; color: #c9a84c; display: block; margin: 4px 0; }
+      .tournament-card span { font-size: 13px; color: rgba(240,230,200,0.5); }
 
       /* ── 참가팀 배정 섹션 ─────────────────────────────── */
       .participants-section {
