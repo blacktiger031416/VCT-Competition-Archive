@@ -8,64 +8,76 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
     <style>
-      /* ── BASE DARK CSS (Champions gold theme) ─────────────────── */
+      /* ── Global Reset ── */
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       body { background: #0a0800; color: #f0e6c8; font-family: "Noto Sans KR", sans-serif; min-height: 100vh; }
+      a { text-decoration: none; }
+
+      /* ── Header ── */
       .site-header { display: flex; align-items: center; gap: 16px; padding: 0 32px; height: 56px; background: rgba(10,8,0,0.95); border-bottom: 1px solid rgba(201,168,76,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
       .site-header .auth-header-btn { margin-left: 0 !important; }
-      .home-link { font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.5); text-decoration: none; }
-      .back-link { margin-left: auto; padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border: 1.5px solid rgba(201,168,76,0.3); border-radius: 999px; color: #c9a84c; font-size: 13px; font-weight: 700; text-decoration: none; }
-      .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; margin-bottom: 10px; }
-      .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-      .section-heading h2 { font-size: 28px; font-weight: 900; color: #c9a84c; }
-      .league-shell { max-width: 1280px; margin: 0 auto; padding: 0 20px 80px; }
-      .playoff-hero { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding: 40px 32px; background: linear-gradient(135deg, #1a1400 0%, #0a0800 100%); margin-bottom: 24px; }
-      .playoff-hero h1 { font-size: clamp(32px,6vw,56px); font-weight: 900; color: #f0e6c8; }
-      .playoff-hero p { color: rgba(240,230,200,0.6); }
-      .bracket-scroll { overflow-x: auto; padding: 0 20px 60px; }
-      .bracket-rounds { display: flex; gap: 8px; justify-content: flex-end; padding: 8px 0; margin-bottom: 8px; }
-      .bracket-rounds span { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #c9a84c; }
-      .bracket-grid { display: flex; gap: 16px; align-items: flex-start; }
-      .bracket-column { display: flex; flex-direction: column; gap: 16px; min-width: 200px; }
-      .bracket-match { background: #111a28; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
+      .home-link { font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,230,200,0.5); }
+      .back-link { margin-left: auto; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(240,230,200,0.4); transition: color 0.15s; }
+      .back-link:hover { color: rgba(240,230,200,0.8); }
+
+      /* ── Playoff Hero ── */
+      .playoff-shell { padding-bottom: 60px; }
+      .playoff-hero { display: flex; align-items: center; gap: 24px; padding: 48px 48px 40px; max-width: 1200px; margin: 0 auto; }
+      .playoff-logo-lockup img { width: 72px; height: 72px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.75; }
+      .playoff-hero .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; margin-bottom: 6px; }
+      .playoff-hero h1 { font-size: clamp(26px,4vw,42px); font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #f0e6c8; line-height: 1; margin-bottom: 6px; }
+      .playoff-hero p { font-size: 13px; color: rgba(240,230,200,0.35); font-weight: 500; }
+
+      /* ── Board & Scroll ── */
+      .playoff-board { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+      .bracket-scroll { overflow-x: auto; padding-bottom: 20px; }
+
+      /* ── Round Labels ── */
+      .bracket-rounds { display: grid; grid-template-columns: repeat(5, minmax(160px,1fr)); gap: 8px; min-width: 820px; margin-bottom: 4px; }
+      .bracket-rounds span { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(201,168,76,0.5); text-align: center; padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+
+      /* ── Section Title ── */
+      .bracket-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; padding: 24px 0 10px 12px; border-left: 3px solid #c9a84c; margin: 8px 0 6px; }
+      .bracket-section-title.lower-title { padding-top: 16px; }
+
+      /* ── Bracket Grid ── */
+      .bracket-grid { display: grid; grid-template-columns: repeat(5, minmax(160px,1fr)); gap: 8px; min-width: 820px; margin-bottom: 6px; }
+      .upper-bracket { min-height: 340px; }
+      .lower-bracket { min-height: 280px; }
+
+      /* ── Bracket Column ── */
+      .bracket-column { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+      .bracket-arrow-column { justify-content: center; align-items: center; font-size: 20px; color: rgba(255,255,255,0.18); }
+      .bracket-column-center { justify-content: center; }
+      .bracket-column-spaced { justify-content: center; gap: 92px; }
+
+      /* ── Match Card ── */
+      .bracket-match { background: #140f00; border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
       .bracket-match:hover { border-color: rgba(201,168,76,0.35); background: #1a1400; }
-      .bracket-match h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 6px 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 5px; margin: 0; background: #140f00; }
+      .bracket-match h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 6px 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 5px; margin: 0; }
+      .bracket-match h3 span { color: rgba(255,255,255,0.16); font-weight: 500; letter-spacing: 0.05em; }
+      .grand-final-card { border-color: rgba(201,168,76,0.35); }
+      .grand-final-card h3 { color: rgba(201,168,76,0.7); border-bottom-color: rgba(201,168,76,0.15); }
+
+      /* ── Team Row ── */
       .bracket-team { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-top: 1px solid rgba(255,255,255,0.04); }
+      .bracket-match .bracket-team:first-of-type { border-top: none; }
+      .bracket-seed { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; color: rgba(255,255,255,0.22); min-width: 36px; flex-shrink: 0; }
       .bracket-logo { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
       .bracket-logo img { width: 20px; height: 20px; object-fit: contain; }
-      .bracket-section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; padding: 24px 0 10px 12px; border-left: 3px solid #c9a84c; margin: 8px 0 6px; }
-      .grand-final-card { border-color: rgba(201,168,76,0.4); }
-      .bracket-seed { font-size: 10px; color: rgba(255,255,255,0.35); min-width: 16px; }
-      .bracket-name { font-size: 12px; font-weight: 700; color: #f0e6c8; }
-      .placeholder { opacity: 0.35; }
+      .bracket-team strong { flex: 1; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .bracket-team em { font-style: normal; font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.3); min-width: 14px; text-align: right; flex-shrink: 0; }
+      .bracket-team.winner { background: rgba(255,255,255,0.03); }
+      .bracket-team.winner strong { color: #f0e6c8; }
+      .bracket-team.winner em { color: rgba(255,255,255,0.9); }
+      .bracket-team.placeholder strong { color: rgba(255,255,255,0.2); }
+      .bracket-team.placeholder em { color: rgba(255,255,255,0.15); }
+      body:not(.view-only) .bracket-team[data-slot]:hover { background: rgba(201,168,76,0.08); }
 
-      /* ── Champions playoff hero ──────────────────────────── */
-      .champions-page .playoff-hero {
-        background: linear-gradient(135deg, #c5b174 0%, #1a1400 100%);
-        color: #fff;
-      }
-      .champions-page .playoff-hero .eyebrow,
-      .champions-page .playoff-hero h1,
-      .champions-page .playoff-hero p { color: #fff; }
-      .champions-page .playoff-logo-lockup { border-right-color: rgba(255,255,255,0.18); }
-      .champions-page .playoff-board {
-        border-color: #c5b174;
-        box-shadow: 0 24px 48px rgba(197,177,116,0.14);
-      }
-      /* ── bracket colors ──────────────────────────────────── */
-      .champions-page .bracket-rounds span { color: #b89640; }
-      .champions-page .bracket-section-title { background: #c5b174; color: #1a1400; }
-      .champions-page .bracket-match { border-color: #c5b174; }
-      .champions-page .bracket-match h3 { background: #c5b174; color: #1a1400; }
-      .champions-page .bracket-match h3 span { color: rgba(26,20,0,0.6); }
-      .champions-page .bracket-match:hover { box-shadow: 0 10px 24px rgba(197,177,116,0.28); }
-      .champions-page .bracket-logo { border-color: rgba(197,177,116,0.32); color: #b89640; }
-      .champions-page .bracket-footer { background: #1a1400; }
-      /* ── grand finals card ───────────────────────────────── */
-      .champions-page .grand-final-card { border-color: #f5c518; }
-      .champions-page .grand-final-card h3 { background: #f5c518; color: #1a1400; }
-      .champions-page .grand-final-card h3 span { color: #5a4800; }
-      .champions-page .grand-final-card:hover { box-shadow: 0 10px 24px rgba(245,197,24,0.36); }
+      /* ── Footer ── */
+      .bracket-footer { padding: 16px 0 8px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 8px; color: rgba(255,255,255,0.35); font-size: 12px; text-align: center; font-weight: 700; letter-spacing: 0.08em; }
+
+      .placeholder { opacity: 0.35; }
       /* ── modal base ──────────────────────────────────────── */
       .sm-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
       .sm-modal[hidden] { display: none !important; }
@@ -121,12 +133,11 @@
       .pm-team-btn:disabled { opacity: .28; pointer-events: none; }
       /* ── 상세 링크 ───────────────────────────────────────── */
       .match-sep-detail {
-        font-size: 9px; font-weight: 700; color: #1a1400;
-        text-decoration: none; opacity: 0.65;
+        font-size: 9px; font-weight: 700; color: rgba(201,168,76,0.75);
+        text-decoration: none; opacity: 0.85;
         margin-left: 4px; letter-spacing: 0.03em;
       }
-      .match-sep-detail:hover { opacity: 1; }
-      .champions-page .grand-final-card h3 .match-sep-detail { color: #1a1400; }
+      .match-sep-detail:hover { opacity: 1; color: #c9a84c; }
       /* ── 슬롯 편집 (어드민) ─────────────────────────────── */
       .champions-page .bracket-team { position: relative; }
       .champions-page .bracket-team[data-team-name]:not([data-team-name=""]) strong { display: none !important; }
@@ -134,8 +145,8 @@
       body:not(.view-only) .champions-page .bracket-team[data-slot]:hover { background: rgba(197,177,116,0.12); border-radius: 6px; }
       body:not(.view-only) .champions-page .bracket-team[data-slot]::after { content: "✎"; font-size: 10px; opacity: 0.4; position: absolute; bottom: 2px; right: 4px; }
       /* ── 스코어 편집 버튼 ────────────────────────────────── */
-      .score-edit-btn { background: rgba(197,177,116,0.28); border: 1px solid rgba(197,177,116,0.5); color: #1a1400; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; margin-left: 4px; font-family: inherit; vertical-align: middle; }
-      .champions-page .grand-final-card h3 .score-edit-btn { color: #1a1400; background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.2); }
+      .score-edit-btn { background: rgba(197,177,116,0.18); border: 1px solid rgba(197,177,116,0.4); color: #c9a84c; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; margin-left: 4px; font-family: inherit; vertical-align: middle; }
+      .score-edit-btn:hover { background: rgba(197,177,116,0.32); }
     </style>
   </head>
   <body class="league-page stage-page champions-page playoff-page">
@@ -597,7 +608,11 @@
           if (h3) {
             const span = h3.querySelector("span");
             if (span) {
-              const detailUrl = `./champions-match-dark.html?from=playoffs&match=${mid}&tournament=champions`;
+              const _dp = new URLSearchParams({ from: "playoffs", match: mid, tournament: "champions" });
+              if (st.a) _dp.set("teamA", st.a);
+              if (st.b) _dp.set("teamB", st.b);
+              if (st.sa !== null && st.sb !== null) _dp.set("score", st.sa + ":" + st.sb);
+              const detailUrl = `./champions-match-dark.html?${_dp}`;
               let spanHtml = st.date ? `(${st.date}) ` : "";
               spanHtml += `<a class="match-sep-detail" href="${detailUrl}" onclick="event.stopPropagation()">상세 ↗</a>`;
               if (isAdmin()) {
@@ -628,11 +643,10 @@
       }
 
       function navigateToMatch(mid, st) {
-        const params = new URLSearchParams({
-          from: "playoffs",
-          match: mid,
-          tournament: "champions",
-        });
+        const params = new URLSearchParams({ from: "playoffs", match: mid, tournament: "champions" });
+        if (st.a) params.set("teamA", st.a);
+        if (st.b) params.set("teamB", st.b);
+        if (st.sa !== null && st.sb !== null) params.set("score", st.sa + ":" + st.sb);
         window.location.href = `./champions-match-dark.html?${params}`;
       }
 
