@@ -621,9 +621,12 @@
           </div>
           <button class="roster-modal-close" id="roster-modal-close" aria-label="닫기">×</button>
         </div>
-        <ul class="roster-player-list" id="roster-player-list"></ul>
+        <span class="roster-section-label">메인 선수 <span style="opacity:0.5;font-size:10px">(5명)</span></span>
+        <ul class="roster-player-list" id="roster-main-list"></ul>
+        <span class="roster-section-label" style="margin-top:2px">서브 선수</span>
+        <ul class="roster-player-list" id="roster-sub-list"></ul>
         <div class="roster-add-row">
-          <input type="text" id="roster-add-input" placeholder="선수 이름 입력..." autocomplete="off" />
+          <input type="text" id="roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
           <button class="roster-add-btn" id="roster-add-btn">추가</button>
         </div>
       </div>
@@ -650,24 +653,30 @@
           "VARREL":             ["C1ndeR", "Klaus", "XuNa", "oonzmlp", "Zexy"],
         };
 
-        const key = (team) => "vct_roster_" + LEAGUE + "_" + team;
+        const key = (team) => "vct_roster:" + team;
 
         function load(team) {
           try {
             const s = localStorage.getItem(key(team));
-            if (s) return JSON.parse(s);
+            if (s) {
+              const p = JSON.parse(s);
+              if (p && !Array.isArray(p) && p.main) return p;
+              if (Array.isArray(p)) return { main: p.slice(0, 5), subs: p.slice(5) };
+            }
           } catch (e) {}
-          return (defaultRosters[team] || []).slice();
+          const def = defaultRosters[team] || [];
+          return { main: def.slice(0, 5), subs: def.slice(5) };
         }
 
-        function save(team, players) {
-          try { localStorage.setItem(key(team), JSON.stringify(players)); } catch (e) {}
+        function save(team, data) {
+          try { localStorage.setItem(key(team), JSON.stringify(data)); } catch (e) {}
         }
 
         const modal   = document.getElementById("roster-modal");
         const logoEl  = document.getElementById("roster-modal-logo");
         const titleEl = document.getElementById("roster-modal-title");
-        const listEl  = document.getElementById("roster-player-list");
+        const mainEl  = document.getElementById("roster-main-list");
+        const subEl   = document.getElementById("roster-sub-list");
         const input   = document.getElementById("roster-add-input");
         let current   = null;
 
@@ -688,33 +697,48 @@
           current = null;
         }
 
+        function saveMain() {
+          if (!current) return;
+          var d = load(current);
+          d.main = Array.from(mainEl.querySelectorAll(".roster-main-input")).map(function(i) { return i.value.trim(); });
+          save(current, d);
+        }
+
         function render() {
           if (!current) return;
-          const players = load(current);
-          if (!players.length) {
-            listEl.innerHTML = '<li class="roster-empty-msg">등록된 선수가 없습니다</li>';
-            return;
-          }
-          listEl.innerHTML = players.map((p, i) =>
-            '<li><span class="player-index">' + (i + 1) + '</span><span>' + p + '</span>' +
-            '<button class="roster-player-remove" data-i="' + i + '" aria-label="' + p + ' 삭제">×</button></li>'
-          ).join("");
-          listEl.querySelectorAll(".roster-player-remove").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              var ps = load(current);
-              ps.splice(Number(btn.dataset.i), 1);
-              save(current, ps);
-              render();
-            });
+          var d = load(current);
+          mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
+            return '<li class="roster-main-item"><span class="player-index">' + (i+1) + '</span>' +
+              '<input class="roster-main-input" data-i="' + i + '" value="' + (d.main[i] || '') + '" placeholder="선수 이름" /></li>';
+          }).join("");
+          mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
+            inp.addEventListener("blur", saveMain);
+            inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
           });
+          if (!d.subs.length) {
+            subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
+          } else {
+            subEl.innerHTML = d.subs.map(function(p, i) {
+              return '<li><span class="player-index">' + (i+1) + '</span><span>' + p + '</span>' +
+                '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button></li>';
+            }).join("");
+            subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
+              btn.addEventListener("click", function() {
+                var d = load(current);
+                d.subs.splice(Number(btn.dataset.sub), 1);
+                save(current, d);
+                render();
+              });
+            });
+          }
         }
 
         function add() {
           var name = input.value.trim();
           if (!name || !current) return;
-          var ps = load(current);
-          ps.push(name);
-          save(current, ps);
+          var d = load(current);
+          d.subs.push(name);
+          save(current, d);
           input.value = "";
           render();
         }

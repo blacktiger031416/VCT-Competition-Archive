@@ -2277,8 +2277,19 @@ var _ALL_ROSTERS = {
   "Wolves Esports":                 ["SiuFatBB", "glacier", "jowa", "yosemite", "Spring"],
 };
 var TEAM_ROSTERS = {};
-TEAM_ROSTERS[TEAM_A_CODE] = _ALL_ROSTERS[MATCH_TEAM_A] || [];
-TEAM_ROSTERS[TEAM_B_CODE] = _ALL_ROSTERS[MATCH_TEAM_B] || [];
+function _loadRoster(teamFullName, code) {
+  try {
+    var s = localStorage.getItem("vct_roster:" + teamFullName);
+    if (s) {
+      var p = JSON.parse(s);
+      if (p && !Array.isArray(p) && p.main) return p.main.filter(Boolean).concat(p.subs || []);
+      if (Array.isArray(p)) return p;
+    }
+  } catch (e) {}
+  return _ALL_ROSTERS[teamFullName] || [];
+}
+TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
+TEAM_ROSTERS[TEAM_B_CODE] = _loadRoster(MATCH_TEAM_B, TEAM_B_CODE);
 
 const maps = [
   createBlankMapData(0),
