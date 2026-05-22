@@ -3100,6 +3100,7 @@ function openRosterPicker(mapIdx, playerIdx) {
   const p = m.players[playerIdx];
   const teamCode = p.side === "a" ? m.teamA : m.teamB;
   const roster   = TEAM_ROSTERS[teamCode] || [];
+  const customVal = roster.includes(p.name) ? "" : (p.name || "");
 
   const popup = document.createElement("div");
   popup.className = "kda-popup roster-popup";
@@ -3111,21 +3112,48 @@ function openRosterPicker(mapIdx, playerIdx) {
           <button class="roster-btn${p.name === name ? ' selected' : ''}"
             data-name="${name}">${name}</button>`).join("")}
       </div>
+      <div style="margin-top:10px;margin-bottom:4px;">
+        <span class="roster-manual-label">직접 입력 (서브 / 교체 선수)</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="roster-manual-input" type="text" placeholder="선수 닉네임"
+            value="${customVal}"
+            style="flex:1;background:#1a2030;border:1px solid rgba(255,255,255,0.18);
+              border-radius:4px;padding:6px 10px;color:#fff;
+              font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+              letter-spacing:0.05em;outline:none;" />
+          <button id="roster-manual-confirm" style="
+            font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+            letter-spacing:0.08em;text-transform:uppercase;
+            padding:6px 14px;border-radius:4px;cursor:pointer;
+            background:rgba(255,70,85,0.2);border:1px solid #ff4655;color:#fff;">확인</button>
+        </div>
+      </div>
       <div class="kda-popup-actions">
         <button class="btn-cancel" id="btn-roster-cancel">취소</button>
       </div>
     </div>`;
   document.body.appendChild(popup);
+
+  const input = document.getElementById("roster-manual-input");
+  const confirmBtn = document.getElementById("roster-manual-confirm");
+
+  function applyName(name) {
+    name = name.trim();
+    if (!name) return;
+    p.name = name;
+    saveFieldSync(mapIdx, playerIdx, 'name', p.name);
+    renderMap(m, mapIdx);
+    popup.remove();
+  }
+
   document.getElementById("btn-roster-cancel").onclick = () => popup.remove();
+  confirmBtn.onclick = () => applyName(input.value);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") applyName(input.value); });
+
   popup.addEventListener("click", e => {
     if (e.target === popup) { popup.remove(); return; }
     const btn = e.target.closest("[data-name]");
-    if (btn) {
-      p.name = btn.dataset.name;
-      saveFieldSync(mapIdx, playerIdx, 'name', p.name);
-      renderMap(m, mapIdx);
-      popup.remove();
-    }
+    if (btn) applyName(btn.dataset.name);
   });
 }
 
