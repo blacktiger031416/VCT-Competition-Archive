@@ -1692,6 +1692,7 @@ var MATCH_TEAM_A     = _params.get('teamA')     || 'Paper Rex';
 var MATCH_TEAM_B     = _params.get('teamB')     || 'Sentinels';
 var MATCH_FROM       = _params.get('from')      || 'swiss';
 var MATCH_BO5        = _params.get('bo5') === '1';
+var MATCH_GF         = _params.get('gf')  === '1';
 var MATCH_SCORE      = _params.get('score')     || '- : -';
 var _MATCH_TOURNAMENT = _params.get('tournament') || '';
 var _MATCH_GROUP      = _params.get('group')      || '';
@@ -1922,7 +1923,7 @@ function renderSlots() {
 function setBo(n) {
   currentBo = n;
   activeMapCount = Math.min(activeMapCount, n);
-  VETO_STEPS    = n === 5 ? VETO_STEPS_BO5 : VETO_STEPS_BO3;
+  VETO_STEPS    = n === 5 ? (MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO5) : VETO_STEPS_BO3;
   VETO_MAP_SLOT = n === 5 ? [2, 3, 4, 5, 6] : [2, 3, 6];
   renderSlots();
   renderVeto();
@@ -2732,11 +2733,11 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   var boVal = localStorage.getItem('vct_bo:' + MATCH_KEY);
   if (boVal === '5') {
     currentBo = 5;
-    VETO_STEPS    = VETO_STEPS_BO5;
+    VETO_STEPS    = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO5;
     VETO_MAP_SLOT = [2, 3, 4, 5, 6];
   } else if (MATCH_BO5 && !boVal) {
     currentBo = 5;
-    VETO_STEPS    = VETO_STEPS_BO5;
+    VETO_STEPS    = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO5;
     VETO_MAP_SLOT = [2, 3, 4, 5, 6];
   }
 
@@ -3404,10 +3405,22 @@ const VETO_STEPS_BO5 = [
   { type: "pick", label: "PICK", mapIndex: 3 },
   { type: "decider", label: "DECIDER", mapIndex: 4 },
 ];
-var VETO_STEPS = VETO_STEPS_BO3;
+/* 결승전 전용: 상위조 팀(A)이 밴 2개 독점 + 첫 픽 선택권 보유 */
+const VETO_STEPS_GF = [
+  { type: "ban",     label: "BAN",     team: "A" },
+  { type: "ban",     label: "BAN",     team: "A" },
+  { type: "pick",    label: "PICK",    team: "A", mapIndex: 0 },
+  { type: "pick",    label: "PICK",    team: "B", mapIndex: 1 },
+  { type: "pick",    label: "PICK",    team: "A", mapIndex: 2 },
+  { type: "pick",    label: "PICK",    team: "B", mapIndex: 3 },
+  { type: "decider", label: "DECIDER", mapIndex: 4 },
+];
+var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO3;
 
-/* 각 스텝에서 행동하는 팀 (A=Paper Rex / B=FULL SENSE) */
+/* 각 스텝에서 행동하는 팀 (A=상위조/선팀, B=상대팀) */
 function vetoStepTeam(idx, firstBan) {
+  const step = VETO_STEPS[idx];
+  if (step && step.team) return step.team;  // GF 결승전 명시적 배정
   return idx % 2 === 0 ? firstBan : (firstBan === "A" ? "B" : "A");
 }
 /* 픽/디사이더에서 진영을 "선택하는" 팀 = 픽한 상대 팀, 디사이더는 3번째픽(index 3) 진영선택팀과 동일 */
