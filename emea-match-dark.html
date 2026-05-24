@@ -3006,6 +3006,11 @@ function openKda(mapIdx, playerIdx) {
 
   document.getElementById("btn-cancel").onclick = () => popup.remove();
   popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
+  const _kdaSave = () => document.getElementById("btn-save").click();
+  ["inp-k","inp-d","inp-a"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("keydown", e => { if (e.key === "Enter") _kdaSave(); });
+  });
   document.getElementById("btn-save").onclick = () => {
     p.k = parseInt(document.getElementById("inp-k").value) || 0;
     p.d = parseInt(document.getElementById("inp-d").value) || 0;
@@ -3038,6 +3043,9 @@ function openAcsEditor(mapIdx, playerIdx) {
   document.getElementById("inp-acs").focus();
   document.getElementById("btn-acs-cancel").onclick = () => popup.remove();
   popup.addEventListener("click", e => { if (e.target === popup) popup.remove(); });
+  const _acsSave = () => document.getElementById("btn-acs-save").click();
+  const _acsInp = document.getElementById("inp-acs");
+  if (_acsInp) _acsInp.addEventListener("keydown", e => { if (e.key === "Enter") _acsSave(); });
   document.getElementById("btn-acs-save").onclick = () => {
     p.acs = parseInt(document.getElementById("inp-acs").value) || 0;
     saveFieldSync(mapIdx, playerIdx, 'acs', p.acs);
