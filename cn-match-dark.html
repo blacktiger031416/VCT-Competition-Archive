@@ -1712,6 +1712,38 @@ var MATCH_KEY = (function() {
   return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
 })();
 
+/* ── MATCH_KEY 마이그레이션: 구버전(date|teamA|teamB) → 신버전 키 ── */
+(function migrateMatchKey() {
+  var _oldKey = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+  if (_oldKey === MATCH_KEY) return; // 키가 같으면 마이그레이션 불필요
+  // 구버전 키로 저장된 항목을 모두 찾아 신버전 키로 복사
+  var toMove = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (!k) continue;
+    if (k === _oldKey ||
+        k.startsWith('set:'         + _oldKey) ||
+        k.startsWith('stats:'       + _oldKey) ||
+        k.startsWith('rounds:'      + _oldKey) ||
+        k.startsWith('players:'     + _oldKey) ||
+        k === 'result:'     + _oldKey ||
+        k === 'prediction:' + _oldKey ||
+        k === 'veto:'       + _oldKey ||
+        k === 'diamonds:'   + _oldKey ||
+        k === 'vct_bo:'     + _oldKey) {
+      toMove.push(k);
+    }
+  }
+  toMove.forEach(function(k) {
+    var newK = k.replace(_oldKey, MATCH_KEY);
+    if (!localStorage.getItem(newK)) { // 신버전 키에 이미 데이터가 없을 때만 복사
+      localStorage.setItem(newK, localStorage.getItem(k));
+    }
+    localStorage.removeItem(k);
+  });
+  if (toMove.length) console.log('[migration] ' + toMove.length + '개 항목: ' + _oldKey + ' → ' + MATCH_KEY);
+})();
+
 var _TC = {
   "All Gamers": "AG",
   "JD Mall JDG Esports": "JDG",

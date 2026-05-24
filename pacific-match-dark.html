@@ -1712,6 +1712,38 @@ var MATCH_KEY = (function() {
   return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
 })();
 
+/* ── MATCH_KEY 마이그레이션: 구버전(date|teamA|teamB) → 신버전 키 ── */
+(function migrateMatchKey() {
+  var _oldKey = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+  if (_oldKey === MATCH_KEY) return; // 키가 같으면 마이그레이션 불필요
+  // 구버전 키로 저장된 항목을 모두 찾아 신버전 키로 복사
+  var toMove = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (!k) continue;
+    if (k === _oldKey ||
+        k.startsWith('set:'         + _oldKey) ||
+        k.startsWith('stats:'       + _oldKey) ||
+        k.startsWith('rounds:'      + _oldKey) ||
+        k.startsWith('players:'     + _oldKey) ||
+        k === 'result:'     + _oldKey ||
+        k === 'prediction:' + _oldKey ||
+        k === 'veto:'       + _oldKey ||
+        k === 'diamonds:'   + _oldKey ||
+        k === 'vct_bo:'     + _oldKey) {
+      toMove.push(k);
+    }
+  }
+  toMove.forEach(function(k) {
+    var newK = k.replace(_oldKey, MATCH_KEY);
+    if (!localStorage.getItem(newK)) { // 신버전 키에 이미 데이터가 없을 때만 복사
+      localStorage.setItem(newK, localStorage.getItem(k));
+    }
+    localStorage.removeItem(k);
+  });
+  if (toMove.length) console.log('[migration] ' + toMove.length + '개 항목: ' + _oldKey + ' → ' + MATCH_KEY);
+})();
+
 var _TC = { "DetonatioN FocusMe":"DFM","Global Esports":"GE","Kiwoom DRX":"KRX","Nongshim RedForce":"NS","Paper Rex":"PRX","Rex Regum Qeon":"RRQ","Team Secret":"TS","ZETA DIVISION":"ZETA","FULL SENSE":"FS","Gen.G":"GEN","VARREL":"VL","T1":"T1" };
 var _TL = { "DetonatioN FocusMe":"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png","Global Esports":"./assets/teams/ge.webp","Kiwoom DRX":"./assets/teams/krx.svg","Nongshim RedForce":"./assets/teams/ns.svg","Paper Rex":"./assets/teams/prx.svg","Rex Regum Qeon":"./assets/teams/rrq.png","Team Secret":"./assets/teams/ts.svg","ZETA DIVISION":"./assets/teams/zeta.png","FULL SENSE":"./assets/teams/fs.svg","Gen.G":"./assets/teams/gen.png","VARREL":"./assets/teams/vl.svg","T1":"./assets/teams/t1.png" };
 var _TCo = { "DetonatioN FocusMe":"#2b53ff","Global Esports":"#e12c30","Kiwoom DRX":"#1f2f5e","Nongshim RedForce":"#e2012d","Paper Rex":"#8c52ff","Rex Regum Qeon":"#ffa100","Team Secret":"#888888","ZETA DIVISION":"#15b24a","FULL SENSE":"#ff751f","Gen.G":"#d2b985","VARREL":"#3ee1ac","T1":"#ec1b24" };
