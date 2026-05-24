@@ -1693,7 +1693,24 @@ var MATCH_TEAM_B = _params.get('teamB') || 'Team Secret';
 var MATCH_FROM  = _params.get('from')   || 'stage1';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
-var MATCH_KEY   = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+var _MATCH_TOURNAMENT = _params.get('tournament') || '';
+var _MATCH_GROUP      = _params.get('group')      || '';
+var _MATCH_IDX        = _params.get('idx')        || '';
+var _MATCH_MID        = _params.get('match')      || '';
+
+/* 경기 고유 키: 재경기(리매치) 충돌 방지
+   - Playoff:  tournament|from|matchId   (예: santiago|playoffs|M5)
+   - Swiss:    tournament|from|group|idx (예: santiago|swiss|A|2)
+   - 기타:     date|teamA|teamB          (기존 방식) */
+var MATCH_KEY = (function() {
+  if (_MATCH_MID) {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_MID].filter(Boolean).join('|');
+  }
+  if (_MATCH_GROUP !== '' && _MATCH_IDX !== '') {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_GROUP, _MATCH_IDX].filter(Boolean).join('|');
+  }
+  return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+})();
 
 var _TC = { "Gentle Mates":"M8","Team Liquid":"TL","Team Heretics":"TH","Natus Vincere":"NAVI","Karmine Corp":"KC","FUT Esports":"FUT","BBL Esports":"BBL","Fnatic":"FNC","Team Vitality":"VIT","GIANTX":"GX","Eternal Fire":"EF","PCIFIC Esports":"PCF","ULF Esports":"ULF" };
 var _TL = { "Gentle Mates":"./assets/teams/gm.png","Team Liquid":"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp","Team Heretics":"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg","Natus Vincere":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png","Karmine Corp":"./assets/teams/kc.png","FUT Esports":"https://specs.gg/assets/img/teams/fut-esports.webp","BBL Esports":"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg","Fnatic":"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg","Team Vitality":"https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png","GIANTX":"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg","Eternal Fire":"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg","PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg","ULF Esports":"https://i.namu.wiki/i/EKmHVjvPqN3x6yN6lHSKBDOoSp5X8dQS3Y9y_hj1y13zoCwWAtaRIiuGxG3C6b7TItP0n6ZsnYqwXpxg_KKoJA.webp" };

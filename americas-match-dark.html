@@ -1693,7 +1693,24 @@ var MATCH_TEAM_B = _params.get('teamB') || 'LOUD';
 var MATCH_FROM  = _params.get('from')   || 'stage1';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
-var MATCH_KEY   = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+var _MATCH_TOURNAMENT = _params.get('tournament') || '';
+var _MATCH_GROUP      = _params.get('group')      || '';
+var _MATCH_IDX        = _params.get('idx')        || '';
+var _MATCH_MID        = _params.get('match')      || '';
+
+/* 경기 고유 키: 재경기(리매치) 충돌 방지
+   - Playoff:  tournament|from|matchId   (예: santiago|playoffs|M5)
+   - Swiss:    tournament|from|group|idx (예: santiago|swiss|A|2)
+   - 기타:     date|teamA|teamB          (기존 방식) */
+var MATCH_KEY = (function() {
+  if (_MATCH_MID) {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_MID].filter(Boolean).join('|');
+  }
+  if (_MATCH_GROUP !== '' && _MATCH_IDX !== '') {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_GROUP, _MATCH_IDX].filter(Boolean).join('|');
+  }
+  return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+})();
 
 var _TC = { "G2 Esports":"G2","Leviatán":"LEV","Cloud9":"C9","MIBR":"MIBR","LOUD":"LOUD","ENVY":"ENVY","KRÜ Esports":"KRU","Sentinels":"SEN","NRG":"NRG","FURIA":"FUR","100 Thieves":"100T","Evil Geniuses":"EG" };
 var _TL = { "G2 Esports":"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg","Leviatán":"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618","Cloud9":"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp","MIBR":"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg","LOUD":"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg","ENVY":"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg","KRÜ Esports":"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg","Sentinels":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg","NRG":"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg","FURIA":"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg","100 Thieves":"https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp","Evil Geniuses":"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg" };

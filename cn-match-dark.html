@@ -1693,7 +1693,24 @@ var MATCH_TEAM_B = _params.get('teamB') || 'JD Mall JDG Esports';
 var MATCH_FROM  = _params.get('from')   || 'stage1';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
-var MATCH_KEY   = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+var _MATCH_TOURNAMENT = _params.get('tournament') || '';
+var _MATCH_GROUP      = _params.get('group')      || '';
+var _MATCH_IDX        = _params.get('idx')        || '';
+var _MATCH_MID        = _params.get('match')      || '';
+
+/* 경기 고유 키: 재경기(리매치) 충돌 방지
+   - Playoff:  tournament|from|matchId   (예: santiago|playoffs|M5)
+   - Swiss:    tournament|from|group|idx (예: santiago|swiss|A|2)
+   - 기타:     date|teamA|teamB          (기존 방식) */
+var MATCH_KEY = (function() {
+  if (_MATCH_MID) {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_MID].filter(Boolean).join('|');
+  }
+  if (_MATCH_GROUP !== '' && _MATCH_IDX !== '') {
+    return [_MATCH_TOURNAMENT, MATCH_FROM, _MATCH_GROUP, _MATCH_IDX].filter(Boolean).join('|');
+  }
+  return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+})();
 
 var _TC = {
   "All Gamers": "AG",
