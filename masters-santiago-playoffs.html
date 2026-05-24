@@ -607,6 +607,7 @@
             const span = h3.querySelector("span");
             if (span) {
               const _dp = new URLSearchParams({ from: "playoffs", match: mid, tournament: "santiago" });
+              if (IS_BO5[mid]) _dp.set('bo5', '1');
               if (st && st.a) _dp.set('teamA', st.a);
               if (st && st.b) _dp.set('teamB', st.b);
               if (st && st.sa != null && st.sb != null) _dp.set('score', st.sa + ':' + st.sb);
@@ -646,6 +647,7 @@
           match: mid,
           tournament: "santiago",
         });
+        if (IS_BO5[mid]) params.set('bo5', '1');
         if (st && st.a) params.set('teamA', st.a);
         if (st && st.b) params.set('teamB', st.b);
         if (st && st.sa != null && st.sb != null) params.set('score', st.sa + ':' + st.sb);
