@@ -243,9 +243,6 @@
     "body.view-only .roster-add-row { display: none !important; }",
     "body.view-only .roster-player-remove { display: none !important; }",
 
-    /* 편집 불가 힌트 */
-    "body.view-only .rt-cell { opacity: 0.5; }",
-    "body.view-only .sb-diamond { opacity: 0.4; }",
     "body.view-only .map-count-bar { display: none !important; }",
   ].join("\n");
   document.head.appendChild(style);
