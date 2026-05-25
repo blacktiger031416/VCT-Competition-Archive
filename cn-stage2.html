@@ -490,15 +490,14 @@
       function getSavedSetRounds(dateKey, teamA, teamB) {
         try {
           const fk = `${dateKey}|${teamA}|${teamB}`;
-          const veto = JSON.parse(localStorage.getItem(`veto:${fk}`) || "{}");
-          const maps = [veto.maps?.[2], veto.maps?.[3], veto.maps?.[6]].filter(Boolean);
-          return maps.reduce((total, mapName, index) => {
-            const saved = JSON.parse(localStorage.getItem(`set:${fk}:${index}:${mapName}`) || "{}");
-            const aScore = Number(saved.stats?.aScore);
-            const bScore = Number(saved.stats?.bScore);
-            if (Number.isFinite(aScore) && Number.isFinite(bScore)) { total.a += aScore; total.b += bScore; }
-            return total;
-          }, { a: 0, b: 0 });
+          let a = 0, b = 0;
+          for (let i = 0; i < 5; i++) {
+            const saved = JSON.parse(localStorage.getItem(`stats:${fk}:${i}`) || "{}");
+            const aScore = Number(saved.aScore);
+            const bScore = Number(saved.bScore);
+            if (Number.isFinite(aScore) && Number.isFinite(bScore)) { a += aScore; b += bScore; }
+          }
+          return { a, b };
         } catch { return { a: 0, b: 0 }; }
       }
 
