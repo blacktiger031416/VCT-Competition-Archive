@@ -2803,6 +2803,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   if (savedVeto.firstBan) vetoState.firstBan = savedVeto.firstBan;
   if (Array.isArray(savedVeto.maps)) vetoState.maps = savedVeto.maps;
   if (savedVeto.sides && typeof savedVeto.sides === 'object') vetoState.sides = savedVeto.sides;
+  if (savedVeto.choosers && typeof savedVeto.choosers === 'object') vetoState.choosers = savedVeto.choosers;
 
   renderSlots();
   applySharedResult();
@@ -3464,6 +3465,7 @@ var vetoState = {
   firstBan: "A",
   maps: ["코로드", "펄", "어센트", "바인드", "어비스", "선셋", "브리즈"],
   sides: { 2: "defense", 3: "defense", 6: "defense" },
+  choosers: {},
 };
 
 /* ── 시청자 승부 예측 ────────────────────────────────── */
@@ -3618,11 +3620,13 @@ function renderVeto() {
       cellClass += " decider-cell";
     }
 
-    const whoLabel = step.type === "decider" ? "자동" : vetoTeamShort(teamCode);
+    const whoLabel = step.type === "decider" ? (vetoState.choosers[idx] ? vetoTeamShort(vetoState.choosers[idx]) : "자동") : vetoTeamShort(teamCode);
 
     let sideHtml = `<div class="mo-veto-side" style="opacity:0.3">—</div>`;
     if (step.type === "pick" || step.type === "decider") {
-      const chooser   = vetoSideChooser(idx, vetoState.firstBan);
+      const chooser   = step.type === "decider"
+        ? (vetoState.choosers[idx] || vetoSideChooser(idx, vetoState.firstBan))
+        : vetoSideChooser(idx, vetoState.firstBan);
       const sideVal   = vetoState.sides[idx] || "defense";
       const sideText  = sideVal === "attack" ? "선 공격" : "선 수비";
       sideHtml = `<div class="mo-veto-side">${vetoTeamShort(chooser)} ${sideText}</div>`;
@@ -3648,7 +3652,9 @@ function openVetoPicker(idx) {
   document.querySelector(".veto-popup")?.remove();
   const step      = VETO_STEPS[idx];
   const isPlayable = step.type === "pick" || step.type === "decider";
-  const chooser    = isPlayable ? vetoSideChooser(idx, vetoState.firstBan) : "";
+  const chooser    = isPlayable
+    ? (step.type === "decider" ? (vetoState.choosers[idx] || vetoSideChooser(idx, vetoState.firstBan)) : vetoSideChooser(idx, vetoState.firstBan))
+    : "";
   const curSide    = vetoState.sides[idx] || "defense";
   const curMap     = vetoState.maps[idx] || "";
 
@@ -3661,8 +3667,18 @@ function openVetoPicker(idx) {
         </select>
       </div>` : "";
 
-  const sideOptions = isPlayable
+  const curChooser = vetoState.choosers[idx] || "";
+  const deciderChooserOpts = step.type === "decider"
     ? `<div class="veto-popup-row">
+        <label>공수 선택 팀</label>
+        <select id="vp-chooser">
+          <option value=""   ${!curChooser?"selected":""}>자동</option>
+          <option value="A"  ${curChooser==="A"?"selected":""}>${MATCH_TEAM_A} (${TEAM_A_CODE})</option>
+          <option value="B"  ${curChooser==="B"?"selected":""}>${MATCH_TEAM_B} (${TEAM_B_CODE})</option>
+        </select>
+      </div>` : "";
+  const sideOptions = isPlayable
+    ? `${deciderChooserOpts}<div class="veto-popup-row">
         <label>${vetoTeamName(chooser)} 진영</label>
         <select id="vp-side">
           <option value="defense" ${curSide==="defense"?"selected":""}>선 수비</option>
@@ -3700,6 +3716,8 @@ function openVetoPicker(idx) {
       if (fb) { vetoState.firstBan = fb.value; }
       vetoState.maps[idx] = btn.dataset.map;
       if (sd) { vetoState.sides[idx] = sd.value; }
+      const ch = popup.querySelector("#vp-chooser");
+      if (ch) { vetoState.choosers[idx] = ch.value; }
       saveVetoSyncState();
       renderVeto();
       syncVetoMaps();
@@ -3710,6 +3728,15 @@ function openVetoPicker(idx) {
   popup.addEventListener("change", function(e) {
     if (e.target.id === "vp-firstban") {
       vetoState.firstBan = e.target.value;
+      saveVetoSyncState(); renderVeto(); syncVetoMaps();
+    }
+    if (e.target.id === "vp-chooser") {
+      vetoState.choosers[idx] = e.target.value;
+      // chooser 바뀌면 vp-side 라벨도 갱신
+      const sdLabel = document.querySelector(".veto-popup .veto-popup-row label[for]");
+      const ch = e.target.value || vetoSideChooser(idx, vetoState.firstBan);
+      const lbl = document.querySelector(".veto-popup #vp-side")?.previousElementSibling;
+      if (lbl) lbl.textContent = vetoTeamName(ch) + " 진영";
       saveVetoSyncState(); renderVeto(); syncVetoMaps();
     }
     if (e.target.id === "vp-side") {
@@ -3733,7 +3760,8 @@ function syncVetoMaps() {
     if (nameEl && mapName) { nameEl.textContent = mapName; }
 
     // 베토 사이드 → firstAttacker 자동 계산
-    var chooser = vetoSideChooser(stepIdx, vetoState.firstBan); // "A" or "B"
+    var isDecider = VETO_STEPS[stepIdx] && VETO_STEPS[stepIdx].type === "decider";
+    var chooser = (isDecider && vetoState.choosers[stepIdx]) ? vetoState.choosers[stepIdx] : vetoSideChooser(stepIdx, vetoState.firstBan); // "A" or "B"
     var side    = vetoState.sides[stepIdx] || "defense";         // chooser가 선택한 side
     // chooser가 attack이면 그 팀이 먼저 공격, defense면 상대가 먼저 공격
     var fa = null;
