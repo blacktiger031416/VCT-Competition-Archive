@@ -41,190 +41,236 @@
     .pm-overlay[hidden] { display: none !important; }
     .pm-backdrop {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(8px);
     }
     .pm-panel {
       position: relative; z-index: 1;
-      width: min(580px, calc(100vw - 24px));
+      width: min(620px, calc(100vw - 24px));
       max-height: 90vh; overflow-y: auto;
-      background: #111a28;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.75);
-      animation: pmIn 0.2s cubic-bezier(0.16,1,0.3,1);
+      background: #0d1520;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      animation: pmIn 0.25s cubic-bezier(0.16,1,0.3,1);
+      overflow: hidden;
     }
     @keyframes pmIn {
-      from { opacity:0; transform: scale(0.96) translateY(12px); }
+      from { opacity:0; transform: scale(0.94) translateY(16px); }
       to   { opacity:1; transform: none; }
     }
 
-    /* 헤더 */
+    /* 헤더 배너 */
     .pm-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 22px 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      padding: 28px 26px 22px;
       gap: 14px;
+      overflow: hidden;
     }
-    .pm-header-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+    .pm-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,70,84,0.18) 0%, rgba(100,120,255,0.12) 50%, transparent 80%);
+      pointer-events: none;
+    }
+    .pm-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,70,84,0.5), rgba(100,120,255,0.5), transparent);
+    }
+    .pm-header-left { position: relative; display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0; }
     .pm-team-logo-wrap {
-      width: 52px; height: 52px; flex-shrink: 0;
+      width: 60px; height: 60px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
-    .pm-team-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .pm-team-logo-wrap img { width: 80%; height: 80%; object-fit: contain; }
     .pm-header-text { flex: 1; min-width: 0; }
     .pm-player-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 28px; font-weight: 900;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      color: #fff; margin: 0; line-height: 1.1;
+      font-size: 36px; font-weight: 900;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #fff; margin: 0; line-height: 1;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-shadow: 0 0 40px rgba(255,100,100,0.4);
     }
     .pm-player-meta {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.45); margin-top: 4px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4); margin-top: 5px;
       text-transform: uppercase;
     }
     .pm-close {
-      background: none; border: none;
-      color: rgba(255,255,255,0.35); font-size: 22px;
-      cursor: pointer; padding: 4px; line-height: 1;
-      transition: color 0.15s; flex-shrink: 0;
+      position: relative;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.4); font-size: 20px;
+      cursor: pointer; padding: 6px 10px; line-height: 1;
+      transition: all 0.15s; flex-shrink: 0; align-self: flex-start;
     }
-    .pm-close:hover { color: #fff; }
+    .pm-close:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.2); }
 
     /* admin 기본정보 편집 */
     .pm-info-edit {
       display: flex; gap: 10px;
-      padding: 14px 22px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 26px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       background: rgba(255,255,255,0.02);
     }
     .pm-info-field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .pm-info-label {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: rgba(255,255,255,0.35);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
     }
     .pm-info-input {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
       color: #fff; font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 600; letter-spacing: 0.04em;
-      padding: 6px 10px; outline: none;
+      padding: 7px 12px; outline: none;
       transition: border-color 0.15s;
     }
-    .pm-info-input:focus { border-color: rgba(255,255,255,0.3); }
+    .pm-info-input:focus { border-color: rgba(255,100,100,0.5); }
 
-    /* 섹션 */
-    .pm-section { padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .pm-section:last-child { border-bottom: none; }
-    .pm-section-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
-      text-transform: uppercase; color: rgba(255,255,255,0.35);
-      margin-bottom: 14px;
+    /* 스탯 영역 */
+    .pm-stats-area {
+      padding: 22px 26px 0;
     }
-
-    /* 스탯 카드 */
-    .pm-stat-cards { display: flex; gap: 10px; margin-bottom: 20px; }
+    .pm-stat-cards { display: flex; gap: 12px; margin-bottom: 22px; }
     .pm-stat-card {
-      flex: 1; background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; padding: 14px 10px; text-align: center;
+      flex: 1; position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 18px 12px 14px; text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
     }
+    .pm-stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,80,80,0.7), transparent);
+      border-radius: 0 0 4px 4px;
+    }
+    .pm-stat-card:hover { border-color: rgba(255,80,80,0.25); transform: translateY(-2px); }
     .pm-stat-val {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 30px; font-weight: 900; color: #fff; line-height: 1;
+      font-size: 38px; font-weight: 900; color: #fff; line-height: 1;
+      letter-spacing: -0.01em;
     }
     .pm-stat-lbl {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: rgba(255,255,255,0.35);
-      margin-top: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+      margin-top: 7px;
     }
 
     /* 사용 요원 */
-    .pm-agents-title {
+    .pm-agents-section { padding: 0 26px 22px; }
+    .pm-section-label {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: rgba(255,255,255,0.35);
-      margin-bottom: 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+      text-transform: uppercase; color: rgba(255,255,255,0.25);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
     }
-    .pm-agents-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pm-section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent);
+    }
+    .pm-agents-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .pm-agent-item {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      transition: transform 0.15s;
     }
+    .pm-agent-item:hover { transform: translateY(-3px); }
     .pm-agent-img {
-      width: 44px; height: 44px; object-fit: cover; object-position: top center;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.12);
+      width: 52px; height: 52px; object-fit: cover; object-position: top center;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
       background: rgba(255,255,255,0.04);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .pm-agent-item:first-child .pm-agent-img {
+      border-color: rgba(255,180,60,0.5);
+      box-shadow: 0 4px 16px rgba(255,150,30,0.25);
     }
     .pm-agent-count {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5);
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.45);
       letter-spacing: 0.04em;
     }
+    .pm-agent-item:first-child .pm-agent-count { color: rgba(255,200,80,0.9); }
 
     .pm-no-data {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; color: rgba(255,255,255,0.25);
-      text-align: center; padding: 10px 0;
+      font-size: 13px; color: rgba(255,255,255,0.2);
+      text-align: center; padding: 16px 0;
+    }
+
+    /* 구분선 */
+    .pm-divider {
+      height: 1px; margin: 0 26px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
     }
 
     /* 우승 기록 */
+    .pm-wins-section { padding: 22px 26px; }
     .pm-wins-list { display: flex; flex-direction: column; gap: 8px; }
     .pm-win-item {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(255,200,60,0.07);
-      border: 1px solid rgba(255,200,60,0.18);
-      border-radius: 8px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      background: linear-gradient(90deg, rgba(255,200,60,0.08), rgba(255,200,60,0.03));
+      border: 1px solid rgba(255,200,60,0.15);
+      border-radius: 10px; padding: 12px 16px;
+      transition: border-color 0.15s;
     }
-    .pm-win-icon { font-size: 16px; flex-shrink: 0; }
+    .pm-win-item:hover { border-color: rgba(255,200,60,0.3); }
+    .pm-win-icon { font-size: 18px; flex-shrink: 0; }
     .pm-win-text {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 15px; font-weight: 700; letter-spacing: 0.04em;
+      font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
       color: rgba(255,220,100,0.9); flex: 1;
     }
     .pm-win-remove {
       background: none; border: none;
-      color: rgba(255,255,255,0.2); font-size: 16px;
+      color: rgba(255,255,255,0.18); font-size: 16px;
       cursor: pointer; padding: 2px 4px; line-height: 1;
       transition: color 0.12s;
     }
     .pm-win-remove:hover { color: rgba(232,67,45,0.8); }
     .pm-no-wins {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; color: rgba(255,255,255,0.25);
+      font-size: 13px; color: rgba(255,255,255,0.2);
       text-align: center; padding: 10px 0;
     }
 
     /* 우승 추가 (admin) */
-    .pm-win-add-row { display: flex; gap: 8px; margin-top: 10px; }
+    .pm-win-add-row { display: flex; gap: 8px; margin-top: 12px; }
     .pm-win-add-input {
-      flex: 1; background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px; color: #fff;
+      flex: 1; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #fff;
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
-      padding: 8px 12px; outline: none;
+      padding: 9px 14px; outline: none;
       transition: border-color 0.15s;
     }
-    .pm-win-add-input::placeholder { color: rgba(255,255,255,0.2); }
-    .pm-win-add-input:focus { border-color: rgba(255,255,255,0.3); }
+    .pm-win-add-input::placeholder { color: rgba(255,255,255,0.18); }
+    .pm-win-add-input:focus { border-color: rgba(255,200,60,0.4); }
     .pm-win-add-btn {
-      background: rgba(255,200,60,0.15);
-      border: 1px solid rgba(255,200,60,0.35);
-      border-radius: 6px; color: rgba(255,220,100,0.9);
+      background: rgba(255,200,60,0.12);
+      border: 1px solid rgba(255,200,60,0.3);
+      border-radius: 8px; color: rgba(255,220,100,0.9);
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; padding: 8px 16px;
+      text-transform: uppercase; padding: 9px 18px;
       cursor: pointer; transition: background 0.12s; white-space: nowrap;
     }
-    .pm-win-add-btn:hover { background: rgba(255,200,60,0.25); }
+    .pm-win-add-btn:hover { background: rgba(255,200,60,0.22); }
   `;
   var styleEl = document.createElement("style");
   styleEl.textContent = css;
@@ -258,14 +304,16 @@
           </div>
         </div>
 
-        <div class="pm-section">
-          <div class="pm-section-title">경기 스탯</div>
+        <div class="pm-stats-area">
           <div id="pm-stat-cards"></div>
-          <div id="pm-agents-wrap"></div>
         </div>
 
-        <div class="pm-section">
-          <div class="pm-section-title">우승 기록</div>
+        <div class="pm-agents-section" id="pm-agents-wrap"></div>
+
+        <div class="pm-divider"></div>
+
+        <div class="pm-wins-section">
+          <div class="pm-section-label">우승 기록</div>
           <div class="pm-wins-list" id="pm-wins"></div>
           <div class="pm-win-add-row" id="pm-win-add-row" style="display:none">
             <input class="pm-win-add-input" id="pm-win-input" placeholder="예: VCT Masters Santiago 2026" />
@@ -344,7 +392,7 @@
 
     // ── 스탯 계산 ──
     var data = scanStats(name);
-    var cardsEl   = document.getElementById('pm-stat-cards');
+    var cardsEl    = document.getElementById('pm-stat-cards');
     var agentsWrap = document.getElementById('pm-agents-wrap');
 
     if (!data.length) {
@@ -360,14 +408,10 @@
         ? (validKD.reduce(function(s,r){ return s + r.k/r.d; }, 0) / validKD.length).toFixed(2)
         : '—';
 
-      // 출전 맵 수
-      var maps = data.length;
-
       cardsEl.innerHTML =
         '<div class="pm-stat-cards">' +
           '<div class="pm-stat-card"><div class="pm-stat-val">' + avgAcs + '</div><div class="pm-stat-lbl">평균 ACS</div></div>' +
           '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D</div></div>' +
-          '<div class="pm-stat-card"><div class="pm-stat-val">' + maps   + '</div><div class="pm-stat-lbl">출전 맵</div></div>' +
         '</div>';
 
       // 사용 요원 집계 (많이 쓴 순)
@@ -391,7 +435,7 @@
         }).join('');
 
         agentsWrap.innerHTML =
-          '<div class="pm-agents-title">사용 요원</div>' +
+          '<div class="pm-section-label">사용 요원</div>' +
           '<div class="pm-agents-row">' + agentHTML + '</div>';
       } else {
         agentsWrap.innerHTML = '';
