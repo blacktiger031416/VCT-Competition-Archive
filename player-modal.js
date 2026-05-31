@@ -341,6 +341,8 @@
   function scanStats(playerName) {
     var results = [];
     var nameLower = (playerName || '').toLowerCase();
+    var debugKeys = [];   // 디버그용: 어떤 키에서 찾았는지
+
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (!k || !k.startsWith('players:')) continue;
@@ -350,7 +352,6 @@
         Object.keys(d).forEach(function(slot) {
           var p = d[slot];
           if (!p) return;
-          // 이름 비교: 대소문자 무시, 앞뒤 공백 무시
           var pName = (p.name || '').trim().toLowerCase();
           if (pName !== nameLower) return;
 
@@ -362,15 +363,30 @@
             K = parts[0]; D = parts[1];
           }
 
+          debugKeys.push(k + '[' + slot + '] agent=' + p.agent + ' acs=' + p.acs + ' kda=' + p.kda);
           results.push({
-            acs:      (!isNaN(acs) && acs > 0) ? acs : null,   // null = ACS 미입력
-            k:        isNaN(K) ? null : K,
-            d:        isNaN(D) ? null : D,
-            agent:    (p.agent || '').trim()
+            acs:   (!isNaN(acs) && acs > 0) ? acs : null,
+            k:     isNaN(K) ? null : K,
+            d:     isNaN(D) ? null : D,
+            agent: (p.agent || '').trim()
           });
         });
       } catch(e) {}
     }
+
+    // 콘솔에서 확인: 어떤 맵이 매칭됐는지
+    console.group('[player-modal] scanStats: ' + playerName);
+    console.log('총 매칭 맵 수:', results.length);
+    console.log('매칭된 entries:', debugKeys);
+    // players: 키 전체 목록 (이름 없이 저장된 것 확인용)
+    var allPlayerKeys = [];
+    for (var j = 0; j < localStorage.length; j++) {
+      var kk = localStorage.key(j);
+      if (kk && kk.startsWith('players:')) allPlayerKeys.push(kk);
+    }
+    console.log('localStorage의 players: 키 전체 (' + allPlayerKeys.length + '개):', allPlayerKeys);
+    console.groupEnd();
+
     return results;
   }
 
