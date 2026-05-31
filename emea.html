@@ -677,8 +677,9 @@
             var nameVal = d.main[i] || '';
             return '<li class="roster-main-item">' +
               (admin
-                ? '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal + '" placeholder="선수 이름" />'
-                : '<span>' + (nameVal || '—') + '</span>') +
+                ? '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal + '" placeholder="선수 이름" />' +
+                  (nameVal ? '<button class="pm-roster-btn" onclick="openPlayerModal(' + JSON.stringify(nameVal) + ',' + JSON.stringify(current) + ',document.getElementById(\"roster-modal-logo\").innerHTML)" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;flex-shrink:0;transition:color 0.12s" onmouseover=\"this.style.color=\'rgba(255,255,255,0.8)\'\" onmouseout=\"this.style.color=\'rgba(255,255,255,0.3)\'\">↗</button>' : '')
+                : '<span class="pm-player-link" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;opacity:0.85" onclick="openPlayerModal(' + JSON.stringify(nameVal||\"—\") + ',' + JSON.stringify(current) + ',document.getElementById(\"roster-modal-logo\").innerHTML)">' + (nameVal || '—') + '</span>') +
               '</li>';
           }).join("");
           if (admin) {
@@ -735,6 +736,7 @@
       })();
         });
     </script>
+  <script src="./player-modal.js"></script>
   <script src="./auth.js"></script>
 </body>
 </html>
