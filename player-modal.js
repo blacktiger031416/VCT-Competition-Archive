@@ -337,8 +337,10 @@
 
   /* ── localStorage 스탯 스캔 ─────────────────────────────────── */
   // 키 형식: players:MATCH_KEY:mapIdx  →  { a0:{name,agent,kda,acs}, a1:..., b0:..., ... }
+  // name이 일치하는 슬롯을 모두 수집. ACS/KDA 없는 맵도 요원 집계에는 포함.
   function scanStats(playerName) {
     var results = [];
+    var nameLower = (playerName || '').toLowerCase();
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (!k || !k.startsWith('players:')) continue;
@@ -347,19 +349,25 @@
         if (!d || typeof d !== 'object' || Array.isArray(d)) continue;
         Object.keys(d).forEach(function(slot) {
           var p = d[slot];
-          if (!p || p.name !== playerName) return;
+          if (!p) return;
+          // 이름 비교: 대소문자 무시, 앞뒤 공백 무시
+          var pName = (p.name || '').trim().toLowerCase();
+          if (pName !== nameLower) return;
+
           var acs = parseFloat(p.acs);
-          var kda = p.kda || '';
-          var parts = kda.split('/').map(function(x) { return parseFloat(x); });
-          var K = parts[0], D = parts[1];
-          if (!isNaN(acs) && acs > 0) {
-            results.push({
-              acs:   acs,
-              k:     isNaN(K) ? 0 : K,
-              d:     isNaN(D) ? 0 : D,
-              agent: p.agent || ''
-            });
+          var kda = (p.kda || '').trim();
+          var K = NaN, D = NaN;
+          if (kda.indexOf('/') !== -1) {
+            var parts = kda.split('/').map(function(x) { return parseFloat(x); });
+            K = parts[0]; D = parts[1];
           }
+
+          results.push({
+            acs:      (!isNaN(acs) && acs > 0) ? acs : null,   // null = ACS 미입력
+            k:        isNaN(K) ? null : K,
+            d:        isNaN(D) ? null : D,
+            agent:    (p.agent || '').trim()
+          });
         });
       } catch(e) {}
     }
@@ -399,11 +407,14 @@
       cardsEl.innerHTML    = '<div class="pm-no-data">기록된 스탯이 없습니다</div>';
       agentsWrap.innerHTML = '';
     } else {
-      // 평균 ACS
-      var avgAcs = Math.round(data.reduce(function(s,r){ return s+r.acs; }, 0) / data.length);
+      // 평균 ACS: acs가 있는 맵만
+      var acsData = data.filter(function(r){ return r.acs !== null; });
+      var avgAcs = acsData.length
+        ? Math.round(acsData.reduce(function(s,r){ return s + r.acs; }, 0) / acsData.length)
+        : '—';
 
-      // K/D: 각 맵의 K/D 평균
-      var validKD = data.filter(function(r){ return r.d > 0; });
+      // 평균 K/D: K와 D 모두 있는 맵만
+      var validKD = data.filter(function(r){ return r.k !== null && r.d !== null && r.d > 0; });
       var avgKD = validKD.length
         ? (validKD.reduce(function(s,r){ return s + r.k/r.d; }, 0) / validKD.length).toFixed(2)
         : '—';
