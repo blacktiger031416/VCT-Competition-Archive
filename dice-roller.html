@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRPG 주사위 굴리기</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #c9a84c;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    /* ── 빠른 선택 버튼 ── */
+    .quick-section {
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 32px;
+    }
+
+    .quick-label {
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .quick-dice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-btn {
+      background: #16213e;
+      border: 1px solid #2a2a5a;
+      color: #c9a84c;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .quick-btn:hover {
+      background: #1e2f5a;
+      border-color: #c9a84c;
+    }
+
+    .quick-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ── 커스텀 설정 ── */
+    .config-card {
+      background: #16213e;
+      border: 1px solid #2a2a5a;
+      border-radius: 16px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 28px;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .config-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .config-group label {
+      font-size: 0.78rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .config-group .notation {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #c9a84c;
+      text-align: center;
+      padding: 8px 0;
+      letter-spacing: 2px;
+    }
+
+    .number-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid #2a2a5a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .number-control button {
+      background: #1a1a2e;
+      border: none;
+      color: #c9a84c;
+      font-size: 1.4rem;
+      width: 44px;
+      height: 48px;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .number-control button:hover {
+      background: #252550;
+    }
+
+    .number-control input {
+      background: #1a1a2e;
+      border: none;
+      border-left: 1px solid #2a2a5a;
+      border-right: 1px solid #2a2a5a;
+      color: #e0e0e0;
+      font-size: 1.1rem;
+      text-align: center;
+      width: 70px;
+      height: 48px;
+      outline: none;
+    }
+
+    .number-control input::-webkit-inner-spin-button,
+    .number-control input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .roll-btn {
+      background: linear-gradient(135deg, #c9a84c, #e8c56e);
+      border: none;
+      border-radius: 12px;
+      color: #1a1a2e;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 14px 40px;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+      align-self: flex-end;
+    }
+
+    .roll-btn:hover {
+      opacity: 0.9;
+    }
+
+    .roll-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ── 결과 ── */
+    .result-card {
+      background: #16213e;
+      border: 1px solid #2a2a5a;
+      border-radius: 16px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .result-card.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .result-notation {
+      font-size: 1rem;
+      color: #888;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .result-total {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #c9a84c;
+      line-height: 1;
+    }
+
+    .result-total-label {
+      font-size: 0.75rem;
+      color: #888;
+      text-align: right;
+    }
+
+    .dice-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .die-chip {
+      background: #1a1a2e;
+      border: 1px solid #3a3a6a;
+      border-radius: 10px;
+      min-width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .die-chip.max {
+      border-color: #c9a84c;
+      color: #c9a84c;
+      box-shadow: 0 0 10px rgba(201,168,76,0.3);
+    }
+
+    .die-chip.min {
+      border-color: #6a3a3a;
+      color: #c46060;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2a5a;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ccc;
+    }
+
+    /* ── 히스토리 ── */
+    .history-section {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .history-title {
+      font-size: 0.78rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #555;
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .clear-btn:hover {
+      color: #888;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: #16213e;
+      border: 1px solid #2a2a5a;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .history-left {
+      color: #888;
+    }
+
+    .history-notation {
+      font-weight: 600;
+      color: #aaa;
+    }
+
+    .history-detail {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .history-total {
+      font-weight: 700;
+      color: #c9a84c;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⚔️ TRPG 주사위</h1>
+  <p class="subtitle">주사위 개수와 면 수를 설정하고 굴려보세요</p>
+
+  <!-- 빠른 선택 -->
+  <div class="quick-section">
+    <div class="quick-label">빠른 선택</div>
+    <div class="quick-dice">
+      <button class="quick-btn" onclick="quickRoll(1,4)">1D4</button>
+      <button class="quick-btn" onclick="quickRoll(1,6)">1D6</button>
+      <button class="quick-btn" onclick="quickRoll(1,8)">1D8</button>
+      <button class="quick-btn" onclick="quickRoll(1,10)">1D10</button>
+      <button class="quick-btn" onclick="quickRoll(1,12)">1D12</button>
+      <button class="quick-btn" onclick="quickRoll(1,20)">1D20</button>
+      <button class="quick-btn" onclick="quickRoll(1,100)">1D100</button>
+      <button class="quick-btn" onclick="quickRoll(2,6)">2D6</button>
+      <button class="quick-btn" onclick="quickRoll(4,6)">4D6</button>
+    </div>
+  </div>
+
+  <!-- 커스텀 설정 -->
+  <div class="config-card">
+    <div class="config-row">
+
+      <div class="config-group">
+        <label>주사위 개수 (N)</label>
+        <div class="number-control">
+          <button onclick="changeCount(-1)">−</button>
+          <input type="number" id="diceCount" value="1" min="1" max="100" oninput="updateNotation()">
+          <button onclick="changeCount(1)">+</button>
+        </div>
+      </div>
+
+      <div class="config-group" style="flex:0; align-items:center;">
+        <label>&nbsp;</label>
+        <div class="notation" id="notation">1D20</div>
+      </div>
+
+      <div class="config-group">
+        <label>면 수 (D)</label>
+        <div class="number-control">
+          <button onclick="changeFaces(-1)">−</button>
+          <input type="number" id="diceFaces" value="20" min="2" max="10000" oninput="updateNotation()">
+          <button onclick="changeFaces(1)">+</button>
+        </div>
+      </div>
+
+      <button class="roll-btn" onclick="rollDice()">굴리기!</button>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div>
+        <div class="result-notation" id="resultNotation"></div>
+        <div style="margin-top:4px; font-size:0.8rem; color:#555;">결과</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="result-total" id="resultTotal"></div>
+        <div class="result-total-label">합계</div>
+      </div>
+    </div>
+
+    <div class="dice-grid" id="diceGrid"></div>
+
+    <div class="stats-row" id="statsRow"></div>
+  </div>
+
+  <!-- 히스토리 -->
+  <div class="history-section">
+    <div class="history-header">
+      <span class="history-title">기록</span>
+      <button class="clear-btn" onclick="clearHistory()">모두 지우기</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <script>
+    const history = [];
+
+    function getCount() {
+      return Math.max(1, Math.min(100, parseInt(document.getElementById('diceCount').value) || 1));
+    }
+
+    function getFaces() {
+      return Math.max(2, Math.min(10000, parseInt(document.getElementById('diceFaces').value) || 6));
+    }
+
+    function updateNotation() {
+      document.getElementById('notation').textContent = `${getCount()}D${getFaces()}`;
+    }
+
+    function changeCount(delta) {
+      const input = document.getElementById('diceCount');
+      input.value = Math.max(1, Math.min(100, (parseInt(input.value) || 1) + delta));
+      updateNotation();
+    }
+
+    function changeFaces(delta) {
+      const input = document.getElementById('diceFaces');
+      const faces = parseInt(input.value) || 6;
+      // 일반적인 TRPG 면 수 스텝
+      const steps = [2,3,4,6,8,10,12,20,100];
+      if (delta > 0) {
+        const next = steps.find(s => s > faces);
+        input.value = next || Math.min(10000, faces + 1);
+      } else {
+        const prev = [...steps].reverse().find(s => s < faces);
+        input.value = prev || Math.max(2, faces - 1);
+      }
+      updateNotation();
+    }
+
+    function quickRoll(count, faces) {
+      document.getElementById('diceCount').value = count;
+      document.getElementById('diceFaces').value = faces;
+      updateNotation();
+      rollDice();
+    }
+
+    function rollDice() {
+      const count = getCount();
+      const faces = getFaces();
+
+      // 주사위 굴리기
+      const rolls = Array.from({ length: count }, () => Math.floor(Math.random() * faces) + 1);
+      const total = rolls.reduce((a, b) => a + b, 0);
+      const max = Math.max(...rolls);
+      const min = Math.min(...rolls);
+      const avg = (total / count).toFixed(1);
+      const notation = `${count}D${faces}`;
+
+      // 결과 카드
+      const card = document.getElementById('resultCard');
+      card.classList.remove('visible');
+      void card.offsetWidth; // reflow for animation
+      card.classList.add('visible');
+
+      document.getElementById('resultNotation').textContent = notation;
+      document.getElementById('resultTotal').textContent = total;
+
+      // 주사위 칩
+      const grid = document.getElementById('diceGrid');
+      grid.innerHTML = '';
+      rolls.forEach(r => {
+        const chip = document.createElement('div');
+        chip.className = 'die-chip' + (r === faces ? ' max' : r === 1 ? ' min' : '');
+        chip.textContent = r;
+        grid.appendChild(chip);
+      });
+
+      // 통계
+      const statsRow = document.getElementById('statsRow');
+      if (count > 1) {
+        statsRow.style.display = 'flex';
+        statsRow.innerHTML = `
+          <div class="stat"><div class="stat-label">최대</div><div class="stat-value">${max}</div></div>
+          <div class="stat"><div class="stat-label">최소</div><div class="stat-value">${min}</div></div>
+          <div class="stat"><div class="stat-label">평균</div><div class="stat-value">${avg}</div></div>
+          <div class="stat"><div class="stat-label">개수</div><div class="stat-value">${count}개</div></div>
+        `;
+      } else {
+        statsRow.style.display = 'none';
+        statsRow.innerHTML = '';
+      }
+
+      // 히스토리
+      const detail = count <= 10 ? rolls.join(', ') : rolls.slice(0, 10).join(', ') + ` … (+${count - 10}개)`;
+      history.unshift({ notation, total, detail, time: new Date() });
+      if (history.length > 20) history.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (history.length === 0) {
+        list.innerHTML = '';
+        return;
+      }
+      list.innerHTML = history.map((h, i) => `
+        <div class="history-item">
+          <div class="history-left">
+            <div class="history-notation">${h.notation}</div>
+            <div class="history-detail">${h.detail}</div>
+          </div>
+          <div class="history-total">${h.total}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory() {
+      history.length = 0;
+      renderHistory();
+    }
+
+    // 초기 노테이션
+    updateNotation();
+  </script>
+</body>
+</html>

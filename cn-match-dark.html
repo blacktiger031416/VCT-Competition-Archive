@@ -3121,6 +3121,7 @@ function openKda(mapIdx, playerIdx) {
     p.a = parseInt(document.getElementById("inp-a").value) || 0;
     p.kda = p.k + '/' + p.d + '/' + p.a;
     saveFieldSync(mapIdx, playerIdx, 'kda', p.kda);
+    if (p.name && p.name !== '-') saveFieldSync(mapIdx, playerIdx, 'name', p.name);
     renderMap(maps[mapIdx], mapIdx);
     popup.remove();
   };
@@ -3153,6 +3154,7 @@ function openAcsEditor(mapIdx, playerIdx) {
   document.getElementById("btn-acs-save").onclick = () => {
     p.acs = parseInt(document.getElementById("inp-acs").value) || 0;
     saveFieldSync(mapIdx, playerIdx, 'acs', p.acs);
+    if (p.name && p.name !== '-') saveFieldSync(mapIdx, playerIdx, 'name', p.name);
     renderMap(maps[mapIdx], mapIdx);
     popup.remove();
   };
@@ -3317,6 +3319,7 @@ function openAgentPicker(mapIdx, playerIdx) {
       p.agent = btn.dataset.agent;
       applyAgentData(p);
       saveFieldSync(mapIdx, playerIdx, 'agent', p.agent);
+    if (p.name && p.name !== '-') saveFieldSync(mapIdx, playerIdx, 'name', p.name);
       renderMap(m, mapIdx);
       popup.remove();
     }
