@@ -288,18 +288,21 @@
   function saveWins(n, a) { try { localStorage.setItem(winsKey(n), JSON.stringify(a)); } catch(e) {} }
 
   /* ── localStorage 스탯 스캔 ─────────────────────────────────── */
+  // 키 형식: players:MATCH_KEY:mapIdx  →  { a0:{name,agent,kda,acs}, a1:..., b0:..., ... }
   function scanStats(playerName) {
     var results = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
-      if (!k || !k.startsWith('stats:')) continue;
+      if (!k || !k.startsWith('players:')) continue;
       try {
         var d = JSON.parse(localStorage.getItem(k));
-        if (!d || !Array.isArray(d.players)) continue;
-        d.players.forEach(function(p) {
+        if (!d || typeof d !== 'object' || Array.isArray(d)) continue;
+        Object.keys(d).forEach(function(slot) {
+          var p = d[slot];
           if (!p || p.name !== playerName) return;
           var acs = parseFloat(p.acs);
-          var parts = (p.kda || '').split('/').map(function(x) { return parseFloat(x); });
+          var kda = p.kda || '';
+          var parts = kda.split('/').map(function(x) { return parseFloat(x); });
           var K = parts[0], D = parts[1];
           if (!isNaN(acs) && acs > 0) {
             results.push({
