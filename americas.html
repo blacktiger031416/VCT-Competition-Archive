@@ -651,33 +651,59 @@
           save(current, d);
         }
 
+        function getLogoHTML() {
+          var el = document.getElementById("roster-modal-logo");
+          return el ? el.innerHTML : "";
+        }
+
+        function attachPlayerClick(el) {
+          var pName = el.getAttribute("data-player");
+          if (!pName) return;
+          el.addEventListener("click", function() {
+            if (window.openPlayerModal) window.openPlayerModal(pName, current, getLogoHTML());
+          });
+          el.style.cursor = "pointer";
+        }
+
         function render() {
           if (!current) return;
           var d = load(current);
           var admin = window.vctIsAdmin && window.vctIsAdmin();
+
+          // 메인 선수
           mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
             var nameVal = d.main[i] || '';
-            return '<li class="roster-main-item">' +
-              (admin
-                ? '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal + '" placeholder="선수 이름" />' +
-                  (nameVal ? '<button class="pm-roster-btn" onclick="openPlayerModal(' + JSON.stringify(nameVal) + ',' + JSON.stringify(current) + ',document.getElementById(\"roster-modal-logo\").innerHTML)" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;flex-shrink:0;transition:color 0.12s" onmouseover=\"this.style.color=\'rgba(255,255,255,0.8)\'\" onmouseout=\"this.style.color=\'rgba(255,255,255,0.3)\'\">↗</button>' : '')
-                : '<span class="pm-player-link" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;opacity:0.85" onclick="openPlayerModal(' + JSON.stringify(nameVal||\"—\") + ',' + JSON.stringify(current) + ',document.getElementById(\"roster-modal-logo\").innerHTML)">' + (nameVal || '—') + '</span>') +
-              '</li>';
+            if (admin) {
+              return '<li class="roster-main-item">' +
+                '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal.replace(/"/g,'&quot;') + '" placeholder="선수 이름" />' +
+                (nameVal ? '<button class="pm-roster-btn" data-player="' + nameVal.replace(/"/g,'&quot;') + '" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↗</button>' : '') +
+                '</li>';
+            } else {
+              return '<li class="roster-main-item">' +
+                '<span data-player="' + nameVal.replace(/"/g,'&quot;') + '" style="opacity:0.85">' + (nameVal || '—') + '</span>' +
+                '</li>';
+            }
           }).join("");
+
+          mainEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
           if (admin) {
             mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
               inp.addEventListener("blur", saveMain);
               inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
             });
           }
+
+          // 서브 선수
           if (!d.subs.length) {
             subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
           } else {
             subEl.innerHTML = d.subs.map(function(p, i) {
-              return '<li><span>' + p + '</span>' +
+              return '<li>' +
+                '<span data-player="' + p.replace(/"/g,'&quot;') + '" style="flex:1;opacity:0.85">' + p + '</span>' +
                 (admin ? '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button>' : '') +
                 '</li>';
             }).join("");
+            subEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
             if (admin) {
               subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
                 btn.addEventListener("click", function() {
