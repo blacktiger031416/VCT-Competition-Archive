@@ -382,6 +382,16 @@
         flex-shrink: 0;
       }
       .roster-modal-close:hover { color: #fff; }
+      .roster-section-label {
+        display: block;
+        padding: 12px 20px 6px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+      }
       .roster-player-list {
         list-style: none;
         max-height: 300px;
@@ -625,7 +635,7 @@
         <ul class="roster-player-list" id="roster-main-list"></ul>
         <span class="roster-section-label" style="margin-top:2px">서브 선수</span>
         <ul class="roster-player-list" id="roster-sub-list"></ul>
-        <div class="roster-add-row">
+        <div class="roster-add-row" id="roster-add-row">
           <input type="text" id="roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
           <button class="roster-add-btn" id="roster-add-btn">추가</button>
         </div>
@@ -687,8 +697,10 @@
           render();
           modal.removeAttribute("hidden");
           document.body.classList.add("roster-open");
+          var addRow = document.getElementById("roster-add-row");
+          if (addRow) addRow.style.display = (window.vctIsAdmin && window.vctIsAdmin()) ? "flex" : "none";
           input.value = "";
-          setTimeout(() => input.focus(), 260);
+          if (window.vctIsAdmin && window.vctIsAdmin()) setTimeout(() => input.focus(), 260);
         }
 
         function close() {
@@ -707,29 +719,39 @@
         function render() {
           if (!current) return;
           var d = load(current);
+          var admin = window.vctIsAdmin && window.vctIsAdmin();
           mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
+            var nameVal = d.main[i] || '';
             return '<li class="roster-main-item"><span class="player-index">' + (i+1) + '</span>' +
-              '<input class="roster-main-input" data-i="' + i + '" value="' + (d.main[i] || '') + '" placeholder="선수 이름" /></li>';
+              (admin
+                ? '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal + '" placeholder="선수 이름" />'
+                : '<span>' + (nameVal || '—') + '</span>') +
+              '</li>';
           }).join("");
-          mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
-            inp.addEventListener("blur", saveMain);
-            inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
-          });
+          if (admin) {
+            mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
+              inp.addEventListener("blur", saveMain);
+              inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
+            });
+          }
           if (!d.subs.length) {
             subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
           } else {
             subEl.innerHTML = d.subs.map(function(p, i) {
               return '<li><span class="player-index">' + (i+1) + '</span><span>' + p + '</span>' +
-                '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button></li>';
+                (admin ? '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button>' : '') +
+                '</li>';
             }).join("");
-            subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
-              btn.addEventListener("click", function() {
-                var d = load(current);
-                d.subs.splice(Number(btn.dataset.sub), 1);
-                save(current, d);
-                render();
+            if (admin) {
+              subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                  var d = load(current);
+                  d.subs.splice(Number(btn.dataset.sub), 1);
+                  save(current, d);
+                  render();
+                });
               });
-            });
+            }
           }
         }
 
