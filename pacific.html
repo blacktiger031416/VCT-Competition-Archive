@@ -722,7 +722,7 @@
           var admin = window.vctIsAdmin && window.vctIsAdmin();
           mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
             var nameVal = d.main[i] || '';
-            return '<li class="roster-main-item"><span class="player-index">' + (i+1) + '</span>' +
+            return '<li class="roster-main-item">' +
               (admin
                 ? '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal + '" placeholder="선수 이름" />'
                 : '<span>' + (nameVal || '—') + '</span>') +
@@ -738,7 +738,7 @@
             subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
           } else {
             subEl.innerHTML = d.subs.map(function(p, i) {
-              return '<li><span class="player-index">' + (i+1) + '</span><span>' + p + '</span>' +
+              return '<li><span>' + p + '</span>' +
                 (admin ? '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button>' : '') +
                 '</li>';
             }).join("");
