@@ -1,5 +1,38 @@
 (function () {
-  /* ── CSS ─────────────────────────────────────────────── */
+  /* ── 요원 이미지 맵 ─────────────────────────────────────────── */
+  var AGENT_IMGS = {
+    게코:    "https://c-valorant-api.op.gg/Assets/Characters/E370FA57-4757-3604-3648-499E1F642D3F_small.png",
+    네온:    "https://i.namu.wiki/i/4ogqg4lB9_G5JKxp145jlSjbzSxRhhXDpUJeoMqSuUnkHrNsHUNj969wyGMvKuYhkd-gDucOmRVlGYFBdHyU2w.webp",
+    데드록:  "https://i.namu.wiki/i/7-QoPRINetjBCUblJjq6oPK_4HHAtH10nsD5vATNG3hwqMxCLRa0GJTZOM_us3WvSHK91b965Eo7VoF7hXEpew.webp",
+    레이나:  "https://i.namu.wiki/i/THZZ8MlhetJzmWZNYTsHi69SPcjCnuQwkbgkHoM8SF7cbgXpvNg2gXSlEpPec_SXHX08Y3gDP2llILTFdRRbdQ.webp",
+    레이즈:  "https://i.namu.wiki/i/14BBGZHNg2x0JYMy6x87Oo2Qlg3jp7GqxhMhGFJ5uYg2vspQXtK7vxJpcak1uFZ_k9vPr6znt6KJcihHw3L_bg.webp",
+    믹스:    "https://i.namu.wiki/i/u_CwGnSZJSLW7tsqGYzZZ9VqPM8vXa4tmmbLElugjV5pOZaoZLrHyBvoWk4mCMtLZGf3CorG6g_N12ZrWjLIPg.webp",
+    바이스:  "https://i.namu.wiki/i/RoVLjmYPHlDcLzy3QwkUOV4MsxdnKFAQAUY_s6H8nB4N_RStAD_TQlSW0RNpkRuCgmY24qQPICqu4fiCVApKcg.webp",
+    바이퍼:  "https://i.namu.wiki/i/Vqp-AY0l-Xe8qK7Ef4FVmjYnOQ99Gj0M1ozbDZjmxibcEJocsbDGUDtEr4FNsTpTq_SyjjWVdJxHWOYgAxywew.webp",
+    브리치:  "https://i.namu.wiki/i/situ_MvKaWMojZasDwAzJ2jN-5Rp__8FRbWxmFuBjDfvVfK0xZ2ER_9fYNluAsUd_h5cFYkufQSuTNH_DKVuJQ.webp",
+    브림스톤: "https://i.namu.wiki/i/UvL7SmnIwxyZuVEHFnHlwPpMTQlD0RhmAlm-gIfTyctIrb3Vnmor4A_nRiKCQlYMxIxi7G73NITfwQIt27Xvzw.webp",
+    비토:    "https://i.namu.wiki/i/k7MZL2YWWu7DT9fcrySpYk2HioLYi80nJjgYHB2l24XiupY3Oebneq9aMJIXe7UqAL9sMd51Z7m_3hZOeSx7jQ.webp",
+    사이퍼:  "https://i.namu.wiki/i/-XPO1Vou13Z8Feqn27wFFqHLg9Olt4vEAt9VB8b8Gfwx7MZugISCbWmekrWjnaI5PONSHtu0zZitKXUb8jZI9w.webp",
+    세이지:  "https://i.namu.wiki/i/jqodeZWsC3MyJzJ8DwABim3K0uuZ37PgksNux_GREfl65HoYrX0L2XIs4cTdm0cpwP7Db1z73YnbpHMctb6hiQ.webp",
+    소바:    "https://c-valorant-api.op.gg/Assets/Characters/320B2A48-4D9B-A075-30F1-1F93A9B638FA_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+    스카이:  "https://i.namu.wiki/i/GfJ7jOzMvNyDGYYCGcmB69dMe2StOUhtsS1jVJzZ3Ul_vht-RwymHwQm2znxrdKGOgnOzxq66ygZupY2bwYetg.webp",
+    아스트라: "https://c-valorant-api.op.gg/Assets/Characters/41FB69C1-4189-7B37-F117-BCAF1E96F1BF_small.png?image=q_auto:good,f_webp,w_200&v=1776341444",
+    아이소:  "https://i.namu.wiki/i/JrF8spBoOI0_cV6S3URHYZ9g2EpLqbugUcxNkW6Vbp60Ig6FZdXDDLNisS7suS92OrcRxH3muHmBDrhuAtrIsQ.webp",
+    오멘:    "https://i.namu.wiki/i/8LpnTIlczZAC81pGY3gcZeLs_6e8C-s43OZR7o2F6JucSs60HPDxnQ_vs4Fk_8HDq1VlGIK8WvjJhZDdQmsfwQ.webp",
+    요루:    "https://i.namu.wiki/i/O8_5nw3EgYWhLraoQ5qj2ooaTQGqhTNhVou0an9A2A4o5Uy7SSr3O8C7nwmub1jzssrRziii5qcwjq8-ACZwkA.webp",
+    웨이레이: "https://i.namu.wiki/i/Kj83E8_P6KTeg8NR0oXc5HiK9bo8_nnHymVoTvrwv8XgUhKrQH8Mf-mCAOaOYBYYbY3NtxbOtnU4rioCjjIafg.webp",
+    제트:    "https://i.namu.wiki/i/_ScoZkw_dp5eGn66y8GXGqzGRHAUQiZD-AEGqpt0FQTpO3sLAdALfP37rzLppNRUFUK505MkSXf31Es-p2hE0g.webp",
+    체임버:  "https://i.namu.wiki/i/kH9bgltG2hlwvNGUr64utZLO7V03cYI0itwIpVwR0H3GLeQ0v1lWeSgZr3QnLzJLaq5OChM9jZ20vSEO-UXysA.webp",
+    케이오:  "https://valorantinfo.com/images/kr/kayo_valorant_icon_3589.webp",
+    클로브:  "https://i.namu.wiki/i/l-OTVsdNYqe6PE3GsUHe4gzw7YbMcLtX831Y7ofn0Ta5gyMdFNqFJp8VVSsoqocBJMit8HFGz_If4e8cnQZbnw.webp",
+    킬조이:  "https://media.valorant-api.com/agents/1e58de9c-4950-5125-93e9-a0aee9f98746/displayicon.png",
+    테호:    "https://i.namu.wiki/i/DczhNjwRqUiOwhoL-DPhCm9EzpbQU3JkqmZzbwz3DF_nkuyFNtbB4sxAaY_bFm3D0h8ZuMre85zAwX7C50UVgA.webp",
+    페이드:  "https://media.valorant-api.com/agents/dade69b4-4f5a-8528-247b-219e5a1facd6/displayicon.png",
+    피닉스:  "https://valorantinfo.com/images/kr/phoenix_valorant_icon_3596.webp",
+    하버:    "https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
+  };
+
+  /* ── CSS ─────────────────────────────────────────────────────── */
   var css = `
     .pm-overlay {
       position: fixed; inset: 0; z-index: 9999;
@@ -13,7 +46,7 @@
     }
     .pm-panel {
       position: relative; z-index: 1;
-      width: min(560px, calc(100vw - 24px));
+      width: min(580px, calc(100vw - 24px));
       max-height: 90vh; overflow-y: auto;
       background: #111a28;
       border: 1px solid rgba(255,255,255,0.1);
@@ -38,9 +71,7 @@
       width: 52px; height: 52px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
     }
-    .pm-team-logo-wrap img {
-      width: 100%; height: 100%; object-fit: contain;
-    }
+    .pm-team-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
     .pm-header-text { flex: 1; min-width: 0; }
     .pm-player-name {
       font-family: 'Barlow Condensed', sans-serif;
@@ -63,7 +94,7 @@
     }
     .pm-close:hover { color: #fff; }
 
-    /* 기본 정보 편집 (admin) */
+    /* admin 기본정보 편집 */
     .pm-info-edit {
       display: flex; gap: 10px;
       padding: 14px 22px;
@@ -98,19 +129,15 @@
     }
 
     /* 스탯 카드 */
-    .pm-stat-cards {
-      display: flex; gap: 10px;
-    }
+    .pm-stat-cards { display: flex; gap: 10px; margin-bottom: 20px; }
     .pm-stat-card {
       flex: 1; background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; padding: 14px 10px;
-      text-align: center;
+      border-radius: 8px; padding: 14px 10px; text-align: center;
     }
     .pm-stat-val {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 28px; font-weight: 900;
-      color: #fff; line-height: 1;
+      font-size: 30px; font-weight: 900; color: #fff; line-height: 1;
     }
     .pm-stat-lbl {
       font-family: 'Barlow Condensed', sans-serif;
@@ -118,7 +145,31 @@
       text-transform: uppercase; color: rgba(255,255,255,0.35);
       margin-top: 6px;
     }
-    .pm-no-stats {
+
+    /* 사용 요원 */
+    .pm-agents-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+    }
+    .pm-agents-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pm-agent-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .pm-agent-img {
+      width: 44px; height: 44px; object-fit: cover; object-position: top center;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+    }
+    .pm-agent-count {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+    }
+
+    .pm-no-data {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; color: rgba(255,255,255,0.25);
       text-align: center; padding: 10px 0;
@@ -152,15 +203,12 @@
     }
 
     /* 우승 추가 (admin) */
-    .pm-win-add-row {
-      display: flex; gap: 8px; margin-top: 10px;
-    }
+    .pm-win-add-row { display: flex; gap: 8px; margin-top: 10px; }
     .pm-win-add-input {
-      flex: 1;
-      background: rgba(255,255,255,0.06);
+      flex: 1; background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
-      color: #fff; font-family: 'Barlow Condensed', sans-serif;
+      border-radius: 6px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
       padding: 8px 12px; outline: none;
       transition: border-color 0.15s;
@@ -174,8 +222,7 @@
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
       text-transform: uppercase; padding: 8px 16px;
-      cursor: pointer; transition: background 0.12s;
-      white-space: nowrap;
+      cursor: pointer; transition: background 0.12s; white-space: nowrap;
     }
     .pm-win-add-btn:hover { background: rgba(255,200,60,0.25); }
   `;
@@ -183,8 +230,9 @@
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
 
-  /* ── HTML 삽입 ──────────────────────────────────────── */
-  var html = `
+  /* ── HTML ────────────────────────────────────────────────────── */
+  var el = document.createElement("div");
+  el.innerHTML = `
     <div id="player-modal" class="pm-overlay" hidden>
       <div class="pm-backdrop" id="pm-backdrop"></div>
       <div class="pm-panel">
@@ -199,7 +247,6 @@
           <button class="pm-close" id="pm-close">×</button>
         </div>
 
-        <!-- admin 기본정보 편집 -->
         <div class="pm-info-edit" id="pm-info-edit" style="display:none">
           <div class="pm-info-field">
             <span class="pm-info-label">국가</span>
@@ -211,13 +258,12 @@
           </div>
         </div>
 
-        <!-- 경기 스탯 -->
         <div class="pm-section">
           <div class="pm-section-title">경기 스탯</div>
-          <div id="pm-stats"></div>
+          <div id="pm-stat-cards"></div>
+          <div id="pm-agents-wrap"></div>
         </div>
 
-        <!-- 우승 기록 -->
         <div class="pm-section">
           <div class="pm-section-title">우승 기록</div>
           <div class="pm-wins-list" id="pm-wins"></div>
@@ -229,30 +275,19 @@
       </div>
     </div>
   `;
-  var wrapper = document.createElement("div");
-  wrapper.innerHTML = html;
-  document.body.appendChild(wrapper.firstElementChild);
+  document.body.appendChild(el.firstElementChild);
 
-  /* ── 상태 ────────────────────────────────────────────── */
-  var _current = null; // 현재 선수 이름
+  /* ── 상태 ────────────────────────────────────────────────────── */
+  var _current = null;
 
-  function metaKey(name)  { return 'vct_player_meta:' + name; }
-  function winsKey(name)  { return 'vct_player_wins:' + name; }
+  function metaKey(n) { return 'vct_player_meta:' + n; }
+  function winsKey(n) { return 'vct_player_wins:' + n; }
+  function loadMeta(n) { try { return JSON.parse(localStorage.getItem(metaKey(n)) || '{}'); } catch(e) { return {}; } }
+  function saveMeta(n, o) { try { localStorage.setItem(metaKey(n), JSON.stringify(o)); } catch(e) {} }
+  function loadWins(n) { try { return JSON.parse(localStorage.getItem(winsKey(n)) || '[]'); } catch(e) { return []; } }
+  function saveWins(n, a) { try { localStorage.setItem(winsKey(n), JSON.stringify(a)); } catch(e) {} }
 
-  function loadMeta(name) {
-    try { return JSON.parse(localStorage.getItem(metaKey(name)) || '{}'); } catch(e) { return {}; }
-  }
-  function saveMeta(name, obj) {
-    try { localStorage.setItem(metaKey(name), JSON.stringify(obj)); } catch(e) {}
-  }
-  function loadWins(name) {
-    try { return JSON.parse(localStorage.getItem(winsKey(name)) || '[]'); } catch(e) { return []; }
-  }
-  function saveWins(name, arr) {
-    try { localStorage.setItem(winsKey(name), JSON.stringify(arr)); } catch(e) {}
-  }
-
-  /* ── 스탯 스캔 ───────────────────────────────────────── */
+  /* ── localStorage 스탯 스캔 ─────────────────────────────────── */
   function scanStats(playerName) {
     var results = [];
     for (var i = 0; i < localStorage.length; i++) {
@@ -263,10 +298,16 @@
         if (!d || !Array.isArray(d.players)) continue;
         d.players.forEach(function(p) {
           if (!p || p.name !== playerName) return;
-          var acsNum = parseFloat(p.acs);
-          var kdaParts = (p.kda || '').split('/').map(Number);
-          if (!isNaN(acsNum) && acsNum > 0) {
-            results.push({ acs: acsNum, k: kdaParts[0] || 0, d: kdaParts[1] || 0, a: kdaParts[2] || 0 });
+          var acs = parseFloat(p.acs);
+          var parts = (p.kda || '').split('/').map(function(x) { return parseFloat(x); });
+          var K = parts[0], D = parts[1];
+          if (!isNaN(acs) && acs > 0) {
+            results.push({
+              acs:   acs,
+              k:     isNaN(K) ? 0 : K,
+              d:     isNaN(D) ? 0 : D,
+              agent: p.agent || ''
+            });
           }
         });
       } catch(e) {}
@@ -274,7 +315,7 @@
     return results;
   }
 
-  /* ── 렌더 ────────────────────────────────────────────── */
+  /* ── 렌더 ────────────────────────────────────────────────────── */
   function render() {
     if (!_current) return;
     var name  = _current.name;
@@ -282,13 +323,13 @@
     var meta  = loadMeta(name);
     var wins  = loadWins(name);
 
-    // 메타 표시
-    var metaParts = [];
-    if (meta.country) metaParts.push(meta.country);
-    if (meta.role)    metaParts.push(meta.role);
-    document.getElementById('pm-meta').textContent = metaParts.join(' · ') || '—';
+    // 메타 텍스트
+    var parts = [];
+    if (meta.country) parts.push(meta.country);
+    if (meta.role)    parts.push(meta.role);
+    document.getElementById('pm-meta').textContent = parts.join(' · ') || '—';
 
-    // admin 편집 칸
+    // admin 편집
     var editRow = document.getElementById('pm-info-edit');
     if (admin) {
       editRow.style.display = 'flex';
@@ -298,26 +339,63 @@
       editRow.style.display = 'none';
     }
 
-    // 스탯
-    var statsEl = document.getElementById('pm-stats');
-    var statData = scanStats(name);
-    if (!statData.length) {
-      statsEl.innerHTML = '<div class="pm-no-stats">기록된 스탯이 없습니다</div>';
+    // ── 스탯 계산 ──
+    var data = scanStats(name);
+    var cardsEl   = document.getElementById('pm-stat-cards');
+    var agentsWrap = document.getElementById('pm-agents-wrap');
+
+    if (!data.length) {
+      cardsEl.innerHTML    = '<div class="pm-no-data">기록된 스탯이 없습니다</div>';
+      agentsWrap.innerHTML = '';
     } else {
-      var avgAcs = Math.round(statData.reduce(function(s,r){ return s+r.acs; }, 0) / statData.length);
-      var totK = statData.reduce(function(s,r){ return s+r.k; }, 0);
-      var totD = statData.reduce(function(s,r){ return s+r.d; }, 0);
-      var totA = statData.reduce(function(s,r){ return s+r.a; }, 0);
-      var kda  = totD ? ((totK + totA * 0.5) / totD).toFixed(2) : (totK + totA * 0.5).toFixed(2);
-      statsEl.innerHTML =
+      // 평균 ACS
+      var avgAcs = Math.round(data.reduce(function(s,r){ return s+r.acs; }, 0) / data.length);
+
+      // K/D: 각 맵의 K/D 평균
+      var validKD = data.filter(function(r){ return r.d > 0; });
+      var avgKD = validKD.length
+        ? (validKD.reduce(function(s,r){ return s + r.k/r.d; }, 0) / validKD.length).toFixed(2)
+        : '—';
+
+      // 출전 맵 수
+      var maps = data.length;
+
+      cardsEl.innerHTML =
         '<div class="pm-stat-cards">' +
           '<div class="pm-stat-card"><div class="pm-stat-val">' + avgAcs + '</div><div class="pm-stat-lbl">평균 ACS</div></div>' +
-          '<div class="pm-stat-card"><div class="pm-stat-val">' + kda   + '</div><div class="pm-stat-lbl">평균 KDA</div></div>' +
-          '<div class="pm-stat-card"><div class="pm-stat-val">' + statData.length + '</div><div class="pm-stat-lbl">출전 맵</div></div>' +
+          '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D</div></div>' +
+          '<div class="pm-stat-card"><div class="pm-stat-val">' + maps   + '</div><div class="pm-stat-lbl">출전 맵</div></div>' +
         '</div>';
+
+      // 사용 요원 집계 (많이 쓴 순)
+      var agentCount = {};
+      data.forEach(function(r) {
+        if (!r.agent) return;
+        agentCount[r.agent] = (agentCount[r.agent] || 0) + 1;
+      });
+      var agentList = Object.keys(agentCount).sort(function(a,b){ return agentCount[b] - agentCount[a]; });
+
+      if (agentList.length) {
+        var agentHTML = agentList.map(function(ag) {
+          var imgUrl = AGENT_IMGS[ag] || '';
+          var cnt    = agentCount[ag];
+          return '<div class="pm-agent-item">' +
+            (imgUrl
+              ? '<img class="pm-agent-img" src="' + imgUrl + '" alt="' + ag + '" title="' + ag + '" />'
+              : '<div class="pm-agent-img" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.3)">' + ag + '</div>') +
+            '<span class="pm-agent-count">' + cnt + '</span>' +
+          '</div>';
+        }).join('');
+
+        agentsWrap.innerHTML =
+          '<div class="pm-agents-title">사용 요원</div>' +
+          '<div class="pm-agents-row">' + agentHTML + '</div>';
+      } else {
+        agentsWrap.innerHTML = '';
+      }
     }
 
-    // 우승 기록
+    // ── 우승 기록 ──
     var winsEl = document.getElementById('pm-wins');
     if (!wins.length) {
       winsEl.innerHTML = '<div class="pm-no-wins">우승 기록이 없습니다</div>';
@@ -327,7 +405,7 @@
           '<span class="pm-win-icon">🏆</span>' +
           '<span class="pm-win-text">' + w + '</span>' +
           (admin ? '<button class="pm-win-remove" data-idx="' + i + '">×</button>' : '') +
-          '</div>';
+        '</div>';
       }).join('');
       if (admin) {
         winsEl.querySelectorAll('.pm-win-remove').forEach(function(btn) {
@@ -340,17 +418,14 @@
         });
       }
     }
-
-    // 우승 추가칸 (admin)
     document.getElementById('pm-win-add-row').style.display = admin ? 'flex' : 'none';
   }
 
-  /* ── 열기/닫기 ───────────────────────────────────────── */
+  /* ── 열기/닫기 ───────────────────────────────────────────────── */
   function open(playerName, teamName, logoHTML) {
     _current = { name: playerName, team: teamName };
     document.getElementById('pm-name').textContent = playerName;
-    var logoEl = document.getElementById('pm-logo');
-    logoEl.innerHTML = logoHTML || '';
+    document.getElementById('pm-logo').innerHTML   = logoHTML || '';
     render();
     document.getElementById('player-modal').removeAttribute('hidden');
   }
@@ -360,15 +435,12 @@
     _current = null;
   }
 
-  /* ── 이벤트 ──────────────────────────────────────────── */
+  /* ── 이벤트 ──────────────────────────────────────────────────── */
   document.getElementById('pm-close').addEventListener('click', close);
   document.getElementById('pm-backdrop').addEventListener('click', close);
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') close();
-  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 
-  // admin: 기본정보 저장 (blur)
-  ['pm-inp-country', 'pm-inp-role'].forEach(function(id) {
+  ['pm-inp-country','pm-inp-role'].forEach(function(id) {
     document.getElementById(id).addEventListener('blur', function() {
       if (!_current) return;
       var meta = loadMeta(_current.name);
@@ -379,7 +451,6 @@
     });
   });
 
-  // admin: 우승 추가
   function addWin() {
     if (!_current) return;
     var inp = document.getElementById('pm-win-input');
@@ -396,6 +467,5 @@
     if (e.key === 'Enter') addWin();
   });
 
-  /* ── 외부 공개 ───────────────────────────────────────── */
   window.openPlayerModal = open;
 })();
