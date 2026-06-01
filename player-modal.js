@@ -213,7 +213,7 @@
       letter-spacing: 0.08em;
       color: #fff; margin: 0; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-shadow: 0 0 40px rgba(255,100,100,0.4);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.6);
     }
     .pm-player-meta {
       font-family: 'Barlow Condensed', sans-serif;
