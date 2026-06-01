@@ -25,6 +25,37 @@ pool.query(`
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+/* ── SSE: 실시간 브로드캐스트 ────────────────────── */
+const sseClients = new Set();
+
+app.get("/api/events", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  /* 25초마다 ping (프록시/방화벽 연결 유지) */
+  const ping = setInterval(() => {
+    try { res.write(": ping\n\n"); } catch (e) { cleanup(); }
+  }, 25000);
+
+  sseClients.add(res);
+
+  function cleanup() {
+    clearInterval(ping);
+    sseClients.delete(res);
+  }
+  req.on("close", cleanup);
+  req.on("error", cleanup);
+});
+
+function broadcast(payload) {
+  const msg = `data: ${JSON.stringify(payload)}\n\n`;
+  sseClients.forEach((client) => {
+    try { client.write(msg); } catch (e) { sseClients.delete(client); }
+  });
+}
+
 /* ── API: 전체 데이터 조회 ────────────────────────── */
 app.get("/api/data/all", async (req, res) => {
   try {
@@ -61,6 +92,8 @@ app.post("/api/data/:key", async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
       [key, String(value)]
     );
+    /* 실시간 브로드캐스트 */
+    broadcast({ type: "set", key, value: String(value) });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -72,6 +105,8 @@ app.delete("/api/data/:key", async (req, res) => {
   const key = decodeURIComponent(req.params.key);
   try {
     await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    /* 실시간 브로드캐스트 */
+    broadcast({ type: "delete", key });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
