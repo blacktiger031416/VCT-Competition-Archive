@@ -679,9 +679,14 @@
       .filter(function(g) { return getGroupSortKey(g) !== 999 && buildGroupLabel(g.league, g.tournament, g.stage) !== ''; })
       .sort(function(a, b) { return getGroupSortKey(a) - getGroupSortKey(b); });
 
-    // '전체' 항목
-    var totalCount = allMaps.length;
-    var items = [{ key: 'all', label: '전체', count: totalCount }].concat(groups);
+    // '전체' 카운트 = 인식된 그룹 맵 합산 (기타 제외)
+    var knownKeySet = {};
+    groups.forEach(function(g) { knownKeySet[g.key] = true; });
+    var recognizedCount = allMaps.filter(function(m) {
+      return knownKeySet[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
+    }).length;
+
+    var items = [{ key: 'all', label: '전체', count: recognizedCount }].concat(groups);
 
     listEl.innerHTML = items.map(function(g) {
       var isSel = _activeFilter === g.key;
@@ -748,17 +753,31 @@
     }
 
     /* ── 필터 버튼 업데이트 ── */
-    var allMaps  = pd.maps || [];
-    var groups   = buildFilterGroups(allMaps);
+    var allMaps   = pd.maps || [];
+    var groups    = buildFilterGroups(allMaps);
     var filterBar = document.getElementById('pm-filter-bar');
     var filterBtn = document.getElementById('pm-filter-btn');
 
-    if (groups.length >= 1) {
+    // 인식된 그룹만 (기타 제외, 정렬)
+    var knownGroups = groups
+      .filter(function(g) { return getGroupSortKey(g) !== 999 && buildGroupLabel(g.league, g.tournament, g.stage) !== ''; })
+      .sort(function(a, b) { return getGroupSortKey(a) - getGroupSortKey(b); });
+
+    // 인식된 그룹 키 집합
+    var knownKeySet2 = {};
+    knownGroups.forEach(function(g) { knownKeySet2[g.key] = true; });
+
+    // 인식된 맵만 (기타 제외)
+    var recognizedMaps = allMaps.filter(function(m) {
+      return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
+    });
+
+    if (knownGroups.length >= 1) {
       filterBar.style.display = 'flex';
 
       // 현재 필터가 유효한지 확인 (없는 그룹이면 'all'로 리셋)
       if (_activeFilter !== 'all') {
-        var validKeys = groups.map(function(g) { return g.key; });
+        var validKeys = knownGroups.map(function(g) { return g.key; });
         if (validKeys.indexOf(_activeFilter) === -1) _activeFilter = 'all';
       }
 
@@ -766,14 +785,14 @@
       var currentLabel, currentCount;
       if (_activeFilter === 'all') {
         currentLabel = '전체';
-        currentCount = allMaps.length;
+        currentCount = recognizedMaps.length; // 기타 제외
       } else {
         var activeGroup = null;
-        for (var gi = 0; gi < groups.length; gi++) {
-          if (groups[gi].key === _activeFilter) { activeGroup = groups[gi]; break; }
+        for (var gi = 0; gi < knownGroups.length; gi++) {
+          if (knownGroups[gi].key === _activeFilter) { activeGroup = knownGroups[gi]; break; }
         }
         currentLabel = activeGroup ? activeGroup.label : '전체';
-        currentCount = activeGroup ? activeGroup.count : allMaps.length;
+        currentCount = activeGroup ? activeGroup.count : recognizedMaps.length;
       }
 
       document.getElementById('pm-filter-btn-label').textContent = currentLabel;
@@ -790,7 +809,7 @@
 
     /* ── 필터 적용 ── */
     var maps = _activeFilter === 'all'
-      ? allMaps
+      ? recognizedMaps  // 기타 맵 제외
       : allMaps.filter(function(m) {
           var key = (m.league || '') + '|' + (m.tournament || '') + '|' + (m.stage || '');
           return key === _activeFilter;
