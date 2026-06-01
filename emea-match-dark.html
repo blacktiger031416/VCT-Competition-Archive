@@ -1691,6 +1691,7 @@ var MATCH_DATE  = _params.get('date')   || '04.26';
 var MATCH_TEAM_A = _params.get('teamA') || 'Nongshim RedForce';
 var MATCH_TEAM_B = _params.get('teamB') || 'Team Secret';
 var MATCH_FROM  = _params.get('from')   || 'stage1';
+var LEAGUE      = 'emea';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
@@ -3310,6 +3311,11 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
         }
       }
       if (!_entry) { _entry = { matchKey: MATCH_KEY, mapIdx: mapIdx }; _pd.maps.push(_entry); }
+      // 대회 태그 (기록 페이지 필터링용)
+      _entry.league = LEAGUE;
+      _entry.stage  = MATCH_FROM;
+      if (typeof _MATCH_TOURNAMENT !== 'undefined' && _MATCH_TOURNAMENT) _entry.tournament = _MATCH_TOURNAMENT;
+      // 스탯
       if (_slot.agent && _slot.agent.trim()) _entry.agent = _slot.agent.trim();
       if (_slot.acs != null && _slot.acs !== '') _entry.acs = _slot.acs;
       if (_slot.kda && _slot.kda.indexOf('/') !== -1) _entry.kda = _slot.kda;
