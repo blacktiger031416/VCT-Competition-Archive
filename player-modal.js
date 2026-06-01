@@ -210,7 +210,7 @@
     .pm-player-name {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 36px; font-weight: 900;
-      letter-spacing: 0.08em; text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: #fff; margin: 0; line-height: 1;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       text-shadow: 0 0 40px rgba(255,100,100,0.4);
