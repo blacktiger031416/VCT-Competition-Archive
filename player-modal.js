@@ -214,6 +214,7 @@
       color: #fff; margin: 0; line-height: 1;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       text-shadow: 0 0 40px rgba(255,100,100,0.4);
+      transform: translateY(-5px);
     }
     .pm-player-meta {
       font-family: 'Barlow Condensed', sans-serif;
