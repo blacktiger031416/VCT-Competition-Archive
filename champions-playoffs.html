@@ -590,6 +590,16 @@
         }
         if (name) name.textContent = t ? t.code : (teamName || "TBD");
         if (scoreEl) scoreEl.textContent = score !== null ? String(score) : "-";
+
+        // 팀 클릭 → 팀 모달
+        row.onclick = null;
+        if (teamName && t && window.openTeamModal) {
+          row.style.cursor = "pointer";
+          row.onclick = function(e) {
+            if (e.target.tagName === 'EM') return;
+            window.openTeamModal(t.name, t.logo, !!t.white, 'champions', 'champions', null);
+          };
+        }
       }
 
       function render() {
@@ -817,5 +827,7 @@
     });
     </script>
     <script src="./auth.js"></script>
+    <script src="./player-modal.js"></script>
+    <script src="./team-modal.js"></script>
   </body>
 </html>

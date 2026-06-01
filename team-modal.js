@@ -2,7 +2,7 @@
  * team-modal.js
  * 팀 클릭 시 로스터 + Masters 스탯 팝업
  * 의존: vct_p: 스토리지, player-modal.js (openPlayerModal)
- * API: window.openTeamModal(teamName, logoUrl, logoWhite, onChangePicker?)
+ * API: window.openTeamModal(teamName, logoUrl, logoWhite, league, tournament, onChangePicker?)
  */
 (function () {
 
@@ -272,10 +272,15 @@
   var _teamName   = '';
   var _logoUrl    = '';
   var _logoWhite  = false;
-  var _onPicker   = null;   // admin picker 콜백
+  var _league     = '';       // 'masters' | 'champions'
+  var _tournament = '';       // 'santiago' | 'london' | '' 등
+  var _onPicker   = null;     // admin picker 콜백
 
-  /* ── 로스터 스토리지 ── */
-  function rosterKey(name) { return 'vct_roster:' + name; }
+  /* ── 로스터 스토리지 (토너먼트별 분리) ── */
+  function rosterKey(name) {
+    // vct_roster:TEAM:LEAGUE:TOURNAMENT  예) vct_roster:Paper Rex:masters:santiago
+    return 'vct_roster:' + name + ':' + (_league || 'unknown') + (_tournament ? ':' + _tournament : '');
+  }
   function loadRoster(name) {
     try { return JSON.parse(localStorage.getItem(rosterKey(name)) || '[]'); } catch(e) { return []; }
   }
@@ -283,13 +288,17 @@
     try { localStorage.setItem(rosterKey(name), JSON.stringify(list)); } catch(e) {}
   }
 
-  /* ── Masters 스탯 계산 ── */
+  /* ── 토너먼트별 스탯 계산 ── */
   function getMastersStats(playerName) {
     try {
       var raw = localStorage.getItem('vct_p:' + playerName);
       if (!raw) return null;
       var pd = JSON.parse(raw);
-      var mm = (pd.maps || []).filter(function(m) { return m.league === 'masters'; });
+      var mm = (pd.maps || []).filter(function(m) {
+        if (_league && m.league !== _league) return false;
+        if (_tournament && m.tournament !== _tournament) return false;
+        return true;
+      });
       if (!mm.length) return null;
 
       var acsArr = mm.map(function(m) { return parseFloat(m.acs); }).filter(function(v) { return !isNaN(v) && v > 0; });
@@ -456,11 +465,13 @@
   }
 
   /* ── 열기 / 닫기 ── */
-  function open(teamName, logoUrl, logoWhite, onPicker) {
-    _teamName  = teamName  || '';
-    _logoUrl   = logoUrl   || '';
-    _logoWhite = !!logoWhite;
-    _onPicker  = onPicker  || null;
+  function open(teamName, logoUrl, logoWhite, league, tournament, onPicker) {
+    _teamName   = teamName   || '';
+    _logoUrl    = logoUrl    || '';
+    _logoWhite  = !!logoWhite;
+    _league     = league     || '';
+    _tournament = tournament || '';
+    _onPicker   = onPicker   || null;
     render();
     document.getElementById('tm-overlay').removeAttribute('hidden');
   }

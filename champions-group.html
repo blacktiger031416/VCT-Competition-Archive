@@ -791,6 +791,15 @@
         scoreEl.textContent = score == null ? "–" : String(score);
         row.appendChild(scoreEl);
 
+        // 팀 클릭 → 팀 모달
+        if (team && window.openTeamModal) {
+          row.style.cursor = "pointer";
+          row.addEventListener("click", function(e) {
+            if (e.target.closest(".gmc-score")) return;
+            window.openTeamModal(team.name, team.logo, !!team.white, 'champions', 'champions', null);
+          });
+        }
+
         return row;
       }
 
@@ -1004,5 +1013,7 @@
       renderAll();
     });
     </script>
+    <script src="./player-modal.js"></script>
+    <script src="./team-modal.js"></script>
   </body>
 </html>
