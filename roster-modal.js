@@ -163,53 +163,8 @@
     </div>
   `);
 
-  /* ── 기본 로스터 (전 리그) ── */
-  var DEFAULT_ROSTERS = {
-    /* Pacific */
-    "Paper Rex":          ["Jinggg", "invy", "f0rsakeN", "d4v41", "something"],
-    "Gen.G":              ["Lakia", "Ash", "Karon", "t3xture", "KiTae", "Xiesta", "ZynX"],
-    "Kiwoom DRX":         ["MaKo", "Hermes", "yong", "free1ng", "HYUNMIN", "BeYN", "Flicker"],
-    "Rex Regum Qeon":     ["crazyguy", "Monyet", "xffero", "Jemkin", "Kushy"],
-    "T1":                 ["stax", "BuZz", "Munchkin", "Meteor", "iZu"],
-    "FULL SENSE":         ["Crws", "Killua", "primmie", "JitBoyS", "Leviathan", "seph1roth", "thyy"],
-    "Global Esports":     ["PatMen", "UdoTan", "Kr1stal", "xavi8k", "Autumn"],
-    "Team Secret":        ["JessieVash", "kellyS", "Sylvan", "BerserX", "Rimuru", "Zeus"],
-    "ZETA DIVISION":      ["eKo", "Absol", "SyouTa", "SugarZ3ro", "Xdll"],
-    "DetonatioN FocusMe": ["Meiy", "SSeeS", "yatsuka", "Caedye", "Akame"],
-    "Nongshim RedForce":  ["Rb", "Xross", "Francis", "Dambi", "Ivy"],
-    "VARREL":             ["C1ndeR", "Klaus", "XuNa", "oonzmlp", "Zexy"],
-    /* Americas */
-    "Sentinels":     ["TenZ", "zekken", "Marved", "pancada", "johnqt"],
-    "G2 Esports":    ["valyn", "leaf", "Trent", "jawgemo", "Tex"],
-    "NRG":           ["s0m", "Victor", "ardiis", "eeiu", "crashies"],
-    "100 Thieves":   ["Derrek", "bang", "Asuna", "Ethan", "Cryo"],
-    "Cloud9":        ["xeppa", "vanity", "Xeppaa", "Mitch", "yay"],
-    "MIBR":          ["Khalil", "murizzz", "frz", "heat", "RgLMeow"],
-    "LOUD":          ["Less", "tuyz", "aspas", "sacy", "pANcada"],
-    "FURIA":         ["mwzera", "raafa", "Quick", "qck", "liazz"],
-    "KRÜ Esports":   ["Klaus", "Mazino", "NagZ", "Azo", "keznit"],
-    "Leviatán":      ["Tacolilla", "kiNgg", "nzr", "Shyy", "Melser"],
-    "Evil Geniuses": ["C0M", "Demon1", "jawgemo", "Boostio", "Ethan"],
-    "ENVY":          ["Victor", "FNS", "marved", "Yay", "Crashies"],
-    /* EMEA */
-    "BBL Esports":   ["AsLanM5", "Turko", "Brave", "QutioNN", "aimDLL"],
-    "Gentle Mates":  ["nzr", "nataNk", "MOLSI", "Kiles", "Evilz"],
-    "Team Liquid":   ["Jamppi", "Sayf", "NAts", "Alfajer", "soulcas"],
-    "Team Heretics": ["RieNs", "Boo", "Wo0t", "benjyfishy", "ComeBack"],
-    "NAVI":          ["hiro", "Ruxic", "Shao", "Filu", "zeek"],
-    "Karmine Corp":  ["DubsteP", "rhyme", "co1n", "beyAz", "vakk"],
-    "FUT Esports":   ["MrFaliN", "qRaxs", "starxo", "zeek", "seyfaN"],
-    "Fnatic":        ["Derke", "Leo", "Boaster", "Alfajer", "Chronicle"],
-    "Team Vitality": ["ceNder", "Destrian", "SyKoS", "Kicks", "meL"],
-    "GIANTX":        ["nukkye", "fl0m", "rhyme", "Meddo", "Sayf"],
-    "Eternal Fire":  ["Brave", "MAJHL", "SouheilCH", "Izzy", "Shyy"],
-    /* CN */
-    "All Gamers":                      ["Smoggy", "somebody", "Croc", "YuanFang", "pANNNN"],
-    "JD Mall JDG Esports":             ["CHICHOO", "Haodong", "Yuhao", "Smoggy", "Astro"],
-    "TYLOO":                           ["Mag", "Biank", "Bazzi", "XIAODENG", "Kanpeki"],
-    "Xi Lai Gaming":                   ["MeiLini", "Derrek", "AIDEN", "yv", "Aniverse"],
-    "EDward Gaming":                   ["ZmjjKK", "nobody", "Haodong", "haitianman", "yuyanjia"],
-  };
+  /* ── 기본 로스터: 비워둠 (어드민이 직접 입력) ── */
+  var DEFAULT_ROSTERS = {};
 
   /* ── 스토리지 ── */
   var rosterKey = function(team) { return 'vct_roster:' + team; };
