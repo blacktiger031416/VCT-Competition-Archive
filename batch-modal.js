@@ -267,6 +267,7 @@
 
       var nameText = (p && p.name && p.name !== '-') ? p.name : '—';
       var hasName  = (p && p.name && p.name !== '-');
+      tr.dataset.name = hasName ? p.name.trim() : '';
 
       var agentVal = (p && p.agent) || '';
       var acsVal   = (p && p.acs   != null) ? String(p.acs) : '';
@@ -331,10 +332,8 @@
     var saved  = 0;
 
     rows.forEach(function(tr) {
-      var globalIdx = parseInt(tr.dataset.pIdx, 10);
-      var p         = m.players[globalIdx];
-      var pName     = p && p.name && p.name !== '-' ? p.name.trim() : '';
-      if (!pName) return;
+      var pName = (tr.dataset.name || '').trim();
+      if (!pName || pName === '-') return;
 
       var agent = tr.querySelector('.f-agent').value.trim();
       var acs   = tr.querySelector('.f-acs').value.trim();
@@ -385,12 +384,13 @@
 
     if (saved > 0) {
       statusEl.textContent = '✅ ' + saved + '명 저장 완료!';
-      statusEl.className = 'save-status ok';
+      statusEl.className = 'ok';
       /* 매치 페이지 테이블 새로고침 */
-      if (typeof renderMap === 'function') renderMap(_activeMap);
+      var mapsArr2 = window.maps || [];
+      if (typeof renderMap === 'function') renderMap(mapsArr2[_activeMap], _activeMap);
     } else {
       statusEl.textContent = '⚠️ 입력된 내용이 없습니다.';
-      statusEl.className = 'save-status err';
+      statusEl.className = 'err';
     }
   });
 
@@ -398,7 +398,7 @@
   function openBatchModal(startMapIdx) {
     _activeMap = startMapIdx || 0;
     document.getElementById('bm-status').textContent = '입력 후 저장을 누르세요.';
-    document.getElementById('bm-status').className = 'save-status';
+    document.getElementById('bm-status').className = '';
     renderTabs();
     renderTable();
     document.getElementById('bm-overlay').removeAttribute('hidden');
