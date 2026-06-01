@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VCT 일괄 입력 — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="./storage.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1520;
+      color: #e8e4e0;
+      font-family: 'Barlow', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 120px;
+    }
+
+    /* ── 헤더 ── */
+    .site-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 56px;
+      background: rgba(13,21,32,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .home-link {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.55);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .home-link:hover { color: #fff; }
+    .header-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(255,80,80,0.7);
+      border: 1px solid rgba(255,80,80,0.3); border-radius: 4px;
+      padding: 3px 8px;
+    }
+
+    /* ── 본문 ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    .page-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px; font-weight: 900; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #fff; margin-bottom: 6px;
+    }
+    .page-desc {
+      font-size: 13px; color: rgba(255,255,255,0.35);
+      margin-bottom: 28px; line-height: 1.6;
+    }
+
+    /* ── 필터 바 ── */
+    .filter-bar {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+    }
+    select, .filter-input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #e8e4e0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
+      padding: 8px 12px; outline: none;
+      transition: border-color 0.15s;
+      appearance: none; cursor: pointer;
+    }
+    select:focus, .filter-input:focus { border-color: rgba(255,70,84,0.5); }
+    option { background: #1a2535; }
+
+    /* ── 테이블 ── */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    thead tr {
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    th {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+      padding: 12px 10px; text-align: left; white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody tr.side-b { background: rgba(100,120,255,0.03); }
+    tbody tr.side-b:hover { background: rgba(100,120,255,0.06); }
+
+    td { padding: 5px 6px; vertical-align: middle; }
+
+    .td-map {
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.2);
+      white-space: nowrap; padding-left: 12px;
+    }
+    .td-side {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .td-side.a { color: rgba(255,100,100,0.7); }
+    .td-side.b { color: rgba(100,140,255,0.7); }
+
+    .td-name {
+      font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.5);
+      white-space: nowrap; min-width: 80px;
+    }
+    .td-name.has-name { color: rgba(255,255,255,0.85); }
+
+    /* 입력 셀 */
+    .cell-input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px; color: #e8e4e0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 600;
+      padding: 6px 8px; outline: none;
+      transition: border-color 0.12s, background 0.12s;
+      width: 100%;
+    }
+    .cell-input:focus {
+      border-color: rgba(255,70,84,0.6);
+      background: rgba(255,70,84,0.06);
+    }
+    .cell-input.filled {
+      border-color: rgba(100,200,120,0.3);
+      background: rgba(100,200,120,0.05);
+      color: #a0ffb0;
+    }
+    .cell-input::placeholder { color: rgba(255,255,255,0.15); }
+
+    /* 에이전트 셀 */
+    .agent-cell { min-width: 90px; }
+    .acs-cell   { min-width: 70px; }
+    .kda-cell   { min-width: 90px; }
+
+    /* ── 하단 저장 바 ── */
+    .save-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(13,21,32,0.97);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      padding: 14px 32px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .save-status {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.35);
+    }
+    .save-status.ok  { color: rgba(100,220,130,0.9); }
+    .save-status.err { color: rgba(255,80,80,0.9); }
+
+    .btn-save {
+      background: linear-gradient(135deg, rgba(255,70,84,0.9), rgba(200,50,70,0.9));
+      border: none; border-radius: 10px;
+      color: #fff; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px; font-weight: 900; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 13px 40px;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 4px 20px rgba(255,70,84,0.3);
+    }
+    .btn-save:hover { opacity: 0.88; }
+    .btn-save:active { transform: scale(0.97); }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-add-row {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: rgba(255,255,255,0.5);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 8px 18px;
+      cursor: pointer; transition: all 0.12s; margin-top: 12px;
+    }
+    .btn-add-row:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    .info-box {
+      background: rgba(255,200,60,0.06);
+      border: 1px solid rgba(255,200,60,0.15);
+      border-radius: 10px; padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px; color: rgba(255,220,100,0.8); line-height: 1.7;
+    }
+    .info-box b { color: rgba(255,230,120,1); }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="home-link" href="./index.html">VCT Archive</a>
+  <span class="header-badge">Admin — 일괄 입력</span>
+</header>
+
+<div class="page">
+  <h1 class="page-title">선수 스탯 일괄 입력</h1>
+  <p class="page-desc">
+    경기·맵·선수별 요원 / ACS / KDA를 한 번에 입력하고 저장합니다.<br>
+    이미 저장된 데이터는 유지되며, 입력한 내용만 추가/업데이트됩니다.
+  </p>
+
+  <div class="info-box">
+    <b>사용법</b><br>
+    • 아래 필터에서 리그와 스테이지를 선택하세요.<br>
+    • 경기 키(MatchKey)는 <b>Match 4|DFM|Gen.G</b> 또는 <b>04.12|Gen.G|Paper Rex</b> 형식입니다.<br>
+    • Tab 키로 다음 칸, Shift+Tab으로 이전 칸으로 이동합니다.<br>
+    • 다 입력하면 <b>저장</b> 버튼 한 번만 누르면 됩니다.
+  </div>
+
+  <!-- 필터 -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">리그</span>
+      <select id="sel-league">
+        <option value="pacific">Pacific</option>
+        <option value="americas">Americas</option>
+        <option value="emea">EMEA</option>
+        <option value="cn">CN</option>
+        <option value="masters">Masters</option>
+        <option value="champions">Champions</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">스테이지</span>
+      <select id="sel-stage">
+        <option value="kickoff">KickOff</option>
+        <option value="stage1">Stage 1</option>
+        <option value="stage1playoffs">Stage 1 Playoffs</option>
+        <option value="stage2">Stage 2</option>
+        <option value="stage2playoffs">Stage 2 Playoffs</option>
+        <option value="playoffs">Playoffs</option>
+        <option value="swiss">Swiss (Masters)</option>
+        <option value="elim">Elim (Masters)</option>
+        <option value="group">Group (Champions)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <table id="entry-table">
+      <thead>
+        <tr>
+          <th style="width:32px">#</th>
+          <th>MatchKey</th>
+          <th style="width:50px">맵</th>
+          <th style="width:44px">팀</th>
+          <th>선수</th>
+          <th>요원</th>
+          <th>ACS</th>
+          <th>KDA</th>
+        </tr>
+      </thead>
+      <tbody id="entry-body">
+      </tbody>
+    </table>
+  </div>
+
+  <button class="btn-add-row" id="btn-add">+ 행 추가</button>
+</div>
+
+<!-- 저장 바 -->
+<div class="save-bar">
+  <span class="save-status" id="save-status">입력 후 저장 버튼을 누르세요.</span>
+  <button class="btn-save" id="btn-save">저장</button>
+</div>
+
+<script>
+(function() {
+  var tbody  = document.getElementById('entry-body');
+  var status = document.getElementById('save-status');
+  var rowNum = 0;
+
+  /* ── 행 추가 ── */
+  function addRow(data) {
+    data = data || {};
+    rowNum++;
+    var tr = document.createElement('tr');
+    tr.dataset.row = rowNum;
+
+    var matchKey = data.matchKey || '';
+    var mapIdx   = data.mapIdx   != null ? data.mapIdx : '';
+    var side     = data.side     || 'a';
+    var name     = data.name     || '';
+    var agent    = data.agent    || '';
+    var acs      = data.acs      != null ? data.acs : '';
+    var kda      = data.kda      || '';
+
+    tr.className = side === 'b' ? 'side-b' : '';
+
+    tr.innerHTML =
+      '<td class="td-map" style="color:rgba(255,255,255,0.25);font-size:11px;padding-left:12px">' + rowNum + '</td>' +
+      '<td><input class="cell-input f-matchkey" placeholder="Match 4|DFM|Gen.G" value="' + esc(matchKey) + '" /></td>' +
+      '<td><input class="cell-input f-mapidx" placeholder="0" style="width:48px;text-align:center" value="' + esc(String(mapIdx)) + '" /></td>' +
+      '<td>' +
+        '<select class="cell-input f-side" style="width:52px;padding:6px 4px">' +
+          '<option value="a"' + (side==='a'?' selected':'') + '>A</option>' +
+          '<option value="b"' + (side==='b'?' selected':'') + '>B</option>' +
+        '</select>' +
+      '</td>' +
+      '<td><input class="cell-input f-name" placeholder="선수이름" value="' + esc(name) + '" /></td>' +
+      '<td class="agent-cell"><input class="cell-input f-agent" placeholder="요루" value="' + esc(agent) + '" /></td>' +
+      '<td class="acs-cell"><input class="cell-input f-acs" placeholder="180" value="' + esc(String(acs)) + '" /></td>' +
+      '<td class="kda-cell"><input class="cell-input f-kda" placeholder="14/8/3" value="' + esc(kda) + '" /></td>';
+
+    // 입력 시 채워진 표시
+    tr.querySelectorAll('.cell-input').forEach(function(inp) {
+      inp.addEventListener('input', function() {
+        inp.classList.toggle('filled', inp.value.trim().length > 0);
+      });
+      if (inp.value.trim()) inp.classList.add('filled');
+    });
+
+    // side 변경 시 행 색상
+    tr.querySelector('.f-side').addEventListener('change', function(e) {
+      tr.className = e.target.value === 'b' ? 'side-b' : '';
+    });
+
+    tbody.appendChild(tr);
+    return tr;
+  }
+
+  function esc(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  }
+
+  /* ── 기본 10행 ── */
+  for (var i = 0; i < 10; i++) {
+    addRow({ side: i < 5 ? 'a' : 'b' });
+  }
+
+  document.getElementById('btn-add').addEventListener('click', function() {
+    var last = tbody.lastElementChild;
+    var lastSide = last ? last.querySelector('.f-side').value : 'a';
+    addRow({ side: lastSide });
+    tbody.lastElementChild.querySelector('.f-matchkey').focus();
+  });
+
+  /* ── 저장 ── */
+  document.getElementById('btn-save').addEventListener('click', function() {
+    var league = document.getElementById('sel-league').value;
+    var stage  = document.getElementById('sel-stage').value;
+    var rows   = tbody.querySelectorAll('tr');
+    var saved  = 0;
+    var skipped = 0;
+
+    rows.forEach(function(tr) {
+      var matchKey = tr.querySelector('.f-matchkey').value.trim();
+      var mapIdxRaw = tr.querySelector('.f-mapidx').value.trim();
+      var name     = tr.querySelector('.f-name').value.trim();
+      var agent    = tr.querySelector('.f-agent').value.trim();
+      var acs      = tr.querySelector('.f-acs').value.trim();
+      var kda      = tr.querySelector('.f-kda').value.trim();
+
+      // 선수 이름 + 경기 키는 필수
+      if (!matchKey || !name || name === '-') { skipped++; return; }
+      var mapIdx = parseInt(mapIdxRaw, 10);
+      if (isNaN(mapIdx)) { skipped++; return; }
+
+      // 입력 내용이 하나도 없으면 스킵
+      if (!agent && !acs && !kda) { skipped++; return; }
+
+      // vct_p: 업데이트
+      try {
+        var vk  = 'vct_p:' + name;
+        var vd  = {};
+        try { vd = JSON.parse(localStorage.getItem(vk) || '{}'); } catch(e2) {}
+        if (!vd.maps) vd.maps = [];
+
+        var entry = null;
+        for (var i = 0; i < vd.maps.length; i++) {
+          if (vd.maps[i].matchKey === matchKey && vd.maps[i].mapIdx === mapIdx) {
+            entry = vd.maps[i]; break;
+          }
+        }
+        if (!entry) {
+          entry = { matchKey: matchKey, mapIdx: mapIdx };
+          vd.maps.push(entry);
+        }
+
+        entry.league = league;
+        entry.stage  = stage;
+        if (agent) entry.agent = agent;
+        if (acs)   entry.acs   = parseFloat(acs) || acs;
+        if (kda && kda.indexOf('/') !== -1) entry.kda = kda;
+
+        localStorage.setItem(vk, JSON.stringify(vd));
+        saved++;
+      } catch(e) {
+        console.error('[batch] 저장 실패:', name, e);
+      }
+    });
+
+    if (saved > 0) {
+      status.textContent = '✅ ' + saved + '개 선수 데이터 저장 완료!' + (skipped > 0 ? ' (' + skipped + '개 스킵)' : '');
+      status.className = 'save-status ok';
+    } else {
+      status.textContent = '⚠️ 저장된 데이터가 없습니다. 선수 이름과 경기 키를 확인해주세요.';
+      status.className = 'save-status err';
+    }
+  });
+})();
+</script>
+</body>
+</html>
