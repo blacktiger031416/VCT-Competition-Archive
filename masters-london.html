@@ -325,7 +325,16 @@
                 <div class="slot-name">${teamName || "미정"}</div>
               </div>
             `;
-            if (isAdmin()) {
+            if (teamName) {
+              slot.addEventListener("click", function() {
+                var pickerCb = isAdmin() ? function() { openPicker(region, i); } : null;
+                if (window.openTeamModal) {
+                  window.openTeamModal(teamName, team ? team.logo : '', team ? !!team.white : false, pickerCb);
+                } else if (isAdmin()) {
+                  openPicker(region, i);
+                }
+              });
+            } else if (isAdmin()) {
               slot.addEventListener("click", () => openPicker(region, i));
             }
             container.appendChild(slot);
@@ -431,5 +440,7 @@
     });
     </script>
     <script src="./auth.js"></script>
+    <script src="./player-modal.js"></script>
+    <script src="./team-modal.js"></script>
   </body>
 </html>
