@@ -113,6 +113,12 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
+/* ── API: 전체 뷰어 새로고침 트리거 ─────────────── */
+app.post("/api/refresh", (req, res) => {
+  broadcast({ type: "force-reload" });
+  res.json({ ok: true });
+});
+
 /* ── SPA fallback ─────────────────────────────────── */
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

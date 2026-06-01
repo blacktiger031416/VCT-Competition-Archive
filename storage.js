@@ -130,6 +130,16 @@
     _sse.onmessage = function (e) {
       try {
         var update = JSON.parse(e.data);
+
+        /* 관리자가 새로고침 버튼을 눌렀을 때 → 뷰어만 새로고침 */
+        if (update.type === "force-reload") {
+          if (!_isAdmin) {
+            sessionStorage.setItem("_vct_scroll_y", String(window.scrollY));
+            window.location.reload();
+          }
+          return;
+        }
+
         if (!update.key || isLocalOnly(update.key)) return;
 
         /* localStorage 즉시 반영 (push 없이 원본 메서드로) */
@@ -139,14 +149,7 @@
           _origSet(update.key, update.value);
         }
 
-        /* 편집 페이지나 관리자가 아닐 때만 자동 새로고침 (묶어서 한 번만) */
-        if (!_isEditPage && !_isAdmin) {
-          clearTimeout(_reloadTimer);
-          _reloadTimer = setTimeout(function () {
-            sessionStorage.setItem("_vct_scroll_y", String(window.scrollY));
-            window.location.reload();
-          }, 800);
-        }
+        /* 자동 새로고침 없음 — 관리자가 버튼으로 직접 트리거 */
       } catch (err) {
         /* 파싱 오류 무시 */
       }

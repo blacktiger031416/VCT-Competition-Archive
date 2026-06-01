@@ -297,6 +297,8 @@
   refreshBtn.title = "서버에서 최신 데이터를 불러옵니다";
   refreshBtn.style.display = "none";
   refreshBtn.addEventListener("click", function () {
+    /* 모든 연결된 뷰어에게 새로고침 신호 전송 후 관리자 페이지도 새로고침 */
+    fetch("/api/refresh", { method: "POST" }).catch(function () {});
     window.location.reload();
   });
 
