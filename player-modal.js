@@ -161,18 +161,28 @@
     london:   'London',
   };
   var STAGE_LABELS = {
-    kickoff:  'KickOff',
-    stage1:   'Stage 1',
-    stage2:   'Stage 2',
-    swiss:    'Swiss',
-    playoffs: 'Playoffs',
+    kickoff:        'KickOff',
+    stage1:         'Stage 1',
+    stage1playoffs: 'Stage 1 Playoffs',
+    stage2:         'Stage 2',
+    stage2playoffs: 'Stage 2 Playoffs',
+    swiss:          'Swiss',
+    playoffs:       'Playoffs',
+    groupstage:     'Group Stage',
   };
 
   /* league + tournament + stage → 표시용 라벨 */
   function buildGroupLabel(league, tournament, stage) {
-    var leagueName     = LEAGUE_LABELS[league]       || league       || '';
-    var tournamentName = TOURNAMENT_LABELS[tournament] || tournament  || '';
-    var stageName      = STAGE_LABELS[stage]           || stage       || '';
+    var leagueName     = LEAGUE_LABELS[league]          || league      || '';
+    var tournamentName = TOURNAMENT_LABELS[tournament]  || tournament  || '';
+
+    // Champions의 Swiss는 Group Stage로 표시
+    var stageName;
+    if (league === 'champions' && stage === 'swiss') {
+      stageName = 'Group Stage';
+    } else {
+      stageName = STAGE_LABELS[stage] || stage || '';
+    }
 
     var prefix = '';
     if ((league === 'masters' || league === 'champions') && tournamentName) {
@@ -184,7 +194,26 @@
     var parts = [];
     if (prefix) parts.push(prefix);
     if (stageName) parts.push(stageName);
-    return parts.join(' · ') || '기타';
+    return parts.join(' · ') || '';
+  }
+
+  /* 그룹 정렬 키 (VCT 시즌 진행 순서) */
+  function getGroupSortKey(g) {
+    var l = g.league, t = g.tournament, s = g.stage;
+    if (s === 'kickoff')                                        return  10;
+    if (l === 'masters' && t === 'santiago' && s === 'swiss')   return  20;
+    if (l === 'masters' && t === 'santiago' && s === 'playoffs') return 30;
+    if (l === 'masters' && !t && s === 'swiss')                 return  25; // 토너먼트 미기재
+    if (l === 'masters' && !t && s === 'playoffs')              return  35;
+    if (s === 'stage1')                                         return  40;
+    if (s === 'stage1playoffs')                                 return  50;
+    if (l === 'masters' && t === 'london' && s === 'swiss')     return  60;
+    if (l === 'masters' && t === 'london' && s === 'playoffs')  return  70;
+    if (s === 'stage2')                                         return  80;
+    if (s === 'stage2playoffs')                                 return  90;
+    if (l === 'champions' && (s === 'swiss' || s === 'groupstage')) return 100;
+    if (l === 'champions' && s === 'playoffs')                  return 110;
+    return 999; // 알 수 없는 조합 → 숨김
   }
 
   /* maps 배열 → 그룹 목록 [{key, label, count}] (출현 순서 유지) */
@@ -644,6 +673,11 @@
     var allMaps  = pd.maps || [];
     var groups   = buildFilterGroups(allMaps);
     var listEl   = document.getElementById('pm-filter-list');
+
+    // 정렬 + 기타(label 없는 항목) 제거
+    groups = groups
+      .filter(function(g) { return getGroupSortKey(g) !== 999 && buildGroupLabel(g.league, g.tournament, g.stage) !== ''; })
+      .sort(function(a, b) { return getGroupSortKey(a) - getGroupSortKey(b); });
 
     // '전체' 항목
     var totalCount = allMaps.length;
