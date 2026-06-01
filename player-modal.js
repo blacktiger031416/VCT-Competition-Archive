@@ -295,6 +295,7 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
     .pm-team-logo-wrap img { width: 80%; height: 80%; object-fit: contain; }
+    .pm-team-logo-wrap img.logo-white { filter: brightness(0) invert(1); }
     .pm-header-text { flex: 1; min-width: 0; }
     .pm-player-name {
       font-family: 'Barlow Condensed', sans-serif;
