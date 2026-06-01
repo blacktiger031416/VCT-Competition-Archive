@@ -184,8 +184,8 @@
     /* 헤더 배너 */
     .pm-header {
       position: relative; flex-shrink: 0;
-      display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 28px 26px 22px; gap: 14px; overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 26px 24px; gap: 14px; overflow: hidden;
     }
     .pm-header::before {
       content: ''; position: absolute; inset: 0;
