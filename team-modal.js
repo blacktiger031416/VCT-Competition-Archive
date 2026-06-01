@@ -276,10 +276,9 @@
   var _tournament = '';       // 'santiago' | 'london' | '' 등
   var _onPicker   = null;     // admin picker 콜백
 
-  /* ── 로스터 스토리지 (토너먼트별 분리) ── */
+  /* ── 로스터 스토리지 (팀 단위 공유) ── */
   function rosterKey(name) {
-    // vct_roster:TEAM:LEAGUE:TOURNAMENT  예) vct_roster:Paper Rex:masters:santiago
-    return 'vct_roster:' + name + ':' + (_league || 'unknown') + (_tournament ? ':' + _tournament : '');
+    return 'vct_roster:' + name;
   }
   function loadRoster(name) {
     try { return JSON.parse(localStorage.getItem(rosterKey(name)) || '[]'); } catch(e) { return []; }
