@@ -253,8 +253,29 @@
     }
     .pm-info-input:focus { border-color: rgba(255,100,100,0.5); }
 
+    /* 스테이지 탭 */
+    .pm-stage-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      padding: 16px 26px 0; flex-shrink: 0;
+    }
+    .pm-stage-tab {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 6px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; color: rgba(255,255,255,0.35);
+      cursor: pointer; transition: all 0.12s;
+    }
+    .pm-stage-tab:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.6); }
+    .pm-stage-tab.active {
+      background: rgba(255,70,84,0.15);
+      border-color: rgba(255,70,84,0.4);
+      color: rgba(255,130,140,1);
+    }
+
     /* 스탯 영역 */
-    .pm-stats-area { padding: 22px 26px 0; }
+    .pm-stats-area { padding: 16px 26px 0; }
     .pm-stat-cards { display: flex; gap: 12px; margin-bottom: 22px; }
     .pm-stat-card {
       flex: 1; position: relative; overflow: hidden;
@@ -414,6 +435,8 @@
           </div>
         </div>
 
+        <div id="pm-stage-tabs" class="pm-stage-tabs" style="display:none"></div>
+
         <div class="pm-panel-scroll">
           <div class="pm-stats-area">
             <div id="pm-stat-cards"></div>
@@ -437,7 +460,16 @@
   /* ═══════════════════════════════════════════════════════════════
      상태
   ═══════════════════════════════════════════════════════════════ */
-  var _current = null;
+  var _current      = null;
+  var _activeStage  = 'all';
+  var STAGE_ORDER   = ['kickoff', 'stage1', 'stage2', 'playoffs'];
+  var STAGE_LABELS  = {
+    all:      '전체',
+    kickoff:  'KickOff',
+    stage1:   'Stage 1',
+    stage2:   'Stage 2',
+    playoffs: 'Playoffs',
+  };
 
   /* ═══════════════════════════════════════════════════════════════
      렌더
@@ -464,11 +496,48 @@
       editRow.style.display = 'none';
     }
 
-    /* ── 스탯 계산 ── */
-    var maps       = pd.maps || [];
+    /* ── 스테이지 탭 ── */
+    var allMaps    = pd.maps || [];
     var cardsEl    = document.getElementById('pm-stat-cards');
     var agentsWrap = document.getElementById('pm-agents-wrap');
+    var tabsEl     = document.getElementById('pm-stage-tabs');
 
+    var stageSeen = {};
+    allMaps.forEach(function(m) {
+      if (m.stage) stageSeen[m.stage] = true;
+    });
+    var stagesFound = STAGE_ORDER.filter(function(s) { return stageSeen[s]; });
+    // 알 수 없는 stage 값도 추가
+    Object.keys(stageSeen).forEach(function(s) {
+      if (STAGE_ORDER.indexOf(s) === -1) stagesFound.push(s);
+    });
+
+    if (stagesFound.length >= 1) {
+      var tabList = ['all'].concat(stagesFound);
+      // _activeStage가 현재 데이터에 없으면 'all'로 리셋
+      if (_activeStage !== 'all' && stagesFound.indexOf(_activeStage) === -1) _activeStage = 'all';
+      tabsEl.style.display = 'flex';
+      tabsEl.innerHTML = tabList.map(function(s) {
+        return '<button class="pm-stage-tab' + (s === _activeStage ? ' active' : '') + '" data-stage="' + s + '">' +
+          (STAGE_LABELS[s] || s) + '</button>';
+      }).join('');
+      tabsEl.querySelectorAll('.pm-stage-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          _activeStage = btn.dataset.stage;
+          render();
+        });
+      });
+    } else {
+      tabsEl.style.display = 'none';
+      _activeStage = 'all';
+    }
+
+    /* 스테이지 필터 적용 */
+    var maps = _activeStage === 'all'
+      ? allMaps
+      : allMaps.filter(function(m) { return m.stage === _activeStage; });
+
+    /* ── 스탯 계산 ── */
     if (!maps.length) {
       cardsEl.innerHTML    = '<div class="pm-no-data">기록된 스탯이 없습니다</div>';
       agentsWrap.innerHTML = '';
@@ -495,10 +564,13 @@
         ? (kdData.reduce(function(s, v) { return s + v; }, 0) / kdData.length).toFixed(2)
         : '—';
 
+      /* 맵 수 표시 */
+      var mapCountLabel = '(' + maps.length + '맵)';
+
       cardsEl.innerHTML =
         '<div class="pm-stat-cards">' +
-          '<div class="pm-stat-card"><div class="pm-stat-val">' + avgAcs + '</div><div class="pm-stat-lbl">평균 ACS</div></div>' +
-          '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D</div></div>' +
+          '<div class="pm-stat-card"><div class="pm-stat-val">' + avgAcs + '</div><div class="pm-stat-lbl">평균 ACS ' + mapCountLabel + '</div></div>' +
+          '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D ' + mapCountLabel + '</div></div>' +
         '</div>';
 
       /* 사용 요원 집계 */
@@ -561,7 +633,8 @@
      열기/닫기
   ═══════════════════════════════════════════════════════════════ */
   function open(playerName, teamName, logoHTML) {
-    _current = { name: playerName, team: teamName };
+    _current     = { name: playerName, team: teamName };
+    _activeStage = 'all';
     document.getElementById('pm-name').textContent = playerName;
     document.getElementById('pm-logo').innerHTML   = logoHTML || '';
     render();
