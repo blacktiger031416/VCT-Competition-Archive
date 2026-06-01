@@ -1,4 +1,9 @@
 (function () {
+  /* ═══════════════════════════════════════════════════════════════
+     VCT PLAYER MODAL  –  v2  (vct_p: storage)
+     새 데이터 구조: vct_p:PLAYER_NAME → { meta, wins, maps[] }
+  ═══════════════════════════════════════════════════════════════ */
+
   /* ── 요원 이미지 맵 ─────────────────────────────────────────── */
   var AGENT_IMGS = {
     게코:    "https://c-valorant-api.op.gg/Assets/Characters/E370FA57-4757-3604-3648-499E1F642D3F_small.png",
@@ -32,7 +37,121 @@
     하버:    "https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
   };
 
-  /* ── CSS ─────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════
+     새 데이터 구조 helpers
+     vct_p:NAME → { meta:{country,role,team}, wins:[], maps:[{matchKey,mapIdx,agent,acs,kda},...] }
+  ═══════════════════════════════════════════════════════════════ */
+  function vctpKey(name) { return 'vct_p:' + name; }
+
+  function loadVctp(name) {
+    try {
+      var raw = localStorage.getItem(vctpKey(name));
+      if (!raw) return { meta: {}, wins: [], maps: [] };
+      var d = JSON.parse(raw);
+      if (!d.meta)  d.meta  = {};
+      if (!d.wins)  d.wins  = [];
+      if (!d.maps)  d.maps  = [];
+      return d;
+    } catch(e) { return { meta: {}, wins: [], maps: [] }; }
+  }
+
+  function saveVctp(name, data) {
+    try { localStorage.setItem(vctpKey(name), JSON.stringify(data)); } catch(e) {}
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     마이그레이션: players:MATCH_KEY:mapIdx → vct_p:NAME
+     한 번만 실행 (vct_p_migrated 플래그로 체크)
+  ═══════════════════════════════════════════════════════════════ */
+  function runMigration() {
+    if (localStorage.getItem('vct_p_migrated') === '1') return;
+
+    var count = 0;
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.startsWith('players:')) keys.push(k);
+    }
+
+    keys.forEach(function(k) {
+      // players:MATCH_KEY:mapIdx  — mapIdx는 맨 마지막 :숫자
+      var withoutPrefix = k.substring('players:'.length);
+      var lastColon = withoutPrefix.lastIndexOf(':');
+      if (lastColon === -1) return;
+      var matchKey = withoutPrefix.substring(0, lastColon);
+      var mapIdx   = parseInt(withoutPrefix.substring(lastColon + 1), 10);
+      if (isNaN(mapIdx)) return;
+
+      try {
+        var d = JSON.parse(localStorage.getItem(k));
+        if (!d || typeof d !== 'object' || Array.isArray(d)) return;
+
+        Object.keys(d).forEach(function(slot) {
+          var p = d[slot];
+          if (!p || !p.name || p.name === '-' || p.name.trim() === '') return;
+
+          var pName = p.name.trim();
+          var pd    = loadVctp(pName);
+
+          // 같은 matchKey+mapIdx 항목이 이미 있으면 필드 병합
+          var existing = null;
+          for (var j = 0; j < pd.maps.length; j++) {
+            if (pd.maps[j].matchKey === matchKey && pd.maps[j].mapIdx === mapIdx) {
+              existing = pd.maps[j]; break;
+            }
+          }
+          if (!existing) {
+            existing = { matchKey: matchKey, mapIdx: mapIdx };
+            pd.maps.push(existing);
+          }
+          if (p.agent && p.agent.trim()) existing.agent = p.agent.trim();
+          if (p.acs   != null && p.acs !== '') existing.acs = p.acs;
+          if (p.kda   && p.kda.indexOf('/') !== -1) existing.kda = p.kda;
+
+          saveVctp(pName, pd);
+          count++;
+        });
+      } catch(e) {}
+    });
+
+    // 구버전 meta/wins 마이그레이션
+    var metaKeys = [];
+    for (var ii = 0; ii < localStorage.length; ii++) {
+      var kk = localStorage.key(ii);
+      if (kk && kk.startsWith('vct_player_meta:')) metaKeys.push(kk);
+    }
+    metaKeys.forEach(function(mk) {
+      var pName = mk.substring('vct_player_meta:'.length);
+      try {
+        var meta = JSON.parse(localStorage.getItem(mk) || '{}');
+        var pd   = loadVctp(pName);
+        pd.meta  = Object.assign({}, meta, pd.meta);
+        saveVctp(pName, pd);
+      } catch(e) {}
+    });
+
+    var winsKeys = [];
+    for (var jj = 0; jj < localStorage.length; jj++) {
+      var wk = localStorage.key(jj);
+      if (wk && wk.startsWith('vct_player_wins:')) winsKeys.push(wk);
+    }
+    winsKeys.forEach(function(wkk) {
+      var pName = wkk.substring('vct_player_wins:'.length);
+      try {
+        var wins = JSON.parse(localStorage.getItem(wkk) || '[]');
+        var pd   = loadVctp(pName);
+        if (!pd.wins.length && wins.length) pd.wins = wins;
+        saveVctp(pName, pd);
+      } catch(e) {}
+    });
+
+    localStorage.setItem('vct_p_migrated', '1');
+    console.log('[player-modal] 마이그레이션 완료: ' + count + '개 슬롯 → vct_p: 구조로 변환');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     CSS
+  ═══════════════════════════════════════════════════════════════ */
   var css = `
     .pm-overlay {
       position: fixed; inset: 0; z-index: 9999;
@@ -47,14 +166,16 @@
     .pm-panel {
       position: relative; z-index: 1;
       width: min(620px, calc(100vw - 24px));
-      max-height: 90vh; overflow-y: auto;
+      max-height: 90vh;
       background: #0d1520;
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px;
       box-shadow: 0 40px 100px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04) inset;
       animation: pmIn 0.25s cubic-bezier(0.16,1,0.3,1);
       overflow: hidden;
+      display: flex; flex-direction: column;
     }
+    .pm-panel-scroll { overflow-y: auto; flex: 1; }
     @keyframes pmIn {
       from { opacity:0; transform: scale(0.94) translateY(16px); }
       to   { opacity:1; transform: none; }
@@ -62,21 +183,17 @@
 
     /* 헤더 배너 */
     .pm-header {
-      position: relative;
+      position: relative; flex-shrink: 0;
       display: flex; align-items: flex-end; justify-content: space-between;
-      padding: 28px 26px 22px;
-      gap: 14px;
-      overflow: hidden;
+      padding: 28px 26px 22px; gap: 14px; overflow: hidden;
     }
     .pm-header::before {
-      content: '';
-      position: absolute; inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: linear-gradient(135deg, rgba(255,70,84,0.18) 0%, rgba(100,120,255,0.12) 50%, transparent 80%);
       pointer-events: none;
     }
     .pm-header::after {
-      content: '';
-      position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(255,70,84,0.5), rgba(100,120,255,0.5), transparent);
     }
     .pm-header-left { position: relative; display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0; }
@@ -107,8 +224,7 @@
     .pm-close {
       position: relative;
       background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: rgba(255,255,255,0.4); font-size: 20px;
+      border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 20px;
       cursor: pointer; padding: 6px 10px; line-height: 1;
       transition: all 0.15s; flex-shrink: 0; align-self: flex-start;
     }
@@ -116,7 +232,7 @@
 
     /* admin 기본정보 편집 */
     .pm-info-edit {
-      display: flex; gap: 10px;
+      display: flex; gap: 10px; flex-shrink: 0;
       padding: 14px 26px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       background: rgba(255,255,255,0.02);
@@ -130,18 +246,15 @@
     .pm-info-input {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #fff; font-family: 'Barlow Condensed', sans-serif;
+      border-radius: 8px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 600; letter-spacing: 0.04em;
-      padding: 7px 12px; outline: none;
-      transition: border-color 0.15s;
+      padding: 7px 12px; outline: none; transition: border-color 0.15s;
     }
     .pm-info-input:focus { border-color: rgba(255,100,100,0.5); }
 
     /* 스탯 영역 */
-    .pm-stats-area {
-      padding: 22px 26px 0;
-    }
+    .pm-stats-area { padding: 22px 26px 0; }
     .pm-stat-cards { display: flex; gap: 12px; margin-bottom: 22px; }
     .pm-stat-card {
       flex: 1; position: relative; overflow: hidden;
@@ -151,8 +264,7 @@
       transition: border-color 0.2s, transform 0.2s;
     }
     .pm-stat-card::before {
-      content: '';
-      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
       width: 60%; height: 2px;
       background: linear-gradient(90deg, transparent, rgba(255,80,80,0.7), transparent);
       border-radius: 0 0 4px 4px;
@@ -212,9 +324,8 @@
       text-align: center; padding: 16px 0;
     }
 
-    /* 구분선 */
     .pm-divider {
-      height: 1px; margin: 0 26px;
+      height: 1px; margin: 0 26px; flex-shrink: 0;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
     }
 
@@ -247,8 +358,6 @@
       font-size: 13px; color: rgba(255,255,255,0.2);
       text-align: center; padding: 10px 0;
     }
-
-    /* 우승 추가 (admin) */
     .pm-win-add-row { display: flex; gap: 8px; margin-top: 12px; }
     .pm-win-add-input {
       flex: 1; background: rgba(255,255,255,0.05);
@@ -256,8 +365,7 @@
       border-radius: 8px; color: #fff;
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
-      padding: 9px 14px; outline: none;
-      transition: border-color 0.15s;
+      padding: 9px 14px; outline: none; transition: border-color 0.15s;
     }
     .pm-win-add-input::placeholder { color: rgba(255,255,255,0.18); }
     .pm-win-add-input:focus { border-color: rgba(255,200,60,0.4); }
@@ -272,12 +380,14 @@
     }
     .pm-win-add-btn:hover { background: rgba(255,200,60,0.22); }
   `;
-  var styleEl = document.createElement("style");
+  var styleEl = document.createElement('style');
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
 
-  /* ── HTML ────────────────────────────────────────────────────── */
-  var el = document.createElement("div");
+  /* ═══════════════════════════════════════════════════════════════
+     HTML
+  ═══════════════════════════════════════════════════════════════ */
+  var el = document.createElement('div');
   el.innerHTML = `
     <div id="player-modal" class="pm-overlay" hidden>
       <div class="pm-backdrop" id="pm-backdrop"></div>
@@ -304,20 +414,19 @@
           </div>
         </div>
 
-        <div class="pm-stats-area">
-          <div id="pm-stat-cards"></div>
-        </div>
-
-        <div class="pm-agents-section" id="pm-agents-wrap"></div>
-
-        <div class="pm-divider"></div>
-
-        <div class="pm-wins-section">
-          <div class="pm-section-label">우승 기록</div>
-          <div class="pm-wins-list" id="pm-wins"></div>
-          <div class="pm-win-add-row" id="pm-win-add-row" style="display:none">
-            <input class="pm-win-add-input" id="pm-win-input" placeholder="예: VCT Masters Santiago 2026" />
-            <button class="pm-win-add-btn" id="pm-win-add-btn">+ 추가</button>
+        <div class="pm-panel-scroll">
+          <div class="pm-stats-area">
+            <div id="pm-stat-cards"></div>
+          </div>
+          <div class="pm-agents-section" id="pm-agents-wrap"></div>
+          <div class="pm-divider"></div>
+          <div class="pm-wins-section">
+            <div class="pm-section-label">우승 기록</div>
+            <div class="pm-wins-list" id="pm-wins"></div>
+            <div class="pm-win-add-row" id="pm-win-add-row" style="display:none">
+              <input class="pm-win-add-input" id="pm-win-input" placeholder="예: VCT Masters Santiago 2026" />
+              <button class="pm-win-add-btn" id="pm-win-add-btn">+ 추가</button>
+            </div>
           </div>
         </div>
       </div>
@@ -325,114 +434,65 @@
   `;
   document.body.appendChild(el.firstElementChild);
 
-  /* ── 상태 ────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════
+     상태
+  ═══════════════════════════════════════════════════════════════ */
   var _current = null;
 
-  function metaKey(n) { return 'vct_player_meta:' + n; }
-  function winsKey(n) { return 'vct_player_wins:' + n; }
-  function loadMeta(n) { try { return JSON.parse(localStorage.getItem(metaKey(n)) || '{}'); } catch(e) { return {}; } }
-  function saveMeta(n, o) { try { localStorage.setItem(metaKey(n), JSON.stringify(o)); } catch(e) {} }
-  function loadWins(n) { try { return JSON.parse(localStorage.getItem(winsKey(n)) || '[]'); } catch(e) { return []; } }
-  function saveWins(n, a) { try { localStorage.setItem(winsKey(n), JSON.stringify(a)); } catch(e) {} }
-
-  /* ── localStorage 스탯 스캔 ─────────────────────────────────── */
-  // 키 형식: players:MATCH_KEY:mapIdx  →  { a0:{name,agent,kda,acs}, a1:..., b0:..., ... }
-  // name이 일치하는 슬롯을 모두 수집. ACS/KDA 없는 맵도 요원 집계에는 포함.
-  function scanStats(playerName) {
-    var results = [];
-    var nameLower = (playerName || '').toLowerCase();
-    var debugKeys = [];   // 디버그용: 어떤 키에서 찾았는지
-
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      if (!k || !k.startsWith('players:')) continue;
-      try {
-        var d = JSON.parse(localStorage.getItem(k));
-        if (!d || typeof d !== 'object' || Array.isArray(d)) continue;
-        Object.keys(d).forEach(function(slot) {
-          var p = d[slot];
-          if (!p) return;
-          var pName = (p.name || '').trim().toLowerCase();
-          if (pName !== nameLower) return;
-
-          var acs = parseFloat(p.acs);
-          var kda = (p.kda || '').trim();
-          var K = NaN, D = NaN;
-          if (kda.indexOf('/') !== -1) {
-            var parts = kda.split('/').map(function(x) { return parseFloat(x); });
-            K = parts[0]; D = parts[1];
-          }
-
-          debugKeys.push(k + '[' + slot + '] agent=' + p.agent + ' acs=' + p.acs + ' kda=' + p.kda);
-          results.push({
-            acs:   (!isNaN(acs) && acs > 0) ? acs : null,
-            k:     isNaN(K) ? null : K,
-            d:     isNaN(D) ? null : D,
-            agent: (p.agent || '').trim()
-          });
-        });
-      } catch(e) {}
-    }
-
-    // 콘솔에서 확인: 어떤 맵이 매칭됐는지
-    console.group('[player-modal] scanStats: ' + playerName);
-    console.log('총 매칭 맵 수:', results.length);
-    console.log('매칭된 entries:', debugKeys);
-    // players: 키 전체 목록 (이름 없이 저장된 것 확인용)
-    var allPlayerKeys = [];
-    for (var j = 0; j < localStorage.length; j++) {
-      var kk = localStorage.key(j);
-      if (kk && kk.startsWith('players:')) allPlayerKeys.push(kk);
-    }
-    console.log('localStorage의 players: 키 전체 (' + allPlayerKeys.length + '개):', allPlayerKeys);
-    console.groupEnd();
-
-    return results;
-  }
-
-  /* ── 렌더 ────────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════
+     렌더
+  ═══════════════════════════════════════════════════════════════ */
   function render() {
     if (!_current) return;
     var name  = _current.name;
     var admin = window.vctIsAdmin && window.vctIsAdmin();
-    var meta  = loadMeta(name);
-    var wins  = loadWins(name);
+    var pd    = loadVctp(name);          // vct_p:NAME 에서 직접 로드
 
-    // 메타 텍스트
+    /* 메타 텍스트 */
     var parts = [];
-    if (meta.country) parts.push(meta.country);
-    if (meta.role)    parts.push(meta.role);
+    if (pd.meta.country) parts.push(pd.meta.country);
+    if (pd.meta.role)    parts.push(pd.meta.role);
     document.getElementById('pm-meta').textContent = parts.join(' · ') || '—';
 
-    // admin 편집
+    /* admin 편집 */
     var editRow = document.getElementById('pm-info-edit');
     if (admin) {
       editRow.style.display = 'flex';
-      document.getElementById('pm-inp-country').value = meta.country || '';
-      document.getElementById('pm-inp-role').value    = meta.role    || '';
+      document.getElementById('pm-inp-country').value = pd.meta.country || '';
+      document.getElementById('pm-inp-role').value    = pd.meta.role    || '';
     } else {
       editRow.style.display = 'none';
     }
 
-    // ── 스탯 계산 ──
-    var data = scanStats(name);
+    /* ── 스탯 계산 ── */
+    var maps       = pd.maps || [];
     var cardsEl    = document.getElementById('pm-stat-cards');
     var agentsWrap = document.getElementById('pm-agents-wrap');
 
-    if (!data.length) {
+    if (!maps.length) {
       cardsEl.innerHTML    = '<div class="pm-no-data">기록된 스탯이 없습니다</div>';
       agentsWrap.innerHTML = '';
     } else {
-      // 평균 ACS: acs가 있는 맵만
-      var acsData = data.filter(function(r){ return r.acs !== null; });
+      /* 평균 ACS */
+      var acsData = [];
+      maps.forEach(function(m) {
+        var v = parseFloat(m.acs);
+        if (!isNaN(v) && v > 0) acsData.push(v);
+      });
       var avgAcs = acsData.length
-        ? Math.round(acsData.reduce(function(s,r){ return s + r.acs; }, 0) / acsData.length)
+        ? Math.round(acsData.reduce(function(s, v) { return s + v; }, 0) / acsData.length)
         : '—';
 
-      // 평균 K/D: K와 D 모두 있는 맵만
-      var validKD = data.filter(function(r){ return r.k !== null && r.d !== null && r.d > 0; });
-      var avgKD = validKD.length
-        ? (validKD.reduce(function(s,r){ return s + r.k/r.d; }, 0) / validKD.length).toFixed(2)
+      /* 평균 K/D */
+      var kdData = [];
+      maps.forEach(function(m) {
+        if (!m.kda) return;
+        var parts2 = m.kda.split('/').map(function(x) { return parseFloat(x); });
+        var K = parts2[0], D = parts2[1];
+        if (!isNaN(K) && !isNaN(D) && D > 0) kdData.push(K / D);
+      });
+      var avgKD = kdData.length
+        ? (kdData.reduce(function(s, v) { return s + v; }, 0) / kdData.length).toFixed(2)
         : '—';
 
       cardsEl.innerHTML =
@@ -441,13 +501,14 @@
           '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D</div></div>' +
         '</div>';
 
-      // 사용 요원 집계 (많이 쓴 순)
+      /* 사용 요원 집계 */
       var agentCount = {};
-      data.forEach(function(r) {
-        if (!r.agent) return;
-        agentCount[r.agent] = (agentCount[r.agent] || 0) + 1;
+      maps.forEach(function(m) {
+        var ag = (m.agent || '').trim();
+        if (!ag) return;
+        agentCount[ag] = (agentCount[ag] || 0) + 1;
       });
-      var agentList = Object.keys(agentCount).sort(function(a,b){ return agentCount[b] - agentCount[a]; });
+      var agentList = Object.keys(agentCount).sort(function(a, b) { return agentCount[b] - agentCount[a]; });
 
       if (agentList.length) {
         var agentHTML = agentList.map(function(ag) {
@@ -469,7 +530,8 @@
       }
     }
 
-    // ── 우승 기록 ──
+    /* ── 우승 기록 ── */
+    var wins  = pd.wins || [];
     var winsEl = document.getElementById('pm-wins');
     if (!wins.length) {
       winsEl.innerHTML = '<div class="pm-no-wins">우승 기록이 없습니다</div>';
@@ -484,9 +546,9 @@
       if (admin) {
         winsEl.querySelectorAll('.pm-win-remove').forEach(function(btn) {
           btn.addEventListener('click', function() {
-            var arr = loadWins(name);
-            arr.splice(Number(btn.dataset.idx), 1);
-            saveWins(name, arr);
+            var d = loadVctp(name);
+            d.wins.splice(Number(btn.dataset.idx), 1);
+            saveVctp(name, d);
             render();
           });
         });
@@ -495,7 +557,9 @@
     document.getElementById('pm-win-add-row').style.display = admin ? 'flex' : 'none';
   }
 
-  /* ── 열기/닫기 ───────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════
+     열기/닫기
+  ═══════════════════════════════════════════════════════════════ */
   function open(playerName, teamName, logoHTML) {
     _current = { name: playerName, team: teamName };
     document.getElementById('pm-name').textContent = playerName;
@@ -509,18 +573,20 @@
     _current = null;
   }
 
-  /* ── 이벤트 ──────────────────────────────────────────────────── */
+  /* ═══════════════════════════════════════════════════════════════
+     이벤트
+  ═══════════════════════════════════════════════════════════════ */
   document.getElementById('pm-close').addEventListener('click', close);
   document.getElementById('pm-backdrop').addEventListener('click', close);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 
-  ['pm-inp-country','pm-inp-role'].forEach(function(id) {
+  ['pm-inp-country', 'pm-inp-role'].forEach(function(id) {
     document.getElementById(id).addEventListener('blur', function() {
       if (!_current) return;
-      var meta = loadMeta(_current.name);
-      meta.country = document.getElementById('pm-inp-country').value.trim();
-      meta.role    = document.getElementById('pm-inp-role').value.trim();
-      saveMeta(_current.name, meta);
+      var d = loadVctp(_current.name);
+      d.meta.country = document.getElementById('pm-inp-country').value.trim();
+      d.meta.role    = document.getElementById('pm-inp-role').value.trim();
+      saveVctp(_current.name, d);
       render();
     });
   });
@@ -530,9 +596,9 @@
     var inp = document.getElementById('pm-win-input');
     var val = inp.value.trim();
     if (!val) return;
-    var arr = loadWins(_current.name);
-    arr.push(val);
-    saveWins(_current.name, arr);
+    var d = loadVctp(_current.name);
+    d.wins.push(val);
+    saveVctp(_current.name, d);
     inp.value = '';
     render();
   }
@@ -541,5 +607,44 @@
     if (e.key === 'Enter') addWin();
   });
 
+  /* ═══════════════════════════════════════════════════════════════
+     공개 API
+  ═══════════════════════════════════════════════════════════════ */
   window.openPlayerModal = open;
+
+  /**
+   * match-dark 파일에서 saveFieldSync 이후 호출:
+   * updateVctPlayer(playerName, matchKey, mapIdx, { agent, acs, kda })
+   */
+  window.updateVctPlayer = function(playerName, matchKey, mapIdx, fields) {
+    if (!playerName || playerName === '-' || !playerName.trim()) return;
+    var pName = playerName.trim();
+    var pd    = loadVctp(pName);
+
+    // 같은 matchKey+mapIdx 항목 찾기 (없으면 생성)
+    var entry = null;
+    for (var i = 0; i < pd.maps.length; i++) {
+      if (pd.maps[i].matchKey === matchKey && pd.maps[i].mapIdx === mapIdx) {
+        entry = pd.maps[i]; break;
+      }
+    }
+    if (!entry) {
+      entry = { matchKey: matchKey, mapIdx: mapIdx };
+      pd.maps.push(entry);
+    }
+
+    // 필드 업데이트 (null/undefined는 건너뜀)
+    if (fields.agent !== undefined && fields.agent !== null && fields.agent !== '')
+      entry.agent = fields.agent;
+    if (fields.acs !== undefined && fields.acs !== null && fields.acs !== '')
+      entry.acs = fields.acs;
+    if (fields.kda !== undefined && fields.kda !== null && fields.kda.indexOf && fields.kda.indexOf('/') !== -1)
+      entry.kda = fields.kda;
+
+    saveVctp(pName, pd);
+  };
+
+  /* ── 마이그레이션 실행 (로드 시 1회) ── */
+  runMigration();
+
 })();
