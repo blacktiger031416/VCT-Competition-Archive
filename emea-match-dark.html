@@ -3294,12 +3294,28 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
   if (!data[pKey]) data[pKey] = {};
   data[pKey][field] = value;
   try { localStorage.setItem(PKEY, JSON.stringify(data)); } catch(e) {}
-  // vct_p: 구조에도 동기화
-  var _slot = data[pKey];
-  var _pName = _slot && _slot.name;
-  if (_pName && _pName !== '-' && _pName.trim() && window.updateVctPlayer) {
-    window.updateVctPlayer(_pName.trim(), MATCH_KEY, mapIdx, { agent: _slot.agent, acs: _slot.acs, kda: _slot.kda });
-  }
+  // vct_p: 구조에도 동기화 (player-modal.js 없이 직접 처리)
+  try {
+    var _slot = data[pKey];
+    var _pName = (_slot && _slot.name || '').trim();
+    if (_pName && _pName !== '-') {
+      var _vk = 'vct_p:' + _pName;
+      var _pd = {};
+      try { _pd = JSON.parse(localStorage.getItem(_vk) || '{}'); } catch(e2) {}
+      if (!_pd.maps) _pd.maps = [];
+      var _entry = null;
+      for (var _i = 0; _i < _pd.maps.length; _i++) {
+        if (_pd.maps[_i].matchKey === MATCH_KEY && _pd.maps[_i].mapIdx === mapIdx) {
+          _entry = _pd.maps[_i]; break;
+        }
+      }
+      if (!_entry) { _entry = { matchKey: MATCH_KEY, mapIdx: mapIdx }; _pd.maps.push(_entry); }
+      if (_slot.agent && _slot.agent.trim()) _entry.agent = _slot.agent.trim();
+      if (_slot.acs != null && _slot.acs !== '') _entry.acs = _slot.acs;
+      if (_slot.kda && _slot.kda.indexOf('/') !== -1) _entry.kda = _slot.kda;
+      localStorage.setItem(_vk, JSON.stringify(_pd));
+    }
+  } catch(e3) {}
 }
 
 function loadPlayersSync(mapIdx) {
