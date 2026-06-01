@@ -430,8 +430,8 @@
             <input class="pm-info-input" id="pm-inp-country" placeholder="예: 싱가포르" />
           </div>
           <div class="pm-info-field">
-            <span class="pm-info-label">포지션</span>
-            <input class="pm-info-input" id="pm-inp-role" placeholder="예: Duelist" />
+            <span class="pm-info-label">본명</span>
+            <input class="pm-info-input" id="pm-inp-realname" placeholder="예: Kim Min-chul" />
           </div>
         </div>
 
@@ -482,16 +482,16 @@
 
     /* 메타 텍스트 */
     var parts = [];
-    if (pd.meta.country) parts.push(pd.meta.country);
-    if (pd.meta.role)    parts.push(pd.meta.role);
+    if (pd.meta.country)  parts.push(pd.meta.country);
+    if (pd.meta.realname) parts.push(pd.meta.realname);
     document.getElementById('pm-meta').textContent = parts.join(' · ') || '—';
 
     /* admin 편집 */
     var editRow = document.getElementById('pm-info-edit');
     if (admin) {
       editRow.style.display = 'flex';
-      document.getElementById('pm-inp-country').value = pd.meta.country || '';
-      document.getElementById('pm-inp-role').value    = pd.meta.role    || '';
+      document.getElementById('pm-inp-country').value  = pd.meta.country  || '';
+      document.getElementById('pm-inp-realname').value = pd.meta.realname || '';
     } else {
       editRow.style.display = 'none';
     }
@@ -653,12 +653,12 @@
   document.getElementById('pm-backdrop').addEventListener('click', close);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 
-  ['pm-inp-country', 'pm-inp-role'].forEach(function(id) {
+  ['pm-inp-country', 'pm-inp-realname'].forEach(function(id) {
     document.getElementById(id).addEventListener('blur', function() {
       if (!_current) return;
       var d = loadVctp(_current.name);
-      d.meta.country = document.getElementById('pm-inp-country').value.trim();
-      d.meta.role    = document.getElementById('pm-inp-role').value.trim();
+      d.meta.country  = document.getElementById('pm-inp-country').value.trim();
+      d.meta.realname = document.getElementById('pm-inp-realname').value.trim();
       saveVctp(_current.name, d);
       render();
     });
