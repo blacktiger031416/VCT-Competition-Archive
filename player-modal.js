@@ -44,15 +44,62 @@
   function vctpKey(name) { return 'vct_p:' + name; }
 
   function loadVctp(name) {
+    var pd = { meta: {}, wins: [], maps: [] };
     try {
       var raw = localStorage.getItem(vctpKey(name));
-      if (!raw) return { meta: {}, wins: [], maps: [] };
-      var d = JSON.parse(raw);
-      if (!d.meta)  d.meta  = {};
-      if (!d.wins)  d.wins  = [];
-      if (!d.maps)  d.maps  = [];
-      return d;
-    } catch(e) { return { meta: {}, wins: [], maps: [] }; }
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (!d.meta) d.meta = {};
+        if (!d.wins) d.wins = [];
+        if (!d.maps) d.maps = [];
+        pd = d;
+      }
+    } catch(e) {}
+
+    // maps가 없으면 players: 키에서 lazy 복구 (cross-page DB 누락 대응)
+    if (!pd.maps || pd.maps.length === 0) {
+      var rebuilt = false;
+      for (var _i = 0; _i < localStorage.length; _i++) {
+        var _k = localStorage.key(_i);
+        if (!_k || !_k.startsWith('players:')) continue;
+        // players:MATCH_KEY:mapIdx 형태
+        var _withoutPrefix = _k.substring('players:'.length);
+        var _lastColon = _withoutPrefix.lastIndexOf(':');
+        if (_lastColon === -1) continue;
+        var _matchKey = _withoutPrefix.substring(0, _lastColon);
+        var _mapIdx   = parseInt(_withoutPrefix.substring(_lastColon + 1), 10);
+        if (isNaN(_mapIdx)) continue;
+        try {
+          var _slotData = JSON.parse(localStorage.getItem(_k));
+          if (!_slotData || typeof _slotData !== 'object' || Array.isArray(_slotData)) continue;
+          Object.keys(_slotData).forEach(function(slot) {
+            var p = _slotData[slot];
+            if (!p || !p.name || p.name === '-' || p.name.trim() !== name) return;
+            var entry = null;
+            for (var j = 0; j < pd.maps.length; j++) {
+              if (pd.maps[j].matchKey === _matchKey && pd.maps[j].mapIdx === _mapIdx) {
+                entry = pd.maps[j]; break;
+              }
+            }
+            if (!entry) {
+              entry = { matchKey: _matchKey, mapIdx: _mapIdx };
+              pd.maps.push(entry);
+            }
+            if (p.agent && p.agent.trim()) entry.agent = p.agent.trim();
+            if (p.acs != null && p.acs !== '') entry.acs = p.acs;
+            if (p.kda && p.kda.indexOf('/') !== -1) entry.kda = p.kda;
+            // league/stage/tournament는 matchKey 파싱으로 복구 불가 → 기존 entry 유지
+            rebuilt = true;
+          });
+        } catch(e2) {}
+      }
+      if (rebuilt) {
+        // 복구된 데이터를 localStorage에 저장 (→ storage.js가 DB에도 동기화)
+        saveVctp(name, pd);
+        console.log('[player-modal] lazy migration: ' + name + ' → ' + pd.maps.length + '맵 복구');
+      }
+    }
+    return pd;
   }
 
   function saveVctp(name, data) {
