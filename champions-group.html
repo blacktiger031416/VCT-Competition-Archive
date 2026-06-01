@@ -791,12 +791,13 @@
         scoreEl.textContent = score == null ? "–" : String(score);
         row.appendChild(scoreEl);
 
-        // 팀 클릭 → 팀 모달
-        if (team && window.openTeamModal) {
+        // 팀 클릭 → 로스터 모달
+        if (team && window.openRosterModal) {
           row.style.cursor = "pointer";
           row.addEventListener("click", function(e) {
             if (e.target.closest(".gmc-score")) return;
-            window.openTeamModal(team.name, team.logo, !!team.white, 'champions', 'champions', null);
+            var logoHTML = '<img src="' + team.logo + '"' + (team.white ? ' class="logo-white"' : '') + ' />';
+            window.openRosterModal(team.name, logoHTML);
           });
         }
 
@@ -1014,6 +1015,6 @@
     });
     </script>
     <script src="./player-modal.js"></script>
-    <script src="./team-modal.js"></script>
+    <script src="./roster-modal.js"></script>
   </body>
 </html>

@@ -328,8 +328,9 @@
             if (teamName) {
               slot.addEventListener("click", function() {
                 var pickerCb = isAdmin() ? function() { openPicker(region, i); } : null;
-                if (window.openTeamModal) {
-                  window.openTeamModal(teamName, team ? team.logo : '', team ? !!team.white : false, 'masters', 'london', pickerCb);
+                if (window.openRosterModal) {
+                  var logoHTML = team ? '<img src="' + team.logo + '"' + (team.white ? ' class="logo-white"' : '') + ' />' : '';
+                  window.openRosterModal(teamName, logoHTML);
                 } else if (isAdmin()) {
                   openPicker(region, i);
                 }
@@ -441,6 +442,6 @@
     </script>
     <script src="./auth.js"></script>
     <script src="./player-modal.js"></script>
-    <script src="./team-modal.js"></script>
+    <script src="./roster-modal.js"></script>
   </body>
 </html>

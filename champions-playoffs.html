@@ -593,11 +593,12 @@
 
         // 팀 클릭 → 팀 모달
         row.onclick = null;
-        if (teamName && t && window.openTeamModal) {
+        if (teamName && t && window.openRosterModal) {
           row.style.cursor = "pointer";
           row.onclick = function(e) {
             if (e.target.tagName === 'EM') return;
-            window.openTeamModal(t.name, t.logo, !!t.white, 'champions', 'champions', null);
+            var logoHTML = '<img src="' + t.logo + '"' + (t.white ? ' class="logo-white"' : '') + ' />';
+            window.openRosterModal(t.name, logoHTML);
           };
         }
       }
@@ -828,6 +829,6 @@
     </script>
     <script src="./auth.js"></script>
     <script src="./player-modal.js"></script>
-    <script src="./team-modal.js"></script>
+    <script src="./roster-modal.js"></script>
   </body>
 </html>
