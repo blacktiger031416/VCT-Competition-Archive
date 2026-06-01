@@ -139,8 +139,8 @@
           _origSet(update.key, update.value);
         }
 
-        /* 편집 페이지가 아니면 자동 새로고침 (여러 키 변경 시 묶어서 한 번만) */
-        if (!_isEditPage) {
+        /* 편집 페이지나 관리자가 아닐 때만 자동 새로고침 (묶어서 한 번만) */
+        if (!_isEditPage && !_isAdmin) {
           clearTimeout(_reloadTimer);
           _reloadTimer = setTimeout(function () {
             sessionStorage.setItem("_vct_scroll_y", String(window.scrollY));

@@ -71,6 +71,33 @@
     "  z-index: 9000;",
     "  box-shadow: 0 4px 20px rgba(0,0,0,0.5);",
     "}",
+    ".auth-refresh-btn {",
+    "  display: inline-flex;",
+    "  align-items: center;",
+    "  gap: 6px;",
+    "  padding: 0 12px;",
+    "  height: 32px;",
+    "  border: 1px solid rgba(255,255,255,0.12);",
+    "  border-radius: 4px;",
+    "  background: rgba(255,255,255,0.05);",
+    "  color: rgba(255,255,255,0.45);",
+    "  font-size: 11px;",
+    "  font-weight: 700;",
+    "  font-family: 'Barlow Condensed', sans-serif;",
+    "  letter-spacing: 0.12em;",
+    "  text-transform: uppercase;",
+    "  cursor: pointer;",
+    "  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;",
+    "  white-space: nowrap;",
+    "  flex-shrink: 0;",
+    "}",
+    ".auth-refresh-btn:hover {",
+    "  background: rgba(255,255,255,0.09);",
+    "  border-color: rgba(255,255,255,0.22);",
+    "  color: rgba(255,255,255,0.85);",
+    "}",
+    ".auth-refresh-btn:active { transform: rotate(180deg); }",
+    ".auth-refresh-btn .refresh-icon { font-size: 13px; line-height: 1; }",
 
     /* ── Modal overlay ── */
     ".login-modal {",
@@ -262,13 +289,26 @@
   var authBtn = document.createElement("button");
   authBtn.type = "button";
 
+  /* 새로고침 버튼 (admin 로그인 시에만 표시) */
+  var refreshBtn = document.createElement("button");
+  refreshBtn.type = "button";
+  refreshBtn.className = "auth-refresh-btn";
+  refreshBtn.innerHTML = '<span class="refresh-icon">↻</span> 새로고침';
+  refreshBtn.title = "서버에서 최신 데이터를 불러옵니다";
+  refreshBtn.style.display = "none";
+  refreshBtn.addEventListener("click", function () {
+    window.location.reload();
+  });
+
   function refreshAuthBtn() {
     if (isAdmin()) {
       authBtn.textContent = "Admin";
       authBtn.className = "auth-header-btn auth-header-btn--on";
+      refreshBtn.style.display = "";
     } else {
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
+      refreshBtn.style.display = "none";
     }
   }
   refreshAuthBtn();
@@ -282,9 +322,11 @@
   });
 
   if (header) {
+    header.appendChild(refreshBtn);
     header.appendChild(authBtn);
   } else {
     authBtn.classList.add("auth-header-btn--floating");
+    document.body.appendChild(refreshBtn);
     document.body.appendChild(authBtn);
   }
 
