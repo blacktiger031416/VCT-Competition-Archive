@@ -185,7 +185,7 @@
     .pm-header {
       position: relative; flex-shrink: 0;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 24px 26px 24px; gap: 14px; overflow: hidden;
+      padding: 24px 26px 24px; gap: 14px;
     }
     .pm-header::before {
       content: ''; position: absolute; inset: 0;
