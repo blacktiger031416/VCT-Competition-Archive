@@ -459,6 +459,25 @@
       font-size: 14px; color: rgba(255,130,140,0.9);
       width: 16px; text-align: center;
     }
+    /* 어드민 토너먼트 태그 버튼 */
+    .pm-tag-row {
+      display: flex; gap: 6px; padding: 0 20px 12px; flex-wrap: wrap;
+    }
+    .pm-tag-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px; border-radius: 6px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.5);
+      transition: all 0.12s;
+    }
+    .pm-tag-btn:hover {
+      background: rgba(100,160,255,0.15);
+      border-color: rgba(100,160,255,0.4);
+      color: rgba(160,210,255,1);
+    }
 
     /* 스탯 영역 */
     .pm-stats-area { padding: 16px 26px 0; }
@@ -688,15 +707,31 @@
 
     var items = [{ key: 'all', label: '전체', count: recognizedCount }].concat(groups);
 
+    var admin = window.vctIsAdmin && window.vctIsAdmin();
+
     listEl.innerHTML = items.map(function(g) {
       var isSel = _activeFilter === g.key;
+      // 어드민: Masters/Champions 토너먼트 미상 그룹에 태그 버튼 표시
+      var needsTag = admin && g.key !== 'all' && (g.league === 'masters' || g.league === 'champions') && !g.tournament;
+      var tagRow = '';
+      if (needsTag) {
+        var opts = g.league === 'masters'
+          ? [['santiago','Santiago'],['london','London']]
+          : [['bangkok','Bangkok']];  // Champions 토너먼트 이름
+        tagRow = '<div class="pm-tag-row">' +
+          '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:0.1em;text-transform:uppercase;align-self:center;">토너먼트 지정:</span>' +
+          opts.map(function(o) {
+            return '<button class="pm-tag-btn" data-tag-key="' + g.key + '" data-tag-val="' + o[0] + '">' + o[1] + '</button>';
+          }).join('') +
+        '</div>';
+      }
       return '<div class="pm-filter-item' + (isSel ? ' pm-fi-selected' : '') + '" data-key="' + g.key + '">' +
-        '<span class="pm-filter-item-label">' + g.label + '</span>' +
+        '<span class="pm-filter-item-label">' + g.label + (needsTag ? ' <span style="font-size:11px;color:rgba(255,180,60,0.7);font-weight:600">(미상)</span>' : '') + '</span>' +
         '<div class="pm-filter-item-right">' +
           '<span class="pm-filter-item-maps">' + g.count + '맵</span>' +
           '<span class="pm-filter-item-check">' + (isSel ? '✓' : '') + '</span>' +
         '</div>' +
-      '</div>';
+      '</div>' + tagRow;
     }).join('');
 
     listEl.querySelectorAll('.pm-filter-item').forEach(function(item) {
@@ -704,6 +739,31 @@
         _activeFilter = item.dataset.key;
         closeFilterPopup();
         render();
+      });
+    });
+
+    // 어드민 토너먼트 태그 버튼
+    listEl.querySelectorAll('.pm-tag-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation(); // 부모 filter-item 클릭 방지
+        var groupKey = btn.dataset.tagKey;   // e.g. 'masters||swiss'
+        var newTournament = btn.dataset.tagVal; // e.g. 'santiago'
+        var pd = loadVctp(_current.name);
+        var changed = 0;
+        pd.maps.forEach(function(m) {
+          var key = (m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'');
+          if (key === groupKey) {
+            m.tournament = newTournament;
+            changed++;
+          }
+        });
+        if (changed > 0) {
+          saveVctp(_current.name, pd);
+          closeFilterPopup();
+          render();
+          // 팝업 다시 열어서 결과 확인
+          setTimeout(openFilterPopup, 80);
+        }
       });
     });
 
