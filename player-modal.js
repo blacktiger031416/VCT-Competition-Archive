@@ -1,6 +1,6 @@
 (function () {
   /* ═══════════════════════════════════════════════════════════════
-     VCT PLAYER MODAL  –  v2  (vct_p: storage)
+     VCT PLAYER MODAL  –  v3  (vct_p: storage)
      새 데이터 구조: vct_p:PLAYER_NAME → { meta, wins, maps[] }
   ═══════════════════════════════════════════════════════════════ */
 
@@ -39,7 +39,7 @@
 
   /* ═══════════════════════════════════════════════════════════════
      새 데이터 구조 helpers
-     vct_p:NAME → { meta:{country,role,team}, wins:[], maps:[{matchKey,mapIdx,agent,acs,kda},...] }
+     vct_p:NAME → { meta:{country,realname}, wins:[], maps:[{matchKey,mapIdx,league,stage,tournament,agent,acs,kda},...] }
   ═══════════════════════════════════════════════════════════════ */
   function vctpKey(name) { return 'vct_p:' + name; }
 
@@ -61,7 +61,6 @@
 
   /* ═══════════════════════════════════════════════════════════════
      마이그레이션: players:MATCH_KEY:mapIdx → vct_p:NAME
-     한 번만 실행 (vct_p_migrated 플래그로 체크)
   ═══════════════════════════════════════════════════════════════ */
   function runMigration() {
     if (localStorage.getItem('vct_p_migrated') === '1') return;
@@ -74,7 +73,6 @@
     }
 
     keys.forEach(function(k) {
-      // players:MATCH_KEY:mapIdx  — mapIdx는 맨 마지막 :숫자
       var withoutPrefix = k.substring('players:'.length);
       var lastColon = withoutPrefix.lastIndexOf(':');
       if (lastColon === -1) return;
@@ -93,7 +91,6 @@
           var pName = p.name.trim();
           var pd    = loadVctp(pName);
 
-          // 같은 matchKey+mapIdx 항목이 이미 있으면 필드 병합
           var existing = null;
           for (var j = 0; j < pd.maps.length; j++) {
             if (pd.maps[j].matchKey === matchKey && pd.maps[j].mapIdx === mapIdx) {
@@ -114,7 +111,6 @@
       } catch(e) {}
     });
 
-    // 구버전 meta/wins 마이그레이션
     var metaKeys = [];
     for (var ii = 0; ii < localStorage.length; ii++) {
       var kk = localStorage.key(ii);
@@ -147,6 +143,70 @@
 
     localStorage.setItem('vct_p_migrated', '1');
     console.log('[player-modal] 마이그레이션 완료: ' + count + '개 슬롯 → vct_p: 구조로 변환');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     필터 그룹 헬퍼
+  ═══════════════════════════════════════════════════════════════ */
+  var LEAGUE_LABELS = {
+    pacific:   'Pacific',
+    americas:  'Americas',
+    emea:      'EMEA',
+    cn:        'China',
+    masters:   'Masters',
+    champions: 'Champions',
+  };
+  var TOURNAMENT_LABELS = {
+    santiago: 'Santiago',
+    london:   'London',
+  };
+  var STAGE_LABELS = {
+    kickoff:  'KickOff',
+    stage1:   'Stage 1',
+    stage2:   'Stage 2',
+    swiss:    'Swiss',
+    playoffs: 'Playoffs',
+  };
+
+  /* league + tournament + stage → 표시용 라벨 */
+  function buildGroupLabel(league, tournament, stage) {
+    var leagueName     = LEAGUE_LABELS[league]       || league       || '';
+    var tournamentName = TOURNAMENT_LABELS[tournament] || tournament  || '';
+    var stageName      = STAGE_LABELS[stage]           || stage       || '';
+
+    var prefix = '';
+    if ((league === 'masters' || league === 'champions') && tournamentName) {
+      prefix = leagueName + ' ' + tournamentName;
+    } else {
+      prefix = leagueName;
+    }
+
+    var parts = [];
+    if (prefix) parts.push(prefix);
+    if (stageName) parts.push(stageName);
+    return parts.join(' · ') || '기타';
+  }
+
+  /* maps 배열 → 그룹 목록 [{key, label, count}] (출현 순서 유지) */
+  function buildFilterGroups(allMaps) {
+    var order  = [];
+    var groups = {};
+    allMaps.forEach(function(m) {
+      var key = (m.league || '') + '|' + (m.tournament || '') + '|' + (m.stage || '');
+      if (!groups[key]) {
+        groups[key] = {
+          key:        key,
+          league:     m.league      || '',
+          tournament: m.tournament  || '',
+          stage:      m.stage       || '',
+          label:      buildGroupLabel(m.league, m.tournament, m.stage),
+          count:      0,
+        };
+        order.push(key);
+      }
+      groups[key].count++;
+    });
+    return order.map(function(k) { return groups[k]; });
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -253,25 +313,122 @@
     }
     .pm-info-input:focus { border-color: rgba(255,100,100,0.5); }
 
-    /* 스테이지 탭 */
-    .pm-stage-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      padding: 16px 26px 0; flex-shrink: 0;
+    /* ── 경기 필터 버튼 바 ── */
+    .pm-filter-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 26px 0; flex-shrink: 0;
     }
-    .pm-stage-tab {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 6px 16px;
+    .pm-filter-btn {
+      display: inline-flex; align-items: center; gap: 8px;
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; color: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 8px 14px;
       cursor: pointer; transition: all 0.12s;
     }
-    .pm-stage-tab:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.6); }
-    .pm-stage-tab.active {
-      background: rgba(255,70,84,0.15);
-      border-color: rgba(255,70,84,0.4);
+    .pm-filter-btn:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .pm-filter-btn.filtered {
+      background: rgba(255,70,84,0.1);
+      border-color: rgba(255,70,84,0.35);
+    }
+    .pm-filter-btn-icon {
+      font-size: 13px; opacity: 0.6;
+    }
+    .pm-filter-btn-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+    .pm-filter-btn.filtered .pm-filter-btn-label {
       color: rgba(255,130,140,1);
+    }
+    .pm-filter-btn-count {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.06);
+      border-radius: 5px; padding: 2px 7px;
+    }
+    .pm-filter-btn.filtered .pm-filter-btn-count {
+      color: rgba(255,130,140,0.7);
+      background: rgba(255,70,84,0.12);
+    }
+    .pm-filter-btn-arrow {
+      font-size: 9px; color: rgba(255,255,255,0.25);
+      transition: transform 0.15s;
+    }
+
+    /* ── 필터 선택 팝업 ── */
+    .pm-filter-popup-overlay {
+      position: fixed; inset: 0; z-index: 10001;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pm-filter-popup-overlay[hidden] { display: none !important; }
+    .pm-filter-popup-bg {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+    }
+    .pm-filter-popup {
+      position: relative; z-index: 1;
+      background: #0d1520;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      width: min(400px, calc(100vw - 40px));
+      max-height: 70vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      animation: pmIn 0.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .pm-filter-popup-title {
+      padding: 16px 20px 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+      text-transform: uppercase; color: rgba(255,255,255,0.28);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky; top: 0;
+      background: #0d1520;
+    }
+    .pm-filter-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 20px;
+      cursor: pointer;
+      transition: background 0.1s;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .pm-filter-item:last-child { border-bottom: none; }
+    .pm-filter-item:hover { background: rgba(255,255,255,0.05); }
+    .pm-filter-item.pm-fi-selected {
+      background: rgba(255,70,84,0.1);
+    }
+    .pm-filter-item-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.75);
+    }
+    .pm-filter-item.pm-fi-selected .pm-filter-item-label {
+      color: rgba(255,130,140,1);
+    }
+    .pm-filter-item-right {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pm-filter-item-maps {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px; padding: 2px 8px;
+    }
+    .pm-filter-item.pm-fi-selected .pm-filter-item-maps {
+      color: rgba(255,130,140,0.6);
+      background: rgba(255,70,84,0.12);
+    }
+    .pm-filter-item-check {
+      font-size: 14px; color: rgba(255,130,140,0.9);
+      width: 16px; text-align: center;
     }
 
     /* 스탯 영역 */
@@ -435,7 +592,14 @@
           </div>
         </div>
 
-        <div id="pm-stage-tabs" class="pm-stage-tabs" style="display:none"></div>
+        <div id="pm-filter-bar" class="pm-filter-bar" style="display:none">
+          <button id="pm-filter-btn" class="pm-filter-btn">
+            <span class="pm-filter-btn-icon">🎮</span>
+            <span id="pm-filter-btn-label" class="pm-filter-btn-label">전체</span>
+            <span id="pm-filter-btn-count" class="pm-filter-btn-count"></span>
+            <span class="pm-filter-btn-arrow">▾</span>
+          </button>
+        </div>
 
         <div class="pm-panel-scroll">
           <div class="pm-stats-area">
@@ -454,22 +618,76 @@
         </div>
       </div>
     </div>
+
+    <div id="pm-filter-popup-overlay" class="pm-filter-popup-overlay" hidden>
+      <div class="pm-filter-popup-bg" id="pm-filter-popup-bg"></div>
+      <div class="pm-filter-popup">
+        <div class="pm-filter-popup-title">경기 필터 선택</div>
+        <div id="pm-filter-list"></div>
+      </div>
+    </div>
   `;
   document.body.appendChild(el.firstElementChild);
+  document.body.appendChild(el.firstElementChild); // filter popup overlay
 
   /* ═══════════════════════════════════════════════════════════════
      상태
   ═══════════════════════════════════════════════════════════════ */
-  var _current      = null;
-  var _activeStage  = 'all';
-  var STAGE_ORDER   = ['kickoff', 'stage1', 'stage2', 'playoffs'];
-  var STAGE_LABELS  = {
-    all:      '전체',
-    kickoff:  'KickOff',
-    stage1:   'Stage 1',
-    stage2:   'Stage 2',
-    playoffs: 'Playoffs',
-  };
+  var _current       = null;
+  var _activeFilter  = 'all'; // 'all' 또는 그룹 key 'league|tournament|stage'
+
+  /* ═══════════════════════════════════════════════════════════════
+     필터 팝업 열기/닫기
+  ═══════════════════════════════════════════════════════════════ */
+  function openFilterPopup() {
+    if (!_current) return;
+    var pd       = loadVctp(_current.name);
+    var allMaps  = pd.maps || [];
+    var groups   = buildFilterGroups(allMaps);
+    var listEl   = document.getElementById('pm-filter-list');
+
+    // '전체' 항목
+    var totalCount = allMaps.length;
+    var items = [{ key: 'all', label: '전체', count: totalCount }].concat(groups);
+
+    listEl.innerHTML = items.map(function(g) {
+      var isSel = _activeFilter === g.key;
+      return '<div class="pm-filter-item' + (isSel ? ' pm-fi-selected' : '') + '" data-key="' + g.key + '">' +
+        '<span class="pm-filter-item-label">' + g.label + '</span>' +
+        '<div class="pm-filter-item-right">' +
+          '<span class="pm-filter-item-maps">' + g.count + '맵</span>' +
+          '<span class="pm-filter-item-check">' + (isSel ? '✓' : '') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    listEl.querySelectorAll('.pm-filter-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        _activeFilter = item.dataset.key;
+        closeFilterPopup();
+        render();
+      });
+    });
+
+    document.getElementById('pm-filter-popup-overlay').removeAttribute('hidden');
+  }
+
+  function closeFilterPopup() {
+    document.getElementById('pm-filter-popup-overlay').setAttribute('hidden', '');
+  }
+
+  document.getElementById('pm-filter-popup-bg').addEventListener('click', closeFilterPopup);
+  document.getElementById('pm-filter-btn').addEventListener('click', openFilterPopup);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var popupVisible = !document.getElementById('pm-filter-popup-overlay').hasAttribute('hidden');
+      if (popupVisible) {
+        closeFilterPopup();
+      } else {
+        close();
+      }
+    }
+  });
 
   /* ═══════════════════════════════════════════════════════════════
      렌더
@@ -478,7 +696,7 @@
     if (!_current) return;
     var name  = _current.name;
     var admin = window.vctIsAdmin && window.vctIsAdmin();
-    var pd    = loadVctp(name);          // vct_p:NAME 에서 직접 로드
+    var pd    = loadVctp(name);
 
     /* 메타 텍스트 */
     var parts = [];
@@ -496,48 +714,59 @@
       editRow.style.display = 'none';
     }
 
-    /* ── 스테이지 탭 ── */
-    var allMaps    = pd.maps || [];
-    var cardsEl    = document.getElementById('pm-stat-cards');
-    var agentsWrap = document.getElementById('pm-agents-wrap');
-    var tabsEl     = document.getElementById('pm-stage-tabs');
+    /* ── 필터 버튼 업데이트 ── */
+    var allMaps  = pd.maps || [];
+    var groups   = buildFilterGroups(allMaps);
+    var filterBar = document.getElementById('pm-filter-bar');
+    var filterBtn = document.getElementById('pm-filter-btn');
 
-    var stageSeen = {};
-    allMaps.forEach(function(m) {
-      if (m.stage) stageSeen[m.stage] = true;
-    });
-    var stagesFound = STAGE_ORDER.filter(function(s) { return stageSeen[s]; });
-    // 알 수 없는 stage 값도 추가
-    Object.keys(stageSeen).forEach(function(s) {
-      if (STAGE_ORDER.indexOf(s) === -1) stagesFound.push(s);
-    });
+    if (groups.length >= 1) {
+      filterBar.style.display = 'flex';
 
-    if (stagesFound.length >= 1) {
-      var tabList = ['all'].concat(stagesFound);
-      // _activeStage가 현재 데이터에 없으면 'all'로 리셋
-      if (_activeStage !== 'all' && stagesFound.indexOf(_activeStage) === -1) _activeStage = 'all';
-      tabsEl.style.display = 'flex';
-      tabsEl.innerHTML = tabList.map(function(s) {
-        return '<button class="pm-stage-tab' + (s === _activeStage ? ' active' : '') + '" data-stage="' + s + '">' +
-          (STAGE_LABELS[s] || s) + '</button>';
-      }).join('');
-      tabsEl.querySelectorAll('.pm-stage-tab').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          _activeStage = btn.dataset.stage;
-          render();
-        });
-      });
+      // 현재 필터가 유효한지 확인 (없는 그룹이면 'all'로 리셋)
+      if (_activeFilter !== 'all') {
+        var validKeys = groups.map(function(g) { return g.key; });
+        if (validKeys.indexOf(_activeFilter) === -1) _activeFilter = 'all';
+      }
+
+      // 현재 필터 라벨 + 맵 수 표시
+      var currentLabel, currentCount;
+      if (_activeFilter === 'all') {
+        currentLabel = '전체';
+        currentCount = allMaps.length;
+      } else {
+        var activeGroup = null;
+        for (var gi = 0; gi < groups.length; gi++) {
+          if (groups[gi].key === _activeFilter) { activeGroup = groups[gi]; break; }
+        }
+        currentLabel = activeGroup ? activeGroup.label : '전체';
+        currentCount = activeGroup ? activeGroup.count : allMaps.length;
+      }
+
+      document.getElementById('pm-filter-btn-label').textContent = currentLabel;
+      document.getElementById('pm-filter-btn-count').textContent = currentCount + '맵';
+      if (_activeFilter !== 'all') {
+        filterBtn.classList.add('filtered');
+      } else {
+        filterBtn.classList.remove('filtered');
+      }
     } else {
-      tabsEl.style.display = 'none';
-      _activeStage = 'all';
+      filterBar.style.display = 'none';
+      _activeFilter = 'all';
     }
 
-    /* 스테이지 필터 적용 */
-    var maps = _activeStage === 'all'
+    /* ── 필터 적용 ── */
+    var maps = _activeFilter === 'all'
       ? allMaps
-      : allMaps.filter(function(m) { return m.stage === _activeStage; });
+      : allMaps.filter(function(m) {
+          var key = (m.league || '') + '|' + (m.tournament || '') + '|' + (m.stage || '');
+          return key === _activeFilter;
+        });
 
     /* ── 스탯 계산 ── */
+    var cardsEl    = document.getElementById('pm-stat-cards');
+    var agentsWrap = document.getElementById('pm-agents-wrap');
+
     if (!maps.length) {
       cardsEl.innerHTML    = '<div class="pm-no-data">기록된 스탯이 없습니다</div>';
       agentsWrap.innerHTML = '';
@@ -556,15 +785,14 @@
       var kdData = [];
       maps.forEach(function(m) {
         if (!m.kda) return;
-        var parts2 = m.kda.split('/').map(function(x) { return parseFloat(x); });
-        var K = parts2[0], D = parts2[1];
+        var kparts = m.kda.split('/').map(function(x) { return parseFloat(x); });
+        var K = kparts[0], D = kparts[1];
         if (!isNaN(K) && !isNaN(D) && D > 0) kdData.push(K / D);
       });
       var avgKD = kdData.length
         ? (kdData.reduce(function(s, v) { return s + v; }, 0) / kdData.length).toFixed(2)
         : '—';
 
-      /* 맵 수 표시 */
       var mapCountLabel = '(' + maps.length + '맵)';
 
       cardsEl.innerHTML =
@@ -633,8 +861,8 @@
      열기/닫기
   ═══════════════════════════════════════════════════════════════ */
   function open(playerName, teamName, logoHTML) {
-    _current     = { name: playerName, team: teamName };
-    _activeStage = 'all';
+    _current      = { name: playerName, team: teamName };
+    _activeFilter = 'all';
     document.getElementById('pm-name').textContent = playerName;
     document.getElementById('pm-logo').innerHTML   = logoHTML || '';
     render();
@@ -643,6 +871,7 @@
 
   function close() {
     document.getElementById('player-modal').setAttribute('hidden', '');
+    closeFilterPopup();
     _current = null;
   }
 
@@ -651,7 +880,6 @@
   ═══════════════════════════════════════════════════════════════ */
   document.getElementById('pm-close').addEventListener('click', close);
   document.getElementById('pm-backdrop').addEventListener('click', close);
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close(); });
 
   ['pm-inp-country', 'pm-inp-realname'].forEach(function(id) {
     document.getElementById(id).addEventListener('blur', function() {
@@ -694,7 +922,6 @@
     var pName = playerName.trim();
     var pd    = loadVctp(pName);
 
-    // 같은 matchKey+mapIdx 항목 찾기 (없으면 생성)
     var entry = null;
     for (var i = 0; i < pd.maps.length; i++) {
       if (pd.maps[i].matchKey === matchKey && pd.maps[i].mapIdx === mapIdx) {
@@ -706,7 +933,6 @@
       pd.maps.push(entry);
     }
 
-    // 필드 업데이트 (null/undefined는 건너뜀)
     if (fields.agent !== undefined && fields.agent !== null && fields.agent !== '')
       entry.agent = fields.agent;
     if (fields.acs !== undefined && fields.acs !== null && fields.acs !== '')
