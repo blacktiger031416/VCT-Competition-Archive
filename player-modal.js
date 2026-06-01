@@ -327,6 +327,47 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
       background: rgba(255,255,255,0.02);
     }
+
+    /* admin 키 진단 */
+    .pm-key-row {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      padding: 8px 26px 10px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.01);
+    }
+    .pm-key-badge {
+      font-family: monospace; font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px; padding: 2px 7px;
+    }
+    .pm-key-warn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      color: rgba(255,180,60,0.85);
+    }
+    .pm-key-merge-inp {
+      flex: 1; min-width: 100px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,180,60,0.35);
+      border-radius: 6px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 600;
+      padding: 5px 10px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .pm-key-merge-inp:focus { border-color: rgba(255,180,60,0.6); }
+    .pm-key-merge-inp::placeholder { color: rgba(255,255,255,0.2); }
+    .pm-key-merge-btn {
+      background: rgba(255,180,60,0.1);
+      border: 1px solid rgba(255,180,60,0.3);
+      border-radius: 6px; color: rgba(255,210,80,0.9);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 5px 12px;
+      cursor: pointer; white-space: nowrap; transition: background 0.12s;
+    }
+    .pm-key-merge-btn:hover { background: rgba(255,180,60,0.22); }
     .pm-info-field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .pm-info-label {
       font-family: 'Barlow Condensed', sans-serif;
@@ -641,6 +682,13 @@
           </div>
         </div>
 
+        <div id="pm-key-row" class="pm-key-row" style="display:none">
+          <code id="pm-key-badge" class="pm-key-badge"></code>
+          <span id="pm-key-warn" class="pm-key-warn" style="display:none">⚠ 데이터 없음 — 이름 불일치?</span>
+          <input id="pm-key-merge-inp" class="pm-key-merge-inp" placeholder="매치 페이지의 이름 입력..." style="display:none" />
+          <button id="pm-key-merge-btn" class="pm-key-merge-btn" style="display:none">여기서 불러오기</button>
+        </div>
+
         <div id="pm-filter-bar" class="pm-filter-bar" style="display:none">
           <button id="pm-filter-btn" class="pm-filter-btn">
             <span id="pm-filter-btn-label" class="pm-filter-btn-label">전체</span>
@@ -805,12 +853,22 @@
 
     /* admin 편집 */
     var editRow = document.getElementById('pm-info-edit');
+    var keyRow  = document.getElementById('pm-key-row');
     if (admin) {
       editRow.style.display = 'flex';
       document.getElementById('pm-inp-country').value  = pd.meta.country  || '';
       document.getElementById('pm-inp-realname').value = pd.meta.realname || '';
+
+      // 키 진단 행
+      keyRow.style.display = 'flex';
+      document.getElementById('pm-key-badge').textContent = 'vct_p:' + name;
+      var hasData = (pd.maps && pd.maps.length > 0);
+      document.getElementById('pm-key-warn').style.display    = hasData ? 'none' : 'inline';
+      document.getElementById('pm-key-merge-inp').style.display = hasData ? 'none' : 'block';
+      document.getElementById('pm-key-merge-btn').style.display = hasData ? 'none' : 'inline-block';
     } else {
       editRow.style.display = 'none';
+      keyRow.style.display  = 'none';
     }
 
     /* ── 필터 버튼 업데이트 ── */
@@ -993,6 +1051,56 @@
   ═══════════════════════════════════════════════════════════════ */
   document.getElementById('pm-close').addEventListener('click', close);
   document.getElementById('pm-backdrop').addEventListener('click', close);
+
+  /* ── 키 병합 버튼 ── */
+  function mergeFromOtherKey() {
+    if (!_current) return;
+    var inp      = document.getElementById('pm-key-merge-inp');
+    var otherName = inp.value.trim();
+    if (!otherName) return;
+
+    var otherPd = loadVctp(otherName);
+    if (!otherPd.maps || !otherPd.maps.length) {
+      inp.style.borderColor = 'rgba(255,60,60,0.6)';
+      inp.placeholder = '"' + otherName + '" 키에 데이터 없음';
+      setTimeout(function() {
+        inp.style.borderColor = '';
+        inp.placeholder = '매치 페이지의 이름 입력...';
+      }, 2000);
+      return;
+    }
+
+    // 현재 선수 데이터에 병합
+    var curPd = loadVctp(_current.name);
+    var existingKeys = {};
+    (curPd.maps || []).forEach(function(m) {
+      existingKeys[m.matchKey + ':' + m.mapIdx] = true;
+    });
+    var added = 0;
+    (otherPd.maps || []).forEach(function(m) {
+      if (!existingKeys[m.matchKey + ':' + m.mapIdx]) {
+        curPd.maps.push(m);
+        added++;
+      }
+    });
+    // meta도 병합 (현재 것 우선)
+    if (!curPd.meta.country  && otherPd.meta.country)  curPd.meta.country  = otherPd.meta.country;
+    if (!curPd.meta.realname && otherPd.meta.realname) curPd.meta.realname = otherPd.meta.realname;
+    // wins 병합
+    (otherPd.wins || []).forEach(function(w) {
+      if ((curPd.wins || []).indexOf(w) === -1) curPd.wins.push(w);
+    });
+
+    saveVctp(_current.name, curPd);
+    inp.value = '';
+    console.log('[player-modal] 병합 완료: "' + otherName + '" → "' + _current.name + '" (' + added + '맵 추가)');
+    render();
+  }
+
+  document.getElementById('pm-key-merge-btn').addEventListener('click', mergeFromOtherKey);
+  document.getElementById('pm-key-merge-inp').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') mergeFromOtherKey();
+  });
 
   ['pm-inp-country', 'pm-inp-realname'].forEach(function(id) {
     document.getElementById(id).addEventListener('blur', function() {
