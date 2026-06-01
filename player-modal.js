@@ -594,7 +594,6 @@
 
         <div id="pm-filter-bar" class="pm-filter-bar" style="display:none">
           <button id="pm-filter-btn" class="pm-filter-btn">
-            <span class="pm-filter-btn-icon">🎮</span>
             <span id="pm-filter-btn-label" class="pm-filter-btn-label">전체</span>
             <span id="pm-filter-btn-count" class="pm-filter-btn-count"></span>
             <span class="pm-filter-btn-arrow">▾</span>
