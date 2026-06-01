@@ -284,7 +284,7 @@
     try { return JSON.parse(localStorage.getItem(rosterKey(name)) || '[]'); } catch(e) { return []; }
   }
   function saveRoster(name, list) {
-    try { localStorage.setItem(rosterKey(name), JSON.stringify(list)); } catch(e) {}
+    try { localStorage.setItem(rosterKey(name), JSON.stringify(list)); } catch(e) { console.error('[team-modal] saveRoster error:', e); }
   }
 
   /* ── 토너먼트별 스탯 계산 ── */
@@ -440,25 +440,28 @@
     if (admin) {
       var addRow = document.createElement('div');
       addRow.className = 'tm-add-row';
-      addRow.innerHTML =
-        '<input class="tm-add-input" id="tm-add-input" placeholder="선수 닉네임 입력" />' +
-        '<button class="tm-add-btn" id="tm-add-btn">+ 추가</button>';
+      var addInp = document.createElement('input');
+      addInp.className = 'tm-add-input';
+      addInp.placeholder = '선수 닉네임 입력';
+      var addBtn = document.createElement('button');
+      addBtn.className = 'tm-add-btn';
+      addBtn.textContent = '+ 추가';
+      addRow.appendChild(addInp);
+      addRow.appendChild(addBtn);
       body.appendChild(addRow);
 
-      function addPlayer() {
-        var inp = document.getElementById('tm-add-input');
-        var val = (inp.value || '').trim();
+      addBtn.addEventListener('click', function() {
+        var val = addInp.value.trim();
         if (!val) return;
         var list = loadRoster(_teamName);
-        if (list.indexOf(val) !== -1) { inp.value = ''; return; }
+        if (list.indexOf(val) !== -1) { addInp.value = ''; return; }
         list.push(val);
         saveRoster(_teamName, list);
-        inp.value = '';
+        addInp.value = '';
         render();
-      }
-      document.getElementById('tm-add-btn').addEventListener('click', addPlayer);
-      document.getElementById('tm-add-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') addPlayer();
+      });
+      addInp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') addBtn.click();
       });
     }
   }
