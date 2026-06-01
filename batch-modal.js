@@ -209,28 +209,22 @@
 
   /* ── 탭 / 테이블 렌더 ── */
   function renderTabs() {
-    var tabsEl = document.getElementById('bm-tabs');
+    var tabsEl  = document.getElementById('bm-tabs');
     tabsEl.innerHTML = '';
     var mapsArr = window.maps || [];
-    var count = 0;
-    mapsArr.forEach(function(m, i) {
-      if (!m || m.hidden) return;
-      count++;
-      var btn = document.createElement('button');
-      btn.className = 'bm-tab' + (i === _activeMap ? ' active' : '');
-      btn.textContent = 'MAP ' + (i + 1);
-      btn.addEventListener('click', function() {
-        _activeMap = i;
-        renderTabs();
-        renderTable();
-      });
-      tabsEl.appendChild(btn);
-    });
-    if (!count) {
-      var btn0 = document.createElement('button');
-      btn0.className = 'bm-tab active';
-      btn0.textContent = 'MAP 1';
-      tabsEl.appendChild(btn0);
+    var count   = window.activeMapCount || mapsArr.length || 1;
+    for (var i = 0; i < count; i++) {
+      (function(idx) {
+        var btn = document.createElement('button');
+        btn.className = 'bm-tab' + (idx === _activeMap ? ' active' : '');
+        btn.textContent = 'MAP ' + (idx + 1);
+        btn.addEventListener('click', function() {
+          _activeMap = idx;
+          renderTabs();
+          renderTable();
+        });
+        tabsEl.appendChild(btn);
+      })(i);
     }
   }
 
