@@ -859,13 +859,13 @@
       document.getElementById('pm-inp-country').value  = pd.meta.country  || '';
       document.getElementById('pm-inp-realname').value = pd.meta.realname || '';
 
-      // 키 진단 행
+      // 키 진단 행 (항상 표시 — recognizedMaps 계산 후 경고 업데이트)
       keyRow.style.display = 'flex';
       document.getElementById('pm-key-badge').textContent = 'vct_p:' + name;
-      var hasData = (pd.maps && pd.maps.length > 0);
-      document.getElementById('pm-key-warn').style.display    = hasData ? 'none' : 'inline';
-      document.getElementById('pm-key-merge-inp').style.display = hasData ? 'none' : 'block';
-      document.getElementById('pm-key-merge-btn').style.display = hasData ? 'none' : 'inline-block';
+      // 경고/병합 툴은 항상 보임 (어드민은 항상 필요할 수 있음)
+      document.getElementById('pm-key-warn').style.display     = 'none'; // recognizedMaps 계산 후 업데이트
+      document.getElementById('pm-key-merge-inp').style.display = 'block';
+      document.getElementById('pm-key-merge-btn').style.display = 'inline-block';
     } else {
       editRow.style.display = 'none';
       keyRow.style.display  = 'none';
@@ -890,6 +890,12 @@
     var recognizedMaps = allMaps.filter(function(m) {
       return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
     });
+
+    // 어드민 경고: 인식된 스탯이 없으면 표시
+    if (admin) {
+      var warnEl = document.getElementById('pm-key-warn');
+      if (warnEl) warnEl.style.display = recognizedMaps.length === 0 ? 'inline' : 'none';
+    }
 
     if (knownGroups.length >= 1) {
       filterBar.style.display = 'flex';
