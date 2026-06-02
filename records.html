@@ -184,6 +184,7 @@
         border-bottom: 1px solid rgba(255,255,255,0.07);
       }
       .content-header img { width: 36px; height: 36px; object-fit: contain; }
+      #content-logo { width: 36px; height: 36px; flex-shrink: 0; }
       .content-header h2 {
         font-family: "Barlow Condensed", sans-serif;
         font-size: 26px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase;
@@ -660,7 +661,7 @@
         <!-- 헤더 -->
         <div class="content-header" id="content-header">
           <div class="accent-bar" id="accent-bar"></div>
-          <img id="content-logo" src="" alt="" />
+          <div id="content-logo"></div>
           <h2 id="content-title"></h2>
         </div>
 
@@ -986,14 +987,14 @@
     };
 
     var LEAGUE_INFO = {
-      "global":           { label: "전체",             logo: "./assets/vct-logo.png",       accent: "#ffffff" },
-      "pacific":          { label: "Pacific",          logo: "./assets/vct-pacific.webp", accent: "#01d2d7" },
-      "cn":               { label: "CN",               logo: "./assets/vct-cn.webp",       accent: "#fb2659" },
-      "americas":         { label: "Americas",         logo: "./assets/vct-americas.png",  accent: "#ff570c" },
-      "emea":             { label: "EMEA",             logo: "./assets/vct-emea.webp",     accent: "#d4ff1f" },
-      "masters-santiago": { label: "Masters Santiago", logo: "./assets/vct-logo.png",       accent: "#a07aff" },
-      "masters-london":   { label: "Masters London",   logo: "./assets/vct-logo.png",       accent: "#a07aff" },
-      "champions":        { label: "Champions",        logo: "./assets/vct-logo.png",       accent: "#c5b174" },
+      "global":           { label: "전체",             logo: "./assets/vct-logo.png",       accent: "#ffffff", mask: true  },
+      "pacific":          { label: "Pacific",          logo: "./assets/vct-pacific.webp", accent: "#01d2d7", mask: false },
+      "cn":               { label: "CN",               logo: "./assets/vct-cn.webp",       accent: "#fb2659", mask: false },
+      "americas":         { label: "Americas",         logo: "./assets/vct-americas.png",  accent: "#ff570c", mask: false },
+      "emea":             { label: "EMEA",             logo: "./assets/vct-emea.webp",     accent: "#d4ff1f", mask: false },
+      "masters-santiago": { label: "Masters Santiago", logo: "./assets/vct-logo.png",       accent: "#a07aff", mask: true  },
+      "masters-london":   { label: "Masters London",   logo: "./assets/vct-logo.png",       accent: "#a07aff", mask: true  },
+      "champions":        { label: "Champions",        logo: "./assets/vct-logo.png",       accent: "#c5b174", mask: true  },
     };
 
     var currentLeague = null;
@@ -1941,7 +1942,22 @@
 
       /* 헤더 업데이트 */
       document.getElementById("accent-bar").style.background = info.accent;
-      document.getElementById("content-logo").src = info.logo;
+      var _logoEl = document.getElementById("content-logo");
+      if (info.mask) {
+        _logoEl.style.backgroundImage = "";
+        _logoEl.style.backgroundSize  = "";
+        _logoEl.style.backgroundColor = info.accent;
+        _logoEl.style.webkitMask = "url(" + info.logo + ") center/contain no-repeat";
+        _logoEl.style.mask       = "url(" + info.logo + ") center/contain no-repeat";
+      } else {
+        _logoEl.style.backgroundColor = "";
+        _logoEl.style.webkitMask = "";
+        _logoEl.style.mask       = "";
+        _logoEl.style.backgroundImage    = "url(" + info.logo + ")";
+        _logoEl.style.backgroundSize     = "contain";
+        _logoEl.style.backgroundRepeat   = "no-repeat";
+        _logoEl.style.backgroundPosition = "center";
+      }
       document.getElementById("content-title").textContent = info.label;
 
       /* 스테이지 필터 */
