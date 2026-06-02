@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>티어리스트 게시판 — VCT Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <script src="./auth.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c1117;
+      color: #fff;
+      font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Site Header ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px; height: 52px;
+      background: rgba(10,14,22,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .home-link {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      color: #fff; text-decoration: none;
+    }
+    .back-link {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); text-decoration: none; transition: color .15s;
+    }
+    .back-link:hover { color: rgba(255,255,255,0.75); }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px 100px; }
+
+    /* ── Page header ── */
+    .tl-page-hdr {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+    }
+    .tl-page-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+      color: #fff; flex: 1;
+    }
+    .admin-only { display: none; }
+    body:not(.view-only) .admin-only { display: flex; gap: 8px; align-items: center; }
+
+    /* ── Buttons ── */
+    .tl-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 16px; height: 34px; border-radius: 4px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+      cursor: pointer; transition: all .15s; white-space: nowrap; border: 1px solid transparent;
+    }
+    .tl-btn-ghost {
+      background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.55);
+    }
+    .tl-btn-ghost:hover { background: rgba(255,255,255,0.09); color: #fff; }
+    .tl-btn-primary { background: #e8432d; color: #fff; }
+    .tl-btn-primary:hover { background: #d43520; }
+    .tl-btn-success { background: rgba(30,210,100,0.15); border-color: rgba(61,220,132,0.3); color: #3ddc84; }
+    .tl-btn-success:hover { background: rgba(30,210,100,0.25); }
+    .tl-btn-danger { background: rgba(180,30,30,0.6); border-color: rgba(220,50,50,0.3); color: #ff9090; }
+    .tl-btn-danger:hover { background: rgba(200,30,30,0.85); color: #fff; }
+    .tl-btn-sm {
+      padding: 0 10px; height: 28px; border-radius: 3px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+      cursor: pointer; transition: all .15s; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+    }
+    .tl-btn-sm:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ── Event area ── */
+    .event-meta {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .event-title-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 700; letter-spacing: .05em;
+      color: rgba(255,255,255,0.8);
+    }
+    .status-badge {
+      padding: 3px 10px; border-radius: 3px; border: 1px solid transparent;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+    }
+    .status-open   { background: rgba(30,210,100,0.12); border-color: rgba(61,220,132,0.3); color: #3ddc84; }
+    .status-closed { background: rgba(255,100,50,0.1);  border-color: rgba(255,100,50,0.25); color: #ff8c69; }
+    .status-draft  { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.35); }
+    .no-event {
+      padding: 52px 24px; text-align: center;
+      border: 1px dashed rgba(255,255,255,0.09); border-radius: 8px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.2); margin-bottom: 32px;
+    }
+
+    /* ── Workspace ── */
+    #workspace { margin-bottom: 40px; }
+
+    /* Tier row */
+    .tier-row {
+      display: flex; align-items: stretch;
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 5px;
+      margin-bottom: 5px; min-height: 76px;
+      transition: box-shadow .15s;
+    }
+    .tier-row.drag-over { box-shadow: 0 0 0 2px rgba(232,67,45,0.5); border-color: transparent; }
+    .tier-label {
+      width: 88px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px 0 0 4px; padding: 8px 6px;
+    }
+    .tier-label-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+      text-align: center; line-height: 1.3; word-break: break-word;
+    }
+    .tier-items {
+      flex: 1; display: flex; flex-wrap: wrap; align-items: center;
+      gap: 6px; padding: 8px 10px;
+      background: rgba(255,255,255,0.02);
+    }
+    .tier-controls {
+      display: flex; flex-direction: column; justify-content: center;
+      gap: 3px; padding: 6px 5px;
+      background: rgba(0,0,0,0.25); border-radius: 0 4px 4px 0;
+    }
+    .tier-ctrl-btn {
+      width: 26px; height: 26px; border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3);
+      font-size: 12px; cursor: pointer; display: grid; place-items: center;
+      transition: all .12s;
+    }
+    .tier-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+
+    /* ── Team card ── */
+    .team-card {
+      width: 70px; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 6px 4px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      cursor: grab; user-select: none; transition: all .12s;
+      position: relative;
+    }
+    .team-card:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
+    .team-card.dragging { opacity: 0.35; }
+    .team-card img { width: 42px; height: 42px; object-fit: contain; }
+    .team-card .tc-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55); text-align: center; line-height: 1.2;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Pool ── */
+    .pool-section { margin-top: 14px; }
+    .pool-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 10px;
+    }
+    #pool-grid {
+      display: flex; flex-wrap: wrap; gap: 7px; min-height: 64px;
+      padding: 10px 12px; border-radius: 6px;
+      border: 1px dashed rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.15); transition: box-shadow .15s;
+    }
+    #pool-grid.drag-over { box-shadow: 0 0 0 2px rgba(120,180,255,0.4); border-color: transparent; }
+    #pool-grid:empty::after {
+      content: "모든 팀이 배치됨"; color: rgba(255,255,255,0.15);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      align-self: center;
+    }
+
+    /* ── Submit ── */
+    .submit-row {
+      display: flex; align-items: center; gap: 14px; margin-top: 20px;
+    }
+    .tl-submit-btn {
+      padding: 0 32px; height: 44px; border: none; border-radius: 4px;
+      background: #e8432d; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      cursor: pointer; transition: background .15s;
+    }
+    .tl-submit-btn:hover { background: #d43520; }
+    .tl-submit-btn:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.25); cursor: not-allowed; }
+    .submit-hint {
+      font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+      font-size: 13px; color: rgba(255,255,255,0.3);
+    }
+
+    /* ── Board ── */
+    .board-section { padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .board-hdr {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    }
+    .board-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+    }
+    .board-count {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: .08em;
+      color: rgba(255,255,255,0.25);
+    }
+    .board-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px;
+    }
+    .board-empty {
+      padding: 36px; text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.18);
+    }
+
+    /* Board card */
+    .board-card {
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 6px;
+      background: rgba(255,255,255,0.02); overflow: hidden;
+      transition: border-color .15s;
+    }
+    .board-card:hover { border-color: rgba(255,255,255,0.12); }
+    .board-card-hdr {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .bc-user {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 800; letter-spacing: .06em;
+      color: rgba(255,255,255,0.75); flex: 1;
+    }
+    .bc-time {
+      font-family: 'Barlow', sans-serif; font-size: 11px;
+      color: rgba(255,255,255,0.22);
+    }
+    .bc-del {
+      width: 22px; height: 22px; display: grid; place-items: center;
+      border: 1px solid rgba(220,50,50,0.2); border-radius: 3px;
+      background: rgba(180,30,30,0.1); color: rgba(255,100,100,0.45);
+      font-size: 11px; cursor: pointer; transition: all .12s;
+    }
+    .bc-del:hover { background: rgba(200,30,30,0.4); color: #ff9090; }
+    .board-card-body { padding: 8px 10px; }
+    .mini-tier-row {
+      display: flex; align-items: center; gap: 5px; margin-bottom: 3px;
+    }
+    .mini-tier-label {
+      width: 60px; flex-shrink: 0; height: 26px; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase;
+      overflow: hidden;
+    }
+    .mini-tier-teams { display: flex; flex-wrap: wrap; gap: 2px; }
+    .mini-logo { width: 26px; height: 26px; object-fit: contain; border-radius: 2px; background: rgba(255,255,255,0.04); }
+
+    /* ── Config Modal ── */
+    .tl-overlay {
+      position: fixed; inset: 0; z-index: 9500;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tl-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(5,8,15,0.8); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .tl-panel {
+      position: relative; z-index: 1;
+      width: min(560px, calc(100vw - 32px));
+      max-height: calc(100vh - 80px);
+      background: #111a28; border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px; box-shadow: 0 32px 96px rgba(0,0,0,0.7);
+      display: flex; flex-direction: column; overflow: hidden;
+      animation: panelIn .22s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes panelIn { from{opacity:0;transform:translateY(14px) scale(0.97)} to{opacity:1;transform:none} }
+    .tl-panel-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .tl-panel-hdr h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: #fff;
+    }
+    .tl-panel-close {
+      width: 28px; height: 28px; display: grid; place-items: center;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 3px;
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35);
+      font-size: 14px; cursor: pointer; transition: all .12s;
+    }
+    .tl-panel-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .tl-panel-body {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .cfg-field { display: flex; flex-direction: column; gap: 8px; }
+    .cfg-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+    .cfg-input {
+      height: 38px; padding: 0 12px; width: 100%;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px; color: #fff; outline: none;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600;
+      transition: border-color .15s;
+    }
+    .cfg-input:focus { border-color: rgba(232,67,45,0.5); }
+    .cfg-count-row { display: flex; gap: 8px; align-items: center; }
+    .cfg-count-row .cfg-input { width: 70px; }
+    /* Tier config list */
+    .cfg-tier-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px; margin-bottom: 4px;
+    }
+    .cfg-tier-color {
+      width: 30px; height: 30px; border-radius: 4px;
+      border: 2px solid rgba(255,255,255,0.15); cursor: pointer; flex-shrink: 0;
+      background: none; padding: 0;
+    }
+    .cfg-tier-name {
+      flex: 1; height: 30px; padding: 0 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px; color: #fff; outline: none;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+    }
+    .cfg-tier-name:focus { border-color: rgba(232,67,45,0.4); }
+    /* Team grid */
+    .cfg-team-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 6px;
+    }
+    .cfg-team-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 6px 4px; border-radius: 5px; cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03); transition: all .12s;
+    }
+    .cfg-team-item:hover { background: rgba(255,255,255,0.07); }
+    .cfg-team-item.sel { border-color: #e8432d; background: rgba(232,67,45,0.08); }
+    .cfg-team-item img { width: 38px; height: 38px; object-fit: contain; }
+    .cfg-team-item .ctn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45); text-align: center; line-height: 1.2;
+    }
+    .cfg-team-item.sel .ctn { color: rgba(255,255,255,0.8); }
+    /* Config actions */
+    .cfg-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 2px; }
+
+    /* ── Inline tier edit popover ── */
+    .tier-popover {
+      position: absolute; top: 0; right: 34px; z-index: 200;
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 5px;
+      background: #1a2436; border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: panelIn .15s cubic-bezier(0.16,1,0.3,1);
+    }
+    .tier-popover input[type=color] {
+      width: 28px; height: 28px; border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.15); cursor: pointer; padding: 1px;
+    }
+    .tier-popover input[type=text] {
+      height: 28px; padding: 0 8px; width: 110px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 3px; color: #fff; outline: none;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
+    }
+    .tier-popover button {
+      height: 28px; padding: 0 8px; border-radius: 3px;
+      background: #e8432d; border: none; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* ── Scrollbar ── */
+    .tl-panel-body::-webkit-scrollbar { width: 5px; }
+    .tl-panel-body::-webkit-scrollbar-track { background: transparent; }
+    .tl-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+    /* ── Toast ── */
+    #tl-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; border-radius: 5px;
+      background: rgba(30,210,100,0.15); border: 1px solid rgba(61,220,132,0.3);
+      color: #3ddc84;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      pointer-events: none; opacity: 0; transition: opacity .25s;
+      z-index: 9999;
+    }
+    #tl-toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <a class="back-link" href="./index.html">← 홈</a>
+  </header>
+
+  <div class="page-wrap">
+    <!-- Page title -->
+    <div class="tl-page-hdr">
+      <h1 class="tl-page-title">티어리스트 게시판</h1>
+      <div class="admin-only" id="admin-bar">
+        <button class="tl-btn tl-btn-ghost" id="btn-cfg">⚙ 설정</button>
+        <button class="tl-btn" id="btn-toggle" style="display:none"></button>
+      </div>
+    </div>
+
+    <!-- Event info -->
+    <div id="event-area"></div>
+
+    <!-- Workspace (when open) -->
+    <div id="workspace" style="display:none">
+      <div id="tier-rows"></div>
+      <!-- Pool -->
+      <div class="pool-section">
+        <div class="pool-label">📌 Pin Images</div>
+        <div id="pool-grid"></div>
+      </div>
+      <!-- Submit -->
+      <div class="submit-row">
+        <button class="tl-submit-btn" id="btn-submit" disabled>게시하기</button>
+        <span class="submit-hint" id="submit-hint"></span>
+      </div>
+    </div>
+
+    <!-- Board -->
+    <div id="board-section" class="board-section" style="display:none">
+      <div class="board-hdr">
+        <h2 class="board-title">게시판</h2>
+        <span class="board-count" id="board-count"></span>
+      </div>
+      <div class="board-grid" id="board-grid"></div>
+    </div>
+  </div>
+
+  <!-- Config Modal -->
+  <div class="tl-overlay" id="cfg-modal" style="display:none">
+    <div class="tl-backdrop" id="cfg-backdrop"></div>
+    <div class="tl-panel">
+      <div class="tl-panel-hdr">
+        <h2>티어리스트 설정</h2>
+        <button class="tl-panel-close" id="cfg-close-btn">×</button>
+      </div>
+      <div class="tl-panel-body">
+        <!-- Title -->
+        <div class="cfg-field">
+          <label class="cfg-label">제목</label>
+          <input class="cfg-input" type="text" id="cfg-title" placeholder="예: Masters Bangkok 팀 티어리스트" />
+        </div>
+        <!-- Tier count -->
+        <div class="cfg-field">
+          <label class="cfg-label">티어 수 (2–8)</label>
+          <div class="cfg-count-row">
+            <input class="cfg-input" type="number" id="cfg-tier-count" min="2" max="8" value="5" />
+            <button class="tl-btn-sm" id="btn-apply-count">적용</button>
+          </div>
+        </div>
+        <!-- Tier names -->
+        <div class="cfg-field">
+          <label class="cfg-label">티어 이름 / 색상</label>
+          <div id="cfg-tier-list"></div>
+        </div>
+        <!-- Teams -->
+        <div class="cfg-field">
+          <label class="cfg-label">참여 팀 선택</label>
+          <div class="cfg-team-grid" id="cfg-team-grid"></div>
+        </div>
+        <!-- Actions -->
+        <div class="cfg-actions">
+          <button class="tl-btn tl-btn-ghost" id="cfg-save-draft">임시 저장</button>
+          <button class="tl-btn tl-btn-primary" id="cfg-publish">저장 &amp; 공개</button>
+          <button class="tl-btn tl-btn-danger" id="cfg-end">마감</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tl-toast"></div>
+
+  <script>
+  (function() {
+    /* ── 팀 데이터 ─────────────────────────────────── */
+    var TEAM_LOGOS = {
+      "DetonatioN FocusMe":"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png",
+      "Global Esports":"./assets/teams/ge.webp","Kiwoom DRX":"./assets/teams/krx.svg",
+      "Nongshim RedForce":"./assets/teams/ns.svg","Paper Rex":"./assets/teams/prx.svg",
+      "Rex Regum Qeon":"./assets/teams/rrq.png","Team Secret":"./assets/teams/ts.svg",
+      "ZETA DIVISION":"./assets/teams/zeta.png","FULL SENSE":"./assets/teams/fs.svg",
+      "Gen.G":"./assets/teams/gen.png","VARREL":"./assets/teams/vl.svg","T1":"./assets/teams/t1.png",
+      "G2 Esports":"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+      "Leviatán":"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+      "Cloud9":"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+      "MIBR":"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+      "LOUD":"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+      "ENVY":"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg",
+      "KRÜ Esports":"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+      "Sentinels":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+      "NRG":"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+      "FURIA":"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+      "100 Thieves":"https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp",
+      "Evil Geniuses":"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+      "Gentle Mates":"./assets/teams/gm.png",
+      "Team Liquid":"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp",
+      "Team Heretics":"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",
+      "Natus Vincere":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+      "Karmine Corp":"./assets/teams/kc.png",
+      "FUT Esports":"https://specs.gg/assets/img/teams/fut-esports.webp",
+      "BBL Esports":"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg",
+      "Fnatic":"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",
+      "Team Vitality":"https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png",
+      "GIANTX":"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",
+      "Eternal Fire":"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",
+      "ULF Esports":"https://i.namu.wiki/i/EKmHVjvPqN3x6yN6lHSKBDOoSp5X8dQS3Y9y_hj1y13zoCwWAtaRIiuGxG3C6b7TItP0n6ZsnYqwXpxg_KKoJA.webp",
+      "All Gamers":"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp",
+      "JD Mall JDG Esports":"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg",
+      "TYLOO":"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg",
+      "Wuxi Titan Esports Club":"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg",
+      "Guangzhou Huadu Bilibili Gaming":"https://dpm.lol/esport/teams/BLG.webp",
+      "FunPlus Phoenix":"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg",
+      "Xi Lai Gaming":"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg",
+      "EDward Gaming":"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png",
+      "Dragon Ranger Gaming":"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp",
+      "Trace Esports":"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg",
+      "Nova Esports":"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp",
+      "Wolves Esports":"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp",
+    };
+    var TEAM_CODES = {
+      "DetonatioN FocusMe":"DFM","Global Esports":"GE","Kiwoom DRX":"KRX","Nongshim RedForce":"NS",
+      "Paper Rex":"PRX","Rex Regum Qeon":"RRQ","Team Secret":"TS","ZETA DIVISION":"ZETA",
+      "FULL SENSE":"FS","Gen.G":"GEN","VARREL":"VL","T1":"T1",
+      "G2 Esports":"G2","Leviatán":"LEV","Cloud9":"C9","MIBR":"MIBR","LOUD":"LOUD",
+      "ENVY":"ENVY","KRÜ Esports":"KRÜ","Sentinels":"SEN","NRG":"NRG","FURIA":"FUR",
+      "100 Thieves":"100T","Evil Geniuses":"EG",
+      "Gentle Mates":"M8","Team Liquid":"TL","Team Heretics":"TH","Natus Vincere":"NAVI",
+      "Karmine Corp":"KC","FUT Esports":"FUT","BBL Esports":"BBL","Fnatic":"FNC",
+      "Team Vitality":"VIT","GIANTX":"GX","Eternal Fire":"EF","ULF Esports":"ULF",
+      "All Gamers":"AG","JD Mall JDG Esports":"JDG","TYLOO":"TYL",
+      "Wuxi Titan Esports Club":"TEC","Guangzhou Huadu Bilibili Gaming":"BLG",
+      "FunPlus Phoenix":"FPX","Xi Lai Gaming":"XLG","EDward Gaming":"EDG",
+      "Dragon Ranger Gaming":"DRG","Trace Esports":"TE","Nova Esports":"NOVA",
+      "Wolves Esports":"WOL",
+    };
+    var LOGO_INVERT = {
+      "Paper Rex":true,"Team Secret":true,"ZETA DIVISION":true,"VARREL":true,
+      "Evil Geniuses":true,"ENVY":true,"MIBR":true,"GIANTX":true,
+      "Team Liquid":true,"ULF Esports":true,"Gentle Mates":true,
+    };
+
+    var DEFAULT_TIER_NAMES  = ["Champion","Top 2","Top 3-4","Top 5-6","Top 7-8","Top 9-10","Top 11-12","Top 13+"];
+    var DEFAULT_TIER_COLORS = ["#e84c4c","#e8832d","#e8c42d","#8fd94e","#4ec4e8","#a869e8","#e869b8","#576574"];
+
+    /* ── 인증 상태 ─────────────────────────────────── */
+    var TOKEN = localStorage.getItem("vct_auth_token") || null;
+    var USER  = null;
+    try { USER = JSON.parse(localStorage.getItem("vct_auth_user")); } catch(e) {}
+    var IS_ADMIN    = !!(USER && USER.role === "admin");
+    var IS_LOGGED_IN = !!USER;
+
+    /* ── 앱 상태 ────────────────────────────────────── */
+    var config   = null; // { title, tiers:[{name,color}], teams:[...], status }
+    var posts    = [];   // [{username, tierData, createdAt}]
+    var tierData = {};   // 현재 유저 작업: {tierName:[teamName,...]}
+
+    /* ── 초기화 ─────────────────────────────────────── */
+    async function init() {
+      try {
+        var [cfgRes, postsRes] = await Promise.all([
+          fetch("/api/tierlist/config"),
+          fetch("/api/tierlist/posts"),
+        ]);
+        config = await cfgRes.json();
+        posts  = await postsRes.json();
+      } catch(e) { config = null; posts = []; }
+
+      /* 내 기존 게시물 로드 */
+      if (IS_LOGGED_IN && config) {
+        var mine = posts.find(function(p){ return p.username === USER.username; });
+        if (mine) {
+          tierData = JSON.parse(JSON.stringify(mine.tierData));
+        } else {
+          initEmptyTierData();
+        }
+      } else if (config) {
+        initEmptyTierData();
+      }
+      render();
+      setupSSE();
+    }
+
+    function initEmptyTierData() {
+      tierData = {};
+      if (config && config.tiers) {
+        config.tiers.forEach(function(t){ tierData[t.name] = []; });
+      }
+    }
+
+    /* ── 전체 렌더 ──────────────────────────────────── */
+    function render() {
+      renderAdminBar();
+      renderEventArea();
+      renderWorkspace();
+      renderBoard();
+    }
+
+    /* ── Admin bar ──────────────────────────────────── */
+    function renderAdminBar() {
+      var toggleBtn = document.getElementById("btn-toggle");
+      if (!IS_ADMIN) { toggleBtn.style.display = "none"; return; }
+      if (!config)   { toggleBtn.style.display = "none"; return; }
+      toggleBtn.style.display = "";
+      if (config.status === "open") {
+        toggleBtn.textContent = "마감";
+        toggleBtn.className   = "tl-btn tl-btn-danger";
+      } else {
+        toggleBtn.textContent = "공개";
+        toggleBtn.className   = "tl-btn tl-btn-success";
+      }
+    }
+
+    /* ── Event area ─────────────────────────────────── */
+    function renderEventArea() {
+      var el = document.getElementById("event-area");
+      if (!config) {
+        el.innerHTML = '<div class="no-event">아직 티어리스트가 설정되지 않았습니다.<br>Admin이 설정 후 공개하면 여기에 표시됩니다.</div>';
+        return;
+      }
+      var sc = config.status === "open" ? "status-open" : config.status === "closed" ? "status-closed" : "status-draft";
+      var st = config.status === "open" ? "참여 중" : config.status === "closed" ? "종료" : "준비 중";
+      el.innerHTML =
+        '<div class="event-meta">' +
+        '<span class="event-title-text">' + escHtml(config.title || "티어리스트") + '</span>' +
+        '<span class="status-badge ' + sc + '">' + st + '</span>' +
+        '</div>';
+    }
+
+    /* ── Workspace ──────────────────────────────────── */
+    function renderWorkspace() {
+      var ws = document.getElementById("workspace");
+      if (!config || config.status !== "open") { ws.style.display = "none"; return; }
+      ws.style.display = "";
+
+      var tiersEl = document.getElementById("tier-rows");
+      tiersEl.innerHTML = "";
+
+      /* 배치된 팀 수집 */
+      var placed = [];
+      Object.values(tierData).forEach(function(arr){ placed = placed.concat(arr); });
+
+      config.tiers.forEach(function(tier, tIdx) {
+        var row = document.createElement("div");
+        row.className = "tier-row";
+        row.dataset.tier = tier.name;
+
+        var tc = getTextColor(tier.color);
+
+        var html =
+          '<div class="tier-label" style="background:' + tier.color + '">' +
+            '<span class="tier-label-text" style="color:' + tc + '">' + escHtml(tier.name) + '</span>' +
+          '</div>' +
+          '<div class="tier-items" id="ti-' + tIdx + '"></div>';
+
+        /* Admin 인라인 컨트롤 */
+        if (IS_ADMIN) {
+          html +=
+            '<div class="tier-controls admin-only" style="position:relative">' +
+              '<button class="tier-ctrl-btn" data-cfg="' + tIdx + '" title="이름/색상 변경">⚙</button>' +
+              '<button class="tier-ctrl-btn" data-up="' + tIdx + '" title="위로">↑</button>' +
+              '<button class="tier-ctrl-btn" data-down="' + tIdx + '" title="아래로">↓</button>' +
+            '</div>';
+        }
+
+        row.innerHTML = html;
+        tiersEl.appendChild(row);
+
+        /* 팀 카드 삽입 */
+        var itemsEl = document.getElementById("ti-" + tIdx);
+        (tierData[tier.name] || []).forEach(function(t) {
+          itemsEl.appendChild(makeTeamCard(t));
+        });
+
+        /* 드래그 이벤트 */
+        row.addEventListener("dragover", function(e) { e.preventDefault(); row.classList.add("drag-over"); });
+        row.addEventListener("dragleave", function(e) { if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over"); });
+        row.addEventListener("drop", function(e) {
+          e.preventDefault(); row.classList.remove("drag-over");
+          var team = e.dataTransfer.getData("team"); if (!team) return;
+          moveToTier(team, tier.name);
+        });
+      });
+
+      /* Admin 컨트롤 이벤트 */
+      if (IS_ADMIN) {
+        tiersEl.querySelectorAll("[data-cfg]").forEach(function(btn) {
+          btn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            openTierPopover(parseInt(btn.dataset.cfg), btn.parentElement);
+          });
+        });
+        tiersEl.querySelectorAll("[data-up]").forEach(function(btn) {
+          btn.addEventListener("click", function() { moveTier(parseInt(btn.dataset.up), -1); });
+        });
+        tiersEl.querySelectorAll("[data-down]").forEach(function(btn) {
+          btn.addEventListener("click", function() { moveTier(parseInt(btn.dataset.down), 1); });
+        });
+      }
+
+      /* Pool */
+      var pool = document.getElementById("pool-grid");
+      pool.innerHTML = "";
+      config.teams.filter(function(t){ return placed.indexOf(t) === -1; })
+        .forEach(function(t){ pool.appendChild(makeTeamCard(t)); });
+
+      pool.addEventListener("dragover", function(e) { e.preventDefault(); pool.classList.add("drag-over"); });
+      pool.addEventListener("dragleave", function(e) { if (!pool.contains(e.relatedTarget)) pool.classList.remove("drag-over"); });
+      pool.addEventListener("drop", function(e) {
+        e.preventDefault(); pool.classList.remove("drag-over");
+        var team = e.dataTransfer.getData("team"); if (!team) return;
+        moveToPool(team);
+      });
+
+      /* Submit 버튼 */
+      var btn  = document.getElementById("btn-submit");
+      var hint = document.getElementById("submit-hint");
+      if (!IS_LOGGED_IN) {
+        btn.disabled = true;
+        hint.textContent = "게시하려면 로그인이 필요합니다.";
+      } else {
+        btn.disabled = false;
+        var mine = posts.find(function(p){ return p.username === USER.username; });
+        btn.textContent = mine ? "수정 게시" : "게시하기";
+        hint.textContent = "";
+      }
+    }
+
+    /* ── 팀 카드 생성 ────────────────────────────────── */
+    function makeTeamCard(teamName) {
+      var card = document.createElement("div");
+      card.className = "team-card";
+      card.draggable = true;
+      card.dataset.team = teamName;
+      var logo = TEAM_LOGOS[teamName] || "";
+      var code = TEAM_CODES[teamName] || teamName;
+      var inv  = LOGO_INVERT[teamName] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+      card.innerHTML =
+        (logo
+          ? '<img src="' + logo + '" alt="' + escHtml(teamName) + '"' + inv + ' onerror="this.style.display=\'none\'" />'
+          : '<div style="width:42px;height:42px"></div>') +
+        '<span class="tc-name">' + escHtml(code) + '</span>';
+      card.addEventListener("dragstart", function(e) {
+        e.dataTransfer.setData("team", teamName);
+        e.dataTransfer.effectAllowed = "move";
+        setTimeout(function(){ card.classList.add("dragging"); }, 0);
+      });
+      card.addEventListener("dragend", function(){ card.classList.remove("dragging"); });
+      return card;
+    }
+
+    /* ── 팀 이동 ─────────────────────────────────────── */
+    function moveToTier(teamName, tierName) {
+      config.tiers.forEach(function(t){
+        var arr = tierData[t.name] || [];
+        var i = arr.indexOf(teamName);
+        if (i !== -1) arr.splice(i, 1);
+        tierData[t.name] = arr;
+      });
+      if (!tierData[tierName]) tierData[tierName] = [];
+      tierData[tierName].push(teamName);
+      renderWorkspace();
+    }
+    function moveToPool(teamName) {
+      config.tiers.forEach(function(t){
+        var arr = tierData[t.name] || [];
+        var i = arr.indexOf(teamName);
+        if (i !== -1) arr.splice(i, 1);
+        tierData[t.name] = arr;
+      });
+      renderWorkspace();
+    }
+
+    /* ── 티어 순서 변경 (admin) ─────────────────────── */
+    function moveTier(idx, dir) {
+      var tiers = config.tiers;
+      var target = idx + dir;
+      if (target < 0 || target >= tiers.length) return;
+      var tmp = tiers[idx]; tiers[idx] = tiers[target]; tiers[target] = tmp;
+      saveConfig(config.status, true);
+    }
+
+    /* ── 인라인 티어 팝오버 (admin) ─────────────────── */
+    function openTierPopover(tIdx, parentEl) {
+      /* 기존 팝오버 제거 */
+      document.querySelectorAll(".tier-popover").forEach(function(p){ p.remove(); });
+      var tier = config.tiers[tIdx];
+      var pop = document.createElement("div");
+      pop.className = "tier-popover";
+      pop.innerHTML =
+        '<input type="color" value="' + tier.color + '" id="pop-color" />' +
+        '<input type="text"  value="' + escHtml(tier.name) + '" id="pop-name" />' +
+        '<button id="pop-save">저장</button>';
+      parentEl.appendChild(pop);
+
+      pop.querySelector("#pop-save").addEventListener("click", function() {
+        config.tiers[tIdx].color = pop.querySelector("#pop-color").value;
+        config.tiers[tIdx].name  = pop.querySelector("#pop-name").value.trim() || tier.name;
+        pop.remove();
+        saveConfig(config.status, true);
+      });
+      /* 외부 클릭 닫기 */
+      setTimeout(function() {
+        document.addEventListener("click", function handler(e) {
+          if (!pop.contains(e.target)) { pop.remove(); document.removeEventListener("click", handler); }
+        });
+      }, 0);
+    }
+
+    /* ── 게시 ────────────────────────────────────────── */
+    document.getElementById("btn-submit").addEventListener("click", async function() {
+      if (!IS_LOGGED_IN) return;
+      var btn = document.getElementById("btn-submit");
+      btn.disabled = true; btn.textContent = "게시 중...";
+      try {
+        var r = await fetch("/api/tierlist/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+          body: JSON.stringify({ tierData: tierData }),
+        });
+        var data = await r.json();
+        if (data.ok) {
+          showToast("게시 완료!");
+          var pr = await fetch("/api/tierlist/posts");
+          posts = await pr.json();
+          btn.disabled = false; btn.textContent = "수정 게시";
+          renderBoard();
+        } else {
+          alert(data.error || "오류가 발생했습니다.");
+          btn.disabled = false; btn.textContent = "게시하기";
+        }
+      } catch(e) {
+        alert("서버에 연결할 수 없습니다.");
+        btn.disabled = false; btn.textContent = "게시하기";
+      }
+    });
+
+    /* ── Board ───────────────────────────────────────── */
+    function renderBoard() {
+      var section = document.getElementById("board-section");
+      var grid    = document.getElementById("board-grid");
+      var countEl = document.getElementById("board-count");
+
+      if (!config) { section.style.display = "none"; return; }
+      section.style.display = "";
+
+      if (posts.length === 0) {
+        grid.innerHTML = '<div class="board-empty">아직 게시된 티어리스트가 없습니다.</div>';
+        countEl.textContent = "";
+        return;
+      }
+      countEl.textContent = posts.length + "개";
+      grid.innerHTML = "";
+      posts.forEach(function(post){ grid.appendChild(makeBoardCard(post)); });
+    }
+
+    function makeBoardCard(post) {
+      var card = document.createElement("div");
+      card.className = "board-card";
+      var t = new Date(post.createdAt);
+      var ts = t.getFullYear() + "/" + (t.getMonth()+1) + "/" + t.getDate() +
+               " " + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0");
+      var canDel = IS_ADMIN || (IS_LOGGED_IN && USER.username === post.username);
+
+      var hdr =
+        '<div class="board-card-hdr">' +
+        '<span class="bc-user">' + escHtml(post.username) + '</span>' +
+        '<span class="bc-time">'  + ts + '</span>' +
+        (canDel ? '<button class="bc-del" data-u="' + escHtml(post.username) + '">✕</button>' : '') +
+        '</div>';
+
+      var body = '<div class="board-card-body">';
+      config.tiers.forEach(function(tier) {
+        var teams = (post.tierData && post.tierData[tier.name]) || [];
+        var tc = getTextColor(tier.color);
+        var logos = teams.map(function(t) {
+          var logo = TEAM_LOGOS[t] || "";
+          var inv  = LOGO_INVERT[t] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+          return logo ? '<img class="mini-logo" src="' + logo + '" title="' + escHtml(t) + '"' + inv + '>' : "";
+        }).join("");
+        body +=
+          '<div class="mini-tier-row">' +
+          '<div class="mini-tier-label" style="background:' + tier.color + ';color:' + tc + '">' + escHtml(tier.name) + '</div>' +
+          '<div class="mini-tier-teams">' + logos + '</div>' +
+          '</div>';
+      });
+      body += '</div>';
+
+      card.innerHTML = hdr + body;
+
+      var delBtn = card.querySelector(".bc-del");
+      if (delBtn) {
+        delBtn.addEventListener("click", async function() {
+          var u = delBtn.dataset.u;
+          if (!confirm(u + "의 게시물을 삭제하시겠습니까?")) return;
+          try {
+            var r = await fetch("/api/tierlist/posts/" + encodeURIComponent(u), {
+              method: "DELETE",
+              headers: { "Authorization": "Bearer " + TOKEN },
+            });
+            var d = await r.json();
+            if (d.ok) {
+              posts = posts.filter(function(p){ return p.username !== u; });
+              renderBoard();
+            } else { alert(d.error || "삭제 실패"); }
+          } catch(e) { alert("서버 오류"); }
+        });
+      }
+      return card;
+    }
+
+    /* ── Config 모달 ─────────────────────────────────── */
+    function openCfgModal() {
+      document.getElementById("cfg-modal").style.display = "flex";
+      var cur = config || {
+        title: "", status: "draft",
+        tiers: DEFAULT_TIER_NAMES.slice(0,5).map(function(n,i){ return {name:n,color:DEFAULT_TIER_COLORS[i]}; }),
+        teams: [],
+      };
+      document.getElementById("cfg-title").value = cur.title || "";
+      document.getElementById("cfg-tier-count").value = cur.tiers.length;
+      renderCfgTiers(cur.tiers);
+      renderCfgTeams(cur.teams || []);
+    }
+    function closeCfgModal() {
+      document.getElementById("cfg-modal").style.display = "none";
+    }
+
+    function renderCfgTiers(tiers) {
+      var n = Math.min(8, Math.max(2, parseInt(document.getElementById("cfg-tier-count").value)||5));
+      var container = document.getElementById("cfg-tier-list");
+      container.innerHTML = "";
+      for (var i = 0; i < n; i++) {
+        var t = tiers[i] || { name: DEFAULT_TIER_NAMES[i] || ("Tier "+(i+1)), color: DEFAULT_TIER_COLORS[i] || "#576574" };
+        var item = document.createElement("div");
+        item.className = "cfg-tier-item";
+        item.innerHTML =
+          '<input type="color" class="cfg-tier-color" value="' + t.color + '">' +
+          '<input type="text"  class="cfg-tier-name"  value="' + escHtml(t.name) + '" placeholder="티어 이름">';
+        container.appendChild(item);
+      }
+    }
+
+    function renderCfgTeams(selected) {
+      var grid = document.getElementById("cfg-team-grid");
+      grid.innerHTML = "";
+      Object.keys(TEAM_LOGOS).forEach(function(name) {
+        var item = document.createElement("div");
+        item.className = "cfg-team-item" + (selected.indexOf(name) !== -1 ? " sel" : "");
+        item.dataset.team = name;
+        var logo = TEAM_LOGOS[name];
+        var code = TEAM_CODES[name] || name;
+        var inv  = LOGO_INVERT[name] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+        item.innerHTML = '<img src="' + logo + '" alt=""' + inv + '><span class="ctn">' + escHtml(code) + '</span>';
+        item.addEventListener("click", function(){ item.classList.toggle("sel"); });
+        grid.appendChild(item);
+      });
+    }
+
+    function getCfgData() {
+      var items = document.querySelectorAll(".cfg-tier-item");
+      var tiers = [];
+      items.forEach(function(item) {
+        var name  = item.querySelector(".cfg-tier-name").value.trim();
+        var color = item.querySelector(".cfg-tier-color").value;
+        if (name) tiers.push({ name: name, color: color });
+      });
+      var teams = [];
+      document.querySelectorAll(".cfg-team-item.sel").forEach(function(item){ teams.push(item.dataset.team); });
+      return { tiers: tiers, teams: teams };
+    }
+
+    async function saveConfig(statusOverride, silent) {
+      var title = document.getElementById("cfg-title") ? document.getElementById("cfg-title").value.trim() : (config ? config.title : "");
+      var tiers, teams;
+      if (document.querySelector(".cfg-tier-item")) {
+        var d = getCfgData();
+        tiers = d.tiers; teams = d.teams;
+      } else {
+        tiers = config ? config.tiers : [];
+        teams = config ? config.teams : [];
+      }
+      if (!silent) {
+        if (!title)        { alert("제목을 입력해 주세요."); return; }
+        if (!tiers.length) { alert("티어를 추가해 주세요."); return; }
+        if (!teams.length) { alert("팀을 하나 이상 선택해 주세요."); return; }
+      }
+      var status = statusOverride !== undefined ? statusOverride : (config ? config.status : "draft");
+      var newConfig = { title: title, tiers: tiers, teams: teams, status: status };
+      try {
+        var r = await fetch("/api/tierlist/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+          body: JSON.stringify(newConfig),
+        });
+        var data = await r.json();
+        if (data.ok) {
+          config = newConfig;
+          initEmptyTierData();
+          if (!silent) closeCfgModal();
+          showToast(status === "open" ? "공개됨!" : status === "closed" ? "마감됨!" : "저장됨!");
+          render();
+        } else { alert(data.error || "저장 실패"); }
+      } catch(e) { alert("서버 오류"); }
+    }
+
+    /* ── Status toggle (quick) ──────────────────────── */
+    document.getElementById("btn-toggle").addEventListener("click", async function() {
+      if (!config) return;
+      var ns = config.status === "open" ? "closed" : "open";
+      config.status = ns;
+      try {
+        await fetch("/api/tierlist/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+          body: JSON.stringify(config),
+        });
+        showToast(ns === "open" ? "공개됨!" : "마감됨!");
+        render();
+      } catch(e) { alert("서버 오류"); }
+    });
+
+    /* ── Modal events ───────────────────────────────── */
+    document.getElementById("btn-cfg").addEventListener("click", openCfgModal);
+    document.getElementById("cfg-close-btn").addEventListener("click", closeCfgModal);
+    document.getElementById("cfg-backdrop").addEventListener("click", closeCfgModal);
+    document.getElementById("btn-apply-count").addEventListener("click", function() {
+      var cur = [];
+      document.querySelectorAll(".cfg-tier-item").forEach(function(item) {
+        cur.push({ name: item.querySelector(".cfg-tier-name").value, color: item.querySelector(".cfg-tier-color").value });
+      });
+      renderCfgTiers(cur);
+    });
+    document.getElementById("cfg-save-draft").addEventListener("click", function(){ saveConfig("draft"); });
+    document.getElementById("cfg-publish").addEventListener("click", function(){ saveConfig("open"); });
+    document.getElementById("cfg-end").addEventListener("click", function(){ saveConfig("closed"); });
+
+    /* ── SSE ─────────────────────────────────────────── */
+    function setupSSE() {
+      var es = new EventSource("/api/events");
+      es.onmessage = function(e) {
+        try {
+          var msg = JSON.parse(e.data);
+          if (msg.type === "tierlist-config") {
+            config = msg.config; initEmptyTierData(); render();
+          } else if (msg.type === "tierlist-post") {
+            var idx = posts.findIndex(function(p){ return p.username === msg.post.username; });
+            if (idx >= 0) posts[idx] = msg.post; else posts.unshift(msg.post);
+            renderBoard();
+          } else if (msg.type === "tierlist-delete") {
+            posts = posts.filter(function(p){ return p.username !== msg.username; });
+            renderBoard();
+          }
+        } catch(_) {}
+      };
+    }
+
+    /* ── Toast ──────────────────────────────────────── */
+    var _toastTimer = null;
+    function showToast(msg) {
+      var el = document.getElementById("tl-toast");
+      el.textContent = msg; el.classList.add("show");
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+    }
+
+    /* ── Utils ──────────────────────────────────────── */
+    function escHtml(s) {
+      return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+    function getTextColor(hex) {
+      if (!hex || hex.length < 7) return "#000";
+      var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return ((0.299*r + 0.587*g + 0.114*b)/255) > 0.55 ? "#000" : "#fff";
+    }
+
+    /* ── Start ──────────────────────────────────────── */
+    init();
+  })();
+  </script>
+</body>
+</html>

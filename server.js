@@ -138,6 +138,25 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
+/* ── 인증 미들웨어 ────────────────────────────────── */
+function requireAuth(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ error: "로그인이 필요합니다." });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: "유효하지 않은 토큰입니다." });
+  }
+}
+function requireAdmin(req, res, next) {
+  requireAuth(req, res, function () {
+    if (req.user.role !== "admin") return res.status(403).json({ error: "관리자만 접근할 수 있습니다." });
+    next();
+  });
+}
+
 /* ── API: 회원가입 ────────────────────────────────── */
 app.post("/api/auth/register", async (req, res) => {
   const { username, password } = req.body || {};
@@ -198,6 +217,79 @@ app.get("/api/auth/me", (req, res) => {
     res.json({ username: payload.username, role: payload.role });
   } catch {
     res.status(401).json({ error: "Invalid or expired token" });
+  }
+});
+
+/* ── API: 티어리스트 설정 조회 ───────────────────── */
+app.get("/api/tierlist/config", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key='tierlist:config'");
+    res.json(result.rows[0] ? JSON.parse(result.rows[0].value) : null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 티어리스트 설정 저장 (admin only) ──────── */
+app.post("/api/tierlist/config", requireAdmin, async (req, res) => {
+  const config = req.body;
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ('tierlist:config', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(config)]
+    );
+    broadcast({ type: "tierlist-config", config });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 티어리스트 게시물 전체 조회 ────────────── */
+app.get("/api/tierlist/posts", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT value FROM app_data WHERE key LIKE 'tierlist:post:%' ORDER BY updated_at DESC"
+    );
+    res.json(result.rows.map((r) => JSON.parse(r.value)));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 티어리스트 게시 (로그인 필요) ──────────── */
+app.post("/api/tierlist/posts", requireAuth, async (req, res) => {
+  const { tierData } = req.body || {};
+  if (!tierData) return res.status(400).json({ error: "tierData required" });
+  const username = req.user.username;
+  const post = { username, tierData, createdAt: new Date().toISOString() };
+  const key = `tierlist:post:${username}`;
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [key, JSON.stringify(post)]
+    );
+    broadcast({ type: "tierlist-post", post });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 티어리스트 게시물 삭제 (admin 또는 본인) ── */
+app.delete("/api/tierlist/posts/:username", requireAuth, async (req, res) => {
+  const target = req.params.username;
+  if (req.user.role !== "admin" && req.user.username !== target)
+    return res.status(403).json({ error: "권한이 없습니다." });
+  const key = `tierlist:post:${target}`;
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    broadcast({ type: "tierlist-delete", username: target });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
