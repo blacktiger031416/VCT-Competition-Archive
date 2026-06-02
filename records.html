@@ -101,6 +101,33 @@
       }
       .league-btn.active .sub-label { color: var(--accent); opacity: 0.75; }
 
+      /* ── STAGE FILTER BAR ──────────────────── */
+      .stage-filter-bar {
+        display: none;
+        gap: 6px; flex-wrap: wrap;
+        margin-bottom: 28px;
+        padding: 14px 16px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 6px;
+      }
+      .stage-filter-bar.visible { display: flex; }
+      .stage-btn {
+        padding: 6px 16px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+        background: transparent; color: rgba(255,255,255,0.35);
+        cursor: pointer; transition: all 0.12s;
+        appearance: none; -webkit-appearance: none;
+      }
+      .stage-btn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.22); }
+      .stage-btn.active {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.25);
+        color: #fff;
+      }
+
       /* ── CONTENT AREA ───────────────────────── */
       .content-area { display: none; }
       .content-area.visible { display: block; }
@@ -254,6 +281,11 @@
         </div>
       </div>
 
+      <!-- ── 스테이지 필터 ── -->
+      <div class="stage-filter-bar" id="stage-filter-bar">
+        <!-- JS로 동적 생성 -->
+      </div>
+
       <!-- ── 선택 전 안내 ── -->
       <div id="placeholder" class="placeholder-msg">
         <div class="ph-icon">📊</div>
@@ -334,8 +366,35 @@
     };
 
     var currentLeague = null;
+    var currentStage  = "all";   // 스테이지 필터
     var currentSort   = "acs";
     var currentRows   = [];
+
+    /* ── 리그별 스테이지 필터 정의 ── */
+    var STAGE_FILTERS = {
+      league: [
+        { key: "all",    label: "전체" },
+        { key: "kickoff", label: "KickOff" },
+        { key: "stage1",  label: "Stage 1" },
+        { key: "stage2",  label: "Stage 2" },
+      ],
+      masters: [
+        { key: "all",      label: "전체" },
+        { key: "swiss",    label: "Swiss Stage" },
+        { key: "playoffs", label: "Playoffs" },
+      ],
+      champions: [
+        { key: "all",        label: "전체" },
+        { key: "groupstage", label: "Group Stage" },
+        { key: "playoffs",   label: "Playoffs" },
+      ],
+    };
+
+    function getFilterGroup(league) {
+      if (league === "masters-santiago" || league === "masters-london") return "masters";
+      if (league === "champions") return "champions";
+      return "league";
+    }
 
     /* ── localStorage에서 vct_p: 키 전부 읽기 ── */
     function getAllPlayerData() {
@@ -366,14 +425,37 @@
       return false;
     }
 
+    /* ── 스테이지 필터 매칭 ── */
+    function matchesStage(m, league, stage) {
+      if (stage === "all") return true;
+      var s = m.stage || "";
+      var filterGroup = getFilterGroup(league);
+
+      if (filterGroup === "league") {
+        if (stage === "kickoff") return s === "kickoff";
+        if (stage === "stage1")  return s === "stage1" || s === "stage1playoffs";
+        if (stage === "stage2")  return s === "stage2" || s === "stage2playoffs";
+      }
+      if (filterGroup === "masters") {
+        if (stage === "swiss")    return s === "swiss";
+        if (stage === "playoffs") return s === "playoffs";
+      }
+      if (filterGroup === "champions") {
+        if (stage === "groupstage") return s === "swiss" || s === "groupstage";
+        if (stage === "playoffs")   return s === "playoffs";
+      }
+      return true;
+    }
+
     /* ── 선택 리그에 맞는 맵만 필터, 선수별 집계 ── */
-    function buildPlayerRows(league) {
+    function buildPlayerRows(league, stage) {
       var all = getAllPlayerData();
       var map = {};
 
       all.forEach(function(player) {
         player.maps.forEach(function(m) {
           if (!matchesLeague(m, league)) return;
+          if (!matchesStage(m, league, stage)) return;
           var acs = parseFloat(m.acs) || 0;
           if (!acs) return;
 
@@ -436,9 +518,27 @@
       return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
 
+    /* ── 스테이지 필터 바 렌더 ── */
+    function renderStageFilter(league) {
+      var bar = document.getElementById("stage-filter-bar");
+      var filters = STAGE_FILTERS[getFilterGroup(league)];
+      bar.innerHTML = filters.map(function(f) {
+        return '<button class="stage-btn' + (f.key === currentStage ? " active" : "") +
+               '" data-stage="' + f.key + '">' + f.label + '</button>';
+      }).join("");
+      bar.classList.add("visible");
+    }
+
+    /* ── 데이터 새로고침 ── */
+    function refreshData() {
+      currentRows = buildPlayerRows(currentLeague, currentStage);
+      renderPlayerTable(sortRows(currentRows, currentSort));
+    }
+
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
+      currentStage  = "all";
       var info = LEAGUE_INFO[league];
 
       /* 버튼 active */
@@ -451,14 +551,26 @@
       document.getElementById("content-logo").src = info.logo;
       document.getElementById("content-title").textContent = info.label;
 
+      /* 스테이지 필터 */
+      renderStageFilter(league);
+
       /* 데이터 로드 */
-      currentRows = buildPlayerRows(league);
-      renderPlayerTable(sortRows(currentRows, currentSort));
+      refreshData();
 
       /* 영역 표시 */
       document.getElementById("placeholder").style.display = "none";
       document.getElementById("content-area").classList.add("visible");
     }
+
+    /* ── 스테이지 필터 클릭 ── */
+    document.getElementById("stage-filter-bar").addEventListener("click", function(e) {
+      var btn = e.target.closest(".stage-btn");
+      if (!btn) return;
+      currentStage = btn.dataset.stage;
+      document.querySelectorAll(".stage-btn").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      refreshData();
+    });
 
     /* ── 정렬 탭 ── */
     document.getElementById("player-sort-tabs").addEventListener("click", function(e) {
