@@ -749,6 +749,33 @@
       "Wolves Esports":                "https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp",
     };
 
+    /* ── 팀 약어 코드 ── */
+    var TEAM_CODES = {
+      /* Pacific */
+      "DetonatioN FocusMe":"DFM", "FULL SENSE":"FS",    "Gen.G":"GEN",
+      "Global Esports":"GE",      "Kiwoom DRX":"KRX",   "Nongshim RedForce":"NS",
+      "Paper Rex":"PRX",          "Rex Regum Qeon":"RRQ","T1":"T1",
+      "Team Secret":"TS",         "VARREL":"VL",         "ZETA DIVISION":"ZETA",
+      /* CN */
+      "All Gamers":"AG",                        "Dragon Ranger Gaming":"DRG",
+      "EDward Gaming":"EDG",                    "FunPlus Phoenix":"FPX",
+      "Guangzhou Huadu Bilibili Gaming":"BLG",  "JD Mall JDG Esports":"JDG",
+      "Nova Esports":"NOVA",                    "Trace Esports":"TE",
+      "TYLOO":"TYL",                            "Wolves Esports":"WOL",
+      "Wuxi Titan Esports Club":"TEC",          "Xi Lai Gaming":"XLG",
+      /* Americas */
+      "100 Thieves":"100T",  "Cloud9":"C9",         "ENVY":"ENVY",
+      "Evil Geniuses":"EG",  "FURIA":"FUR",         "G2 Esports":"G2",
+      "KRÜ Esports":"KRÜ",  "Leviatán":"LEV",      "LOUD":"LOUD",
+      "MIBR":"MIBR",         "NRG":"NRG",           "Sentinels":"SEN",
+      /* EMEA */
+      "BBL Esports":"BBL",   "Eternal Fire":"EF",   "Fnatic":"FNC",
+      "FUT Esports":"FUT",   "Gentle Mates":"M8",   "GIANTX":"GX",
+      "Karmine Corp":"KC",   "Natus Vincere":"NAVI", "NAVI":"NAVI",
+      "PCIFIC Esports":"PCF","Team Heretics":"TH",  "Team Liquid":"TL",
+      "Team Vitality":"VIT", "ULF Esports":"ULF",
+    };
+
     var TEAM_COLORS = {
       /* Pacific */
       "DetonatioN FocusMe": "#2b53ff", "Global Esports": "#e12c30",
@@ -1639,7 +1666,7 @@
         html += entries.map(function(r, i) {
           var rankCls = i===0?" r1":i===1?" r2":i===2?" r3":"";
           var team = teamMap[r.name] || "";
-          var teamCode = team.slice(0,4).toUpperCase() || "";
+          var teamCode = TEAM_CODES[team] || team.slice(0,4).toUpperCase() || "";
           return '<div class="lb-row">' +
             '<span class="lb-rank' + rankCls + '">' + (i+1) + '</span>' +
             _lbLogoHtml(team) +
