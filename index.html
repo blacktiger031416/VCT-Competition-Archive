@@ -174,8 +174,7 @@
       .emea     { --accent: #d4ff1f; }
       .masters  { --accent: #651eff; }
       .champions{ --accent: #c5b174; }
-      .records     { --accent: #e8b840; min-height: 120px; grid-template-rows: auto auto; gap: 10px; }
-      .leaderboard { --accent: #a07aff; min-height: 120px; grid-template-rows: auto auto; gap: 10px; }
+      .records  { --accent: #e8b840; grid-column: 1 / -1; min-height: 120px; grid-template-rows: auto auto; gap: 10px; }
 
       /* ── Enter transitions ── */
       body.entering-pacific .league-card:not(.pacific),
@@ -184,7 +183,6 @@
       body.entering-americas .league-card:not(.americas),
       body.entering-masters .league-card:not(.masters),
       body.entering-champions .league-card:not(.champions),
-      body.entering-leaderboard .league-card:not(.leaderboard),
       body.entering-records .league-card:not(.records) {
         opacity: 0.3; transform: scale(0.96); filter: blur(2px);
       }
@@ -234,11 +232,7 @@
         border-color: #e8b840;
         box-shadow: 0 0 0 2px rgba(232,184,64,0.72), 0 34px 90px rgba(232,184,64,0.28);
       }
-      body.entering-leaderboard .league-card.leaderboard {
-        z-index: 20; transform: scale(1.03);
-        border-color: #a07aff;
-        box-shadow: 0 0 0 2px rgba(160,122,255,0.72), 0 34px 90px rgba(160,122,255,0.28);
-      }
+
 
       /* ── Swipe overlays ── */
       .pacific-enter-transition, .emea-enter-transition, .cn-enter-transition,
@@ -361,10 +355,7 @@
             <span class="league-name">기록</span>
             <span class="league-action">기록 보기</span>
           </a>
-          <a class="league-card leaderboard" href="./leaderboard.html" aria-label="VCT 리더보드 보기" data-leaderboard-enter>
-            <span class="league-name">Leaderboard</span>
-            <span class="league-action">순위 보기</span>
-          </a>
+
         </nav>
       </section>
     </main>
@@ -385,7 +376,6 @@
         { attr: "data-masters-enter",   cls: "entering-masters" },
         { attr: "data-champions-enter", cls: "entering-champions" },
         { attr: "data-records-enter",     cls: "entering-records" },
-        { attr: "data-leaderboard-enter", cls: "entering-leaderboard" },
       ];
       entries.forEach(({ attr, cls }) => {
         const link = document.querySelector(`[${attr}]`);
