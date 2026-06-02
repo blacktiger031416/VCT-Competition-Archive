@@ -161,15 +161,14 @@
         margin-bottom: 10px;
       }
       .team-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
         gap: 8px;
       }
       .team-btn {
         --tc: #888;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        gap: 6px; padding: 10px 14px 8px;
-        min-width: 90px;
+        gap: 6px; padding: 10px 8px 8px;
         background: rgba(255,255,255,0.03);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 6px;
@@ -609,6 +608,34 @@
       "Nova Esports": "#b262d7",                    "Wolves Esports": "#fbb900",
     };
 
+    /* ── 권역별 고정 팀 목록 (국내 리그) ─────────
+       데이터 유무와 무관하게 항상 해당 팀들 표시.
+       Masters/Champions는 데이터 기반 자동 감지.   */
+    var LEAGUE_TEAMS = {
+      "pacific": [
+        "DetonatioN FocusMe", "FULL SENSE", "Gen.G", "Global Esports",
+        "Kiwoom DRX", "Nongshim RedForce", "Paper Rex", "Rex Regum Qeon",
+        "T1", "Team Secret", "VARREL", "ZETA DIVISION",
+      ],
+      "americas": [
+        "100 Thieves", "Cloud9", "ENVY", "Evil Geniuses",
+        "FURIA", "G2 Esports", "KRÜ Esports", "Leviatán",
+        "LOUD", "MIBR", "NRG", "Sentinels",
+      ],
+      "emea": [
+        "BBL Esports", "Eternal Fire", "Fnatic", "FUT Esports",
+        "Gentle Mates", "GIANTX", "Karmine Corp", "Natus Vincere",
+        "PCIFIC Esports", "Team Heretics", "Team Liquid", "Team Vitality",
+        "ULF Esports",
+      ],
+      "cn": [
+        "All Gamers", "Dragon Ranger Gaming", "EDward Gaming", "FunPlus Phoenix",
+        "Guangzhou Huadu Bilibili Gaming", "JD Mall JDG Esports", "Nova Esports",
+        "Trace Esports", "TYLOO", "Wolves Esports", "Wuxi Titan Esports Club",
+        "Xi Lai Gaming",
+      ],
+    };
+
     /* ── 스테이지 섹션 라벨 ────────────────────── */
     var STAGE_GROUP_LABELS = {
       kickoff:    "KickOff",
@@ -745,8 +772,14 @@
       return null;
     }
 
-    /* ── 이 리그에 데이터가 있는 팀 목록 ── */
+    /* ── 이 리그에 표시할 팀 목록 ── */
     function getTeamsForLeague(league) {
+      /* 국내 리그: 하드코딩 목록 사용 (데이터 유무 무관, 항상 올바른 팀 표시) */
+      if (LEAGUE_TEAMS[league]) {
+        return LEAGUE_TEAMS[league].slice(); /* 이미 알파벳 정렬 */
+      }
+
+      /* 국제 대회(Masters·Champions): 데이터 기반 자동 감지 */
       var teams = [];
       for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
