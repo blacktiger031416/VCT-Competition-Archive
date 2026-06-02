@@ -684,9 +684,10 @@
       "하버":     _agImg("95b78ed7-4637-86d9-7e41-71ba8c293152"),
     };
 
-    /* ── 맵 이미지 (한국어 이름 → CDN URL) ────── */
+    /* ── 맵 이미지 (한국어/영어 이름 → CDN URL) ── */
     function _mapImg(uuid) { return "https://media.valorant-api.com/maps/" + uuid + "/listviewicon.png"; }
     var MAP_IMG = {
+      /* 한국어 */
       "어센트":    _mapImg("7eaecc1b-4337-bbf6-6ab9-04b8f06b3319"),
       "스플릿":    _mapImg("d960549e-485c-e861-8d71-aa9d1aed12a2"),
       "프랙처":    _mapImg("b529448b-4d60-346e-e89e-00a4c527a405"),
@@ -700,7 +701,34 @@
       "코로드":    _mapImg("1c18ab1f-420d-0d8b-71d0-77ad3c439115"),
       "헤이븐":    _mapImg("2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"),
       "헤이브":    _mapImg("2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"),
+      /* 영어 (데이터가 영어로 저장된 경우 대응) */
+      "Ascent":    _mapImg("7eaecc1b-4337-bbf6-6ab9-04b8f06b3319"),
+      "Split":     _mapImg("d960549e-485c-e861-8d71-aa9d1aed12a2"),
+      "Fracture":  _mapImg("b529448b-4d60-346e-e89e-00a4c527a405"),
+      "Bind":      _mapImg("2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba"),
+      "Breeze":    _mapImg("2fb9a4fd-47b8-4e7d-a969-74b4046ebd53"),
+      "Abyss":     _mapImg("224b0a95-48b9-f703-1bd8-67aca101a61f"),
+      "Lotus":     _mapImg("2fe4ed3a-450a-948b-6d6b-e89a78e680a9"),
+      "Sunset":    _mapImg("92584fbe-486a-b1b2-9faa-39b0f486b498"),
+      "Pearl":     _mapImg("fd267378-4d1d-484f-ff52-77821ed10dc2"),
+      "Icebox":    _mapImg("e2ad5c54-4114-a870-9641-8ea21279579a"),
+      "Corrode":   _mapImg("1c18ab1f-420d-0d8b-71d0-77ad3c439115"),
+      "Haven":     _mapImg("2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"),
     };
+
+    /* ── 영어 맵 이름 → 한국어 변환 ─────────────── */
+    var MAP_NAME_KO = {
+      "Ascent": "어센트",   "Split": "스플릿",    "Fracture": "프랙처",
+      "Bind": "바인드",     "Breeze": "브리즈",   "Abyss": "어비스",
+      "Lotus": "로터스",    "Sunset": "선셋",     "Pearl": "펄",
+      "Icebox": "아이스박스","Corrode": "코로드",  "Haven": "헤이븐",
+      "헤이브": "헤이븐",   /* API 오타 수정 */
+    };
+
+    /* 맵 이름을 한국어로 정규화 */
+    function normalizeMapName(name) {
+      return MAP_NAME_KO[name] || name;
+    }
 
     /* ── 스테이지 섹션 라벨 ────────────────────── */
     var STAGE_GROUP_LABELS = {
@@ -952,6 +980,7 @@
 
         var mapName = getMapName(mm.matchKey, mm.mapIdx, matchMaxIdx[mm.matchKey]);
         if (!mapName) mapName = "Map " + (mm.mapIdx + 1);
+        mapName = normalizeMapName(mapName); /* 영어 → 한국어, 오타 수정 */
 
         var sgKey = getStageGroupKey(mm.stageVal, league);
         var sortedAgents = agents.slice().sort();
