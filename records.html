@@ -251,34 +251,45 @@
       }
       .comp-maps-list { padding: 4px 0 12px; }
       .comp-map-block {
-        display: flex; align-items: flex-start; gap: 16px;
-        padding: 8px 20px;
+        padding: 10px 20px;
       }
       .comp-map-block + .comp-map-block {
         border-top: 1px solid rgba(255,255,255,0.04);
       }
+      .comp-map-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 8px;
+      }
+      .comp-map-img {
+        width: 70px; height: 40px;
+        object-fit: cover; border-radius: 3px;
+        flex-shrink: 0; opacity: 0.85;
+        background: rgba(255,255,255,0.05);
+      }
       .comp-map-name {
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 14px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
-        color: rgba(255,255,255,0.55);
-        min-width: 100px;
-        padding-top: 4px;
-        flex-shrink: 0;
+        font-size: 15px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
+        color: rgba(255,255,255,0.65);
       }
-      .comp-combos { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+      .comp-combos { display: flex; flex-direction: column; gap: 6px; }
       .comp-combo-item {
         display: flex; align-items: center; gap: 8px;
       }
-      .agent-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-      .agent-chip {
-        padding: 3px 9px;
-        font-family: "Barlow Condensed", sans-serif;
-        font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+      .agent-chips { display: flex; gap: 3px; align-items: center; }
+      .agent-icon {
+        width: 38px; height: 38px;
+        border-radius: 4px; overflow: hidden;
         background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 3px;
-        color: rgba(255,255,255,0.75);
-        white-space: nowrap;
+        border: 1px solid rgba(255,255,255,0.12);
+        flex-shrink: 0;
+      }
+      .agent-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .agent-icon-fallback {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
+        text-transform: uppercase; text-align: center; line-height: 1.1; padding: 2px;
       }
       .combo-count {
         font-family: "Barlow Condensed", sans-serif;
@@ -636,6 +647,61 @@
       ],
     };
 
+    /* ── 에이전트 이미지 (한국어 이름 → CDN URL) ── */
+    function _agImg(uuid) { return "https://media.valorant-api.com/agents/" + uuid + "/displayicon.png"; }
+    var AGENT_IMG = {
+      "게코":     _agImg("e370fa57-4757-3604-3648-499e1f642d3f"),
+      "네온":     _agImg("bb2a4828-46eb-8cd1-e765-15848195d751"),
+      "데드록":   _agImg("cc8b64c8-4b25-4ff9-6e7f-37b4da43d235"),
+      "데드락":   _agImg("cc8b64c8-4b25-4ff9-6e7f-37b4da43d235"),
+      "레이나":   _agImg("a3bfb853-43b2-7238-a4f1-ad90e9e46bcc"),
+      "레이즈":   _agImg("f94c3b30-42be-e959-889c-5aa313dba261"),
+      "믹스":     _agImg("7c8a4701-4de6-9355-b254-e09bc2a34b72"),
+      "바이스":   _agImg("efba5359-4016-a1e5-7626-b1ae76895940"),
+      "바이퍼":   _agImg("707eab51-4836-f488-046a-cda6bf494859"),
+      "브리치":   _agImg("5f8d3a7f-467b-97f3-062c-13acf203c006"),
+      "브림스톤": _agImg("9f0d8ba9-4140-b941-57d3-a7ad57c6b417"),
+      "비토":     _agImg("92eeef5d-43b5-1d4a-8d03-b3927a09034b"),
+      "사이퍼":   _agImg("117ed9e3-49f3-6512-3ccf-0cada7e3823b"),
+      "세이지":   _agImg("569fdd95-4d10-43ab-ca70-79becc718b46"),
+      "소바":     _agImg("320b2a48-4d9b-a075-30f1-1f93a9b638fa"),
+      "스카이":   _agImg("6f2a04ca-43e0-be17-7f36-b3908627744d"),
+      "아스트라": _agImg("41fb69c1-4189-7b37-f117-bcaf1e96f1bf"),
+      "아이소":   _agImg("0e38b510-41a8-5780-5e8f-568b2a4f2d6c"),
+      "오멘":     _agImg("8e253930-4c05-31dd-1b6c-968525494517"),
+      "요루":     _agImg("7f94d92c-4234-0a36-9646-3a87eb8b5c89"),
+      "웨이레이": _agImg("df1cb487-4902-002e-5c17-d28e83e78588"),
+      "제트":     _agImg("add6443a-41bd-e414-f6ad-e58d267f4e95"),
+      "체임버":   _agImg("22697a3d-45bf-8dd7-4fec-84a9e28c69d7"),
+      "챔버":     _agImg("22697a3d-45bf-8dd7-4fec-84a9e28c69d7"),
+      "케이/오":  _agImg("601dbbe7-43ce-be57-2a40-4abd24953621"),
+      "케이오":   _agImg("601dbbe7-43ce-be57-2a40-4abd24953621"),
+      "클로브":   _agImg("1dbf2edd-4729-0984-3115-daa5eed44993"),
+      "킬조이":   _agImg("1e58de9c-4950-5125-93e9-a0aee9f98746"),
+      "테호":     _agImg("b444168c-4e35-8076-db47-ef9bf368f384"),
+      "페이드":   _agImg("dade69b4-4f5a-8528-247b-219e5a1facd6"),
+      "피닉스":   _agImg("eb93336a-449b-9c1b-0a54-a891f7921d69"),
+      "하버":     _agImg("95b78ed7-4637-86d9-7e41-71ba8c293152"),
+    };
+
+    /* ── 맵 이미지 (한국어 이름 → CDN URL) ────── */
+    function _mapImg(uuid) { return "https://media.valorant-api.com/maps/" + uuid + "/listviewicon.png"; }
+    var MAP_IMG = {
+      "어센트":    _mapImg("7eaecc1b-4337-bbf6-6ab9-04b8f06b3319"),
+      "스플릿":    _mapImg("d960549e-485c-e861-8d71-aa9d1aed12a2"),
+      "프랙처":    _mapImg("b529448b-4d60-346e-e89e-00a4c527a405"),
+      "바인드":    _mapImg("2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba"),
+      "브리즈":    _mapImg("2fb9a4fd-47b8-4e7d-a969-74b4046ebd53"),
+      "어비스":    _mapImg("224b0a95-48b9-f703-1bd8-67aca101a61f"),
+      "로터스":    _mapImg("2fe4ed3a-450a-948b-6d6b-e89a78e680a9"),
+      "선셋":      _mapImg("92584fbe-486a-b1b2-9faa-39b0f486b498"),
+      "펄":        _mapImg("fd267378-4d1d-484f-ff52-77821ed10dc2"),
+      "아이스박스":_mapImg("e2ad5c54-4114-a870-9641-8ea21279579a"),
+      "코로드":    _mapImg("1c18ab1f-420d-0d8b-71d0-77ad3c439115"),
+      "헤이븐":    _mapImg("2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"),
+      "헤이브":    _mapImg("2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"),
+    };
+
     /* ── 스테이지 섹션 라벨 ────────────────────── */
     var STAGE_GROUP_LABELS = {
       kickoff:    "KickOff",
@@ -758,18 +824,31 @@
       return true;
     }
 
-    /* ── veto에서 맵 이름 추출 ── */
-    function getMapName(matchKey, mapIdx) {
+    /* ── veto에서 맵 이름 추출 ──────────────────────────────
+       vetoState.maps = 7칸 배열 (뱅/픽 순서로 맵 이름 저장)
+       BO3: 픽/디사이더 스텝 위치 = 2, 3, 6
+       BO5: 픽/디사이더 스텝 위치 = 2, 3, 4, 5, 6
+       matchMaxMapIdx ≥ 3 이면 BO5로 판단                    */
+    function getMapName(matchKey, mapIdx, matchMaxMapIdx) {
       var vetoRaw = localStorage.getItem("veto:" + matchKey);
       if (!vetoRaw) return null;
       var veto;
       try { veto = JSON.parse(vetoRaw); } catch(e) { return null; }
-      if (!veto.maps) return null;
-      var played = veto.maps.filter(function(v) {
-        return v.action === "pick" || v.action === "decider";
-      });
-      if (played[mapIdx]) return played[mapIdx].map;
-      return null;
+      var maps = veto.maps;
+      if (!Array.isArray(maps) || !maps.length) return null;
+
+      var mi    = parseInt(mapIdx) || 0;
+      var isBo5 = (parseInt(matchMaxMapIdx) || 0) >= 3;
+      /* mapIdx → veto 배열 인덱스 */
+      var stepPos;
+      if      (mi === 0) stepPos = 2;
+      else if (mi === 1) stepPos = 3;
+      else if (mi === 2) stepPos = isBo5 ? 4 : 6;
+      else if (mi === 3) stepPos = 5;
+      else if (mi === 4) stepPos = 6;
+      else return null;
+
+      return maps[stepPos] || null;
     }
 
     /* ── 이 리그에 표시할 팀 목록 ── */
@@ -836,6 +915,13 @@
         });
       });
 
+      /* matchKey별 최대 mapIdx 계산 (BO3 vs BO5 판별) */
+      var matchMaxIdx = {};
+      Object.values(matchMaps).forEach(function(mm) {
+        var mk = mm.matchKey, mi = mm.mapIdx;
+        if (matchMaxIdx[mk] === undefined || mi > matchMaxIdx[mk]) matchMaxIdx[mk] = mi;
+      });
+
       /* 각 경기·맵에서 조합 추출 */
       /* result: stageGroupKey → mapName → { comboKey: {agents, count} } */
       var result = {};
@@ -864,7 +950,7 @@
         }
         if (agents.length === 0) return;
 
-        var mapName = getMapName(mm.matchKey, mm.mapIdx);
+        var mapName = getMapName(mm.matchKey, mm.mapIdx, matchMaxIdx[mm.matchKey]);
         if (!mapName) mapName = "Map " + (mm.mapIdx + 1);
 
         var sgKey = getStageGroupKey(mm.stageVal, league);
@@ -951,8 +1037,12 @@
             return combos[b].count - combos[a].count;
           });
 
+          var mImg = MAP_IMG[mapName] || "";
           html += '<div class="comp-map-block">' +
+            '<div class="comp-map-header">' +
+            (mImg ? '<img class="comp-map-img" src="' + esc(mImg) + '" alt="' + esc(mapName) + '" />' : '') +
             '<div class="comp-map-name">' + esc(mapName) + '</div>' +
+            '</div>' +
             '<div class="comp-combos">';
 
           comboKeys.forEach(function(ck) {
@@ -960,7 +1050,10 @@
             html += '<div class="comp-combo-item">' +
               '<div class="agent-chips">' +
               combo.agents.map(function(a) {
-                return '<span class="agent-chip">' + esc(a) + '</span>';
+                var img = AGENT_IMG[a] || "";
+                return img
+                  ? '<div class="agent-icon" title="' + esc(a) + '"><img src="' + esc(img) + '" alt="' + esc(a) + '" /></div>'
+                  : '<div class="agent-icon"><div class="agent-icon-fallback">' + esc(a.substring(0, 3)) + '</div></div>';
               }).join("") +
               '</div>' +
               (combo.count > 1 ? '<span class="combo-count">×' + combo.count + '</span>' : '') +
