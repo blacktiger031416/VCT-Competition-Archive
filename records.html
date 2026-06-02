@@ -969,9 +969,12 @@
     /* ── 리그별 스테이지 필터 정의 ── */
     var STAGE_FILTERS = {
       global: [
-        { key: "kickoff", label: "KickOff (Masters Santiago 진출팀)" },
-        { key: "stage1",  label: "Stage 1 (Masters London 진출팀)" },
-        { key: "stage2",  label: "Stage 2 (Champions 진출팀)" },
+        { key: "kickoff-all", label: "KickOff (전체)" },
+        { key: "kickoff-ms",  label: "KickOff (Masters Santiago 진출팀)" },
+        { key: "stage1-all",  label: "Stage 1 (전체)" },
+        { key: "stage1-ml",   label: "Stage 1 (Masters London 진출팀)" },
+        { key: "stage2-all",  label: "Stage 2 (전체)" },
+        { key: "stage2-ch",   label: "Stage 2 (Champions 진출팀)" },
       ],
       league: [
         { key: "all",    label: "전체" },
@@ -1012,11 +1015,11 @@
       } catch(e) { return []; }
     }
 
-    /* 전체 뷰 스테이지 → 참가팀 키 매핑 */
+    /* 전체 뷰 스테이지 → 참가팀 키 매핑 (진출팀 필터 있는 버튼만) */
     var GLOBAL_STAGE_PARTICIPANTS = {
-      kickoff: "masters_santiago_participants",
-      stage1:  "masters_london_participants",
-      stage2:  "champions_participants",
+      "kickoff-ms": "masters_santiago_participants",
+      "stage1-ml":  "masters_london_participants",
+      "stage2-ch":  "champions_participants",
     };
 
     /* ── 스테이지 값 → 그룹 키 정규화 ── */
@@ -1076,9 +1079,9 @@
 
       /* 전체 뷰: 각 권역 리그 스테이지만 매칭 (masters/champions 경기는 제외) */
       if (filterGroup === "global") {
-        if (stage === "kickoff") return s === "kickoff";
-        if (stage === "stage1")  return s === "stage1" || s === "stage1playoffs";
-        if (stage === "stage2")  return s === "stage2" || s === "stage2playoffs";
+        if (stage === "kickoff-all" || stage === "kickoff-ms") return s === "kickoff";
+        if (stage === "stage1-all"  || stage === "stage1-ml")  return s === "stage1" || s === "stage1playoffs";
+        if (stage === "stage2-all"  || stage === "stage2-ch")  return s === "stage2" || s === "stage2playoffs";
       }
 
       if (filterGroup === "league") {
@@ -1806,9 +1809,12 @@
         };
         if (league === "global") {
           var globalLabelMap = {
-            kickoff: "· KickOff — Masters Santiago 진출팀",
-            stage1:  "· Stage 1 — Masters London 진출팀",
-            stage2:  "· Stage 2 — Champions 진출팀",
+            "kickoff-all": "· KickOff (전체)",
+            "kickoff-ms":  "· KickOff — Masters Santiago 진출팀",
+            "stage1-all":  "· Stage 1 (전체)",
+            "stage1-ml":   "· Stage 1 — Masters London 진출팀",
+            "stage2-all":  "· Stage 2 (전체)",
+            "stage2-ch":   "· Stage 2 — Champions 진출팀",
           };
           stageLabelEl.textContent = globalLabelMap[stage] || "";
         } else {
@@ -1844,7 +1850,7 @@
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
-      currentStage  = (league === "global") ? "kickoff" : "all";
+      currentStage  = (league === "global") ? "kickoff-all" : "all";
       currentTeam   = null;
       var info = LEAGUE_INFO[league];
 
