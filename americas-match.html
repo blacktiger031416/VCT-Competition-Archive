@@ -860,6 +860,7 @@
         };
         picker.addEventListener("click", (event) => {
           if (event.target === picker || event.target.dataset.agentClose !== undefined) close();
+          if (event.target.dataset.clearField !== undefined) { apply(""); return; }
           if (event.target.dataset.value !== undefined) apply(event.target.dataset.value);
         });
         picker.querySelector("form")?.addEventListener("submit", (event) => {
@@ -1390,12 +1391,20 @@
                   `,
                 )
                 .join("")}
-            </div>
+                        <div class="picker-clear-row"><button type="button" data-clear-field>칸 비우기</button></div>
+          </div>
           </div>
         `;
         document.body.appendChild(picker);
         picker.addEventListener("click", (event) => {
           if (event.target === picker || event.target.dataset.agentClose !== undefined) {
+            picker.remove();
+            return;
+          }
+          if (event.target.dataset.clearField !== undefined) {
+            state.rows[rowIndex][`${side}Agent`] = "";
+            saveSetState(mapName, index, state);
+            renderSetView(card, state);
             picker.remove();
             return;
           }
@@ -1429,6 +1438,7 @@
                     <button type="submit">적용</button>
                   </form>`
             }
+            <div class="picker-clear-row"><button type="button" data-clear-field>칸 비우기</button></div>
           </div>
         `;
         document.body.appendChild(picker);
@@ -1442,6 +1452,7 @@
         };
         picker.addEventListener("click", (event) => {
           if (event.target === picker || event.target.dataset.agentClose !== undefined) close();
+          if (event.target.dataset.clearField !== undefined) { apply(""); return; }
           if (event.target.dataset.value !== undefined) apply(event.target.dataset.value);
         });
         picker.querySelector("form")?.addEventListener("submit", (event) => {

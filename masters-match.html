@@ -986,10 +986,15 @@
             <div class="agent-picker-grid agent-image-grid">
               ${agents.map((a,ai)=>`<button type="button" data-agent-index="${ai}" aria-label="${a}"><img src="${agentImage(a)}" alt="" /></button>`).join("")}
             </div>
+            <div class="picker-clear-row"><button type="button" data-clear-field>칸 비우기</button></div>
           </div>`;
         document.body.appendChild(picker);
         picker.addEventListener("click", e => {
           if(e.target===picker||e.target.dataset.agentClose!==undefined){picker.remove();return;}
+          if(e.target.dataset.clearField!==undefined){
+            state.rows[rowIdx][`${side}Agent`] = "";
+            saveSetState(mapName,i,state); renderSetView(card,state); picker.remove(); return;
+          }
           const ab = e.target.closest("[data-agent-index]");
           if(!ab)return;
           state.rows[rowIdx][`${side}Agent`] = agents[Number(ab.dataset.agentIndex)];
@@ -1012,6 +1017,7 @@
                   <input value="${options.value||""}" placeholder="${options.placeholder||"-"}" autofocus />
                   <button type="submit">적용</button>
                 </form>`}
+            <div class="picker-clear-row"><button type="button" data-clear-field>칸 비우기</button></div>
           </div>`;
         document.body.appendChild(picker);
         const close = () => picker.remove();
@@ -1022,6 +1028,7 @@
         };
         picker.addEventListener("click", e => {
           if(e.target===picker||e.target.dataset.agentClose!==undefined) close();
+          if(e.target.dataset.clearField!==undefined) { apply(""); return; }
           if(e.target.dataset.value!==undefined) apply(e.target.dataset.value);
         });
         picker.querySelector("form")?.addEventListener("submit", e => { e.preventDefault(); apply(e.currentTarget.querySelector("input").value.trim()); });
