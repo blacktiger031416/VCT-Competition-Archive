@@ -3346,10 +3346,23 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
       _entry.league = LEAGUE;
       _entry.stage  = MATCH_FROM;
       if (typeof _MATCH_TOURNAMENT !== 'undefined' && _MATCH_TOURNAMENT) _entry.tournament = _MATCH_TOURNAMENT;
-      // 스탯
+      // 스탯 — 유효값이면 세트, null/빈값으로 명시 초기화된 경우 삭제
       if (_slot.agent && _slot.agent.trim()) _entry.agent = _slot.agent.trim();
+      else if (_slot.agent === '' || _slot.agent === null) delete _entry.agent;
+
       if (_slot.acs != null && _slot.acs !== '') _entry.acs = _slot.acs;
+      else if (_slot.acs === null) delete _entry.acs;
+
       if (_slot.kda && _slot.kda.indexOf('/') !== -1) _entry.kda = _slot.kda;
+      else if (_slot.kda === null || _slot.kda === '') delete _entry.kda;
+
+      // entry가 league/stage 태그만 남고 실제 스탯이 없으면 통째로 제거
+      var hasStats = ('acs' in _entry) || ('kda' in _entry);
+      if (!hasStats) {
+        _pd.maps = _pd.maps.filter(function(e) {
+          return !(e.matchKey === MATCH_KEY && e.mapIdx === mapIdx);
+        });
+      }
       localStorage.setItem(_vk, JSON.stringify(_pd));
     }
   } catch(e3) {}
