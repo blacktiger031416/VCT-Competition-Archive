@@ -1898,10 +1898,11 @@
           mapName = normalizeMapName(mapName);
           var stepTeam = (s % 2 === 0) ? fb : (fb==="A"?"B":"A");
           if (stepTeam !== teamSide) continue; /* 이 팀 액션만 */
-          if (!mapStats[mapName]) mapStats[mapName] = { picks: 0, bans: 0 };
           var t = steps[s];
+          if (t === "decider") continue; /* 디사이더 제외 */
+          if (!mapStats[mapName]) mapStats[mapName] = { picks: 0, bans: 0 };
           if (t === "ban") mapStats[mapName].bans++;
-          else             mapStats[mapName].picks++; /* pick + decider */
+          else             mapStats[mapName].picks++;
         }
       }
       return mapStats;
