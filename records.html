@@ -937,7 +937,16 @@
       if (!Array.isArray(maps) || !maps.length) return null;
 
       var mi    = parseInt(mapIdx) || 0;
+      /* BO5/GF 판별:
+         1) matchMaxIdx >= 3 → 4맵 이상 플레이된 경우
+         2) veto.choosers[0] === veto.choosers[1] → Grand Finals 포맷
+            (GF는 팀A가 첫 밴 2개를 모두 수행 → choosers[0]=choosers[1]="A")
+            일반 BO3/BO5는 교대로 밴 → choosers[0] ≠ choosers[1]          */
       var isBo5 = (parseInt(matchMaxMapIdx) || 0) >= 3;
+      if (!isBo5 && veto.choosers) {
+        var c0 = veto.choosers[0], c1 = veto.choosers[1];
+        if (c0 !== undefined && c1 !== undefined && c0 === c1) isBo5 = true;
+      }
       /* mapIdx → veto 배열 인덱스 */
       var stepPos;
       if      (mi === 0) stepPos = 2;
