@@ -464,20 +464,20 @@
       }
       @media (max-width: 640px) { .lb-panels { grid-template-columns: 1fr; } }
 
-      /* ── 팀 기록 캐러셀 ── */
-      .team-carousel-wrap {
+      /* ── 기록 통합 캐러셀 (2패널씩) ── */
+      .stats-carousel-wrap {
         position: relative; display: flex; align-items: center; gap: 12px;
-        max-width: 560px;
       }
-      .team-carousel-viewport {
-        flex: 1; overflow: hidden; border-radius: 10px;
+      .stats-carousel-viewport {
+        flex: 1; overflow: hidden;
       }
-      .team-carousel-track {
-        display: flex; transition: transform .35s cubic-bezier(.4,0,.2,1);
+      .stats-carousel-track {
+        display: flex; gap: 20px;
+        transition: transform .35s cubic-bezier(.4,0,.2,1);
       }
-      .carousel-slide {
-        min-width: 100%; flex-shrink: 0;
-        border-radius: 10px;
+      .stats-slide {
+        min-width: calc(50% - 10px); /* (viewport - 20px gap) / 2 */
+        flex-shrink: 0;
       }
       .carousel-arrow {
         flex-shrink: 0;
@@ -725,42 +725,29 @@
           <div class="comp-body" id="comp-body"></div>
         </div>
 
-        <!-- 선수 기록 (Top 10 패널) -->
-        <div class="subsection" id="player-stats-section">
+        <!-- 기록 (선수 + 팀 통합 캐러셀, 2패널씩) -->
+        <div class="subsection" id="stats-section">
           <div class="subsection-header">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span class="subsection-title">선수 기록</span>
-              <span id="player-stats-stage-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);"></span>
-            </div>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">TOP 10</span>
-          </div>
-          <div class="lb-panels">
-            <div class="lb-panel" id="lb-panel-acs"></div>
-            <div class="lb-panel" id="lb-panel-kd"></div>
-          </div>
-        </div>
-
-        <!-- 팀 기록 -->
-        <div class="subsection" id="team-stats-section">
-          <div class="subsection-header">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="subsection-title">팀 기록</span>
-              <span id="team-stats-stage-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);"></span>
+              <span class="subsection-title">기록</span>
+              <span id="stats-stage-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);"></span>
             </div>
             <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">RANKING</span>
           </div>
-          <div class="team-carousel-wrap">
-            <button class="carousel-arrow carousel-arrow-left" id="team-carousel-prev" aria-label="이전">&#8249;</button>
-            <div class="team-carousel-viewport" id="team-carousel-viewport">
-              <div class="team-carousel-track" id="team-carousel-track">
-                <div class="lb-panel carousel-slide" id="lb-panel-team-pistol"></div>
-                <div class="lb-panel carousel-slide" id="lb-panel-team-atk"></div>
-                <div class="lb-panel carousel-slide" id="lb-panel-team-def"></div>
+          <div class="stats-carousel-wrap">
+            <button class="carousel-arrow" id="stats-carousel-prev" aria-label="이전">&#8249;</button>
+            <div class="stats-carousel-viewport" id="stats-carousel-viewport">
+              <div class="stats-carousel-track" id="stats-carousel-track">
+                <div class="lb-panel stats-slide" id="lb-panel-acs"></div>
+                <div class="lb-panel stats-slide" id="lb-panel-kd"></div>
+                <div class="lb-panel stats-slide" id="lb-panel-team-pistol"></div>
+                <div class="lb-panel stats-slide" id="lb-panel-team-atk"></div>
+                <div class="lb-panel stats-slide" id="lb-panel-team-def"></div>
               </div>
             </div>
-            <button class="carousel-arrow carousel-arrow-right" id="team-carousel-next" aria-label="다음">&#8250;</button>
+            <button class="carousel-arrow" id="stats-carousel-next" aria-label="다음">&#8250;</button>
           </div>
-          <div class="carousel-dots" id="team-carousel-dots">
+          <div class="carousel-dots" id="stats-carousel-dots">
             <span class="carousel-dot active" data-idx="0"></span>
             <span class="carousel-dot" data-idx="1"></span>
             <span class="carousel-dot" data-idx="2"></span>
@@ -1668,10 +1655,9 @@
         btn.classList.toggle("active", btn.dataset.team === teamName);
       });
 
-      /* 조합 뷰 표시, 선수/팀 기록 숨김 */
+      /* 조합 뷰 표시, 기록 섹션 숨김 */
       renderCompositions(teamName, currentLeague, currentStage);
-      document.getElementById("player-stats-section").style.display = "none";
-      document.getElementById("team-stats-section").style.display   = "none";
+      document.getElementById("stats-section").style.display = "none";
     }
 
     /* ── 팀 해제 ── */
@@ -1681,8 +1667,7 @@
         btn.classList.remove("active");
       });
       document.getElementById("comp-section").style.display = "none";
-      document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = "";
+      document.getElementById("stats-section").style.display = "";
     }
 
     /* ── 선수→팀 맵 ──────────────────────────────────────────
@@ -1872,7 +1857,7 @@
       _renderLbPanel("lb-panel-kd",  "K/D Top 10",  kdTop10,  accent);
 
       /* 스테이지 라벨 업데이트 */
-      var stageLabelEl = document.getElementById("player-stats-stage-label");
+      var stageLabelEl = document.getElementById("stats-stage-label");
       if (stageLabelEl) {
         var stageLabelMap = {
           all: "", kickoff: "· KickOff", stage1: "· Stage 1", stage2: "· Stage 2",
@@ -2110,7 +2095,7 @@
 
     /* ── 팀 기록 패널 렌더 ── */
     function renderTeamPanels(league, stage) {
-      var section = document.getElementById("team-stats-section");
+      var section = document.getElementById("stats-section");
       if (!section) return;
 
       /* topN: 진출팀 필터 선택 시 해당 팀 수 전체 표시 */
@@ -2169,7 +2154,7 @@
       _renderTeamLbPanel("lb-panel-team-def", "수비 승률", defList, accent, topN);
 
       /* 스테이지 라벨 */
-      var labelEl = document.getElementById("team-stats-stage-label");
+      var labelEl = document.getElementById("stats-stage-label");
       if (labelEl) {
         var stageLabelMap = {
           all: "", kickoff: "· KickOff", stage1: "· Stage 1", stage2: "· Stage 2",
@@ -2187,42 +2172,39 @@
         }
       }
 
-      /* ── 캐러셀 초기화 ── */
-      _initTeamCarousel();
     }
 
-    var _carouselIdx = 0;
-    function _initTeamCarousel() {
-      var track  = document.getElementById("team-carousel-track");
-      var prev   = document.getElementById("team-carousel-prev");
-      var next   = document.getElementById("team-carousel-next");
-      var dots   = document.querySelectorAll("#team-carousel-dots .carousel-dot");
-      var total  = 3;
-      _carouselIdx = 0;
+    /* ── 통합 기록 캐러셀 (2패널씩, 3페이지) ──────────────────
+       Page 0: ACS + K/D   Page 1: 피스톨 + 공격   Page 2: 수비   */
+    var _statsPage = 0;
+    function _initStatsCarousel() {
+      var track = document.getElementById("stats-carousel-track");
+      var vp    = document.getElementById("stats-carousel-viewport");
+      var prev  = document.getElementById("stats-carousel-prev");
+      var next  = document.getElementById("stats-carousel-next");
+      var dots  = document.querySelectorAll("#stats-carousel-dots .carousel-dot");
+      var PAGES = 3;
+      _statsPage = 0;
 
-      function goTo(idx) {
-        _carouselIdx = Math.max(0, Math.min(total - 1, idx));
-        if (track) track.style.transform = "translateX(-" + (_carouselIdx * 100) + "%)";
-        dots.forEach(function(d, i) {
-          d.classList.toggle("active", i === _carouselIdx);
-        });
-        if (prev) prev.disabled = (_carouselIdx === 0);
-        if (next) next.disabled = (_carouselIdx === total - 1);
-        /* dot accent color sync */
-        var _accentEl = document.getElementById("lb-panel-team-pistol");
+      function goTo(page) {
+        _statsPage = Math.max(0, Math.min(PAGES - 1, page));
+        /* 각 페이지 = viewport 너비 + gap(20px) 만큼 이동 */
+        var offset = _statsPage * (vp.offsetWidth + 20);
+        if (track) track.style.transform = "translateX(-" + offset + "px)";
+        dots.forEach(function(d, i) { d.classList.toggle("active", i === _statsPage); });
+        if (prev) prev.disabled = (_statsPage === 0);
+        if (next) next.disabled = (_statsPage === PAGES - 1);
+        /* dot accent 색상 */
+        var _accentEl = document.getElementById("lb-panel-acs");
         var _accent = _accentEl
           ? getComputedStyle(_accentEl).getPropertyValue("--league-accent").trim() || "rgba(255,255,255,0.55)"
           : "rgba(255,255,255,0.55)";
-        dots.forEach(function(d, i) {
-          d.style.background = (i === _carouselIdx) ? _accent : "";
-        });
+        dots.forEach(function(d, i) { d.style.background = (i === _statsPage) ? _accent : ""; });
       }
 
-      if (prev) { prev.onclick = function() { goTo(_carouselIdx - 1); }; }
-      if (next) { next.onclick = function() { goTo(_carouselIdx + 1); }; }
-      dots.forEach(function(d) {
-        d.onclick = function() { goTo(parseInt(d.dataset.idx) || 0); };
-      });
+      if (prev) prev.onclick = function() { goTo(_statsPage - 1); };
+      if (next) next.onclick = function() { goTo(_statsPage + 1); };
+      dots.forEach(function(d) { d.onclick = function() { goTo(parseInt(d.dataset.idx) || 0); }; });
 
       goTo(0);
     }
@@ -2281,6 +2263,7 @@
     function refreshData() {
       renderPlayerPanels(currentLeague, currentStage);
       renderTeamPanels(currentLeague, currentStage);
+      _initStatsCarousel();
       /* 팀이 선택된 상태면 조합 뷰도 새로고침 */
       if (currentTeam) {
         renderCompositions(currentTeam, currentLeague, currentStage);
@@ -2332,9 +2315,10 @@
       /* 조합 뷰 초기화 */
       document.getElementById("comp-section").style.display = "none";
 
-      /* 선수/팀 기록 표시 */
-      document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = "";
+      /* 기록 섹션 표시 */
+      document.getElementById("stats-section").style.display = "";
+      
+      
 
       /* 데이터 로드 */
       refreshData();
