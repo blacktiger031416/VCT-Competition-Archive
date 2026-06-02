@@ -51,7 +51,8 @@
       /* ── LEAGUE SELECTOR ────────────────────── */
       .league-selector { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
       .selector-row { display: grid; gap: 10px; }
-      .selector-row.four { grid-template-columns: repeat(4, 1fr); }
+      .selector-row.five  { grid-template-columns: repeat(5, 1fr); }
+      .selector-row.four  { grid-template-columns: repeat(4, 1fr); }
       .selector-row.three { grid-template-columns: repeat(3, 1fr); }
       .league-btn {
         --accent: #888;
@@ -100,6 +101,7 @@
       .league-btn.lb-masters-santiago  { --accent: #a07aff; }
       .league-btn.lb-masters-london    { --accent: #a07aff; }
       .league-btn.lb-champions         { --accent: #c5b174; }
+      .league-btn.lb-global            { --accent: #ffffff; }
 
       .league-btn .sub-label {
         font-family: "Barlow Condensed", sans-serif;
@@ -564,8 +566,12 @@
 
       <!-- ── 권역 선택 카드 ── -->
       <div class="league-selector">
-        <!-- 리그 4개 -->
-        <div class="selector-row four">
+        <!-- 리그 4개 + 전체 -->
+        <div class="selector-row five">
+          <button class="league-btn lb-global"   data-league="global">
+            <img src="./assets/vct-logo.png" alt="전체" />
+            <span>전체</span>
+          </button>
           <button class="league-btn lb-pacific"  data-league="pacific">
             <img src="./assets/vct-pacific.webp" alt="Pacific" />
             <span>Pacific</span>
@@ -944,6 +950,7 @@
     };
 
     var LEAGUE_INFO = {
+      "global":           { label: "전체",             logo: "./assets/vct-logo.png",       accent: "#ffffff" },
       "pacific":          { label: "Pacific",          logo: "./assets/vct-pacific.webp", accent: "#01d2d7" },
       "cn":               { label: "CN",               logo: "./assets/vct-cn.webp",       accent: "#fb2659" },
       "americas":         { label: "Americas",         logo: "./assets/vct-americas.png",  accent: "#ff570c" },
@@ -961,6 +968,11 @@
 
     /* ── 리그별 스테이지 필터 정의 ── */
     var STAGE_FILTERS = {
+      global: [
+        { key: "kickoff", label: "KickOff (Masters Santiago 진출팀)" },
+        { key: "stage1",  label: "Stage 1 (Masters London 진출팀)" },
+        { key: "stage2",  label: "Stage 2 (Champions 진출팀)" },
+      ],
       league: [
         { key: "all",    label: "전체" },
         { key: "kickoff", label: "KickOff" },
@@ -980,10 +992,32 @@
     };
 
     function getFilterGroup(league) {
+      if (league === "global") return "global";
       if (league === "masters-santiago" || league === "masters-london") return "masters";
       if (league === "champions") return "champions";
       return "league";
     }
+
+    /* ── 전체 뷰: 참가팀 목록을 localStorage에서 동적으로 읽기 ── */
+    function getParticipantTeams(storageKey) {
+      try {
+        var data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        var teams = [];
+        ["pacific","americas","cn","emea"].forEach(function(r) {
+          if (Array.isArray(data[r])) {
+            data[r].forEach(function(t) { if (t) teams.push(t); });
+          }
+        });
+        return teams;
+      } catch(e) { return []; }
+    }
+
+    /* 전체 뷰 스테이지 → 참가팀 키 매핑 */
+    var GLOBAL_STAGE_PARTICIPANTS = {
+      kickoff: "masters_santiago_participants",
+      stage1:  "masters_london_participants",
+      stage2:  "champions_participants",
+    };
 
     /* ── 스테이지 값 → 그룹 키 정규화 ── */
     function getStageGroupKey(stageVal, league) {
@@ -1023,6 +1057,7 @@
     /* ── 리그 매칭 ── */
     function matchesLeague(m, league) {
       var l = m.league || "", t = m.tournament || "";
+      if (league === "global")           return l === "pacific" || l === "cn" || l === "americas" || l === "emea";
       if (league === "pacific")          return l === "pacific";
       if (league === "cn")               return l === "cn";
       if (league === "americas")         return l === "americas";
@@ -1038,6 +1073,13 @@
       if (stage === "all") return true;
       var s = m.stage || "";
       var filterGroup = getFilterGroup(league);
+
+      /* 전체 뷰: 각 권역 리그 스테이지만 매칭 (masters/champions 경기는 제외) */
+      if (filterGroup === "global") {
+        if (stage === "kickoff") return s === "kickoff";
+        if (stage === "stage1")  return s === "stage1" || s === "stage1playoffs";
+        if (stage === "stage2")  return s === "stage2" || s === "stage2playoffs";
+      }
 
       if (filterGroup === "league") {
         if (stage === "kickoff") return s === "kickoff";
@@ -1654,7 +1696,7 @@
       var el = document.getElementById(panelId);
       if (!el) return;
       /* accent 색 밝기 판단 (어두운 색이면 흰 글자) */
-      var darkAccents = ["#d4ff1f"];
+      var darkAccents = ["#d4ff1f", "#ffffff"];
       var valCls = darkAccents.indexOf(accent) !== -1 ? " dk" : "";
 
       var html = '<div class="lb-panel-hd">' +
@@ -1693,7 +1735,25 @@
       var acsPMap = {}, kdPMap = {};
       var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
 
+      /* 전체 뷰: 해당 스테이지의 진출팀 목록 로드 */
+      var globalTeamFilter = null;
+      if (league === "global") {
+        var participantsKey = GLOBAL_STAGE_PARTICIPANTS[stage];
+        if (participantsKey) {
+          globalTeamFilter = getParticipantTeams(participantsKey);
+        }
+      }
+
+      /* 전체 뷰에서 선수가 진출팀 소속인지 확인하기 위해 팀맵 미리 빌드 */
+      var teamMap = (league === "global") ? buildPlayerTeamMap() : null;
+
       all.forEach(function(player) {
+        /* 전체 뷰: 진출팀 소속 선수만 포함 */
+        if (league === "global" && globalTeamFilter && globalTeamFilter.length > 0) {
+          var playerTeam = teamMap ? teamMap[player.name] : null;
+          if (!playerTeam || globalTeamFilter.indexOf(playerTeam) === -1) return;
+        }
+
         player.maps.forEach(function(m) {
           if (!matchesLeague(m, league)) return;
           if (!matchesStage(m, league, stage)) return;
@@ -1736,9 +1796,18 @@
       if (stageLabelEl) {
         var stageLabelMap = {
           all: "", kickoff: "· KickOff", stage1: "· Stage 1", stage2: "· Stage 2",
-          swiss: "· Swiss Stage", playoffs: "· Playoffs"
+          swiss: "· Swiss Stage", playoffs: "· Playoffs", groupstage: "· Group Stage"
         };
-        stageLabelEl.textContent = stageLabelMap[stage] || "";
+        if (league === "global") {
+          var globalLabelMap = {
+            kickoff: "· KickOff — Masters Santiago 진출팀",
+            stage1:  "· Stage 1 — Masters London 진출팀",
+            stage2:  "· Stage 2 — Champions 진출팀",
+          };
+          stageLabelEl.textContent = globalLabelMap[stage] || "";
+        } else {
+          stageLabelEl.textContent = stageLabelMap[stage] || "";
+        }
       }
     }
 
@@ -1769,7 +1838,7 @@
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
-      currentStage  = "all";
+      currentStage  = (league === "global") ? "kickoff" : "all";
       currentTeam   = null;
       var info = LEAGUE_INFO[league];
 
@@ -1786,15 +1855,19 @@
       /* 스테이지 필터 */
       renderStageFilter(league);
 
-      /* 팀 선택기 */
-      renderTeamSelector(league);
+      /* 팀 선택기 (전체 뷰에서는 숨김) */
+      if (league === "global") {
+        document.getElementById("team-selector").style.display = "none";
+      } else {
+        renderTeamSelector(league);
+      }
 
       /* 조합 뷰 초기화 */
       document.getElementById("comp-section").style.display = "none";
 
       /* 선수/팀 기록 표시 */
       document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = "";
+      document.getElementById("team-stats-section").style.display   = (league === "global") ? "none" : "";
 
       /* 데이터 로드 */
       refreshData();
