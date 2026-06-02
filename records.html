@@ -969,6 +969,7 @@
     /* ── 리그별 스테이지 필터 정의 ── */
     var STAGE_FILTERS = {
       global: [
+        { key: "all",         label: "전체 스테이지" },
         { key: "kickoff-all", label: "KickOff (전체)" },
         { key: "kickoff-ms",  label: "KickOff (Masters Santiago 진출팀)" },
         { key: "stage1-all",  label: "Stage 1 (전체)" },
@@ -1809,6 +1810,7 @@
         };
         if (league === "global") {
           var globalLabelMap = {
+            "all":         "",
             "kickoff-all": "· KickOff (전체)",
             "kickoff-ms":  "· KickOff — Masters Santiago 진출팀",
             "stage1-all":  "· Stage 1 (전체)",
@@ -1850,7 +1852,7 @@
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
-      currentStage  = (league === "global") ? "kickoff-all" : "all";
+      currentStage  = "all";
       currentTeam   = null;
       var info = LEAGUE_INFO[league];
 
