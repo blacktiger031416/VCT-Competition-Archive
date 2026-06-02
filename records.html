@@ -1627,7 +1627,7 @@
       });
       document.getElementById("comp-section").style.display = "none";
       document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = (currentLeague === "global") ? "none" : "";
+      document.getElementById("team-stats-section").style.display   = "";
     }
 
     /* ── 선수→팀 맵 ──────────────────────────────────────────
@@ -1999,7 +1999,7 @@
     /* ── 팀 기록 패널 렌더 ── */
     function renderTeamPanels(league, stage) {
       var section = document.getElementById("team-stats-section");
-      if (!section || section.style.display === "none") return;
+      if (!section) return;
 
       var topN = league === "global" ? 10 : league === "champions" ? 16 : 12;
       var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
@@ -2147,7 +2147,7 @@
 
       /* 선수/팀 기록 표시 */
       document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = (league === "global") ? "none" : "";
+      document.getElementById("team-stats-section").style.display   = "";
 
       /* 데이터 로드 */
       refreshData();
