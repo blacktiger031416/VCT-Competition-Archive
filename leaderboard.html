@@ -394,8 +394,14 @@
   }
 
   /* ── vct_roster에서 선수→팀 맵 ── */
+  var _STAGE_WORDS = [
+    "swiss","playoffs","kickoff","stage1","stage2",
+    "stage1playoffs","stage2playoffs","santiago","london","all"
+  ];
   function buildPlayerTeamMap() {
     var map = {};
+
+    /* 1. vct_roster: 키 */
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (!k || !k.startsWith("vct_roster:")) continue;
@@ -406,6 +412,39 @@
         players.forEach(function (p) { if (p) map[p] = team; });
       } catch (e) {}
     }
+
+    /* 2. vct_p matchKey "날짜|팀A|팀B" 에서 자동 추론 */
+    for (var j = 0; j < localStorage.length; j++) {
+      var vk = localStorage.key(j);
+      if (!vk || !vk.startsWith("vct_p:")) continue;
+      var pName = vk.slice(6);
+      if (map[pName]) continue;
+      var pd;
+      try { pd = JSON.parse(localStorage.getItem(vk) || "{}"); } catch (e) { continue; }
+      if (!pd.maps) continue;
+      for (var mi = 0; mi < pd.maps.length; mi++) {
+        var m = pd.maps[mi];
+        if (!m.matchKey) continue;
+        var parts = m.matchKey.split("|");
+        if (parts.length < 3) continue;
+        if (_STAGE_WORDS.indexOf(parts[0].toLowerCase()) !== -1) continue;
+        if (_STAGE_WORDS.indexOf(parts[1].toLowerCase()) !== -1) continue;
+        var playersRaw = localStorage.getItem("players:" + m.matchKey + ":" + (m.mapIdx || 0));
+        if (!playersRaw) continue;
+        var pData;
+        try { pData = JSON.parse(playersRaw); } catch (e) { continue; }
+        var pnLower = pName.toLowerCase();
+        var side = null;
+        for (var si = 0; si < 5 && side === null; si++) {
+          var slotA = pData["a" + si], slotB = pData["b" + si];
+          if (slotA && (slotA.name || "").toLowerCase() === pnLower) side = "a";
+          if (slotB && (slotB.name || "").toLowerCase() === pnLower) side = "b";
+        }
+        if (side === "a" && parts[1]) { map[pName] = parts[1]; break; }
+        if (side === "b" && parts[2]) { map[pName] = parts[2]; break; }
+      }
+    }
+
     return map;
   }
 
