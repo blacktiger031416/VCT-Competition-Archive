@@ -401,7 +401,7 @@
         background: rgba(232,184,64,0.12); border-color: rgba(232,184,64,0.35); color: #e8b840;
       }
 
-      /* ── STAT TABLE ─────────────────────────── */
+      /* ── STAT TABLE (팀 기록용 유지) ──────────── */
       .stat-table-wrap { border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; overflow: hidden; }
       .stat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       .stat-table thead th {
@@ -419,13 +419,108 @@
       .stat-table tbody tr:hover { background: rgba(255,255,255,0.025); }
       .stat-table td { padding: 10px 14px; color: rgba(255,255,255,0.7); }
 
-      .td-rank {
-        font-family: "Barlow Condensed", sans-serif;
-        font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.18); width: 36px;
+      /* ── TOP-10 LEADERBOARD PANELS ─────────── */
+      .lb-panels {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
       }
-      tbody tr:nth-child(1) .td-rank { color: #e8b840; }
-      tbody tr:nth-child(2) .td-rank { color: rgba(210,210,210,0.7); }
-      tbody tr:nth-child(3) .td-rank { color: rgba(180,120,60,0.7); }
+      @media (max-width: 640px) { .lb-panels { grid-template-columns: 1fr; } }
+
+      .lb-panel {
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 8px; overflow: hidden;
+      }
+      .lb-panel-hd {
+        display: flex; align-items: center; gap: 8px;
+        padding: 11px 14px;
+        background: rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .lb-panel-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--league-accent, #888);
+        flex-shrink: 0;
+      }
+      .lb-panel-ttl {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+        color: rgba(255,255,255,0.75);
+      }
+      .lb-panel-meta {
+        margin-left: auto;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+        color: rgba(255,255,255,0.22);
+      }
+
+      .lb-row {
+        display: flex; align-items: center; gap: 9px;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.1s;
+      }
+      .lb-row:last-child { border-bottom: none; }
+      .lb-row:hover { background: rgba(255,255,255,0.025); }
+
+      .lb-rank {
+        min-width: 18px; text-align: center;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px; font-weight: 800;
+        color: rgba(255,255,255,0.22); flex-shrink: 0;
+      }
+      .lb-rank.r1 { color: #e8b840; }
+      .lb-rank.r2 { color: #a8a8c0; }
+      .lb-rank.r3 { color: #b87333; }
+
+      .lb-logo {
+        width: 24px; height: 24px; object-fit: contain; flex-shrink: 0;
+      }
+      .lb-logo.invert { filter: brightness(0) invert(1); }
+      .lb-logo-ph {
+        width: 24px; height: 24px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.06); border-radius: 3px;
+      }
+
+      .lb-info { flex: 1; min-width: 0; }
+      .lb-player {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 15px; font-weight: 800; letter-spacing: .02em;
+        color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .lb-team {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+        color: rgba(255,255,255,0.27); margin-top: 1px;
+      }
+
+      .lb-maps {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.25);
+        text-align: right; white-space: nowrap; flex-shrink: 0; line-height: 1.2;
+      }
+      .lb-maps small {
+        display: block; font-size: 8px; letter-spacing: .07em; text-transform: uppercase;
+      }
+
+      .lb-val {
+        min-width: 58px; text-align: center; padding: 6px 8px; border-radius: 5px;
+        background: var(--league-accent, #888);
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 19px; font-weight: 900; letter-spacing: .01em;
+        flex-shrink: 0; line-height: 1;
+        color: #0a0a0c;
+      }
+      .lb-val.lt { color: rgba(255,255,255,0.95); }
+      .lb-row:first-child .lb-val { font-size: 21px; }
+
+      .lb-empty-panel {
+        padding: 32px 14px; text-align: center;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.18);
+      }
 
       .player-cell { display: flex; align-items: center; gap: 8px; }
       .player-name { font-weight: 700; color: #fff; font-size: 13px; }
@@ -544,29 +639,15 @@
           <div class="comp-body" id="comp-body"></div>
         </div>
 
-        <!-- 선수 기록 -->
+        <!-- 선수 기록 (Top 10 패널) -->
         <div class="subsection" id="player-stats-section">
           <div class="subsection-header">
             <span class="subsection-title">선수 기록</span>
-            <div class="sort-tabs" id="player-sort-tabs">
-              <button class="sort-tab active" data-sort="acs">ACS</button>
-              <button class="sort-tab" data-sort="kda">KDA</button>
-              <button class="sort-tab" data-sort="maps">맵 수</button>
-            </div>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">TOP 10</span>
           </div>
-          <div class="stat-table-wrap">
-            <table class="stat-table">
-              <thead>
-                <tr>
-                  <th class="td-rank">#</th>
-                  <th>선수</th>
-                  <th class="num">ACS</th>
-                  <th class="num">KDA</th>
-                  <th class="num">맵</th>
-                </tr>
-              </thead>
-              <tbody id="player-tbody"></tbody>
-            </table>
+          <div class="lb-panels">
+            <div class="lb-panel" id="lb-panel-acs"></div>
+            <div class="lb-panel" id="lb-panel-kd"></div>
           </div>
         </div>
 
@@ -1456,71 +1537,119 @@
       document.getElementById("team-stats-section").style.display   = "";
     }
 
-    /* ── 선수 기록 집계 ── */
-    function buildPlayerRows(league, stage) {
-      var all = getAllPlayerData();
+    /* ── 선수→팀 맵 (vct_roster: 스캔) ── */
+    function buildPlayerTeamMap() {
       var map = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || !k.startsWith("vct_roster:")) continue;
+        var team = k.slice(11);
+        try {
+          var r = JSON.parse(localStorage.getItem(k) || "{}");
+          var players = (r.main || []).concat(r.subs || []);
+          players.forEach(function(p) { if (p) map[p] = team; });
+        } catch(e) {}
+      }
+      return map;
+    }
+
+    /* ── 팀 로고 HTML ── */
+    var _LB_INVERT = {
+      "Paper Rex":true,"Team Secret":true,"ZETA DIVISION":true,"VARREL":true,
+      "Evil Geniuses":true,"ENVY":true,"MIBR":true,
+      "GIANTX":true,"Team Liquid":true,"ULF Esports":true,"Gentle Mates":true,
+    };
+    function _lbLogoHtml(team) {
+      var src = (typeof TEAM_LOGOS !== "undefined" && TEAM_LOGOS[team]) || null;
+      if (!src) {
+        var code = (team||"?").slice(0,4).toUpperCase();
+        return '<div class="lb-logo-ph">' + esc(code) + '</div>';
+      }
+      var inv = _LB_INVERT[team] ? " invert" : "";
+      return '<img class="lb-logo' + inv + '" src="' + esc(src) + '" alt="' + esc(team) + '" onerror="this.style.display='none'" />';
+    }
+
+    /* ── Top-10 패널 렌더 ── */
+    function _renderLbPanel(panelId, title, entries, accent) {
+      var el = document.getElementById(panelId);
+      if (!el) return;
+      /* accent 색 밝기 판단 (어두운 색이면 흰 글자) */
+      var lightText = ["#fb2659","#a07aff"].indexOf(accent) !== -1;
+      var valCls = lightText ? " lt" : "";
+
+      var html = '<div class="lb-panel-hd">' +
+        '<div class="lb-panel-dot"></div>' +
+        '<span class="lb-panel-ttl">' + esc(title) + '</span>' +
+        '<span class="lb-panel-meta">' + entries.length + ' / 10</span>' +
+        '</div>';
+
+      if (!entries.length) {
+        html += '<div class="lb-empty-panel">기록 없음</div>';
+      } else {
+        var teamMap = buildPlayerTeamMap();
+        html += entries.map(function(r, i) {
+          var rankCls = i===0?" r1":i===1?" r2":i===2?" r3":"";
+          var team = teamMap[r.name] || "";
+          var teamCode = team.slice(0,4).toUpperCase() || "";
+          return '<div class="lb-row">' +
+            '<span class="lb-rank' + rankCls + '">' + (i+1) + '</span>' +
+            _lbLogoHtml(team) +
+            '<div class="lb-info">' +
+              '<div class="lb-player">' + esc(r.name) + '</div>' +
+              (teamCode ? '<div class="lb-team">' + esc(teamCode) + '</div>' : '') +
+            '</div>' +
+            '<div class="lb-maps">' + r.maps + '<small>Maps</small></div>' +
+            '<div class="lb-val' + valCls + '">' + r.val + '</div>' +
+            '</div>';
+        }).join("");
+      }
+      el.style.setProperty("--league-accent", accent);
+      el.innerHTML = html;
+    }
+
+    /* ── 선수 기록 집계 + Top-10 패널 렌더 ── */
+    function renderPlayerPanels(league, stage) {
+      var all = getAllPlayerData();
+      var acsPMap = {}, kdPMap = {};
+      var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
 
       all.forEach(function(player) {
         player.maps.forEach(function(m) {
           if (!matchesLeague(m, league)) return;
           if (!matchesStage(m, league, stage)) return;
-          var acs = parseFloat(m.acs) || 0;
-          if (!acs) return;
 
-          if (!map[player.name]) {
-            map[player.name] = { name: player.name, maps: 0, totalAcs: 0,
-              totalK: 0, totalD: 0, totalA: 0, kdaMaps: 0 };
+          var acs = parseFloat(m.acs) || 0;
+          var hasKda = m.kda && m.kda.indexOf("/") !== -1;
+          if (!acs && !hasKda) return;
+
+          if (acs > 0) {
+            if (!acsPMap[player.name]) acsPMap[player.name] = { maps:0, total:0 };
+            acsPMap[player.name].maps++;
+            acsPMap[player.name].total += acs;
           }
-          var e = map[player.name];
-          e.maps++;
-          e.totalAcs += acs;
-          if (m.kda && m.kda.indexOf("/") !== -1) {
+          if (hasKda) {
             var pts = m.kda.split("/");
-            e.totalK += parseFloat(pts[0]) || 0;
-            e.totalD += parseFloat(pts[1]) || 0;
-            e.totalA += parseFloat(pts[2]) || 0;
-            e.kdaMaps++;
+            if (!kdPMap[player.name]) kdPMap[player.name] = { maps:0, totalK:0, totalD:0 };
+            kdPMap[player.name].maps++;
+            kdPMap[player.name].totalK += parseFloat(pts[0]) || 0;
+            kdPMap[player.name].totalD += parseFloat(pts[1]) || 0;
           }
         });
       });
 
-      return Object.values(map).map(function(e) {
-        var avgAcs = e.maps ? Math.round(e.totalAcs / e.maps) : 0;
-        var kda = "—";
-        if (e.kdaMaps > 0) {
-          var d = e.totalD > 0 ? e.totalD : 0.5;
-          kda = ((e.totalK + e.totalA * 0.5) / d).toFixed(2);
-        }
-        return { name: e.name, maps: e.maps, avgAcs: avgAcs, kda: kda, kdaNum: parseFloat(kda) || 0 };
-      });
-    }
+      var acsTop10 = Object.keys(acsPMap).map(function(n) {
+        var e = acsPMap[n];
+        return { name:n, maps:e.maps, val: Math.round(e.total/e.maps) };
+      }).sort(function(a,b){ return b.val-a.val; }).slice(0,10);
 
-    /* ── 정렬 ── */
-    function sortRows(rows, sortKey) {
-      var sorted = rows.slice();
-      if (sortKey === "acs")  sorted.sort(function(a,b){ return b.avgAcs - a.avgAcs; });
-      if (sortKey === "kda")  sorted.sort(function(a,b){ return b.kdaNum - a.kdaNum; });
-      if (sortKey === "maps") sorted.sort(function(a,b){ return b.maps - a.maps; });
-      return sorted;
-    }
+      var kdTop10 = Object.keys(kdPMap).map(function(n) {
+        var e = kdPMap[n];
+        var d = e.totalD > 0 ? e.totalD : 0.5;
+        return { name:n, maps:e.maps, val: parseFloat((e.totalK/d).toFixed(2)) };
+      }).sort(function(a,b){ return b.val-a.val; }).slice(0,10);
 
-    /* ── 선수 테이블 렌더 ── */
-    function renderPlayerTable(rows) {
-      var tbody = document.getElementById("player-tbody");
-      if (!rows.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">기록 없음</td></tr>';
-        return;
-      }
-      tbody.innerHTML = rows.map(function(r, i) {
-        return '<tr>' +
-          '<td class="td-rank">' + (i + 1) + '</td>' +
-          '<td><div class="player-cell"><span class="player-name">' + esc(r.name) + '</span></div></td>' +
-          '<td class="num"><span class="stat-val' + (i === 0 ? " top" : "") + '">' + (r.avgAcs || "—") + '</span></td>' +
-          '<td class="num"><span class="stat-val">' + r.kda + '</span></td>' +
-          '<td class="num"><span class="stat-val">' + r.maps + '</span></td>' +
-          '</tr>';
-      }).join("");
+      _renderLbPanel("lb-panel-acs", "ACS Top 10",  acsTop10, accent);
+      _renderLbPanel("lb-panel-kd",  "K/D Top 10",  kdTop10,  accent);
     }
 
     function esc(s) {
@@ -1540,8 +1669,7 @@
 
     /* ── 데이터 새로고침 ── */
     function refreshData() {
-      currentRows = buildPlayerRows(currentLeague, currentStage);
-      renderPlayerTable(sortRows(currentRows, currentSort));
+      renderPlayerPanels(currentLeague, currentStage);
       /* 팀이 선택된 상태면 조합 뷰도 새로고침 */
       if (currentTeam) {
         renderCompositions(currentTeam, currentLeague, currentStage);
@@ -1596,15 +1724,7 @@
       refreshData();
     });
 
-    /* ── 정렬 탭 ── */
-    document.getElementById("player-sort-tabs").addEventListener("click", function(e) {
-      var btn = e.target.closest(".sort-tab");
-      if (!btn) return;
-      currentSort = btn.dataset.sort;
-      document.querySelectorAll(".sort-tab").forEach(function(b){ b.classList.remove("active"); });
-      btn.classList.add("active");
-      if (currentRows.length) renderPlayerTable(sortRows(currentRows, currentSort));
-    });
+
 
     /* ── 조합 뷰 닫기 ── */
     document.getElementById("comp-close-btn").addEventListener("click", function() {
