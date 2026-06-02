@@ -1889,9 +1889,12 @@
         /* 라운드 데이터 */
         var rdRaw = localStorage.getItem(key);
         if (!rdRaw) continue;
-        var rdState;
-        try { rdState = JSON.parse(rdRaw); } catch(e) { continue; }
-        var rounds = rdState.rounds || [];
+        var rounds;
+        try {
+          var rdParsed = JSON.parse(rdRaw);
+          /* saveRoundState는 배열을 직접 저장: [...] */
+          rounds = Array.isArray(rdParsed) ? rdParsed : (rdParsed.rounds || []);
+        } catch(e) { continue; }
 
         /* 라운드 승수 집계 */
         var aW = 0, bW = 0;
