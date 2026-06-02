@@ -220,37 +220,66 @@ app.get("/api/auth/me", (req, res) => {
   }
 });
 
-/* ── API: 티어리스트 설정 조회 ───────────────────── */
-app.get("/api/tierlist/config", async (req, res) => {
+/* ── API: 티어리스트 이벤트 목록 조회 ───────────── */
+app.get("/api/tierlist/events", async (req, res) => {
   try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key='tierlist:config'");
-    res.json(result.rows[0] ? JSON.parse(result.rows[0].value) : null);
+    const [evRes, postRes] = await Promise.all([
+      pool.query("SELECT value FROM app_data WHERE key LIKE 'tlevt:%' ORDER BY updated_at DESC"),
+      pool.query("SELECT key FROM app_data WHERE key LIKE 'tlpost:%'"),
+    ]);
+    const counts = {};
+    postRes.rows.forEach((r) => {
+      const parts = r.key.split(":"); // tlpost:{evtId}:{username}
+      if (parts[1]) counts[parts[1]] = (counts[parts[1]] || 0) + 1;
+    });
+    const events = evRes.rows.map((r) => {
+      const e = JSON.parse(r.value);
+      e.postCount = counts[e.id] || 0;
+      return e;
+    });
+    res.json(events);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-/* ── API: 티어리스트 설정 저장 (admin only) ──────── */
-app.post("/api/tierlist/config", requireAdmin, async (req, res) => {
-  const config = req.body;
+/* ── API: 티어리스트 이벤트 생성/수정 (admin) ───── */
+app.post("/api/tierlist/events", requireAdmin, async (req, res) => {
+  const evt = req.body;
+  if (!evt.id) evt.id = Date.now().toString();
+  const key = `tlevt:${evt.id}`;
   try {
     await pool.query(
-      `INSERT INTO app_data (key, value) VALUES ('tierlist:config', $1)
-       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
-      [JSON.stringify(config)]
+      `INSERT INTO app_data (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [key, JSON.stringify(evt)]
     );
-    broadcast({ type: "tierlist-config", config });
+    broadcast({ type: "tl-event-update", event: evt });
+    res.json({ ok: true, id: evt.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 티어리스트 이벤트 삭제 (admin) ─────────── */
+app.delete("/api/tierlist/events/:id", requireAdmin, async (req, res) => {
+  const id = req.params.id;
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1 OR key LIKE $2",
+      [`tlevt:${id}`, `tlpost:${id}:%`]);
+    broadcast({ type: "tl-event-delete", id });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-/* ── API: 티어리스트 게시물 전체 조회 ────────────── */
-app.get("/api/tierlist/posts", async (req, res) => {
+/* ── API: 이벤트별 게시물 조회 ───────────────────── */
+app.get("/api/tierlist/events/:id/posts", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT value FROM app_data WHERE key LIKE 'tierlist:post:%' ORDER BY updated_at DESC"
+      "SELECT value FROM app_data WHERE key LIKE $1 ORDER BY updated_at DESC",
+      [`tlpost:${req.params.id}:%`]
     );
     res.json(result.rows.map((r) => JSON.parse(r.value)));
   } catch (err) {
@@ -258,35 +287,35 @@ app.get("/api/tierlist/posts", async (req, res) => {
   }
 });
 
-/* ── API: 티어리스트 게시 (로그인 필요) ──────────── */
-app.post("/api/tierlist/posts", requireAuth, async (req, res) => {
+/* ── API: 이벤트별 게시 (로그인 필요) ────────────── */
+app.post("/api/tierlist/events/:id/posts", requireAuth, async (req, res) => {
+  const evtId = req.params.id;
   const { tierData } = req.body || {};
   if (!tierData) return res.status(400).json({ error: "tierData required" });
   const username = req.user.username;
-  const post = { username, tierData, createdAt: new Date().toISOString() };
-  const key = `tierlist:post:${username}`;
+  const post = { username, tierData, eventId: evtId, createdAt: new Date().toISOString() };
+  const key = `tlpost:${evtId}:${username}`;
   try {
     await pool.query(
       `INSERT INTO app_data (key, value) VALUES ($1, $2)
        ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
       [key, JSON.stringify(post)]
     );
-    broadcast({ type: "tierlist-post", post });
+    broadcast({ type: "tl-post", eventId: evtId, post });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-/* ── API: 티어리스트 게시물 삭제 (admin 또는 본인) ── */
-app.delete("/api/tierlist/posts/:username", requireAuth, async (req, res) => {
-  const target = req.params.username;
-  if (req.user.role !== "admin" && req.user.username !== target)
+/* ── API: 이벤트별 게시물 삭제 (admin 또는 본인) ── */
+app.delete("/api/tierlist/events/:id/posts/:username", requireAuth, async (req, res) => {
+  const { id, username } = req.params;
+  if (req.user.role !== "admin" && req.user.username !== username)
     return res.status(403).json({ error: "권한이 없습니다." });
-  const key = `tierlist:post:${target}`;
   try {
-    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
-    broadcast({ type: "tierlist-delete", username: target });
+    await pool.query("DELETE FROM app_data WHERE key=$1", [`tlpost:${id}:${username}`]);
+    broadcast({ type: "tl-delete", eventId: id, username });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

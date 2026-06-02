@@ -10,410 +10,299 @@
   <script src="./auth.js" defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #0c1117;
-      color: #fff;
-      font-family: 'Barlow', 'Noto Sans KR', sans-serif;
-      min-height: 100vh;
-    }
+    body { background: #0c1117; color: #fff; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
     /* ── Site Header ── */
     .site-header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; gap: 16px;
       padding: 0 24px; height: 52px;
-      background: rgba(10,14,22,0.92);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(10,14,22,0.92); border-bottom: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     }
-    .home-link {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 18px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
-      color: #fff; text-decoration: none;
-    }
-    .back-link {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: rgba(255,255,255,0.35); text-decoration: none; transition: color .15s;
-    }
-    .back-link:hover { color: rgba(255,255,255,0.75); }
+    .home-link { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#fff; text-decoration:none; }
+    .back-link  { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.35); text-decoration:none; transition:color .15s; }
+    .back-link:hover { color:rgba(255,255,255,0.75); }
 
     /* ── Layout ── */
     .page-wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px 100px; }
 
-    /* ── Page header ── */
-    .tl-page-hdr {
-      display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
-    }
-    .tl-page-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 26px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
-      color: #fff; flex: 1;
-    }
+    /* ── Admin only ── */
     .admin-only { display: none; }
     body:not(.view-only) .admin-only { display: flex; gap: 8px; align-items: center; }
 
     /* ── Buttons ── */
     .tl-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 0 16px; height: 34px; border-radius: 4px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
-      cursor: pointer; transition: all .15s; white-space: nowrap; border: 1px solid transparent;
+      padding: 0 16px; height: 34px; border-radius: 4px; border: 1px solid transparent;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800;
+      letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: all .15s; white-space: nowrap;
     }
-    .tl-btn-ghost {
-      background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.55);
-    }
-    .tl-btn-ghost:hover { background: rgba(255,255,255,0.09); color: #fff; }
-    .tl-btn-primary { background: #e8432d; color: #fff; }
-    .tl-btn-primary:hover { background: #d43520; }
-    .tl-btn-success { background: rgba(30,210,100,0.15); border-color: rgba(61,220,132,0.3); color: #3ddc84; }
-    .tl-btn-success:hover { background: rgba(30,210,100,0.25); }
-    .tl-btn-danger { background: rgba(180,30,30,0.6); border-color: rgba(220,50,50,0.3); color: #ff9090; }
-    .tl-btn-danger:hover { background: rgba(200,30,30,0.85); color: #fff; }
+    .tl-btn-ghost   { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.12); color:rgba(255,255,255,0.55); }
+    .tl-btn-ghost:hover { background:rgba(255,255,255,0.09); color:#fff; }
+    .tl-btn-primary { background:#e8432d; color:#fff; }
+    .tl-btn-primary:hover { background:#d43520; }
+    .tl-btn-success { background:rgba(30,210,100,0.15); border-color:rgba(61,220,132,0.3); color:#3ddc84; }
+    .tl-btn-success:hover { background:rgba(30,210,100,0.25); }
+    .tl-btn-danger  { background:rgba(180,30,30,0.6); border-color:rgba(220,50,50,0.3); color:#ff9090; }
+    .tl-btn-danger:hover { background:rgba(200,30,30,0.85); color:#fff; }
     .tl-btn-sm {
-      padding: 0 10px; height: 28px; border-radius: 3px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
-      cursor: pointer; transition: all .15s; border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+      padding:0 10px; height:28px; border-radius:3px; border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5);
+      font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800;
+      letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .15s;
     }
-    .tl-btn-sm:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .tl-btn-sm:hover { background:rgba(255,255,255,0.12); color:#fff; }
+    .tl-btn-icon {
+      width:28px; height:28px; padding:0; display:grid; place-items:center;
+      border-radius:3px; border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.35);
+      font-size:12px; cursor:pointer; transition:all .12s;
+    }
+    .tl-btn-icon:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .tl-btn-icon-danger { border-color:rgba(220,50,50,0.2); background:rgba(180,30,30,0.1); color:rgba(255,100,100,0.45); }
+    .tl-btn-icon-danger:hover { background:rgba(200,30,30,0.4); color:#ff9090; }
 
-    /* ── Event area ── */
-    .event-meta {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-    }
-    .event-title-text {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 18px; font-weight: 700; letter-spacing: .05em;
-      color: rgba(255,255,255,0.8);
-    }
+    /* ── Status badges ── */
     .status-badge {
-      padding: 3px 10px; border-radius: 3px; border: 1px solid transparent;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase;
+      padding:3px 10px; border-radius:3px; border:1px solid transparent;
+      font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
     }
-    .status-open   { background: rgba(30,210,100,0.12); border-color: rgba(61,220,132,0.3); color: #3ddc84; }
-    .status-closed { background: rgba(255,100,50,0.1);  border-color: rgba(255,100,50,0.25); color: #ff8c69; }
-    .status-draft  { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.35); }
-    .no-event {
-      padding: 52px 24px; text-align: center;
-      border: 1px dashed rgba(255,255,255,0.09); border-radius: 8px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.2); margin-bottom: 32px;
+    .status-open   { background:rgba(30,210,100,0.12); border-color:rgba(61,220,132,0.3); color:#3ddc84; }
+    .status-closed { background:rgba(255,100,50,0.1);  border-color:rgba(255,100,50,0.25); color:#ff8c69; }
+    .status-draft  { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:rgba(255,255,255,0.35); }
+
+    /* ═══════════════════════════════════════════════
+       LIST VIEW
+    ═══════════════════════════════════════════════ */
+    #view-list { }
+
+    .list-hdr {
+      display:flex; align-items:center; gap:14px; margin-bottom:28px;
+    }
+    .list-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900;
+      letter-spacing:.06em; text-transform:uppercase; color:#fff; flex:1;
     }
 
-    /* ── Workspace ── */
-    #workspace { margin-bottom: 40px; }
+    .events-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;
+    }
+    .event-card {
+      border:1px solid rgba(255,255,255,0.08); border-radius:8px;
+      background:rgba(255,255,255,0.02); overflow:hidden;
+      display:flex; flex-direction:column; transition:border-color .15s;
+    }
+    .event-card:hover { border-color:rgba(255,255,255,0.14); }
+    .event-card-body {
+      padding:18px 18px 14px; flex:1;
+    }
+    .event-card-top {
+      display:flex; align-items:flex-start; gap:10px; margin-bottom:10px;
+    }
+    .event-card-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800;
+      letter-spacing:.04em; color:#fff; flex:1; line-height:1.3;
+    }
+    .event-card-meta {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+      letter-spacing:.08em; color:rgba(255,255,255,0.3); margin-bottom:14px;
+    }
+    .event-card-footer {
+      display:flex; align-items:center; gap:8px;
+      padding:12px 18px; border-top:1px solid rgba(255,255,255,0.05);
+      background:rgba(0,0,0,0.15);
+    }
+    .event-card-enter {
+      flex:1; padding:0 18px; height:36px; border:none; border-radius:4px;
+      background:#e8432d; color:#fff;
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:800;
+      letter-spacing:.14em; text-transform:uppercase; cursor:pointer; transition:background .15s;
+      text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .event-card-enter:hover { background:#d43520; }
+    .event-card-enter.view-only-enter {
+      background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+    .event-card-enter.view-only-enter:hover { background:rgba(255,255,255,0.1); color:#fff; }
 
-    /* Tier row */
+    .no-events {
+      padding:60px 24px; text-align:center;
+      border:1px dashed rgba(255,255,255,0.09); border-radius:8px;
+      font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,0.2);
+    }
+
+    /* ═══════════════════════════════════════════════
+       DETAIL VIEW
+    ═══════════════════════════════════════════════ */
+    #view-detail { display:none; }
+
+    .detail-nav {
+      display:flex; align-items:center; gap:12px; margin-bottom:24px;
+    }
+    .detail-back {
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.35);
+      cursor:pointer; text-decoration:none; transition:color .15s;
+    }
+    .detail-back:hover { color:rgba(255,255,255,0.75); }
+    .detail-hdr {
+      display:flex; align-items:center; gap:12px; margin-bottom:22px;
+    }
+    .detail-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800;
+      letter-spacing:.05em; color:rgba(255,255,255,0.85); flex:1;
+    }
+
+    /* Tier rows */
     .tier-row {
-      display: flex; align-items: stretch;
-      border: 1px solid rgba(255,255,255,0.07); border-radius: 5px;
-      margin-bottom: 5px; min-height: 76px;
-      transition: box-shadow .15s;
+      display:flex; align-items:stretch; border:1px solid rgba(255,255,255,0.07);
+      border-radius:5px; margin-bottom:5px; min-height:76px; transition:box-shadow .15s;
     }
-    .tier-row.drag-over { box-shadow: 0 0 0 2px rgba(232,67,45,0.5); border-color: transparent; }
+    .tier-row.drag-over { box-shadow:0 0 0 2px rgba(232,67,45,0.5); border-color:transparent; }
     .tier-label {
-      width: 88px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 4px 0 0 4px; padding: 8px 6px;
+      width:88px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      border-radius:4px 0 0 4px; padding:8px 6px;
     }
     .tier-label-text {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
-      text-align: center; line-height: 1.3; word-break: break-word;
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:900;
+      letter-spacing:.06em; text-transform:uppercase; text-align:center; line-height:1.3; word-break:break-word;
     }
     .tier-items {
-      flex: 1; display: flex; flex-wrap: wrap; align-items: center;
-      gap: 6px; padding: 8px 10px;
-      background: rgba(255,255,255,0.02);
+      flex:1; display:flex; flex-wrap:wrap; align-items:center;
+      gap:6px; padding:8px 10px; background:rgba(255,255,255,0.02);
     }
     .tier-controls {
-      display: flex; flex-direction: column; justify-content: center;
-      gap: 3px; padding: 6px 5px;
-      background: rgba(0,0,0,0.25); border-radius: 0 4px 4px 0;
+      display:flex; flex-direction:column; justify-content:center;
+      gap:3px; padding:6px 5px; background:rgba(0,0,0,0.25); border-radius:0 4px 4px 0;
     }
     .tier-ctrl-btn {
-      width: 26px; height: 26px; border-radius: 3px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3);
-      font-size: 12px; cursor: pointer; display: grid; place-items: center;
-      transition: all .12s;
+      width:26px; height:26px; border-radius:3px; border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.3);
+      font-size:12px; cursor:pointer; display:grid; place-items:center; transition:all .12s;
     }
-    .tier-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+    .tier-ctrl-btn:hover { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.85); }
 
-    /* ── Team card ── */
+    /* Team card */
     .team-card {
-      width: 70px; flex-shrink: 0;
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 6px 4px; border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
-      cursor: grab; user-select: none; transition: all .12s;
-      position: relative;
+      width:70px; flex-shrink:0; display:flex; flex-direction:column; align-items:center;
+      gap:4px; padding:6px 4px; border-radius:4px; border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04); cursor:grab; user-select:none; transition:all .12s;
     }
-    .team-card:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
-    .team-card.dragging { opacity: 0.35; }
-    .team-card img { width: 42px; height: 42px; object-fit: contain; }
+    .team-card:hover { background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.18); }
+    .team-card.dragging { opacity:.35; }
+    .team-card img { width:42px; height:42px; object-fit:contain; }
     .team-card .tc-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      color: rgba(255,255,255,0.55); text-align: center; line-height: 1.2;
-      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
+      letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,0.55);
+      text-align:center; line-height:1.2; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
 
-    /* ── Pool ── */
-    .pool-section { margin-top: 14px; }
+    /* Pool */
+    .pool-section { margin-top:14px; }
     .pool-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
-      color: rgba(255,255,255,0.3); margin-bottom: 10px;
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800;
+      letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:10px;
     }
     #pool-grid {
-      display: flex; flex-wrap: wrap; gap: 7px; min-height: 64px;
-      padding: 10px 12px; border-radius: 6px;
-      border: 1px dashed rgba(255,255,255,0.1);
-      background: rgba(0,0,0,0.15); transition: box-shadow .15s;
+      display:flex; flex-wrap:wrap; gap:7px; min-height:64px; padding:10px 12px;
+      border-radius:6px; border:1px dashed rgba(255,255,255,0.1);
+      background:rgba(0,0,0,0.15); transition:box-shadow .15s;
     }
-    #pool-grid.drag-over { box-shadow: 0 0 0 2px rgba(120,180,255,0.4); border-color: transparent; }
+    #pool-grid.drag-over { box-shadow:0 0 0 2px rgba(120,180,255,0.4); border-color:transparent; }
     #pool-grid:empty::after {
-      content: "모든 팀이 배치됨"; color: rgba(255,255,255,0.15);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      align-self: center;
+      content:"모든 팀이 배치됨"; color:rgba(255,255,255,0.15); align-self:center;
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase;
     }
 
-    /* ── Submit ── */
-    .submit-row {
-      display: flex; align-items: center; gap: 14px; margin-top: 20px;
-    }
+    /* Submit */
+    .submit-row { display:flex; align-items:center; gap:14px; margin-top:20px; }
     .tl-submit-btn {
-      padding: 0 32px; height: 44px; border: none; border-radius: 4px;
-      background: #e8432d; color: #fff;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
-      cursor: pointer; transition: background .15s;
+      padding:0 32px; height:44px; border:none; border-radius:4px;
+      background:#e8432d; color:#fff; font-family:'Barlow Condensed',sans-serif;
+      font-size:14px; font-weight:800; letter-spacing:.18em; text-transform:uppercase;
+      cursor:pointer; transition:background .15s;
     }
-    .tl-submit-btn:hover { background: #d43520; }
-    .tl-submit-btn:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.25); cursor: not-allowed; }
-    .submit-hint {
-      font-family: 'Barlow', 'Noto Sans KR', sans-serif;
-      font-size: 13px; color: rgba(255,255,255,0.3);
-    }
+    .tl-submit-btn:hover { background:#d43520; }
+    .tl-submit-btn:disabled { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.25); cursor:not-allowed; }
+    .submit-hint { font-family:'Barlow','Noto Sans KR',sans-serif; font-size:13px; color:rgba(255,255,255,0.3); }
 
-    /* ── Board ── */
-    .board-section { padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.07); }
-    .board-hdr {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
-    }
+    /* Board */
+    .board-section { padding-top:32px; border-top:1px solid rgba(255,255,255,0.07); margin-top:32px; }
+    .board-hdr { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
     .board-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 18px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
+      font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900;
+      letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,0.7);
     }
-    .board-count {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: .08em;
-      color: rgba(255,255,255,0.25);
-    }
-    .board-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px;
-    }
+    .board-count { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,0.25); }
+    .board-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
     .board-empty {
-      padding: 36px; text-align: center;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.18);
+      padding:36px; text-align:center; font-family:'Barlow Condensed',sans-serif;
+      font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,0.18);
     }
 
     /* Board card */
-    .board-card {
-      border: 1px solid rgba(255,255,255,0.07); border-radius: 6px;
-      background: rgba(255,255,255,0.02); overflow: hidden;
-      transition: border-color .15s;
-    }
-    .board-card:hover { border-color: rgba(255,255,255,0.12); }
-    .board-card-hdr {
-      display: flex; align-items: center; gap: 8px;
-      padding: 9px 12px; background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .bc-user {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 800; letter-spacing: .06em;
-      color: rgba(255,255,255,0.75); flex: 1;
-    }
-    .bc-time {
-      font-family: 'Barlow', sans-serif; font-size: 11px;
-      color: rgba(255,255,255,0.22);
-    }
-    .bc-del {
-      width: 22px; height: 22px; display: grid; place-items: center;
-      border: 1px solid rgba(220,50,50,0.2); border-radius: 3px;
-      background: rgba(180,30,30,0.1); color: rgba(255,100,100,0.45);
-      font-size: 11px; cursor: pointer; transition: all .12s;
-    }
-    .bc-del:hover { background: rgba(200,30,30,0.4); color: #ff9090; }
-    .board-card-body { padding: 8px 10px; }
-    .mini-tier-row {
-      display: flex; align-items: center; gap: 5px; margin-bottom: 3px;
-    }
-    .mini-tier-label {
-      width: 60px; flex-shrink: 0; height: 26px; border-radius: 2px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 9px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase;
-      overflow: hidden;
-    }
-    .mini-tier-teams { display: flex; flex-wrap: wrap; gap: 2px; }
-    .mini-logo { width: 26px; height: 26px; object-fit: contain; border-radius: 2px; background: rgba(255,255,255,0.04); }
+    .board-card { border:1px solid rgba(255,255,255,0.07); border-radius:6px; background:rgba(255,255,255,0.02); overflow:hidden; transition:border-color .15s; }
+    .board-card:hover { border-color:rgba(255,255,255,0.12); }
+    .board-card-hdr { display:flex; align-items:center; gap:8px; padding:9px 12px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05); }
+    .bc-user { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; letter-spacing:.06em; color:rgba(255,255,255,0.75); flex:1; }
+    .bc-time { font-family:'Barlow',sans-serif; font-size:11px; color:rgba(255,255,255,0.22); }
+    .bc-del { width:22px; height:22px; display:grid; place-items:center; border:1px solid rgba(220,50,50,0.2); border-radius:3px; background:rgba(180,30,30,0.1); color:rgba(255,100,100,0.45); font-size:11px; cursor:pointer; transition:all .12s; }
+    .bc-del:hover { background:rgba(200,30,30,0.4); color:#ff9090; }
+    .board-card-body { padding:8px 10px; }
+    .mini-tier-row { display:flex; align-items:center; gap:5px; margin-bottom:3px; }
+    .mini-tier-label { width:60px; flex-shrink:0; height:26px; border-radius:2px; display:flex; align-items:center; justify-content:center; font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; overflow:hidden; }
+    .mini-tier-teams { display:flex; flex-wrap:wrap; gap:2px; }
+    .mini-logo { width:26px; height:26px; object-fit:contain; border-radius:2px; background:rgba(255,255,255,0.04); }
 
     /* ── Config Modal ── */
-    .tl-overlay {
-      position: fixed; inset: 0; z-index: 9500;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .tl-backdrop {
-      position: absolute; inset: 0;
-      background: rgba(5,8,15,0.8); backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
+    .tl-overlay { position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center; }
+    .tl-backdrop { position:absolute; inset:0; background:rgba(5,8,15,0.8); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
     .tl-panel {
-      position: relative; z-index: 1;
-      width: min(560px, calc(100vw - 32px));
-      max-height: calc(100vh - 80px);
-      background: #111a28; border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 8px; box-shadow: 0 32px 96px rgba(0,0,0,0.7);
-      display: flex; flex-direction: column; overflow: hidden;
-      animation: panelIn .22s cubic-bezier(0.16,1,0.3,1);
+      position:relative; z-index:1; width:min(560px,calc(100vw - 32px)); max-height:calc(100vh - 80px);
+      background:#111a28; border:1px solid rgba(255,255,255,0.09); border-radius:8px;
+      box-shadow:0 32px 96px rgba(0,0,0,0.7); display:flex; flex-direction:column; overflow:hidden;
+      animation:panelIn .22s cubic-bezier(0.16,1,0.3,1);
     }
     @keyframes panelIn { from{opacity:0;transform:translateY(14px) scale(0.97)} to{opacity:1;transform:none} }
-    .tl-panel-hdr {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
-      flex-shrink: 0;
-    }
-    .tl-panel-hdr h2 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 15px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: #fff;
-    }
-    .tl-panel-close {
-      width: 28px; height: 28px; display: grid; place-items: center;
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 3px;
-      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35);
-      font-size: 14px; cursor: pointer; transition: all .12s;
-    }
-    .tl-panel-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .tl-panel-body {
-      flex: 1; overflow-y: auto; padding: 20px;
-      display: flex; flex-direction: column; gap: 20px;
-    }
-    .cfg-field { display: flex; flex-direction: column; gap: 8px; }
-    .cfg-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-    }
-    .cfg-input {
-      height: 38px; padding: 0 12px; width: 100%;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 4px; color: #fff; outline: none;
-      font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600;
-      transition: border-color .15s;
-    }
-    .cfg-input:focus { border-color: rgba(232,67,45,0.5); }
-    .cfg-count-row { display: flex; gap: 8px; align-items: center; }
-    .cfg-count-row .cfg-input { width: 70px; }
-    /* Tier config list */
-    .cfg-tier-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 10px;
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 4px; margin-bottom: 4px;
-    }
-    .cfg-tier-color {
-      width: 30px; height: 30px; border-radius: 4px;
-      border: 2px solid rgba(255,255,255,0.15); cursor: pointer; flex-shrink: 0;
-      background: none; padding: 0;
-    }
-    .cfg-tier-name {
-      flex: 1; height: 30px; padding: 0 10px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 3px; color: #fff; outline: none;
-      font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
-    }
-    .cfg-tier-name:focus { border-color: rgba(232,67,45,0.4); }
-    /* Team grid */
-    .cfg-team-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 6px;
-    }
-    .cfg-team-item {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 6px 4px; border-radius: 5px; cursor: pointer;
-      border: 2px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.03); transition: all .12s;
-    }
-    .cfg-team-item:hover { background: rgba(255,255,255,0.07); }
-    .cfg-team-item.sel { border-color: #e8432d; background: rgba(232,67,45,0.08); }
-    .cfg-team-item img { width: 38px; height: 38px; object-fit: contain; }
-    .cfg-team-item .ctn {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      color: rgba(255,255,255,0.45); text-align: center; line-height: 1.2;
-    }
-    .cfg-team-item.sel .ctn { color: rgba(255,255,255,0.8); }
-    /* Config actions */
-    .cfg-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 2px; }
+    .tl-panel-hdr { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+    .tl-panel-hdr h2 { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:#fff; }
+    .tl-panel-close { width:28px; height:28px; display:grid; place-items:center; border:1px solid rgba(255,255,255,0.08); border-radius:3px; background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.35); font-size:14px; cursor:pointer; transition:all .12s; }
+    .tl-panel-close:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .tl-panel-body { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:20px; }
+    .tl-panel-body::-webkit-scrollbar { width:5px; }
+    .tl-panel-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.12); border-radius:3px; }
+    .cfg-field { display:flex; flex-direction:column; gap:8px; }
+    .cfg-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,0.35); }
+    .cfg-input { height:38px; padding:0 12px; width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:4px; color:#fff; outline:none; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:600; transition:border-color .15s; }
+    .cfg-input:focus { border-color:rgba(232,67,45,0.5); }
+    .cfg-count-row { display:flex; gap:8px; align-items:center; }
+    .cfg-count-row .cfg-input { width:70px; }
+    .cfg-tier-item { display:flex; align-items:center; gap:8px; padding:7px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; margin-bottom:4px; }
+    .cfg-tier-color { width:30px; height:30px; border-radius:4px; border:2px solid rgba(255,255,255,0.15); cursor:pointer; flex-shrink:0; background:none; padding:0; }
+    .cfg-tier-name { flex:1; height:30px; padding:0 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:#fff; outline:none; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; }
+    .cfg-tier-name:focus { border-color:rgba(232,67,45,0.4); }
+    .cfg-team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(68px,1fr)); gap:6px; }
+    .cfg-team-item { display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 4px; border-radius:5px; cursor:pointer; border:2px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.03); transition:all .12s; }
+    .cfg-team-item:hover { background:rgba(255,255,255,0.07); }
+    .cfg-team-item.sel { border-color:#e8432d; background:rgba(232,67,45,0.08); }
+    .cfg-team-item img { width:38px; height:38px; object-fit:contain; }
+    .cfg-team-item .ctn { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,0.45); text-align:center; line-height:1.2; }
+    .cfg-team-item.sel .ctn { color:rgba(255,255,255,0.8); }
+    .cfg-actions { display:flex; gap:8px; flex-wrap:wrap; padding-top:2px; }
 
-    /* ── Inline tier edit popover ── */
-    .tier-popover {
-      position: absolute; top: 0; right: 34px; z-index: 200;
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 10px; border-radius: 5px;
-      background: #1a2436; border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      animation: panelIn .15s cubic-bezier(0.16,1,0.3,1);
-    }
-    .tier-popover input[type=color] {
-      width: 28px; height: 28px; border-radius: 3px;
-      border: 1px solid rgba(255,255,255,0.15); cursor: pointer; padding: 1px;
-    }
-    .tier-popover input[type=text] {
-      height: 28px; padding: 0 8px; width: 110px;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 3px; color: #fff; outline: none;
-      font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
-    }
-    .tier-popover button {
-      height: 28px; padding: 0 8px; border-radius: 3px;
-      background: #e8432d; border: none; color: #fff;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-      cursor: pointer;
-    }
+    /* Tier popover */
+    .tier-popover { position:absolute; top:0; right:34px; z-index:200; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:5px; background:#1a2436; border:1px solid rgba(255,255,255,0.12); box-shadow:0 8px 32px rgba(0,0,0,0.5); animation:panelIn .15s cubic-bezier(0.16,1,0.3,1); }
+    .tier-popover input[type=color] { width:28px; height:28px; border-radius:3px; border:1px solid rgba(255,255,255,0.15); cursor:pointer; padding:1px; }
+    .tier-popover input[type=text] { height:28px; padding:0 8px; width:110px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:3px; color:#fff; outline:none; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; }
+    .tier-popover button { height:28px; padding:0 8px; border-radius:3px; background:#e8432d; border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
 
-    /* ── Scrollbar ── */
-    .tl-panel-body::-webkit-scrollbar { width: 5px; }
-    .tl-panel-body::-webkit-scrollbar-track { background: transparent; }
-    .tl-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
-
-    /* ── Toast ── */
-    #tl-toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      padding: 10px 20px; border-radius: 5px;
-      background: rgba(30,210,100,0.15); border: 1px solid rgba(61,220,132,0.3);
-      color: #3ddc84;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-      pointer-events: none; opacity: 0; transition: opacity .25s;
-      z-index: 9999;
-    }
-    #tl-toast.show { opacity: 1; }
+    /* Toast */
+    #tl-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:5px; background:rgba(30,210,100,0.15); border:1px solid rgba(61,220,132,0.3); color:#3ddc84; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; opacity:0; transition:opacity .25s; z-index:9999; }
+    #tl-toast.show { opacity:1; }
   </style>
 </head>
 <body>
@@ -423,40 +312,52 @@
   </header>
 
   <div class="page-wrap">
-    <!-- Page title -->
-    <div class="tl-page-hdr">
-      <h1 class="tl-page-title">티어리스트 게시판</h1>
-      <div class="admin-only" id="admin-bar">
-        <button class="tl-btn tl-btn-ghost" id="btn-cfg">⚙ 설정</button>
-        <button class="tl-btn" id="btn-toggle" style="display:none"></button>
+    <!-- ══ LIST VIEW ══ -->
+    <div id="view-list">
+      <div class="list-hdr">
+        <h1 class="list-title">티어리스트 게시판</h1>
+        <div class="admin-only">
+          <button class="tl-btn tl-btn-primary" id="btn-new">+ 새 티어리스트 만들기</button>
+        </div>
       </div>
+      <div id="events-grid" class="events-grid"></div>
     </div>
 
-    <!-- Event info -->
-    <div id="event-area"></div>
+    <!-- ══ DETAIL VIEW ══ -->
+    <div id="view-detail">
+      <div class="detail-nav">
+        <a class="detail-back" id="btn-back" href="./tierlist.html">← 목록으로</a>
+      </div>
+      <div class="detail-hdr">
+        <span class="detail-title" id="detail-title"></span>
+        <span class="status-badge" id="detail-status"></span>
+        <div class="admin-only" id="detail-admin-bar" style="gap:8px">
+          <button class="tl-btn tl-btn-ghost" id="btn-edit-evt">⚙ 설정</button>
+          <button class="tl-btn" id="btn-toggle-status"></button>
+        </div>
+      </div>
 
-    <!-- Workspace (when open) -->
-    <div id="workspace" style="display:none">
-      <div id="tier-rows"></div>
-      <!-- Pool -->
-      <div class="pool-section">
-        <div class="pool-label">📌 Pin Images</div>
-        <div id="pool-grid"></div>
+      <!-- Workspace -->
+      <div id="workspace">
+        <div id="tier-rows"></div>
+        <div class="pool-section">
+          <div class="pool-label">📌 Pin Images</div>
+          <div id="pool-grid"></div>
+        </div>
+        <div class="submit-row">
+          <button class="tl-submit-btn" id="btn-submit" disabled>게시하기</button>
+          <span class="submit-hint" id="submit-hint"></span>
+        </div>
       </div>
-      <!-- Submit -->
-      <div class="submit-row">
-        <button class="tl-submit-btn" id="btn-submit" disabled>게시하기</button>
-        <span class="submit-hint" id="submit-hint"></span>
-      </div>
-    </div>
 
-    <!-- Board -->
-    <div id="board-section" class="board-section" style="display:none">
-      <div class="board-hdr">
-        <h2 class="board-title">게시판</h2>
-        <span class="board-count" id="board-count"></span>
+      <!-- Board -->
+      <div class="board-section" id="board-section" style="display:none">
+        <div class="board-hdr">
+          <h2 class="board-title">게시판</h2>
+          <span class="board-count" id="board-count"></span>
+        </div>
+        <div class="board-grid" id="board-grid"></div>
       </div>
-      <div class="board-grid" id="board-grid"></div>
     </div>
   </div>
 
@@ -465,16 +366,14 @@
     <div class="tl-backdrop" id="cfg-backdrop"></div>
     <div class="tl-panel">
       <div class="tl-panel-hdr">
-        <h2>티어리스트 설정</h2>
+        <h2 id="cfg-modal-title">새 티어리스트</h2>
         <button class="tl-panel-close" id="cfg-close-btn">×</button>
       </div>
       <div class="tl-panel-body">
-        <!-- Title -->
         <div class="cfg-field">
           <label class="cfg-label">제목</label>
           <input class="cfg-input" type="text" id="cfg-title" placeholder="예: Masters Bangkok 팀 티어리스트" />
         </div>
-        <!-- Tier count -->
         <div class="cfg-field">
           <label class="cfg-label">티어 수 (2–8)</label>
           <div class="cfg-count-row">
@@ -482,21 +381,18 @@
             <button class="tl-btn-sm" id="btn-apply-count">적용</button>
           </div>
         </div>
-        <!-- Tier names -->
         <div class="cfg-field">
           <label class="cfg-label">티어 이름 / 색상</label>
           <div id="cfg-tier-list"></div>
         </div>
-        <!-- Teams -->
         <div class="cfg-field">
           <label class="cfg-label">참여 팀 선택</label>
           <div class="cfg-team-grid" id="cfg-team-grid"></div>
         </div>
-        <!-- Actions -->
         <div class="cfg-actions">
-          <button class="tl-btn tl-btn-ghost" id="cfg-save-draft">임시 저장</button>
-          <button class="tl-btn tl-btn-primary" id="cfg-publish">저장 &amp; 공개</button>
-          <button class="tl-btn tl-btn-danger" id="cfg-end">마감</button>
+          <button class="tl-btn tl-btn-ghost"    id="cfg-save-draft">임시 저장</button>
+          <button class="tl-btn tl-btn-primary"  id="cfg-publish">저장 &amp; 공개</button>
+          <button class="tl-btn tl-btn-danger"   id="cfg-end" style="display:none">마감</button>
         </div>
       </div>
     </div>
@@ -572,185 +468,237 @@
       "Evil Geniuses":true,"ENVY":true,"MIBR":true,"GIANTX":true,
       "Team Liquid":true,"ULF Esports":true,"Gentle Mates":true,
     };
-
     var DEFAULT_TIER_NAMES  = ["Champion","Top 2","Top 3-4","Top 5-6","Top 7-8","Top 9-10","Top 11-12","Top 13+"];
     var DEFAULT_TIER_COLORS = ["#e84c4c","#e8832d","#e8c42d","#8fd94e","#4ec4e8","#a869e8","#e869b8","#576574"];
 
-    /* ── 인증 상태 ─────────────────────────────────── */
-    var TOKEN = localStorage.getItem("vct_auth_token") || null;
-    var USER  = null;
+    /* ── 인증 ───────────────────────────────────────── */
+    var TOKEN       = localStorage.getItem("vct_auth_token") || null;
+    var USER        = null;
     try { USER = JSON.parse(localStorage.getItem("vct_auth_user")); } catch(e) {}
     var IS_ADMIN    = !!(USER && USER.role === "admin");
     var IS_LOGGED_IN = !!USER;
 
-    /* ── 앱 상태 ────────────────────────────────────── */
-    var config   = null; // { title, tiers:[{name,color}], teams:[...], status }
-    var posts    = [];   // [{username, tierData, createdAt}]
-    var tierData = {};   // 현재 유저 작업: {tierName:[teamName,...]}
+    /* ── 상태 ───────────────────────────────────────── */
+    var events   = [];   // 이벤트 목록
+    var curEvt   = null; // 현재 상세 이벤트
+    var posts    = [];   // 현재 이벤트 게시물
+    var tierData = {};   // 유저 작업 중인 티어 배치
+    var editingId = null; // 수정 중인 이벤트 id
+
+    /* ── URL 파싱 ───────────────────────────────────── */
+    var urlId = new URLSearchParams(location.search).get("id");
 
     /* ── 초기화 ─────────────────────────────────────── */
     async function init() {
+      if (urlId) {
+        await loadDetail(urlId);
+      } else {
+        await loadList();
+      }
+      setupSSE();
+    }
+
+    /* ══ LIST VIEW ══════════════════════════════════ */
+    async function loadList() {
       try {
-        var [cfgRes, postsRes] = await Promise.all([
-          fetch("/api/tierlist/config"),
-          fetch("/api/tierlist/posts"),
+        var r = await fetch("/api/tierlist/events");
+        events = await r.json();
+      } catch(e) { events = []; }
+      showView("list");
+      renderList();
+    }
+
+    function renderList() {
+      var grid = document.getElementById("events-grid");
+      if (!events.length) {
+        grid.innerHTML = '<div class="no-events">아직 티어리스트가 없습니다.<br>Admin이 새 티어리스트를 만들면 여기에 표시됩니다.</div>';
+        return;
+      }
+      grid.innerHTML = "";
+      events.forEach(function(evt) {
+        grid.appendChild(makeEventCard(evt));
+      });
+    }
+
+    function makeEventCard(evt) {
+      var card = document.createElement("div");
+      card.className = "event-card";
+      var sc = evt.status === "open" ? "status-open" : evt.status === "closed" ? "status-closed" : "status-draft";
+      var st = evt.status === "open" ? "참여 중" : evt.status === "closed" ? "종료" : "준비 중";
+      var meta = (evt.teams ? evt.teams.length : 0) + "개 팀 · " +
+                 (evt.tiers ? evt.tiers.length : 0) + "개 티어 · " +
+                 (evt.postCount || 0) + "개 게시물";
+
+      var enterLabel = evt.status === "open" ? "참여하기" : "보기";
+      var enterClass = evt.status === "open" ? "" : "view-only-enter";
+
+      card.innerHTML =
+        '<div class="event-card-body">' +
+          '<div class="event-card-top">' +
+            '<span class="event-card-title">' + escHtml(evt.title || "제목 없음") + '</span>' +
+            '<span class="status-badge ' + sc + '">' + st + '</span>' +
+          '</div>' +
+          '<div class="event-card-meta">' + meta + '</div>' +
+        '</div>' +
+        '<div class="event-card-footer">' +
+          '<a class="event-card-enter ' + enterClass + '" href="./tierlist.html?id=' + escHtml(evt.id) + '">' + enterLabel + '</a>' +
+          (IS_ADMIN
+            ? '<button class="tl-btn-icon" data-edit="' + escHtml(evt.id) + '" title="설정">⚙</button>' +
+              '<button class="tl-btn-icon tl-btn-icon-danger" data-del="' + escHtml(evt.id) + '" title="삭제">✕</button>'
+            : '') +
+        '</div>';
+
+      if (IS_ADMIN) {
+        card.querySelector("[data-edit]").addEventListener("click", function() {
+          openCfgModal(evt);
+        });
+        card.querySelector("[data-del]").addEventListener("click", async function() {
+          if (!confirm('"' + evt.title + '" 티어리스트를 삭제하시겠습니까?\n게시물도 모두 삭제됩니다.')) return;
+          await deleteEvent(evt.id);
+        });
+      }
+      return card;
+    }
+
+    async function deleteEvent(id) {
+      try {
+        var r = await fetch("/api/tierlist/events/" + id, {
+          method: "DELETE", headers: { "Authorization": "Bearer " + TOKEN }
+        });
+        var d = await r.json();
+        if (d.ok) {
+          events = events.filter(function(e){ return e.id !== id; });
+          renderList();
+          showToast("삭제됨");
+        } else { alert(d.error || "삭제 실패"); }
+      } catch(e) { alert("서버 오류"); }
+    }
+
+    /* ══ DETAIL VIEW ══════════════════════════════ */
+    async function loadDetail(id) {
+      try {
+        var [evtsRes, postsRes] = await Promise.all([
+          fetch("/api/tierlist/events"),
+          fetch("/api/tierlist/events/" + id + "/posts"),
         ]);
-        config = await cfgRes.json();
+        events = await evtsRes.json();
         posts  = await postsRes.json();
-      } catch(e) { config = null; posts = []; }
+      } catch(e) { events = []; posts = []; }
+
+      curEvt = events.find(function(e){ return e.id === id; }) || null;
+      if (!curEvt) { location.href = "./tierlist.html"; return; }
 
       /* 내 기존 게시물 로드 */
-      if (IS_LOGGED_IN && config) {
+      if (IS_LOGGED_IN) {
         var mine = posts.find(function(p){ return p.username === USER.username; });
         if (mine) {
           tierData = JSON.parse(JSON.stringify(mine.tierData));
         } else {
           initEmptyTierData();
         }
-      } else if (config) {
+      } else {
         initEmptyTierData();
       }
-      render();
-      setupSSE();
+
+      showView("detail");
+      renderDetail();
     }
 
     function initEmptyTierData() {
       tierData = {};
-      if (config && config.tiers) {
-        config.tiers.forEach(function(t){ tierData[t.name] = []; });
-      }
+      if (curEvt && curEvt.tiers) curEvt.tiers.forEach(function(t){ tierData[t.name] = []; });
     }
 
-    /* ── 전체 렌더 ──────────────────────────────────── */
-    function render() {
-      renderAdminBar();
-      renderEventArea();
+    function renderDetail() {
+      if (!curEvt) return;
+
+      /* 헤더 */
+      document.getElementById("detail-title").textContent = curEvt.title || "티어리스트";
+      var sb = document.getElementById("detail-status");
+      var sc = curEvt.status === "open" ? "status-open" : curEvt.status === "closed" ? "status-closed" : "status-draft";
+      var st = curEvt.status === "open" ? "참여 중" : curEvt.status === "closed" ? "종료" : "준비 중";
+      sb.className = "status-badge " + sc; sb.textContent = st;
+
+      /* Admin 상태 토글 버튼 */
+      var tb = document.getElementById("btn-toggle-status");
+      if (curEvt.status === "open") {
+        tb.textContent = "마감"; tb.className = "tl-btn tl-btn-danger";
+      } else {
+        tb.textContent = "공개"; tb.className = "tl-btn tl-btn-success";
+      }
+
       renderWorkspace();
       renderBoard();
     }
 
-    /* ── Admin bar ──────────────────────────────────── */
-    function renderAdminBar() {
-      var toggleBtn = document.getElementById("btn-toggle");
-      if (!IS_ADMIN) { toggleBtn.style.display = "none"; return; }
-      if (!config)   { toggleBtn.style.display = "none"; return; }
-      toggleBtn.style.display = "";
-      if (config.status === "open") {
-        toggleBtn.textContent = "마감";
-        toggleBtn.className   = "tl-btn tl-btn-danger";
-      } else {
-        toggleBtn.textContent = "공개";
-        toggleBtn.className   = "tl-btn tl-btn-success";
-      }
-    }
-
-    /* ── Event area ─────────────────────────────────── */
-    function renderEventArea() {
-      var el = document.getElementById("event-area");
-      if (!config) {
-        el.innerHTML = '<div class="no-event">아직 티어리스트가 설정되지 않았습니다.<br>Admin이 설정 후 공개하면 여기에 표시됩니다.</div>';
-        return;
-      }
-      var sc = config.status === "open" ? "status-open" : config.status === "closed" ? "status-closed" : "status-draft";
-      var st = config.status === "open" ? "참여 중" : config.status === "closed" ? "종료" : "준비 중";
-      el.innerHTML =
-        '<div class="event-meta">' +
-        '<span class="event-title-text">' + escHtml(config.title || "티어리스트") + '</span>' +
-        '<span class="status-badge ' + sc + '">' + st + '</span>' +
-        '</div>';
-    }
-
-    /* ── Workspace ──────────────────────────────────── */
     function renderWorkspace() {
       var ws = document.getElementById("workspace");
-      if (!config || config.status !== "open") { ws.style.display = "none"; return; }
+      if (!curEvt || curEvt.status !== "open") { ws.style.display = "none"; return; }
       ws.style.display = "";
+
+      /* 배치된 팀 */
+      var placed = [];
+      Object.values(tierData).forEach(function(arr){ placed = placed.concat(arr); });
 
       var tiersEl = document.getElementById("tier-rows");
       tiersEl.innerHTML = "";
 
-      /* 배치된 팀 수집 */
-      var placed = [];
-      Object.values(tierData).forEach(function(arr){ placed = placed.concat(arr); });
-
-      config.tiers.forEach(function(tier, tIdx) {
+      curEvt.tiers.forEach(function(tier, tIdx) {
         var row = document.createElement("div");
-        row.className = "tier-row";
-        row.dataset.tier = tier.name;
-
+        row.className = "tier-row"; row.dataset.tier = tier.name;
         var tc = getTextColor(tier.color);
-
         var html =
           '<div class="tier-label" style="background:' + tier.color + '">' +
             '<span class="tier-label-text" style="color:' + tc + '">' + escHtml(tier.name) + '</span>' +
           '</div>' +
           '<div class="tier-items" id="ti-' + tIdx + '"></div>';
-
-        /* Admin 인라인 컨트롤 */
         if (IS_ADMIN) {
           html +=
             '<div class="tier-controls admin-only" style="position:relative">' +
-              '<button class="tier-ctrl-btn" data-cfg="' + tIdx + '" title="이름/색상 변경">⚙</button>' +
-              '<button class="tier-ctrl-btn" data-up="' + tIdx + '" title="위로">↑</button>' +
-              '<button class="tier-ctrl-btn" data-down="' + tIdx + '" title="아래로">↓</button>' +
+              '<button class="tier-ctrl-btn" data-cfg="' + tIdx + '">⚙</button>' +
+              '<button class="tier-ctrl-btn" data-up="'  + tIdx + '">↑</button>' +
+              '<button class="tier-ctrl-btn" data-down="'+ tIdx + '">↓</button>' +
             '</div>';
         }
-
         row.innerHTML = html;
         tiersEl.appendChild(row);
 
-        /* 팀 카드 삽입 */
         var itemsEl = document.getElementById("ti-" + tIdx);
-        (tierData[tier.name] || []).forEach(function(t) {
-          itemsEl.appendChild(makeTeamCard(t));
-        });
+        (tierData[tier.name] || []).forEach(function(t){ itemsEl.appendChild(makeTeamCard(t)); });
 
-        /* 드래그 이벤트 */
-        row.addEventListener("dragover", function(e) { e.preventDefault(); row.classList.add("drag-over"); });
-        row.addEventListener("dragleave", function(e) { if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over"); });
-        row.addEventListener("drop", function(e) {
+        row.addEventListener("dragover", function(e){ e.preventDefault(); row.classList.add("drag-over"); });
+        row.addEventListener("dragleave", function(e){ if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over"); });
+        row.addEventListener("drop", function(e){
           e.preventDefault(); row.classList.remove("drag-over");
-          var team = e.dataTransfer.getData("team"); if (!team) return;
-          moveToTier(team, tier.name);
+          var t = e.dataTransfer.getData("team"); if (!t) return;
+          moveToTier(t, tier.name);
         });
       });
 
-      /* Admin 컨트롤 이벤트 */
       if (IS_ADMIN) {
-        tiersEl.querySelectorAll("[data-cfg]").forEach(function(btn) {
-          btn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            openTierPopover(parseInt(btn.dataset.cfg), btn.parentElement);
-          });
-        });
-        tiersEl.querySelectorAll("[data-up]").forEach(function(btn) {
-          btn.addEventListener("click", function() { moveTier(parseInt(btn.dataset.up), -1); });
-        });
-        tiersEl.querySelectorAll("[data-down]").forEach(function(btn) {
-          btn.addEventListener("click", function() { moveTier(parseInt(btn.dataset.down), 1); });
-        });
+        tiersEl.querySelectorAll("[data-cfg]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); openTierPopover(parseInt(b.dataset.cfg), b.parentElement); }); });
+        tiersEl.querySelectorAll("[data-up]").forEach(function(b){ b.addEventListener("click", function(){ moveTier(parseInt(b.dataset.up), -1); }); });
+        tiersEl.querySelectorAll("[data-down]").forEach(function(b){ b.addEventListener("click", function(){ moveTier(parseInt(b.dataset.down), 1); }); });
       }
 
       /* Pool */
       var pool = document.getElementById("pool-grid");
       pool.innerHTML = "";
-      config.teams.filter(function(t){ return placed.indexOf(t) === -1; })
+      curEvt.teams.filter(function(t){ return placed.indexOf(t) === -1; })
         .forEach(function(t){ pool.appendChild(makeTeamCard(t)); });
-
-      pool.addEventListener("dragover", function(e) { e.preventDefault(); pool.classList.add("drag-over"); });
-      pool.addEventListener("dragleave", function(e) { if (!pool.contains(e.relatedTarget)) pool.classList.remove("drag-over"); });
-      pool.addEventListener("drop", function(e) {
+      pool.addEventListener("dragover", function(e){ e.preventDefault(); pool.classList.add("drag-over"); });
+      pool.addEventListener("dragleave", function(e){ if (!pool.contains(e.relatedTarget)) pool.classList.remove("drag-over"); });
+      pool.addEventListener("drop", function(e){
         e.preventDefault(); pool.classList.remove("drag-over");
-        var team = e.dataTransfer.getData("team"); if (!team) return;
-        moveToPool(team);
+        var t = e.dataTransfer.getData("team"); if (!t) return;
+        moveToPool(t);
       });
 
-      /* Submit 버튼 */
-      var btn  = document.getElementById("btn-submit");
+      /* Submit */
+      var btn = document.getElementById("btn-submit");
       var hint = document.getElementById("submit-hint");
       if (!IS_LOGGED_IN) {
-        btn.disabled = true;
-        hint.textContent = "게시하려면 로그인이 필요합니다.";
+        btn.disabled = true; hint.textContent = "게시하려면 로그인이 필요합니다.";
       } else {
         btn.disabled = false;
         var mine = posts.find(function(p){ return p.username === USER.username; });
@@ -759,328 +707,278 @@
       }
     }
 
-    /* ── 팀 카드 생성 ────────────────────────────────── */
     function makeTeamCard(teamName) {
       var card = document.createElement("div");
-      card.className = "team-card";
-      card.draggable = true;
-      card.dataset.team = teamName;
+      card.className = "team-card"; card.draggable = true; card.dataset.team = teamName;
       var logo = TEAM_LOGOS[teamName] || "";
       var code = TEAM_CODES[teamName] || teamName;
       var inv  = LOGO_INVERT[teamName] ? " style=\"filter:brightness(0) invert(1)\"" : "";
       card.innerHTML =
-        (logo
-          ? '<img src="' + logo + '" alt="' + escHtml(teamName) + '"' + inv + ' onerror="this.style.display=\'none\'" />'
-          : '<div style="width:42px;height:42px"></div>') +
+        (logo ? '<img src="' + logo + '" alt=""' + inv + ' onerror="this.style.display=\'none\'">' : '<div style="width:42px;height:42px"></div>') +
         '<span class="tc-name">' + escHtml(code) + '</span>';
-      card.addEventListener("dragstart", function(e) {
-        e.dataTransfer.setData("team", teamName);
-        e.dataTransfer.effectAllowed = "move";
-        setTimeout(function(){ card.classList.add("dragging"); }, 0);
-      });
+      card.addEventListener("dragstart", function(e){ e.dataTransfer.setData("team", teamName); setTimeout(function(){ card.classList.add("dragging"); }, 0); });
       card.addEventListener("dragend", function(){ card.classList.remove("dragging"); });
       return card;
     }
 
-    /* ── 팀 이동 ─────────────────────────────────────── */
     function moveToTier(teamName, tierName) {
-      config.tiers.forEach(function(t){
-        var arr = tierData[t.name] || [];
-        var i = arr.indexOf(teamName);
-        if (i !== -1) arr.splice(i, 1);
-        tierData[t.name] = arr;
-      });
+      curEvt.tiers.forEach(function(t){ var a = tierData[t.name]||[]; var i = a.indexOf(teamName); if (i!==-1) a.splice(i,1); tierData[t.name]=a; });
       if (!tierData[tierName]) tierData[tierName] = [];
       tierData[tierName].push(teamName);
       renderWorkspace();
     }
     function moveToPool(teamName) {
-      config.tiers.forEach(function(t){
-        var arr = tierData[t.name] || [];
-        var i = arr.indexOf(teamName);
-        if (i !== -1) arr.splice(i, 1);
-        tierData[t.name] = arr;
-      });
+      curEvt.tiers.forEach(function(t){ var a = tierData[t.name]||[]; var i = a.indexOf(teamName); if (i!==-1) a.splice(i,1); tierData[t.name]=a; });
       renderWorkspace();
     }
-
-    /* ── 티어 순서 변경 (admin) ─────────────────────── */
     function moveTier(idx, dir) {
-      var tiers = config.tiers;
-      var target = idx + dir;
-      if (target < 0 || target >= tiers.length) return;
-      var tmp = tiers[idx]; tiers[idx] = tiers[target]; tiers[target] = tmp;
-      saveConfig(config.status, true);
+      var t = curEvt.tiers; var tgt = idx + dir;
+      if (tgt < 0 || tgt >= t.length) return;
+      var tmp = t[idx]; t[idx] = t[tgt]; t[tgt] = tmp;
+      saveEvent(curEvt.status, true);
     }
-
-    /* ── 인라인 티어 팝오버 (admin) ─────────────────── */
     function openTierPopover(tIdx, parentEl) {
-      /* 기존 팝오버 제거 */
       document.querySelectorAll(".tier-popover").forEach(function(p){ p.remove(); });
-      var tier = config.tiers[tIdx];
+      var tier = curEvt.tiers[tIdx];
       var pop = document.createElement("div");
       pop.className = "tier-popover";
-      pop.innerHTML =
-        '<input type="color" value="' + tier.color + '" id="pop-color" />' +
-        '<input type="text"  value="' + escHtml(tier.name) + '" id="pop-name" />' +
-        '<button id="pop-save">저장</button>';
+      pop.innerHTML = '<input type="color" value="' + tier.color + '" id="pop-color"><input type="text" value="' + escHtml(tier.name) + '" id="pop-name"><button id="pop-save">저장</button>';
       parentEl.appendChild(pop);
-
-      pop.querySelector("#pop-save").addEventListener("click", function() {
-        config.tiers[tIdx].color = pop.querySelector("#pop-color").value;
-        config.tiers[tIdx].name  = pop.querySelector("#pop-name").value.trim() || tier.name;
-        pop.remove();
-        saveConfig(config.status, true);
+      pop.querySelector("#pop-save").addEventListener("click", function(){
+        curEvt.tiers[tIdx].color = pop.querySelector("#pop-color").value;
+        curEvt.tiers[tIdx].name  = pop.querySelector("#pop-name").value.trim() || tier.name;
+        pop.remove(); saveEvent(curEvt.status, true);
       });
-      /* 외부 클릭 닫기 */
-      setTimeout(function() {
-        document.addEventListener("click", function handler(e) {
-          if (!pop.contains(e.target)) { pop.remove(); document.removeEventListener("click", handler); }
-        });
+      setTimeout(function(){
+        document.addEventListener("click", function h(e){ if (!pop.contains(e.target)){ pop.remove(); document.removeEventListener("click",h); } });
       }, 0);
     }
 
-    /* ── 게시 ────────────────────────────────────────── */
     document.getElementById("btn-submit").addEventListener("click", async function() {
-      if (!IS_LOGGED_IN) return;
+      if (!IS_LOGGED_IN || !curEvt) return;
       var btn = document.getElementById("btn-submit");
       btn.disabled = true; btn.textContent = "게시 중...";
       try {
-        var r = await fetch("/api/tierlist/posts", {
+        var r = await fetch("/api/tierlist/events/" + curEvt.id + "/posts", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
           body: JSON.stringify({ tierData: tierData }),
         });
-        var data = await r.json();
-        if (data.ok) {
+        var d = await r.json();
+        if (d.ok) {
           showToast("게시 완료!");
-          var pr = await fetch("/api/tierlist/posts");
+          var pr = await fetch("/api/tierlist/events/" + curEvt.id + "/posts");
           posts = await pr.json();
           btn.disabled = false; btn.textContent = "수정 게시";
           renderBoard();
-        } else {
-          alert(data.error || "오류가 발생했습니다.");
-          btn.disabled = false; btn.textContent = "게시하기";
-        }
-      } catch(e) {
-        alert("서버에 연결할 수 없습니다.");
-        btn.disabled = false; btn.textContent = "게시하기";
-      }
+        } else { alert(d.error||"오류"); btn.disabled=false; btn.textContent="게시하기"; }
+      } catch(e) { alert("서버 오류"); btn.disabled=false; btn.textContent="게시하기"; }
     });
 
-    /* ── Board ───────────────────────────────────────── */
+    document.getElementById("btn-toggle-status").addEventListener("click", async function() {
+      if (!curEvt) return;
+      var ns = curEvt.status === "open" ? "closed" : "open";
+      curEvt.status = ns;
+      try {
+        await fetch("/api/tierlist/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+          body: JSON.stringify(curEvt),
+        });
+        showToast(ns === "open" ? "공개됨!" : "마감됨!");
+        renderDetail();
+      } catch(e) { alert("서버 오류"); }
+    });
+
     function renderBoard() {
       var section = document.getElementById("board-section");
       var grid    = document.getElementById("board-grid");
       var countEl = document.getElementById("board-count");
-
-      if (!config) { section.style.display = "none"; return; }
+      if (!curEvt) { section.style.display = "none"; return; }
       section.style.display = "";
-
-      if (posts.length === 0) {
+      if (!posts.length) {
         grid.innerHTML = '<div class="board-empty">아직 게시된 티어리스트가 없습니다.</div>';
-        countEl.textContent = "";
-        return;
+        countEl.textContent = ""; return;
       }
       countEl.textContent = posts.length + "개";
       grid.innerHTML = "";
-      posts.forEach(function(post){ grid.appendChild(makeBoardCard(post)); });
+      posts.forEach(function(p){ grid.appendChild(makeBoardCard(p)); });
     }
 
     function makeBoardCard(post) {
-      var card = document.createElement("div");
-      card.className = "board-card";
+      var card = document.createElement("div"); card.className = "board-card";
       var t = new Date(post.createdAt);
       var ts = t.getFullYear() + "/" + (t.getMonth()+1) + "/" + t.getDate() +
                " " + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0");
       var canDel = IS_ADMIN || (IS_LOGGED_IN && USER.username === post.username);
-
       var hdr =
-        '<div class="board-card-hdr">' +
-        '<span class="bc-user">' + escHtml(post.username) + '</span>' +
-        '<span class="bc-time">'  + ts + '</span>' +
-        (canDel ? '<button class="bc-del" data-u="' + escHtml(post.username) + '">✕</button>' : '') +
-        '</div>';
-
+        '<div class="board-card-hdr"><span class="bc-user">' + escHtml(post.username) + '</span>' +
+        '<span class="bc-time">' + ts + '</span>' +
+        (canDel ? '<button class="bc-del" data-u="' + escHtml(post.username) + '">✕</button>' : '') + '</div>';
       var body = '<div class="board-card-body">';
-      config.tiers.forEach(function(tier) {
+      curEvt.tiers.forEach(function(tier){
         var teams = (post.tierData && post.tierData[tier.name]) || [];
         var tc = getTextColor(tier.color);
-        var logos = teams.map(function(t) {
-          var logo = TEAM_LOGOS[t] || "";
-          var inv  = LOGO_INVERT[t] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+        var logos = teams.map(function(t){
+          var logo = TEAM_LOGOS[t] || ""; var inv = LOGO_INVERT[t] ? " style=\"filter:brightness(0) invert(1)\"" : "";
           return logo ? '<img class="mini-logo" src="' + logo + '" title="' + escHtml(t) + '"' + inv + '>' : "";
         }).join("");
-        body +=
-          '<div class="mini-tier-row">' +
-          '<div class="mini-tier-label" style="background:' + tier.color + ';color:' + tc + '">' + escHtml(tier.name) + '</div>' +
-          '<div class="mini-tier-teams">' + logos + '</div>' +
-          '</div>';
+        body += '<div class="mini-tier-row"><div class="mini-tier-label" style="background:' + tier.color + ';color:' + tc + '">' + escHtml(tier.name) + '</div><div class="mini-tier-teams">' + logos + '</div></div>';
       });
       body += '</div>';
-
       card.innerHTML = hdr + body;
-
       var delBtn = card.querySelector(".bc-del");
-      if (delBtn) {
-        delBtn.addEventListener("click", async function() {
-          var u = delBtn.dataset.u;
-          if (!confirm(u + "의 게시물을 삭제하시겠습니까?")) return;
-          try {
-            var r = await fetch("/api/tierlist/posts/" + encodeURIComponent(u), {
-              method: "DELETE",
-              headers: { "Authorization": "Bearer " + TOKEN },
-            });
-            var d = await r.json();
-            if (d.ok) {
-              posts = posts.filter(function(p){ return p.username !== u; });
-              renderBoard();
-            } else { alert(d.error || "삭제 실패"); }
-          } catch(e) { alert("서버 오류"); }
-        });
-      }
+      if (delBtn) delBtn.addEventListener("click", async function(){
+        var u = delBtn.dataset.u;
+        if (!confirm(u + "의 게시물을 삭제하시겠습니까?")) return;
+        try {
+          var r = await fetch("/api/tierlist/events/" + curEvt.id + "/posts/" + encodeURIComponent(u), {
+            method:"DELETE", headers:{"Authorization":"Bearer " + TOKEN}
+          });
+          var d = await r.json();
+          if (d.ok) { posts = posts.filter(function(p){ return p.username !== u; }); renderBoard(); }
+          else alert(d.error||"삭제 실패");
+        } catch(e) { alert("서버 오류"); }
+      });
       return card;
     }
 
-    /* ── Config 모달 ─────────────────────────────────── */
-    function openCfgModal() {
-      document.getElementById("cfg-modal").style.display = "flex";
-      var cur = config || {
-        title: "", status: "draft",
+    /* ══ CONFIG MODAL ════════════════════════════════ */
+    function openCfgModal(evt) {
+      editingId = evt ? evt.id : null;
+      document.getElementById("cfg-modal-title").textContent = evt ? "티어리스트 수정" : "새 티어리스트";
+      document.getElementById("cfg-end").style.display = evt ? "" : "none";
+      var cur = evt || {
+        title:"", status:"draft",
         tiers: DEFAULT_TIER_NAMES.slice(0,5).map(function(n,i){ return {name:n,color:DEFAULT_TIER_COLORS[i]}; }),
-        teams: [],
+        teams:[],
       };
       document.getElementById("cfg-title").value = cur.title || "";
       document.getElementById("cfg-tier-count").value = cur.tiers.length;
       renderCfgTiers(cur.tiers);
       renderCfgTeams(cur.teams || []);
+      document.getElementById("cfg-modal").style.display = "flex";
     }
-    function closeCfgModal() {
-      document.getElementById("cfg-modal").style.display = "none";
-    }
+    function closeCfgModal() { document.getElementById("cfg-modal").style.display = "none"; }
 
     function renderCfgTiers(tiers) {
       var n = Math.min(8, Math.max(2, parseInt(document.getElementById("cfg-tier-count").value)||5));
-      var container = document.getElementById("cfg-tier-list");
-      container.innerHTML = "";
+      var c = document.getElementById("cfg-tier-list"); c.innerHTML = "";
       for (var i = 0; i < n; i++) {
-        var t = tiers[i] || { name: DEFAULT_TIER_NAMES[i] || ("Tier "+(i+1)), color: DEFAULT_TIER_COLORS[i] || "#576574" };
-        var item = document.createElement("div");
-        item.className = "cfg-tier-item";
-        item.innerHTML =
-          '<input type="color" class="cfg-tier-color" value="' + t.color + '">' +
-          '<input type="text"  class="cfg-tier-name"  value="' + escHtml(t.name) + '" placeholder="티어 이름">';
-        container.appendChild(item);
+        var t = tiers[i] || {name:DEFAULT_TIER_NAMES[i]||("Tier "+(i+1)),color:DEFAULT_TIER_COLORS[i]||"#576574"};
+        var item = document.createElement("div"); item.className = "cfg-tier-item";
+        item.innerHTML = '<input type="color" class="cfg-tier-color" value="' + t.color + '"><input type="text" class="cfg-tier-name" value="' + escHtml(t.name) + '" placeholder="티어 이름">';
+        c.appendChild(item);
       }
     }
-
     function renderCfgTeams(selected) {
-      var grid = document.getElementById("cfg-team-grid");
-      grid.innerHTML = "";
-      Object.keys(TEAM_LOGOS).forEach(function(name) {
+      var grid = document.getElementById("cfg-team-grid"); grid.innerHTML = "";
+      Object.keys(TEAM_LOGOS).forEach(function(name){
         var item = document.createElement("div");
-        item.className = "cfg-team-item" + (selected.indexOf(name) !== -1 ? " sel" : "");
+        item.className = "cfg-team-item" + (selected.indexOf(name)!==-1?" sel":"");
         item.dataset.team = name;
-        var logo = TEAM_LOGOS[name];
-        var code = TEAM_CODES[name] || name;
-        var inv  = LOGO_INVERT[name] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+        var logo = TEAM_LOGOS[name]; var code = TEAM_CODES[name]||name;
+        var inv = LOGO_INVERT[name] ? " style=\"filter:brightness(0) invert(1)\"" : "";
         item.innerHTML = '<img src="' + logo + '" alt=""' + inv + '><span class="ctn">' + escHtml(code) + '</span>';
         item.addEventListener("click", function(){ item.classList.toggle("sel"); });
         grid.appendChild(item);
       });
     }
-
     function getCfgData() {
-      var items = document.querySelectorAll(".cfg-tier-item");
-      var tiers = [];
-      items.forEach(function(item) {
-        var name  = item.querySelector(".cfg-tier-name").value.trim();
+      var tiers = []; document.querySelectorAll(".cfg-tier-item").forEach(function(item){
+        var name = item.querySelector(".cfg-tier-name").value.trim();
         var color = item.querySelector(".cfg-tier-color").value;
-        if (name) tiers.push({ name: name, color: color });
+        if (name) tiers.push({name:name,color:color});
       });
-      var teams = [];
-      document.querySelectorAll(".cfg-team-item.sel").forEach(function(item){ teams.push(item.dataset.team); });
-      return { tiers: tiers, teams: teams };
+      var teams = []; document.querySelectorAll(".cfg-team-item.sel").forEach(function(item){ teams.push(item.dataset.team); });
+      return {tiers:tiers, teams:teams};
     }
 
-    async function saveConfig(statusOverride, silent) {
-      var title = document.getElementById("cfg-title") ? document.getElementById("cfg-title").value.trim() : (config ? config.title : "");
-      var tiers, teams;
-      if (document.querySelector(".cfg-tier-item")) {
-        var d = getCfgData();
-        tiers = d.tiers; teams = d.teams;
-      } else {
-        tiers = config ? config.tiers : [];
-        teams = config ? config.teams : [];
-      }
-      if (!silent) {
-        if (!title)        { alert("제목을 입력해 주세요."); return; }
-        if (!tiers.length) { alert("티어를 추가해 주세요."); return; }
-        if (!teams.length) { alert("팀을 하나 이상 선택해 주세요."); return; }
-      }
-      var status = statusOverride !== undefined ? statusOverride : (config ? config.status : "draft");
-      var newConfig = { title: title, tiers: tiers, teams: teams, status: status };
-      try {
-        var r = await fetch("/api/tierlist/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-          body: JSON.stringify(newConfig),
+    async function saveEvent(statusOverride, silent) {
+      var title = (document.getElementById("cfg-title")||{}).value;
+      var d = getCfgData();
+      var tiers = d.tiers, teams = d.teams;
+
+      if (silent && curEvt) {
+        /* inline tier reorder/rename: patch curEvt directly */
+        curEvt.tiers = curEvt.tiers; // already mutated
+        await fetch("/api/tierlist/events", {
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+TOKEN},
+          body:JSON.stringify(curEvt)
         });
-        var data = await r.json();
-        if (data.ok) {
-          config = newConfig;
-          initEmptyTierData();
-          if (!silent) closeCfgModal();
-          showToast(status === "open" ? "공개됨!" : status === "closed" ? "마감됨!" : "저장됨!");
-          render();
-        } else { alert(data.error || "저장 실패"); }
+        renderDetail();
+        return;
+      }
+
+      title = (title||"").trim();
+      var status = statusOverride !== undefined ? statusOverride : (editingId && curEvt ? curEvt.status : "draft");
+
+      if (!title)        { alert("제목을 입력해 주세요."); return; }
+      if (!tiers.length) { alert("티어를 추가해 주세요."); return; }
+      if (!teams.length) { alert("팀을 하나 이상 선택해 주세요."); return; }
+
+      var evt = { id: editingId || null, title:title, tiers:tiers, teams:teams, status:status, createdAt: (editingId && curEvt ? curEvt.createdAt : new Date().toISOString()) };
+
+      try {
+        var r = await fetch("/api/tierlist/events", {
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+TOKEN},
+          body:JSON.stringify(evt)
+        });
+        var res = await r.json();
+        if (res.ok) {
+          evt.id = res.id;
+          closeCfgModal();
+          showToast(status==="open"?"공개됨!":status==="closed"?"마감됨!":"저장됨!");
+          if (urlId) {
+            /* 상세 페이지에서 수정 */
+            curEvt = evt;
+            renderDetail();
+          } else {
+            /* 목록에서 새로 만들기/수정 */
+            var idx = events.findIndex(function(e){ return e.id === evt.id; });
+            if (idx >= 0) events[idx] = evt; else events.unshift(evt);
+            renderList();
+          }
+        } else { alert(res.error||"저장 실패"); }
       } catch(e) { alert("서버 오류"); }
     }
 
-    /* ── Status toggle (quick) ──────────────────────── */
-    document.getElementById("btn-toggle").addEventListener("click", async function() {
-      if (!config) return;
-      var ns = config.status === "open" ? "closed" : "open";
-      config.status = ns;
-      try {
-        await fetch("/api/tierlist/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-          body: JSON.stringify(config),
-        });
-        showToast(ns === "open" ? "공개됨!" : "마감됨!");
-        render();
-      } catch(e) { alert("서버 오류"); }
-    });
-
-    /* ── Modal events ───────────────────────────────── */
-    document.getElementById("btn-cfg").addEventListener("click", openCfgModal);
+    document.getElementById("btn-new").addEventListener("click", function(){ openCfgModal(null); });
+    document.getElementById("btn-edit-evt").addEventListener("click", function(){ if (curEvt) openCfgModal(curEvt); });
     document.getElementById("cfg-close-btn").addEventListener("click", closeCfgModal);
     document.getElementById("cfg-backdrop").addEventListener("click", closeCfgModal);
-    document.getElementById("btn-apply-count").addEventListener("click", function() {
-      var cur = [];
-      document.querySelectorAll(".cfg-tier-item").forEach(function(item) {
-        cur.push({ name: item.querySelector(".cfg-tier-name").value, color: item.querySelector(".cfg-tier-color").value });
+    document.getElementById("btn-apply-count").addEventListener("click", function(){
+      var cur = []; document.querySelectorAll(".cfg-tier-item").forEach(function(item){
+        cur.push({name:item.querySelector(".cfg-tier-name").value, color:item.querySelector(".cfg-tier-color").value});
       });
       renderCfgTiers(cur);
     });
-    document.getElementById("cfg-save-draft").addEventListener("click", function(){ saveConfig("draft"); });
-    document.getElementById("cfg-publish").addEventListener("click", function(){ saveConfig("open"); });
-    document.getElementById("cfg-end").addEventListener("click", function(){ saveConfig("closed"); });
+    document.getElementById("cfg-save-draft").addEventListener("click", function(){ saveEvent("draft"); });
+    document.getElementById("cfg-publish").addEventListener("click", function(){ saveEvent("open"); });
+    document.getElementById("cfg-end").addEventListener("click", function(){ saveEvent("closed"); });
 
-    /* ── SSE ─────────────────────────────────────────── */
+    /* ── SSE ─────────────────────────────────────── */
     function setupSSE() {
       var es = new EventSource("/api/events");
       es.onmessage = function(e) {
         try {
           var msg = JSON.parse(e.data);
-          if (msg.type === "tierlist-config") {
-            config = msg.config; initEmptyTierData(); render();
-          } else if (msg.type === "tierlist-post") {
-            var idx = posts.findIndex(function(p){ return p.username === msg.post.username; });
-            if (idx >= 0) posts[idx] = msg.post; else posts.unshift(msg.post);
+          if (msg.type === "tl-event-update") {
+            var idx = events.findIndex(function(ev){ return ev.id === msg.event.id; });
+            if (idx >= 0) events[idx] = msg.event; else events.unshift(msg.event);
+            if (urlId === msg.event.id) { curEvt = msg.event; renderDetail(); }
+            else if (!urlId) renderList();
+          } else if (msg.type === "tl-event-delete") {
+            events = events.filter(function(ev){ return ev.id !== msg.id; });
+            if (urlId === msg.id) location.href = "./tierlist.html";
+            else if (!urlId) renderList();
+          } else if (msg.type === "tl-post" && urlId === msg.eventId) {
+            var pi = posts.findIndex(function(p){ return p.username === msg.post.username; });
+            if (pi >= 0) posts[pi] = msg.post; else posts.unshift(msg.post);
             renderBoard();
-          } else if (msg.type === "tierlist-delete") {
+          } else if (msg.type === "tl-delete" && urlId === msg.eventId) {
             posts = posts.filter(function(p){ return p.username !== msg.username; });
             renderBoard();
           }
@@ -1088,26 +986,27 @@
       };
     }
 
-    /* ── Toast ──────────────────────────────────────── */
-    var _toastTimer = null;
+    /* ── View switch ─────────────────────────────── */
+    function showView(v) {
+      document.getElementById("view-list").style.display   = v === "list"   ? "" : "none";
+      document.getElementById("view-detail").style.display = v === "detail" ? "" : "none";
+    }
+
+    /* ── Toast ───────────────────────────────────── */
+    var _tt = null;
     function showToast(msg) {
-      var el = document.getElementById("tl-toast");
-      el.textContent = msg; el.classList.add("show");
-      clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+      var el = document.getElementById("tl-toast"); el.textContent = msg; el.classList.add("show");
+      clearTimeout(_tt); _tt = setTimeout(function(){ el.classList.remove("show"); }, 2200);
     }
 
-    /* ── Utils ──────────────────────────────────────── */
-    function escHtml(s) {
-      return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    }
+    /* ── Utils ───────────────────────────────────── */
+    function escHtml(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
     function getTextColor(hex) {
-      if (!hex || hex.length < 7) return "#000";
-      var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-      return ((0.299*r + 0.587*g + 0.114*b)/255) > 0.55 ? "#000" : "#fff";
+      if (!hex||hex.length<7) return "#000";
+      var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+      return ((0.299*r+0.587*g+0.114*b)/255)>0.55?"#000":"#fff";
     }
 
-    /* ── Start ──────────────────────────────────────── */
     init();
   })();
   </script>
