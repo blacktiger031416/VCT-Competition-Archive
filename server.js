@@ -265,8 +265,10 @@ app.post("/api/tierlist/events", requireAdmin, async (req, res) => {
 app.delete("/api/tierlist/events/:id", requireAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    await pool.query("DELETE FROM app_data WHERE key=$1 OR key LIKE $2",
-      [`tlevt:${id}`, `tlpost:${id}:%`]);
+    await pool.query(
+      "DELETE FROM app_data WHERE key=$1 OR key LIKE $2 OR key LIKE $3",
+      [`tlevt:${id}`, `tlpost:${id}:%`, `tllike:${id}:%`]
+    );
     broadcast({ type: "tl-event-delete", id });
     res.json({ ok: true });
   } catch (err) {
@@ -274,14 +276,26 @@ app.delete("/api/tierlist/events/:id", requireAdmin, async (req, res) => {
   }
 });
 
-/* ── API: 이벤트별 게시물 조회 ───────────────────── */
+/* ── API: 이벤트별 게시물 조회 (좋아요 포함) ──────── */
 app.get("/api/tierlist/events/:id/posts", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT value FROM app_data WHERE key LIKE $1 ORDER BY updated_at DESC",
-      [`tlpost:${req.params.id}:%`]
-    );
-    res.json(result.rows.map((r) => JSON.parse(r.value)));
+    const [postsRes, likesRes] = await Promise.all([
+      pool.query("SELECT value FROM app_data WHERE key LIKE $1 ORDER BY updated_at DESC",
+        [`tlpost:${req.params.id}:%`]),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE $1",
+        [`tllike:${req.params.id}:%`]),
+    ]);
+    const likesMap = {};
+    likesRes.rows.forEach((r) => {
+      const postUser = r.key.split(":")[2]; // tllike:{evtId}:{postUser}
+      if (postUser) likesMap[postUser] = JSON.parse(r.value);
+    });
+    const posts = postsRes.rows.map((r) => {
+      const p = JSON.parse(r.value);
+      p.likes = likesMap[p.username] || [];
+      return p;
+    });
+    res.json(posts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -314,9 +328,32 @@ app.delete("/api/tierlist/events/:id/posts/:username", requireAuth, async (req, 
   if (req.user.role !== "admin" && req.user.username !== username)
     return res.status(403).json({ error: "권한이 없습니다." });
   try {
-    await pool.query("DELETE FROM app_data WHERE key=$1", [`tlpost:${id}:${username}`]);
+    await pool.query("DELETE FROM app_data WHERE key=$1 OR key=$2",
+      [`tlpost:${id}:${username}`, `tllike:${id}:${username}`]);
     broadcast({ type: "tl-delete", eventId: id, username });
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 게시물 좋아요 토글 (로그인 필요) ──────── */
+app.post("/api/tierlist/events/:id/posts/:postUser/like", requireAuth, async (req, res) => {
+  const { id, postUser } = req.params;
+  const liker = req.user.username;
+  const key = `tllike:${id}:${postUser}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    let likes = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
+    const idx = likes.indexOf(liker);
+    if (idx >= 0) likes.splice(idx, 1); else likes.push(liker);
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [key, JSON.stringify(likes)]
+    );
+    broadcast({ type: "tl-like", eventId: id, postUser, likes });
+    res.json({ ok: true, likes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

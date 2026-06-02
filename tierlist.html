@@ -266,6 +266,16 @@
     .board-card-hdr { display:flex; align-items:center; gap:8px; padding:9px 12px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.05); }
     .bc-user { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; letter-spacing:.06em; color:rgba(255,255,255,0.75); flex:1; }
     .bc-time { font-family:'Barlow',sans-serif; font-size:11px; color:rgba(255,255,255,0.22); }
+    .bc-like {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:0 8px; height:22px; border-radius:11px;
+      border:1px solid rgba(255,100,100,0.2); background:rgba(200,50,50,0.06);
+      color:rgba(255,130,130,0.5); font-size:11px; font-family:'Barlow Condensed',sans-serif;
+      font-weight:700; cursor:pointer; transition:all .15s; flex-shrink:0;
+    }
+    .bc-like:hover { border-color:rgba(255,80,80,0.45); background:rgba(200,50,50,0.18); color:#ff8888; }
+    .bc-like.liked { border-color:rgba(255,70,70,0.55); background:rgba(220,50,50,0.2); color:#ff5555; }
+    .bc-like-static { font-size:11px; font-family:'Barlow Condensed',sans-serif; font-weight:700; color:rgba(255,130,130,0.45); flex-shrink:0; }
     .bc-del { width:22px; height:22px; display:grid; place-items:center; border:1px solid rgba(220,50,50,0.2); border-radius:3px; background:rgba(180,30,30,0.1); color:rgba(255,100,100,0.45); font-size:11px; cursor:pointer; transition:all .12s; }
     .bc-del:hover { background:rgba(200,30,30,0.4); color:#ff9090; }
     .board-card-body { padding:8px 10px; }
@@ -824,7 +834,12 @@
       }
       countEl.textContent = posts.length + "개";
       grid.innerHTML = "";
-      posts.forEach(function(p){ grid.appendChild(makeBoardCard(p)); });
+      /* 좋아요 많은 순 → 최신 순 정렬 */
+      var sorted = posts.slice().sort(function(a, b) {
+        var diff = ((b.likes||[]).length) - ((a.likes||[]).length);
+        return diff !== 0 ? diff : new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      sorted.forEach(function(p){ grid.appendChild(makeBoardCard(p)); });
     }
 
     function makeBoardCard(post) {
@@ -833,8 +848,14 @@
       var ts = t.getFullYear() + "/" + (t.getMonth()+1) + "/" + t.getDate() +
                " " + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0");
       var canDel = IS_ADMIN || (IS_LOGGED_IN && USER.username === post.username);
+      var likes = post.likes || [];
+      var liked = IS_LOGGED_IN && likes.indexOf(USER.username) >= 0;
+      var likeHtml = IS_LOGGED_IN
+        ? '<button class="bc-like' + (liked ? ' liked' : '') + '" data-pu="' + escHtml(post.username) + '">♥ ' + likes.length + '</button>'
+        : (likes.length > 0 ? '<span class="bc-like-static">♥ ' + likes.length + '</span>' : '');
       var hdr =
         '<div class="board-card-hdr"><span class="bc-user">' + escHtml(post.username) + '</span>' +
+        likeHtml +
         '<span class="bc-time">' + ts + '</span>' +
         (canDel ? '<button class="bc-del" data-u="' + escHtml(post.username) + '">✕</button>' : '') + '</div>';
       var body = '<div class="board-card-body">';
@@ -849,6 +870,25 @@
       });
       body += '</div>';
       card.innerHTML = hdr + body;
+      var likeBtn = card.querySelector(".bc-like");
+      if (likeBtn && IS_LOGGED_IN) {
+        likeBtn.addEventListener("click", async function() {
+          var pu = likeBtn.dataset.pu;
+          try {
+            var r = await fetch(
+              "/api/tierlist/events/" + curEvt.id + "/posts/" + encodeURIComponent(pu) + "/like",
+              { method:"POST", headers:{"Authorization":"Bearer " + TOKEN} }
+            );
+            var d = await r.json();
+            if (d.ok) {
+              var pi = posts.findIndex(function(p){ return p.username === pu; });
+              if (pi >= 0) posts[pi].likes = d.likes;
+              renderBoard();
+            }
+          } catch(e) {}
+        });
+      }
+
       var delBtn = card.querySelector(".bc-del");
       if (delBtn) delBtn.addEventListener("click", async function(){
         var u = delBtn.dataset.u;
@@ -1015,6 +1055,9 @@
           } else if (msg.type === "tl-delete" && urlId === msg.eventId) {
             posts = posts.filter(function(p){ return p.username !== msg.username; });
             renderBoard();
+          } else if (msg.type === "tl-like" && urlId === msg.eventId) {
+            var li = posts.findIndex(function(p){ return p.username === msg.postUser; });
+            if (li >= 0) { posts[li].likes = msg.likes; renderBoard(); }
           }
         } catch(_) {}
       };
