@@ -1125,6 +1125,30 @@
         });
       });
 
+      /* ── 중복 제거: "Match N|팀A|팀B" (3조각)과 "stage1playoffs|N" (2조각)이
+            같은 경기를 가리킬 때, 2조각 구버전 키를 제거해 카운트 2배 방지 ── */
+      (function deduplicateMatchMapInfo() {
+        /* 1) 3조각 "Match N|..." 키가 있는 matchNum:mapIdx 수집 */
+        var canonSet = {};
+        Object.keys(matchMapInfo).forEach(function(k) {
+          var mm = matchMapInfo[k];
+          var p = mm.matchKey.split("|");
+          if (p.length >= 3 && /^match\s*\d+$/i.test(p[0].trim())) {
+            var num = p[0].trim().replace(/^match\s*/i, "");
+            canonSet[num + ":" + mm.mapIdx] = true;
+          }
+        });
+        /* 2) 대응하는 2조각 키 삭제 */
+        Object.keys(matchMapInfo).forEach(function(k) {
+          var mm = matchMapInfo[k];
+          var p = mm.matchKey.split("|");
+          if (p.length < 3) {
+            var num = p[p.length - 1];
+            if (canonSet[num + ":" + mm.mapIdx]) delete matchMapInfo[k];
+          }
+        });
+      })();
+
       /* matchKey별 최대 mapIdx (BO3 vs BO5 판별) */
       var matchMaxIdx = {};
       Object.values(matchMapInfo).forEach(function(mm) {
