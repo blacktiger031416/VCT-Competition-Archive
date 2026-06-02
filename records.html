@@ -709,6 +709,8 @@
           </div>
           <div class="lb-panels">
             <div class="lb-panel" id="lb-panel-team-pistol"></div>
+            <div class="lb-panel" id="lb-panel-team-atk"></div>
+            <div class="lb-panel" id="lb-panel-team-def"></div>
           </div>
         </div>
       </div>
@@ -1874,7 +1876,9 @@
       }
 
       var pTeamMap = buildPlayerTeamMap();
-      var stats = {}; /* teamName → { maps, mapWins, pistolTotal, pistolWins } */
+      var ATK_TYPES = ["attack_kill", "attack_spike"];
+      var DEF_TYPES = ["def_defuse", "def_timeout", "def_kill"];
+      var stats = {}; /* teamName → { maps, mapWins, pistolTotal, pistolWins, atkTotal, atkWins, defTotal, defWins } */
 
       for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
@@ -1912,32 +1916,47 @@
         });
         if (aW + bW === 0) continue; /* 데이터 없는 맵 제외 */
 
-        /* 팀 식별 — players 데이터에서 선수명 → 팀 역추론 */
+        /* 팀 식별 ─────────────────────────────────────────────────────
+           우선순위 1: DATE|TEAMA|TEAMB 형식 matchKey → 직접 추출 (roster 오매핑 방지)
+           우선순위 2: 구조화 matchKey(TOURNAMENT|STAGE|MID) → player map 역추론   */
         var teamA = null, teamB = null;
-        var plRaw = localStorage.getItem("players:" + mk + ":" + mi);
-        if (plRaw) {
-          try {
-            var pl = JSON.parse(plRaw);
-            for (var pi = 0; pi < 5 && !teamA; pi++) {
-              var pa = pl["a" + pi];
-              if (pa && pa.name && pa.name !== "-") teamA = pTeamMap[pa.name.trim()] || null;
-            }
-            for (var pi2 = 0; pi2 < 5 && !teamB; pi2++) {
-              var pb = pl["b" + pi2];
-              if (pb && pb.name && pb.name !== "-") teamB = pTeamMap[pb.name.trim()] || null;
-            }
-          } catch(e) {}
+        var _mkParts = mk.split("|");
+        if (_mkParts.length >= 3) {
+          var _sw = _STAGE_WORDS;
+          /* parts[1], parts[2]가 스테이지 키워드가 아니면 팀명 직접 사용 */
+          if (_sw.indexOf(_mkParts[1].toLowerCase()) === -1 &&
+              _sw.indexOf(_mkParts[2].toLowerCase()) === -1) {
+            teamA = _mkParts[1];
+            teamB = _mkParts[2];
+          }
         }
 
-        /* fallback: DATE|TEAMA|TEAMB 형식 matchKey */
+        /* 구조화 matchKey이거나 팀명 미확인 → players 슬롯 + pTeamMap 다수결
+           5명 전부 투표 → 가장 많이 나온 팀명 채택 (이적 선수 오매핑 방지) */
         if (!teamA || !teamB) {
-          var parts = mk.split("|");
-          if (parts.length >= 3) {
-            var sw = _STAGE_WORDS;
-            if (sw.indexOf(parts[1].toLowerCase()) === -1 && sw.indexOf(parts[2].toLowerCase()) === -1) {
-              if (!teamA) teamA = parts[1];
-              if (!teamB) teamB = parts[2];
-            }
+          var plRaw = localStorage.getItem("players:" + mk + ":" + mi);
+          if (plRaw) {
+            try {
+              var pl = JSON.parse(plRaw);
+              var _votesA = {}, _votesB = {};
+              for (var pi = 0; pi < 5; pi++) {
+                var pa = pl["a" + pi];
+                if (pa && pa.name && pa.name !== "-") {
+                  var _ta = pTeamMap[pa.name.trim()];
+                  if (_ta) _votesA[_ta] = (_votesA[_ta] || 0) + 1;
+                }
+                var pb = pl["b" + pi];
+                if (pb && pb.name && pb.name !== "-") {
+                  var _tb = pTeamMap[pb.name.trim()];
+                  if (_tb) _votesB[_tb] = (_votesB[_tb] || 0) + 1;
+                }
+              }
+              /* 최다 득표 팀 선택 */
+              var _bestA = 0;
+              Object.keys(_votesA).forEach(function(t) { if (_votesA[t] > _bestA) { _bestA = _votesA[t]; teamA = t; } });
+              var _bestB = 0;
+              Object.keys(_votesB).forEach(function(t) { if (_votesB[t] > _bestB) { _bestB = _votesB[t]; teamB = t; } });
+            } catch(e) {}
           }
         }
 
@@ -1949,8 +1968,8 @@
         if (!allowA && !allowB) continue;
 
         /* stats 초기화 */
-        if (allowA && !stats[teamA]) stats[teamA] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
-        if (allowB && !stats[teamB]) stats[teamB] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
+        if (allowA && !stats[teamA]) stats[teamA] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0, atkTotal: 0, atkWins: 0, defTotal: 0, defWins: 0 };
+        if (allowB && !stats[teamB]) stats[teamB] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0, atkTotal: 0, atkWins: 0, defTotal: 0, defWins: 0 };
 
         /* 맵 승패 */
         if (allowA) { stats[teamA].maps++; if (aW > bW) stats[teamA].mapWins++; }
@@ -1962,6 +1981,36 @@
           if (pr && (pr.winner === "a" || pr.winner === "b")) {
             if (allowA) { stats[teamA].pistolTotal++; if (pr.winner === "a") stats[teamA].pistolWins++; }
             if (allowB) { stats[teamB].pistolTotal++; if (pr.winner === "b") stats[teamB].pistolWins++; }
+          }
+        });
+
+        /* 공격/수비 승률 —
+           r.winner + r.type 으로 어느 팀이 공격/수비였는지 판단:
+           winner=a & ATK_TYPES → A가 공격(승), B가 수비(패)
+           winner=a & DEF_TYPES → A가 수비(승), B가 공격(패)
+           winner=b & ATK_TYPES → B가 공격(승), A가 수비(패)
+           winner=b & DEF_TYPES → B가 수비(승), A가 공격(패) */
+        rounds.forEach(function(r) {
+          if (!r || !r.type) return;
+          var w = r.winner;
+          if (w !== "a" && w !== "b") return;
+          var isAtk = ATK_TYPES.indexOf(r.type) !== -1;
+          var isDef = DEF_TYPES.indexOf(r.type) !== -1;
+          if (!isAtk && !isDef) return;
+
+          /* winner 기준 atk/def 측 결정 */
+          /* winner=a: isAtk → A공격, isDef → A수비 */
+          /* winner=b: isAtk → B공격, isDef → B수비 */
+          var aIsAtk = (w === "a" && isAtk) || (w === "b" && isDef);
+          /* aIsAtk=true: A공격 라운드, false: A수비 라운드 */
+
+          if (allowA) {
+            if (aIsAtk) { stats[teamA].atkTotal++; if (w === "a") stats[teamA].atkWins++; }
+            else        { stats[teamA].defTotal++; if (w === "a") stats[teamA].defWins++; }
+          }
+          if (allowB) {
+            if (!aIsAtk) { stats[teamB].atkTotal++; if (w === "b") stats[teamB].atkWins++; }
+            else         { stats[teamB].defTotal++; if (w === "b") stats[teamB].defWins++; }
           }
         });
       }
@@ -1987,8 +2036,8 @@
       } else {
         html += entries.map(function(r, i) {
           var rankCls = i===0?" r1":i===1?" r2":i===2?" r3":"";
-          var mapsHtml = (r.pistolWins !== undefined)
-            ? r.pistolWins + '<span style="opacity:.55;font-size:.8em">/' + r.pistolTotal + '</span>'
+          var mapsHtml = (r.subWins !== undefined)
+            ? r.subWins + '<span style="opacity:.55;font-size:.8em">/' + r.subTotal + '</span>'
             : r.maps + '<small>Maps</small>';
           return '<div class="lb-row">' +
             '<span class="lb-rank' + rankCls + '">' + (i+1) + '</span>' +
@@ -2023,12 +2072,40 @@
           var s = teamStats[t];
           var pct = Math.round(s.pistolWins / s.pistolTotal * 100);
           return { name: t, maps: s.maps, val: pct, valStr: pct + "%",
-                   pistolWins: s.pistolWins, pistolTotal: s.pistolTotal };
+                   subWins: s.pistolWins, subTotal: s.pistolTotal };
         })
-        .sort(function(a,b){ return b.val - a.val || b.pistolTotal - a.pistolTotal; })
+        .sort(function(a,b){ return b.val - a.val || b.subTotal - a.subTotal; })
         .slice(0, topN);
 
       _renderTeamLbPanel("lb-panel-team-pistol", "피스톨 승률", pistolList, accent, topN);
+
+      /* 공격 승률 */
+      var atkList = Object.keys(teamStats)
+        .filter(function(t) { return teamStats[t].atkTotal >= 1; })
+        .map(function(t) {
+          var s = teamStats[t];
+          var pct = Math.round(s.atkWins / s.atkTotal * 100);
+          return { name: t, maps: s.maps, val: pct, valStr: pct + "%",
+                   subWins: s.atkWins, subTotal: s.atkTotal };
+        })
+        .sort(function(a,b){ return b.val - a.val || b.subTotal - a.subTotal; })
+        .slice(0, topN);
+
+      _renderTeamLbPanel("lb-panel-team-atk", "공격 승률", atkList, accent, topN);
+
+      /* 수비 승률 */
+      var defList = Object.keys(teamStats)
+        .filter(function(t) { return teamStats[t].defTotal >= 1; })
+        .map(function(t) {
+          var s = teamStats[t];
+          var pct = Math.round(s.defWins / s.defTotal * 100);
+          return { name: t, maps: s.maps, val: pct, valStr: pct + "%",
+                   subWins: s.defWins, subTotal: s.defTotal };
+        })
+        .sort(function(a,b){ return b.val - a.val || b.subTotal - a.subTotal; })
+        .slice(0, topN);
+
+      _renderTeamLbPanel("lb-panel-team-def", "수비 승률", defList, accent, topN);
 
       /* 스테이지 라벨 */
       var labelEl = document.getElementById("team-stats-stage-label");
