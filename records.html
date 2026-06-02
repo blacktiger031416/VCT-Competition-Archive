@@ -137,6 +137,42 @@
         color: #fff;
       }
 
+      /* ── GLOBAL STAGE FILTER (그룹 레이아웃) ── */
+      .global-stage-filter {
+        display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+        margin-bottom: 28px;
+        padding: 14px 16px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 6px;
+      }
+      .global-stage-all {
+        align-self: center;
+        padding: 6px 16px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+        background: transparent; color: rgba(255,255,255,0.35);
+        cursor: pointer; transition: all 0.12s; appearance: none; -webkit-appearance: none;
+      }
+      .global-stage-all:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.22); }
+      .global-stage-all.active { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.25); color: #fff; }
+      .global-stage-divider {
+        align-self: stretch; width: 1px;
+        background: rgba(255,255,255,0.08); margin: 0 4px;
+      }
+      .stage-group {
+        display: flex; flex-direction: column; gap: 5px;
+      }
+      .stage-group-label {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+        color: rgba(255,255,255,0.25); padding: 0 2px;
+      }
+      .stage-group-btns {
+        display: flex; gap: 5px; flex-wrap: wrap;
+      }
+
       /* ── CONTENT AREA ───────────────────────── */
       .content-area { display: none; }
       .content-area.visible { display: block; }
@@ -1835,12 +1871,51 @@
     /* ── 스테이지 필터 바 렌더 ── */
     function renderStageFilter(league) {
       var bar = document.getElementById("stage-filter-bar");
-      var filters = STAGE_FILTERS[getFilterGroup(league)];
-      bar.innerHTML = filters.map(function(f) {
-        return '<button class="stage-btn' + (f.key === currentStage ? " active" : "") +
-               '" data-stage="' + f.key + '">' + f.label + '</button>';
-      }).join("");
-      bar.classList.add("visible");
+
+      if (league === "global") {
+        /* 전체 뷰: 그룹 레이아웃 */
+        var cs = currentStage;
+        function sbtn(key, label) {
+          return '<button class="stage-btn' + (key === cs ? " active" : "") +
+                 '" data-stage="' + key + '">' + label + '</button>';
+        }
+        bar.className = "global-stage-filter";
+        bar.innerHTML =
+          '<button class="stage-btn global-stage-all' + ("g-all" === cs ? " active" : "") +
+          '" data-stage="g-all">전체 스테이지</button>' +
+          '<div class="global-stage-divider"></div>' +
+          '<div class="stage-group">' +
+            '<span class="stage-group-label">KickOff</span>' +
+            '<div class="stage-group-btns">' +
+              sbtn("g-kickoff",    "전체") +
+              sbtn("g-kickoff-ms", "Masters Santiago 진출팀") +
+            '</div>' +
+          '</div>' +
+          '<div class="global-stage-divider"></div>' +
+          '<div class="stage-group">' +
+            '<span class="stage-group-label">Stage 1</span>' +
+            '<div class="stage-group-btns">' +
+              sbtn("g-stage1",    "전체") +
+              sbtn("g-stage1-ml", "Masters London 진출팀") +
+            '</div>' +
+          '</div>' +
+          '<div class="global-stage-divider"></div>' +
+          '<div class="stage-group">' +
+            '<span class="stage-group-label">Stage 2</span>' +
+            '<div class="stage-group-btns">' +
+              sbtn("g-stage2",    "전체") +
+              sbtn("g-stage2-ch", "Champions 진출팀") +
+            '</div>' +
+          '</div>';
+      } else {
+        /* 일반 리그/대회: 기존 flat 레이아웃 */
+        bar.className = "stage-filter-bar visible";
+        var filters = STAGE_FILTERS[getFilterGroup(league)];
+        bar.innerHTML = filters.map(function(f) {
+          return '<button class="stage-btn' + (f.key === currentStage ? " active" : "") +
+                 '" data-stage="' + f.key + '">' + f.label + '</button>';
+        }).join("");
+      }
     }
 
     /* ── 데이터 새로고침 ── */
@@ -1855,7 +1930,7 @@
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
-      currentStage  = "all";
+      currentStage  = (league === "global") ? "g-all" : "all";
       currentTeam   = null;
       var info = LEAGUE_INFO[league];
 
