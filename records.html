@@ -985,6 +985,7 @@
        정확 일치 실패 시 부분 문자열 매칭으로 재시도
        반환값: { players: [], foundKey: "vct_roster:..." | null }  */
     function getRosterPlayers(teamName) {
+      /* 1. 정확한 roster 키 조회 */
       var raw = localStorage.getItem("vct_roster:" + teamName);
       if (raw) {
         try {
@@ -993,7 +994,7 @@
           if (p.length) return { players: p, foundKey: "vct_roster:" + teamName };
         } catch(e) {}
       }
-      /* 부분 매칭 스캔 */
+      /* 2. 부분 이름 매칭 (roster 키 스캔) */
       var lower = teamName.toLowerCase();
       for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
@@ -1011,10 +1012,31 @@
           } catch(e) {}
         }
       }
+      /* 3. Fallback: vct_p 엔트리의 matchKey("날짜|팀A|팀B")에서 역추적
+             roster가 저장되지 않은 팀도 커버 */
+      var playerSet = {};
+      for (var j = 0; j < localStorage.length; j++) {
+        var pkey = localStorage.key(j);
+        if (!pkey || !pkey.startsWith("vct_p:")) continue;
+        try {
+          var pd = JSON.parse(localStorage.getItem(pkey) || "{}");
+          if (!pd.maps) continue;
+          var inTeam = pd.maps.some(function(m) {
+            if (!m.matchKey) return false;
+            var parts = m.matchKey.split("|");
+            if (parts.length < 3) return false;
+            return parts[1].toLowerCase() === lower || parts[2].toLowerCase() === lower;
+          });
+          if (inTeam) playerSet[pkey.slice(6)] = true;
+        } catch(e) {}
+      }
+      var fallbackPlayers = Object.keys(playerSet);
+      if (fallbackPlayers.length) return { players: fallbackPlayers, foundKey: "matchKey 역추적:" + teamName };
+
       /* 저장된 모든 vct_roster 키 수집 (진단용) */
       var allRosterKeys = [];
-      for (var j = 0; j < localStorage.length; j++) {
-        var k = localStorage.key(j);
+      for (var k2 = 0; k2 < localStorage.length; k2++) {
+        var k = localStorage.key(k2);
         if (k && k.startsWith("vct_roster:")) allRosterKeys.push(k.slice(11));
       }
       return { players: [], foundKey: null, allKeys: allRosterKeys };
