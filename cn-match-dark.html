@@ -2604,7 +2604,7 @@ function renderMap(mapData, mapIdx) {
         <div class="pc-inner">
           ${agentA}
           <div class="pc-text">
-            <span class="player-name" style="${a ? 'cursor:pointer' : ''}" onclick="${a ? `openRosterPicker(${mapIdx},${ai})` : ''}">${a ? a.name : ""}</span>
+            <span class="player-name" style="${a ? 'cursor:pointer' : ''}" onclick="${a ? `openRosterPicker(${mapIdx},${ai})` : ''}">${a ? (a.name || "-") : ""}</span>
             <div class="pc-stats">
               ${a && a.acs != null ? `<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor(${mapIdx},${ai})">(${a.acs})</span>` : ""}
               <div class="pc-kda">${a ? kdaHtml(a, mapIdx, ai) : ""}</div>
@@ -2620,7 +2620,7 @@ function renderMap(mapData, mapIdx) {
               <div class="pc-kda">${b ? kdaHtml(b, mapIdx, bi) : ""}</div>
               ${b && b.acs != null ? `<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor(${mapIdx},${bi})">(${b.acs})</span>` : ""}
             </div>
-            <span class="player-name pc-name" style="${b ? 'cursor:pointer' : ''}" onclick="${b ? `openRosterPicker(${mapIdx},${bi})` : ''}">${b ? b.name : ""}</span>
+            <span class="player-name pc-name" style="${b ? 'cursor:pointer' : ''}" onclick="${b ? `openRosterPicker(${mapIdx},${bi})` : ''}">${b ? (b.name || "-") : ""}</span>
           </div>
           ${agentB}
         </div>
@@ -3302,7 +3302,7 @@ function openRosterPicker(mapIdx, playerIdx) {
 
   document.getElementById("btn-roster-clear").onclick = () => {
     p.name = "-";
-    saveFieldSync(mapIdx, playerIdx, 'name', "");
+    saveFieldSync(mapIdx, playerIdx, 'name', "-");
     renderMap(m, mapIdx);
     popup.remove();
   };

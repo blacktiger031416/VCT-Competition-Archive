@@ -1760,6 +1760,12 @@
 
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
+          /* k=0, d=0, a=0 → 칸 비우기된 빈 데이터는 무시 */
+          if (hasKda) {
+            var _pts = m.kda.split("/");
+            var _k = parseFloat(_pts[0]) || 0, _d = parseFloat(_pts[1]) || 0, _a = parseFloat(_pts[2]) || 0;
+            if (_k === 0 && _d === 0 && _a === 0) hasKda = false;
+          }
           if (!acs && !hasKda) return;
 
           if (acs > 0) {
