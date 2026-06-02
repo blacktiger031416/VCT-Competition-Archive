@@ -1720,9 +1720,10 @@
         });
         if (aW + bW === 0) continue;
 
-        /* 맵 이름 */
+        /* 맵 이름 (한국어로 통일) */
         var mapName = getMapName(mk, mi, mkMaxMap[mk]);
         if (!mapName) continue;
+        mapName = normalizeMapName(mapName);
 
         if (!mapStats[mapName]) mapStats[mapName] = { wins: 0, total: 0 };
         mapStats[mapName].total++;
