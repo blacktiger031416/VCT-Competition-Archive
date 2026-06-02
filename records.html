@@ -1522,22 +1522,7 @@
       var html = "";
 
       if (!mapNames.length) {
-        var dbg = data._debug || {};
-        var dbgHtml = '';
-        if (dbg.noRoster) {
-          dbgHtml += '<div style="margin-top:8px;font-size:12px;color:#f87171">🔍 로스터 없음: ' + esc(dbg.triedKey) + '<br>';
-          if (dbg.allRosterKeys && dbg.allRosterKeys.length) {
-            dbgHtml += '저장된 팀: ' + dbg.allRosterKeys.map(esc).join(', ');
-          } else {
-            dbgHtml += '저장된 roster 키 없음';
-          }
-          dbgHtml += '</div>';
-        } else if (dbg.players) {
-          dbgHtml += '<div style="margin-top:8px;font-size:12px;color:#94a3b8">🔍 로스터: ' + esc(dbg.foundRosterKey || '?') + '<br>';
-          dbgHtml += Object.keys(dbg.players).map(function(p){ return esc(p) + ': ' + esc(dbg.players[p]); }).join('<br>');
-          dbgHtml += '<br>matchMaps 수집: ' + (dbg.matchMapsCount || 0) + '</div>';
-        }
-        html = '<div class="comp-empty">조합 데이터가 없습니다' + dbgHtml + '</div>';
+        html = '<div class="comp-empty">아직 데이터가 없습니다</div>';
       } else {
         html = '<div class="comp-map-card-grid">';
         mapNames.forEach(function(mapName) {
