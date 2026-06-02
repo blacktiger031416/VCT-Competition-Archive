@@ -698,27 +698,18 @@
           </div>
         </div>
 
-        <!-- 팀 기록 (준비 중) -->
+        <!-- 팀 기록 -->
         <div class="subsection" id="team-stats-section">
           <div class="subsection-header">
-            <span class="subsection-title">팀 기록</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="subsection-title">팀 기록</span>
+              <span id="team-stats-stage-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);"></span>
+            </div>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">RANKING</span>
           </div>
-          <div class="stat-table-wrap">
-            <table class="stat-table">
-              <thead>
-                <tr>
-                  <th class="td-rank">#</th>
-                  <th>팀</th>
-                  <th class="num">승</th>
-                  <th class="num">패</th>
-                  <th class="num">맵 승</th>
-                  <th class="num">맵 패</th>
-                </tr>
-              </thead>
-              <tbody id="team-tbody">
-                <tr class="empty-row"><td colspan="6">준비 중</td></tr>
-              </tbody>
-            </table>
+          <div class="lb-panels">
+            <div class="lb-panel" id="lb-panel-team-mapwin"></div>
+            <div class="lb-panel" id="lb-panel-team-pistol"></div>
           </div>
         </div>
       </div>
@@ -1637,7 +1628,7 @@
       });
       document.getElementById("comp-section").style.display = "none";
       document.getElementById("player-stats-section").style.display = "";
-      document.getElementById("team-stats-section").style.display   = "";
+      document.getElementById("team-stats-section").style.display   = (currentLeague === "global") ? "none" : "";
     }
 
     /* ── 선수→팀 맵 ──────────────────────────────────────────
@@ -1854,6 +1845,207 @@
       return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
+    /* ── 팀 순위 집계 ─────────────────────────────────────────────
+       rounds:MATCH_KEY:mapIdx → 라운드별 승자('a'/'b')
+       피스톨 라운드: index 0 (Round 01), index 12 (Round 13)
+       맵 승자: aWins > bWins → A팀 승                            */
+    function getTeamRanking(league, stage) {
+      /* matchKey+mapIdx → {league, stage, tournament} 인덱스 빌드 */
+      var mlIdx = {};
+      for (var _i = 0; _i < localStorage.length; _i++) {
+        var _k = localStorage.key(_i);
+        if (!_k || !_k.startsWith("vct_p:")) continue;
+        try {
+          var _pd = JSON.parse(localStorage.getItem(_k) || "{}");
+          (_pd.maps || []).forEach(function(m) {
+            if (!m.matchKey) return;
+            var idxKey = m.matchKey + "|" + (parseInt(m.mapIdx) || 0);
+            if (!mlIdx[idxKey]) mlIdx[idxKey] = { league: m.league || "", stage: m.stage || "", tournament: m.tournament || "" };
+          });
+        } catch(e) {}
+      }
+
+      var pTeamMap = buildPlayerTeamMap();
+      var stats = {}; /* teamName → { maps, mapWins, pistolTotal, pistolWins } */
+
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || !key.startsWith("rounds:")) continue;
+
+        /* rounds:MATCH_KEY:mapIdx 파싱 */
+        var rest = key.slice(7);
+        var lc = rest.lastIndexOf(":");
+        if (lc === -1) continue;
+        var mk = rest.slice(0, lc);
+        var mi = parseInt(rest.slice(lc + 1)) || 0;
+
+        /* 리그/스테이지 필터 */
+        var info = mlIdx[mk + "|" + mi];
+        if (!info) continue;
+        var fakeM = { league: info.league, stage: info.stage, tournament: info.tournament };
+        if (!matchesLeague(fakeM, league)) continue;
+        if (!matchesStage(fakeM, league, stage)) continue;
+
+        /* 라운드 데이터 */
+        var rdRaw = localStorage.getItem(key);
+        if (!rdRaw) continue;
+        var rdState;
+        try { rdState = JSON.parse(rdRaw); } catch(e) { continue; }
+        var rounds = rdState.rounds || [];
+
+        /* 라운드 승수 집계 */
+        var aW = 0, bW = 0;
+        rounds.forEach(function(r) {
+          if (r && r.winner === "a") aW++;
+          else if (r && r.winner === "b") bW++;
+        });
+        if (aW + bW === 0) continue; /* 데이터 없는 맵 제외 */
+
+        /* 팀 식별 — players 데이터에서 선수명 → 팀 역추론 */
+        var teamA = null, teamB = null;
+        var plRaw = localStorage.getItem("players:" + mk + ":" + mi);
+        if (plRaw) {
+          try {
+            var pl = JSON.parse(plRaw);
+            for (var pi = 0; pi < 5 && !teamA; pi++) {
+              var pa = pl["a" + pi];
+              if (pa && pa.name && pa.name !== "-") teamA = pTeamMap[pa.name.trim()] || null;
+            }
+            for (var pi2 = 0; pi2 < 5 && !teamB; pi2++) {
+              var pb = pl["b" + pi2];
+              if (pb && pb.name && pb.name !== "-") teamB = pTeamMap[pb.name.trim()] || null;
+            }
+          } catch(e) {}
+        }
+
+        /* fallback: DATE|TEAMA|TEAMB 형식 matchKey */
+        if (!teamA || !teamB) {
+          var parts = mk.split("|");
+          if (parts.length >= 3) {
+            var sw = _STAGE_WORDS;
+            if (sw.indexOf(parts[1].toLowerCase()) === -1 && sw.indexOf(parts[2].toLowerCase()) === -1) {
+              if (!teamA) teamA = parts[1];
+              if (!teamB) teamB = parts[2];
+            }
+          }
+        }
+
+        if (!teamA || !teamB || teamA === teamB) continue;
+
+        /* stats 초기화 */
+        if (!stats[teamA]) stats[teamA] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
+        if (!stats[teamB]) stats[teamB] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
+
+        /* 맵 승패 */
+        stats[teamA].maps++;
+        stats[teamB].maps++;
+        if (aW > bW) stats[teamA].mapWins++;
+        else if (bW > aW) stats[teamB].mapWins++;
+
+        /* 피스톨 라운드 (index 0, 12) */
+        [0, 12].forEach(function(idx) {
+          var pr = rounds[idx];
+          if (pr && (pr.winner === "a" || pr.winner === "b")) {
+            stats[teamA].pistolTotal++;
+            stats[teamB].pistolTotal++;
+            if (pr.winner === "a") stats[teamA].pistolWins++;
+            else stats[teamB].pistolWins++;
+          }
+        });
+      }
+
+      return stats;
+    }
+
+    /* ── 팀 랭킹 패널 렌더 ── */
+    function _renderTeamLbPanel(panelId, title, entries, accent, topN) {
+      var el = document.getElementById(panelId);
+      if (!el) return;
+      var darkAccents = ["#d4ff1f", "#ffffff"];
+      var valCls = darkAccents.indexOf(accent) !== -1 ? " dk" : "";
+
+      var html = '<div class="lb-panel-hd">' +
+        '<div class="lb-panel-dot"></div>' +
+        '<span class="lb-panel-ttl">' + esc(title) + '</span>' +
+        '<span class="lb-panel-meta">' + entries.length + ' / ' + topN + '</span>' +
+        '</div>';
+
+      if (!entries.length) {
+        html += '<div class="lb-empty-panel">기록 없음</div>';
+      } else {
+        html += entries.map(function(r, i) {
+          var rankCls = i===0?" r1":i===1?" r2":i===2?" r3":"";
+          return '<div class="lb-row">' +
+            '<span class="lb-rank' + rankCls + '">' + (i+1) + '</span>' +
+            _lbLogoHtml(r.name) +
+            '<div class="lb-info">' +
+              '<div class="lb-player">' + esc(TEAM_CODES[r.name] || r.name) + '</div>' +
+              '<div class="lb-team" style="font-size:10px;opacity:.6">' + esc(r.name) + '</div>' +
+            '</div>' +
+            '<div class="lb-maps">' + r.maps + '<small>Maps</small></div>' +
+            '<div class="lb-val' + valCls + '">' + r.valStr + '</div>' +
+            '</div>';
+        }).join("");
+      }
+      el.style.setProperty("--league-accent", accent);
+      el.innerHTML = html;
+    }
+
+    /* ── 팀 기록 패널 렌더 ── */
+    function renderTeamPanels(league, stage) {
+      var section = document.getElementById("team-stats-section");
+      if (!section || section.style.display === "none") return;
+
+      var topN = league === "global" ? 10 : league === "champions" ? 16 : 12;
+      var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
+
+      var teamStats = getTeamRanking(league, stage);
+
+      /* 맵 승률 */
+      var mapList = Object.keys(teamStats)
+        .filter(function(t) { return teamStats[t].maps >= 1; })
+        .map(function(t) {
+          var s = teamStats[t];
+          var pct = Math.round(s.mapWins / s.maps * 100);
+          return { name: t, maps: s.maps, val: pct, valStr: pct + "%" };
+        })
+        .sort(function(a,b){ return b.val - a.val || b.maps - a.maps; })
+        .slice(0, topN);
+
+      /* 피스톨 승률 */
+      var pistolList = Object.keys(teamStats)
+        .filter(function(t) { return teamStats[t].pistolTotal >= 1; })
+        .map(function(t) {
+          var s = teamStats[t];
+          var pct = Math.round(s.pistolWins / s.pistolTotal * 100);
+          return { name: t, maps: s.maps, val: pct, valStr: pct + "%" };
+        })
+        .sort(function(a,b){ return b.val - a.val || b.maps - a.maps; })
+        .slice(0, topN);
+
+      _renderTeamLbPanel("lb-panel-team-mapwin", "맵 승률",    mapList,    accent, topN);
+      _renderTeamLbPanel("lb-panel-team-pistol", "피스톨 승률", pistolList, accent, topN);
+
+      /* 스테이지 라벨 */
+      var labelEl = document.getElementById("team-stats-stage-label");
+      if (labelEl) {
+        var stageLabelMap = {
+          all: "", kickoff: "· KickOff", stage1: "· Stage 1", stage2: "· Stage 2",
+          swiss: "· Swiss Stage", playoffs: "· Playoffs", groupstage: "· Group Stage"
+        };
+        if (league === "global") {
+          var gMap = {
+            "g-all":"","g-kickoff":"· KickOff (전체)","g-kickoff-ms":"· KickOff — MS 진출팀",
+            "g-stage1":"· Stage 1 (전체)","g-stage1-ml":"· Stage 1 — ML 진출팀",
+            "g-stage2":"· Stage 2 (전체)","g-stage2-ch":"· Stage 2 — CH 진출팀"
+          };
+          labelEl.textContent = gMap[stage] || "";
+        } else {
+          labelEl.textContent = stageLabelMap[stage] || "";
+        }
+      }
+    }
+
     /* ── 스테이지 필터 바 렌더 ── */
     function renderStageFilter(league) {
       var bar = document.getElementById("stage-filter-bar");
@@ -1907,6 +2099,7 @@
     /* ── 데이터 새로고침 ── */
     function refreshData() {
       renderPlayerPanels(currentLeague, currentStage);
+      renderTeamPanels(currentLeague, currentStage);
       /* 팀이 선택된 상태면 조합 뷰도 새로고침 */
       if (currentTeam) {
         renderCompositions(currentTeam, currentLeague, currentStage);
