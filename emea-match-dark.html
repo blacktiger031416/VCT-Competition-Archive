@@ -2753,6 +2753,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   if (Array.isArray(savedVeto.maps)) vetoState.maps = savedVeto.maps;
   if (savedVeto.sides && typeof savedVeto.sides === 'object') vetoState.sides = savedVeto.sides;
   if (savedVeto.choosers && typeof savedVeto.choosers === 'object') vetoState.choosers = savedVeto.choosers;
+  saveVetoSyncState(); /* bo5/gf 플래그 즉시 갱신 */
 
   renderSlots();
   applySharedResult();
