@@ -940,9 +940,15 @@
       /* BO5/GF 판별 (우선순위 순):
          1) veto.gf / veto.bo5 플래그 (match-dark 수정 이후 저장된 경우)
          2) matchMaxIdx >= 3 → 4맵 이상 플레이된 경우 (일반 BO5)
-         3) matchKey의 날짜 부분에 "grand" / "gf" 포함 → GF fallback     */
+         3) veto.sides[4] 또는 veto.sides[5] 존재 →
+            BO5에서만 step 4/5가 픽(플레이된 맵)이므로 sides에 기록됨.
+            BO3는 step 4/5가 밴이라 sides에 절대 없음. 가장 신뢰도 높은 fallback.
+         4) matchKey 날짜 부분에 "grand" / "gf" 키워드 → 기존 GF 데이터 fallback  */
       var isBo5 = !!(veto.gf || veto.bo5);
       if (!isBo5) isBo5 = (parseInt(matchMaxMapIdx) || 0) >= 3;
+      if (!isBo5 && veto.sides) {
+        isBo5 = (veto.sides[4] !== undefined) || (veto.sides[5] !== undefined);
+      }
       if (!isBo5) {
         var datePart = (String(matchKey).split("|")[0] || "").toLowerCase();
         isBo5 = datePart.indexOf("grand") !== -1 || datePart.indexOf(" gf") !== -1
