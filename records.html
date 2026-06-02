@@ -980,18 +980,51 @@
       return teams.sort();
     }
 
-    /* ── 팀 조합 집계 ── */
-    function getTeamCompositions(teamName, league, stage) {
-      var rosterRaw = localStorage.getItem("vct_roster:" + teamName);
-      if (!rosterRaw) return {};
-      var roster;
-      try { roster = JSON.parse(rosterRaw); } catch(e) { return {}; }
-      var allPlayers = (roster.main || []).concat(roster.subs || []);
-      var playerSet = {};
-      allPlayers.forEach(function(p) { playerSet[p] = true; });
+    /* ── 팀 선수 명단 조회 (부분 이름 매칭 지원) ──────────
+       "ZETA"로 저장된 경우도 "ZETA DIVISION"을 찾을 수 있도록
+       정확 일치 실패 시 부분 문자열 매칭으로 재시도           */
+    function getRosterPlayers(teamName) {
+      var raw = localStorage.getItem("vct_roster:" + teamName);
+      if (raw) {
+        try {
+          var r = JSON.parse(raw);
+          var p = (r.main || []).concat(r.subs || []);
+          if (p.length) return p;
+        } catch(e) {}
+      }
+      /* 부분 매칭 스캔 */
+      var lower = teamName.toLowerCase();
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || !key.startsWith("vct_roster:")) continue;
+        var storedLower = key.slice(11).toLowerCase();
+        if (storedLower.length < 2) continue;
+        var hit = storedLower === lower ||
+                  (storedLower.length >= 3 && lower.indexOf(storedLower) !== -1) ||
+                  (lower.length >= 3 && storedLower.indexOf(lower) !== -1);
+        if (hit) {
+          try {
+            var roster = JSON.parse(localStorage.getItem(key) || "{}");
+            var players = (roster.main || []).concat(roster.subs || []);
+            if (players.length) return players;
+          } catch(e) {}
+        }
+      }
+      return [];
+    }
 
-      /* 이 팀 선수가 포함된 matchKey + mapIdx 수집 */
+    /* ── 팀 조합 집계 ──────────────────────────────────────
+       vct_p:선수명의 agent 필드를 직접 사용 →
+       players:MATCH_KEY:MAPIDX 사이드 판별 불필요.
+       roster에 등록된 선수들의 agent를 matchKey+mapIdx 단위로 모아
+       5명 조합을 구성한다.                                  */
+    function getTeamCompositions(teamName, league, stage) {
+      var allPlayers = getRosterPlayers(teamName);
+      if (!allPlayers.length) return {};
+
+      /* matchKey|mapIdx → { matchKey, mapIdx, stageVal, agents:{playerName:agentName} } */
       var matchMaps = {};
+
       allPlayers.forEach(function(pName) {
         var pdRaw = localStorage.getItem("vct_p:" + pName);
         if (!pdRaw) return;
@@ -1002,12 +1035,14 @@
           if (!matchesLeague(m, league)) return;
           if (stage !== "all" && !matchesStage(m, league, stage)) return;
           if (m.matchKey === undefined || m.matchKey === null || m.matchKey === "") return;
+          if (!m.agent) return;
           var mk = String(m.matchKey);
           var mi = parseInt(m.mapIdx) || 0;
           var key = mk + "|" + mi;
           if (!matchMaps[key]) {
-            matchMaps[key] = { matchKey: mk, mapIdx: mi, stageVal: m.stage || "" };
+            matchMaps[key] = { matchKey: mk, mapIdx: mi, stageVal: m.stage || "", agents: {} };
           }
+          matchMaps[key].agents[pName] = m.agent;
         });
       });
 
@@ -1018,40 +1053,19 @@
         if (matchMaxIdx[mk] === undefined || mi > matchMaxIdx[mk]) matchMaxIdx[mk] = mi;
       });
 
-      /* 각 경기·맵에서 조합 추출 */
-      /* result: stageGroupKey → mapName → { comboKey: {agents, count} } */
+      /* 결과 집계 */
       var result = {};
 
       Object.values(matchMaps).forEach(function(mm) {
-        var playersKey = "players:" + mm.matchKey + ":" + mm.mapIdx;
-        var pdRaw = localStorage.getItem(playersKey);
-        if (!pdRaw) return;
-        var pData;
-        try { pData = JSON.parse(pdRaw); } catch(e) { return; }
-
-        /* 팀이 어느 쪽 사이드인지 판별 */
-        var aCount = 0, bCount = 0;
-        ["a0","a1","a2","a3","a4"].forEach(function(k) {
-          if (pData[k] && playerSet[pData[k].name]) aCount++;
-        });
-        ["b0","b1","b2","b3","b4"].forEach(function(k) {
-          if (pData[k] && playerSet[pData[k].name]) bCount++;
-        });
-
-        var side = aCount >= bCount ? "a" : "b";
-        var agents = [];
-        for (var i = 0; i < 5; i++) {
-          var entry = pData[side + i];
-          if (entry && entry.agent) agents.push(entry.agent);
-        }
-        if (agents.length === 0) return;
+        var agentList = Object.values(mm.agents);
+        if (!agentList.length) return;
 
         var mapName = getMapName(mm.matchKey, mm.mapIdx, matchMaxIdx[mm.matchKey]);
         if (!mapName) mapName = "Map " + (mm.mapIdx + 1);
-        mapName = normalizeMapName(mapName); /* 영어 → 한국어, 오타 수정 */
+        mapName = normalizeMapName(mapName);
 
         var sgKey = getStageGroupKey(mm.stageVal, league);
-        var sortedAgents = agents.slice().sort();
+        var sortedAgents = agentList.slice().sort();
         var comboKey = sortedAgents.join("|");
 
         if (!result[sgKey]) result[sgKey] = {};
