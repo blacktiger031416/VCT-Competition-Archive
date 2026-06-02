@@ -193,6 +193,9 @@
         width: 32px; height: 32px; object-fit: contain;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
       }
+      /* 검은색/어두운 로고 팀 → 흰색으로 변환 */
+      .team-btn.logo-invert img        { filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+      .team-btn.logo-invert.active img { filter: brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
       .team-btn span {
         font-family: "Barlow Condensed", sans-serif;
         font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
@@ -688,6 +691,16 @@
       "Xi Lai Gaming": "#206189",                   "EDward Gaming": "#442a1e",
       "Dragon Ranger Gaming": "#4b78ff",            "Trace Esports": "#5a80c5",
       "Nova Esports": "#b262d7",                    "Wolves Esports": "#fbb900",
+    };
+
+    /* ── 로고가 검은색/어두워서 흰색 필터 필요한 팀 ── */
+    var LOGO_INVERT = {
+      /* Pacific */
+      "Paper Rex": true, "Team Secret": true, "ZETA DIVISION": true, "VARREL": true,
+      /* Americas */
+      "Evil Geniuses": true, "ENVY": true, "MIBR": true,
+      /* EMEA */
+      "GIANTX": true, "Team Liquid": true, "ULF Esports": true, "M8": true,
     };
 
     /* ── 권역별 고정 팀 목록 (국내 리그) ─────────
@@ -1242,9 +1255,10 @@
       grid.innerHTML = teams.map(function(team) {
         var logo  = TEAM_LOGOS[team]  || "";
         var color = TEAM_COLORS[team] || "#888";
-        var isActive = team === currentTeam;
-        return '<button class="team-btn' + (isActive ? " active" : "") +
-          '" data-team="' + esc(team) + '" style="--tc:' + color + '">' +
+        var isActive  = team === currentTeam;
+        var isInvert  = LOGO_INVERT[team] || false;
+        var cls = "team-btn" + (isActive ? " active" : "") + (isInvert ? " logo-invert" : "");
+        return '<button class="' + cls + '" data-team="' + esc(team) + '" style="--tc:' + color + '">' +
           (logo ? '<img src="' + esc(logo) + '" alt="' + esc(team) + '" onerror="this.style.display=\'none\'" />' : "") +
           '<span>' + esc(team) + '</span>' +
           '</button>';
