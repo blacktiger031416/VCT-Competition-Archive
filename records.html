@@ -708,7 +708,6 @@
             <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">RANKING</span>
           </div>
           <div class="lb-panels">
-            <div class="lb-panel" id="lb-panel-team-mapwin"></div>
             <div class="lb-panel" id="lb-panel-team-pistol"></div>
           </div>
         </div>
@@ -1978,6 +1977,9 @@
       } else {
         html += entries.map(function(r, i) {
           var rankCls = i===0?" r1":i===1?" r2":i===2?" r3":"";
+          var mapsHtml = (r.pistolWins !== undefined)
+            ? r.pistolWins + '<small>/' + r.pistolTotal + '</small>'
+            : r.maps + '<small>Maps</small>';
           return '<div class="lb-row">' +
             '<span class="lb-rank' + rankCls + '">' + (i+1) + '</span>' +
             _lbLogoHtml(r.name) +
@@ -1985,7 +1987,7 @@
               '<div class="lb-player">' + esc(TEAM_CODES[r.name] || r.name) + '</div>' +
               '<div class="lb-team" style="font-size:10px;opacity:.6">' + esc(r.name) + '</div>' +
             '</div>' +
-            '<div class="lb-maps">' + r.maps + '<small>Maps</small></div>' +
+            '<div class="lb-maps">' + mapsHtml + '</div>' +
             '<div class="lb-val' + valCls + '">' + r.valStr + '</div>' +
             '</div>';
         }).join("");
@@ -2004,29 +2006,18 @@
 
       var teamStats = getTeamRanking(league, stage);
 
-      /* 맵 승률 */
-      var mapList = Object.keys(teamStats)
-        .filter(function(t) { return teamStats[t].maps >= 1; })
-        .map(function(t) {
-          var s = teamStats[t];
-          var pct = Math.round(s.mapWins / s.maps * 100);
-          return { name: t, maps: s.maps, val: pct, valStr: pct + "%" };
-        })
-        .sort(function(a,b){ return b.val - a.val || b.maps - a.maps; })
-        .slice(0, topN);
-
       /* 피스톨 승률 */
       var pistolList = Object.keys(teamStats)
         .filter(function(t) { return teamStats[t].pistolTotal >= 1; })
         .map(function(t) {
           var s = teamStats[t];
           var pct = Math.round(s.pistolWins / s.pistolTotal * 100);
-          return { name: t, maps: s.maps, val: pct, valStr: pct + "%" };
+          return { name: t, maps: s.maps, val: pct, valStr: pct + "%",
+                   pistolWins: s.pistolWins, pistolTotal: s.pistolTotal };
         })
-        .sort(function(a,b){ return b.val - a.val || b.maps - a.maps; })
+        .sort(function(a,b){ return b.val - a.val || b.pistolTotal - a.pistolTotal; })
         .slice(0, topN);
 
-      _renderTeamLbPanel("lb-panel-team-mapwin", "맵 승률",    mapList,    accent, topN);
       _renderTeamLbPanel("lb-panel-team-pistol", "피스톨 승률", pistolList, accent, topN);
 
       /* 스테이지 라벨 */
