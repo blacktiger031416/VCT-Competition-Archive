@@ -1098,9 +1098,14 @@
           var mi = parseInt(m.mapIdx) || 0;
           var key = mk + "|" + mi;
           if (!matchMapInfo[key]) {
-            /* matchKey = "날짜|팀A|팀B" 에서 사이드 판별 */
+            /* matchKey = "날짜|팀A|팀B" 에서 사이드 판별
+               팀이 matchKey에 없으면 반드시 skip — 다른 팀 경기 데이터 오염 방지 */
             var parts = mk.split("|");
-            var side = (parts.length >= 3 && parts[1].toLowerCase() === teamLower) ? "a" : "b";
+            if (parts.length < 3) return;
+            var side = null;
+            if (parts[1].toLowerCase() === teamLower) side = "a";
+            else if (parts[2].toLowerCase() === teamLower) side = "b";
+            if (side === null) return; /* 이 팀이 이 경기에 없음 → 완전히 제외 */
             matchMapInfo[key] = { matchKey: mk, mapIdx: mi, stageVal: m.stage || "", side: side };
           }
         });
