@@ -937,15 +937,16 @@
       if (!Array.isArray(maps) || !maps.length) return null;
 
       var mi    = parseInt(mapIdx) || 0;
-      /* BO5/GF 판별:
-         1) matchMaxIdx >= 3 → 4맵 이상 플레이된 경우
-         2) veto.choosers[0] === veto.choosers[1] → Grand Finals 포맷
-            (GF는 팀A가 첫 밴 2개를 모두 수행 → choosers[0]=choosers[1]="A")
-            일반 BO3/BO5는 교대로 밴 → choosers[0] ≠ choosers[1]          */
-      var isBo5 = (parseInt(matchMaxMapIdx) || 0) >= 3;
-      if (!isBo5 && veto.choosers) {
-        var c0 = veto.choosers[0], c1 = veto.choosers[1];
-        if (c0 !== undefined && c1 !== undefined && c0 === c1) isBo5 = true;
+      /* BO5/GF 판별 (우선순위 순):
+         1) veto.gf / veto.bo5 플래그 (match-dark 수정 이후 저장된 경우)
+         2) matchMaxIdx >= 3 → 4맵 이상 플레이된 경우 (일반 BO5)
+         3) matchKey의 날짜 부분에 "grand" / "gf" 포함 → GF fallback     */
+      var isBo5 = !!(veto.gf || veto.bo5);
+      if (!isBo5) isBo5 = (parseInt(matchMaxMapIdx) || 0) >= 3;
+      if (!isBo5) {
+        var datePart = (String(matchKey).split("|")[0] || "").toLowerCase();
+        isBo5 = datePart.indexOf("grand") !== -1 || datePart.indexOf(" gf") !== -1
+                || datePart.indexOf("_gf") !== -1 || datePart.startsWith("gf");
       }
       /* mapIdx → veto 배열 인덱스 */
       var stepPos;

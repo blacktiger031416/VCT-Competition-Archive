@@ -3560,6 +3560,8 @@ function loadPredState() {
   try { return JSON.parse(localStorage.getItem(PRED_KEY) || '{}'); } catch(e) { return {}; }
 }
 function saveVetoSyncState() {
+  vetoState.bo5 = MATCH_BO5 || false;
+  vetoState.gf  = MATCH_GF  || false;
   try { localStorage.setItem(VETO_SYNC_KEY, JSON.stringify(vetoState)); } catch(e) {}
 }
 function loadVetoSyncState() {
