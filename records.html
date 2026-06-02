@@ -134,7 +134,7 @@
 
       .content-header {
         display: flex; align-items: center; gap: 16px;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
         padding-bottom: 16px;
         border-bottom: 1px solid rgba(255,255,255,0.07);
       }
@@ -148,6 +148,152 @@
         width: 4px; height: 28px; border-radius: 2px;
         background: var(--league-accent, #888);
         flex-shrink: 0;
+      }
+
+      /* ── TEAM SELECTOR SECTION ──────────────── */
+      .team-selector-section {
+        margin-bottom: 28px;
+      }
+      .team-selector-label {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+        color: rgba(255,255,255,0.25);
+        margin-bottom: 10px;
+      }
+      .team-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .team-btn {
+        --tc: #888;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 6px; padding: 10px 14px 8px;
+        min-width: 90px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, transform 0.12s;
+        user-select: none;
+        position: relative;
+        overflow: hidden;
+      }
+      .team-btn::after {
+        content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+        height: 2px; background: var(--tc); opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .team-btn:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); transform: translateY(-1px); }
+      .team-btn.active {
+        background: color-mix(in srgb, var(--tc) 14%, transparent);
+        border-color: color-mix(in srgb, var(--tc) 45%, transparent);
+      }
+      .team-btn.active::after { opacity: 1; }
+      .team-btn img {
+        width: 32px; height: 32px; object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      }
+      .team-btn span {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+        color: rgba(255,255,255,0.4); text-align: center; line-height: 1.2;
+        transition: color 0.15s;
+        max-width: 80px;
+      }
+      .team-btn.active span { color: var(--tc); }
+      .team-btn.active img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
+
+      /* ── COMPOSITION VIEW ───────────────────── */
+      .comp-section {
+        display: none;
+        margin-bottom: 32px;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .comp-view-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 20px;
+        background: rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .comp-team-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 18px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+        color: #fff;
+      }
+      .comp-subtitle {
+        font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.35); margin-left: 8px;
+      }
+      .comp-close-btn {
+        padding: 5px 12px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.12); border-radius: 4px;
+        background: transparent; color: rgba(255,255,255,0.35);
+        cursor: pointer; transition: all 0.12s;
+        appearance: none; -webkit-appearance: none;
+      }
+      .comp-close-btn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.25); }
+
+      .comp-body { padding: 0; }
+
+      .comp-stage-block {
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+      .comp-stage-block:last-child { border-bottom: none; }
+      .comp-stage-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+        color: rgba(255,255,255,0.25);
+        padding: 12px 20px 8px;
+        background: rgba(255,255,255,0.015);
+      }
+      .comp-maps-list { padding: 4px 0 12px; }
+      .comp-map-block {
+        display: flex; align-items: flex-start; gap: 16px;
+        padding: 8px 20px;
+      }
+      .comp-map-block + .comp-map-block {
+        border-top: 1px solid rgba(255,255,255,0.04);
+      }
+      .comp-map-name {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 14px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        min-width: 100px;
+        padding-top: 4px;
+        flex-shrink: 0;
+      }
+      .comp-combos { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+      .comp-combo-item {
+        display: flex; align-items: center; gap: 8px;
+      }
+      .agent-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+      .agent-chip {
+        padding: 3px 9px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 3px;
+        color: rgba(255,255,255,0.75);
+        white-space: nowrap;
+      }
+      .combo-count {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px; font-weight: 800; letter-spacing: 0.05em;
+        color: #e8b840;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .comp-empty {
+        padding: 48px 20px;
+        text-align: center;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+        color: rgba(255,255,255,0.18);
       }
 
       /* ── SUBSECTION ─────────────────────────── */
@@ -301,8 +447,26 @@
           <h2 id="content-title"></h2>
         </div>
 
+        <!-- 팀 선택 그리드 -->
+        <div class="team-selector-section" id="team-selector-section" style="display:none;">
+          <div class="team-selector-label">팀 선택</div>
+          <div class="team-grid" id="team-grid"></div>
+        </div>
+
+        <!-- 맵 조합 뷰 -->
+        <div class="comp-section" id="comp-section">
+          <div class="comp-view-header">
+            <div>
+              <span class="comp-team-title" id="comp-team-title"></span>
+              <span class="comp-subtitle">맵 조합</span>
+            </div>
+            <button class="comp-close-btn" id="comp-close-btn">× 닫기</button>
+          </div>
+          <div class="comp-body" id="comp-body"></div>
+        </div>
+
         <!-- 선수 기록 -->
-        <div class="subsection">
+        <div class="subsection" id="player-stats-section">
           <div class="subsection-header">
             <span class="subsection-title">선수 기록</span>
             <div class="sort-tabs" id="player-sort-tabs">
@@ -328,7 +492,7 @@
         </div>
 
         <!-- 팀 기록 (준비 중) -->
-        <div class="subsection">
+        <div class="subsection" id="team-stats-section">
           <div class="subsection-header">
             <span class="subsection-title">팀 기록</span>
           </div>
@@ -355,6 +519,106 @@
 
     <script src="./storage.js"></script>
     <script>
+    /* ── 팀 로고 / 색상 맵 ─────────────────────── */
+    var TEAM_LOGOS = {
+      /* Pacific */
+      "DetonatioN FocusMe": "https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png",
+      "Global Esports":     "./assets/teams/ge.webp",
+      "Kiwoom DRX":         "./assets/teams/krx.svg",
+      "Nongshim RedForce":  "./assets/teams/ns.svg",
+      "Paper Rex":          "./assets/teams/prx.svg",
+      "Rex Regum Qeon":     "./assets/teams/rrq.png",
+      "Team Secret":        "./assets/teams/ts.svg",
+      "ZETA DIVISION":      "./assets/teams/zeta.png",
+      "FULL SENSE":         "./assets/teams/fs.svg",
+      "Gen.G":              "./assets/teams/gen.png",
+      "VARREL":             "./assets/teams/vl.svg",
+      "T1":                 "./assets/teams/t1.png",
+      /* Americas */
+      "G2 Esports":         "https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+      "Leviatán":           "https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+      "Cloud9":             "https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+      "MIBR":               "https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+      "LOUD":               "https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+      "ENVY":               "https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg",
+      "KRÜ Esports":        "https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+      "Sentinels":          "https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+      "NRG":                "https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+      "FURIA":              "https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+      "100 Thieves":        "https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp",
+      "Evil Geniuses":      "https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+      /* EMEA */
+      "Gentle Mates":       "./assets/teams/gm.png",
+      "Team Liquid":        "https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp",
+      "Team Heretics":      "https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",
+      "Natus Vincere":      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+      "NAVI":               "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+      "Karmine Corp":       "./assets/teams/kc.png",
+      "FUT Esports":        "https://specs.gg/assets/img/teams/fut-esports.webp",
+      "BBL Esports":        "https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg",
+      "Fnatic":             "https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",
+      "Team Vitality":      "https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png",
+      "GIANTX":             "https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",
+      "Eternal Fire":       "https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",
+      "PCIFIC Esports":     "https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg",
+      "ULF Esports":        "https://i.namu.wiki/i/EKmHVjvPqN3x6yN6lHSKBDOoSp5X8dQS3Y9y_hj1y13zoCwWAtaRIiuGxG3C6b7TItP0n6ZsnYqwXpxg_KKoJA.webp",
+      /* CN */
+      "All Gamers":                    "https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp",
+      "JD Mall JDG Esports":           "https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg",
+      "TYLOO":                         "https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg",
+      "Wuxi Titan Esports Club":       "https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg",
+      "Guangzhou Huadu Bilibili Gaming":"https://dpm.lol/esport/teams/BLG.webp",
+      "FunPlus Phoenix":               "https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg",
+      "Xi Lai Gaming":                 "https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg",
+      "EDward Gaming":                 "https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png",
+      "Dragon Ranger Gaming":          "https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp",
+      "Trace Esports":                 "https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg",
+      "Nova Esports":                  "https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp",
+      "Wolves Esports":                "https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp",
+    };
+
+    var TEAM_COLORS = {
+      /* Pacific */
+      "DetonatioN FocusMe": "#2b53ff", "Global Esports": "#e12c30",
+      "Kiwoom DRX": "#1f2f5e",         "Nongshim RedForce": "#e2012d",
+      "Paper Rex": "#8c52ff",           "Rex Regum Qeon": "#ffa100",
+      "Team Secret": "#888888",         "ZETA DIVISION": "#15b24a",
+      "FULL SENSE": "#ff751f",          "Gen.G": "#d2b985",
+      "VARREL": "#3ee1ac",              "T1": "#ec1b24",
+      /* Americas */
+      "G2 Esports": "#8400CB",          "Leviatán": "#6BA6DE",
+      "Cloud9": "#03AAF5",              "MIBR": "#0EC8DB",
+      "LOUD": "#13FF00",                "ENVY": "#3727F1",
+      "KRÜ Esports": "#FF319C",         "Sentinels": "#CE0037",
+      "NRG": "#F63D0A",                 "FURIA": "#888888",
+      "100 Thieves": "#EA3031",         "Evil Geniuses": "#2E268D",
+      /* EMEA */
+      "Gentle Mates": "#ff72f9",        "Team Liquid": "#142e60",
+      "Team Heretics": "#dca710",       "Natus Vincere": "#fdf135",
+      "NAVI": "#fdf135",                "Karmine Corp": "#01ccff",
+      "FUT Esports": "#21efc4",         "BBL Esports": "#cb9803",
+      "Fnatic": "#ff5900",              "Team Vitality": "#f8ff04",
+      "GIANTX": "#28b8ff",              "Eternal Fire": "#9c8d69",
+      "PCIFIC Esports": "#41c0dc",      "ULF Esports": "#888888",
+      /* CN */
+      "All Gamers": "#d6323c",                     "JD Mall JDG Esports": "#da202d",
+      "TYLOO": "#cc3a32",                           "Wuxi Titan Esports Club": "#f7553e",
+      "Guangzhou Huadu Bilibili Gaming": "#24c8e8", "FunPlus Phoenix": "#fb1000",
+      "Xi Lai Gaming": "#206189",                   "EDward Gaming": "#442a1e",
+      "Dragon Ranger Gaming": "#4b78ff",            "Trace Esports": "#5a80c5",
+      "Nova Esports": "#b262d7",                    "Wolves Esports": "#fbb900",
+    };
+
+    /* ── 스테이지 섹션 라벨 ────────────────────── */
+    var STAGE_GROUP_LABELS = {
+      kickoff:    "KickOff",
+      stage1:     "Stage 1",
+      stage2:     "Stage 2",
+      swiss:      "Swiss Stage",
+      playoffs:   "Playoffs",
+      groupstage: "Group Stage",
+    };
+
     var LEAGUE_INFO = {
       "pacific":          { label: "Pacific",          logo: "./assets/vct-pacific.webp", accent: "#01d2d7" },
       "cn":               { label: "CN",               logo: "./assets/vct-cn.webp",       accent: "#fb2659" },
@@ -366,7 +630,8 @@
     };
 
     var currentLeague = null;
-    var currentStage  = "all";   // 스테이지 필터
+    var currentStage  = "all";
+    var currentTeam   = null;
     var currentSort   = "acs";
     var currentRows   = [];
 
@@ -396,6 +661,25 @@
       return "league";
     }
 
+    /* ── 스테이지 값 → 그룹 키 정규화 ── */
+    function getStageGroupKey(stageVal, league) {
+      var fg = getFilterGroup(league);
+      if (fg === "league") {
+        if (stageVal === "kickoff") return "kickoff";
+        if (stageVal === "stage1" || stageVal === "stage1playoffs") return "stage1";
+        if (stageVal === "stage2" || stageVal === "stage2playoffs") return "stage2";
+      }
+      if (fg === "masters") {
+        if (stageVal === "swiss")    return "swiss";
+        if (stageVal === "playoffs") return "playoffs";
+      }
+      if (fg === "champions") {
+        if (stageVal === "swiss" || stageVal === "groupstage") return "groupstage";
+        if (stageVal === "playoffs") return "playoffs";
+      }
+      return stageVal;
+    }
+
     /* ── localStorage에서 vct_p: 키 전부 읽기 ── */
     function getAllPlayerData() {
       var list = [];
@@ -412,7 +696,7 @@
       return list;
     }
 
-    /* ── 리그 키 → 맵 매칭 함수 ── */
+    /* ── 리그 매칭 ── */
     function matchesLeague(m, league) {
       var l = m.league || "", t = m.tournament || "";
       if (league === "pacific")          return l === "pacific";
@@ -447,7 +731,252 @@
       return true;
     }
 
-    /* ── 선택 리그에 맞는 맵만 필터, 선수별 집계 ── */
+    /* ── veto에서 맵 이름 추출 ── */
+    function getMapName(matchKey, mapIdx) {
+      var vetoRaw = localStorage.getItem("veto:" + matchKey);
+      if (!vetoRaw) return null;
+      var veto;
+      try { veto = JSON.parse(vetoRaw); } catch(e) { return null; }
+      if (!veto.maps) return null;
+      var played = veto.maps.filter(function(v) {
+        return v.action === "pick" || v.action === "decider";
+      });
+      if (played[mapIdx]) return played[mapIdx].map;
+      return null;
+    }
+
+    /* ── 이 리그에 데이터가 있는 팀 목록 ── */
+    function getTeamsForLeague(league) {
+      var teams = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || !key.startsWith("vct_roster:")) continue;
+        var teamName = key.slice(11);
+        var rosterRaw = localStorage.getItem(key);
+        if (!rosterRaw) continue;
+        var roster;
+        try { roster = JSON.parse(rosterRaw); } catch(e) { continue; }
+        var allPlayers = (roster.main || []).concat(roster.subs || []);
+
+        var hasData = allPlayers.some(function(pName) {
+          var pdRaw = localStorage.getItem("vct_p:" + pName);
+          if (!pdRaw) return false;
+          var pd;
+          try { pd = JSON.parse(pdRaw); } catch(e) { return false; }
+          if (!pd.maps) return false;
+          return pd.maps.some(function(m) { return matchesLeague(m, league); });
+        });
+
+        if (hasData) teams.push(teamName);
+      }
+      return teams.sort();
+    }
+
+    /* ── 팀 조합 집계 ── */
+    function getTeamCompositions(teamName, league, stage) {
+      var rosterRaw = localStorage.getItem("vct_roster:" + teamName);
+      if (!rosterRaw) return {};
+      var roster;
+      try { roster = JSON.parse(rosterRaw); } catch(e) { return {}; }
+      var allPlayers = (roster.main || []).concat(roster.subs || []);
+      var playerSet = {};
+      allPlayers.forEach(function(p) { playerSet[p] = true; });
+
+      /* 이 팀 선수가 포함된 matchKey + mapIdx 수집 */
+      var matchMaps = {};
+      allPlayers.forEach(function(pName) {
+        var pdRaw = localStorage.getItem("vct_p:" + pName);
+        if (!pdRaw) return;
+        var pd;
+        try { pd = JSON.parse(pdRaw); } catch(e) { return; }
+        if (!pd.maps) return;
+        pd.maps.forEach(function(m) {
+          if (!matchesLeague(m, league)) return;
+          if (stage !== "all" && !matchesStage(m, league, stage)) return;
+          if (m.matchKey === undefined || m.matchKey === null || m.matchKey === "") return;
+          var mk = String(m.matchKey);
+          var mi = parseInt(m.mapIdx) || 0;
+          var key = mk + "|" + mi;
+          if (!matchMaps[key]) {
+            matchMaps[key] = { matchKey: mk, mapIdx: mi, stageVal: m.stage || "" };
+          }
+        });
+      });
+
+      /* 각 경기·맵에서 조합 추출 */
+      /* result: stageGroupKey → mapName → { comboKey: {agents, count} } */
+      var result = {};
+
+      Object.values(matchMaps).forEach(function(mm) {
+        var playersKey = "players:" + mm.matchKey + ":" + mm.mapIdx;
+        var pdRaw = localStorage.getItem(playersKey);
+        if (!pdRaw) return;
+        var pData;
+        try { pData = JSON.parse(pdRaw); } catch(e) { return; }
+
+        /* 팀이 어느 쪽 사이드인지 판별 */
+        var aCount = 0, bCount = 0;
+        ["a0","a1","a2","a3","a4"].forEach(function(k) {
+          if (pData[k] && playerSet[pData[k].name]) aCount++;
+        });
+        ["b0","b1","b2","b3","b4"].forEach(function(k) {
+          if (pData[k] && playerSet[pData[k].name]) bCount++;
+        });
+
+        var side = aCount >= bCount ? "a" : "b";
+        var agents = [];
+        for (var i = 0; i < 5; i++) {
+          var entry = pData[side + i];
+          if (entry && entry.agent) agents.push(entry.agent);
+        }
+        if (agents.length === 0) return;
+
+        var mapName = getMapName(mm.matchKey, mm.mapIdx);
+        if (!mapName) mapName = "Map " + (mm.mapIdx + 1);
+
+        var sgKey = getStageGroupKey(mm.stageVal, league);
+        var sortedAgents = agents.slice().sort();
+        var comboKey = sortedAgents.join("|");
+
+        if (!result[sgKey]) result[sgKey] = {};
+        if (!result[sgKey][mapName]) result[sgKey][mapName] = {};
+        if (!result[sgKey][mapName][comboKey]) {
+          result[sgKey][mapName][comboKey] = { agents: sortedAgents, count: 0 };
+        }
+        result[sgKey][mapName][comboKey].count++;
+      });
+
+      return result;
+    }
+
+    /* ── 팀 선택기 렌더 ── */
+    function renderTeamSelector(league) {
+      var section = document.getElementById("team-selector-section");
+      var grid    = document.getElementById("team-grid");
+      var teams   = getTeamsForLeague(league);
+
+      if (!teams.length) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "";
+      grid.innerHTML = teams.map(function(team) {
+        var logo  = TEAM_LOGOS[team]  || "";
+        var color = TEAM_COLORS[team] || "#888";
+        var isActive = team === currentTeam;
+        return '<button class="team-btn' + (isActive ? " active" : "") +
+          '" data-team="' + esc(team) + '" style="--tc:' + color + '">' +
+          (logo ? '<img src="' + esc(logo) + '" alt="' + esc(team) + '" onerror="this.style.display=\'none\'" />' : "") +
+          '<span>' + esc(team) + '</span>' +
+          '</button>';
+      }).join("");
+
+      grid.querySelectorAll(".team-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var tname = this.dataset.team;
+          if (currentTeam === tname) {
+            deselectTeam();
+          } else {
+            selectTeam(tname);
+          }
+        });
+      });
+    }
+
+    /* ── 조합 뷰 렌더 ── */
+    function renderCompositions(teamName, league, stage) {
+      var fg = getFilterGroup(league);
+      var stageOrder;
+      if (fg === "league")    stageOrder = ["kickoff", "stage1", "stage2"];
+      else if (fg === "masters") stageOrder = ["swiss", "playoffs"];
+      else                    stageOrder = ["groupstage", "playoffs"];
+
+      /* 스테이지 필터가 선택된 경우 해당 그룹만 */
+      if (stage !== "all") {
+        stageOrder = stageOrder.filter(function(k) { return k === stage; });
+      }
+
+      var data = getTeamCompositions(teamName, league, stage);
+      var html = "";
+      var hasAny = false;
+
+      stageOrder.forEach(function(sgKey) {
+        var maps = data[sgKey];
+        if (!maps) return;
+        var mapNames = Object.keys(maps).sort();
+        if (!mapNames.length) return;
+        hasAny = true;
+
+        html += '<div class="comp-stage-block">' +
+          '<div class="comp-stage-title">' + (STAGE_GROUP_LABELS[sgKey] || sgKey) + '</div>' +
+          '<div class="comp-maps-list">';
+
+        mapNames.forEach(function(mapName) {
+          var combos = maps[mapName];
+          var comboKeys = Object.keys(combos).sort(function(a, b) {
+            return combos[b].count - combos[a].count;
+          });
+
+          html += '<div class="comp-map-block">' +
+            '<div class="comp-map-name">' + esc(mapName) + '</div>' +
+            '<div class="comp-combos">';
+
+          comboKeys.forEach(function(ck) {
+            var combo = combos[ck];
+            html += '<div class="comp-combo-item">' +
+              '<div class="agent-chips">' +
+              combo.agents.map(function(a) {
+                return '<span class="agent-chip">' + esc(a) + '</span>';
+              }).join("") +
+              '</div>' +
+              (combo.count > 1 ? '<span class="combo-count">×' + combo.count + '</span>' : '') +
+              '</div>';
+          });
+
+          html += '</div></div>'; /* comp-combos / comp-map-block */
+        });
+
+        html += '</div></div>'; /* comp-maps-list / comp-stage-block */
+      });
+
+      if (!hasAny) {
+        html = '<div class="comp-empty">조합 데이터가 없습니다</div>';
+      }
+
+      document.getElementById("comp-team-title").textContent = teamName;
+      document.getElementById("comp-body").innerHTML = html;
+
+      var compSection = document.getElementById("comp-section");
+      compSection.style.display = "";
+    }
+
+    /* ── 팀 선택 ── */
+    function selectTeam(teamName) {
+      currentTeam = teamName;
+
+      document.querySelectorAll(".team-btn").forEach(function(btn) {
+        btn.classList.toggle("active", btn.dataset.team === teamName);
+      });
+
+      /* 조합 뷰 표시, 선수/팀 기록 숨김 */
+      renderCompositions(teamName, currentLeague, currentStage);
+      document.getElementById("player-stats-section").style.display = "none";
+      document.getElementById("team-stats-section").style.display   = "none";
+    }
+
+    /* ── 팀 해제 ── */
+    function deselectTeam() {
+      currentTeam = null;
+      document.querySelectorAll(".team-btn").forEach(function(btn) {
+        btn.classList.remove("active");
+      });
+      document.getElementById("comp-section").style.display = "none";
+      document.getElementById("player-stats-section").style.display = "";
+      document.getElementById("team-stats-section").style.display   = "";
+    }
+
+    /* ── 선수 기록 집계 ── */
     function buildPlayerRows(league, stage) {
       var all = getAllPlayerData();
       var map = {};
@@ -515,7 +1044,7 @@
     }
 
     function esc(s) {
-      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
     /* ── 스테이지 필터 바 렌더 ── */
@@ -533,12 +1062,17 @@
     function refreshData() {
       currentRows = buildPlayerRows(currentLeague, currentStage);
       renderPlayerTable(sortRows(currentRows, currentSort));
+      /* 팀이 선택된 상태면 조합 뷰도 새로고침 */
+      if (currentTeam) {
+        renderCompositions(currentTeam, currentLeague, currentStage);
+      }
     }
 
     /* ── 권역 선택 ── */
     function selectLeague(league) {
       currentLeague = league;
       currentStage  = "all";
+      currentTeam   = null;
       var info = LEAGUE_INFO[league];
 
       /* 버튼 active */
@@ -553,6 +1087,16 @@
 
       /* 스테이지 필터 */
       renderStageFilter(league);
+
+      /* 팀 선택기 */
+      renderTeamSelector(league);
+
+      /* 조합 뷰 초기화 */
+      document.getElementById("comp-section").style.display = "none";
+
+      /* 선수/팀 기록 표시 */
+      document.getElementById("player-stats-section").style.display = "";
+      document.getElementById("team-stats-section").style.display   = "";
 
       /* 데이터 로드 */
       refreshData();
@@ -580,6 +1124,11 @@
       document.querySelectorAll(".sort-tab").forEach(function(b){ b.classList.remove("active"); });
       btn.classList.add("active");
       if (currentRows.length) renderPlayerTable(sortRows(currentRows, currentSort));
+    });
+
+    /* ── 조합 뷰 닫기 ── */
+    document.getElementById("comp-close-btn").addEventListener("click", function() {
+      deselectTeam();
     });
 
     /* ── 권역 버튼 ── */
