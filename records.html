@@ -1849,6 +1849,15 @@
        피스톨 라운드: index 0 (Round 01), index 12 (Round 13)
        맵 승자: aWins > bWins → A팀 승                            */
     function getTeamRanking(league, stage) {
+      /* 전체 뷰 진출팀 필터 준비 */
+      var _gsmFilter = null;
+      if (league === "global") {
+        var _gsm2 = GLOBAL_STAGE_MAP[stage];
+        if (_gsm2 && _gsm2.participants) {
+          _gsmFilter = getParticipantTeams(_gsm2.participants); /* [] or [teamName, ...] */
+        }
+      }
+
       /* matchKey+mapIdx → {league, stage, tournament} 인덱스 빌드 */
       var mlIdx = {};
       for (var _i = 0; _i < localStorage.length; _i++) {
@@ -1934,24 +1943,25 @@
 
         if (!teamA || !teamB || teamA === teamB) continue;
 
+        /* 전체 뷰 진출팀 필터 — 팀별 개별 판단 */
+        var allowA = !_gsmFilter || _gsmFilter.length === 0 || _gsmFilter.indexOf(teamA) !== -1;
+        var allowB = !_gsmFilter || _gsmFilter.length === 0 || _gsmFilter.indexOf(teamB) !== -1;
+        if (!allowA && !allowB) continue;
+
         /* stats 초기화 */
-        if (!stats[teamA]) stats[teamA] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
-        if (!stats[teamB]) stats[teamB] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
+        if (allowA && !stats[teamA]) stats[teamA] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
+        if (allowB && !stats[teamB]) stats[teamB] = { maps: 0, mapWins: 0, pistolTotal: 0, pistolWins: 0 };
 
         /* 맵 승패 */
-        stats[teamA].maps++;
-        stats[teamB].maps++;
-        if (aW > bW) stats[teamA].mapWins++;
-        else if (bW > aW) stats[teamB].mapWins++;
+        if (allowA) { stats[teamA].maps++; if (aW > bW) stats[teamA].mapWins++; }
+        if (allowB) { stats[teamB].maps++; if (bW > aW) stats[teamB].mapWins++; }
 
         /* 피스톨 라운드 (index 0, 12) */
         [0, 12].forEach(function(idx) {
           var pr = rounds[idx];
           if (pr && (pr.winner === "a" || pr.winner === "b")) {
-            stats[teamA].pistolTotal++;
-            stats[teamB].pistolTotal++;
-            if (pr.winner === "a") stats[teamA].pistolWins++;
-            else stats[teamB].pistolWins++;
+            if (allowA) { stats[teamA].pistolTotal++; if (pr.winner === "a") stats[teamA].pistolWins++; }
+            if (allowB) { stats[teamB].pistolTotal++; if (pr.winner === "b") stats[teamB].pistolWins++; }
           }
         });
       }
