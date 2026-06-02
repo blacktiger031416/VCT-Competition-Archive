@@ -442,8 +442,8 @@
       }
       .lb-panel-ttl {
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
-        color: rgba(255,255,255,0.75);
+        font-size: 15px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+        color: rgba(255,255,255,0.85);
       }
       .lb-panel-meta {
         margin-left: auto;
@@ -453,8 +453,8 @@
       }
 
       .lb-row {
-        display: flex; align-items: center; gap: 9px;
-        padding: 8px 12px;
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px;
         border-bottom: 1px solid rgba(255,255,255,0.04);
         transition: background 0.1s;
       }
@@ -462,9 +462,9 @@
       .lb-row:hover { background: rgba(255,255,255,0.025); }
 
       .lb-rank {
-        min-width: 18px; text-align: center;
+        min-width: 20px; text-align: center;
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 13px; font-weight: 800;
+        font-size: 15px; font-weight: 800;
         color: rgba(255,255,255,0.22); flex-shrink: 0;
       }
       .lb-rank.r1 { color: #e8b840; }
@@ -472,48 +472,48 @@
       .lb-rank.r3 { color: #b87333; }
 
       .lb-logo {
-        width: 24px; height: 24px; object-fit: contain; flex-shrink: 0;
+        width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;
       }
       .lb-logo.invert { filter: brightness(0) invert(1); }
       .lb-logo-ph {
-        width: 24px; height: 24px; flex-shrink: 0;
+        width: 28px; height: 28px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.3);
+        font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.3);
         background: rgba(255,255,255,0.06); border-radius: 3px;
       }
 
-      .lb-info { flex: 1; min-width: 0; }
+      .lb-info { flex: 1; min-width: 0; max-width: 160px; }
       .lb-player {
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 15px; font-weight: 800; letter-spacing: .02em;
+        font-size: 17px; font-weight: 800; letter-spacing: .02em;
         color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .lb-team {
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-        color: rgba(255,255,255,0.27); margin-top: 1px;
+        font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+        color: rgba(255,255,255,0.35); margin-top: 1px;
       }
 
       .lb-maps {
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.75);
+        font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.75);
         text-align: right; white-space: nowrap; flex-shrink: 0; line-height: 1.2;
       }
       .lb-maps small {
-        display: block; font-size: 9px; letter-spacing: .07em; text-transform: uppercase;
+        display: block; font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
       }
 
       .lb-val {
-        min-width: 58px; text-align: center; padding: 6px 8px; border-radius: 5px;
+        min-width: 64px; text-align: center; padding: 7px 10px; border-radius: 5px;
         background: var(--league-accent, #888);
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 19px; font-weight: 900; letter-spacing: .01em;
+        font-size: 21px; font-weight: 900; letter-spacing: .01em;
         flex-shrink: 0; line-height: 1;
         color: rgba(255,255,255,0.95);
       }
       .lb-val.lt { color: rgba(255,255,255,0.95); }
-      .lb-row:first-child .lb-val { font-size: 21px; }
+      .lb-row:first-child .lb-val { font-size: 23px; }
 
       .lb-empty-panel {
         padding: 32px 14px; text-align: center;
@@ -643,6 +643,7 @@
         <div class="subsection" id="player-stats-section">
           <div class="subsection-header">
             <span class="subsection-title">선수 기록</span>
+            <span id="player-stats-stage-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-left:6px;"></span>
             <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.28);">TOP 10</span>
           </div>
           <div class="lb-panels">
@@ -1726,6 +1727,16 @@
 
       _renderLbPanel("lb-panel-acs", "ACS Top 10",  acsTop10, accent);
       _renderLbPanel("lb-panel-kd",  "K/D Top 10",  kdTop10,  accent);
+
+      /* 스테이지 라벨 업데이트 */
+      var stageLabelEl = document.getElementById("player-stats-stage-label");
+      if (stageLabelEl) {
+        var stageLabelMap = {
+          all: "", kickoff: "· KickOff", stage1: "· Stage 1", stage2: "· Stage 2",
+          swiss: "· Swiss Stage", playoffs: "· Playoffs"
+        };
+        stageLabelEl.textContent = stageLabelMap[stage] || "";
+      }
     }
 
     function esc(s) {
