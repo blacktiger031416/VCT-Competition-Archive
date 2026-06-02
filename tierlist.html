@@ -334,6 +334,7 @@
         <div class="admin-only" id="detail-admin-bar" style="gap:8px">
           <button class="tl-btn tl-btn-ghost" id="btn-edit-evt">⚙ 설정</button>
           <button class="tl-btn" id="btn-toggle-status"></button>
+          <button class="tl-btn tl-btn-danger" id="btn-del-evt">🗑 삭제</button>
         </div>
       </div>
 
@@ -947,6 +948,18 @@
 
     document.getElementById("btn-new").addEventListener("click", function(){ openCfgModal(null); });
     document.getElementById("btn-edit-evt").addEventListener("click", function(){ if (curEvt) openCfgModal(curEvt); });
+    document.getElementById("btn-del-evt").addEventListener("click", async function() {
+      if (!curEvt) return;
+      if (!confirm('"' + curEvt.title + '" 티어리스트를 삭제하시겠습니까?\n게시물도 모두 삭제됩니다.')) return;
+      try {
+        var r = await fetch("/api/tierlist/events/" + curEvt.id, {
+          method: "DELETE", headers: { "Authorization": "Bearer " + TOKEN }
+        });
+        var d = await r.json();
+        if (d.ok) { location.href = "./tierlist.html"; }
+        else { alert(d.error || "삭제 실패"); }
+      } catch(e) { alert("서버 오류"); }
+    });
     document.getElementById("cfg-close-btn").addEventListener("click", closeCfgModal);
     document.getElementById("cfg-backdrop").addEventListener("click", closeCfgModal);
     document.getElementById("btn-apply-count").addEventListener("click", function(){
