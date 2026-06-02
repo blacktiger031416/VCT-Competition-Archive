@@ -2060,7 +2060,15 @@
       var section = document.getElementById("team-stats-section");
       if (!section) return;
 
-      var topN = league === "global" ? 10 : league === "champions" ? 16 : 12;
+      /* topN: 진출팀 필터 선택 시 해당 팀 수 전체 표시 */
+      var topN = 12;
+      if (league === "champions") topN = 16;
+      else if (league === "global") {
+        if (stage === "g-kickoff-ms") topN = 12;      /* Masters Santiago 진출팀 12 */
+        else if (stage === "g-stage1-ml") topN = 12;  /* Masters London 진출팀 12 */
+        else if (stage === "g-stage2-ch") topN = 16;  /* Champions 진출팀 16 */
+        else topN = 10;                               /* 전체/스테이지 전체는 Top 10 */
+      }
       var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
 
       var teamStats = getTeamRanking(league, stage);
