@@ -969,13 +969,13 @@
     /* ── 리그별 스테이지 필터 정의 ── */
     var STAGE_FILTERS = {
       global: [
-        { key: "all",         label: "전체 스테이지" },
-        { key: "kickoff-all", label: "KickOff (전체)" },
-        { key: "kickoff-ms",  label: "KickOff (Masters Santiago 진출팀)" },
-        { key: "stage1-all",  label: "Stage 1 (전체)" },
-        { key: "stage1-ml",   label: "Stage 1 (Masters London 진출팀)" },
-        { key: "stage2-all",  label: "Stage 2 (전체)" },
-        { key: "stage2-ch",   label: "Stage 2 (Champions 진출팀)" },
+        { key: "g-all",        label: "전체 스테이지" },
+        { key: "g-kickoff",    label: "KickOff (전체)" },
+        { key: "g-kickoff-ms", label: "KickOff (Masters Santiago 진출팀)" },
+        { key: "g-stage1",     label: "Stage 1 (전체)" },
+        { key: "g-stage1-ml",  label: "Stage 1 (Masters London 진출팀)" },
+        { key: "g-stage2",     label: "Stage 2 (전체)" },
+        { key: "g-stage2-ch",  label: "Stage 2 (Champions 진출팀)" },
       ],
       league: [
         { key: "all",    label: "전체" },
@@ -1016,11 +1016,15 @@
       } catch(e) { return []; }
     }
 
-    /* 전체 뷰 스테이지 → 참가팀 키 매핑 (진출팀 필터 있는 버튼만) */
-    var GLOBAL_STAGE_PARTICIPANTS = {
-      "kickoff-ms": "masters_santiago_participants",
-      "stage1-ml":  "masters_london_participants",
-      "stage2-ch":  "champions_participants",
+    /* 전체 뷰: stage 키 → 실제 스테이지 값 + 참가팀 localStorage 키 매핑 */
+    var GLOBAL_STAGE_MAP = {
+      "g-all":        { stages: null,                          participants: null },
+      "g-kickoff":    { stages: ["kickoff"],                   participants: null },
+      "g-kickoff-ms": { stages: ["kickoff"],                   participants: "masters_santiago_participants" },
+      "g-stage1":     { stages: ["stage1","stage1playoffs"],   participants: null },
+      "g-stage1-ml":  { stages: ["stage1","stage1playoffs"],   participants: "masters_london_participants" },
+      "g-stage2":     { stages: ["stage2","stage2playoffs"],   participants: null },
+      "g-stage2-ch":  { stages: ["stage2","stage2playoffs"],   participants: "champions_participants" },
     };
 
     /* ── 스테이지 값 → 그룹 키 정규화 ── */
@@ -1078,11 +1082,11 @@
       var s = m.stage || "";
       var filterGroup = getFilterGroup(league);
 
-      /* 전체 뷰: 각 권역 리그 스테이지만 매칭 (masters/champions 경기는 제외) */
+      /* 전체 뷰: GLOBAL_STAGE_MAP 기준으로 스테이지 매칭 */
       if (filterGroup === "global") {
-        if (stage === "kickoff-all" || stage === "kickoff-ms") return s === "kickoff";
-        if (stage === "stage1-all"  || stage === "stage1-ml")  return s === "stage1" || s === "stage1playoffs";
-        if (stage === "stage2-all"  || stage === "stage2-ch")  return s === "stage2" || s === "stage2playoffs";
+        var gsm = GLOBAL_STAGE_MAP[stage];
+        if (!gsm || !gsm.stages) return true;   /* g-all 또는 알 수 없는 키 → 전체 허용 */
+        return gsm.stages.indexOf(s) !== -1;
       }
 
       if (filterGroup === "league") {
@@ -1739,21 +1743,20 @@
       var acsPMap = {}, kdPMap = {};
       var accent = (LEAGUE_INFO[league] && LEAGUE_INFO[league].accent) || "#888";
 
-      /* 전체 뷰: 해당 스테이지의 진출팀 목록 로드 */
-      var globalTeamFilter = null;
+      /* 전체 뷰: 진출팀 필터 준비 */
+      var globalTeamFilter = null;  /* null = 필터 없음, [] = 데이터 없음, [...] = 팀 목록 */
+      var teamMap = null;
       if (league === "global") {
-        var participantsKey = GLOBAL_STAGE_PARTICIPANTS[stage];
-        if (participantsKey) {
-          globalTeamFilter = getParticipantTeams(participantsKey);
+        var _gsm = GLOBAL_STAGE_MAP[stage];
+        if (_gsm && _gsm.participants) {
+          globalTeamFilter = getParticipantTeams(_gsm.participants);
+          teamMap = buildPlayerTeamMap();
         }
       }
 
-      /* 전체 뷰에서 선수가 진출팀 소속인지 확인하기 위해 팀맵 미리 빌드 */
-      var teamMap = (league === "global") ? buildPlayerTeamMap() : null;
-
       all.forEach(function(player) {
-        /* 전체 뷰: 진출팀 소속 선수만 포함 */
-        if (league === "global" && globalTeamFilter && globalTeamFilter.length > 0) {
+        /* 전체-진출팀 뷰: 팀 필터 적용 */
+        if (globalTeamFilter !== null && globalTeamFilter.length > 0) {
           var playerTeam = teamMap ? teamMap[player.name] : null;
           if (!playerTeam || globalTeamFilter.indexOf(playerTeam) === -1) return;
         }
@@ -1810,13 +1813,13 @@
         };
         if (league === "global") {
           var globalLabelMap = {
-            "all":         "",
-            "kickoff-all": "· KickOff (전체)",
-            "kickoff-ms":  "· KickOff — Masters Santiago 진출팀",
-            "stage1-all":  "· Stage 1 (전체)",
-            "stage1-ml":   "· Stage 1 — Masters London 진출팀",
-            "stage2-all":  "· Stage 2 (전체)",
-            "stage2-ch":   "· Stage 2 — Champions 진출팀",
+            "g-all":        "",
+            "g-kickoff":    "· KickOff (전체)",
+            "g-kickoff-ms": "· KickOff — Masters Santiago 진출팀",
+            "g-stage1":     "· Stage 1 (전체)",
+            "g-stage1-ml":  "· Stage 1 — Masters London 진출팀",
+            "g-stage2":     "· Stage 2 (전체)",
+            "g-stage2-ch":  "· Stage 2 — Champions 진출팀",
           };
           stageLabelEl.textContent = globalLabelMap[stage] || "";
         } else {
@@ -1871,7 +1874,7 @@
 
       /* 팀 선택기 (전체 뷰에서는 숨김) */
       if (league === "global") {
-        document.getElementById("team-selector").style.display = "none";
+        document.getElementById("team-selector-section").style.display = "none";
       } else {
         renderTeamSelector(league);
       }
@@ -1928,14 +1931,6 @@
       });
     });
 
-    /* ── storageReady 완료 후 재렌더 (서버 슬립 중 첫 클릭 대응) ── */
-    if (window.storageReady && typeof window.storageReady.then === "function") {
-      window.storageReady.then(function() {
-        if (currentLeague) {
-          refreshData();
-        }
-      });
-    }
     </script>
     <script src="./auth.js"></script>
   </body>
