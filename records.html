@@ -325,7 +325,10 @@
       }
       .comp-modal-stage-title:first-child { margin-top: 0; }
       .comp-modal-combos { display: flex; flex-direction: column; gap: 8px; }
-      .comp-modal-combo { display: flex; align-items: center; gap: 10px; }
+      .comp-modal-combo { display: flex; flex-direction: column; gap: 4px; }
+      .comp-modal-combo-main { display: flex; align-items: center; gap: 10px; }
+      .combo-sources { display: flex; flex-wrap: wrap; gap: 4px; padding-left: 2px; }
+      .combo-sources span { font-size: 10px; color: rgba(255,255,255,0.3); font-family: 'Barlow Condensed', sans-serif; letter-spacing: .05em; background: rgba(255,255,255,0.05); border-radius: 3px; padding: 1px 5px; }
 
       /* 공통 에이전트 아이콘 */
       .comp-combo-item {
@@ -1118,12 +1121,19 @@
         var sortedAgents = agents.slice().sort();
         var comboKey = sortedAgents.join("|");
 
+        /* matchKey에서 날짜·상대팀 추출 → 출처 표시용 */
+        var mkParts  = mm.matchKey.split("|");
+        var srcDate  = mkParts[0] || "";
+        var opponent = mm.side === "a" ? (mkParts[2] || "") : (mkParts[1] || "");
+        var srcLabel = srcDate + (opponent ? " vs " + opponent : "");
+
         if (!result[sgKey]) result[sgKey] = {};
         if (!result[sgKey][mapName]) result[sgKey][mapName] = {};
         if (!result[sgKey][mapName][comboKey]) {
-          result[sgKey][mapName][comboKey] = { agents: sortedAgents, count: 0 };
+          result[sgKey][mapName][comboKey] = { agents: sortedAgents, count: 0, sources: [] };
         }
         result[sgKey][mapName][comboKey].count++;
+        result[sgKey][mapName][comboKey].sources.push(srcLabel);
       });
 
       /* 진단 정보 (빈 결과일 때 renderCompositions에서 표시) */
@@ -1294,7 +1304,14 @@
         html += '<div class="comp-modal-combos">';
         comboKeys.forEach(function(ck) {
           var combo = combos[ck];
+          var srcHtml = '';
+          if (combo.sources && combo.sources.length) {
+            srcHtml = '<div class="combo-sources">' +
+              combo.sources.map(function(s){ return '<span>' + esc(s) + '</span>'; }).join('') +
+              '</div>';
+          }
           html += '<div class="comp-modal-combo">' +
+            '<div class="comp-modal-combo-main">' +
             '<div class="agent-chips">' +
             combo.agents.map(function(a) {
               var img = AGENT_IMG[a] || "";
@@ -1304,6 +1321,8 @@
             }).join("") +
             '</div>' +
             (combo.count > 1 ? '<span class="combo-count">×' + combo.count + '</span>' : '') +
+            '</div>' +
+            srcHtml +
             '</div>';
         });
         html += '</div>';
