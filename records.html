@@ -1099,13 +1099,27 @@
           var key = mk + "|" + mi;
           if (!matchMapInfo[key]) {
             /* matchKey = "날짜|팀A|팀B" 에서 사이드 판별
-               팀이 matchKey에 없으면 반드시 skip — 다른 팀 경기 데이터 오염 방지 */
+               팀이 matchKey에 없으면 반드시 skip — 다른 팀 경기 데이터 오염 방지
+               Playoff 단축 키(stage1playoffs|N 등 2조각) → players 슬롯에서 선수 위치로 판별 */
             var parts = mk.split("|");
-            if (parts.length < 3) return;
             var side = null;
-            if (parts[1].toLowerCase() === teamLower) side = "a";
-            else if (parts[2].toLowerCase() === teamLower) side = "b";
-            if (side === null) return; /* 이 팀이 이 경기에 없음 → 완전히 제외 */
+            if (parts.length >= 3) {
+              if (parts[1].toLowerCase() === teamLower) side = "a";
+              else if (parts[2].toLowerCase() === teamLower) side = "b";
+              if (side === null) return; /* 이 팀이 이 경기에 없음 → 완전히 제외 */
+            } else {
+              /* Playoff 키: players 데이터에서 현재 선수(pName)가 a/b 어느 슬롯인지 확인 */
+              try {
+                var _ppd = JSON.parse(localStorage.getItem("players:" + mk + ":" + mi) || "{}");
+                var _pnLower = pName.toLowerCase();
+                for (var _pi = 0; _pi < 5 && side === null; _pi++) {
+                  var _sa = _ppd["a" + _pi], _sb = _ppd["b" + _pi];
+                  if (_sa && (_sa.name || "").toLowerCase() === _pnLower) side = "a";
+                  if (_sb && (_sb.name || "").toLowerCase() === _pnLower) side = "b";
+                }
+              } catch(e) {}
+              if (side === null) return; /* players 데이터에서도 못 찾음 → 제외 */
+            }
             matchMapInfo[key] = { matchKey: mk, mapIdx: mi, stageVal: m.stage || "", side: side };
           }
         });
@@ -1142,10 +1156,19 @@
         var sortedAgents = agents.slice().sort();
         var comboKey = sortedAgents.join("|");
 
-        /* matchKey에서 날짜·상대팀 추출 → 출처 표시용 */
+        /* matchKey에서 날짜·상대팀 추출 → 출처 표시용
+           "날짜|팀A|팀B" → srcDate=날짜, opponent=상대팀
+           "stage1playoffs|N" 같은 2조각 Playoff 키 → "Match N" 형식으로 표시 */
         var mkParts  = mm.matchKey.split("|");
-        var srcDate  = mkParts[0] || "";
-        var opponent = mm.side === "a" ? (mkParts[2] || "") : (mkParts[1] || "");
+        var srcDate, opponent;
+        if (mkParts.length >= 3) {
+          srcDate  = mkParts[0] || "";
+          opponent = mm.side === "a" ? (mkParts[2] || "") : (mkParts[1] || "");
+        } else {
+          /* Playoff 단축 키: "stage1playoffs|7" → "Match 7" 표시 */
+          srcDate  = "Match " + (mkParts[mkParts.length - 1] || "?");
+          opponent = "";
+        }
         var srcLabel = srcDate + (opponent ? " vs " + opponent : "");
 
         if (!result[sgKey]) result[sgKey] = {};
