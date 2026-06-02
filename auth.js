@@ -239,7 +239,9 @@
     "body.view-only .sb-score-diamond-l,",
     "body.view-only .sb-score-diamond-r,",
     /* 팀 스텟 (스코어, 첫킬, 절약왕 등) */
-    "body.view-only .ts-val",
+    "body.view-only .ts-val,",
+    /* 배당률 */
+    "body.view-only .mo-pred-odds",
     "{ pointer-events:none !important; cursor:default !important; }",
     "body.view-only .roster-add-row { display:none !important; }",
     "body.view-only .roster-player-remove { display:none !important; }",
