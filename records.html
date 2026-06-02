@@ -1925,6 +1925,15 @@
         selectLeague(this.dataset.league);
       });
     });
+
+    /* ── storageReady 완료 후 재렌더 (서버 슬립 중 첫 클릭 대응) ── */
+    if (window.storageReady && typeof window.storageReady.then === "function") {
+      window.storageReady.then(function() {
+        if (currentLeague) {
+          refreshData();
+        }
+      });
+    }
     </script>
     <script src="./auth.js"></script>
   </body>
