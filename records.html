@@ -49,12 +49,10 @@
       }
 
       /* ── LEAGUE SELECTOR ────────────────────── */
-      .league-selector {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        margin-bottom: 40px;
-      }
+      .league-selector { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+      .selector-row { display: grid; gap: 10px; }
+      .selector-row.four { grid-template-columns: repeat(4, 1fr); }
+      .selector-row.three { grid-template-columns: repeat(3, 1fr); }
       .league-btn {
         --accent: #888;
         position: relative;
@@ -88,12 +86,20 @@
       }
       .league-btn.active span { color: var(--accent); }
 
-      .league-btn.lb-pacific   { --accent: #01d2d7; }
-      .league-btn.lb-cn        { --accent: #fb2659; }
-      .league-btn.lb-americas  { --accent: #ff570c; }
-      .league-btn.lb-emea      { --accent: #d4ff1f; }
-      .league-btn.lb-masters   { --accent: #a07aff; }
-      .league-btn.lb-champions { --accent: #c5b174; }
+      .league-btn.lb-pacific           { --accent: #01d2d7; }
+      .league-btn.lb-cn                { --accent: #fb2659; }
+      .league-btn.lb-americas          { --accent: #ff570c; }
+      .league-btn.lb-emea              { --accent: #d4ff1f; }
+      .league-btn.lb-masters-santiago  { --accent: #a07aff; }
+      .league-btn.lb-masters-london    { --accent: #a07aff; }
+      .league-btn.lb-champions         { --accent: #c5b174; }
+
+      .league-btn .sub-label {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.28); margin-top: -6px;
+      }
+      .league-btn.active .sub-label { color: var(--accent); opacity: 0.75; }
 
       /* ── CONTENT AREA ───────────────────────── */
       .content-area { display: none; }
@@ -210,30 +216,42 @@
 
       <!-- ── 권역 선택 카드 ── -->
       <div class="league-selector">
-        <button class="league-btn lb-pacific"   data-league="pacific">
-          <img src="./assets/vct-pacific.webp" alt="Pacific" />
-          <span>Pacific</span>
-        </button>
-        <button class="league-btn lb-cn"        data-league="cn">
-          <img src="./assets/vct-cn.webp" alt="CN" />
-          <span>CN</span>
-        </button>
-        <button class="league-btn lb-americas"  data-league="americas">
-          <img src="./assets/vct-americas.png" alt="Americas" />
-          <span>Americas</span>
-        </button>
-        <button class="league-btn lb-emea"      data-league="emea">
-          <img src="./assets/vct-emea.webp" alt="EMEA" />
-          <span>EMEA</span>
-        </button>
-        <button class="league-btn lb-masters"   data-league="masters">
-          <img src="./assets/vct-logo.png" alt="Masters" />
-          <span>Masters</span>
-        </button>
-        <button class="league-btn lb-champions" data-league="champions">
-          <img src="./assets/vct-logo.png" alt="Champions" />
-          <span>Champions</span>
-        </button>
+        <!-- 리그 4개 -->
+        <div class="selector-row four">
+          <button class="league-btn lb-pacific"  data-league="pacific">
+            <img src="./assets/vct-pacific.webp" alt="Pacific" />
+            <span>Pacific</span>
+          </button>
+          <button class="league-btn lb-cn"       data-league="cn">
+            <img src="./assets/vct-cn.webp" alt="CN" />
+            <span>CN</span>
+          </button>
+          <button class="league-btn lb-americas" data-league="americas">
+            <img src="./assets/vct-americas.png" alt="Americas" />
+            <span>Americas</span>
+          </button>
+          <button class="league-btn lb-emea"     data-league="emea">
+            <img src="./assets/vct-emea.webp" alt="EMEA" />
+            <span>EMEA</span>
+          </button>
+        </div>
+        <!-- 국제 대회 3개 -->
+        <div class="selector-row three">
+          <button class="league-btn lb-masters-santiago" data-league="masters-santiago">
+            <img src="./assets/vct-logo.png" alt="Masters Santiago" />
+            <span>Masters</span>
+            <span class="sub-label">Santiago</span>
+          </button>
+          <button class="league-btn lb-masters-london" data-league="masters-london">
+            <img src="./assets/vct-logo.png" alt="Masters London" />
+            <span>Masters</span>
+            <span class="sub-label">London</span>
+          </button>
+          <button class="league-btn lb-champions" data-league="champions">
+            <img src="./assets/vct-logo.png" alt="Champions" />
+            <span>Champions</span>
+          </button>
+        </div>
       </div>
 
       <!-- ── 선택 전 안내 ── -->
@@ -306,12 +324,13 @@
     <script src="./storage.js"></script>
     <script>
     var LEAGUE_INFO = {
-      pacific:   { label: "Pacific",   logo: "./assets/vct-pacific.webp",  accent: "#01d2d7" },
-      cn:        { label: "CN",        logo: "./assets/vct-cn.webp",        accent: "#fb2659" },
-      americas:  { label: "Americas",  logo: "./assets/vct-americas.png",   accent: "#ff570c" },
-      emea:      { label: "EMEA",      logo: "./assets/vct-emea.webp",      accent: "#d4ff1f" },
-      masters:   { label: "Masters",   logo: "./assets/vct-logo.png",        accent: "#a07aff" },
-      champions: { label: "Champions", logo: "./assets/vct-logo.png",        accent: "#c5b174" },
+      "pacific":          { label: "Pacific",          logo: "./assets/vct-pacific.webp", accent: "#01d2d7" },
+      "cn":               { label: "CN",               logo: "./assets/vct-cn.webp",       accent: "#fb2659" },
+      "americas":         { label: "Americas",         logo: "./assets/vct-americas.png",  accent: "#ff570c" },
+      "emea":             { label: "EMEA",             logo: "./assets/vct-emea.webp",     accent: "#d4ff1f" },
+      "masters-santiago": { label: "Masters Santiago", logo: "./assets/vct-logo.png",       accent: "#a07aff" },
+      "masters-london":   { label: "Masters London",   logo: "./assets/vct-logo.png",       accent: "#a07aff" },
+      "champions":        { label: "Champions",        logo: "./assets/vct-logo.png",       accent: "#c5b174" },
     };
 
     var currentLeague = null;
@@ -334,6 +353,19 @@
       return list;
     }
 
+    /* ── 리그 키 → 맵 매칭 함수 ── */
+    function matchesLeague(m, league) {
+      var l = m.league || "", t = m.tournament || "";
+      if (league === "pacific")          return l === "pacific";
+      if (league === "cn")               return l === "cn";
+      if (league === "americas")         return l === "americas";
+      if (league === "emea")             return l === "emea";
+      if (league === "masters-santiago") return l === "masters" && t === "santiago";
+      if (league === "masters-london")   return l === "masters" && t === "london";
+      if (league === "champions")        return l === "champions";
+      return false;
+    }
+
     /* ── 선택 리그에 맞는 맵만 필터, 선수별 집계 ── */
     function buildPlayerRows(league) {
       var all = getAllPlayerData();
@@ -341,7 +373,7 @@
 
       all.forEach(function(player) {
         player.maps.forEach(function(m) {
-          if ((m.league || "") !== league) return;
+          if (!matchesLeague(m, league)) return;
           var acs = parseFloat(m.acs) || 0;
           if (!acs) return;
 
