@@ -451,6 +451,8 @@
           resultKey(matchId, codedTeams),
           resultKey(matchId, [normalizedTeams[0], codedTeams[1]]),
           resultKey(matchId, [codedTeams[0], normalizedTeams[1]]),
+          /* cn-match-dark.html이 match= 파라미터를 받을 때 생성하는 키 포맷 */
+          `result:stage1playoffs|${matchId}`,
         ];
       }
 
@@ -559,7 +561,6 @@
           teamB,
           score: `${scoreA} : ${scoreB}`,
           from: "stage1playoffs",
-          match: String(matchId),
           ...(isBo5 ? { bo5: "1" } : {}),
         });
         window.location.href = `./cn-match-dark.html?${query.toString()}`;
