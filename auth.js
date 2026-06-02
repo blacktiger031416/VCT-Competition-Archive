@@ -308,10 +308,21 @@
     header.appendChild(registerBtn);
     header.appendChild(authBtn);
   } else {
-    authBtn.classList.add("auth-header-btn--floating");
-    document.body.appendChild(refreshBtn);
-    document.body.appendChild(registerBtn);
-    document.body.appendChild(authBtn);
+    /* 헤더 없는 페이지(index 등): 우측 상단 고정 컨테이너 */
+    var floatWrap = document.createElement("div");
+    floatWrap.style.cssText = [
+      "position:fixed",
+      "top:16px",
+      "right:20px",
+      "z-index:9000",
+      "display:flex",
+      "align-items:center",
+      "gap:8px",
+    ].join(";");
+    floatWrap.appendChild(refreshBtn);
+    floatWrap.appendChild(registerBtn);
+    floatWrap.appendChild(authBtn);
+    document.body.appendChild(floatWrap);
   }
 
   /* ── 토큰 서버 검증 (백그라운드) ─────────────────── */
