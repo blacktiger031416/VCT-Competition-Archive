@@ -2368,7 +2368,7 @@ var maps = [
 // ── 렌더링 ────────────────────────────────────────────────────
 function kdaHtml(p, mapIdx, playerIdx) {
   let k = p.k, d = p.d, a = p.a;
-  if (p.kda != null) {
+  if (p.kda != null && p.kda !== "") {
     const parts = String(p.kda).split("/");
     k = parts[0] ?? 0;
     d = parts[1] ?? 0;
@@ -3094,8 +3094,8 @@ function openKda(mapIdx, playerIdx) {
   document.getElementById("inp-k").focus();
 
   document.getElementById("btn-kda-clear").onclick = () => {
-    p.k = 0; p.d = 0; p.a = 0; p.kda = "";
-    saveFieldSync(mapIdx, playerIdx, 'kda', p.kda);
+    p.k = "-"; p.d = "-"; p.a = "-"; p.kda = null;
+    saveFieldSync(mapIdx, playerIdx, 'kda', null);
     renderMap(maps[mapIdx], mapIdx);
     popup.remove();
   };
