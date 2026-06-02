@@ -1121,14 +1121,20 @@
             /* matchKey = "날짜|팀A|팀B" 에서 사이드 판별
                팀이 matchKey에 없으면 반드시 skip — 다른 팀 경기 데이터 오염 방지
                Playoff 단축 키(stage1playoffs|N 등 2조각) → players 슬롯에서 선수 위치로 판별 */
+            /* matchKey 포맷별 사이드 판별:
+               ① 구버전 "날짜|팀A|팀B" (3조각, parts[1]이 팀명) → 팀명 비교로 판별
+               ② Masters 구조화 키 "tournament|stage|..." (3~4조각, parts[1]이 스테이지)
+                  → 팀명이 parts에 없음, players 슬롯에서 선수 위치로 판별
+               ③ CN Playoff 단축 키 "stage1playoffs|N" (2조각) → players 슬롯 판별 */
             var parts = mk.split("|");
             var side = null;
-            if (parts.length >= 3) {
+            if (parts.length >= 3 &&
+                (parts[1].toLowerCase() === teamLower || parts[2].toLowerCase() === teamLower)) {
+              /* ① 구버전 날짜|팀A|팀B 포맷: parts[1]/[2]가 실제 팀명 */
               if (parts[1].toLowerCase() === teamLower) side = "a";
-              else if (parts[2].toLowerCase() === teamLower) side = "b";
-              if (side === null) return; /* 이 팀이 이 경기에 없음 → 완전히 제외 */
+              else side = "b";
             } else {
-              /* Playoff 키: players 데이터에서 현재 선수(pName)가 a/b 어느 슬롯인지 확인 */
+              /* ②③ 구조화 키 또는 단축 키: players 데이터에서 선수 슬롯 위치로 판별 */
               try {
                 var _ppd = JSON.parse(localStorage.getItem("players:" + mk + ":" + mi) || "{}");
                 var _pnLower = pName.toLowerCase();
@@ -1233,8 +1239,8 @@
           try {
             var pd = JSON.parse(pdRaw);
             var maps = (pd.maps || []);
-            var leagueMaps = maps.filter(function(m){ return m.league === league; });
-            debugPlayers[pName] = "전체 " + maps.length + "맵, " + league + " " + leagueMaps.length + "맵";
+            var leagueMaps = maps.filter(function(m){ return matchesLeague(m, league); });
+            debugPlayers[pName] = "전체 " + maps.length + "맵, " + league.toUpperCase().replace(/-/g,"·") + " " + leagueMaps.length + "맵";
           } catch(e) { debugPlayers[pName] = "파싱 오류"; }
         });
         result._debug = {
