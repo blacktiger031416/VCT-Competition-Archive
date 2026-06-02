@@ -1012,26 +1012,35 @@
           } catch(e) {}
         }
       }
-      /* 3. Fallback: vct_p 엔트리의 matchKey("날짜|팀A|팀B")에서 역추적
-             roster가 저장되지 않은 팀도 커버 */
+      /* 3. Fallback: players:MATCH_KEY:MAPIDX 에서 사이드별 선수 역추적
+             matchKey = "날짜|팀A|팀B" → 팀A면 side "a", 팀B면 side "b" */
       var playerSet = {};
       for (var j = 0; j < localStorage.length; j++) {
         var pkey = localStorage.key(j);
-        if (!pkey || !pkey.startsWith("vct_p:")) continue;
+        if (!pkey || !pkey.startsWith("players:")) continue;
+        /* key 형식: "players:날짜|팀A|팀B:맵인덱스" */
+        var withoutPrefix = pkey.slice(8);          /* "날짜|팀A|팀B:맵인덱스" */
+        var lastColon = withoutPrefix.lastIndexOf(":");
+        if (lastColon < 0) continue;
+        var matchKey = withoutPrefix.slice(0, lastColon);
+        var parts = matchKey.split("|");
+        if (parts.length < 3) continue;
+        var side = null;
+        if (parts[1].toLowerCase() === lower) side = "a";
+        else if (parts[2].toLowerCase() === lower) side = "b";
+        else continue;
         try {
-          var pd = JSON.parse(localStorage.getItem(pkey) || "{}");
-          if (!pd.maps) continue;
-          var inTeam = pd.maps.some(function(m) {
-            if (!m.matchKey) return false;
-            var parts = m.matchKey.split("|");
-            if (parts.length < 3) return false;
-            return parts[1].toLowerCase() === lower || parts[2].toLowerCase() === lower;
-          });
-          if (inTeam) playerSet[pkey.slice(6)] = true;
+          var pdata = JSON.parse(localStorage.getItem(pkey) || "{}");
+          for (var si = 0; si < 5; si++) {
+            var slot = pdata[side + si];
+            if (slot && slot.name && slot.name.trim() && slot.name !== "-") {
+              playerSet[slot.name.trim()] = true;
+            }
+          }
         } catch(e) {}
       }
       var fallbackPlayers = Object.keys(playerSet);
-      if (fallbackPlayers.length) return { players: fallbackPlayers, foundKey: "matchKey 역추적:" + teamName };
+      if (fallbackPlayers.length) return { players: fallbackPlayers, foundKey: "players: 사이드 역추적" };
 
       /* 저장된 모든 vct_roster 키 수집 (진단용) */
       var allRosterKeys = [];
