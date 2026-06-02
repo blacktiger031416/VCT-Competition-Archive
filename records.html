@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT 기록 — 시즌 스탯</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      a { color: inherit; text-decoration: none; }
+
+      body {
+        min-height: 100vh;
+        font-family: "Noto Sans KR", system-ui, sans-serif;
+        color: #f0f0f0;
+        background: #0a0a0c;
+      }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 20px; padding: 0 32px; height: 56px;
+        background: rgba(10,10,12,0.92);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky; top: 0; z-index: 100;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-size: 15px; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: rgba(255,255,255,0.55);
+        text-decoration: none; transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .back-link {
+        font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: rgba(255,255,255,0.4);
+        text-decoration: none; transition: color 0.15s; margin-left: auto;
+      }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+
+      /* ── SHELL ──────────────────────────────── */
+      .records-shell {
+        max-width: 1200px; margin: 0 auto; padding: 0 24px 80px;
+      }
+
+      /* ── HERO ───────────────────────────────── */
+      .records-hero {
+        padding: 52px 0 40px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        margin-bottom: 0;
+      }
+      .records-eyebrow {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.3em; text-transform: uppercase;
+        color: #e8b840; margin-bottom: 10px;
+      }
+      .records-hero h1 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: clamp(44px, 7vw, 76px); font-weight: 900;
+        line-height: 1; color: #fff; letter-spacing: 0.01em;
+        text-transform: uppercase;
+      }
+      .records-hero p {
+        margin-top: 12px;
+        font-size: 14px; color: rgba(255,255,255,0.38);
+        line-height: 1.7;
+      }
+
+      /* ── TOURNAMENT TABS ────────────────────── */
+      .tournament-nav {
+        display: flex; gap: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        overflow-x: auto; scrollbar-width: none;
+        position: sticky; top: 56px; z-index: 50;
+        background: #0a0a0c;
+      }
+      .tournament-nav::-webkit-scrollbar { display: none; }
+
+      .t-tab {
+        flex-shrink: 0;
+        padding: 0 22px; height: 48px;
+        display: flex; align-items: center; gap: 8px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.35);
+        border-bottom: 2px solid transparent;
+        cursor: pointer; transition: color 0.15s, border-color 0.15s;
+        white-space: nowrap; user-select: none;
+      }
+      .t-tab:hover { color: rgba(255,255,255,0.7); }
+      .t-tab.active {
+        color: #e8b840;
+        border-bottom-color: #e8b840;
+      }
+      .t-tab .t-badge {
+        font-size: 9px; font-weight: 900; letter-spacing: 0.1em;
+        padding: 2px 6px; border-radius: 2px;
+        background: rgba(255,255,255,0.07);
+        color: rgba(255,255,255,0.3);
+      }
+      .t-tab.active .t-badge {
+        background: rgba(232,184,64,0.15);
+        color: #e8b840;
+      }
+
+      /* ── SECTION PANELS ─────────────────────── */
+      .t-panel { display: none; padding-top: 36px; }
+      .t-panel.active { display: block; }
+
+      .panel-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 0.24em; text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        margin-bottom: 20px;
+        display: flex; align-items: center; gap: 12px;
+      }
+      .panel-title::after {
+        content: ""; flex: 1;
+        height: 1px; background: rgba(255,255,255,0.06);
+      }
+
+      /* ── SUBSECTION (선수 / 팀) ──────────────── */
+      .subsection { margin-bottom: 48px; }
+      .subsection-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .subsection-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 20px; font-weight: 800;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: #fff;
+      }
+      .subsection-tabs {
+        display: flex; gap: 4px;
+      }
+      .subsection-tab {
+        padding: 5px 12px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 3px;
+        background: transparent;
+        color: rgba(255,255,255,0.35);
+        cursor: pointer; transition: all 0.12s;
+      }
+      .subsection-tab:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.22); }
+      .subsection-tab.active {
+        background: rgba(232,184,64,0.12);
+        border-color: rgba(232,184,64,0.35);
+        color: #e8b840;
+      }
+
+      /* ── STAT TABLE ─────────────────────────── */
+      .stat-table-wrap {
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 6px; overflow: hidden;
+      }
+      .stat-table {
+        width: 100%; border-collapse: collapse;
+        font-size: 13px;
+      }
+      .stat-table thead th {
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.04);
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        white-space: nowrap;
+        cursor: pointer; user-select: none;
+      }
+      .stat-table thead th:hover { color: rgba(255,255,255,0.55); }
+      .stat-table thead th.sorted { color: #e8b840; }
+      .stat-table thead th.num, .stat-table td.num { text-align: right; }
+      .stat-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.1s;
+      }
+      .stat-table tbody tr:last-child { border-bottom: none; }
+      .stat-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+      .stat-table td { padding: 10px 14px; color: rgba(255,255,255,0.75); }
+      .stat-table td.rank {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 15px; font-weight: 700;
+        color: rgba(255,255,255,0.2); width: 36px;
+      }
+      .stat-table tbody tr:nth-child(1) td.rank { color: #e8b840; }
+      .stat-table tbody tr:nth-child(2) td.rank { color: rgba(200,200,200,0.7); }
+      .stat-table tbody tr:nth-child(3) td.rank { color: rgba(180,120,60,0.7); }
+      .player-name-cell { display: flex; align-items: center; gap: 10px; }
+      .player-logo-wrap {
+        width: 24px; height: 24px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .player-logo-wrap img {
+        width: 100%; height: 100%; object-fit: contain;
+      }
+      .player-name { font-weight: 700; color: #fff; }
+      .player-team {
+        font-size: 11px; color: rgba(255,255,255,0.35);
+        font-family: "Barlow Condensed", sans-serif;
+        letter-spacing: 0.06em;
+      }
+      .stat-val {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 16px; font-weight: 700;
+        color: rgba(255,255,255,0.85);
+      }
+      .stat-val.highlight { color: #e8b840; }
+      .league-badge {
+        display: inline-block;
+        padding: 2px 7px; border-radius: 3px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .lb-pacific  { background: rgba(1,210,215,0.12); color: #01d2d7; }
+      .lb-cn       { background: rgba(251,38,89,0.12); color: #fb2659; }
+      .lb-americas { background: rgba(255,87,12,0.12); color: #ff570c; }
+      .lb-emea     { background: rgba(212,255,31,0.12); color: #d4ff1f; }
+      .lb-masters  { background: rgba(101,30,255,0.12); color: #a07aff; }
+      .lb-champions{ background: rgba(197,177,116,0.12); color: #c5b174; }
+
+      /* ── EMPTY STATE ────────────────────────── */
+      .empty-state {
+        padding: 56px 24px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 6px;
+        color: rgba(255,255,255,0.2);
+      }
+      .empty-state .empty-icon {
+        font-size: 32px; margin-bottom: 12px; opacity: 0.4;
+      }
+      .empty-state p {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px; font-weight: 700;
+        letter-spacing: 0.15em; text-transform: uppercase;
+      }
+
+      /* ── TEAM TABLE ─────────────────────────── */
+      .team-row-logo {
+        width: 28px; height: 28px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .team-row-logo img { width: 100%; height: 100%; object-fit: contain; }
+      .team-name-cell { display: flex; align-items: center; gap: 10px; }
+      .team-name { font-weight: 700; color: #fff; }
+      .wl-bar {
+        display: flex; height: 4px; border-radius: 2px;
+        overflow: hidden; width: 80px; background: rgba(255,255,255,0.07);
+      }
+      .wl-bar-win { background: #3ddc84; }
+      .wl-bar-loss { background: rgba(255,80,80,0.5); }
+
+      /* ── LOADING ────────────────────────────── */
+      .loading-row td {
+        text-align: center; padding: 32px;
+        color: rgba(255,255,255,0.2);
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./index.html">← 홈</a>
+    </header>
+
+    <div class="records-shell">
+      <!-- HERO -->
+      <section class="records-hero">
+        <p class="records-eyebrow">VCT 2026 시즌 기록</p>
+        <h1>기록</h1>
+        <p>선수별, 팀별 시즌 스탯을 대회 단위로 정리합니다.</p>
+      </section>
+
+      <!-- TOURNAMENT TABS -->
+      <nav class="tournament-nav" id="tournament-nav" aria-label="대회 선택">
+        <button class="t-tab active" data-panel="kickoff">KickOff</button>
+        <button class="t-tab" data-panel="santiago">Masters Santiago</button>
+        <button class="t-tab" data-panel="stage1">Stage 1</button>
+        <button class="t-tab" data-panel="london">Masters London</button>
+        <button class="t-tab" data-panel="stage2">Stage 2</button>
+        <button class="t-tab" data-panel="champions">Champions</button>
+      </nav>
+
+      <!-- ── KICKOFF ─────────────────────────── -->
+      <section class="t-panel active" id="panel-kickoff">
+        <p class="panel-title">KickOff</p>
+
+        <div class="subsection" id="kickoff-players">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table" id="kickoff-player-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="kickoff-player-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subsection" id="kickoff-teams">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table" id="kickoff-team-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="kickoff-team-body">
+                <tr class="loading-row"><td colspan="7">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── MASTERS SANTIAGO ───────────────── -->
+      <section class="t-panel" id="panel-santiago">
+        <p class="panel-title">Masters Santiago</p>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                </tr>
+              </thead>
+              <tbody id="santiago-player-body">
+                <tr class="loading-row"><td colspan="5">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                </tr>
+              </thead>
+              <tbody id="santiago-team-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── STAGE 1 ─────────────────────────── -->
+      <section class="t-panel" id="panel-stage1">
+        <p class="panel-title">Stage 1</p>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="stage1-player-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="stage1-team-body">
+                <tr class="loading-row"><td colspan="7">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── MASTERS LONDON ─────────────────── -->
+      <section class="t-panel" id="panel-london">
+        <p class="panel-title">Masters London</p>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                </tr>
+              </thead>
+              <tbody id="london-player-body">
+                <tr class="loading-row"><td colspan="5">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                </tr>
+              </thead>
+              <tbody id="london-team-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── STAGE 2 ─────────────────────────── -->
+      <section class="t-panel" id="panel-stage2">
+        <p class="panel-title">Stage 2</p>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="stage2-player-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                  <th>리그</th>
+                </tr>
+              </thead>
+              <tbody id="stage2-team-body">
+                <tr class="loading-row"><td colspan="7">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CHAMPIONS ──────────────────────── -->
+      <section class="t-panel" id="panel-champions">
+        <p class="panel-title">Champions</p>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">선수 기록</span>
+            <div class="subsection-tabs">
+              <button class="subsection-tab active" data-sort="acs">ACS</button>
+              <button class="subsection-tab" data-sort="kda">KDA</button>
+              <button class="subsection-tab" data-sort="maps">맵 수</button>
+            </div>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>선수</th>
+                  <th class="num sorted" data-col="acs">ACS</th>
+                  <th class="num" data-col="kda">KDA</th>
+                  <th class="num" data-col="maps">맵</th>
+                </tr>
+              </thead>
+              <tbody id="champions-player-body">
+                <tr class="loading-row"><td colspan="5">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-header">
+            <span class="subsection-title">팀 기록</span>
+          </div>
+          <div class="stat-table-wrap">
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th class="rank">#</th>
+                  <th>팀</th>
+                  <th class="num sorted">승</th>
+                  <th class="num">패</th>
+                  <th class="num">맵 승</th>
+                  <th class="num">맵 패</th>
+                </tr>
+              </thead>
+              <tbody id="champions-team-body">
+                <tr class="loading-row"><td colspan="6">데이터 로딩 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div><!-- /records-shell -->
+
+    <script src="./storage.js"></script>
+    <script>
+    /* ── 탭 전환 ─────────────────────────────────────── */
+    document.querySelectorAll(".t-tab").forEach(function(tab) {
+      tab.addEventListener("click", function() {
+        var panelId = this.dataset.panel;
+        document.querySelectorAll(".t-tab").forEach(function(t) { t.classList.remove("active"); });
+        document.querySelectorAll(".t-panel").forEach(function(p) { p.classList.remove("active"); });
+        this.classList.add("active");
+        var panel = document.getElementById("panel-" + panelId);
+        if (panel) panel.classList.add("active");
+      });
+    });
+
+    /* ── 서브탭 전환 ──────────────────────────────────── */
+    document.querySelectorAll(".subsection-tabs").forEach(function(tabs) {
+      tabs.querySelectorAll(".subsection-tab").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          tabs.querySelectorAll(".subsection-tab").forEach(function(b) { b.classList.remove("active"); });
+          this.classList.add("active");
+          // TODO: 정렬 로직 연결
+        });
+      });
+    });
+
+    /* ── 리그 레이블 매핑 ─────────────────────────────── */
+    var LEAGUE_BADGE = {
+      pacific:  { cls: "lb-pacific",  label: "Pacific" },
+      cn:       { cls: "lb-cn",       label: "CN" },
+      americas: { cls: "lb-americas", label: "Americas" },
+      emea:     { cls: "lb-emea",     label: "EMEA" },
+      masters:  { cls: "lb-masters",  label: "Masters" },
+      champions:{ cls: "lb-champions",label: "Champions" },
+    };
+
+    /* ── 스테이지 → 대회 매핑 ────────────────────────── */
+    var STAGE_TO_PANEL = {
+      kickoff:        "kickoff",
+      swiss:          "santiago",   // Masters Swiss (기본값 Santiago)
+      playoffs:       "santiago",   // Masters Playoffs (기본값 Santiago)
+      stage1:         "stage1",
+      stage1playoffs: "stage1",
+      stage2:         "stage2",
+      stage2playoffs: "stage2",
+      groupstage:     "champions",
+      // tournament 필드로 보정 필요
+    };
+
+    /* ── localStorage에서 모든 vct_p: 키 수집 ───────── */
+    function getAllPlayerData() {
+      var players = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || !key.startsWith("vct_p:")) continue;
+        var name = key.slice(6);
+        try {
+          var pd = JSON.parse(localStorage.getItem(key) || "{}");
+          if (!pd.maps || !pd.maps.length) continue;
+          players.push({ name: name, maps: pd.maps, meta: pd.meta || {} });
+        } catch(e) {}
+      }
+      return players;
+    }
+
+    /* ── 선수 데이터 → 대회별 집계 ──────────────────── */
+    function aggregatePlayersByPanel(players) {
+      /* panel → { playerName → { maps, totalAcs, totalMaps, kda합산 } } */
+      var byPanel = {};
+      ["kickoff","santiago","stage1","london","stage2","champions"].forEach(function(p) {
+        byPanel[p] = {};
+      });
+
+      players.forEach(function(player) {
+        player.maps.forEach(function(m) {
+          var panel = resolvePanel(m);
+          if (!panel) return;
+          var acs = parseFloat(m.acs) || 0;
+          if (!acs) return; // ACS 없으면 스킵
+
+          if (!byPanel[panel][player.name]) {
+            byPanel[panel][player.name] = {
+              name: player.name,
+              league: m.league || "",
+              maps: 0, totalAcs: 0,
+              totalK: 0, totalD: 0, totalA: 0, hasKda: false,
+              meta: player.meta,
+            };
+          }
+          var entry = byPanel[panel][player.name];
+          entry.maps += 1;
+          entry.totalAcs += acs;
+          entry.league = entry.league || m.league || "";
+          if (m.kda && m.kda.indexOf("/") !== -1) {
+            var pts = m.kda.split("/");
+            var k = parseFloat(pts[0]) || 0;
+            var d = parseFloat(pts[1]) || 0;
+            var a = parseFloat(pts[2]) || 0;
+            entry.totalK += k; entry.totalD += d; entry.totalA += a;
+            entry.hasKda = true;
+          }
+        });
+      });
+
+      /* 평균 계산 */
+      var result = {};
+      Object.keys(byPanel).forEach(function(panel) {
+        result[panel] = Object.values(byPanel[panel]).map(function(e) {
+          var avgAcs = e.maps ? Math.round(e.totalAcs / e.maps) : 0;
+          var kda = e.hasKda && e.totalD > 0
+            ? ((e.totalK + e.totalA * 0.5) / e.totalD).toFixed(2)
+            : (e.hasKda ? (e.totalK + e.totalA * 0.5).toFixed(2) : "—");
+          return {
+            name: e.name, league: e.league, maps: e.maps,
+            avgAcs: avgAcs, kda: kda, meta: e.meta,
+          };
+        });
+      });
+      return result;
+    }
+
+    function resolvePanel(m) {
+      var l = m.league || "", s = m.stage || "", t = m.tournament || "";
+      if (s === "kickoff") return "kickoff";
+      if (l === "masters" || l === "champions") {
+        if (t === "santiago" || (l === "masters" && !t && (s === "swiss" || s === "playoffs"))) return "santiago";
+        if (t === "london") return "london";
+        if (l === "champions") return "champions";
+        return null;
+      }
+      if (s === "stage1" || s === "stage1playoffs") return "stage1";
+      if (s === "stage2" || s === "stage2playoffs") return "stage2";
+      return null;
+    }
+
+    /* ── 테이블 렌더 ─────────────────────────────────── */
+    function renderEmpty(tbodyId, colspan) {
+      var el = document.getElementById(tbodyId);
+      if (!el) return;
+      el.innerHTML = '<tr><td colspan="' + colspan + '" style="text-align:center;padding:40px;color:rgba(255,255,255,0.18);font-family:\'Barlow Condensed\',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;">기록 없음</td></tr>';
+    }
+
+    function renderPlayerTable(tbodyId, rows, hasLeague) {
+      var el = document.getElementById(tbodyId);
+      if (!el) return;
+      if (!rows.length) { renderEmpty(tbodyId, hasLeague ? 6 : 5); return; }
+
+      /* ACS 기준 정렬 */
+      rows.sort(function(a, b) { return b.avgAcs - a.avgAcs; });
+
+      var html = rows.map(function(r, i) {
+        var badge = LEAGUE_BADGE[r.league] || {};
+        var leagueCell = hasLeague
+          ? '<td><span class="league-badge ' + (badge.cls || "") + '">' + (badge.label || r.league || "—") + '</span></td>'
+          : "";
+        return '<tr>' +
+          '<td class="rank">' + (i + 1) + '</td>' +
+          '<td><div class="player-name-cell"><span class="player-name">' + escHtml(r.name) + '</span></div></td>' +
+          '<td class="num"><span class="stat-val' + (i === 0 ? " highlight" : "") + '">' + (r.avgAcs || "—") + '</span></td>' +
+          '<td class="num"><span class="stat-val">' + r.kda + '</span></td>' +
+          '<td class="num"><span class="stat-val">' + r.maps + '</span></td>' +
+          leagueCell +
+          '</tr>';
+      }).join("");
+      el.innerHTML = html;
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    /* ── 메인: 데이터 로드 & 렌더 ───────────────────── */
+    window.storageReady.then(function() {
+      var players = getAllPlayerData();
+      var byPanel = aggregatePlayersByPanel(players);
+
+      renderPlayerTable("kickoff-player-body",   byPanel.kickoff,   true);
+      renderPlayerTable("santiago-player-body",  byPanel.santiago,  false);
+      renderPlayerTable("stage1-player-body",    byPanel.stage1,    true);
+      renderPlayerTable("london-player-body",    byPanel.london,    false);
+      renderPlayerTable("stage2-player-body",    byPanel.stage2,    true);
+      renderPlayerTable("champions-player-body", byPanel.champions, false);
+
+      /* 팀 테이블: 준비 중 안내 */
+      ["kickoff","santiago","stage1","london","stage2","champions"].forEach(function(p) {
+        var hasMasters = (p === "santiago" || p === "london" || p === "champions");
+        renderEmpty(p + "-team-body", hasMasters ? 6 : 7);
+      });
+    });
+    </script>
+    <script src="./auth.js"></script>
+  </body>
+</html>
