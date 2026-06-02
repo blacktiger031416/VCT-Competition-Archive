@@ -334,6 +334,54 @@
         color: var(--league-accent, #fff);
       }
 
+      /* ── 맵 밴픽 섹션 ── */
+      .map-bp-section {
+        border-top: 1px solid rgba(255,255,255,0.06);
+        padding: 16px 20px;
+      }
+      .map-bp-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.3); margin-bottom: 14px;
+      }
+      .map-bp-row {
+        display: flex; align-items: center; gap: 14px;
+        margin-bottom: 10px;
+      }
+      .map-bp-row:last-child { margin-bottom: 0; }
+      .map-bp-thumb {
+        width: 72px; height: 40px; object-fit: cover;
+        border-radius: 5px; flex-shrink: 0;
+        background: rgba(255,255,255,0.05);
+      }
+      .map-bp-name {
+        width: 68px; flex-shrink: 0;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px; font-weight: 700; letter-spacing: .05em;
+        color: rgba(255,255,255,0.75);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .map-bp-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+      .map-bp-chip {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 20px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      }
+      .map-bp-chip.pick {
+        background: rgba(100,220,180,0.12);
+        color: rgba(100,220,180,0.9);
+        border: 1px solid rgba(100,220,180,0.25);
+      }
+      .map-bp-chip.ban {
+        background: rgba(255,90,90,0.1);
+        color: rgba(255,110,110,0.85);
+        border: 1px solid rgba(255,90,90,0.2);
+      }
+      .map-bp-chip-count {
+        font-size: 15px; font-weight: 900;
+      }
+
       /* ── 맵 카드 그리드 ─────────────────────────── */
       .comp-map-card-grid {
         display: grid;
@@ -1628,8 +1676,9 @@
 
       document.getElementById("comp-section").style.display = "block";
 
-      /* ── 맵별 승률 렌더 ── */
+      /* ── 맵별 승률 + 밴픽 렌더 ── */
       renderMapWinRates(teamName, league, stage);
+      renderMapBanPick(teamName, league, stage);
     }
 
     /* ── 팀 맵 승률 계산 ────────────────────────────────────────── */
@@ -1768,6 +1817,125 @@
           '<div class="map-wr-bar-wrap"><div class="map-wr-bar-fill" style="width:' + pct + '%"></div></div>' +
           '<div class="map-wr-stat"><strong>' + pct + '%</strong> <span style="opacity:.55;font-size:.85em">' + s.wins + 'W ' + (s.total - s.wins) + 'L</span></div>' +
           '</div>';
+      });
+      html += '</div>';
+
+      body.insertAdjacentHTML("beforeend", html);
+    }
+
+    /* ── 팀 맵 밴픽 집계 ── */
+    function getTeamMapBanPick(teamName, league, stage) {
+      var pTeamMap = buildPlayerTeamMap();
+      var BO3 = ["ban","ban","pick","pick","ban","ban","decider"];
+      var BO5 = ["ban","ban","pick","pick","pick","pick","decider"];
+
+      /* matchKey → {league, stage, tournament} */
+      var mlIdx = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var vk = localStorage.key(i);
+        if (!vk || !vk.startsWith("vct_p:")) continue;
+        try {
+          var pd = JSON.parse(localStorage.getItem(vk) || "{}");
+          (pd.maps || []).forEach(function(m) {
+            if (m.matchKey && !mlIdx[m.matchKey])
+              mlIdx[m.matchKey] = { league: m.league||"", stage: m.stage||"", tournament: m.tournament||"" };
+          });
+        } catch(e) {}
+      }
+
+      var mapStats = {}; /* mapName → { picks:0, bans:0 } */
+
+      for (var j = 0; j < localStorage.length; j++) {
+        var key = localStorage.key(j);
+        if (!key || !key.startsWith("veto:")) continue;
+        var mk = key.slice(5);
+
+        /* 리그/스테이지 필터 */
+        var info = mlIdx[mk];
+        if (!info) continue;
+        var fakeM = { league: info.league, stage: info.stage, tournament: info.tournament };
+        if (!matchesLeague(fakeM, league)) continue;
+        if (!matchesStage(fakeM, league, stage)) continue;
+
+        var veto;
+        try { veto = JSON.parse(localStorage.getItem(key) || "{}"); } catch(e) { continue; }
+        if (!veto.maps || !veto.maps.length) continue;
+
+        /* 팀이 A인지 B인지 판별 (다수결) */
+        var teamSide = null;
+        var plRaw = localStorage.getItem("players:" + mk + ":0");
+        if (plRaw) {
+          try {
+            var pl = JSON.parse(plRaw);
+            var _vA = {}, _vB = {};
+            for (var pi = 0; pi < 5; pi++) {
+              var pa = pl["a"+pi]; if (pa&&pa.name&&pa.name!=="-"){ var ta=pTeamMap[pa.name.trim()]; if(ta) _vA[ta]=(_vA[ta]||0)+1; }
+              var pb = pl["b"+pi]; if (pb&&pb.name&&pb.name!=="-"){ var tb=pTeamMap[pb.name.trim()]; if(tb) _vB[tb]=(_vB[tb]||0)+1; }
+            }
+            var bA=0,bAT=null; Object.keys(_vA).forEach(function(t){ if(_vA[t]>bA){bA=_vA[t];bAT=t;} });
+            var bB=0,bBT=null; Object.keys(_vB).forEach(function(t){ if(_vB[t]>bB){bB=_vB[t];bBT=t;} });
+            if (bAT===teamName) teamSide="A";
+            else if (bBT===teamName) teamSide="B";
+          } catch(e) {}
+        }
+        /* fallback: DATE|TEAMA|TEAMB */
+        if (!teamSide) {
+          var pts = mk.split("|");
+          if (pts.length>=3 && _STAGE_WORDS.indexOf(pts[1].toLowerCase())===-1) {
+            if (pts[1]===teamName) teamSide="A";
+            else if (pts[2]===teamName) teamSide="B";
+          }
+        }
+        if (!teamSide) continue;
+
+        var isBo5 = !!(veto.bo5 || veto.gf);
+        var steps = isBo5 ? BO5 : BO3;
+        var fb = veto.firstBan || "A";
+
+        for (var s = 0; s < steps.length; s++) {
+          var mapName = veto.maps[s];
+          if (!mapName) continue;
+          mapName = normalizeMapName(mapName);
+          var stepTeam = (s % 2 === 0) ? fb : (fb==="A"?"B":"A");
+          if (stepTeam !== teamSide) continue; /* 이 팀 액션만 */
+          if (!mapStats[mapName]) mapStats[mapName] = { picks: 0, bans: 0 };
+          var t = steps[s];
+          if (t === "ban") mapStats[mapName].bans++;
+          else             mapStats[mapName].picks++; /* pick + decider */
+        }
+      }
+      return mapStats;
+    }
+
+    function renderMapBanPick(teamName, league, stage) {
+      var body = document.getElementById("comp-body");
+      if (!body) return;
+      var old = body.querySelector(".map-bp-section");
+      if (old) old.remove();
+
+      var mapStats = getTeamMapBanPick(teamName, league, stage);
+      var mapNames = Object.keys(mapStats).filter(function(m){ return mapStats[m].picks + mapStats[m].bans > 0; });
+      if (!mapNames.length) return;
+
+      /* 픽 많은 순 → 밴 많은 순 */
+      mapNames.sort(function(a,b){
+        return (mapStats[b].picks - mapStats[a].picks) || (mapStats[b].bans - mapStats[a].bans);
+      });
+
+      var html = '<div class="map-bp-section"><div class="map-bp-title">맵 밴픽</div>';
+      mapNames.forEach(function(mapName) {
+        var s = mapStats[mapName];
+        var imgSrc = MAP_IMG[mapName] || "";
+        html += '<div class="map-bp-row">' +
+          (imgSrc ? '<img class="map-bp-thumb" src="' + esc(imgSrc) + '" alt="' + esc(mapName) + '" />'
+                  : '<div class="map-bp-thumb"></div>') +
+          '<div class="map-bp-name">' + esc(mapName) + '</div>' +
+          '<div class="map-bp-chips">';
+        if (s.picks > 0)
+          html += '<span class="map-bp-chip pick"><span class="map-bp-chip-count">' + s.picks + '</span>픽</span>';
+        if (s.bans > 0)
+          html += '<span class="map-bp-chip ban"><span class="map-bp-chip-count">' + s.bans + '</span>밴</span>';
+        html += '</div></div>';
       });
       html += '</div>';
 
