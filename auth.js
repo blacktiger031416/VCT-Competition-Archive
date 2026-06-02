@@ -237,7 +237,9 @@
     "body.view-only .mo-veto-cell,",
     "body.view-only .pc-agent,",
     "body.view-only .sb-score-diamond-l,",
-    "body.view-only .sb-score-diamond-r",
+    "body.view-only .sb-score-diamond-r,",
+    /* 팀 스텟 (스코어, 첫킬, 절약왕 등) */
+    "body.view-only .ts-val",
     "{ pointer-events:none !important; cursor:default !important; }",
     "body.view-only .roster-add-row { display:none !important; }",
     "body.view-only .roster-player-remove { display:none !important; }",
