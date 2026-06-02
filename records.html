@@ -238,40 +238,96 @@
 
       .comp-body { padding: 0; }
 
-      .comp-stage-block {
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+      /* ── 맵 카드 그리드 ─────────────────────────── */
+      .comp-map-card-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 16px 20px 20px;
       }
-      .comp-stage-block:last-child { border-bottom: none; }
-      .comp-stage-title {
+      .comp-map-card {
+        position: relative; cursor: pointer;
+        border-radius: 6px; overflow: hidden;
+        aspect-ratio: 16 / 9;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      }
+      .comp-map-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255,255,255,0.22);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      }
+      .comp-map-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .comp-map-card-name {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 18px 8px 7px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.72));
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
-        color: rgba(255,255,255,0.25);
-        padding: 12px 20px 8px;
-        background: rgba(255,255,255,0.015);
+        font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        color: #fff; text-align: center;
       }
-      .comp-maps-list { padding: 4px 0 12px; }
-      .comp-map-block {
-        padding: 10px 20px;
-      }
-      .comp-map-block + .comp-map-block {
-        border-top: 1px solid rgba(255,255,255,0.04);
-      }
-      .comp-map-header {
-        display: flex; align-items: center; gap: 10px;
-        margin-bottom: 8px;
-      }
-      .comp-map-img {
-        width: 70px; height: 40px;
-        object-fit: cover; border-radius: 3px;
-        flex-shrink: 0; opacity: 0.85;
-        background: rgba(255,255,255,0.05);
-      }
-      .comp-map-name {
+      .comp-map-card-noimg {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
         font-family: "Barlow Condensed", sans-serif;
-        font-size: 15px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
-        color: rgba(255,255,255,0.65);
+        font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.2); text-transform: uppercase;
       }
-      .comp-combos { display: flex; flex-direction: column; gap: 6px; }
+
+      /* ── 맵 팝업 모달 ────────────────────────────── */
+      .comp-modal-overlay {
+        display: none; position: fixed; inset: 0; z-index: 500;
+        background: rgba(0,0,0,0.7);
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      }
+      .comp-modal-overlay.active { display: flex; }
+      .comp-modal {
+        width: min(560px, 92vw); max-height: 82vh;
+        background: #111113;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px; overflow: hidden;
+        display: flex; flex-direction: column;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+      }
+      .comp-modal-banner {
+        position: relative; height: 130px; flex-shrink: 0; overflow: hidden;
+      }
+      .comp-modal-banner img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        filter: brightness(0.55);
+      }
+      .comp-modal-banner-noimg {
+        width: 100%; height: 100%; background: rgba(255,255,255,0.04);
+      }
+      .comp-modal-map-name {
+        position: absolute; bottom: 12px; left: 16px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 26px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase;
+        color: #fff;
+      }
+      .comp-modal-close {
+        position: absolute; top: 10px; right: 10px;
+        width: 28px; height: 28px;
+        background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%; color: rgba(255,255,255,0.75); font-size: 15px; line-height: 1;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background 0.12s, color 0.12s;
+        appearance: none; -webkit-appearance: none;
+      }
+      .comp-modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+      .comp-modal-body { overflow-y: auto; padding: 16px 20px 20px; flex: 1; }
+      .comp-modal-stage-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+        color: rgba(255,255,255,0.28); margin-bottom: 10px; margin-top: 16px;
+      }
+      .comp-modal-stage-title:first-child { margin-top: 0; }
+      .comp-modal-combos { display: flex; flex-direction: column; gap: 8px; }
+      .comp-modal-combo { display: flex; align-items: center; gap: 10px; }
+
+      /* 공통 에이전트 아이콘 */
       .comp-combo-item {
         display: flex; align-items: center; gap: 8px;
       }
@@ -524,6 +580,18 @@
             </table>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ── 맵 조합 팝업 모달 ── -->
+    <div class="comp-modal-overlay" id="comp-modal-overlay">
+      <div class="comp-modal">
+        <div class="comp-modal-banner" id="comp-modal-banner">
+          <img id="comp-modal-banner-img" src="" alt="" />
+          <div class="comp-modal-map-name" id="comp-modal-map-name"></div>
+          <button class="comp-modal-close" id="comp-modal-close">✕</button>
+        </div>
+        <div class="comp-modal-body" id="comp-modal-body"></div>
       </div>
     </div>
 
@@ -1032,78 +1100,122 @@
       });
     }
 
-    /* ── 조합 뷰 렌더 ── */
+    /* ── 조합 뷰 렌더 (맵 카드 그리드) ── */
+    var _compMapData   = {};  /* openMapModal에서 참조 */
+    var _compStageOrder = [];
+
     function renderCompositions(teamName, league, stage) {
       var fg = getFilterGroup(league);
       var stageOrder;
-      if (fg === "league")    stageOrder = ["kickoff", "stage1", "stage2"];
+      if (fg === "league")       stageOrder = ["kickoff", "stage1", "stage2"];
       else if (fg === "masters") stageOrder = ["swiss", "playoffs"];
-      else                    stageOrder = ["groupstage", "playoffs"];
-
-      /* 스테이지 필터가 선택된 경우 해당 그룹만 */
-      if (stage !== "all") {
-        stageOrder = stageOrder.filter(function(k) { return k === stage; });
-      }
+      else                       stageOrder = ["groupstage", "playoffs"];
+      if (stage !== "all") stageOrder = stageOrder.filter(function(k) { return k === stage; });
 
       var data = getTeamCompositions(teamName, league, stage);
-      var html = "";
-      var hasAny = false;
 
+      /* 맵별로 스테이지 데이터 집계: { mapName → { sgKey → { comboKey → {agents,count} } } } */
+      var mapData = {};
       stageOrder.forEach(function(sgKey) {
         var maps = data[sgKey];
         if (!maps) return;
-        var mapNames = Object.keys(maps).sort();
-        if (!mapNames.length) return;
+        Object.keys(maps).forEach(function(mapName) {
+          if (!mapData[mapName]) mapData[mapName] = {};
+          mapData[mapName][sgKey] = maps[mapName];
+        });
+      });
+
+      _compMapData    = mapData;
+      _compStageOrder = stageOrder;
+
+      document.getElementById("comp-team-title").textContent = teamName;
+
+      var mapNames = Object.keys(mapData).sort();
+      var html = "";
+
+      if (!mapNames.length) {
+        html = '<div class="comp-empty">조합 데이터가 없습니다</div>';
+      } else {
+        html = '<div class="comp-map-card-grid">';
+        mapNames.forEach(function(mapName) {
+          var mImg = MAP_IMG[mapName] || "";
+          html += '<div class="comp-map-card" data-map="' + esc(mapName) + '">' +
+            (mImg
+              ? '<img src="' + esc(mImg) + '" alt="' + esc(mapName) + '" />'
+              : '<div class="comp-map-card-noimg">' + esc(mapName) + '</div>') +
+            '<div class="comp-map-card-name">' + esc(mapName) + '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+
+      var body = document.getElementById("comp-body");
+      body.innerHTML = html;
+
+      /* 맵 카드 클릭 → 팝업 */
+      body.querySelectorAll(".comp-map-card").forEach(function(card) {
+        card.addEventListener("click", function() {
+          openMapModal(this.dataset.map);
+        });
+      });
+
+      document.getElementById("comp-section").style.display = "block";
+    }
+
+    /* ── 맵 팝업 열기 ── */
+    function openMapModal(mapName) {
+      var combosForMap = _compMapData[mapName] || {};
+      var mImg = MAP_IMG[mapName] || "";
+
+      /* 배너 */
+      var bannerImg = document.getElementById("comp-modal-banner-img");
+      if (mImg) {
+        bannerImg.src = mImg; bannerImg.alt = mapName; bannerImg.style.display = "";
+      } else {
+        bannerImg.style.display = "none";
+      }
+      document.getElementById("comp-modal-map-name").textContent = mapName;
+
+      /* 조합 목록 */
+      var html = "";
+      var hasAny = false;
+      _compStageOrder.forEach(function(sgKey) {
+        var combos = combosForMap[sgKey];
+        if (!combos) return;
+        var comboKeys = Object.keys(combos).sort(function(a, b) {
+          return combos[b].count - combos[a].count;
+        });
+        if (!comboKeys.length) return;
         hasAny = true;
 
-        html += '<div class="comp-stage-block">' +
-          '<div class="comp-stage-title">' + (STAGE_GROUP_LABELS[sgKey] || sgKey) + '</div>' +
-          '<div class="comp-maps-list">';
-
-        mapNames.forEach(function(mapName) {
-          var combos = maps[mapName];
-          var comboKeys = Object.keys(combos).sort(function(a, b) {
-            return combos[b].count - combos[a].count;
-          });
-
-          var mImg = MAP_IMG[mapName] || "";
-          html += '<div class="comp-map-block">' +
-            '<div class="comp-map-header">' +
-            (mImg ? '<img class="comp-map-img" src="' + esc(mImg) + '" alt="' + esc(mapName) + '" />' : '') +
-            '<div class="comp-map-name">' + esc(mapName) + '</div>' +
+        /* 스테이지가 "전체"일 때만 섹션 제목 표시 */
+        if (currentStage === "all") {
+          html += '<div class="comp-modal-stage-title">' + (STAGE_GROUP_LABELS[sgKey] || sgKey) + '</div>';
+        }
+        html += '<div class="comp-modal-combos">';
+        comboKeys.forEach(function(ck) {
+          var combo = combos[ck];
+          html += '<div class="comp-modal-combo">' +
+            '<div class="agent-chips">' +
+            combo.agents.map(function(a) {
+              var img = AGENT_IMG[a] || "";
+              return img
+                ? '<div class="agent-icon" title="' + esc(a) + '"><img src="' + esc(img) + '" alt="' + esc(a) + '" /></div>'
+                : '<div class="agent-icon"><div class="agent-icon-fallback">' + esc(a.substring(0, 3)) + '</div></div>';
+            }).join("") +
             '</div>' +
-            '<div class="comp-combos">';
-
-          comboKeys.forEach(function(ck) {
-            var combo = combos[ck];
-            html += '<div class="comp-combo-item">' +
-              '<div class="agent-chips">' +
-              combo.agents.map(function(a) {
-                var img = AGENT_IMG[a] || "";
-                return img
-                  ? '<div class="agent-icon" title="' + esc(a) + '"><img src="' + esc(img) + '" alt="' + esc(a) + '" /></div>'
-                  : '<div class="agent-icon"><div class="agent-icon-fallback">' + esc(a.substring(0, 3)) + '</div></div>';
-              }).join("") +
-              '</div>' +
-              (combo.count > 1 ? '<span class="combo-count">×' + combo.count + '</span>' : '') +
-              '</div>';
-          });
-
-          html += '</div></div>'; /* comp-combos / comp-map-block */
+            (combo.count > 1 ? '<span class="combo-count">×' + combo.count + '</span>' : '') +
+            '</div>';
         });
-
-        html += '</div></div>'; /* comp-maps-list / comp-stage-block */
+        html += '</div>';
       });
 
       if (!hasAny) {
-        html = '<div class="comp-empty">조합 데이터가 없습니다</div>';
+        html = '<div style="color:rgba(255,255,255,0.25);font-family:\'Barlow Condensed\',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:24px">데이터 없음</div>';
       }
 
-      document.getElementById("comp-team-title").textContent = teamName;
-      document.getElementById("comp-body").innerHTML = html;
-
-      var compSection = document.getElementById("comp-section");
-      compSection.style.display = "block";
+      document.getElementById("comp-modal-body").innerHTML = html;
+      document.getElementById("comp-modal-overlay").classList.add("active");
     }
 
     /* ── 팀 선택 ── */
@@ -1284,6 +1396,19 @@
     /* ── 조합 뷰 닫기 ── */
     document.getElementById("comp-close-btn").addEventListener("click", function() {
       deselectTeam();
+    });
+
+    /* ── 맵 팝업 닫기 ── */
+    document.getElementById("comp-modal-close").addEventListener("click", function() {
+      document.getElementById("comp-modal-overlay").classList.remove("active");
+    });
+    document.getElementById("comp-modal-overlay").addEventListener("click", function(e) {
+      if (e.target === this) this.classList.remove("active");
+    });
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        document.getElementById("comp-modal-overlay").classList.remove("active");
+      }
     });
 
     /* ── 권역 버튼 ── */
