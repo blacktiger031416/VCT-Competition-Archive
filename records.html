@@ -982,14 +982,15 @@
 
     /* ── 팀 선수 명단 조회 (부분 이름 매칭 지원) ──────────
        "ZETA"로 저장된 경우도 "ZETA DIVISION"을 찾을 수 있도록
-       정확 일치 실패 시 부분 문자열 매칭으로 재시도           */
+       정확 일치 실패 시 부분 문자열 매칭으로 재시도
+       반환값: { players: [], foundKey: "vct_roster:..." | null }  */
     function getRosterPlayers(teamName) {
       var raw = localStorage.getItem("vct_roster:" + teamName);
       if (raw) {
         try {
           var r = JSON.parse(raw);
           var p = (r.main || []).concat(r.subs || []);
-          if (p.length) return p;
+          if (p.length) return { players: p, foundKey: "vct_roster:" + teamName };
         } catch(e) {}
       }
       /* 부분 매칭 스캔 */
@@ -1006,11 +1007,17 @@
           try {
             var roster = JSON.parse(localStorage.getItem(key) || "{}");
             var players = (roster.main || []).concat(roster.subs || []);
-            if (players.length) return players;
+            if (players.length) return { players: players, foundKey: key };
           } catch(e) {}
         }
       }
-      return [];
+      /* 저장된 모든 vct_roster 키 수집 (진단용) */
+      var allRosterKeys = [];
+      for (var j = 0; j < localStorage.length; j++) {
+        var k = localStorage.key(j);
+        if (k && k.startsWith("vct_roster:")) allRosterKeys.push(k.slice(11));
+      }
+      return { players: [], foundKey: null, allKeys: allRosterKeys };
     }
 
     /* ── 팀 조합 집계 ──────────────────────────────────────
@@ -1019,8 +1026,9 @@
        roster에 등록된 선수들의 agent를 matchKey+mapIdx 단위로 모아
        5명 조합을 구성한다.                                  */
     function getTeamCompositions(teamName, league, stage) {
-      var allPlayers = getRosterPlayers(teamName);
-      if (!allPlayers.length) return {};
+      var rosterResult = getRosterPlayers(teamName);
+      var allPlayers = rosterResult.players;
+      if (!allPlayers.length) return { _debug: { noRoster: true, triedKey: "vct_roster:" + teamName, allRosterKeys: rosterResult.allKeys || [] } };
 
       /* matchKey|mapIdx → { matchKey, mapIdx, stageVal, agents:{playerName:agentName} } */
       var matchMaps = {};
@@ -1075,6 +1083,27 @@
         }
         result[sgKey][mapName][comboKey].count++;
       });
+
+      /* 진단 정보 (빈 결과일 때 renderCompositions에서 표시) */
+      if (!Object.keys(result).length) {
+        var debugPlayers = {};
+        allPlayers.forEach(function(pName) {
+          var pdRaw = localStorage.getItem("vct_p:" + pName);
+          if (!pdRaw) { debugPlayers[pName] = "키 없음"; return; }
+          try {
+            var pd = JSON.parse(pdRaw);
+            var maps = (pd.maps || []);
+            var leagueMaps = maps.filter(function(m){ return m.league === league; });
+            debugPlayers[pName] = "전체 " + maps.length + "맵, " + league + " " + leagueMaps.length + "맵" +
+              (leagueMaps.length ? " (에이전트:" + leagueMaps.filter(function(m){return m.agent;}).length + "개)" : "");
+          } catch(e) { debugPlayers[pName] = "파싱 오류"; }
+        });
+        result._debug = {
+          foundRosterKey: rosterResult.foundKey,
+          players: debugPlayers,
+          matchMapsCount: Object.keys(matchMaps).length,
+        };
+      }
 
       return result;
     }
@@ -1148,7 +1177,22 @@
       var html = "";
 
       if (!mapNames.length) {
-        html = '<div class="comp-empty">조합 데이터가 없습니다</div>';
+        var dbg = data._debug || {};
+        var dbgHtml = '';
+        if (dbg.noRoster) {
+          dbgHtml += '<div style="margin-top:8px;font-size:12px;color:#f87171">🔍 로스터 없음: ' + esc(dbg.triedKey) + '<br>';
+          if (dbg.allRosterKeys && dbg.allRosterKeys.length) {
+            dbgHtml += '저장된 팀: ' + dbg.allRosterKeys.map(esc).join(', ');
+          } else {
+            dbgHtml += '저장된 roster 키 없음';
+          }
+          dbgHtml += '</div>';
+        } else if (dbg.players) {
+          dbgHtml += '<div style="margin-top:8px;font-size:12px;color:#94a3b8">🔍 로스터: ' + esc(dbg.foundRosterKey || '?') + '<br>';
+          dbgHtml += Object.keys(dbg.players).map(function(p){ return esc(p) + ': ' + esc(dbg.players[p]); }).join('<br>');
+          dbgHtml += '<br>matchMaps 수집: ' + (dbg.matchMapsCount || 0) + '</div>';
+        }
+        html = '<div class="comp-empty">조합 데이터가 없습니다' + dbgHtml + '</div>';
       } else {
         html = '<div class="comp-map-card-grid">';
         mapNames.forEach(function(mapName) {
