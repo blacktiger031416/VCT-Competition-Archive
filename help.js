@@ -177,15 +177,15 @@
           desc: "화살표를 클릭해 ACS, K/D, 피스톨, 공격·수비 승률 등 다른 스탯 슬라이드로 넘깁니다." },
 
         /* ③ 전체 강제 선택 후: 스테이지 필터 */
-        { sel: ".global-stage-all",
+        { sel: "#stage-filter-bar",
           title: "전체 스테이지",
-          desc: "전 권역을 기준으로 스탯 순위를 보여줍니다.",
+          desc: "전체 스테이지와 각 KickOff, Stage 1, Stage 2의 전체 버튼으로 해당 스테이지 기준 스탯 순위를 보여줍니다.",
           action: function () {
             var btn = document.querySelector(".league-btn.lb-global");
             if (btn) btn.click();
           },
           actionDelay: 800 },
-        { sel: "button[data-stage='g-kickoff-ms']",
+        { multiSel: "button[data-stage='g-kickoff-ms'], button[data-stage='g-stage1-ml'], button[data-stage='g-stage2-ch']",
           title: "Masters / Champions 진출팀",
           desc: "각 Masters·Champions에 진출한 팀들과 선수들을 기준으로 스탯 순위를 보여줍니다." },
       ],
@@ -363,6 +363,43 @@
     return null;
   }
 
+  /* multiSel: "sel1, sel2, sel3" → 각각 querySelectorAll의 첫 결과를 모아 배열 반환 */
+  function findMultiEls(multiSel) {
+    var els = [];
+    multiSel.split(",").forEach(function (s) {
+      try {
+        var el = document.querySelector(s.trim());
+        if (el) els.push(el);
+      } catch (e) {}
+    });
+    return els;
+  }
+
+  /* 여러 요소의 합집합 BoundingRect 계산 */
+  function unionRect(els) {
+    var minL = Infinity, minT = Infinity, maxR = -Infinity, maxB = -Infinity;
+    els.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.left   < minL) minL = r.left;
+      if (r.top    < minT) minT = r.top;
+      if (r.right  > maxR) maxR = r.right;
+      if (r.bottom > maxB) maxB = r.bottom;
+    });
+    return { left: minL, top: minT, right: maxR, bottom: maxB,
+             width: maxR - minL, height: maxB - minT };
+  }
+
+  /* 아이템에서 사용할 요소(들) 반환 — { el, rect, multi } */
+  function resolveItem(item) {
+    if (item.multiSel) {
+      var els = findMultiEls(item.multiSel);
+      if (!els.length) return null;
+      return { els: els, rect: null }; /* rect는 place 시점에 계산 */
+    }
+    var el = findEl(item.sel);
+    return el ? { el: el, rect: null } : null;
+  }
+
   /* ── 상태 ──────────────────────────────────────────── */
   var _isOpen      = false;
   var _pending     = false;   /* 액션 딜레이 중 네비게이션 잠금 */
@@ -395,9 +432,9 @@
       if (item.action) {
         _stepItems.push(item);
       } else {
-        var el = findEl(item.sel);
-        if (el) {
-          item._cachedEl = el;
+        var resolved = resolveItem(item);
+        if (resolved) {
+          item._resolved = resolved;
           _stepItems.push(item);
         }
       }
@@ -450,24 +487,26 @@
       _actionTimer = setTimeout(function () {
         if (!_isOpen) return;
         _pending = false;
-        var el = findEl(item.sel);
-        item._cachedEl = el || null;
-        if (el) scrollAndPlace(el, idx + 1);
+        var resolved = resolveItem(item);
+        item._resolved = resolved || null;
+        if (resolved) scrollAndPlace(resolved, idx + 1);
         renderPanel(item, idx, false);
       }, item.actionDelay || 700);
     } else {
-      var el = item._cachedEl || findEl(item.sel);
-      item._cachedEl = el || null;
-      if (el) scrollAndPlace(el, idx + 1);
+      var resolved = item._resolved || resolveItem(item);
+      item._resolved = resolved || null;
+      if (resolved) scrollAndPlace(resolved, idx + 1);
       renderPanel(item, idx, false);
     }
   }
 
   /* ── 스크롤 + 마커/링 배치 ──────────────────────────── */
-  function scrollAndPlace(el, num) {
-    var panelH  = 160;
-    var rect    = el.getBoundingClientRect();
-    var inView  = (
+  function scrollAndPlace(resolved, num) {
+    /* 스크롤 앵커: 단일 요소 or 첫 번째 요소 */
+    var anchor = resolved.el || resolved.els[0];
+    var panelH = 160;
+    var rect   = anchor.getBoundingClientRect();
+    var inView = (
       rect.top    >= 0 &&
       rect.left   >= 0 &&
       rect.bottom <= (window.innerHeight - panelH) &&
@@ -475,21 +514,22 @@
     );
 
     if (!inView) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      anchor.scrollIntoView({ behavior: "smooth", block: "center" });
       if (_scrollTimer) clearTimeout(_scrollTimer);
       _scrollTimer = setTimeout(function () {
-        if (_isOpen) placeDecor(el, num);
+        if (_isOpen) placeDecor(resolved, num);
       }, 450);
     } else {
-      placeDecor(el, num);
+      placeDecor(resolved, num);
     }
   }
 
-  function placeDecor(el, num) {
+  function placeDecor(resolved, num) {
     if (!_isOpen) return;
     clearDecor();
 
-    var rect = el.getBoundingClientRect();
+    /* 단일 요소 or 복수 요소의 합집합 rect */
+    var rect = resolved.els ? unionRect(resolved.els) : resolved.el.getBoundingClientRect();
     var pad  = 6;
 
     /* 하이라이트 링 */
@@ -501,7 +541,7 @@
     _ringEl.style.height = (rect.height + pad * 2) + "px";
     document.body.appendChild(_ringEl);
 
-    /* 번호 마커 */
+    /* 번호 마커 (링 오른쪽 위) */
     _markerEl = document.createElement("div");
     _markerEl.className = "help-marker";
     _markerEl.textContent = num;
