@@ -285,6 +285,25 @@
         { sel: ".league-mark img, .league-hero img",
           title: "리그 로고",
           desc: "현재 보고 있는 리그의 공식 로고입니다." },
+        { sel: ".teams-section .team-grid, .team-grid",
+          title: "참가팀",
+          desc: "팀의 선수 명단을 볼 수 있습니다." },
+        { sel: "#roster-main-list",
+          title: "선수 명단",
+          desc: "선수들의 이름을 클릭하여 선수의 개인 평균 ACS, K/D, 국적, 본명, 사용 요원, 우승 기록을 볼 수 있습니다.",
+          action: function () {
+            var card = document.querySelector(".teams-section .team-card");
+            if (card) card.click();
+          },
+          actionDelay: 500 },
+        { sel: ".back-link",
+          title: "홈으로",
+          desc: "원래 기존 사이트의 메인 페이지로 돌아갑니다.",
+          action: function () {
+            var closeBtn = document.getElementById("roster-modal-close");
+            if (closeBtn) closeBtn.click();
+          },
+          actionDelay: 350 },
       ],
     },
 
