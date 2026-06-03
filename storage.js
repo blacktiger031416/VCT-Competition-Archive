@@ -220,4 +220,13 @@
       .catch(function () {});
   });
 
+  /* ── bfcache 복원 시 자동 새로고침 ─────────────────────
+     Chrome 뒤로가기 버튼으로 돌아올 때 JS 애니메이션이 멈춘
+     상태로 복원되어 카드가 투명하게 보이는 버그 방지 */
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) {
+      window.location.reload();
+    }
+  });
+
 })();
