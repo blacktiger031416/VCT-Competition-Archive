@@ -1,9 +1,10 @@
 /**
- * help.js — 페이지별 도움말 오버레이 (스텝 방식)
+ * help.js — 페이지별 도움말 오버레이 (스텝 방식 + 액션 지원)
  *
  * auth.js의 "?" 버튼이 window.vctHelpOpen() 을 호출합니다.
  * 한 번에 하나씩 요소를 강조하며, 다음/이전 버튼으로 탐색합니다.
- * 요소가 화면 밖에 있으면 자동으로 스크롤합니다.
+ * 요소가 화면 밖에 있으면 자동으로 스크롤하고,
+ * action이 있는 스텝은 액션 실행 후 요소를 탐색합니다.
  */
 (function () {
   "use strict";
@@ -41,13 +42,12 @@
     "}",
     "@keyframes markerPop { from{opacity:0;transform:scale(0.3)} to{opacity:1;transform:scale(1)} }",
 
-    /* 하이라이트 링 */
     ".help-highlight-ring {",
     "  position:fixed; z-index:98005;",
-    "  border:2px solid rgba(232,67,45,0.6);",
+    "  border:2px solid rgba(232,67,45,0.7);",
     "  border-radius:6px;",
     "  pointer-events:none;",
-    "  box-shadow:0 0 0 4000px rgba(0,0,0,0.35);",
+    "  box-shadow:0 0 0 4000px rgba(0,0,0,0.40);",
     "  animation:ringPop .3s cubic-bezier(0.16,1,0.3,1) both;",
     "}",
     "@keyframes ringPop { from{opacity:0} to{opacity:1} }",
@@ -107,14 +107,14 @@
     "  background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6);",
     "  font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;",
     "  letter-spacing:.1em; text-transform:uppercase; cursor:pointer;",
-    "  transition:background .15s, color .15s, border-color .15s;",
+    "  transition:background .15s, color .15s, border-color .15s, opacity .15s;",
     "}",
-    ".help-nav-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.22); }",
+    ".help-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.22); }",
     ".help-nav-btn:disabled { opacity:0.3; cursor:default; }",
     ".help-nav-btn--next {",
     "  background:#e8432d; border-color:#e8432d; color:#fff;",
     "}",
-    ".help-nav-btn--next:hover { background:#d43520; border-color:#d43520; }",
+    ".help-nav-btn--next:hover:not(:disabled) { background:#d43520; border-color:#d43520; }",
     ".help-nav-dots {",
     "  display:flex; gap:5px; align-items:center; flex-shrink:0;",
     "}",
@@ -135,7 +135,7 @@
       items: [
         { sel: ".nav-links a[href*='records'], .nav-link[href*='records']",
           title: "기록",
-          desc: "맵 상세 데이터와 선수들의 개인 스텟 순위를 볼 수 있는 페이지입니다." },
+          desc: "맵 상세 데이터와 선수들의 개인 스탯 순위를 볼 수 있는 페이지입니다." },
         { sel: ".nav-links a[href*='tierlist'], .nav-link[href*='tierlist']",
           title: "티어리스트",
           desc: "팀 티어리스트를 직접 만들고, 다른 사람들의 티어리스트를 볼 수 있는 게시판입니다." },
@@ -145,6 +145,49 @@
         { sel: ".league-grid .league-card, .hero",
           title: "리그 / 대회 카드",
           desc: "Pacific, CN, Americas, EMEA 리그 및 Masters, Champions 대회 페이지로 이동합니다." },
+      ],
+    },
+
+    /* ── 기록 페이지 (3단계 흐름) */
+    records: {
+      title: "기록 도움말",
+      items: [
+        /* ① 리그 선택 */
+        { sel: ".league-btn.lb-global",
+          title: "전체",
+          desc: "전 권역의 팀들과 각 Masters, Champions 진출팀들의 스탯 순위를 확인할 수 있는 페이지입니다." },
+        { sel: ".league-btn.lb-pacific",
+          title: "Pacific / CN / Americas / EMEA / Masters / Champions",
+          desc: "각 대회에 속해 있는 팀들의 스탯 순위를 확인할 수 있는 페이지입니다." },
+
+        /* ② Pacific 강제 선택 후: 팀 그리드 · 기록 · 화살표 */
+        { sel: "#team-grid",
+          title: "팀 로고",
+          desc: "각 팀의 맵별 조합, 맵 승률, 그리고 맵 밴픽을 볼 수 있습니다.",
+          action: function () {
+            var btn = document.querySelector(".league-btn.lb-pacific");
+            if (btn) btn.click();
+          },
+          actionDelay: 800 },
+        { sel: "#stats-section",
+          title: "기록",
+          desc: "각 권역에 맞는 선수들의 ACS·K/D 순위, 팀별 피스톨·수비·공격 승률을 볼 수 있습니다." },
+        { sel: "#stats-carousel-next",
+          title: "화살표",
+          desc: "화살표를 클릭해 ACS, K/D, 피스톨, 공격·수비 승률 등 다른 스탯 슬라이드로 넘깁니다." },
+
+        /* ③ 전체 강제 선택 후: 스테이지 필터 */
+        { sel: ".global-stage-all",
+          title: "전체 스테이지",
+          desc: "전 권역을 기준으로 스탯 순위를 보여줍니다.",
+          action: function () {
+            var btn = document.querySelector(".league-btn.lb-global");
+            if (btn) btn.click();
+          },
+          actionDelay: 800 },
+        { sel: "button[data-stage='g-kickoff-ms']",
+          title: "Masters / Champions 진출팀",
+          desc: "각 Masters·Champions에 진출한 팀들과 선수들을 기준으로 스탯 순위를 보여줍니다." },
       ],
     },
 
@@ -205,19 +248,6 @@
         { sel: "#board-section",
           title: "게시판",
           desc: "다른 유저들이 올린 티어리스트를 볼 수 있습니다. ♥를 눌러 좋아요를 남겨보세요." },
-      ],
-    },
-
-    /* ── 기록 페이지 */
-    records: {
-      title: "경기 기록 도움말",
-      items: [
-        { sel: ".filter-group, .filter-bar, .record-filter, select",
-          title: "필터",
-          desc: "리그, 대회, 팀을 선택해 원하는 경기 기록만 필터링합니다." },
-        { sel: ".match-row, .record-card, .result-item, table tbody tr",
-          title: "경기 기록",
-          desc: "각 경기의 팀과 스코어를 보여줍니다. 행을 클릭하면 맵별 상세 데이터로 이동합니다." },
       ],
     },
 
@@ -321,41 +351,59 @@
     return HELP_CONFIG.index;
   }
 
+  /* ── 요소 탐색 헬퍼 ──────────────────────────────────── */
+  function findEl(sel) {
+    var selectors = sel.split(",");
+    for (var i = 0; i < selectors.length; i++) {
+      try {
+        var el = document.querySelector(selectors[i].trim());
+        if (el) return el;
+      } catch (e) {}
+    }
+    return null;
+  }
+
   /* ── 상태 ──────────────────────────────────────────── */
   var _isOpen      = false;
+  var _pending     = false;   /* 액션 딜레이 중 네비게이션 잠금 */
   var _step        = 0;
-  var _validItems  = [];   /* { title, desc, _el } */
+  var _allItems    = [];      /* 설정의 전체 항목 */
+  var _stepItems   = [];      /* 실제 사용할 항목 (필터링됨) */
   var _overlayEl   = null;
   var _panelEl     = null;
   var _closeBtnEl  = null;
   var _markerEl    = null;
   var _ringEl      = null;
   var _scrollTimer = null;
+  var _actionTimer = null;
 
   /* ── 오버레이 열기 ──────────────────────────────────── */
   function openHelp() {
     if (_isOpen) return;
-    _isOpen = true;
-    _step = 0;
+    _isOpen  = true;
+    _pending = false;
+    _step    = 0;
 
     var cfg = getConfig();
+    _allItems = cfg.items;
 
-    /* 유효 항목 수집 */
-    _validItems = [];
-    cfg.items.forEach(function (item) {
-      var el = null;
-      var selectors = item.sel.split(",");
-      for (var i = 0; i < selectors.length; i++) {
-        try {
-          var found = document.querySelector(selectors[i].trim());
-          if (found) { el = found; break; }
-        } catch (e) {}
+    /* 유효 항목 수집:
+       - action 있음 → 무조건 포함 (액션 후에 요소가 생김)
+       - action 없음 → 지금 요소가 있어야 포함 */
+    _stepItems = [];
+    _allItems.forEach(function (item) {
+      if (item.action) {
+        _stepItems.push(item);
+      } else {
+        var el = findEl(item.sel);
+        if (el) {
+          item._cachedEl = el;
+          _stepItems.push(item);
+        }
       }
-      if (!el) return;
-      _validItems.push({ title: item.title, desc: item.desc, _el: el });
     });
 
-    /* 반투명 오버레이 (pointer-events:none 이라 클릭 통과) */
+    /* 오버레이 */
     _overlayEl = document.createElement("div");
     _overlayEl.id = "help-overlay";
     document.body.appendChild(_overlayEl);
@@ -375,8 +423,8 @@
 
     document.addEventListener("keydown", _onKeyDown);
 
-    if (_validItems.length === 0) {
-      renderEmptyPanel(cfg.title);
+    if (_stepItems.length === 0) {
+      renderEmptyPanel();
     } else {
       goToStep(0);
     }
@@ -384,47 +432,67 @@
 
   /* ── 스텝 이동 ──────────────────────────────────────── */
   function goToStep(idx) {
+    if (!_isOpen || _pending) return;
     _step = idx;
-    var item = _validItems[idx];
-    var el   = item._el;
 
-    /* 하이라이트 링 제거 → 재생성 */
-    if (_ringEl)   { _ringEl.remove();   _ringEl   = null; }
-    if (_markerEl) { _markerEl.remove(); _markerEl = null; }
+    var item = _stepItems[idx];
 
-    /* 스크롤: 요소가 뷰포트 안에 있는지 확인 */
-    var rect = el.getBoundingClientRect();
-    var panelHeight = 160; /* 패널 높이 여유 */
-    var inView = (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight - panelHeight) &&
-      rect.right <= window.innerWidth
+    /* 기존 마커/링 제거 */
+    clearDecor();
+
+    if (item.action) {
+      /* 액션 실행 → 딜레이 후 요소 탐색 */
+      _pending = true;
+      renderPanel(item, idx, true); /* 로딩 상태로 패널 먼저 표시 */
+      item.action();
+
+      if (_actionTimer) clearTimeout(_actionTimer);
+      _actionTimer = setTimeout(function () {
+        if (!_isOpen) return;
+        _pending = false;
+        var el = findEl(item.sel);
+        item._cachedEl = el || null;
+        if (el) scrollAndPlace(el, idx + 1);
+        renderPanel(item, idx, false);
+      }, item.actionDelay || 700);
+    } else {
+      var el = item._cachedEl || findEl(item.sel);
+      item._cachedEl = el || null;
+      if (el) scrollAndPlace(el, idx + 1);
+      renderPanel(item, idx, false);
+    }
+  }
+
+  /* ── 스크롤 + 마커/링 배치 ──────────────────────────── */
+  function scrollAndPlace(el, num) {
+    var panelH  = 160;
+    var rect    = el.getBoundingClientRect();
+    var inView  = (
+      rect.top    >= 0 &&
+      rect.left   >= 0 &&
+      rect.bottom <= (window.innerHeight - panelH) &&
+      rect.right  <= window.innerWidth
     );
 
     if (!inView) {
-      /* 요소가 화면 밖 → 스크롤 후 마커 배치 */
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       if (_scrollTimer) clearTimeout(_scrollTimer);
       _scrollTimer = setTimeout(function () {
-        placeMarkerAndRing(el, idx + 1);
+        if (_isOpen) placeDecor(el, num);
       }, 450);
     } else {
-      placeMarkerAndRing(el, idx + 1);
+      placeDecor(el, num);
     }
-
-    /* 패널 업데이트 */
-    renderPanel(item, idx);
   }
 
-  /* ── 마커 + 링 배치 ─────────────────────────────────── */
-  function placeMarkerAndRing(el, num) {
+  function placeDecor(el, num) {
     if (!_isOpen) return;
+    clearDecor();
 
     var rect = el.getBoundingClientRect();
+    var pad  = 6;
 
-    /* 링 */
-    var pad = 6;
+    /* 하이라이트 링 */
     _ringEl = document.createElement("div");
     _ringEl.className = "help-highlight-ring";
     _ringEl.style.left   = Math.max(rect.left - pad, 0) + "px";
@@ -433,25 +501,27 @@
     _ringEl.style.height = (rect.height + pad * 2) + "px";
     document.body.appendChild(_ringEl);
 
-    /* 번호 마커 (오른쪽 위) */
+    /* 번호 마커 */
     _markerEl = document.createElement("div");
     _markerEl.className = "help-marker";
     _markerEl.textContent = num;
-    var mx = Math.min(rect.right - 4, window.innerWidth - 32);
-    var my = Math.max(rect.top  - 14, 8);
-    _markerEl.style.left = mx + "px";
-    _markerEl.style.top  = my + "px";
+    _markerEl.style.left = Math.min(rect.right - 4,  window.innerWidth  - 32) + "px";
+    _markerEl.style.top  = Math.max(rect.top  - 14, 8) + "px";
     document.body.appendChild(_markerEl);
   }
 
+  function clearDecor() {
+    if (_markerEl) { _markerEl.remove(); _markerEl = null; }
+    if (_ringEl)   { _ringEl.remove();   _ringEl   = null; }
+  }
+
   /* ── 패널 렌더링 ─────────────────────────────────────── */
-  function renderPanel(item, idx) {
+  function renderPanel(item, idx, loading) {
     if (!_panelEl) return;
-    var total = _validItems.length;
+    var total   = _stepItems.length;
     var isFirst = (idx === 0);
     var isLast  = (idx === total - 1);
 
-    /* 도트 인디케이터 */
     var dots = "";
     for (var i = 0; i < total; i++) {
       dots += '<div class="help-nav-dot' + (i === idx ? " active" : "") + '"></div>';
@@ -470,28 +540,29 @@
         '</div>' +
       '</div>' +
       '<div class="help-panel-nav">' +
-        '<button class="help-nav-btn help-nav-btn--prev" ' + (isFirst ? 'disabled' : '') + '>← 이전</button>' +
+        '<button class="help-nav-btn help-nav-btn--prev"' + (isFirst || loading ? ' disabled' : '') + '>← 이전</button>' +
         '<div class="help-nav-dots">' + dots + '</div>' +
         (isLast
-          ? '<button class="help-nav-btn help-nav-btn--next">닫기</button>'
-          : '<button class="help-nav-btn help-nav-btn--next">다음 →</button>'
+          ? '<button class="help-nav-btn help-nav-btn--next"' + (loading ? ' disabled' : '') + '>닫기</button>'
+          : '<button class="help-nav-btn help-nav-btn--next"' + (loading ? ' disabled' : '') + '>다음 →</button>'
         ) +
       '</div>';
 
     _panelEl.querySelector(".help-nav-btn--prev").addEventListener("click", function () {
-      if (_step > 0) goToStep(_step - 1);
+      if (!_pending && _step > 0) goToStep(_step - 1);
     });
     _panelEl.querySelector(".help-nav-btn--next").addEventListener("click", function () {
-      if (_step < _validItems.length - 1) goToStep(_step + 1);
+      if (_pending) return;
+      if (_step < _stepItems.length - 1) goToStep(_step + 1);
       else closeHelp();
     });
   }
 
-  function renderEmptyPanel(title) {
+  function renderEmptyPanel() {
     if (!_panelEl) return;
     _panelEl.innerHTML =
       '<div class="help-panel-header">' +
-        '<div class="help-panel-title">' + escHtml(title) + '</div>' +
+        '<div class="help-panel-title">도움말</div>' +
       '</div>' +
       '<div class="help-step-desc" style="color:rgba(255,255,255,0.35);text-align:center;padding:8px 0 14px;">이 페이지에서 인식된 요소가 없습니다.</div>' +
       '<div class="help-panel-nav">' +
@@ -503,20 +574,22 @@
   /* ── 오버레이 닫기 ──────────────────────────────────── */
   function closeHelp() {
     if (!_isOpen) return;
-    _isOpen = false;
+    _isOpen  = false;
+    _pending = false;
     if (_scrollTimer) { clearTimeout(_scrollTimer); _scrollTimer = null; }
+    if (_actionTimer) { clearTimeout(_actionTimer); _actionTimer = null; }
     if (_overlayEl)  { _overlayEl.remove();  _overlayEl  = null; }
     if (_panelEl)    { _panelEl.remove();    _panelEl    = null; }
     if (_closeBtnEl) { _closeBtnEl.remove(); _closeBtnEl = null; }
-    if (_markerEl)   { _markerEl.remove();   _markerEl   = null; }
-    if (_ringEl)     { _ringEl.remove();     _ringEl     = null; }
-    _validItems = [];
+    clearDecor();
+    _stepItems = [];
     document.removeEventListener("keydown", _onKeyDown);
   }
 
   function _onKeyDown(e) {
-    if (e.key === "Escape") closeHelp();
-    if (e.key === "ArrowRight" && _step < _validItems.length - 1) goToStep(_step + 1);
+    if (e.key === "Escape") { closeHelp(); return; }
+    if (_pending) return;
+    if (e.key === "ArrowRight" && _step < _stepItems.length - 1) goToStep(_step + 1);
     if (e.key === "ArrowLeft"  && _step > 0) goToStep(_step - 1);
   }
 
