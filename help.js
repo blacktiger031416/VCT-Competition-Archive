@@ -567,9 +567,25 @@
     if (!inView) {
       anchor.scrollIntoView({ behavior: "smooth", block: "center" });
       if (_scrollTimer) clearTimeout(_scrollTimer);
-      _scrollTimer = setTimeout(function () {
-        if (_isOpen) placeDecor(resolved, num);
-      }, 450);
+
+      /* 스크롤이 완전히 멈춘 뒤 링 배치 (100ms 간격으로 scrollY 변화 감지) */
+      var _lastY = window.scrollY;
+      var _stableCount = 0;
+      var checkStop = function () {
+        if (!_isOpen) return;
+        if (window.scrollY === _lastY) {
+          _stableCount++;
+          if (_stableCount >= 2) {          /* 200ms 연속 정지 → 완료로 판정 */
+            placeDecor(resolved, num);
+            return;
+          }
+        } else {
+          _stableCount = 0;
+          _lastY = window.scrollY;
+        }
+        _scrollTimer = setTimeout(checkStop, 100);
+      };
+      _scrollTimer = setTimeout(checkStop, 100);
     } else {
       placeDecor(resolved, num);
     }
