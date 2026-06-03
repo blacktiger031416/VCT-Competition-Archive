@@ -307,7 +307,36 @@
       ],
     },
 
-    /* ── 스테이지 / 플레이오프 페이지 */
+    /* ── Stage 1 / Stage 2 (그룹 스테이지) */
+    stage_group: {
+      title: "스테이지 도움말",
+      items: [
+        { sel: ".group-assign-section, .group-assign-grid",
+          title: "그룹 팀 배정",
+          desc: "각 조의 팀을 보여줍니다." },
+        { sel: ".week-section, .week-panels",
+          title: "주차별 경기",
+          desc: "각 주차별 경기를 보여줍니다." },
+        { sel: "a.playoff-link",
+          title: "PlayOff",
+          desc: "그룹 스테이지 이후의 PlayOff 대진표로 넘어갑니다." },
+        { sel: ".standings-section, .standings-grid",
+          title: "순위표",
+          desc: "각 조별 순위를 보여줍니다." },
+        { sel: ".back-link",
+          title: function () {
+            var bl = document.querySelector(".back-link");
+            return bl ? bl.textContent.trim() : "메인 페이지";
+          },
+          desc: function () {
+            var bl = document.querySelector(".back-link");
+            var name = bl ? bl.textContent.trim() : "메인";
+            return name + " 메인 페이지로 넘어갑니다.";
+          } },
+      ],
+    },
+
+    /* ── KickOff / Playoffs (브래킷 대진표) */
     stage: {
       title: "경기 결과 페이지 도움말",
       items: [
@@ -375,9 +404,11 @@
       return qs.includes("id=") ? HELP_CONFIG.tierlist_detail : HELP_CONFIG.tierlist_list;
     }
 
-    if (path.includes("stage") || path.includes("kickoff") ||
-        path.includes("playoffs") || path.includes("swiss") ||
-        path.includes("group"))         return HELP_CONFIG.stage;
+    /* playoffs/kickoff → 브래킷 config, stage1/2 → 그룹 스테이지 config */
+    if (path.includes("playoffs") || path.includes("kickoff") ||
+        path.includes("swiss"))         return HELP_CONFIG.stage;
+    if (path.includes("stage") || path.includes("group"))
+                                        return HELP_CONFIG.stage_group;
 
     if (path.includes("masters") || path.includes("champions")) {
       return HELP_CONFIG.tournament_setup;
@@ -647,8 +678,8 @@
       '<div class="help-step-body">' +
         '<div class="help-step-num">' + (idx + 1) + '</div>' +
         '<div class="help-step-text">' +
-          '<div class="help-step-title">' + escHtml(item.title) + '</div>' +
-          '<div class="help-step-desc">' + escHtml(item.desc) + '</div>' +
+          '<div class="help-step-title">' + escHtml(getStr(item.title)) + '</div>' +
+          '<div class="help-step-desc">' + escHtml(getStr(item.desc)) + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="help-panel-nav">' +
@@ -715,6 +746,11 @@
     if (_pending) return;
     if (e.key === "ArrowRight" && _step < _stepItems.length - 1) goToStep(_step + 1);
     if (e.key === "ArrowLeft"  && _step > 0) goToStep(_step - 1);
+  }
+
+  /* title/desc 는 문자열 또는 함수 모두 허용 */
+  function getStr(val) {
+    return typeof val === "function" ? String(val() || "") : String(val || "");
   }
 
   function escHtml(s) {
