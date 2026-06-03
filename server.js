@@ -584,6 +584,49 @@ app.get("/api/coins", requireAuth, async (req, res) => {
   }
 });
 
+/* ── API: 건의함 제출 (누구나) ──────────────────────── */
+app.post("/api/suggestions", async (req, res) => {
+  const text = String((req.body && req.body.text) || "").trim();
+  if (!text) return res.status(400).json({ error: "내용을 입력해주세요." });
+  if (text.length > 500) return res.status(400).json({ error: "500자 이하로 입력해주세요." });
+  const key = `suggest:${Date.now()}`;
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,
+      [key, JSON.stringify({ text, at: new Date().toISOString() })]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 건의함 목록 (Admin 전용) ───────────────────── */
+app.get("/api/suggestions", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'suggest:%' ORDER BY key DESC"
+    );
+    res.json(result.rows.map((r) => {
+      const v = JSON.parse(r.value);
+      return { key: r.key, text: v.text, at: v.at };
+    }));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 건의함 삭제 (Admin 전용) ───────────────────── */
+app.delete("/api/suggestions/:ts", requireAdmin, async (req, res) => {
+  const key = `suggest:${req.params.ts}`;
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 금고 조회 ─────────────────────────────────── */
 app.get("/api/vault", requireAuth, async (req, res) => {
   const key = `vault:${req.user.username}`;

@@ -27,7 +27,7 @@
    * (이 키가 localStorage에 남아 있으면 Admin의 syncLocalToDB가 삭제된 데이터를 복원하는 버그 발생)
    */
   var SERVER_ONLY_PREFIXES = [
-    "tlevt:", "tlpost:", "tllike:",
+    "tlevt:", "tlpost:", "tllike:", "suggest:",
   ];
 
   /* 혹시 이전에 DB에 올라간 auth 키가 있으면 즉시 삭제 (보안 픽스) */

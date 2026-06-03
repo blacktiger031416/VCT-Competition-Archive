@@ -230,6 +230,42 @@
     ".login-submit--danger { background:rgba(180,30,30,0.85); border:1px solid rgba(220,50,50,0.3); }",
     ".login-submit--danger:hover { background:rgba(200,30,30,0.95); }",
 
+    /* ── 건의함 버튼 ── */
+    ".suggest-trigger-btn {",
+    "  display:inline-flex; align-items:center; gap:5px;",
+    "  padding:0 11px; height:30px; border-radius:4px;",
+    "  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.11);",
+    "  color:rgba(255,255,255,0.45); font-size:12px; font-weight:700;",
+    "  font-family:'Noto Sans KR','Barlow',sans-serif; cursor:pointer; flex-shrink:0;",
+    "  transition:background .15s,color .15s,border-color .15s; white-space:nowrap;",
+    "}",
+    ".suggest-trigger-btn:hover { background:rgba(255,255,255,0.11); border-color:rgba(255,255,255,0.22); color:rgba(255,255,255,0.85); }",
+
+    /* ── 건의함 모달 내용 ── */
+    ".sg-notice {",
+    "  background:rgba(240,192,64,.08); border:1px solid rgba(240,192,64,.2);",
+    "  border-radius:4px; padding:10px 14px;",
+    "  font-size:12px; color:rgba(240,192,64,.85); line-height:1.65;",
+    "}",
+    ".sg-textarea {",
+    "  width:100%; height:110px; padding:10px 14px; box-sizing:border-box;",
+    "  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10);",
+    "  border-radius:4px; font-family:'Noto Sans KR','Barlow',sans-serif; font-size:13px;",
+    "  color:#fff; resize:vertical; outline:none;",
+    "  transition:border-color .15s,background .15s;",
+    "}",
+    ".sg-textarea::placeholder { color:rgba(255,255,255,.2); }",
+    ".sg-textarea:focus { border-color:rgba(232,67,45,.5); background:rgba(255,255,255,.06); box-shadow:0 0 0 3px rgba(232,67,45,.1); }",
+    ".sg-char { text-align:right; font-size:11px; color:rgba(255,255,255,.25); margin-top:4px; }",
+    ".sg-char.over { color:#ff6b6b; }",
+    ".sg-list { display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto; }",
+    ".sg-item { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:6px; padding:12px 14px; }",
+    ".sg-item-meta { font-size:11px; color:rgba(255,255,255,.3); display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }",
+    ".sg-item-text { font-size:13px; color:rgba(255,255,255,.8); line-height:1.65; white-space:pre-wrap; word-break:break-word; }",
+    ".sg-item-del { background:none; border:1px solid rgba(220,50,50,.3); border-radius:3px; color:rgba(220,80,80,.7); font-size:11px; font-weight:700; padding:2px 8px; cursor:pointer; transition:background .12s,color .12s,border-color .12s; }",
+    ".sg-item-del:hover { background:rgba(220,50,50,.15); color:#ff6b6b; border-color:rgba(220,50,50,.5); }",
+    ".sg-empty { text-align:center; padding:32px 0; color:rgba(255,255,255,.25); font-size:13px; }",
+
     /* ── view-only ── */
     "body.view-only .inline-edit,",
     "body.view-only .agent-chip,",
@@ -315,11 +351,30 @@
     if (window.vctHelpOpen) window.vctHelpOpen();
   });
 
+  /* 건의함 버튼 (index 페이지만) */
+  var suggestBtn = null;
+  (function () {
+    var p = window.location.pathname;
+    var onIndex = (p === "/" || p === "" || p.endsWith("/index.html"));
+    if (!onIndex) return;
+    suggestBtn = document.createElement("button");
+    suggestBtn.type = "button";
+    suggestBtn.className = "suggest-trigger-btn";
+    if (isAdmin()) {
+      suggestBtn.innerHTML = "📮 건의함 확인";
+      suggestBtn.addEventListener("click", openSuggestAdminModal);
+    } else {
+      suggestBtn.innerHTML = "📮 건의함";
+      suggestBtn.addEventListener("click", openSuggestModal);
+    }
+  })();
+
   if (header) {
     /* 우측 버튼 그룹 wrapper */
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
+    if (suggestBtn) rightGroup.appendChild(suggestBtn);
     rightGroup.appendChild(helpBtn);
     rightGroup.appendChild(authBtn);
     header.appendChild(rightGroup);
@@ -336,6 +391,7 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
+    if (suggestBtn) floatWrap.appendChild(suggestBtn);
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
     document.body.appendChild(floatWrap);
@@ -586,6 +642,182 @@
       options.onSubmit();
       close();
     });
+  }
+
+  /* ── 건의함 제출 모달 (일반 유저) ──────────────────── */
+  function openSuggestModal() {
+    var existing = document.querySelector(".login-modal");
+    if (existing) existing.remove();
+
+    var modal = document.createElement("div");
+    modal.className = "login-modal";
+    modal.innerHTML =
+      '<div class="login-backdrop"></div>' +
+      '<div class="login-panel" role="dialog" aria-modal="true">' +
+        '<div class="login-panel-header">' +
+          '<h2>📮 건의함</h2>' +
+          '<button class="login-close" type="button" aria-label="닫기">×</button>' +
+        '</div>' +
+        '<div class="login-form" style="display:flex;flex-direction:column;gap:12px;">' +
+          '<div class="sg-notice">⚠ 주의사항<br>욕설, 폭언 등은 삼가 주실 것.</div>' +
+          '<div>' +
+            '<textarea class="sg-textarea" id="sg-input" placeholder="건의할 내용을 입력해주세요. (최대 500자)" maxlength="500"></textarea>' +
+            '<div class="sg-char"><span id="sg-count">0</span> / 500</div>' +
+          '</div>' +
+          '<p class="login-error" id="sg-error" hidden></p>' +
+          '<p class="login-success" id="sg-ok" hidden>전달되었습니다! 감사합니다 😊</p>' +
+          '<div class="login-actions">' +
+            '<button type="button" class="login-submit" id="sg-submit">보내기</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var textarea = modal.querySelector("#sg-input");
+    var countEl  = modal.querySelector("#sg-count");
+    var errEl    = modal.querySelector("#sg-error");
+    var okEl     = modal.querySelector("#sg-ok");
+    var submitBtn = modal.querySelector("#sg-submit");
+
+    textarea.addEventListener("input", function () {
+      var len = textarea.value.length;
+      countEl.textContent = len;
+      countEl.parentElement.className = "sg-char" + (len > 500 ? " over" : "");
+    });
+
+    function close() {
+      modal.remove();
+      document.removeEventListener("keydown", escH);
+    }
+    modal.querySelector(".login-backdrop").addEventListener("click", close);
+    modal.querySelector(".login-close").addEventListener("click", close);
+    function escH(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", escH);
+
+    submitBtn.addEventListener("click", function () {
+      var text = textarea.value.trim();
+      errEl.hidden = true;
+      okEl.hidden = true;
+      if (!text) { errEl.textContent = "내용을 입력해주세요."; errEl.hidden = false; return; }
+      if (text.length > 500) { errEl.textContent = "500자 이하로 입력해주세요."; errEl.hidden = false; return; }
+      submitBtn.disabled = true;
+      submitBtn.textContent = "전송 중...";
+      fetch("/api/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text }),
+      }).then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.error) {
+            errEl.textContent = d.error;
+            errEl.hidden = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = "보내기";
+          } else {
+            okEl.hidden = false;
+            textarea.value = "";
+            countEl.textContent = "0";
+            submitBtn.disabled = true;
+            submitBtn.textContent = "전송 완료";
+            setTimeout(close, 1800);
+          }
+        })
+        .catch(function () {
+          errEl.textContent = "서버에 연결할 수 없습니다.";
+          errEl.hidden = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = "보내기";
+        });
+    });
+
+    setTimeout(function () { textarea.focus(); }, 60);
+  }
+
+  /* ── 건의함 확인 모달 (Admin) ────────────────────── */
+  function openSuggestAdminModal() {
+    var existing = document.querySelector(".login-modal");
+    if (existing) existing.remove();
+
+    var modal = document.createElement("div");
+    modal.className = "login-modal";
+    modal.innerHTML =
+      '<div class="login-backdrop"></div>' +
+      '<div class="login-panel" style="width:min(520px,calc(100vw - 32px));" role="dialog" aria-modal="true">' +
+        '<div class="login-panel-header">' +
+          '<h2>📮 건의함 확인</h2>' +
+          '<button class="login-close" type="button" aria-label="닫기">×</button>' +
+        '</div>' +
+        '<div class="login-form" style="display:flex;flex-direction:column;gap:12px;">' +
+          '<div class="sg-list" id="sg-list"><div class="sg-empty">불러오는 중…</div></div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var listEl = modal.querySelector("#sg-list");
+
+    function close() {
+      modal.remove();
+      document.removeEventListener("keydown", escH);
+    }
+    modal.querySelector(".login-backdrop").addEventListener("click", close);
+    modal.querySelector(".login-close").addEventListener("click", close);
+    function escH(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", escH);
+
+    function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function fmtDate(iso) {
+      try {
+        var d = new Date(iso);
+        var kst = new Date(d.getTime() + 9 * 3600000);
+        return kst.toISOString().replace("T"," ").slice(0,16) + " KST";
+      } catch(e) { return iso; }
+    }
+
+    function renderList(items) {
+      if (!items.length) {
+        listEl.innerHTML = '<div class="sg-empty">아직 건의가 없습니다.</div>';
+        return;
+      }
+      listEl.innerHTML = items.map(function (item) {
+        var ts = item.key.replace("suggest:", "");
+        return '<div class="sg-item" data-key="' + esc(item.key) + '" data-ts="' + esc(ts) + '">' +
+          '<div class="sg-item-meta">' +
+            '<span>' + fmtDate(item.at) + '</span>' +
+            '<button class="sg-item-del" type="button">삭제</button>' +
+          '</div>' +
+          '<div class="sg-item-text">' + esc(item.text) + '</div>' +
+        '</div>';
+      }).join("");
+
+      listEl.querySelectorAll(".sg-item-del").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var item = btn.closest(".sg-item");
+          var ts = item.dataset.ts;
+          btn.disabled = true;
+          btn.textContent = "…";
+          fetch("/api/suggestions/" + encodeURIComponent(ts), {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + getToken() },
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.ok) item.remove();
+              else { btn.disabled = false; btn.textContent = "삭제"; }
+              if (!listEl.querySelector(".sg-item")) {
+                listEl.innerHTML = '<div class="sg-empty">아직 건의가 없습니다.</div>';
+              }
+            })
+            .catch(function () { btn.disabled = false; btn.textContent = "삭제"; });
+        });
+      });
+    }
+
+    fetch("/api/suggestions", {
+      headers: { Authorization: "Bearer " + getToken() },
+    }).then(function (r) { return r.json(); })
+      .then(function (data) { renderList(Array.isArray(data) ? data : []); })
+      .catch(function () { listEl.innerHTML = '<div class="sg-empty">불러오기 실패.</div>'; });
   }
 
   /* ── 전역 노출 ── */
