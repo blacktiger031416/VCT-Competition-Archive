@@ -1250,11 +1250,14 @@
     }
 
     /* ── Init ── */
-    Promise.all([loadMatches(), loadMyBets(), loadCoins(), loadVault(), initAttendance()]).then(function () {
-      document.getElementById("pred-loading").style.display = "none";
-      document.getElementById("matches-list").style.display = "block";
-      render();
-    });
+    /* loadCoins → initAttendance 순서 보장: 출석 POST 응답이 loadCoins GET에 덮어씌워지는 레이스 방지 */
+    Promise.all([loadMatches(), loadMyBets(), loadCoins(), loadVault()])
+      .then(function () { return initAttendance(); })
+      .then(function () {
+        document.getElementById("pred-loading").style.display = "none";
+        document.getElementById("matches-list").style.display = "block";
+        render();
+      });
 
     /* ── Create form ── */
     document.getElementById("create-form").addEventListener("submit", function (e) {
