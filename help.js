@@ -197,7 +197,7 @@
           desc: "진행 중인 경기에 코인을 베팅합니다. 팀을 선택하고 베팅 코인을 입력하세요." },
         { sel: ".tab-btn[data-tab='rank'], [data-tab='rank']",
           title: "순위 탭",
-          desc: "코인 보유량 기준 상위 10명의 순위표입니다. Admin 계정은 포함되지 않습니다." },
+          desc: "코인 보유량 기준 상위 10명의 순위표입니다." },
         { sel: ".tab-btn[data-tab='hof'], [data-tab='hof']",
           title: "명예의 전당 탭",
           desc: "시즌이 종료될 때마다 1·2·3위 수상자가 기록되는 공간입니다." },
