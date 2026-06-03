@@ -584,6 +584,21 @@ app.get("/api/coins", requireAuth, async (req, res) => {
   }
 });
 
+/* ── API: Admin 통계 (계정 수 · 접속자 수) ──────────── */
+app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT COUNT(*)::int AS cnt FROM users WHERE role != 'admin'"
+    );
+    res.json({
+      userCount:   result.rows[0].cnt,
+      onlineCount: sseClients.size,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 건의함 제출 (누구나) ──────────────────────── */
 app.post("/api/suggestions", async (req, res) => {
   const text = String((req.body && req.body.text) || "").trim();
