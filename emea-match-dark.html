@@ -1414,7 +1414,8 @@
     body.white-mode .kda-sep { font-size: 15px; font-weight: 700; }
 
     /* 헤더 auth 버튼은 KickOff 바로 옆에 붙도록 margin-left 제거 */
-    .site-header .auth-header-btn { margin-left: 0; }
+    .site-header .auth-header-btn { margin-left: auto !important; }
+    .site-header .home-link-dark::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
 
   </style>
 </head>
@@ -1430,7 +1431,7 @@
     padding: 0 32px; height: 56px;
     display: flex; align-items: center; gap: 20px;
   ">
-    <a href="./index.html" style="
+    <a class="home-link-dark" href="./index.html" style="
       font-family:'Barlow Condensed',sans-serif;
       font-weight:700; font-size:15px;
       letter-spacing:0.12em; text-transform:uppercase;
@@ -1444,7 +1445,7 @@
       letter-spacing:0.1em; text-transform:uppercase;
       color:rgba(255,255,255,0.4);
       text-decoration:none;
-      margin-left: auto;
+      
       transition: color 0.15s;
     ">–</a>
   </header>
@@ -2660,7 +2661,7 @@ function applyMatchUI() {
   var navLink = document.getElementById('nav-back-link');
   if (navLink) {
     navLink.href = _fromInfo.href;
-    navLink.textContent = '← ' + _fromInfo.label;
+    navLink.textContent = _fromInfo.label;
   }
 
   // 매치 오버뷰
