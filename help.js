@@ -365,6 +365,9 @@
         { sel: "section.participants-section, .participants-grid",
           title: "참가팀 배정",
           desc: "각 권역별 국제대회에 출전한 팀들의 명단입니다. 각 팀의 로스터 또한 확인 가능합니다." },
+        { sel: "section.groups-outer-section, .groups-2x2",
+          title: "그룹 대진표",
+          desc: "각 그룹당의 경기 결과를 보여줍니다." },
       ],
     },
 
@@ -404,15 +407,17 @@
       return qs.includes("id=") ? HELP_CONFIG.tierlist_detail : HELP_CONFIG.tierlist_list;
     }
 
+    /* masters/champions: 내부 playoffs·swiss는 브래킷, 나머지는 팀 배정/그룹 */
+    if (path.includes("masters") || path.includes("champions")) {
+      if (path.includes("playoffs") || path.includes("swiss")) return HELP_CONFIG.stage;
+      return HELP_CONFIG.tournament_setup;   /* champions-group도 여기로 */
+    }
+
     /* playoffs/kickoff → 브래킷 config, stage1/2 → 그룹 스테이지 config */
     if (path.includes("playoffs") || path.includes("kickoff") ||
         path.includes("swiss"))         return HELP_CONFIG.stage;
     if (path.includes("stage") || path.includes("group"))
                                         return HELP_CONFIG.stage_group;
-
-    if (path.includes("masters") || path.includes("champions")) {
-      return HELP_CONFIG.tournament_setup;
-    }
 
     if (path.includes("pacific") || path.includes("americas") ||
         path.includes("emea") || path.includes("cn")) {
