@@ -125,6 +125,28 @@ app.post("/api/data/:key", async (req, res) => {
   }
 });
 
+/* ── API: 리더보드 (코인 순위, admin 제외, 상위 10명) ── */
+app.get("/api/leaderboard", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT ad.key, ad.value
+      FROM app_data ad
+      JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
+      WHERE ad.key LIKE 'coins:%'
+        AND u.role != 'admin'
+      ORDER BY CAST(ad.value AS INTEGER) DESC
+      LIMIT 10
+    `);
+    const rows = result.rows.map((r) => ({
+      username: r.key.slice(6),         /* 'coins:' 접두사 제거 */
+      coins:    parseInt(r.value, 10),
+    }));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 데이터 삭제 ─────────────────────────────── */
 app.delete("/api/data/:key", async (req, res) => {
   const key = decodeURIComponent(req.params.key);

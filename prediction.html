@@ -281,6 +281,48 @@
     .settle-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .settle-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; }
 
+    /* ── Tab bar ── */
+    .tab-bar {
+      display:flex; gap:4px; margin-bottom:28px;
+      border-bottom:1px solid rgba(255,255,255,.08); padding-bottom:0;
+    }
+    .tab-btn {
+      position:relative; padding:10px 20px; border:none; background:none;
+      font-family:inherit; font-size:14px; font-weight:700; color:rgba(255,255,255,.38);
+      cursor:pointer; transition:color .15s; border-radius:4px 4px 0 0; flex-shrink:0;
+    }
+    .tab-btn:hover { color:rgba(255,255,255,.72); }
+    .tab-btn.active { color:#f0c040; }
+    .tab-btn.active::after {
+      content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+      background:#f0c040; border-radius:2px 2px 0 0;
+    }
+
+    /* ── Leaderboard ── */
+    .lb-wrap { display:none; }
+    .lb-loading { display:flex; align-items:center; gap:12px; padding:48px 0; color:rgba(255,255,255,.28); font-size:14px; }
+    .lb-table { width:100%; border-collapse:collapse; }
+    .lb-table th {
+      text-align:left; font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+      color:rgba(255,255,255,.25); padding:0 14px 10px; border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .lb-table th:last-child { text-align:right; }
+    .lb-row { transition:background .14s; }
+    .lb-row:hover { background:rgba(255,255,255,.03); }
+    .lb-row td { padding:13px 14px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+    .lb-rank {
+      font-size:16px; font-weight:900; width:44px; color:rgba(255,255,255,.3);
+      white-space:nowrap;
+    }
+    .lb-rank.gold   { color:#f0c040; }
+    .lb-rank.silver { color:#c0c8d4; }
+    .lb-rank.bronze { color:#cd8c5a; }
+    .lb-name { font-size:15px; font-weight:700; color:#f0f0f0; }
+    .lb-name.is-me { color:#f0c040; }
+    .lb-name.is-me::after { content:" (나)"; font-size:11px; font-weight:500; color:rgba(240,192,64,.6); }
+    .lb-coins { text-align:right; font-size:14px; font-weight:700; color:#f0c040; white-space:nowrap; }
+    .lb-empty { padding:56px 0; text-align:center; color:rgba(255,255,255,.22); font-size:14px; }
+
     /* ── Attendance card ── */
     .attend-card {
       display:none; align-items:center; gap:16px; flex-wrap:wrap;
@@ -327,6 +369,15 @@
   </header>
 
   <div class="pred-wrap">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="predict">🏆 승부 예측</button>
+      <button class="tab-btn"        data-tab="rank">📊 순위</button>
+    </div>
+
+    <!-- ═══ Prediction tab ═══ -->
+    <div id="tab-predict">
 
     <!-- Admin: create match -->
     <div class="admin-panel" id="admin-panel">
@@ -384,6 +435,16 @@
         <div class="pred-spinner"></div>불러오는 중...
       </div>
       <div id="matches-list" style="display:none"></div>
+    </div>
+
+    </div><!-- /#tab-predict -->
+
+    <!-- ═══ Rank tab ═══ -->
+    <div class="lb-wrap" id="tab-rank">
+      <div class="lb-loading" id="lb-loading">
+        <div class="pred-spinner"></div>불러오는 중...
+      </div>
+      <div id="lb-content"></div>
     </div>
 
   </div>
@@ -595,6 +656,77 @@
         .then(function (r) { return r.json(); })
         .then(function (d) { if (typeof d.coins === "number") { myCoins = d.coins; updateCoinDisplay(); } })
         .catch(function () {});
+    }
+
+    /* ── Tabs ── */
+    var activeTab = "predict";
+    var lbLoaded  = false;
+
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var tab = btn.dataset.tab;
+        if (tab === activeTab) return;
+        activeTab = tab;
+
+        document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+
+        document.getElementById("tab-predict").style.display = tab === "predict" ? "" : "none";
+        document.getElementById("tab-rank").style.display    = tab === "rank"    ? "" : "none";
+
+        if (tab === "rank" && !lbLoaded) loadLeaderboard();
+      });
+    });
+
+    /* ── Leaderboard ── */
+    function loadLeaderboard() {
+      lbLoaded = true;
+      document.getElementById("lb-loading").style.display = "flex";
+      fetch("/api/leaderboard")
+        .then(function (r) { return r.json(); })
+        .then(function (rows) {
+          document.getElementById("lb-loading").style.display = "none";
+          renderLeaderboard(rows);
+        })
+        .catch(function () {
+          document.getElementById("lb-loading").style.display = "none";
+          document.getElementById("lb-content").innerHTML =
+            '<div class="lb-empty">순위를 불러오지 못했습니다.</div>';
+        });
+    }
+
+    function renderLeaderboard(rows) {
+      var content = document.getElementById("lb-content");
+      if (!rows || !rows.length) {
+        content.innerHTML = '<div class="lb-empty">아직 등록된 유저가 없습니다.</div>';
+        return;
+      }
+      var medals = ["🥇", "🥈", "🥉"];
+      var rankClass = ["gold", "silver", "bronze"];
+      var myName = USER ? USER.username : null;
+
+      var html = '<table class="lb-table">' +
+        '<thead><tr>' +
+          '<th style="width:44px">순위</th>' +
+          '<th>유저</th>' +
+          '<th>코인</th>' +
+        '</tr></thead><tbody>';
+
+      rows.forEach(function (row, i) {
+        var rank = i + 1;
+        var medal  = medals[i]     || String(rank);
+        var rClass = rankClass[i]  || "";
+        var isMe   = myName && row.username === myName;
+        html +=
+          '<tr class="lb-row">' +
+            '<td class="lb-rank ' + rClass + '">' + medal + '</td>' +
+            '<td class="lb-name' + (isMe ? ' is-me' : '') + '">' + esc(row.username) + '</td>' +
+            '<td class="lb-coins">🪙 ' + row.coins.toLocaleString() + '</td>' +
+          '</tr>';
+      });
+
+      html += '</tbody></table>';
+      content.innerHTML = html;
     }
 
     /* ── Attendance ── */
