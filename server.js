@@ -556,6 +556,65 @@ app.post("/api/prediction/matches/:id/settle", requireAdmin, async (req, res) =>
   }
 });
 
+/* ── API: 출석 체크 상태 조회 ─────────────────────── */
+app.get("/api/attendance/status", requireAuth, async (req, res) => {
+  const username = req.user.username;
+  const kst  = new Date(Date.now() + 9 * 3600000);
+  const date = kst.toISOString().slice(0, 10); // YYYY-MM-DD KST
+  try {
+    const result = await pool.query(
+      "SELECT value FROM app_data WHERE key=$1",
+      [`attend:${username}:${date}`]
+    );
+    res.json({ checkedIn: !!result.rows[0], date });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 출석 체크 (100코인 지급) ────────────────── */
+app.post("/api/attendance", requireAuth, async (req, res) => {
+  const username = req.user.username;
+  const kst     = new Date(Date.now() + 9 * 3600000);
+  const kstHour = kst.getUTCHours();  // KST hour (0~23)
+  const date    = kst.toISOString().slice(0, 10);
+
+  // 07:00 ~ 24:00 KST 만 허용
+  if (kstHour < 7) {
+    return res.status(400).json({ error: "출석체크는 오전 7시부터 가능합니다." });
+  }
+
+  const attendKey = `attend:${username}:${date}`;
+  try {
+    const existing = await pool.query(
+      "SELECT value FROM app_data WHERE key=$1", [attendKey]
+    );
+    if (existing.rows[0])
+      return res.status(409).json({ error: "오늘 이미 출석체크를 하셨습니다." });
+
+    // 출석 기록
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,
+      [attendKey, "1"]
+    );
+    // 100코인 지급
+    const coinKey = `coins:${username}`;
+    const coinRes = await pool.query(
+      "SELECT value FROM app_data WHERE key=$1", [coinKey]
+    );
+    const cur      = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 0;
+    const newCoins = cur + 100;
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [coinKey, String(newCoins)]
+    );
+    res.json({ ok: true, coins: newCoins, bonus: 100 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 내 배팅 목록 (로그인 필요) ─────────────── */
 app.get("/api/prediction/my-bets", requireAuth, async (req, res) => {
   const username = req.user.username;

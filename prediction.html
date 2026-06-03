@@ -281,6 +281,26 @@
     .settle-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .settle-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; }
 
+    /* ── Attendance card ── */
+    .attend-card {
+      display:none; align-items:center; gap:16px; flex-wrap:wrap;
+      background:rgba(240,192,64,.05); border:1px solid rgba(240,192,64,.15); border-radius:8px;
+      padding:18px 22px; margin-bottom:28px;
+    }
+    .attend-icon { font-size:28px; flex-shrink:0; line-height:1; }
+    .attend-info { flex:1; min-width:140px; }
+    .attend-title { font-size:15px; font-weight:900; color:#f0c040; margin-bottom:4px; }
+    .attend-sub   { font-size:12px; color:rgba(255,255,255,.38); }
+    .attend-btn {
+      height:42px; padding:0 22px; border:none; border-radius:6px;
+      font-family:inherit; font-size:14px; font-weight:900; color:#111; background:#f0c040;
+      cursor:pointer; transition:background .15s, opacity .15s; flex-shrink:0;
+    }
+    .attend-btn:hover:not(:disabled) { background:#ffd14a; }
+    .attend-btn:disabled { opacity:.55; cursor:default; }
+    .attend-btn.done  { background:rgba(61,220,132,.14)!important; border:1px solid rgba(61,220,132,.28); color:#3ddc84!important; }
+    .attend-btn.early { background:rgba(255,255,255,.06)!important; border:1px solid rgba(255,255,255,.1);  color:rgba(255,255,255,.38)!important; }
+
     /* Loading / empty */
     .pred-loading { display:flex; align-items:center; gap:12px; padding:48px 0; color:rgba(255,255,255,.28); font-size:14px; }
     .pred-spinner { width:20px; height:20px; border:2px solid rgba(255,255,255,.08); border-top-color:#f0c040; border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
@@ -346,6 +366,16 @@
         </div>
         <p class="form-error" id="create-error"></p>
       </form>
+    </div>
+
+    <!-- Attendance card (visible when logged in) -->
+    <div class="attend-card" id="attend-card">
+      <div class="attend-icon">📅</div>
+      <div class="attend-info">
+        <div class="attend-title">출석 체크</div>
+        <div class="attend-sub" id="attend-sub">매일 출석하면 100코인 지급 · 07:00 ~ 24:00 KST</div>
+      </div>
+      <button class="attend-btn" id="attend-btn">출석 체크하기 +100코인</button>
     </div>
 
     <!-- Matches -->
@@ -564,6 +594,66 @@
       return fetch("/api/coins", { headers: { Authorization: "Bearer " + TOKEN } })
         .then(function (r) { return r.json(); })
         .then(function (d) { if (typeof d.coins === "number") { myCoins = d.coins; updateCoinDisplay(); } })
+        .catch(function () {});
+    }
+
+    /* ── Attendance ── */
+    function initAttendance() {
+      if (!IS_LOGGED_IN) return Promise.resolve();
+      var card = document.getElementById("attend-card");
+      var btn  = document.getElementById("attend-btn");
+      var sub  = document.getElementById("attend-sub");
+      card.style.display = "flex";
+
+      /* 클라이언트에서 KST 시간대 확인 (UI 힌트용 — 실제 제한은 서버에서) */
+      var kstNow  = new Date(Date.now() + 9 * 3600000);
+      var kstHour = kstNow.getUTCHours();
+      var inWindow = kstHour >= 7;
+
+      function doCheckIn() {
+        btn.disabled = true;
+        btn.textContent = "처리 중...";
+        btn.classList.remove("early");
+        fetch("/api/attendance", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + TOKEN },
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.error) {
+              btn.textContent = d.error;
+              btn.disabled = true;
+              btn.classList.add("early");
+            } else {
+              myCoins = d.coins;
+              updateCoinDisplay();
+              btn.textContent = "✓ 오늘 출석 완료  (+100코인)";
+              btn.disabled = true;
+              btn.classList.add("done");
+              sub.textContent = "출석 체크 완료! 내일 또 와주세요 🎉";
+            }
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = "출석 체크하기 +100코인";
+          });
+      }
+
+      return fetch("/api/attendance/status", { headers: { Authorization: "Bearer " + TOKEN } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.checkedIn) {
+            btn.textContent = "✓ 오늘 출석 완료";
+            btn.disabled = true;
+            btn.classList.add("done");
+            sub.textContent = d.date + " 출석 완료 · 내일 또 만나요!";
+          } else if (!inWindow) {
+            btn.textContent = "오전 7시부터 가능합니다";
+            btn.disabled = true;
+            btn.classList.add("early");
+          } else {
+            btn.addEventListener("click", doCheckIn);
+          }
+        })
         .catch(function () {});
     }
 
@@ -807,7 +897,7 @@
     }
 
     /* ── Init ── */
-    Promise.all([loadMatches(), loadMyBets(), loadCoins()]).then(function () {
+    Promise.all([loadMatches(), loadMyBets(), loadCoins(), initAttendance()]).then(function () {
       document.getElementById("pred-loading").style.display = "none";
       document.getElementById("matches-list").style.display = "block";
       render();
