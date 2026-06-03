@@ -185,9 +185,6 @@
             if (btn) btn.click();
           },
           actionDelay: 800 },
-        { multiSel: "button[data-stage='g-kickoff-ms'], button[data-stage='g-stage1-ml'], button[data-stage='g-stage2-ch']",
-          title: "Masters / Champions 진출팀",
-          desc: "각 Masters·Champions에 진출한 팀들과 선수들을 기준으로 스탯 순위를 보여줍니다." },
       ],
     },
 
