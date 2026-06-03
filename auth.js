@@ -230,19 +230,6 @@
     ".login-submit--danger { background:rgba(180,30,30,0.85); border:1px solid rgba(220,50,50,0.3); }",
     ".login-submit--danger:hover { background:rgba(200,30,30,0.95); }",
 
-    /* ── Admin 통계 칩 ── */
-    ".admin-stats-chip {",
-    "  display:none; align-items:center; gap:7px;",
-    "  padding:0 11px; height:30px; border-radius:4px;",
-    "  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);",
-    "  font-size:12px; font-weight:700; color:rgba(255,255,255,0.38);",
-    "  font-family:'Barlow Condensed','Noto Sans KR',sans-serif; letter-spacing:0.05em;",
-    "  white-space:nowrap; flex-shrink:0;",
-    "}",
-    ".admin-stats-chip.visible { display:inline-flex; }",
-    ".asc-sep { color:rgba(255,255,255,0.15); }",
-    ".asc-online { color:#3ddc84; }",
-
     /* ── 건의함 버튼 ── */
     ".suggest-trigger-btn {",
     "  position:relative; display:inline-flex; align-items:center; gap:5px;",
@@ -388,47 +375,11 @@
     }
   })();
 
-  /* Admin 전용 통계 칩 */
-  var statsChip = document.createElement("div");
-  statsChip.className = "admin-stats-chip";
-  statsChip.innerHTML =
-    '👥 <span id="asc-users">-</span>명' +
-    '<span class="asc-sep">·</span>' +
-    '🟢 <span id="asc-online" class="asc-online">-</span> 접속 중';
-  if (isAdmin()) {
-    statsChip.classList.add("visible");
-    (function pollStats() {
-      fetch("/api/admin/stats", {
-        headers: { Authorization: "Bearer " + getToken() },
-      }).then(function (r) { return r.json(); })
-        .then(function (d) {
-          var u = document.getElementById("asc-users");
-          var o = document.getElementById("asc-online");
-          if (u) u.textContent = d.userCount;
-          if (o) o.textContent = d.onlineCount;
-        })
-        .catch(function () {});
-    })();
-    setInterval(function () {
-      fetch("/api/admin/stats", {
-        headers: { Authorization: "Bearer " + getToken() },
-      }).then(function (r) { return r.json(); })
-        .then(function (d) {
-          var u = document.getElementById("asc-users");
-          var o = document.getElementById("asc-online");
-          if (u) u.textContent = d.userCount;
-          if (o) o.textContent = d.onlineCount;
-        })
-        .catch(function () {});
-    }, 10000);
-  }
-
   if (header) {
     /* 우측 버튼 그룹 wrapper */
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
-    if (isAdmin()) rightGroup.appendChild(statsChip);
     if (suggestBtn) rightGroup.appendChild(suggestBtn);
     rightGroup.appendChild(helpBtn);
     rightGroup.appendChild(authBtn);
@@ -446,7 +397,6 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
-    if (isAdmin()) floatWrap.appendChild(statsChip);
     if (suggestBtn) floatWrap.appendChild(suggestBtn);
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
