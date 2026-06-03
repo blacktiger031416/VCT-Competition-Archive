@@ -13,8 +13,8 @@
   style.textContent = [
     "#help-overlay {",
     "  position:fixed; inset:0; z-index:98000;",
-    "  background:rgba(0,0,0,0.75);",
-    "  backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);",
+    "  background:rgba(0,0,0,0.30);",
+    "  backdrop-filter:blur(1px); -webkit-backdrop-filter:blur(1px);",
     "  animation:helpFadeIn .2s ease;",
     "}",
     "@keyframes helpFadeIn { from{opacity:0} to{opacity:1} }",
