@@ -1,9 +1,9 @@
 /**
- * help.js — 페이지별 도움말 오버레이
+ * help.js — 페이지별 도움말 오버레이 (스텝 방식)
  *
  * auth.js의 "?" 버튼이 window.vctHelpOpen() 을 호출합니다.
- * 각 페이지의 주요 요소에 번호 마커를 표시하고
- * 하단 패널에 설명을 보여줍니다.
+ * 한 번에 하나씩 요소를 강조하며, 다음/이전 버튼으로 탐색합니다.
+ * 요소가 화면 밖에 있으면 자동으로 스크롤합니다.
  */
 (function () {
   "use strict";
@@ -14,7 +14,7 @@
     "#help-overlay {",
     "  position:fixed; inset:0; z-index:98000;",
     "  background:rgba(0,0,0,0.10);",
-    "  backdrop-filter:blur(0px); -webkit-backdrop-filter:blur(0px);",
+    "  pointer-events:none;",
     "  animation:helpFadeIn .2s ease;",
     "}",
     "@keyframes helpFadeIn { from{opacity:0} to{opacity:1} }",
@@ -30,61 +30,99 @@
 
     ".help-marker {",
     "  position:fixed; z-index:98010;",
-    "  width:24px; height:24px; border-radius:50%;",
+    "  width:28px; height:28px; border-radius:50%;",
     "  background:#e8432d; color:#fff;",
     "  font-family:'Barlow Condensed',sans-serif;",
-    "  font-size:12px; font-weight:900;",
+    "  font-size:13px; font-weight:900;",
     "  display:grid; place-items:center;",
-    "  box-shadow:0 2px 10px rgba(0,0,0,0.6), 0 0 0 3px rgba(232,67,45,0.3);",
+    "  box-shadow:0 2px 12px rgba(232,67,45,0.6), 0 0 0 4px rgba(232,67,45,0.25);",
     "  pointer-events:none;",
-    "  animation:markerPop .25s cubic-bezier(0.16,1,0.3,1) both;",
+    "  animation:markerPop .3s cubic-bezier(0.16,1,0.3,1) both;",
     "}",
-    "@keyframes markerPop { from{opacity:0;transform:scale(0.4)} to{opacity:1;transform:scale(1)} }",
+    "@keyframes markerPop { from{opacity:0;transform:scale(0.3)} to{opacity:1;transform:scale(1)} }",
+
+    /* 하이라이트 링 */
+    ".help-highlight-ring {",
+    "  position:fixed; z-index:98005;",
+    "  border:2px solid rgba(232,67,45,0.6);",
+    "  border-radius:6px;",
+    "  pointer-events:none;",
+    "  box-shadow:0 0 0 4000px rgba(0,0,0,0.35);",
+    "  animation:ringPop .3s cubic-bezier(0.16,1,0.3,1) both;",
+    "}",
+    "@keyframes ringPop { from{opacity:0} to{opacity:1} }",
 
     "#help-panel {",
     "  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);",
     "  z-index:98020;",
-    "  width:min(600px,calc(100vw - 32px));",
-    "  max-height:45vh; overflow-y:auto;",
+    "  width:min(560px,calc(100vw - 32px));",
     "  background:rgba(8,12,22,0.97);",
     "  border:1px solid rgba(255,255,255,0.1); border-radius:12px;",
-    "  padding:18px 20px;",
+    "  padding:18px 20px 14px;",
     "  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);",
     "  box-shadow:0 24px 80px rgba(0,0,0,0.8);",
-    "  animation:helpFadeIn .25s ease;",
+    "  animation:helpFadeIn .2s ease;",
     "}",
-    "#help-panel::-webkit-scrollbar { width:4px; }",
-    "#help-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }",
 
+    ".help-panel-header {",
+    "  display:flex; align-items:center; justify-content:space-between;",
+    "  margin-bottom:12px;",
+    "}",
     ".help-panel-title {",
     "  font-family:'Barlow Condensed',sans-serif;",
     "  font-size:11px; font-weight:800; letter-spacing:.18em; text-transform:uppercase;",
-    "  color:rgba(255,255,255,0.35); margin-bottom:14px;",
+    "  color:rgba(255,255,255,0.3);",
     "}",
-    ".help-item {",
-    "  display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;",
+    ".help-panel-counter {",
+    "  font-family:'Barlow Condensed',sans-serif;",
+    "  font-size:11px; font-weight:700; letter-spacing:.08em;",
+    "  color:rgba(255,255,255,0.3);",
     "}",
-    ".help-item:last-child { margin-bottom:0; }",
-    ".help-item-num {",
-    "  flex-shrink:0; width:22px; height:22px; border-radius:50%;",
+
+    ".help-step-body {",
+    "  display:flex; align-items:flex-start; gap:12px; margin-bottom:16px;",
+    "}",
+    ".help-step-num {",
+    "  flex-shrink:0; width:26px; height:26px; border-radius:50%;",
     "  background:#e8432d; color:#fff;",
-    "  font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:900;",
-    "  display:grid; place-items:center; margin-top:1px;",
+    "  font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900;",
+    "  display:grid; place-items:center;",
     "}",
-    ".help-item-text { flex:1; min-width:0; }",
-    ".help-item-title {",
-    "  font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:800;",
-    "  letter-spacing:.03em; color:#fff; margin-bottom:2px;",
+    ".help-step-text { flex:1; min-width:0; }",
+    ".help-step-title {",
+    "  font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800;",
+    "  letter-spacing:.03em; color:#fff; margin-bottom:4px;",
     "}",
-    ".help-item-desc {",
-    "  font-family:'Noto Sans KR','Barlow',sans-serif; font-size:12px;",
-    "  color:rgba(255,255,255,0.48); line-height:1.65; word-break:keep-all;",
+    ".help-step-desc {",
+    "  font-family:'Noto Sans KR','Barlow',sans-serif; font-size:13px;",
+    "  color:rgba(255,255,255,0.55); line-height:1.7; word-break:keep-all;",
     "}",
-    ".help-panel-tip {",
-    "  margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.07);",
-    "  font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;",
-    "  letter-spacing:.06em; color:rgba(255,255,255,0.2); text-align:center;",
+
+    ".help-panel-nav {",
+    "  display:flex; gap:8px; align-items:center;",
+    "  border-top:1px solid rgba(255,255,255,0.07); padding-top:12px;",
     "}",
+    ".help-nav-btn {",
+    "  flex:1; height:36px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);",
+    "  background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6);",
+    "  font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;",
+    "  letter-spacing:.1em; text-transform:uppercase; cursor:pointer;",
+    "  transition:background .15s, color .15s, border-color .15s;",
+    "}",
+    ".help-nav-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.22); }",
+    ".help-nav-btn:disabled { opacity:0.3; cursor:default; }",
+    ".help-nav-btn--next {",
+    "  background:#e8432d; border-color:#e8432d; color:#fff;",
+    "}",
+    ".help-nav-btn--next:hover { background:#d43520; border-color:#d43520; }",
+    ".help-nav-dots {",
+    "  display:flex; gap:5px; align-items:center; flex-shrink:0;",
+    "}",
+    ".help-nav-dot {",
+    "  width:6px; height:6px; border-radius:50%;",
+    "  background:rgba(255,255,255,0.18); transition:background .2s;",
+    "}",
+    ".help-nav-dot.active { background:#e8432d; }",
   ].join("\n");
   document.head.appendChild(style);
 
@@ -240,7 +278,7 @@
           desc: "양 팀이 진행한 맵 선택/밴 순서와 결과를 보여줍니다." },
         { sel: ".sb-row, .scoreboard-wrap, #score-section",
           title: "라운드 스코어보드",
-          desc: "라운드별 공격/방어 승패를 색으로 구분해 보여줍니다. 클릭하면 상세 정보를 볼 수 있습니다." },
+          desc: "라운드별 공격/방어 승패를 색으로 구분해 보여줍니다." },
         { sel: ".pc-row, .player-stat-row, #player-section",
           title: "플레이어 스탯",
           desc: "각 선수의 ACS, K/D/A, KAST, ADR 등 상세 통계입니다." },
@@ -283,26 +321,43 @@
     return HELP_CONFIG.index;
   }
 
-  /* ── 오버레이 열기 ──────────────────────────────────── */
-  var _isOpen     = false;
-  var _markers    = [];
-  var _overlayEl  = null;
-  var _panelEl    = null;
-  var _closeBtnEl = null;
+  /* ── 상태 ──────────────────────────────────────────── */
+  var _isOpen      = false;
+  var _step        = 0;
+  var _validItems  = [];   /* { title, desc, _el } */
+  var _overlayEl   = null;
+  var _panelEl     = null;
+  var _closeBtnEl  = null;
+  var _markerEl    = null;
+  var _ringEl      = null;
+  var _scrollTimer = null;
 
+  /* ── 오버레이 열기 ──────────────────────────────────── */
   function openHelp() {
     if (_isOpen) return;
     _isOpen = true;
+    _step = 0;
 
     var cfg = getConfig();
 
-    /* 스크롤 잠금 */
-    document.body.style.overflow = "hidden";
+    /* 유효 항목 수집 */
+    _validItems = [];
+    cfg.items.forEach(function (item) {
+      var el = null;
+      var selectors = item.sel.split(",");
+      for (var i = 0; i < selectors.length; i++) {
+        try {
+          var found = document.querySelector(selectors[i].trim());
+          if (found) { el = found; break; }
+        } catch (e) {}
+      }
+      if (!el) return;
+      _validItems.push({ title: item.title, desc: item.desc, _el: el });
+    });
 
-    /* 반투명 오버레이 */
+    /* 반투명 오버레이 (pointer-events:none 이라 클릭 통과) */
     _overlayEl = document.createElement("div");
     _overlayEl.id = "help-overlay";
-    _overlayEl.addEventListener("click", closeHelp);
     document.body.appendChild(_overlayEl);
 
     /* 닫기 버튼 */
@@ -313,86 +368,156 @@
     _closeBtnEl.addEventListener("click", closeHelp);
     document.body.appendChild(_closeBtnEl);
 
-    /* 요소 탐색 → 유효한 항목만 마커 생성 */
-    var validItems = [];
-    cfg.items.forEach(function (item) {
-      /* 콤마로 연결된 여러 셀렉터 중 처음으로 찾은 것 사용 */
-      var el = null;
-      var selectors = item.sel.split(",");
-      for (var i = 0; i < selectors.length; i++) {
-        try {
-          var found = document.querySelector(selectors[i].trim());
-          if (found) { el = found; break; }
-        } catch (e) { /* 잘못된 셀렉터 무시 */ }
-      }
-      if (!el) return;
-
-      var rect = el.getBoundingClientRect();
-      if (rect.width === 0 && rect.height === 0) return;
-
-      var num = validItems.length + 1;
-      item._num = num;
-      validItems.push(item);
-
-      /* 번호 마커 */
-      var marker = document.createElement("div");
-      marker.className = "help-marker";
-      marker.textContent = num;
-      marker.style.animationDelay = (num * 0.06) + "s";
-
-      /* 요소 오른쪽 위 모서리 근처에 배치 */
-      var mx = Math.min(rect.right - 12, window.innerWidth - 28);
-      var my = Math.max(rect.top - 12,  8);
-      marker.style.left = mx + "px";
-      marker.style.top  = my + "px";
-
-      document.body.appendChild(marker);
-      _markers.push(marker);
-    });
-
-    /* 하단 정보 패널 */
+    /* 패널 */
     _panelEl = document.createElement("div");
     _panelEl.id = "help-panel";
-    _panelEl.addEventListener("click", function (e) { e.stopPropagation(); });
-
-    var html = '<div class="help-panel-title">' + escHtml(cfg.title) + '</div>';
-    if (!validItems.length) {
-      html += '<div class="help-item-desc" style="color:rgba(255,255,255,0.35);text-align:center;padding:12px 0;">이 페이지에서 인식된 요소가 없습니다.</div>';
-    } else {
-      validItems.forEach(function (item) {
-        html +=
-          '<div class="help-item">' +
-            '<div class="help-item-num">' + item._num + '</div>' +
-            '<div class="help-item-text">' +
-              '<div class="help-item-title">' + escHtml(item.title) + '</div>' +
-              '<div class="help-item-desc">' + escHtml(item.desc) + '</div>' +
-            '</div>' +
-          '</div>';
-      });
-    }
-    html += '<div class="help-panel-tip">클릭하거나 ESC 키를 눌러 닫기</div>';
-
-    _panelEl.innerHTML = html;
     document.body.appendChild(_panelEl);
 
     document.addEventListener("keydown", _onKeyDown);
+
+    if (_validItems.length === 0) {
+      renderEmptyPanel(cfg.title);
+    } else {
+      goToStep(0);
+    }
+  }
+
+  /* ── 스텝 이동 ──────────────────────────────────────── */
+  function goToStep(idx) {
+    _step = idx;
+    var item = _validItems[idx];
+    var el   = item._el;
+
+    /* 하이라이트 링 제거 → 재생성 */
+    if (_ringEl)   { _ringEl.remove();   _ringEl   = null; }
+    if (_markerEl) { _markerEl.remove(); _markerEl = null; }
+
+    /* 스크롤: 요소가 뷰포트 안에 있는지 확인 */
+    var rect = el.getBoundingClientRect();
+    var panelHeight = 160; /* 패널 높이 여유 */
+    var inView = (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight - panelHeight) &&
+      rect.right <= window.innerWidth
+    );
+
+    if (!inView) {
+      /* 요소가 화면 밖 → 스크롤 후 마커 배치 */
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (_scrollTimer) clearTimeout(_scrollTimer);
+      _scrollTimer = setTimeout(function () {
+        placeMarkerAndRing(el, idx + 1);
+      }, 450);
+    } else {
+      placeMarkerAndRing(el, idx + 1);
+    }
+
+    /* 패널 업데이트 */
+    renderPanel(item, idx);
+  }
+
+  /* ── 마커 + 링 배치 ─────────────────────────────────── */
+  function placeMarkerAndRing(el, num) {
+    if (!_isOpen) return;
+
+    var rect = el.getBoundingClientRect();
+
+    /* 링 */
+    var pad = 6;
+    _ringEl = document.createElement("div");
+    _ringEl.className = "help-highlight-ring";
+    _ringEl.style.left   = Math.max(rect.left - pad, 0) + "px";
+    _ringEl.style.top    = Math.max(rect.top  - pad, 0) + "px";
+    _ringEl.style.width  = (rect.width  + pad * 2) + "px";
+    _ringEl.style.height = (rect.height + pad * 2) + "px";
+    document.body.appendChild(_ringEl);
+
+    /* 번호 마커 (오른쪽 위) */
+    _markerEl = document.createElement("div");
+    _markerEl.className = "help-marker";
+    _markerEl.textContent = num;
+    var mx = Math.min(rect.right - 4, window.innerWidth - 32);
+    var my = Math.max(rect.top  - 14, 8);
+    _markerEl.style.left = mx + "px";
+    _markerEl.style.top  = my + "px";
+    document.body.appendChild(_markerEl);
+  }
+
+  /* ── 패널 렌더링 ─────────────────────────────────────── */
+  function renderPanel(item, idx) {
+    if (!_panelEl) return;
+    var total = _validItems.length;
+    var isFirst = (idx === 0);
+    var isLast  = (idx === total - 1);
+
+    /* 도트 인디케이터 */
+    var dots = "";
+    for (var i = 0; i < total; i++) {
+      dots += '<div class="help-nav-dot' + (i === idx ? " active" : "") + '"></div>';
+    }
+
+    _panelEl.innerHTML =
+      '<div class="help-panel-header">' +
+        '<div class="help-panel-title">도움말</div>' +
+        '<div class="help-panel-counter">' + (idx + 1) + ' / ' + total + '</div>' +
+      '</div>' +
+      '<div class="help-step-body">' +
+        '<div class="help-step-num">' + (idx + 1) + '</div>' +
+        '<div class="help-step-text">' +
+          '<div class="help-step-title">' + escHtml(item.title) + '</div>' +
+          '<div class="help-step-desc">' + escHtml(item.desc) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="help-panel-nav">' +
+        '<button class="help-nav-btn help-nav-btn--prev" ' + (isFirst ? 'disabled' : '') + '>← 이전</button>' +
+        '<div class="help-nav-dots">' + dots + '</div>' +
+        (isLast
+          ? '<button class="help-nav-btn help-nav-btn--next">닫기</button>'
+          : '<button class="help-nav-btn help-nav-btn--next">다음 →</button>'
+        ) +
+      '</div>';
+
+    _panelEl.querySelector(".help-nav-btn--prev").addEventListener("click", function () {
+      if (_step > 0) goToStep(_step - 1);
+    });
+    _panelEl.querySelector(".help-nav-btn--next").addEventListener("click", function () {
+      if (_step < _validItems.length - 1) goToStep(_step + 1);
+      else closeHelp();
+    });
+  }
+
+  function renderEmptyPanel(title) {
+    if (!_panelEl) return;
+    _panelEl.innerHTML =
+      '<div class="help-panel-header">' +
+        '<div class="help-panel-title">' + escHtml(title) + '</div>' +
+      '</div>' +
+      '<div class="help-step-desc" style="color:rgba(255,255,255,0.35);text-align:center;padding:8px 0 14px;">이 페이지에서 인식된 요소가 없습니다.</div>' +
+      '<div class="help-panel-nav">' +
+        '<button class="help-nav-btn help-nav-btn--next" style="flex:none;width:100%;">닫기</button>' +
+      '</div>';
+    _panelEl.querySelector(".help-nav-btn--next").addEventListener("click", closeHelp);
   }
 
   /* ── 오버레이 닫기 ──────────────────────────────────── */
   function closeHelp() {
     if (!_isOpen) return;
     _isOpen = false;
-    document.body.style.overflow = "";
+    if (_scrollTimer) { clearTimeout(_scrollTimer); _scrollTimer = null; }
     if (_overlayEl)  { _overlayEl.remove();  _overlayEl  = null; }
     if (_panelEl)    { _panelEl.remove();    _panelEl    = null; }
     if (_closeBtnEl) { _closeBtnEl.remove(); _closeBtnEl = null; }
-    _markers.forEach(function (m) { m.remove(); });
-    _markers = [];
+    if (_markerEl)   { _markerEl.remove();   _markerEl   = null; }
+    if (_ringEl)     { _ringEl.remove();     _ringEl     = null; }
+    _validItems = [];
     document.removeEventListener("keydown", _onKeyDown);
   }
 
   function _onKeyDown(e) {
     if (e.key === "Escape") closeHelp();
+    if (e.key === "ArrowRight" && _step < _validItems.length - 1) goToStep(_step + 1);
+    if (e.key === "ArrowLeft"  && _step > 0) goToStep(_step - 1);
   }
 
   function escHtml(s) {
@@ -401,7 +526,7 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  /* ── 전역 노출 (auth.js의 "?" 버튼이 호출) ─────────── */
+  /* ── 전역 노출 ── */
   window.vctHelpOpen  = openHelp;
   window.vctHelpClose = closeHelp;
 
