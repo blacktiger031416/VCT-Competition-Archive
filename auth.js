@@ -232,7 +232,7 @@
 
     /* ── 건의함 버튼 ── */
     ".suggest-trigger-btn {",
-    "  display:inline-flex; align-items:center; gap:5px;",
+    "  position:relative; display:inline-flex; align-items:center; gap:5px;",
     "  padding:0 11px; height:30px; border-radius:4px;",
     "  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.11);",
     "  color:rgba(255,255,255,0.45); font-size:12px; font-weight:700;",
@@ -240,6 +240,12 @@
     "  transition:background .15s,color .15s,border-color .15s; white-space:nowrap;",
     "}",
     ".suggest-trigger-btn:hover { background:rgba(255,255,255,0.11); border-color:rgba(255,255,255,0.22); color:rgba(255,255,255,0.85); }",
+    ".sg-badge {",
+    "  display:none; position:absolute; top:-4px; right:-4px;",
+    "  width:9px; height:9px; border-radius:50%;",
+    "  background:#e8432d; border:1.5px solid #080c16;",
+    "  pointer-events:none;",
+    "}",
 
     /* ── 건의함 모달 내용 ── */
     ".sg-notice {",
@@ -361,7 +367,7 @@
     suggestBtn.type = "button";
     suggestBtn.className = "suggest-trigger-btn";
     if (isAdmin()) {
-      suggestBtn.innerHTML = "📮 건의함 확인";
+      suggestBtn.innerHTML = "📮 건의함 확인<span class='sg-badge' id='sg-badge'></span>";
       suggestBtn.addEventListener("click", openSuggestAdminModal);
     } else {
       suggestBtn.innerHTML = "📮 건의함";
@@ -395,6 +401,11 @@
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
     document.body.appendChild(floatWrap);
+  }
+
+  /* 건의함 배지 초기 확인 (Admin + index) */
+  if (isAdmin() && suggestBtn) {
+    checkSuggestBadge();
   }
 
   /* ── 토큰 서버 검증 (백그라운드) ─────────────────── */
@@ -734,10 +745,36 @@
     setTimeout(function () { textarea.focus(); }, 60);
   }
 
+  /* ── 건의함 배지 헬퍼 ───────────────────────────── */
+  function showSuggestBadge() {
+    var b = document.getElementById("sg-badge");
+    if (b) b.style.display = "block";
+  }
+  function hideSuggestBadge() {
+    var b = document.getElementById("sg-badge");
+    if (b) b.style.display = "none";
+  }
+  function checkSuggestBadge() {
+    fetch("/api/suggestions", {
+      headers: { Authorization: "Bearer " + getToken() },
+    }).then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!Array.isArray(data) || !data.length) { hideSuggestBadge(); return; }
+        var lastViewed = localStorage.getItem("sg_last_viewed") || "";
+        var hasNew = data.some(function (item) { return item.at > lastViewed; });
+        if (hasNew) showSuggestBadge(); else hideSuggestBadge();
+      })
+      .catch(function () {});
+  }
+
   /* ── 건의함 확인 모달 (Admin) ────────────────────── */
   function openSuggestAdminModal() {
     var existing = document.querySelector(".login-modal");
     if (existing) existing.remove();
+
+    /* 열리는 순간 "확인함" 기록 → 배지 숨김 */
+    localStorage.setItem("sg_last_viewed", new Date().toISOString());
+    hideSuggestBadge();
 
     var modal = document.createElement("div");
     modal.className = "login-modal";

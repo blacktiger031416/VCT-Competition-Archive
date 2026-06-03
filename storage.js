@@ -18,7 +18,7 @@
   /* 서버에 동기화하지 않을 키 (auth 토큰은 절대 DB에 저장 금지) */
   var LOCAL_ONLY = [
     "vct_admin_auth", "__vct_dirty", "__vct_sync",
-    "vct_auth_token", "vct_auth_user",
+    "vct_auth_token", "vct_auth_user", "sg_last_viewed",
   ];
 
   /*
