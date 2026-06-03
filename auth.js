@@ -659,7 +659,7 @@
           '<button class="login-close" type="button" aria-label="닫기">×</button>' +
         '</div>' +
         '<div class="login-form" style="display:flex;flex-direction:column;gap:12px;">' +
-          '<div class="sg-notice">⚠ 주의사항<br>욕설, 폭언 등은 삼가 주실 것.</div>' +
+          '<div class="sg-notice">⚠ 주의사항<br>욕설, 폭언 등은 삼가주세요.</div>' +
           '<div>' +
             '<textarea class="sg-textarea" id="sg-input" placeholder="건의할 내용을 입력해주세요. (최대 500자)" maxlength="500"></textarea>' +
             '<div class="sg-char"><span id="sg-count">0</span> / 500</div>' +
