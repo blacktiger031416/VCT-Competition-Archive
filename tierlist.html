@@ -485,6 +485,38 @@
       letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,0.3);
     }
 
+    /* ── Category sections ── */
+    #events-grid.has-categories { display: block; }
+    .cat-section { margin-bottom: 32px; }
+    .cat-label {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 800;
+      letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,0.35);
+      margin-bottom: 14px;
+    }
+    .cat-label::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+    .cat-cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;
+    }
+    .event-cat-badge {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 800;
+      letter-spacing: .12em; text-transform: uppercase; padding: 2px 7px;
+      border-radius: 3px; flex-shrink: 0;
+    }
+    .cat-global   { background: rgba(90,140,255,0.1);  color: rgba(130,175,255,0.8); border: 1px solid rgba(90,140,255,0.2); }
+    .cat-regional { background: rgba(255,175,50,0.1);  color: rgba(255,195,80,0.8);  border: 1px solid rgba(255,175,50,0.2); }
+
+    /* Category selector in config modal */
+    .cfg-cat-row { display: flex; gap: 8px; }
+    .cfg-cat-btn {
+      flex: 1; height: 36px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.4);
+      font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .15s;
+    }
+    .cfg-cat-btn.active { border-color: #e8432d; background: rgba(232,67,45,0.12); color: #ff7860; }
+    .cfg-cat-btn:hover:not(.active) { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+
     /* Toast */
     #tl-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:5px; background:rgba(30,210,100,0.15); border:1px solid rgba(61,220,132,0.3); color:#3ddc84; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; opacity:0; transition:opacity .25s; z-index:9999; }
     #tl-toast.show { opacity:1; }
@@ -569,6 +601,13 @@
         <button class="tl-panel-close" id="cfg-close-btn">×</button>
       </div>
       <div class="tl-panel-body">
+        <div class="cfg-field">
+          <label class="cfg-label">카테고리</label>
+          <div class="cfg-cat-row" id="cfg-cat-row">
+            <button type="button" class="cfg-cat-btn active" data-cat="global">🌍 세계대회</button>
+            <button type="button" class="cfg-cat-btn" data-cat="regional">🌐 권역별</button>
+          </div>
+        </div>
         <div class="cfg-field">
           <label class="cfg-label">제목</label>
           <input class="cfg-input" type="text" id="cfg-title" placeholder="예: Masters Bangkok 팀 티어리스트" />
@@ -776,16 +815,37 @@
         winnersSection.style.display = "none";
       }
 
-      /* 일반 이벤트 그리드 */
+      /* 일반 이벤트 그리드 - 카테고리별 분리 */
       var grid = document.getElementById("events-grid");
       if (!events.length) {
+        grid.className = "events-grid";
         grid.innerHTML = '<div class="no-events">아직 티어리스트가 없습니다.<br>Admin이 새 티어리스트를 만들면 여기에 표시됩니다.</div>';
         return;
       }
+
+      var globalEvts   = events.filter(function(e){ return !e.category || e.category === "global"; });
+      var regionalEvts = events.filter(function(e){ return e.category === "regional"; });
+
+      grid.className = "events-grid has-categories";
       grid.innerHTML = "";
-      events.forEach(function(evt) {
-        grid.appendChild(makeEventCard(evt));
-      });
+
+      function addCatSection(label, evtList) {
+        if (!evtList.length) return;
+        var sec = document.createElement("div");
+        sec.className = "cat-section";
+        var hdr = document.createElement("div");
+        hdr.className = "cat-label";
+        hdr.textContent = label;
+        var inner = document.createElement("div");
+        inner.className = "cat-cards-grid";
+        evtList.forEach(function(evt){ inner.appendChild(makeEventCard(evt)); });
+        sec.appendChild(hdr);
+        sec.appendChild(inner);
+        grid.appendChild(sec);
+      }
+
+      addCatSection("🌍 세계대회", globalEvts);
+      addCatSection("🌐 권역별", regionalEvts);
     }
 
     function makeWinnerCard(w, medal, label) {
@@ -940,10 +1000,14 @@
       var enterLabel = evt.status === "open" ? "참여하기" : "보기";
       var enterClass = evt.status === "open" ? "" : "view-only-enter";
 
+      var catLabel = evt.category === "regional" ? "권역별" : "세계대회";
+      var catClass = evt.category === "regional" ? "cat-regional" : "cat-global";
+
       card.innerHTML =
         '<div class="event-card-body">' +
           '<div class="event-card-top">' +
             '<span class="event-card-title">' + escHtml(evt.title || "제목 없음") + '</span>' +
+            '<span class="event-cat-badge ' + catClass + '">' + catLabel + '</span>' +
             '<span class="status-badge ' + sc + '">' + st + '</span>' +
           '</div>' +
           '<div class="event-card-meta">' + meta + '</div>' +
@@ -1373,6 +1437,11 @@
       document.getElementById("cfg-tier-count").value = cur.tiers.length;
       renderCfgTiers(cur.tiers);
       renderCfgTeams(cur.teams || []);
+      /* 카테고리 버튼 초기화 */
+      var activeCat = cur.category || "global";
+      document.querySelectorAll(".cfg-cat-btn").forEach(function(b) {
+        b.classList.toggle("active", b.dataset.cat === activeCat);
+      });
       document.getElementById("cfg-modal").style.display = "flex";
     }
     function closeCfgModal() { document.getElementById("cfg-modal").style.display = "none"; }
@@ -1407,7 +1476,9 @@
         if (name) tiers.push({name:name,color:color});
       });
       var teams = []; document.querySelectorAll(".cfg-team-item.sel").forEach(function(item){ teams.push(item.dataset.team); });
-      return {tiers:tiers, teams:teams};
+      var activeBtn = document.querySelector(".cfg-cat-btn.active");
+      var category = activeBtn ? activeBtn.dataset.cat : "global";
+      return {tiers:tiers, teams:teams, category:category};
     }
 
     async function saveEvent(statusOverride, silent) {
@@ -1434,7 +1505,8 @@
       if (!tiers.length) { alert("티어를 추가해 주세요."); return; }
       if (!teams.length) { alert("팀을 하나 이상 선택해 주세요."); return; }
 
-      var evt = { id: editingId || null, title:title, tiers:tiers, teams:teams, status:status, createdAt: (editingId && curEvt ? curEvt.createdAt : new Date().toISOString()) };
+      var category = d.category || "global";
+      var evt = { id: editingId || null, title:title, tiers:tiers, teams:teams, status:status, category:category, createdAt: (editingId && curEvt ? curEvt.createdAt : new Date().toISOString()) };
 
       try {
         var r = await fetch("/api/tierlist/events", {
@@ -1460,6 +1532,14 @@
         } else { alert(res.error||"저장 실패"); }
       } catch(e) { alert("서버 오류"); }
     }
+
+    /* 카테고리 버튼 토글 */
+    document.getElementById("cfg-cat-row").addEventListener("click", function(e) {
+      var btn = e.target.closest(".cfg-cat-btn");
+      if (!btn) return;
+      document.querySelectorAll(".cfg-cat-btn").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+    });
 
     document.getElementById("btn-new").addEventListener("click", function(){ openCfgModal(null); });
     document.getElementById("btn-edit-evt").addEventListener("click", function(){ if (curEvt) openCfgModal(curEvt); });
