@@ -42,11 +42,11 @@
 
       .page-shell {
         width: min(1180px, calc(100% - 40px));
-        min-height: 100vh;
+        min-height: calc(100vh - 52px);
         margin: 0 auto;
         display: grid;
         place-items: center;
-        padding: 44px 0;
+        padding: 36px 0 52px;
       }
 
       .hero {
@@ -174,9 +174,31 @@
       .emea     { --accent: #d4ff1f; }
       .masters  { --accent: #651eff; }
       .champions{ --accent: #c5b174; }
-      .records   { --accent: #e8b840; grid-column: 1 / -1; min-height: 120px; grid-template-rows: auto auto; gap: 10px; }
-      .tierlist  { --accent: #3ddc84; grid-column: 1 / -1; min-height: 80px; grid-template-rows: auto auto; gap: 10px; }
-      .prediction{ --accent: #f0c040; grid-column: 1 / -1; min-height: 80px; grid-template-rows: auto auto; gap: 10px; }
+      /* ── Site nav (sticky) ── */
+      .site-header {
+        position: sticky; top: 0; z-index: 200;
+        display: flex; align-items: center; gap: 8px;
+        padding: 0 20px; height: 52px; width: 100%;
+        background: rgba(8,8,8,.92);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255,255,255,.07);
+      }
+      .nav-brand {
+        font-size: 12px; font-weight: 900; color: #ff2638;
+        letter-spacing: .09em; text-transform: uppercase; flex-shrink: 0;
+      }
+      .nav-sep { width: 1px; height: 16px; background: rgba(255,255,255,.1); margin: 0 4px; flex-shrink: 0; }
+      .nav-links { display: flex; gap: 4px; align-items: center; }
+      .nav-link {
+        display: inline-flex; align-items: center; gap: 5px;
+        height: 30px; padding: 0 13px;
+        border: 1px solid rgba(255,255,255,.08); border-radius: 4px;
+        background: rgba(255,255,255,.04);
+        font-size: 12px; font-weight: 700; color: rgba(255,255,255,.5);
+        transition: background .15s, border-color .15s, color .15s; white-space: nowrap;
+      }
+      .nav-link:hover { background: rgba(255,255,255,.09); color: #fff; border-color: rgba(255,255,255,.18); }
+      .nav-spacer { flex: 1; }
 
       /* ── Enter transitions ── */
       body.entering-pacific .league-card:not(.pacific),
@@ -292,6 +314,19 @@
     </style>
   </head>
   <body>
+    <!-- ── Sticky top nav ── -->
+    <header class="site-header">
+      <span class="nav-brand">VCT Archive</span>
+      <span class="nav-sep"></span>
+      <nav class="nav-links" aria-label="사이트 메뉴">
+        <a class="nav-link" href="./records.html" data-records-enter>📋 기록</a>
+        <a class="nav-link" href="./tierlist.html">🏅 티어리스트</a>
+        <a class="nav-link" href="./prediction.html">🏆 승부 예측</a>
+      </nav>
+      <span class="nav-spacer"></span>
+      <!-- auth.js 버튼 자동 주입 -->
+    </header>
+
     <main class="page-shell">
       <section class="hero" aria-labelledby="site-title">
         <div class="hero-copy">
@@ -351,21 +386,6 @@
             </span>
             <span class="league-name">Champions</span>
             <span class="league-action">대회 보기</span>
-          </a>
-
-          <a class="league-card records" href="./records.html" aria-label="VCT 시즌 기록 보기" data-records-enter>
-            <span class="league-name">기록</span>
-            <span class="league-action">기록 보기</span>
-          </a>
-
-          <a class="league-card tierlist" href="./tierlist.html" aria-label="티어리스트 게시판 보기">
-            <span class="league-name">티어리스트</span>
-            <span class="league-action">게시판 보기</span>
-          </a>
-
-          <a class="league-card prediction" href="./prediction.html" aria-label="승부 예측 보기">
-            <span class="league-name">승부 예측</span>
-            <span class="league-action">예측하기 →</span>
           </a>
 
         </nav>
