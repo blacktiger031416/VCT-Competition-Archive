@@ -550,19 +550,27 @@
 
   /* ── 스크롤 + 마커/링 배치 ──────────────────────────── */
   function scrollAndPlace(resolved, num) {
-    /* 스크롤 앵커: 단일 요소 or 첫 번째 요소 */
-    var anchor = resolved.el || resolved.els[0];
     var panelH = 160;
-    var rect   = anchor.getBoundingClientRect();
+
+    /* union rect (multiSel) 또는 단일 요소 rect로 inView 판단 */
+    var rect = resolved.els ? unionRect(resolved.els)
+                            : resolved.el.getBoundingClientRect();
     var inView = (
-      rect.top    >= 0 &&
+      rect.top    >= 20 &&
       rect.left   >= 0 &&
       rect.bottom <= (window.innerHeight - panelH) &&
       rect.right  <= window.innerWidth
     );
 
     if (!inView) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+      /* multiSel이거나 세로로 큰 요소 → union rect의 top을 뷰포트 상단에 맞춤 */
+      if (resolved.els || rect.height > window.innerHeight * 0.4) {
+        var targetY = window.scrollY + rect.top - 80;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+      } else {
+        resolved.el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
       if (_scrollTimer) clearTimeout(_scrollTimer);
 
       /* 스크롤이 완전히 멈춘 뒤 링 배치 (100ms 간격으로 scrollY 변화 감지) */
