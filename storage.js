@@ -15,8 +15,16 @@
 (function () {
   "use strict";
 
-  /* 서버에 동기화하지 않을 키 */
-  var LOCAL_ONLY = ["vct_admin_auth", "__vct_dirty", "__vct_sync"];
+  /* 서버에 동기화하지 않을 키 (auth 토큰은 절대 DB에 저장 금지) */
+  var LOCAL_ONLY = [
+    "vct_admin_auth", "__vct_dirty", "__vct_sync",
+    "vct_auth_token", "vct_auth_user",
+  ];
+
+  /* 혹시 이전에 DB에 올라간 auth 키가 있으면 즉시 삭제 (보안 픽스) */
+  ["vct_auth_token", "vct_auth_user"].forEach(function (key) {
+    fetch("/api/data/" + encodeURIComponent(key), { method: "DELETE" }).catch(function () {});
+  });
 
   function isLocalOnly(key) {
     return LOCAL_ONLY.indexOf(key) !== -1;
