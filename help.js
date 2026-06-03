@@ -357,14 +357,14 @@
 
     /* ── Masters / Champions 팀 배정 페이지 */
     tournament_setup: {
-      title: "대회 팀 배정 도움말",
+      title: "대회 도움말",
       items: [
-        { sel: ".slot-grid, .region-group, .team-slot-wrap",
-          title: "지역별 참가팀 슬롯",
-          desc: "각 지역에서 진출한 팀을 슬롯에 배정합니다. 슬롯을 클릭해 팀을 선택하세요." },
-        { sel: ".match-block, .bracket-wrap",
-          title: "대진표 / 경기 결과",
-          desc: "대회의 대진 구조와 각 경기 결과를 보여줍니다." },
+        { sel: "section.tournament-section, .tournament-grid",
+          title: "대회 선택",
+          desc: "Swiss Stage, PlayOff 등 대회 내 각 단계 페이지로 이동합니다." },
+        { sel: "section.participants-section, .participants-grid",
+          title: "참가팀 배정",
+          desc: "각 권역별 국제대회에 출전한 팀들의 명단입니다. 각 팀의 로스터 또한 확인 가능합니다." },
       ],
     },
 
