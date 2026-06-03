@@ -85,12 +85,44 @@
     ".auth-header-btn--user:hover { background: rgba(220,50,50,0.12); border-color: rgba(220,50,50,0.35); color: #ff6b6b; }",
     ".auth-header-btn--user:hover::before { background: #ff6b6b; box-shadow: 0 0 6px rgba(255,100,100,0.6); }",
 
+    /* 우측 버튼 그룹 */
+    ".header-right-group {",
+    "  margin-left: auto;",
+    "  display: flex;",
+    "  align-items: center;",
+    "  gap: 8px;",
+    "  flex-shrink: 0;",
+    "}",
+    /* auth-header-btn의 per-page margin-left:auto를 그룹 내에서 무력화 */
+    ".header-right-group .auth-header-btn { margin-left: 0 !important; }",
+    ".header-right-group .auth-register-btn { margin-left: 0 !important; }",
+
+    /* 도움말 버튼 */
+    ".help-trigger-btn {",
+    "  width: 30px; height: 30px;",
+    "  border-radius: 50%;",
+    "  background: rgba(255,255,255,0.07);",
+    "  border: 1px solid rgba(255,255,255,0.14);",
+    "  color: rgba(255,255,255,0.45);",
+    "  font-family: 'Barlow Condensed', sans-serif;",
+    "  font-size: 15px; font-weight: 900;",
+    "  cursor: pointer; flex-shrink: 0;",
+    "  display: grid; place-items: center;",
+    "  transition: background .15s, color .15s, border-color .15s;",
+    "  line-height: 1;",
+    "}",
+    ".help-trigger-btn:hover {",
+    "  background: rgba(255,255,255,0.14);",
+    "  border-color: rgba(255,255,255,0.28);",
+    "  color: #fff;",
+    "}",
+
     /* 회원가입 보조 버튼 */
     ".auth-register-btn {",
     "  display: inline-flex;",
     "  align-items: center;",
     "  gap: 6px;",
-    "  margin-left: auto;",
+    "  margin-left: 0;",
     "  padding: 0 13px;",
     "  height: 32px;",
     "  border: 1px solid rgba(255,255,255,0.1);",
@@ -303,10 +335,25 @@
 
   refreshAuthButtons();
 
+  /* 도움말 버튼 */
+  var helpBtn = document.createElement("button");
+  helpBtn.type = "button";
+  helpBtn.className = "help-trigger-btn";
+  helpBtn.textContent = "?";
+  helpBtn.title = "도움말";
+  helpBtn.addEventListener("click", function () {
+    if (window.vctHelpOpen) window.vctHelpOpen();
+  });
+
   if (header) {
-    header.appendChild(refreshBtn);
-    header.appendChild(registerBtn);
-    header.appendChild(authBtn);
+    /* 우측 버튼 그룹 wrapper */
+    var rightGroup = document.createElement("div");
+    rightGroup.className = "header-right-group";
+    rightGroup.appendChild(refreshBtn);
+    rightGroup.appendChild(registerBtn);
+    rightGroup.appendChild(helpBtn);
+    rightGroup.appendChild(authBtn);
+    header.appendChild(rightGroup);
   } else {
     /* 헤더 없는 페이지(index 등): 우측 상단 고정 컨테이너 */
     var floatWrap = document.createElement("div");
@@ -321,6 +368,7 @@
     ].join(";");
     floatWrap.appendChild(refreshBtn);
     floatWrap.appendChild(registerBtn);
+    floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
     document.body.appendChild(floatWrap);
   }
