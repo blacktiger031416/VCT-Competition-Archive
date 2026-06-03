@@ -217,34 +217,61 @@
     tierlist_list: {
       title: "티어리스트 게시판 도움말",
       items: [
+        /* 전 시즌 수상자: 시즌이 종료되어 수상자 섹션이 표시될 때만 노출 */
         { sel: "#season-winners",
+          condition: function () {
+            var el = document.getElementById("season-winners");
+            return !!(el && el.style.display !== "none");
+          },
           title: "전 시즌 수상자 티어리스트",
           desc: "지난 시즌 1·2·3위 유저의 티어리스트가 고정 표시됩니다. 보기를 눌러 확인하세요." },
-        { sel: "#btn-new",
-          title: "새 티어리스트 만들기 (Admin)",
-          desc: "Admin 전용 버튼입니다. 팀 구성과 티어 이름을 설정해 새 이벤트를 만듭니다." },
+
         { sel: "#events-grid",
           title: "이벤트 목록",
           desc: "참여 가능한 티어리스트 이벤트가 표시됩니다. 카드를 클릭해 티어리스트를 작성하세요." },
+
+        /* 가장 최근 이벤트 카드로 이동 (Masters London 우선, 없으면 첫 번째) */
+        { sel: ".event-card",
+          title: "티어리스트 상세 보기",
+          desc: "이제 티어리스트 제작 화면으로 이동해 세부 기능을 안내합니다.",
+          navigate: function () {
+            var cards = document.querySelectorAll(".event-card");
+            for (var i = 0; i < cards.length; i++) {
+              var t = cards[i].querySelector(".event-card-title");
+              if (t && t.textContent.indexOf("Masters London") >= 0) {
+                var lnk = cards[i].querySelector("a.event-card-enter");
+                if (lnk) return lnk.href;
+              }
+            }
+            var first = document.querySelector(".event-card a.event-card-enter");
+            return first ? first.href : null;
+          } },
       ],
     },
 
     /* ── 티어리스트 상세 (제작/감상) */
     tierlist_detail: {
-      title: "티어리스트 제작 도움말",
+      title: "티어리스트 게시판 도움말",
       items: [
         { sel: "#tier-rows",
-          title: "티어 행",
-          desc: "팀 카드를 드래그해 원하는 티어에 놓으세요. 같은 티어 내에서도 순서를 바꿀 수 있습니다." },
-        { sel: "#pool-grid",
-          title: "팀 풀",
-          desc: "아직 배치하지 않은 팀들입니다. 드래그해서 티어에 배치하거나, 배치된 팀을 다시 여기로 드래그해 제거합니다." },
+          title: "티어리스트",
+          desc: "팀 카드를 드래그해 원하는 티어에 놓아 티어리스트를 만들 수 있습니다. 같은 티어 내에서도 순서를 바꿀 수 있습니다." },
         { sel: "#btn-submit",
-          title: "게시하기",
-          desc: "완성한 티어리스트를 게시판에 올립니다. 이미 게시한 경우 수정 게시로 업데이트됩니다." },
+          title: "게시하기 버튼",
+          desc: "게시를 통해 완성한 티어리스트를 다른 사람들과 공유할 수 있습니다. 이미 게시한 경우 수정 게시로 업데이트됩니다." },
         { sel: "#board-section",
+          condition: function () {
+            var el = document.getElementById("board-section");
+            return !!(el && el.style.display !== "none");
+          },
           title: "게시판",
-          desc: "다른 유저들이 올린 티어리스트를 볼 수 있습니다. ♥를 눌러 좋아요를 남겨보세요." },
+          desc: "다른 사람들이 공유한 티어리스트들을 볼 수 있습니다." },
+        { sel: ".bc-like",
+          condition: function () {
+            return !!document.querySelector(".bc-like");
+          },
+          title: "하트",
+          desc: "마음에 드는 유저의 티어리스트에 하트 표시를 할 수 있습니다. 하트가 높을수록 가장 먼저 노출됩니다." },
       ],
     },
 
@@ -422,11 +449,13 @@
     _allItems = cfg.items;
 
     /* 유효 항목 수집:
-       - action 있음 → 무조건 포함 (액션 후에 요소가 생김)
-       - action 없음 → 지금 요소가 있어야 포함 */
+       - condition 있음 → condition() === false 이면 스킵
+       - action/navigate 있음 → 무조건 포함 (액션 후에 요소가 생김)
+       - action/navigate 없음 → 지금 요소가 있어야 포함 */
     _stepItems = [];
     _allItems.forEach(function (item) {
-      if (item.action) {
+      if (item.condition && !item.condition()) return; /* 조건 불충족 → 스킵 */
+      if (item.action || item.navigate) {
         _stepItems.push(item);
       } else {
         var resolved = resolveItem(item);
@@ -489,6 +518,12 @@
         if (resolved) scrollAndPlace(resolved, idx + 1);
         renderPanel(item, idx, false);
       }, item.actionDelay || 700);
+    } else if (item.navigate) {
+      /* 페이지 이동 아이템 — 요소가 있으면 마커만 표시, 패널 렌더링 */
+      var resolved = resolveItem(item);
+      item._resolved = resolved || null;
+      if (resolved) scrollAndPlace(resolved, idx + 1);
+      renderPanel(item, idx, false);
     } else {
       var resolved = item._resolved || resolveItem(item);
       item._resolved = resolved || null;
@@ -590,6 +625,18 @@
     });
     _panelEl.querySelector(".help-nav-btn--next").addEventListener("click", function () {
       if (_pending) return;
+      var cur = _stepItems[_step];
+      if (cur && cur.navigate) {
+        /* 페이지 이동: sessionStorage에 재개 플래그 저장 후 navigate */
+        var url = cur.navigate();
+        if (url) {
+          sessionStorage.setItem("__vct_help_resume", "1");
+          window.location.href = url;
+        } else {
+          closeHelp();
+        }
+        return;
+      }
       if (_step < _stepItems.length - 1) goToStep(_step + 1);
       else closeHelp();
     });
@@ -639,5 +686,26 @@
   /* ── 전역 노출 ── */
   window.vctHelpOpen  = openHelp;
   window.vctHelpClose = closeHelp;
+
+  /* ── 페이지 이동 후 도움말 자동 재개 ───────────────────
+     tierlist list → detail 이동 시 sessionStorage 플래그를 읽어 자동으로 도움말 오픈 */
+  (function checkHelpResume() {
+    var flag = sessionStorage.getItem("__vct_help_resume");
+    if (!flag) return;
+    sessionStorage.removeItem("__vct_help_resume");
+    /* 페이지 초기화가 끝난 뒤 오픈 (tierlist는 async init 있음) */
+    var tryOpen = function () {
+      if (window.storageReady && typeof window.storageReady.then === "function") {
+        window.storageReady.then(function () { setTimeout(openHelp, 800); });
+      } else {
+        setTimeout(openHelp, 800);
+      }
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", tryOpen);
+    } else {
+      tryOpen();
+    }
+  })();
 
 })();
