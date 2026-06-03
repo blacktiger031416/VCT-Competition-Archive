@@ -207,10 +207,19 @@
     .team-card {
       width:70px; flex-shrink:0; display:flex; flex-direction:column; align-items:center;
       gap:4px; padding:6px 4px; border-radius:4px; border:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.04); cursor:grab; user-select:none; transition:all .12s;
+      background:rgba(255,255,255,0.04); cursor:grab; user-select:none; transition:background .12s, border-color .12s;
+      position:relative;
     }
     .team-card:hover { background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.18); }
     .team-card.dragging { opacity:.35; }
+    /* 드래그 삽입 위치 인디케이터 */
+    .team-card.tc-insert-before::before,
+    .team-card.tc-insert-after::after {
+      content:""; position:absolute; top:0; bottom:0; width:3px;
+      background:#e8432d; border-radius:2px; pointer-events:none;
+    }
+    .team-card.tc-insert-before::before { left:-4px; }
+    .team-card.tc-insert-after::after  { right:-4px; }
     .team-card img { width:42px; height:42px; object-fit:contain; }
     .team-card .tc-name {
       font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
@@ -1064,9 +1073,15 @@
         var itemsEl = document.getElementById("ti-" + tIdx);
         (tierData[tier.name] || []).forEach(function(t){ itemsEl.appendChild(makeTeamCard(t)); });
 
-        row.addEventListener("dragover", function(e){ e.preventDefault(); row.classList.add("drag-over"); });
+        row.addEventListener("dragover", function(e){
+          /* 팀카드 위에서는 카드의 핸들러가 처리 — row는 빈 공간만 담당 */
+          if (e.target.closest(".team-card")) return;
+          e.preventDefault(); row.classList.add("drag-over");
+        });
         row.addEventListener("dragleave", function(e){ if (!row.contains(e.relatedTarget)) row.classList.remove("drag-over"); });
         row.addEventListener("drop", function(e){
+          /* 팀카드 위에서는 카드의 핸들러가 처리 */
+          if (e.target.closest(".team-card")) return;
           e.preventDefault(); row.classList.remove("drag-over");
           var t = e.dataTransfer.getData("team"); if (!t) return;
           moveToTier(t, tier.name);
@@ -1105,6 +1120,12 @@
       }
     }
 
+    function clearInsertIndicators() {
+      document.querySelectorAll(".tc-insert-before, .tc-insert-after").forEach(function(el) {
+        el.classList.remove("tc-insert-before", "tc-insert-after");
+      });
+    }
+
     function makeTeamCard(teamName) {
       var card = document.createElement("div");
       card.className = "team-card"; card.draggable = true; card.dataset.team = teamName;
@@ -1114,8 +1135,74 @@
       card.innerHTML =
         (logo ? '<img src="' + logo + '" alt=""' + inv + ' onerror="this.style.display=\'none\'">' : '<div style="width:42px;height:42px"></div>') +
         '<span class="tc-name">' + escHtml(code) + '</span>';
-      card.addEventListener("dragstart", function(e){ e.dataTransfer.setData("team", teamName); setTimeout(function(){ card.classList.add("dragging"); }, 0); });
-      card.addEventListener("dragend", function(){ card.classList.remove("dragging"); });
+
+      card.addEventListener("dragstart", function(e) {
+        e.dataTransfer.setData("team", teamName);
+        setTimeout(function(){ card.classList.add("dragging"); }, 0);
+      });
+      card.addEventListener("dragend", function() {
+        card.classList.remove("dragging");
+        clearInsertIndicators();
+      });
+
+      /* 다른 팀카드 위로 드래그 → 삽입 위치 인디케이터 표시 */
+      card.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        e.stopPropagation(); /* 티어 row의 drag-over 클래스 방지 */
+        var dragged = e.dataTransfer.types && (e.dataTransfer.types.indexOf ? e.dataTransfer.types.indexOf("team") !== -1 : e.dataTransfer.types.contains("team"));
+        if (!dragged) return;
+        clearInsertIndicators();
+        var rect = card.getBoundingClientRect();
+        if (e.clientX < rect.left + rect.width / 2) {
+          card.classList.add("tc-insert-before");
+        } else {
+          card.classList.add("tc-insert-after");
+        }
+      });
+      card.addEventListener("dragleave", function(e) {
+        if (!card.contains(e.relatedTarget)) {
+          card.classList.remove("tc-insert-before", "tc-insert-after");
+        }
+      });
+      card.addEventListener("drop", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearInsertIndicators();
+        var draggedTeam = e.dataTransfer.getData("team");
+        if (!draggedTeam || draggedTeam === teamName) return;
+
+        /* 이 카드가 속한 티어 이름 파악 */
+        var tierRow = card.closest(".tier-row");
+        var targetTierName = tierRow ? tierRow.dataset.tier : null;
+        if (!targetTierName) return;
+
+        /* 삽입 위치 결정 (커서가 카드 중심 기준 왼쪽/오른쪽) */
+        var rect = card.getBoundingClientRect();
+        var insertBefore = e.clientX < rect.left + rect.width / 2;
+
+        /* 드래그한 팀을 기존 위치에서 제거 */
+        curEvt.tiers.forEach(function(t) {
+          var a = tierData[t.name] || [];
+          var i = a.indexOf(draggedTeam);
+          if (i !== -1) a.splice(i, 1);
+          tierData[t.name] = a;
+        });
+
+        /* 목표 티어의 목표 팀 위치에 삽입 */
+        if (!tierData[targetTierName]) tierData[targetTierName] = [];
+        var arr = tierData[targetTierName];
+        var targetIdx = arr.indexOf(teamName);
+        if (targetIdx === -1) {
+          arr.push(draggedTeam);
+        } else if (insertBefore) {
+          arr.splice(targetIdx, 0, draggedTeam);
+        } else {
+          arr.splice(targetIdx + 1, 0, draggedTeam);
+        }
+
+        renderWorkspace();
+      });
+
       return card;
     }
 
