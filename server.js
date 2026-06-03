@@ -413,13 +413,14 @@ app.get("/api/prediction/matches", async (req, res) => {
 
 /* ── API: 예측 경기 생성 (admin) ─────────────────── */
 app.post("/api/prediction/matches", requireAdmin, async (req, res) => {
-  const { team1, team2, odds1, odds2, label } = req.body || {};
+  const { team1, team2, odds1, odds2, label, logo1, logo2 } = req.body || {};
   if (!team1 || !team2 || !odds1 || !odds2)
     return res.status(400).json({ error: "team1, team2, odds1, odds2 필수" });
   const id = Date.now().toString();
   const match = {
     id, label: label || "", team1, team2,
     odds1: parseFloat(odds1), odds2: parseFloat(odds2),
+    logo1: logo1 || "", logo2: logo2 || "",
     status: "open", winner: null,
     createdAt: new Date().toISOString(),
   };
