@@ -22,57 +22,34 @@
     body::before {
       position: fixed; inset: 0; z-index: -1; pointer-events: none; content: "";
       background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
       background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 80%);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 80%);
     }
 
-    /* ── Site header ── */
+    /* ── Header ── */
     .site-header {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; gap: 10px;
       padding: 0 24px; height: 52px;
-      background: rgba(8,8,8,0.88);
+      background: rgba(8,8,8,.88);
       backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
-    .back-link { color: rgba(255,255,255,0.38); font-size:13px; font-weight:500; text-decoration:none; transition:color .15s; flex-shrink:0; }
-    .back-link:hover { color: rgba(255,255,255,0.8); }
-    .header-sep { color: rgba(255,255,255,0.13); font-size:14px; flex-shrink:0; }
-    .header-title { font-size:15px; font-weight:900; color:#f0c040; letter-spacing:.04em; flex-shrink:0; }
-    .coin-display {
-      display: none;
-      align-items: center; gap: 6px;
-      margin-left: 16px; padding: 0 12px; height: 30px;
-      background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.22); border-radius: 4px;
+    .back-link { color:rgba(255,255,255,.38); font-size:13px; font-weight:500; text-decoration:none; transition:color .15s; flex-shrink:0; }
+    .back-link:hover { color:rgba(255,255,255,.8); }
+    .header-sep  { color:rgba(255,255,255,.13); font-size:14px; flex-shrink:0; }
+    .header-title{ font-size:15px; font-weight:900; color:#f0c040; letter-spacing:.04em; flex-shrink:0; }
+    .coin-display{
+      display:none; align-items:center; gap:6px;
+      margin-left:16px; padding:0 12px; height:30px;
+      background:rgba(240,192,64,.1); border:1px solid rgba(240,192,64,.22); border-radius:4px;
       font-size:13px; font-weight:700; color:#f0c040; white-space:nowrap; flex-shrink:0;
     }
 
     /* ── Layout ── */
-    .pred-wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 96px; }
-
-    /* ── Admin panel ── */
-    .admin-panel {
-      display: none;
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
-      padding: 20px 22px 22px; margin-bottom: 32px;
-    }
-    .admin-panel-title { font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); letter-spacing:.14em; text-transform:uppercase; margin-bottom:16px; }
-    .create-form { display:flex; flex-direction:column; gap:12px; }
-    .form-row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
-    .form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:110px; }
-    .form-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.28); letter-spacing:.13em; text-transform:uppercase; }
-    .form-input {
-      height:38px; padding:0 12px;
-      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:4px;
-      color:#fff; font-size:14px; font-weight:500; font-family:inherit; outline:none;
-      transition:border-color .15s, background .15s;
-    }
-    .form-input:focus { border-color:rgba(240,192,64,0.5); background:rgba(255,255,255,0.06); }
-    .form-input::placeholder { color:rgba(255,255,255,0.15); }
-    .vs-sep { font-size:18px; font-weight:900; color:rgba(255,255,255,0.18); flex-shrink:0; padding-bottom:8px; }
-    .form-error { font-size:12px; color:#ff7070; display:none; margin-top:2px; }
+    .pred-wrap { max-width:860px; margin:0 auto; padding:32px 20px 96px; }
 
     /* ── Buttons ── */
     .btn {
@@ -86,12 +63,123 @@
     .btn-primary { background:#f0c040; color:#111; }
     .btn-primary:hover:not(:disabled) { background:#ffd14a; }
     .btn-danger  { background:rgba(220,50,50,.18); border:1px solid rgba(220,50,50,.32); color:#ff7070; }
-    .btn-danger:hover:not(:disabled) { background:rgba(220,50,50,.32); }
+    .btn-danger:hover:not(:disabled)  { background:rgba(220,50,50,.32); }
     .btn-muted   { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.5); }
-    .btn-muted:hover:not(:disabled)  { background:rgba(255,255,255,.13); color:rgba(255,255,255,.85); }
+    .btn-muted:hover:not(:disabled)   { background:rgba(255,255,255,.13); color:rgba(255,255,255,.85); }
     .btn-win     { background:rgba(61,220,132,.14); border:1px solid rgba(61,220,132,.28); color:#3ddc84; }
-    .btn-win:hover:not(:disabled)    { background:rgba(61,220,132,.26); }
+    .btn-win:hover:not(:disabled)     { background:rgba(61,220,132,.26); }
     .btn-sm { height:28px; padding:0 10px; font-size:12px; }
+
+    /* ── Admin panel ── */
+    .admin-panel {
+      display:none;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:8px;
+      padding:20px 22px 22px; margin-bottom:32px;
+    }
+    .admin-panel-title { font-size:11px; font-weight:700; color:rgba(255,255,255,.3); letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; }
+
+    .create-form { display:flex; flex-direction:column; gap:14px; }
+    .form-row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+    .form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:110px; }
+    .form-label { font-size:10px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.13em; text-transform:uppercase; }
+    .form-input {
+      height:38px; padding:0 12px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:4px;
+      color:#fff; font-size:14px; font-weight:500; font-family:inherit; outline:none;
+      transition:border-color .15s, background .15s;
+    }
+    .form-input:focus { border-color:rgba(240,192,64,.5); background:rgba(255,255,255,.06); }
+    .form-input::placeholder { color:rgba(255,255,255,.15); }
+    .form-error { font-size:12px; color:#ff7070; display:none; margin-top:2px; }
+
+    /* Team picker button (in create form) */
+    .team-pick-area { display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px; }
+    .team-pick-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+      width:100%; min-height:110px; padding:14px 12px;
+      background:rgba(255,255,255,.04); border:1.5px dashed rgba(255,255,255,.14); border-radius:8px;
+      cursor:pointer; transition:all .16s; font-family:inherit;
+    }
+    .team-pick-btn:hover { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.28); }
+    .team-pick-btn.is-set { border-style:solid; border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.05); }
+    .pick-placeholder { font-size:13px; font-weight:700; color:rgba(255,255,255,.28); }
+    .pick-logo { width:56px; height:56px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(0,0,0,.5)); }
+    .pick-initial {
+      width:48px; height:48px; border-radius:50%;
+      background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; font-weight:900; color:rgba(255,255,255,.4);
+    }
+    .pick-name { font-size:13px; font-weight:700; color:#fff; }
+
+    .vs-sep { font-size:20px; font-weight:900; color:rgba(255,255,255,.16); padding-bottom:14px; flex-shrink:0; }
+
+    /* ── Team picker MODAL ── */
+    .picker-modal {
+      position:fixed; inset:0; z-index:9500;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .picker-backdrop {
+      position:absolute; inset:0;
+      background:rgba(4,6,12,.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    }
+    .picker-panel {
+      position:relative; z-index:1;
+      width:min(680px,calc(100vw - 28px));
+      max-height:min(620px,calc(100vh - 56px));
+      display:flex; flex-direction:column;
+      background:#111a28;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:10px;
+      box-shadow:0 32px 96px rgba(0,0,0,.75);
+      overflow:hidden;
+      animation:pickerIn .2s cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes pickerIn { from{opacity:0;transform:scale(.96) translateY(10px)} to{opacity:1;transform:none} }
+
+    .picker-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.06); flex-shrink:0;
+    }
+    .picker-title { font-size:15px; font-weight:900; color:#fff; }
+    .picker-close {
+      width:28px; height:28px; display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,.1); border-radius:4px;
+      background:rgba(255,255,255,.05); color:rgba(255,255,255,.45);
+      font-size:16px; cursor:pointer; transition:all .12s;
+    }
+    .picker-close:hover { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.2); }
+
+    .picker-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(130px,1fr));
+      gap:10px; padding:16px; overflow-y:auto; flex:1;
+    }
+    .picker-team-btn {
+      display:flex; flex-direction:column; align-items:center; gap:9px;
+      padding:16px 10px 13px; border-radius:8px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+      cursor:pointer; transition:all .14s; font-family:inherit;
+    }
+    .picker-team-btn:hover {
+      background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.18);
+      transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(0,0,0,.4);
+    }
+    .picker-team-logo { width:60px; height:60px; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
+    .picker-team-name { font-size:12px; font-weight:700; color:rgba(255,255,255,.75); text-align:center; line-height:1.3; }
+
+    .picker-footer {
+      display:flex; align-items:center; gap:8px;
+      padding:12px 16px; border-top:1px solid rgba(255,255,255,.06); flex-shrink:0;
+    }
+    .picker-footer-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.3); letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
+    .picker-custom-input {
+      flex:1; height:36px; padding:0 12px;
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:4px;
+      color:#fff; font-size:14px; font-family:inherit; outline:none; transition:border-color .15s;
+    }
+    .picker-custom-input:focus { border-color:rgba(240,192,64,.5); }
 
     /* ── Section heading ── */
     .section-heading {
@@ -108,7 +196,6 @@
     .match-card[data-status="open"]    { border-color:rgba(240,192,64,.18); }
     .match-card[data-status="settled"] { opacity:.65; }
 
-    /* top bar */
     .card-top {
       display:flex; align-items:center; gap:8px;
       padding:10px 14px 9px; border-bottom:1px solid rgba(255,255,255,.05); flex-wrap:wrap;
@@ -120,91 +207,39 @@
     .match-label { font-size:12px; color:rgba(255,255,255,.32); flex:1; min-width:0; }
     .card-admin-btns { display:flex; gap:6px; margin-left:auto; flex-shrink:0; }
 
-    /* ── Teams area ── */
-    .card-teams {
-      display: flex; align-items: stretch;
-      padding: 16px 14px 14px; gap: 8px;
-    }
-    /* Each team is a card-like block */
+    /* Teams */
+    .card-teams { display:flex; align-items:stretch; padding:14px 12px 12px; gap:8px; }
     .team-block {
-      flex: 1;
-      display: flex; flex-direction: column; align-items: center;
-      gap: 8px; padding: 16px 12px 14px;
-      border-radius: 8px;
-      border: 1.5px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.03);
-      transition: border-color .18s, background .18s, transform .15s;
-      user-select: none;
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:16px 10px 14px; border-radius:8px;
+      border:1.5px solid rgba(255,255,255,.06); background:rgba(255,255,255,.03);
+      transition:border-color .18s, background .18s, transform .15s;
+      user-select:none;
     }
-
-    /* Hoverable when can-bet */
-    .card-teams.can-bet .team-block {
-      cursor: pointer;
-    }
-    .card-teams.can-bet .team-block:hover {
-      border-color: rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06);
-      transform: translateY(-2px);
-    }
-
-    /* Selected */
-    .team-block.selected {
-      border-color: rgba(240,192,64,0.55) !important;
-      background: rgba(240,192,64,0.08) !important;
-      transform: translateY(-2px);
-    }
-    .team-block.selected .team-name { color: #f0c040; }
+    .card-teams.can-bet .team-block { cursor:pointer; }
+    .card-teams.can-bet .team-block:hover { border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.06); transform:translateY(-2px); }
+    .team-block.selected { border-color:rgba(240,192,64,.55)!important; background:rgba(240,192,64,.08)!important; transform:translateY(-2px); }
+    .team-block.selected .team-name { color:#f0c040; }
     .team-block.selected .odds-tag  { background:rgba(240,192,64,.18); color:#f0c040; }
-    .team-block.selected .select-hint { color: #f0c040; opacity:1; }
-    .team-block.selected .select-hint::before { content: "✓ "; }
-
-    /* Winner / loser */
-    .team-block.winner { border-color:rgba(61,220,132,.45) !important; background:rgba(61,220,132,.07) !important; }
+    .team-block.selected .select-hint { color:#f0c040; }
+    .team-block.winner { border-color:rgba(61,220,132,.45)!important; background:rgba(61,220,132,.07)!important; }
     .team-block.winner .team-name { color:#3ddc84; }
     .team-block.winner .odds-tag  { background:rgba(61,220,132,.15); color:#3ddc84; }
     .team-block.loser { opacity:.38; }
 
-    /* Logo */
-    .team-logo-wrap {
-      width: 72px; height: 72px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .team-logo {
-      max-width: 72px; max-height: 72px;
-      object-fit: contain;
-      filter: drop-shadow(0 4px 14px rgba(0,0,0,0.5));
-    }
+    .team-logo-wrap { width:72px; height:72px; display:flex; align-items:center; justify-content:center; }
+    .team-logo { max-width:72px; max-height:72px; object-fit:contain; filter:drop-shadow(0 4px 14px rgba(0,0,0,.5)); }
     .team-logo-placeholder {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.06);
-      border: 1.5px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 900; color: rgba(255,255,255,0.2);
-      letter-spacing: -0.02em;
+      width:52px; height:52px; border-radius:50%;
+      background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; font-weight:900; color:rgba(255,255,255,.2);
     }
-
     .team-name { font-size:20px; font-weight:900; color:#fff; letter-spacing:.02em; text-align:center; line-height:1.2; }
-    .odds-tag {
-      font-size:13px; font-weight:700;
-      padding:4px 10px; border-radius:12px;
-      background:rgba(255,255,255,.07); color:rgba(255,255,255,.45);
-    }
-    .select-hint {
-      font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-      color:rgba(255,255,255,.22); opacity:.7;
-      transition: color .15s, opacity .15s;
-    }
-    .card-teams.can-bet .team-block:hover .select-hint { opacity:1; color:rgba(255,255,255,.55); }
+    .odds-tag { font-size:13px; font-weight:700; padding:4px 10px; border-radius:12px; background:rgba(255,255,255,.07); color:rgba(255,255,255,.45); }
+    .select-hint { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.22); }
+    .vs-divider { flex-shrink:0; width:36px; text-align:center; align-self:center; font-size:12px; font-weight:900; color:rgba(255,255,255,.18); letter-spacing:.08em; }
 
-    /* VS divider */
-    .vs-divider {
-      flex-shrink:0; width:36px; text-align:center; align-self:center;
-      font-size:12px; font-weight:900; color:rgba(255,255,255,.18); letter-spacing:.08em;
-    }
-
-    /* ── Meta / badges ── */
     .card-meta { padding:4px 14px 12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .meta-item { font-size:12px; color:rgba(255,255,255,.28); }
     .my-bet-badge { padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700; background:rgba(126,184,255,.1); border:1px solid rgba(126,184,255,.18); color:#7eb8ff; }
@@ -212,11 +247,7 @@
     .result-badge.win  { background:rgba(61,220,132,.1);  border:1px solid rgba(61,220,132,.22);  color:#3ddc84; }
     .result-badge.lose { background:rgba(220,50,50,.1);   border:1px solid rgba(220,50,50,.22);   color:#ff7070; }
 
-    /* ── Bet input area ── */
-    .bet-input-area {
-      padding: 10px 14px 14px;
-      border-top: 1px solid rgba(255,255,255,.05);
-    }
+    .bet-input-area { padding:10px 14px 14px; border-top:1px solid rgba(255,255,255,.05); }
     .bet-amount-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     .bet-amount-input {
       flex:1; min-width:100px; height:38px; padding:0 12px;
@@ -226,18 +257,15 @@
     .bet-amount-input:focus { border-color:rgba(240,192,64,.45); }
     .bet-hint { font-size:11px; color:rgba(255,255,255,.24); white-space:nowrap; }
     .bet-error { font-size:12px; color:#ff7070; margin-top:7px; display:none; }
-
-    /* ── Login prompt ── */
     .login-prompt { padding:11px 14px; border-top:1px solid rgba(255,255,255,.05); font-size:13px; color:rgba(255,255,255,.28); }
 
-    /* ── Admin settle ── */
     .settle-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .settle-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; }
 
-    /* ── Loading / empty ── */
+    /* Loading / empty */
     .pred-loading { display:flex; align-items:center; gap:12px; padding:48px 0; color:rgba(255,255,255,.28); font-size:14px; }
     .pred-spinner { width:20px; height:20px; border:2px solid rgba(255,255,255,.08); border-top-color:#f0c040; border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes spin { to{transform:rotate(360deg)} }
     .no-matches { padding:56px 0; text-align:center; color:rgba(255,255,255,.22); font-size:14px; }
     .matches-section-wrap { margin-bottom:28px; }
 
@@ -245,8 +273,7 @@
       .form-row { flex-direction:column; }
       .vs-sep { display:none; }
       .team-name { font-size:17px; }
-      .team-logo-wrap { width:56px; height:56px; }
-      .team-logo { max-width:56px; max-height:56px; }
+      .picker-grid { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); }
     }
   </style>
 </head>
@@ -272,33 +299,27 @@
             <input class="form-input" name="label" placeholder="예: VCT Masters 준결승" />
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">팀 1 이름</label>
-            <input class="form-input" name="team1" placeholder="팀 이름" required />
+        <div class="form-row" style="align-items:flex-start">
+          <div class="team-pick-area">
+            <span class="form-label">팀 1</span>
+            <button type="button" class="team-pick-btn" id="pick-btn-1">
+              <span class="pick-placeholder">팀 선택 →</span>
+            </button>
           </div>
-          <span class="vs-sep">VS</span>
-          <div class="form-group">
-            <label class="form-label">팀 2 이름</label>
-            <input class="form-input" name="team2" placeholder="팀 이름" required />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">팀 1 로고 URL (선택)</label>
-            <input class="form-input" name="logo1" placeholder="https://..." />
-          </div>
-          <div class="form-group">
-            <label class="form-label">팀 2 로고 URL (선택)</label>
-            <input class="form-input" name="logo2" placeholder="https://..." />
+          <span class="vs-sep" style="padding-top:34px">VS</span>
+          <div class="team-pick-area">
+            <span class="form-label">팀 2</span>
+            <button type="button" class="team-pick-btn" id="pick-btn-2">
+              <span class="pick-placeholder">팀 선택 →</span>
+            </button>
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group" style="max-width:120px">
+          <div class="form-group" style="max-width:130px">
             <label class="form-label">배당률 팀 1</label>
             <input class="form-input" name="odds1" type="number" step="0.01" min="1.01" placeholder="1.85" required />
           </div>
-          <div class="form-group" style="max-width:120px">
+          <div class="form-group" style="max-width:130px">
             <label class="form-label">배당률 팀 2</label>
             <input class="form-input" name="odds2" type="number" step="0.01" min="1.01" placeholder="2.10" required />
           </div>
@@ -320,338 +341,443 @@
 
   <script src="./auth.js"></script>
   <script>
-    (function () {
-      "use strict";
+  (function () {
+    "use strict";
 
-      var IS_ADMIN     = window.vctIsAdmin ? window.vctIsAdmin() : false;
-      var USER         = window.vctGetUser ? window.vctGetUser() : null;
-      var IS_LOGGED_IN = !!USER;
-      var TOKEN        = localStorage.getItem("vct_auth_token");
+    /* ── Auth ── */
+    var IS_ADMIN     = window.vctIsAdmin ? window.vctIsAdmin() : false;
+    var USER         = window.vctGetUser ? window.vctGetUser() : null;
+    var IS_LOGGED_IN = !!USER;
+    var TOKEN        = localStorage.getItem("vct_auth_token");
 
-      var matches  = [];
-      var myBets   = {};  // matchId → bet
-      var myCoins  = 0;
+    /* ── State ── */
+    var matches  = [];
+    var myBets   = {};
+    var myCoins  = 0;
+    var pickedTeam = { 1: null, 2: null }; // { name, logo }
 
-      if (IS_ADMIN) document.getElementById("admin-panel").style.display = "block";
+    /* ── Team registry (predefined logos) ── */
+    var TEAMS = [
+      { name: "T1",                    logo: "./assets/teams/t1.png"   },
+      { name: "Gen.G",                 logo: "./assets/teams/gen.png"  },
+      { name: "Kiwoom DRX",            logo: "./assets/teams/krx.svg"  },
+      { name: "ZETA DIVISION",         logo: "./assets/teams/zeta.png" },
+      { name: "Paper Rex",             logo: "./assets/teams/prx.svg"  },
+      { name: "Global Esports",        logo: "./assets/teams/ge.webp"  },
+      { name: "Rex Regum Qeon",        logo: "./assets/teams/rrq.png"  },
+      { name: "Team Secret",           logo: "./assets/teams/ts.svg"   },
+      { name: "Nongshim RedForce",     logo: "./assets/teams/ns.svg"   },
+      { name: "DetonatioN FocusMe",    logo: "./assets/teams/dfm.svg"  },
+      { name: "FULL SENSE",            logo: "./assets/teams/fs.svg"   },
+      { name: "VARREL",                logo: "./assets/teams/vl.svg"   },
+      { name: "Gentle Mates",          logo: "./assets/teams/gm.png"   },
+      { name: "Karmine Corp",          logo: "./assets/teams/kc.png"   },
+    ];
 
-      /* ── Coins ── */
-      function updateCoinDisplay() {
-        if (!IS_LOGGED_IN) return;
-        var el = document.getElementById("coin-display");
-        el.style.display = "flex";
-        document.getElementById("coin-amount").textContent = myCoins.toLocaleString();
-      }
-      function loadCoins() {
-        if (!IS_LOGGED_IN) return Promise.resolve();
-        return fetch("/api/coins", { headers: { Authorization: "Bearer " + TOKEN } })
-          .then(function (r) { return r.json(); })
-          .then(function (d) { if (typeof d.coins === "number") { myCoins = d.coins; updateCoinDisplay(); } })
-          .catch(function () {});
-      }
+    /* ── Team picker modal ── */
+    function openTeamPicker(slot, onSelect) {
+      var modal = document.createElement("div");
+      modal.className = "picker-modal";
 
-      /* ── Data ── */
-      function loadMatches() {
-        return fetch("/api/prediction/matches")
-          .then(function (r) { return r.json(); })
-          .then(function (d) { matches = Array.isArray(d) ? d : []; })
-          .catch(function () {});
-      }
-      function loadMyBets() {
-        if (!IS_LOGGED_IN) return Promise.resolve();
-        return fetch("/api/prediction/my-bets", { headers: { Authorization: "Bearer " + TOKEN } })
-          .then(function (r) { return r.json(); })
-          .then(function (d) { myBets = {}; if (Array.isArray(d)) d.forEach(function (b) { myBets[b.matchId] = b; }); })
-          .catch(function () {});
-      }
+      var gridHtml = TEAMS.map(function (t) {
+        return '<button class="picker-team-btn" type="button" data-name="' + esc(t.name) + '" data-logo="' + esc(t.logo) + '">' +
+          '<img class="picker-team-logo" src="' + esc(t.logo) + '" alt="" loading="lazy" />' +
+          '<span class="picker-team-name">' + esc(t.name) + '</span>' +
+        '</button>';
+      }).join('');
 
-      /* ── Render ── */
-      function render() {
-        var c = document.getElementById("matches-list");
-        c.innerHTML = "";
-        var order = { open: 0, closed: 1, settled: 2 };
-        var sorted = matches.slice().sort(function (a, b) {
-          var so = (order[a.status] || 0) - (order[b.status] || 0);
-          return so !== 0 ? so : new Date(b.createdAt) - new Date(a.createdAt);
+      modal.innerHTML =
+        '<div class="picker-backdrop"></div>' +
+        '<div class="picker-panel">' +
+          '<div class="picker-header">' +
+            '<span class="picker-title">팀 ' + slot + ' 선택</span>' +
+            '<button class="picker-close" type="button">×</button>' +
+          '</div>' +
+          '<div class="picker-grid">' + gridHtml + '</div>' +
+          '<div class="picker-footer">' +
+            '<span class="picker-footer-label">직접 입력</span>' +
+            '<input class="picker-custom-input" type="text" placeholder="팀 이름" />' +
+            '<button class="btn btn-muted btn-sm" type="button" id="picker-custom-ok">선택</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(modal);
+
+      function close() { modal.remove(); }
+
+      modal.querySelector(".picker-backdrop").addEventListener("click", close);
+      modal.querySelector(".picker-close").addEventListener("click", close);
+
+      modal.querySelectorAll(".picker-team-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          onSelect({ name: btn.dataset.name, logo: btn.dataset.logo });
+          close();
         });
-        if (!sorted.length) { c.innerHTML = '<div class="no-matches">진행 중인 예측 경기가 없습니다.</div>'; return; }
+      });
 
-        function grp(list, title) {
-          if (!list.length) return;
-          var wrap = document.createElement("div"); wrap.className = "matches-section-wrap";
-          var h = document.createElement("div"); h.className = "section-heading"; h.textContent = title;
-          var grid = document.createElement("div"); grid.className = "matches-grid";
-          list.forEach(function (m) { grid.appendChild(makeCard(m)); });
-          wrap.appendChild(h); wrap.appendChild(grid); c.appendChild(wrap);
-        }
-        grp(sorted.filter(function (m) { return m.status === "open";    }), "배팅 진행 중");
-        grp(sorted.filter(function (m) { return m.status === "closed";  }), "배팅 마감");
-        grp(sorted.filter(function (m) { return m.status === "settled"; }), "정산 완료");
+      var customInput = modal.querySelector(".picker-custom-input");
+      modal.querySelector("#picker-custom-ok").addEventListener("click", function () {
+        var name = (customInput.value || "").trim();
+        if (name) { onSelect({ name: name, logo: "" }); close(); }
+      });
+      customInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") modal.querySelector("#picker-custom-ok").click();
+      });
+    }
+
+    /* ── Update pick button display ── */
+    function updatePickBtn(slot, team) {
+      var btn = document.getElementById("pick-btn-" + slot);
+      if (!team) {
+        btn.innerHTML = '<span class="pick-placeholder">팀 선택 →</span>';
+        btn.classList.remove("is-set");
+      } else {
+        var inner = team.logo
+          ? '<img class="pick-logo" src="' + esc(team.logo) + '" alt="" />'
+          : '<div class="pick-initial">' + esc(team.name.charAt(0).toUpperCase()) + '</div>';
+        btn.innerHTML = inner + '<span class="pick-name">' + esc(team.name) + '</span>';
+        btn.classList.add("is-set");
       }
+    }
 
-      /* ── Card builder ── */
-      function makeCard(match) {
-        var card  = document.createElement("div");
-        card.className = "match-card";
-        card.dataset.id = match.id;
-        card.dataset.status = match.status;
+    /* wire up pick buttons */
+    if (IS_ADMIN) {
+      document.getElementById("admin-panel").style.display = "block";
+      [1, 2].forEach(function (slot) {
+        document.getElementById("pick-btn-" + slot).addEventListener("click", function () {
+          openTeamPicker(slot, function (team) {
+            pickedTeam[slot] = team;
+            updatePickBtn(slot, team);
+          });
+        });
+      });
+    }
 
-        var myBet   = myBets[match.id] || null;
-        var canBet  = match.status === "open" && IS_LOGGED_IN && !myBet;
-        var stText  = { open: "OPEN", closed: "마감", settled: "정산완료" }[match.status] || match.status;
+    /* ── Coins ── */
+    function updateCoinDisplay() {
+      if (!IS_LOGGED_IN) return;
+      document.getElementById("coin-display").style.display = "flex";
+      document.getElementById("coin-amount").textContent = myCoins.toLocaleString();
+    }
+    function loadCoins() {
+      if (!IS_LOGGED_IN) return Promise.resolve();
+      return fetch("/api/coins", { headers: { Authorization: "Bearer " + TOKEN } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (typeof d.coins === "number") { myCoins = d.coins; updateCoinDisplay(); } })
+        .catch(function () {});
+    }
 
-        /* --- top bar --- */
-        var topHtml = '<div class="card-top">' +
-          '<span class="status-badge ' + match.status + '">' + stText + '</span>' +
-          '<span class="match-label">' + esc(match.label || "") + '</span>';
-        if (IS_ADMIN) {
-          topHtml += '<div class="card-admin-btns">';
-          if (match.status === "open")
-            topHtml += '<button class="btn btn-muted btn-sm" data-action="close">배팅 마감</button>';
-          topHtml += '<button class="btn btn-danger btn-sm" data-action="delete">삭제</button>';
-          topHtml += '</div>';
-        }
+    /* ── Data ── */
+    function loadMatches() {
+      return fetch("/api/prediction/matches")
+        .then(function (r) { return r.json(); })
+        .then(function (d) { matches = Array.isArray(d) ? d : []; })
+        .catch(function () {});
+    }
+    function loadMyBets() {
+      if (!IS_LOGGED_IN) return Promise.resolve();
+      return fetch("/api/prediction/my-bets", { headers: { Authorization: "Bearer " + TOKEN } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          myBets = {};
+          if (Array.isArray(d)) d.forEach(function (b) { myBets[b.matchId] = b; });
+        })
+        .catch(function () {});
+    }
+
+    /* ── Render ── */
+    function render() {
+      var c = document.getElementById("matches-list");
+      c.innerHTML = "";
+      var order = { open: 0, closed: 1, settled: 2 };
+      var sorted = matches.slice().sort(function (a, b) {
+        var so = (order[a.status] || 0) - (order[b.status] || 0);
+        return so !== 0 ? so : new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      if (!sorted.length) {
+        c.innerHTML = '<div class="no-matches">진행 중인 예측 경기가 없습니다.</div>';
+        return;
+      }
+      function grp(list, title) {
+        if (!list.length) return;
+        var wrap = document.createElement("div"); wrap.className = "matches-section-wrap";
+        var h = document.createElement("div"); h.className = "section-heading"; h.textContent = title;
+        var grid = document.createElement("div"); grid.className = "matches-grid";
+        list.forEach(function (m) { grid.appendChild(makeCard(m)); });
+        wrap.appendChild(h); wrap.appendChild(grid); c.appendChild(wrap);
+      }
+      grp(sorted.filter(function (m) { return m.status === "open";    }), "배팅 진행 중");
+      grp(sorted.filter(function (m) { return m.status === "closed";  }), "배팅 마감");
+      grp(sorted.filter(function (m) { return m.status === "settled"; }), "정산 완료");
+    }
+
+    /* ── Card builder ── */
+    function makeCard(match) {
+      var card = document.createElement("div");
+      card.className = "match-card";
+      card.dataset.id = match.id;
+      card.dataset.status = match.status;
+
+      var myBet  = myBets[match.id] || null;
+      var canBet = match.status === "open" && IS_LOGGED_IN && !myBet;
+      var stText = { open: "OPEN", closed: "마감", settled: "정산완료" }[match.status] || match.status;
+
+      /* top */
+      var topHtml = '<div class="card-top">' +
+        '<span class="status-badge ' + match.status + '">' + stText + '</span>' +
+        '<span class="match-label">' + esc(match.label || "") + '</span>';
+      if (IS_ADMIN) {
+        topHtml += '<div class="card-admin-btns">';
+        if (match.status === "open")
+          topHtml += '<button class="btn btn-muted btn-sm" data-action="close">배팅 마감</button>';
+        topHtml += '<button class="btn btn-danger btn-sm" data-action="delete">삭제</button>';
         topHtml += '</div>';
+      }
+      topHtml += '</div>';
 
-        /* --- team styling by state --- */
-        var t1Cls = "team-block", t2Cls = "team-block";
+      /* team classes */
+      var t1c = "team-block", t2c = "team-block";
+      if (match.status === "settled") {
+        if (match.winner === match.team1) { t1c += " winner"; t2c += " loser"; }
+        else                              { t1c += " loser";  t2c += " winner"; }
+      } else if (myBet) {
+        if (myBet.team === match.team1) t1c += " selected";
+        else                             t2c += " selected";
+      }
+
+      /* logo html */
+      function logoBlock(url, name) {
+        var inner = url
+          ? '<img class="team-logo" src="' + esc(url) + '" alt="" />'
+          : '<div class="team-logo-placeholder">' + esc(name.charAt(0).toUpperCase()) + '</div>';
+        return '<div class="team-logo-wrap">' + inner + '</div>';
+      }
+
+      var hintHtml = canBet ? '<span class="select-hint">선택</span>' : '';
+
+      var teamsHtml =
+        '<div class="card-teams' + (canBet ? ' can-bet' : '') + '">' +
+          '<div class="' + t1c + '" data-team="' + esc(match.team1) + '">' +
+            logoBlock(match.logo1, match.team1) +
+            '<div class="team-name">' + esc(match.team1) + '</div>' +
+            '<div class="odds-tag">' + match.odds1 + '배</div>' +
+            hintHtml +
+          '</div>' +
+          '<div class="vs-divider">VS</div>' +
+          '<div class="' + t2c + '" data-team="' + esc(match.team2) + '">' +
+            logoBlock(match.logo2, match.team2) +
+            '<div class="team-name">' + esc(match.team2) + '</div>' +
+            '<div class="odds-tag">' + match.odds2 + '배</div>' +
+            hintHtml +
+          '</div>' +
+        '</div>';
+
+      /* meta */
+      var metaHtml = '<div class="card-meta"><span class="meta-item">참여 ' + (match.betCount || 0) + '명</span>';
+      if (myBet) {
+        metaHtml += '<span class="my-bet-badge">내 배팅: ' + esc(myBet.team) + ' · ' + myBet.amount.toLocaleString() + '코인</span>';
         if (match.status === "settled") {
-          if (match.winner === match.team1) { t1Cls += " winner"; t2Cls += " loser"; }
-          else                              { t1Cls += " loser";  t2Cls += " winner"; }
-        } else if (myBet) {
-          if (myBet.team === match.team1) t1Cls += " selected";
-          else                             t2Cls += " selected";
-        }
-
-        /* logo or placeholder */
-        function logoHtml(logoUrl, teamName) {
-          var inner = logoUrl
-            ? '<img class="team-logo" src="' + esc(logoUrl) + '" alt="" onerror="this.style.display=\'none\'" />'
-            : '<div class="team-logo-placeholder">' + esc(teamName.charAt(0).toUpperCase()) + '</div>';
-          return '<div class="team-logo-wrap">' + inner + '</div>';
-        }
-
-        var hintHtml = canBet ? '<span class="select-hint">선택</span>' : '';
-
-        var teamsHtml =
-          '<div class="card-teams' + (canBet ? ' can-bet' : '') + '">' +
-            '<div class="' + t1Cls + '" data-team="' + esc(match.team1) + '">' +
-              logoHtml(match.logo1, match.team1) +
-              '<div class="team-name">' + esc(match.team1) + '</div>' +
-              '<div class="odds-tag">' + match.odds1 + '배</div>' +
-              hintHtml +
-            '</div>' +
-            '<div class="vs-divider">VS</div>' +
-            '<div class="' + t2Cls + '" data-team="' + esc(match.team2) + '">' +
-              logoHtml(match.logo2, match.team2) +
-              '<div class="team-name">' + esc(match.team2) + '</div>' +
-              '<div class="odds-tag">' + match.odds2 + '배</div>' +
-              hintHtml +
-            '</div>' +
-          '</div>';
-
-        /* --- meta --- */
-        var metaHtml = '<div class="card-meta">' +
-          '<span class="meta-item">참여 ' + (match.betCount || 0) + '명</span>';
-        if (myBet) {
-          metaHtml += '<span class="my-bet-badge">내 배팅: ' + esc(myBet.team) + ' · ' + myBet.amount.toLocaleString() + '코인</span>';
-          if (match.status === "settled") {
-            var won = myBet.team === match.winner;
-            if (won) {
-              var wOdds  = match.winner === match.team1 ? match.odds1 : match.odds2;
-              var payout = Math.floor(myBet.amount * wOdds);
-              metaHtml += '<span class="result-badge win">✓ 승리 +' + payout.toLocaleString() + '코인</span>';
-            } else {
-              metaHtml += '<span class="result-badge lose">✗ 패배 −' + myBet.amount.toLocaleString() + '코인</span>';
-            }
+          var won = myBet.team === match.winner;
+          if (won) {
+            var wOdds  = match.winner === match.team1 ? match.odds1 : match.odds2;
+            var payout = Math.floor(myBet.amount * wOdds);
+            metaHtml += '<span class="result-badge win">✓ 승리 +' + payout.toLocaleString() + '코인</span>';
+          } else {
+            metaHtml += '<span class="result-badge lose">✗ 패배 −' + myBet.amount.toLocaleString() + '코인</span>';
           }
         }
-        metaHtml += '</div>';
+      }
+      metaHtml += '</div>';
 
-        /* --- bet input area --- */
-        var betAreaHtml = "";
-        if (canBet) {
-          betAreaHtml =
-            '<div class="bet-input-area">' +
-              '<div class="bet-amount-row">' +
-                '<input class="bet-amount-input" type="number" min="1" placeholder="배팅할 코인 수" />' +
-                '<span class="bet-hint">보유 ' + myCoins.toLocaleString() + '코인</span>' +
-                '<button class="btn btn-primary" data-action="bet" style="height:38px;padding:0 18px">배팅</button>' +
-              '</div>' +
-              '<p class="bet-error"></p>' +
-            '</div>';
-        } else if (match.status === "open" && !IS_LOGGED_IN) {
-          betAreaHtml = '<div class="login-prompt">배팅하려면 로그인해 주세요.</div>';
-        }
+      /* bet input */
+      var betAreaHtml = "";
+      if (canBet) {
+        betAreaHtml =
+          '<div class="bet-input-area">' +
+            '<div class="bet-amount-row">' +
+              '<input class="bet-amount-input" type="number" min="1" placeholder="배팅할 코인 수" />' +
+              '<span class="bet-hint">보유 ' + myCoins.toLocaleString() + '코인</span>' +
+              '<button class="btn btn-primary" data-action="bet" style="height:38px;padding:0 18px">배팅</button>' +
+            '</div>' +
+            '<p class="bet-error"></p>' +
+          '</div>';
+      } else if (match.status === "open" && !IS_LOGGED_IN) {
+        betAreaHtml = '<div class="login-prompt">배팅하려면 로그인해 주세요.</div>';
+      }
 
-        /* --- admin settle --- */
-        var settleHtml = "";
-        if (IS_ADMIN && match.status === "closed") {
-          settleHtml =
-            '<div class="settle-area">' +
-              '<span class="settle-label">승리팀:</span>' +
-              '<button class="btn btn-win btn-sm" style="height:30px" data-action="settle" data-winner="' + esc(match.team1) + '">' + esc(match.team1) + ' 승리</button>' +
-              '<button class="btn btn-win btn-sm" style="height:30px" data-action="settle" data-winner="' + esc(match.team2) + '">' + esc(match.team2) + ' 승리</button>' +
-            '</div>';
-        }
+      /* settle */
+      var settleHtml = "";
+      if (IS_ADMIN && match.status === "closed") {
+        settleHtml =
+          '<div class="settle-area">' +
+            '<span class="settle-label">승리팀:</span>' +
+            '<button class="btn btn-win btn-sm" style="height:30px" data-action="settle" data-winner="' + esc(match.team1) + '">' + esc(match.team1) + ' 승리</button>' +
+            '<button class="btn btn-win btn-sm" style="height:30px" data-action="settle" data-winner="' + esc(match.team2) + '">' + esc(match.team2) + ' 승리</button>' +
+          '</div>';
+      }
 
-        card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml;
+      card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml;
 
-        /* ── Interactions ── */
-
-        /* Team block click → select */
-        if (canBet) {
-          card.querySelectorAll(".card-teams .team-block").forEach(function (blk) {
-            blk.addEventListener("click", function () {
-              card.querySelectorAll(".card-teams .team-block").forEach(function (b) { b.classList.remove("selected"); });
-              blk.classList.add("selected");
-              /* update hint text */
-              card.querySelectorAll(".select-hint").forEach(function (h) { h.textContent = "선택"; });
-              blk.querySelector(".select-hint") && (blk.querySelector(".select-hint").textContent = "✓ 선택됨");
+      /* ── handlers ── */
+      if (canBet) {
+        card.querySelectorAll(".card-teams .team-block").forEach(function (blk) {
+          blk.addEventListener("click", function () {
+            card.querySelectorAll(".card-teams .team-block").forEach(function (b) {
+              b.classList.remove("selected");
+              var sh = b.querySelector(".select-hint");
+              if (sh) sh.textContent = "선택";
             });
-          });
-        }
-
-        /* Bet */
-        var betBtn = card.querySelector("[data-action='bet']");
-        if (betBtn) {
-          betBtn.addEventListener("click", function () {
-            var active  = card.querySelector(".card-teams .team-block.selected");
-            var input   = card.querySelector(".bet-amount-input");
-            var errEl   = card.querySelector(".bet-error");
-            errEl.style.display = "none";
-            if (!active) { errEl.textContent = "배팅할 팀을 선택해 주세요."; errEl.style.display = "block"; return; }
-            var amount = parseInt(input.value, 10);
-            if (!amount || amount < 1) { errEl.textContent = "올바른 배팅 금액을 입력해 주세요."; errEl.style.display = "block"; return; }
-            if (amount > myCoins) { errEl.textContent = "코인이 부족합니다. (보유: " + myCoins.toLocaleString() + "코인)"; errEl.style.display = "block"; return; }
-            betBtn.disabled = true; betBtn.textContent = "처리 중...";
-            fetch("/api/prediction/matches/" + match.id + "/bet", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-              body: JSON.stringify({ team: active.dataset.team, amount: amount }),
-            }).then(function (r) { return r.json(); })
-              .then(function (d) {
-                if (d.error) { errEl.textContent = d.error; errEl.style.display = "block"; betBtn.disabled = false; betBtn.textContent = "배팅"; }
-                else { myCoins = d.coins; updateCoinDisplay(); myBets[match.id] = { team: active.dataset.team, amount: amount, matchId: match.id }; render(); }
-              })
-              .catch(function () { errEl.textContent = "서버 오류"; errEl.style.display = "block"; betBtn.disabled = false; betBtn.textContent = "배팅"; });
-          });
-        }
-
-        /* Admin close */
-        var closeBtn = card.querySelector("[data-action='close']");
-        if (closeBtn) {
-          closeBtn.addEventListener("click", function () {
-            if (!confirm(match.team1 + " vs " + match.team2 + "\n배팅을 마감하시겠습니까?")) return;
-            closeBtn.disabled = true;
-            fetch("/api/prediction/matches/" + match.id, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-              body: JSON.stringify({ status: "closed" }),
-            }).then(function (r) { return r.json(); })
-              .then(function (d) { if (d.error) { alert(d.error); closeBtn.disabled = false; } })
-              .catch(function () { closeBtn.disabled = false; });
-          });
-        }
-
-        /* Admin delete */
-        var deleteBtn = card.querySelector("[data-action='delete']");
-        if (deleteBtn) {
-          deleteBtn.addEventListener("click", function () {
-            if (!confirm("이 경기를 삭제하시겠습니까?\n모든 배팅 데이터도 함께 삭제됩니다.")) return;
-            deleteBtn.disabled = true;
-            fetch("/api/prediction/matches/" + match.id, {
-              method: "DELETE", headers: { "Authorization": "Bearer " + TOKEN },
-            }).then(function (r) { return r.json(); })
-              .then(function (d) { if (d.error) { alert(d.error); deleteBtn.disabled = false; } })
-              .catch(function () { deleteBtn.disabled = false; });
-          });
-        }
-
-        /* Admin settle */
-        card.querySelectorAll("[data-action='settle']").forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            var w = btn.dataset.winner;
-            if (!confirm(w + " 팀의 승리로 정산하시겠습니까?\n승리자에게 코인이 지급됩니다.")) return;
-            btn.disabled = true;
-            fetch("/api/prediction/matches/" + match.id + "/settle", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-              body: JSON.stringify({ winner: w }),
-            }).then(function (r) { return r.json(); })
-              .then(function (d) { if (d.error) { alert(d.error); btn.disabled = false; } })
-              .catch(function () { btn.disabled = false; });
+            blk.classList.add("selected");
+            var sh = blk.querySelector(".select-hint");
+            if (sh) sh.textContent = "✓ 선택됨";
           });
         });
-
-        return card;
       }
 
-      /* ── Init ── */
-      Promise.all([loadMatches(), loadMyBets(), loadCoins()]).then(function () {
-        document.getElementById("pred-loading").style.display = "none";
-        document.getElementById("matches-list").style.display = "block";
-        render();
+      var betBtn = card.querySelector("[data-action='bet']");
+      if (betBtn) {
+        betBtn.addEventListener("click", function () {
+          var active = card.querySelector(".card-teams .team-block.selected");
+          var input  = card.querySelector(".bet-amount-input");
+          var errEl  = card.querySelector(".bet-error");
+          errEl.style.display = "none";
+          if (!active) { errEl.textContent = "배팅할 팀을 선택해 주세요."; errEl.style.display = "block"; return; }
+          var amount = parseInt(input.value, 10);
+          if (!amount || amount < 1) { errEl.textContent = "올바른 배팅 금액을 입력해 주세요."; errEl.style.display = "block"; return; }
+          if (amount > myCoins) { errEl.textContent = "코인이 부족합니다. (보유: " + myCoins.toLocaleString() + "코인)"; errEl.style.display = "block"; return; }
+          betBtn.disabled = true; betBtn.textContent = "처리 중...";
+          fetch("/api/prediction/matches/" + match.id + "/bet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+            body: JSON.stringify({ team: active.dataset.team, amount: amount }),
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) { errEl.textContent = d.error; errEl.style.display = "block"; betBtn.disabled = false; betBtn.textContent = "배팅"; }
+              else { myCoins = d.coins; updateCoinDisplay(); myBets[match.id] = { team: active.dataset.team, amount: amount, matchId: match.id }; render(); }
+            })
+            .catch(function () { errEl.textContent = "서버 오류"; errEl.style.display = "block"; betBtn.disabled = false; betBtn.textContent = "배팅"; });
+        });
+      }
+
+      var closeBtn = card.querySelector("[data-action='close']");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", function () {
+          if (!confirm(match.team1 + " vs " + match.team2 + "\n배팅을 마감하시겠습니까?")) return;
+          closeBtn.disabled = true;
+          fetch("/api/prediction/matches/" + match.id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+            body: JSON.stringify({ status: "closed" }),
+          }).then(function (r) { return r.json(); })
+            .then(function (d) { if (d.error) { alert(d.error); closeBtn.disabled = false; } })
+            .catch(function () { closeBtn.disabled = false; });
+        });
+      }
+
+      var deleteBtn = card.querySelector("[data-action='delete']");
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", function () {
+          if (!confirm("이 경기를 삭제하시겠습니까?\n모든 배팅 데이터도 함께 삭제됩니다.")) return;
+          deleteBtn.disabled = true;
+          fetch("/api/prediction/matches/" + match.id, {
+            method: "DELETE", headers: { "Authorization": "Bearer " + TOKEN },
+          }).then(function (r) { return r.json(); })
+            .then(function (d) { if (d.error) { alert(d.error); deleteBtn.disabled = false; } })
+            .catch(function () { deleteBtn.disabled = false; });
+        });
+      }
+
+      card.querySelectorAll("[data-action='settle']").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var w = btn.dataset.winner;
+          if (!confirm(w + " 팀의 승리로 정산하시겠습니까?\n승리자에게 코인이 지급됩니다.")) return;
+          btn.disabled = true;
+          fetch("/api/prediction/matches/" + match.id + "/settle", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+            body: JSON.stringify({ winner: w }),
+          }).then(function (r) { return r.json(); })
+            .then(function (d) { if (d.error) { alert(d.error); btn.disabled = false; } })
+            .catch(function () { btn.disabled = false; });
+        });
       });
 
-      /* ── Create form ── */
-      document.getElementById("create-form").addEventListener("submit", function (e) {
-        e.preventDefault();
-        var f    = e.target;
-        var data = {
-          label: (f.querySelector("[name=label]").value  || "").trim(),
-          team1: (f.querySelector("[name=team1]").value  || "").trim(),
-          team2: (f.querySelector("[name=team2]").value  || "").trim(),
-          logo1: (f.querySelector("[name=logo1]").value  || "").trim(),
-          logo2: (f.querySelector("[name=logo2]").value  || "").trim(),
-          odds1: parseFloat(f.querySelector("[name=odds1]").value),
-          odds2: parseFloat(f.querySelector("[name=odds2]").value),
-        };
-        var errEl = document.getElementById("create-error");
-        errEl.style.display = "none";
-        if (!data.team1 || !data.team2) { errEl.textContent = "팀 이름을 입력해 주세요."; errEl.style.display = "block"; return; }
-        if (!data.odds1 || !data.odds2 || data.odds1 < 1.01 || data.odds2 < 1.01) { errEl.textContent = "배당률은 1.01 이상이어야 합니다."; errEl.style.display = "block"; return; }
-        var sub = f.querySelector("[type=submit]"); sub.disabled = true; sub.textContent = "추가 중...";
-        fetch("/api/prediction/matches", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
-          body: JSON.stringify(data),
-        }).then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (d.error) { errEl.textContent = d.error; errEl.style.display = "block"; }
-            else { f.reset(); }
-            sub.disabled = false; sub.textContent = "경기 추가";
-          })
-          .catch(function () { errEl.textContent = "서버 오류"; errEl.style.display = "block"; sub.disabled = false; sub.textContent = "경기 추가"; });
-      });
+      return card;
+    }
 
-      /* ── SSE ── */
-      var es = new EventSource("/api/events");
-      es.onmessage = function (e) {
-        var msg; try { msg = JSON.parse(e.data); } catch (_) { return; }
-        if (msg.type === "pred-match-update") {
-          var idx = matches.findIndex(function (m) { return m.id === msg.match.id; });
-          if (idx >= 0) { msg.match.betCount = matches[idx].betCount || msg.match.betCount || 0; matches[idx] = msg.match; }
-          else          { msg.match.betCount = msg.match.betCount || 0; matches.unshift(msg.match); }
-          render();
-          if (msg.match.status === "settled" && IS_LOGGED_IN) loadCoins();
-        } else if (msg.type === "pred-match-delete") {
-          matches = matches.filter(function (m) { return m.id !== msg.id; }); render();
-        } else if (msg.type === "pred-bet") {
-          var bi = matches.findIndex(function (m) { return m.id === msg.matchId; });
-          if (bi >= 0) {
-            if (!IS_LOGGED_IN || msg.username !== (USER && USER.username))
-              matches[bi].betCount = (matches[bi].betCount || 0) + 1;
-            render();
+    /* ── Init ── */
+    Promise.all([loadMatches(), loadMyBets(), loadCoins()]).then(function () {
+      document.getElementById("pred-loading").style.display = "none";
+      document.getElementById("matches-list").style.display = "block";
+      render();
+    });
+
+    /* ── Create form ── */
+    document.getElementById("create-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var f    = e.target;
+      var errEl = document.getElementById("create-error");
+      errEl.style.display = "none";
+
+      var t1 = pickedTeam[1], t2 = pickedTeam[2];
+      if (!t1) { errEl.textContent = "팀 1을 선택해 주세요."; errEl.style.display = "block"; return; }
+      if (!t2) { errEl.textContent = "팀 2를 선택해 주세요."; errEl.style.display = "block"; return; }
+
+      var odds1 = parseFloat(f.querySelector("[name=odds1]").value);
+      var odds2 = parseFloat(f.querySelector("[name=odds2]").value);
+      if (!odds1 || !odds2 || odds1 < 1.01 || odds2 < 1.01) { errEl.textContent = "배당률은 1.01 이상이어야 합니다."; errEl.style.display = "block"; return; }
+
+      var sub = f.querySelector("[type=submit]"); sub.disabled = true; sub.textContent = "추가 중...";
+      fetch("/api/prediction/matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+        body: JSON.stringify({
+          label: (f.querySelector("[name=label]").value || "").trim(),
+          team1: t1.name, logo1: t1.logo,
+          team2: t2.name, logo2: t2.logo,
+          odds1: odds1,   odds2: odds2,
+        }),
+      }).then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.error) { errEl.textContent = d.error; errEl.style.display = "block"; }
+          else {
+            f.reset();
+            pickedTeam[1] = null; pickedTeam[2] = null;
+            updatePickBtn(1, null); updatePickBtn(2, null);
           }
-        } else if (msg.type === "force-reload") {
-          window.location.reload();
-        }
-      };
+          sub.disabled = false; sub.textContent = "경기 추가";
+        })
+        .catch(function () { errEl.textContent = "서버 오류"; errEl.style.display = "block"; sub.disabled = false; sub.textContent = "경기 추가"; });
+    });
 
-      function esc(s) {
-        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    /* ── SSE ── */
+    var es = new EventSource("/api/events");
+    es.onmessage = function (e) {
+      var msg; try { msg = JSON.parse(e.data); } catch (_) { return; }
+      if (msg.type === "pred-match-update") {
+        var idx = matches.findIndex(function (m) { return m.id === msg.match.id; });
+        if (idx >= 0) { msg.match.betCount = matches[idx].betCount || msg.match.betCount || 0; matches[idx] = msg.match; }
+        else          { msg.match.betCount = msg.match.betCount || 0; matches.unshift(msg.match); }
+        render();
+        if (msg.match.status === "settled" && IS_LOGGED_IN) loadCoins();
+      } else if (msg.type === "pred-match-delete") {
+        matches = matches.filter(function (m) { return m.id !== msg.id; }); render();
+      } else if (msg.type === "pred-bet") {
+        var bi = matches.findIndex(function (m) { return m.id === msg.matchId; });
+        if (bi >= 0) {
+          if (!IS_LOGGED_IN || msg.username !== (USER && USER.username))
+            matches[bi].betCount = (matches[bi].betCount || 0) + 1;
+          render();
+        }
+      } else if (msg.type === "force-reload") {
+        window.location.reload();
       }
-    })();
+    };
+
+    function esc(s) {
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+  })();
   </script>
 </body>
 </html>
