@@ -449,6 +449,25 @@
         </div>
         <button class="btn btn-danger" id="season-end-btn" style="flex-shrink:0;">시즌 종료</button>
       </div>
+
+      <!-- 전체 데이터 리셋 -->
+      <div style="margin-top:20px; padding-top:18px; border-top:1px solid rgba(180,30,30,.18); background:rgba(180,30,30,.05); border-radius:6px; padding:16px;">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,80,80,.5);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;">⚠ 전체 데이터 리셋</div>
+        <div style="font-size:12px;color:rgba(255,120,120,.45);margin-bottom:14px;line-height:1.7;">
+          모든 계정(Admin 제외), 승부 예측, 티어리스트, 명예의 전당, 코인, 출석 기록이 <strong style="color:rgba(255,80,80,.8);">영구적으로 삭제</strong>됩니다.<br>
+          아래 칸에 정확히 입력 후 버튼을 눌러야 실행됩니다.
+        </div>
+        <div style="font-size:13px;font-weight:700;color:rgba(255,150,150,.7);margin-bottom:8px;letter-spacing:.01em;">
+          모든 데이터를 전부 리셋시키겠습니다.
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="full-reset-confirm-input"
+            placeholder="위 문장을 정확히 입력하세요"
+            style="flex:1;min-width:220px;height:36px;padding:0 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,80,80,.2);border-radius:4px;color:#f0f0f0;font-size:13px;outline:none;"
+          />
+          <button class="btn btn-danger" id="full-reset-btn" style="flex-shrink:0;opacity:.45;cursor:not-allowed;" disabled>전체 리셋</button>
+        </div>
+      </div>
     </div>
 
     <!-- Attendance card (visible when logged in) -->
@@ -751,6 +770,53 @@
               alert("서버 오류");
               seasonEndBtn.disabled = false;
               seasonEndBtn.textContent = "시즌 종료";
+            });
+        });
+      }
+    }
+
+    /* ── Full Reset (Admin) ── */
+    if (IS_ADMIN) {
+      var fullResetInput = document.getElementById("full-reset-confirm-input");
+      var fullResetBtn   = document.getElementById("full-reset-btn");
+      var RESET_PHRASE   = "모든 데이터를 전부 리셋시키겠습니다.";
+
+      if (fullResetInput && fullResetBtn) {
+        fullResetInput.addEventListener("input", function () {
+          var match = fullResetInput.value === RESET_PHRASE;
+          fullResetBtn.disabled = !match;
+          fullResetBtn.style.opacity  = match ? "1"    : ".45";
+          fullResetBtn.style.cursor   = match ? "pointer" : "not-allowed";
+        });
+
+        fullResetBtn.addEventListener("click", function () {
+          if (fullResetInput.value !== RESET_PHRASE) return;
+          if (!confirm("⚠ 정말로 모든 데이터를 삭제하시겠습니까?\n\n계정, 티어리스트, 승부 예측, 명예의 전당, 코인, 출석 기록이\n전부 영구 삭제됩니다. 되돌릴 수 없습니다.")) return;
+
+          fullResetBtn.disabled = true;
+          fullResetBtn.textContent = "리셋 중...";
+          fullResetInput.disabled = true;
+
+          fetch("/api/admin/full-reset", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + TOKEN },
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.ok) {
+                alert("전체 리셋 완료. 페이지를 새로고침합니다.");
+                location.reload();
+              } else {
+                alert("오류: " + (d.error || "알 수 없는 오류"));
+                fullResetBtn.disabled = false;
+                fullResetBtn.textContent = "전체 리셋";
+                fullResetInput.disabled = false;
+              }
+            })
+            .catch(function () {
+              alert("서버 오류");
+              fullResetBtn.disabled = false;
+              fullResetBtn.textContent = "전체 리셋";
+              fullResetInput.disabled = false;
             });
         });
       }

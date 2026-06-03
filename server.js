@@ -515,6 +515,37 @@ app.get("/api/tierlist/user/:username/posts", async (req, res) => {
   }
 });
 
+/* ── API: 전체 데이터 리셋 (admin 전용) ─────────── */
+app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
+  try {
+    // 1. 티어리스트 (이벤트, 게시물, 좋아요)
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'tlevt:%'");
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'tlpost:%'");
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'tllike:%'");
+
+    // 2. 승부 예측 (매치, 베팅)
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'pred:match:%'");
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'pred:bet:%'");
+
+    // 3. 명예의 전당 + 시즌 기록
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'season:%'");
+
+    // 4. 코인 전부 삭제 (계정 삭제 후 재가입 시 자동 발급)
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'coins:%'");
+
+    // 5. 출석체크 기록
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'attend:%'");
+
+    // 6. Admin 제외 모든 계정 삭제
+    await pool.query("DELETE FROM users WHERE role != 'admin'");
+
+    broadcast({ type: "force-reload" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 전체 뷰어 새로고침 트리거 ─────────────── */
 app.post("/api/refresh", (req, res) => {
   broadcast({ type: "force-reload" });
