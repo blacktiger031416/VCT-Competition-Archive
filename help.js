@@ -135,7 +135,7 @@
       items: [
         { sel: ".nav-links a[href*='records'], .nav-link[href*='records']",
           title: "기록",
-          desc: "VCT 경기 결과와 맵 상세 데이터를 볼 수 있는 아카이브 페이지로 이동합니다." },
+          desc: "맵 상세 데이터와 선수들의 개인 스텟 순위를 볼 수 있는 페이지입니다." },
         { sel: ".nav-links a[href*='tierlist'], .nav-link[href*='tierlist']",
           title: "티어리스트",
           desc: "팀 티어리스트를 직접 만들고, 다른 사람들의 티어리스트를 볼 수 있는 게시판입니다." },
