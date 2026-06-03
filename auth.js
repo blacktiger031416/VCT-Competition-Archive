@@ -24,6 +24,15 @@
     document.body.classList.add("view-only");
   }
 
+  /* ── Barlow Condensed 폰트 (help ? 버튼용, 미로드 페이지 보완) ── */
+  if (!document.querySelector('link[href*="Barlow+Condensed"]') &&
+      !document.querySelector('link[href*="Barlow_Condensed"]')) {
+    var fontLink = document.createElement("link");
+    fontLink.rel  = "stylesheet";
+    fontLink.href = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&display=swap";
+    document.head.appendChild(fontLink);
+  }
+
   /* ── 스타일 인젝션 ───────────────────────────────── */
   var style = document.createElement("style");
   style.textContent = [
