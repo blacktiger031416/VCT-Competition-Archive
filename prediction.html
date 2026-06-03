@@ -48,6 +48,12 @@
       background:rgba(240,192,64,.1); border:1px solid rgba(240,192,64,.22); border-radius:4px;
       font-size:13px; font-weight:700; color:#f0c040; white-space:nowrap; flex-shrink:0;
     }
+    .vault-display{
+      display:none; align-items:center; gap:6px;
+      margin-left:8px; padding:0 12px; height:30px;
+      background:rgba(160,100,240,.1); border:1px solid rgba(160,100,240,.28); border-radius:4px;
+      font-size:13px; font-weight:700; color:#b57ef0; white-space:nowrap; flex-shrink:0;
+    }
 
     /* ── Layout ── */
     .pred-wrap { max-width:860px; margin:0 auto; padding:32px 20px 96px; }
@@ -389,6 +395,9 @@
     <div class="coin-display" id="coin-display">
       🪙 <span id="coin-amount">0</span> 코인
     </div>
+    <div class="vault-display" id="vault-display">
+      🏦 <span id="vault-amount">0</span> 금고
+    </div>
   </header>
 
   <div class="pred-wrap">
@@ -524,6 +533,7 @@
     var matches  = [];
     var myBets   = {};
     var myCoins  = 0;
+    var myVault  = 0;
     var pickedTeam = { 1: null, 2: null }; // { name, logo }
 
     /* ── Team registry (4개 리그 전체) ── */
@@ -718,6 +728,20 @@
         .catch(function () {});
     }
 
+    /* ── Vault ── */
+    function updateVaultDisplay() {
+      if (!IS_LOGGED_IN) return;
+      document.getElementById("vault-display").style.display = "flex";
+      document.getElementById("vault-amount").textContent = myVault.toLocaleString();
+    }
+    function loadVault() {
+      if (!IS_LOGGED_IN) return Promise.resolve();
+      return fetch("/api/vault", { headers: { Authorization: "Bearer " + TOKEN } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (typeof d.vault === "number") { myVault = d.vault; updateVaultDisplay(); } })
+        .catch(function () {});
+    }
+
     /* ── Tabs ── */
     var activeTab = "predict";
     var lbLoaded  = false;
@@ -762,6 +786,7 @@
                 alert("시즌 " + d.season + " 종료 완료!\n1위: " + (d.top3[0] ? d.top3[0].username : "없음"));
                 myCoins = 1000;
                 updateCoinDisplay();
+                loadVault(); // 금고 업데이트
                 hofLoaded = false; // 명예의 전당 다시 로드
                 seasonEndBtn.disabled = false;
                 seasonEndBtn.textContent = "시즌 종료";
@@ -1225,7 +1250,7 @@
     }
 
     /* ── Init ── */
-    Promise.all([loadMatches(), loadMyBets(), loadCoins(), initAttendance()]).then(function () {
+    Promise.all([loadMatches(), loadMyBets(), loadCoins(), loadVault(), initAttendance()]).then(function () {
       document.getElementById("pred-loading").style.display = "none";
       document.getElementById("matches-list").style.display = "block";
       render();
@@ -1287,6 +1312,13 @@
           if (!IS_LOGGED_IN || msg.username !== (USER && USER.username))
             matches[bi].betCount = (matches[bi].betCount || 0) + 1;
           render();
+        }
+      } else if (msg.type === "season-end") {
+        /* 시즌 종료 — 코인 리셋 & 금고 갱신 */
+        if (IS_LOGGED_IN) {
+          myCoins = 1000;
+          updateCoinDisplay();
+          loadVault();
         }
       } else if (msg.type === "force-reload") {
         window.location.reload();

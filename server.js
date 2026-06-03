@@ -438,19 +438,33 @@ app.post("/api/season/end", requireAdmin, async (req, res) => {
       [String(seasonNum + 1)]
     );
 
-    /* 모든 유저 코인 1000으로 리셋 (admin 제외) */
+    /* 모든 유저 코인 → 금고에 누적 후 1000으로 리셋 (admin 제외) */
     const coinsRes = await pool.query(`
-      SELECT ad.key FROM app_data ad
+      SELECT ad.key, ad.value FROM app_data ad
       JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
       WHERE ad.key LIKE 'coins:%' AND u.role != 'admin'
     `);
     await Promise.all(
-      coinsRes.rows.map((r) =>
-        pool.query(
+      coinsRes.rows.map(async (r) => {
+        const username   = r.key.slice(6);
+        const earned     = parseInt(r.value, 10) || 0;
+        const vaultKey   = `vault:${username}`;
+        const vaultRes   = await pool.query(
+          "SELECT value FROM app_data WHERE key=$1", [vaultKey]
+        );
+        const prevVault  = vaultRes.rows[0] ? parseInt(vaultRes.rows[0].value, 10) : 0;
+        /* 금고 누적 저장 */
+        await pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1, $2)
+           ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [vaultKey, String(prevVault + earned)]
+        );
+        /* 코인 리셋 */
+        await pool.query(
           `UPDATE app_data SET value='1000', updated_at=NOW() WHERE key=$1`,
           [r.key]
-        )
-      )
+        );
+      })
     );
 
     broadcast({ type: "season-end", season: seasonNum, top3 });
@@ -565,6 +579,17 @@ app.get("/api/coins", requireAuth, async (req, res) => {
       return res.json({ coins: 1000 });
     }
     res.json({ coins: parseInt(result.rows[0].value, 10) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 금고 조회 ─────────────────────────────────── */
+app.get("/api/vault", requireAuth, async (req, res) => {
+  const key = `vault:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    res.json({ vault: result.rows[0] ? parseInt(result.rows[0].value, 10) : 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
