@@ -21,6 +21,15 @@
     "vct_auth_token", "vct_auth_user",
   ];
 
+  /*
+   * 서버 API 전용 접두사 — localStorage에 캐시하지 않음.
+   * 이 키들은 API 엔드포인트로만 관리되므로 storage.js 동기화 대상에서 완전히 제외.
+   * (이 키가 localStorage에 남아 있으면 Admin의 syncLocalToDB가 삭제된 데이터를 복원하는 버그 발생)
+   */
+  var SERVER_ONLY_PREFIXES = [
+    "tlevt:", "tlpost:", "tllike:",
+  ];
+
   /* 혹시 이전에 DB에 올라간 auth 키가 있으면 즉시 삭제 (보안 픽스) */
   ["vct_auth_token", "vct_auth_user"].forEach(function (key) {
     fetch("/api/data/" + encodeURIComponent(key), { method: "DELETE" }).catch(function () {});
@@ -29,6 +38,25 @@
   function isLocalOnly(key) {
     return LOCAL_ONLY.indexOf(key) !== -1;
   }
+
+  function isServerOnly(key) {
+    for (var i = 0; i < SERVER_ONLY_PREFIXES.length; i++) {
+      if (key.indexOf(SERVER_ONLY_PREFIXES[i]) === 0) return true;
+    }
+    return false;
+  }
+
+  /* localStorage에 남아 있는 서버 전용 키 즉시 정리 (원본 메서드 사용) */
+  (function cleanServerOnlyFromLocal() {
+    var toRemove = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && isServerOnly(k)) toRemove.push(k);
+    }
+    toRemove.forEach(function (k) {
+      localStorage.removeItem(k); /* 오버라이드 전이므로 원본이 아직 없음 — 바로 호출 */
+    });
+  })();
 
   /* 관리자 여부 (vct_admin_auth는 LOCAL_ONLY라 localStorage에서 직접 읽음) */
   var _isAdmin = !!localStorage.getItem("vct_admin_auth");
@@ -54,7 +82,7 @@
   /* ── setItem 오버라이드 ───────────────────────────────── */
   localStorage.setItem = function (key, value) {
     _origSet(key, value);
-    if (!isLocalOnly(key)) {
+    if (!isLocalOnly(key) && !isServerOnly(key)) {
       pushKey(key, value);
     }
   };
@@ -62,7 +90,7 @@
   /* ── removeItem 오버라이드 ───────────────────────────── */
   localStorage.removeItem = function (key) {
     _origRemove(key);
-    if (!isLocalOnly(key)) {
+    if (!isLocalOnly(key) && !isServerOnly(key)) {
       fetch("/api/data/" + encodeURIComponent(key), {
         method: "DELETE",
       }).catch(function (e) {
@@ -77,7 +105,7 @@
     var syncs = [];
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
-      if (!key || isLocalOnly(key)) continue;
+      if (!key || isLocalOnly(key) || isServerOnly(key)) continue;
       var localVal = localStorage.getItem(key);
       if (localVal === null) continue;
       if (dbData[key] !== localVal) {
@@ -97,7 +125,7 @@
       var dbKeys = Object.keys(data);
 
       dbKeys.forEach(function (key) {
-        if (isLocalOnly(key)) return;
+        if (isLocalOnly(key) || isServerOnly(key)) return;
         if (_isAdmin) {
           /* 관리자: localStorage에 없는 키만 DB에서 채움 (슬립 중 저장 보호) */
           if (localStorage.getItem(key) === null) {
@@ -148,7 +176,7 @@
           return;
         }
 
-        if (!update.key || isLocalOnly(update.key)) return;
+        if (!update.key || isLocalOnly(update.key) || isServerOnly(update.key)) return;
 
         /* localStorage 즉시 반영 (push 없이 원본 메서드로) */
         if (update.type === "delete") {
@@ -180,7 +208,7 @@
       .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function (data) {
         Object.keys(data).forEach(function (key) {
-          if (!isLocalOnly(key) && localStorage.getItem(key) === null) {
+          if (!isLocalOnly(key) && !isServerOnly(key) && localStorage.getItem(key) === null) {
             _origSet(key, data[key]);
           }
         });
