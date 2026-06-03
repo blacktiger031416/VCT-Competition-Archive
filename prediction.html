@@ -282,6 +282,28 @@
     .settle-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .settle-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; }
 
+    /* ── Hall of Fame ── */
+    .hof-season { margin-bottom:36px; }
+    .hof-season-title {
+      font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+      color:rgba(255,255,255,.28); margin-bottom:14px; display:flex; align-items:center; gap:10px;
+    }
+    .hof-season-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.06); }
+    .hof-podium { display:flex; gap:12px; flex-wrap:wrap; }
+    .hof-card {
+      flex:1; min-width:160px; max-width:260px;
+      padding:18px 16px 16px; border-radius:8px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+      display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;
+    }
+    .hof-card.rank-1 { border-color:rgba(240,192,64,.28); background:rgba(240,192,64,.06); }
+    .hof-card.rank-2 { border-color:rgba(192,200,212,.2); background:rgba(192,200,212,.04); }
+    .hof-card.rank-3 { border-color:rgba(205,140,90,.2);  background:rgba(205,140,90,.04); }
+    .hof-medal { font-size:32px; line-height:1; }
+    .hof-username { font-size:16px; font-weight:900; color:#f0f0f0; }
+    .hof-coins { font-size:13px; font-weight:700; color:rgba(255,255,255,.4); }
+    .hof-empty { padding:56px 0; text-align:center; color:rgba(255,255,255,.22); font-size:14px; }
+
     /* ── Tab bar ── */
     .tab-bar {
       display:flex; gap:4px; margin-bottom:28px;
@@ -375,6 +397,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="predict">🏆 승부 예측</button>
       <button class="tab-btn"        data-tab="rank">📊 순위</button>
+      <button class="tab-btn"        data-tab="hof">🎖 명예의 전당</button>
     </div>
 
     <!-- ═══ Prediction tab ═══ -->
@@ -418,6 +441,14 @@
         </div>
         <p class="form-error" id="create-error"></p>
       </form>
+      <!-- 시즌 종료 -->
+      <div style="margin-top:20px; padding-top:18px; border-top:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:160px;">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.28);letter-spacing:.13em;text-transform:uppercase;margin-bottom:4px;">시즌 관리</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.32);">시즌을 종료하면 현재 코인 순위가 명예의 전당에 기록되고,<br>모든 유저의 코인이 1,000으로 초기화됩니다.</div>
+        </div>
+        <button class="btn btn-danger" id="season-end-btn" style="flex-shrink:0;">시즌 종료</button>
+      </div>
     </div>
 
     <!-- Attendance card (visible when logged in) -->
@@ -446,6 +477,14 @@
         <div class="pred-spinner"></div>불러오는 중...
       </div>
       <div id="lb-content"></div>
+    </div>
+
+    <!-- ═══ Hall of Fame tab ═══ -->
+    <div class="lb-wrap" id="tab-hof">
+      <div class="lb-loading" id="hof-loading">
+        <div class="pred-spinner"></div>불러오는 중...
+      </div>
+      <div id="hof-content"></div>
     </div>
 
   </div>
@@ -662,6 +701,7 @@
     /* ── Tabs ── */
     var activeTab = "predict";
     var lbLoaded  = false;
+    var hofLoaded = false;
 
     document.querySelectorAll(".tab-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -674,10 +714,98 @@
 
         document.getElementById("tab-predict").style.display = tab === "predict" ? "block" : "none";
         document.getElementById("tab-rank").style.display    = tab === "rank"    ? "block" : "none";
+        document.getElementById("tab-hof").style.display     = tab === "hof"     ? "block" : "none";
 
         if (tab === "rank" && !lbLoaded) loadLeaderboard();
+        if (tab === "hof"  && !hofLoaded) loadHallOfFame();
       });
     });
+
+    /* ── Season End (Admin) ── */
+    if (IS_ADMIN) {
+      var seasonEndBtn = document.getElementById("season-end-btn");
+      if (seasonEndBtn) {
+        seasonEndBtn.addEventListener("click", function () {
+          if (!confirm("시즌을 종료하시겠습니까?\n\n현재 코인 순위가 명예의 전당에 기록되고,\n모든 유저의 코인이 1,000으로 초기화됩니다.")) return;
+          seasonEndBtn.disabled = true;
+          seasonEndBtn.textContent = "처리 중...";
+          fetch("/api/season/end", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + TOKEN },
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) {
+                alert("오류: " + d.error);
+                seasonEndBtn.disabled = false;
+                seasonEndBtn.textContent = "시즌 종료";
+              } else {
+                alert("시즌 " + d.season + " 종료 완료!\n1위: " + (d.top3[0] ? d.top3[0].username : "없음"));
+                myCoins = 1000;
+                updateCoinDisplay();
+                hofLoaded = false; // 명예의 전당 다시 로드
+                seasonEndBtn.disabled = false;
+                seasonEndBtn.textContent = "시즌 종료";
+              }
+            })
+            .catch(function () {
+              alert("서버 오류");
+              seasonEndBtn.disabled = false;
+              seasonEndBtn.textContent = "시즌 종료";
+            });
+        });
+      }
+    }
+
+    /* ── Hall of Fame ── */
+    function loadHallOfFame() {
+      hofLoaded = true;
+      document.getElementById("hof-loading").style.display = "flex";
+      fetch("/api/seasons")
+        .then(function (r) { return r.json(); })
+        .then(function (seasons) {
+          document.getElementById("hof-loading").style.display = "none";
+          renderHallOfFame(seasons);
+        })
+        .catch(function () {
+          document.getElementById("hof-loading").style.display = "none";
+          document.getElementById("hof-content").innerHTML =
+            '<div class="hof-empty">명예의 전당을 불러오지 못했습니다.</div>';
+        });
+    }
+
+    function renderHallOfFame(seasons) {
+      var content = document.getElementById("hof-content");
+      if (!seasons || !seasons.length) {
+        content.innerHTML = '<div class="hof-empty">아직 완료된 시즌이 없습니다.<br>시즌이 종료되면 여기에 기록됩니다.</div>';
+        return;
+      }
+      var medals = ["🥇", "🥈", "🥉"];
+      var rankClass = ["rank-1", "rank-2", "rank-3"];
+      var myName = USER ? USER.username : null;
+
+      /* 최신 시즌 먼저 */
+      var sorted = seasons.slice().sort(function (a, b) { return b.season - a.season; });
+      var html = "";
+      sorted.forEach(function (s) {
+        html += '<div class="hof-season">';
+        html += '<div class="hof-season-title">시즌 ' + s.season + '</div>';
+        html += '<div class="hof-podium">';
+        s.top3.forEach(function (entry) {
+          var i = entry.rank - 1;
+          var isMe = myName && entry.username === myName;
+          html +=
+            '<div class="hof-card ' + (rankClass[i] || "") + '">' +
+              '<div class="hof-medal">' + (medals[i] || String(entry.rank)) + '</div>' +
+              '<div class="hof-username' + (isMe ? '" style="color:#f0c040' : '') + '">' +
+                esc(entry.username) + (isMe ? ' <span style="font-size:10px;opacity:.6">(나)</span>' : '') +
+              '</div>' +
+              '<div class="hof-coins">🪙 ' + entry.coins.toLocaleString() + ' 코인</div>' +
+            '</div>';
+        });
+        html += '</div></div>';
+      });
+      content.innerHTML = html;
+    }
 
     /* ── Leaderboard ── */
     function loadLeaderboard() {

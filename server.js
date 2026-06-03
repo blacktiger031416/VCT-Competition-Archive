@@ -386,6 +386,103 @@ app.post("/api/tierlist/events/:id/posts/:postUser/like", requireAuth, async (re
   }
 });
 
+/* ── API: 시즌 목록 조회 ────────────────────────── */
+app.get("/api/seasons", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'season:%:top3' ORDER BY key ASC"
+    );
+    const seasons = result.rows.map((r) => ({
+      season: parseInt(r.key.split(":")[1], 10),
+      top3: JSON.parse(r.value),
+    }));
+    res.json(seasons);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 시즌 종료 (admin) ─ 코인 리셋 + 순위 기록 */
+app.post("/api/season/end", requireAdmin, async (req, res) => {
+  try {
+    /* 현재 시즌 번호 */
+    const snRes = await pool.query("SELECT value FROM app_data WHERE key='season:current'");
+    const seasonNum = snRes.rows[0] ? parseInt(snRes.rows[0].value, 10) : 1;
+
+    /* 상위 3명 (admin 제외) */
+    const top3Res = await pool.query(`
+      SELECT ad.key, ad.value
+      FROM app_data ad
+      JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
+      WHERE ad.key LIKE 'coins:%' AND u.role != 'admin'
+      ORDER BY CAST(ad.value AS INTEGER) DESC
+      LIMIT 3
+    `);
+    const top3 = top3Res.rows.map((r, i) => ({
+      rank:     i + 1,
+      username: r.key.slice(6),
+      coins:    parseInt(r.value, 10),
+    }));
+
+    /* 시즌 기록 저장 */
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [`season:${seasonNum}:top3`, JSON.stringify(top3)]
+    );
+
+    /* 다음 시즌 번호 저장 */
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ('season:current', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [String(seasonNum + 1)]
+    );
+
+    /* 모든 유저 코인 1000으로 리셋 (admin 제외) */
+    const coinsRes = await pool.query(`
+      SELECT ad.key FROM app_data ad
+      JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
+      WHERE ad.key LIKE 'coins:%' AND u.role != 'admin'
+    `);
+    await Promise.all(
+      coinsRes.rows.map((r) =>
+        pool.query(
+          `UPDATE app_data SET value='1000', updated_at=NOW() WHERE key=$1`,
+          [r.key]
+        )
+      )
+    );
+
+    broadcast({ type: "season-end", season: seasonNum, top3 });
+    res.json({ ok: true, season: seasonNum, top3 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 유저의 최근 티어리스트 게시물 ─────────── */
+app.get("/api/tierlist/user/:username/recent", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT key, value FROM app_data
+       WHERE key LIKE $1
+       ORDER BY updated_at DESC LIMIT 1`,
+      [`tlpost:%:${req.params.username}`]
+    );
+    if (!result.rows[0]) return res.json(null);
+    const post = JSON.parse(result.rows[0].value);
+    /* 이벤트 정보도 함께 반환 */
+    const evtRes = await pool.query(
+      "SELECT value FROM app_data WHERE key=$1",
+      [`tlevt:${post.eventId}`]
+    );
+    post.event = evtRes.rows[0] ? JSON.parse(evtRes.rows[0].value) : null;
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 전체 뷰어 새로고침 트리거 ─────────────── */
 app.post("/api/refresh", (req, res) => {
   broadcast({ type: "force-reload" });

@@ -328,6 +328,55 @@
     .tier-popover input[type=text] { height:28px; padding:0 8px; width:110px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:3px; color:#fff; outline:none; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; }
     .tier-popover button { height:28px; padding:0 8px; border-radius:3px; background:#e8432d; border:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
 
+    /* ── Season Winners Pinned Section ── */
+    .season-winners-section { margin-bottom: 28px; }
+    .season-winners-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800;
+      letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px;
+    }
+    .season-winners-row {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; margin-bottom:24px;
+    }
+    .season-divider { border:none; border-top:1px solid rgba(255,255,255,0.07); margin-bottom:28px; }
+    .winner-card {
+      border-radius:8px; overflow:hidden; background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.08); transition:border-color .15s;
+      display:flex; flex-direction:column;
+    }
+    .winner-card.rank-1 { border-color:rgba(255,215,0,0.28); background:rgba(255,215,0,0.04); }
+    .winner-card.rank-2 { border-color:rgba(192,192,192,0.25); background:rgba(192,192,192,0.03); }
+    .winner-card.rank-3 { border-color:rgba(205,127,50,0.28); background:rgba(205,127,50,0.03); }
+    .winner-card:hover { border-color:rgba(255,255,255,0.14); }
+    .winner-card.rank-1:hover { border-color:rgba(255,215,0,0.5); }
+    .winner-card.rank-2:hover { border-color:rgba(192,192,192,0.45); }
+    .winner-card.rank-3:hover { border-color:rgba(205,127,50,0.5); }
+    .winner-card-body { padding:16px 18px 14px; flex:1; display:flex; flex-direction:column; gap:5px; }
+    .winner-medal { font-size:22px; line-height:1; margin-bottom:2px; }
+    .winner-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:800;
+      letter-spacing:.04em; color:#fff; line-height:1.3;
+    }
+    .winner-username {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+      letter-spacing:.08em; color:rgba(255,255,255,0.35);
+    }
+    .winner-card-footer {
+      display:flex; align-items:center; padding:10px 18px;
+      border-top:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.15);
+    }
+    .winner-enter {
+      flex:1; padding:0 18px; height:32px; border:none; border-radius:4px;
+      background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6);
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:800;
+      letter-spacing:.14em; text-transform:uppercase; cursor:pointer; transition:all .15s;
+      text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .winner-enter:hover { background:rgba(255,255,255,0.14); color:#fff; }
+    .winner-no-post {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+      letter-spacing:.08em; color:rgba(255,255,255,0.18); text-transform:uppercase;
+    }
+
     /* Toast */
     #tl-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:5px; background:rgba(30,210,100,0.15); border:1px solid rgba(61,220,132,0.3); color:#3ddc84; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; pointer-events:none; opacity:0; transition:opacity .25s; z-index:9999; }
     #tl-toast.show { opacity:1; }
@@ -348,6 +397,14 @@
           <button class="tl-btn tl-btn-primary" id="btn-new">+ 새 티어리스트 만들기</button>
         </div>
       </div>
+
+      <!-- 전 시즌 수상자 고정 섹션 -->
+      <div class="season-winners-section" id="season-winners" style="display:none">
+        <div class="season-winners-label">🏆 전 시즌 수상자 티어리스트</div>
+        <div class="season-winners-row" id="winners-row"></div>
+        <hr class="season-divider">
+      </div>
+
       <div id="events-grid" class="events-grid">
         <div class="tl-loading" id="list-loading">
           <div class="tl-loading-spinner"></div>
@@ -513,11 +570,12 @@
     var IS_LOGGED_IN = !!USER;
 
     /* ── 상태 ───────────────────────────────────────── */
-    var events   = [];   // 이벤트 목록
-    var curEvt   = null; // 현재 상세 이벤트
-    var posts    = [];   // 현재 이벤트 게시물
-    var tierData = {};   // 유저 작업 중인 티어 배치
-    var editingId = null; // 수정 중인 이벤트 id
+    var events      = [];   // 이벤트 목록
+    var curEvt      = null; // 현재 상세 이벤트
+    var posts       = [];   // 현재 이벤트 게시물
+    var tierData    = {};   // 유저 작업 중인 티어 배치
+    var editingId   = null; // 수정 중인 이벤트 id
+    var cachedWinners = []; // 전 시즌 수상자 (캐시)
 
     /* ── URL 파싱 ───────────────────────────────────── */
     var urlId = new URLSearchParams(location.search).get("id");
@@ -538,11 +596,61 @@
         var r = await fetch("/api/tierlist/events");
         events = await r.json();
       } catch(e) { events = []; }
+
+      /* 전 시즌 수상자 티어리스트 fetch */
+      var prevWinners = [];
+      try {
+        var sr = await fetch("/api/seasons");
+        var seasons = await sr.json();
+        if (seasons && seasons.length > 0) {
+          /* 시즌 번호 기준 가장 최신 시즌 */
+          var latestSeason = seasons.reduce(function(a, b) {
+            return (a.season || 0) > (b.season || 0) ? a : b;
+          });
+          var top3 = latestSeason.top3 || [];
+          prevWinners = await Promise.all(top3.map(async function(w) {
+            try {
+              var pr = await fetch("/api/tierlist/user/" + encodeURIComponent(w.username) + "/recent");
+              var pd = await pr.json();
+              /* 서버는 게시물 객체 또는 null 반환 (ok 필드 없음) */
+              return { rank: w.rank, username: w.username, coins: w.coins, post: (pd && pd.eventId) ? pd : null };
+            } catch(e) {
+              return { rank: w.rank, username: w.username, coins: w.coins, post: null };
+            }
+          }));
+        }
+      } catch(e) {}
+
+      cachedWinners = prevWinners;
       showView("list");
-      renderList();
+      renderList(cachedWinners);
     }
 
-    function renderList() {
+    function renderList(winners) {
+      winners = (winners !== undefined) ? winners : cachedWinners;
+
+      /* 전 시즌 수상자 섹션 */
+      var winnersSection = document.getElementById("season-winners");
+      var winnersRow = document.getElementById("winners-row");
+      if (winners.length > 0) {
+        winnersSection.style.display = "";
+        winnersRow.innerHTML = "";
+        var rankLabels = [
+          "전 시즌 1등 티어리스트",
+          "전 시즌 2등 티어리스트",
+          "전 시즌 3등 티어리스트",
+        ];
+        var medals = ["🥇", "🥈", "🥉"];
+        winners.forEach(function(w, i) {
+          var label = rankLabels[i] || ("전 시즌 " + w.rank + "등 티어리스트");
+          var medal = medals[i] || "🏅";
+          winnersRow.appendChild(makeWinnerCard(w, medal, label));
+        });
+      } else {
+        winnersSection.style.display = "none";
+      }
+
+      /* 일반 이벤트 그리드 */
       var grid = document.getElementById("events-grid");
       if (!events.length) {
         grid.innerHTML = '<div class="no-events">아직 티어리스트가 없습니다.<br>Admin이 새 티어리스트를 만들면 여기에 표시됩니다.</div>';
@@ -552,6 +660,29 @@
       events.forEach(function(evt) {
         grid.appendChild(makeEventCard(evt));
       });
+    }
+
+    function makeWinnerCard(w, medal, label) {
+      var card = document.createElement("div");
+      card.className = "winner-card rank-" + w.rank;
+
+      var bodyHtml =
+        '<div class="winner-card-body">' +
+          '<div class="winner-medal">' + medal + '</div>' +
+          '<div class="winner-label">' + escHtml(label) + '</div>' +
+          '<div class="winner-username">@' + escHtml(w.username) + '</div>' +
+        '</div>';
+
+      var footerHtml = '<div class="winner-card-footer">';
+      if (w.post && w.post.eventId) {
+        footerHtml += '<a class="winner-enter" href="./tierlist.html?id=' + escHtml(w.post.eventId) + '">보기</a>';
+      } else {
+        footerHtml += '<span class="winner-no-post">게시물 없음</span>';
+      }
+      footerHtml += '</div>';
+
+      card.innerHTML = bodyHtml + footerHtml;
+      return card;
     }
 
     function makeEventCard(evt) {
