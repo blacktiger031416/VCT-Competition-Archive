@@ -95,7 +95,6 @@
     "}",
     /* auth-header-btn의 per-page margin-left:auto를 그룹 내에서 무력화 */
     ".header-right-group .auth-header-btn { margin-left: 0 !important; }",
-    ".header-right-group .auth-register-btn { margin-left: 0 !important; }",
 
     /* 도움말 버튼 */
     ".help-trigger-btn {",
@@ -115,34 +114,6 @@
     "  background: rgba(255,255,255,0.14);",
     "  border-color: rgba(255,255,255,0.28);",
     "  color: #fff;",
-    "}",
-
-    /* 회원가입 보조 버튼 */
-    ".auth-register-btn {",
-    "  display: inline-flex;",
-    "  align-items: center;",
-    "  gap: 6px;",
-    "  margin-left: 0;",
-    "  padding: 0 13px;",
-    "  height: 32px;",
-    "  border: 1px solid rgba(255,255,255,0.1);",
-    "  border-radius: 4px;",
-    "  background: transparent;",
-    "  color: rgba(255,255,255,0.38);",
-    "  font-size: 11px;",
-    "  font-weight: 700;",
-    "  font-family: 'Barlow Condensed', sans-serif;",
-    "  letter-spacing: 0.14em;",
-    "  text-transform: uppercase;",
-    "  cursor: pointer;",
-    "  transition: background 0.15s, border-color 0.15s, color 0.15s;",
-    "  white-space: nowrap;",
-    "  flex-shrink: 0;",
-    "}",
-    ".auth-register-btn:hover {",
-    "  background: rgba(255,255,255,0.07);",
-    "  border-color: rgba(255,255,255,0.2);",
-    "  color: rgba(255,255,255,0.75);",
     "}",
 
     /* 새로고침 버튼 */
@@ -296,13 +267,6 @@
     window.location.reload();
   });
 
-  /* 회원가입 버튼 (미로그인시) */
-  var registerBtn = document.createElement("button");
-  registerBtn.type = "button";
-  registerBtn.className = "auth-register-btn";
-  registerBtn.textContent = "회원 가입";
-  registerBtn.addEventListener("click", openRegisterModal);
-
   /* 메인 auth 버튼 */
   var authBtn = document.createElement("button");
   authBtn.type = "button";
@@ -311,21 +275,18 @@
     var user = getCachedUser();
     if (!user) {
       /* 미로그인 */
-      registerBtn.style.display = "";
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
       refreshBtn.style.display = "none";
       authBtn.onclick = openLoginModal;
     } else if (user.role === "admin") {
       /* Admin */
-      registerBtn.style.display = "none";
       authBtn.textContent = "Admin";
       authBtn.className = "auth-header-btn auth-header-btn--on";
       refreshBtn.style.display = "";
       authBtn.onclick = openLogoutConfirm;
     } else {
       /* 일반 유저 */
-      registerBtn.style.display = "none";
       authBtn.textContent = user.username;
       authBtn.className = "auth-header-btn auth-header-btn--user";
       refreshBtn.style.display = "none";
@@ -350,7 +311,6 @@
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
-    rightGroup.appendChild(registerBtn);
     rightGroup.appendChild(helpBtn);
     rightGroup.appendChild(authBtn);
     header.appendChild(rightGroup);
@@ -367,7 +327,6 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
-    floatWrap.appendChild(registerBtn);
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
     document.body.appendChild(floatWrap);
