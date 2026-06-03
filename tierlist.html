@@ -370,11 +370,109 @@
       font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:800;
       letter-spacing:.14em; text-transform:uppercase; cursor:pointer; transition:all .15s;
       text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+      outline:none;
     }
     .winner-enter:hover { background:rgba(255,255,255,0.14); color:#fff; }
+    button.winner-enter { width:100%; }
     .winner-no-post {
       font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
       letter-spacing:.08em; color:rgba(255,255,255,0.18); text-transform:uppercase;
+    }
+
+    /* ── Winner View Modal ── */
+    #winner-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
+    #winner-backdrop { position:absolute; inset:0; background:rgba(5,8,15,0.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); cursor:pointer; }
+    .winner-panel {
+      position:relative; z-index:1;
+      width:min(700px,calc(100vw - 32px)); max-height:calc(100vh - 60px);
+      background:#111a28; border:1px solid rgba(255,255,255,0.09); border-radius:10px;
+      box-shadow:0 32px 96px rgba(0,0,0,0.75); display:flex; flex-direction:column; overflow:hidden;
+      animation:panelIn .22s cubic-bezier(0.16,1,0.3,1);
+    }
+    .winner-panel-hdr {
+      display:flex; align-items:center; gap:12px;
+      padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0;
+    }
+    .winner-panel-hdr-medal { font-size:20px; line-height:1; }
+    .winner-panel-hdr-title {
+      font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:900;
+      letter-spacing:.08em; text-transform:uppercase; color:#fff; flex:1;
+    }
+    .winner-panel-hdr-sub {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700;
+      letter-spacing:.08em; color:rgba(255,255,255,0.3);
+    }
+    .winner-panel-close {
+      width:28px; height:28px; display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,0.08); border-radius:3px;
+      background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.35);
+      font-size:16px; cursor:pointer; transition:all .12s; flex-shrink:0;
+    }
+    .winner-panel-close:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .winner-panel-body { flex:1; overflow-y:auto; padding:20px; }
+    .winner-panel-body::-webkit-scrollbar { width:5px; }
+    .winner-panel-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.12); border-radius:3px; }
+
+    /* Event selector in winner modal */
+    .wm-evt-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800;
+      letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px;
+    }
+    .wm-evt-list { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+    .wm-evt-btn {
+      display:flex; align-items:center; gap:12px; padding:12px 16px;
+      border:1px solid rgba(255,255,255,0.08); border-radius:6px;
+      background:rgba(255,255,255,0.03); cursor:pointer; transition:all .15s; text-align:left;
+    }
+    .wm-evt-btn:hover { border-color:rgba(255,255,255,0.16); background:rgba(255,255,255,0.07); }
+    .wm-evt-btn.active { border-color:rgba(232,67,45,0.45); background:rgba(232,67,45,0.08); }
+    .wm-evt-name {
+      font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:800;
+      letter-spacing:.04em; color:#fff; flex:1;
+    }
+    .wm-evt-arrow { color:rgba(255,255,255,0.2); font-size:14px; }
+
+    /* Back button inside modal */
+    .wm-back {
+      display:inline-flex; align-items:center; gap:6px; margin-bottom:16px;
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800;
+      letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,0.35);
+      cursor:pointer; border:none; background:none; padding:0; transition:color .15s;
+    }
+    .wm-back:hover { color:rgba(255,255,255,0.75); }
+
+    /* Tierlist display inside modal */
+    .wm-tier-row {
+      display:flex; align-items:stretch; border:1px solid rgba(255,255,255,0.07);
+      border-radius:5px; margin-bottom:5px; min-height:64px;
+    }
+    .wm-tier-label {
+      width:80px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      border-radius:4px 0 0 4px; padding:6px 4px;
+    }
+    .wm-tier-label-text {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:900;
+      letter-spacing:.06em; text-transform:uppercase; text-align:center; line-height:1.3;
+    }
+    .wm-tier-teams {
+      flex:1; display:flex; flex-wrap:wrap; align-items:center;
+      gap:6px; padding:8px 10px; background:rgba(255,255,255,0.02);
+    }
+    .wm-team-card {
+      width:60px; flex-shrink:0; display:flex; flex-direction:column; align-items:center;
+      gap:3px; padding:5px 3px; border-radius:4px;
+      border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.03);
+    }
+    .wm-team-card img { width:36px; height:36px; object-fit:contain; }
+    .wm-team-name {
+      font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700;
+      letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,0.45);
+      text-align:center; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .wm-loading {
+      padding:40px; text-align:center;
+      font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,0.3);
     }
 
     /* Toast */
@@ -485,6 +583,24 @@
           <button class="tl-btn tl-btn-primary"  id="cfg-publish">저장 &amp; 공개</button>
           <button class="tl-btn tl-btn-danger"   id="cfg-end" style="display:none">마감</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Winner View Modal -->
+  <div id="winner-modal" style="display:none">
+    <div id="winner-backdrop"></div>
+    <div class="winner-panel">
+      <div class="winner-panel-hdr">
+        <span class="winner-panel-hdr-medal" id="wm-medal"></span>
+        <div style="flex:1;min-width:0">
+          <div class="winner-panel-hdr-title" id="wm-title"></div>
+          <div class="winner-panel-hdr-sub" id="wm-sub"></div>
+        </div>
+        <button class="winner-panel-close" id="winner-panel-close">×</button>
+      </div>
+      <div class="winner-panel-body" id="winner-panel-body">
+        <div class="wm-loading">불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -674,16 +790,133 @@
         '</div>';
 
       var footerHtml = '<div class="winner-card-footer">';
-      if (w.post && w.post.eventId) {
-        footerHtml += '<a class="winner-enter" href="./tierlist.html?id=' + escHtml(w.post.eventId) + '">보기</a>';
-      } else {
-        footerHtml += '<span class="winner-no-post">게시물 없음</span>';
-      }
+      footerHtml += '<button class="winner-enter" data-winner-btn>보기</button>';
       footerHtml += '</div>';
 
       card.innerHTML = bodyHtml + footerHtml;
+
+      card.querySelector("[data-winner-btn]").addEventListener("click", function() {
+        openWinnerModal(w, medal, label);
+      });
+
       return card;
     }
+
+    /* ── Winner Modal ──────────────────────────────── */
+    var wmCurrentWinner = null;
+
+    function openWinnerModal(w, medal, label) {
+      wmCurrentWinner = w;
+      document.getElementById("wm-medal").textContent = medal;
+      document.getElementById("wm-title").textContent = label;
+      document.getElementById("wm-sub").textContent = "@" + w.username;
+      document.getElementById("winner-panel-body").innerHTML = '<div class="wm-loading">불러오는 중...</div>';
+      document.getElementById("winner-modal").style.display = "flex";
+
+      fetch("/api/tierlist/user/" + encodeURIComponent(w.username) + "/posts")
+        .then(function(r) { return r.json(); })
+        .then(function(posts) {
+          if (!posts || !posts.length) {
+            document.getElementById("winner-panel-body").innerHTML =
+              '<div class="wm-loading">게시된 티어리스트가 없습니다.</div>';
+            return;
+          }
+          if (posts.length === 1) {
+            /* 게시물 1개면 바로 표시 */
+            renderWmTierlist(posts[0]);
+          } else {
+            /* 여러 개면 선택 화면 */
+            renderWmEventSelect(posts, w, medal, label);
+          }
+        })
+        .catch(function() {
+          document.getElementById("winner-panel-body").innerHTML =
+            '<div class="wm-loading">불러오기 실패</div>';
+        });
+    }
+
+    function renderWmEventSelect(posts, w, medal, label) {
+      var body = document.getElementById("winner-panel-body");
+      var html = '<div class="wm-evt-label">티어리스트 선택</div><div class="wm-evt-list">';
+      posts.forEach(function(p, i) {
+        var evtTitle = (p.event && p.event.title) ? p.event.title : ("이벤트 #" + (i + 1));
+        html +=
+          '<button class="wm-evt-btn" data-idx="' + i + '">' +
+            '<span class="wm-evt-name">' + escHtml(evtTitle) + '</span>' +
+            '<span class="wm-evt-arrow">›</span>' +
+          '</button>';
+      });
+      html += '</div>';
+      body.innerHTML = html;
+      body.querySelectorAll(".wm-evt-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          renderWmTierlist(posts[parseInt(btn.dataset.idx)], posts, w, medal, label);
+        });
+      });
+    }
+
+    function renderWmTierlist(post, posts, w, medal, label) {
+      var body = document.getElementById("winner-panel-body");
+      var html = "";
+
+      /* 목록이 여러 개였을 때 뒤로 가기 버튼 */
+      if (posts && posts.length > 1) {
+        html += '<button class="wm-back" id="wm-back-btn">‹ 목록으로</button>';
+      }
+
+      var evt = post.event;
+      if (!evt || !evt.tiers) {
+        html += '<div class="wm-loading">이벤트 정보를 찾을 수 없습니다.</div>';
+        body.innerHTML = html;
+        if (posts && posts.length > 1) {
+          body.querySelector("#wm-back-btn").addEventListener("click", function() {
+            renderWmEventSelect(posts, w, medal, label);
+          });
+        }
+        return;
+      }
+
+      /* 이벤트 제목 */
+      html += '<div style="margin-bottom:16px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,0.45)">' + escHtml(evt.title || "") + '</div>';
+
+      /* 티어 행 */
+      evt.tiers.forEach(function(tier) {
+        var teams = (post.tierData && post.tierData[tier.name]) || [];
+        if (!teams.length) return; /* 비어있는 티어는 숨김 */
+        var tc = getTextColor(tier.color);
+        var teamsHtml = teams.map(function(teamName) {
+          var logo = TEAM_LOGOS[teamName] || "";
+          var code = TEAM_CODES[teamName] || teamName;
+          var inv = LOGO_INVERT[teamName] ? " style=\"filter:brightness(0) invert(1)\"" : "";
+          return '<div class="wm-team-card">' +
+            (logo ? '<img src="' + logo + '" alt=""' + inv + ' onerror="this.style.display=\'none\'">' : '<div style="width:36px;height:36px"></div>') +
+            '<span class="wm-team-name">' + escHtml(code) + '</span>' +
+            '</div>';
+        }).join("");
+        html +=
+          '<div class="wm-tier-row">' +
+            '<div class="wm-tier-label" style="background:' + tier.color + '">' +
+              '<span class="wm-tier-label-text" style="color:' + tc + '">' + escHtml(tier.name) + '</span>' +
+            '</div>' +
+            '<div class="wm-tier-teams">' + teamsHtml + '</div>' +
+          '</div>';
+      });
+
+      body.innerHTML = html;
+
+      if (posts && posts.length > 1) {
+        body.querySelector("#wm-back-btn").addEventListener("click", function() {
+          renderWmEventSelect(posts, w, medal, label);
+        });
+      }
+    }
+
+    function closeWinnerModal() {
+      document.getElementById("winner-modal").style.display = "none";
+    }
+
+    document.getElementById("winner-panel-close").addEventListener("click", closeWinnerModal);
+    document.getElementById("winner-backdrop").addEventListener("click", closeWinnerModal);
 
     function makeEventCard(evt) {
       var card = document.createElement("div");

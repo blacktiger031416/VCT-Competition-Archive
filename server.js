@@ -483,6 +483,38 @@ app.get("/api/tierlist/user/:username/recent", async (req, res) => {
   }
 });
 
+/* ── API: 유저의 모든 티어리스트 게시물 ─────────── */
+app.get("/api/tierlist/user/:username/posts", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT key, value FROM app_data WHERE key LIKE $1 ORDER BY updated_at DESC`,
+      [`tlpost:%:${req.params.username}`]
+    );
+    if (!result.rows.length) return res.json([]);
+    const posts = result.rows.map((r) => {
+      const post = JSON.parse(r.value);
+      // key 형식: tlpost:{evtId}:{username}
+      post.eventId = r.key.split(":")[1];
+      return post;
+    });
+    // 이벤트 정보 병렬 fetch
+    const evtIds = [...new Set(posts.map((p) => p.eventId))];
+    const evtRows = await Promise.all(
+      evtIds.map((id) =>
+        pool.query("SELECT value FROM app_data WHERE key=$1", [`tlevt:${id}`])
+      )
+    );
+    const evtMap = {};
+    evtIds.forEach((id, i) => {
+      evtMap[id] = evtRows[i].rows[0] ? JSON.parse(evtRows[i].rows[0].value) : null;
+    });
+    posts.forEach((p) => { p.event = evtMap[p.eventId] || null; });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 전체 뷰어 새로고침 트리거 ─────────────── */
 app.post("/api/refresh", (req, res) => {
   broadcast({ type: "force-reload" });
