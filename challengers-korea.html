@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Challengers Korea 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --accent: #159194;
+        --accent-dim: rgba(21,145,148,0.7);
+        --accent-bg:  rgba(21,145,148,0.12);
+        --bg-base:    #071515;
+        --bg-card:    #0d1f1f;
+        --bg-card2:   #112222;
+      }
+
+      body {
+        background: var(--bg-base);
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(7,21,21,0.92);
+        border-bottom: 1px solid rgba(21,145,148,0.15);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.55); text-decoration: none;
+        transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: rgba(255,255,255,0.4); text-decoration: none;
+        transition: color 0.15s;
+      }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      /* ── HERO ───────────────────────────────── */
+      .league-hero {
+        position: relative;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 32px; padding: 72px 48px 80px;
+        max-width: 1080px; margin: 0 auto; overflow: hidden;
+      }
+      .league-hero::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(21,145,148,0.18) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--accent); margin-bottom: 10px;
+      }
+      .league-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(42px, 7vw, 80px); font-weight: 900;
+        letter-spacing: 0.03em; text-transform: uppercase;
+        line-height: 0.95; color: #fff; margin-bottom: 20px;
+      }
+      .league-hero .intro {
+        font-size: 14px; line-height: 1.7;
+        color: rgba(255,255,255,0.45); max-width: 420px;
+        font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all;
+      }
+      .league-mark {
+        flex-shrink: 0; position: relative; z-index: 1; padding: 16px;
+      }
+      .league-mark img {
+        width: clamp(120px, 18vw, 200px); height: clamp(120px, 18vw, 200px);
+        object-fit: contain; opacity: 0.9;
+        filter: drop-shadow(0 4px 24px rgba(21,145,148,0.35));
+      }
+
+      /* ── SECTIONS ───────────────────────────── */
+      .league-shell {
+        max-width: 1080px; margin: 0 auto; padding: 0 32px 80px;
+      }
+      .section-heading {
+        margin-bottom: 24px;
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+      }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 28px; font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+      }
+
+      /* ── TOURNAMENT GRID ─────────────────────── */
+      .tournament-section { margin-bottom: 64px; }
+      .tournament-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 640px) {
+        .tournament-grid { grid-template-columns: 1fr; }
+      }
+      .tournament-card {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 24px 22px;
+        background: var(--bg-card);
+        border: 1px solid rgba(21,145,148,0.12);
+        border-radius: 4px; text-decoration: none;
+        color: #e8e4e0; position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        cursor: pointer;
+      }
+      .tournament-card::before {
+        content: '';
+        position: absolute; inset: 0 0 0 0;
+        border-bottom: 2px solid var(--accent);
+        transform: scaleX(0); transform-origin: left;
+        transition: transform 0.25s ease;
+      }
+      .tournament-card:hover {
+        border-color: rgba(21,145,148,0.4);
+        background: var(--bg-card2);
+        transform: translateY(-2px);
+      }
+      .tournament-card:hover::before { transform: scaleX(1); }
+      .tournament-kicker {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 0.2em; text-transform: uppercase;
+        color: var(--accent-dim);
+      }
+      .tournament-card strong {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 26px; font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        color: #fff; line-height: 1;
+      }
+      .tournament-card > span:last-child {
+        font-size: 12px; color: rgba(255,255,255,0.35);
+        font-family: 'Barlow', sans-serif; margin-top: 4px;
+      }
+
+      /* 잠긴 스플릿 카드 */
+      .tournament-card.locked {
+        opacity: 0.5; pointer-events: none; cursor: default;
+      }
+      .tournament-card.locked::after {
+        content: '업데이트 예정';
+        position: absolute; top: 10px; right: 10px;
+        padding: 2px 8px; border-radius: 3px;
+        background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.4); text-transform: uppercase;
+      }
+
+      /* ── DIVIDER ────────────────────────────── */
+      .section-divider {
+        height: 1px;
+        background: rgba(21,145,148,0.12);
+        margin: 0 0 56px;
+      }
+
+      /* ── PAGE TRANSITION ────────────────────── */
+      .card-transition-overlay {
+        position: fixed; inset: 0;
+        background: var(--bg-base);
+        pointer-events: none; opacity: 0; z-index: 9999;
+        transition: opacity 0.4s ease;
+      }
+      body.card-transitioning .card-transition-overlay { opacity: 1; }
+
+    </style>
+  </head>
+  <body class="league-page challengers-korea-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./index.html">홈으로</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title" style="padding:72px 0 80px;">
+        <div class="hero-text">
+          <p class="eyebrow">VCT Challengers 2026</p>
+          <h1 id="league-title">Korea<br>Challengers</h1>
+          <p class="intro">
+            2026 VCT Challengers Korea의 Split 1, Split 2, Split 3 결과를
+            정리하는 리그 페이지입니다.<br>
+            각 Split의 경기 결과와 참가 팀 정보를 이곳에서 확인할 수 있습니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="VCT Challengers Korea" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <section class="tournament-section" aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournaments</p>
+          <h2 id="tournament-title">대회 선택</h2>
+        </div>
+
+        <div class="tournament-grid">
+          <a class="tournament-card" href="./challengers-korea-split1.html" data-split="split1">
+            <span class="tournament-kicker">2026 Korea Challengers</span>
+            <strong>Split 1</strong>
+            <span>준비 중</span>
+          </a>
+          <a class="tournament-card" href="./challengers-korea-split2.html" data-split="split2">
+            <span class="tournament-kicker">2026 Korea Challengers</span>
+            <strong>Split 2</strong>
+            <span>준비 중</span>
+          </a>
+          <a class="tournament-card" href="./challengers-korea-split3.html" data-split="split3">
+            <span class="tournament-kicker">2026 Korea Challengers</span>
+            <strong>Split 3</strong>
+            <span>준비 중</span>
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <div class="card-transition-overlay" aria-hidden="true"></div>
+
+    <script>
+      (function () {
+        var overlay = document.querySelector(".card-transition-overlay");
+        document.querySelectorAll(".tournament-card:not(.locked)").forEach(function (card) {
+          var href = card.getAttribute("href");
+          if (!href || href === "#") return;
+          card.addEventListener("click", function (e) {
+            e.preventDefault();
+            card.classList.add("selected");
+            document.body.classList.add("card-transitioning");
+            setTimeout(function () { window.location.href = href; }, 400);
+          });
+        });
+      })();
+    </script>
+
+    <script src="./storage.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
