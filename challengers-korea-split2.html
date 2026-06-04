@@ -471,6 +471,12 @@
             +'</div></strong>';
           (function(w,mc) {
             var strongs = card.querySelectorAll("strong");
+            function goToDetail() {
+              var d=loadMT(w,mc); if(!d.teamA||!d.teamB) return;
+              var s=loadSc(w,mc,d.teamA,d.teamB);
+              var q=new URLSearchParams({date:"CKS2W"+w+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:s?(s.a+" : "+s.b):"0 : 0",from:"ck_split"});
+              window.location.href="./challengers-korea-match-dark.html?"+q.toString();
+            }
             if (_isAdmin) {
               strongs[0].addEventListener("click", function(e) { e.stopPropagation(); openPickModal(w,mc,"A"); });
               strongs[1].addEventListener("click", function(e) { e.stopPropagation(); openPickModal(w,mc,"B"); });
@@ -479,15 +485,9 @@
                 var d=loadMT(w,mc); if(!d.teamA||!d.teamB){ alert("먼저 팀을 선택하세요"); return; }
                 openMatchScoreModal(w,mc);
               });
-            } else {
-              card.addEventListener("click", function() {
-                var d=loadMT(w,mc); if(!d.teamA||!d.teamB) return;
-                var s=loadSc(w,mc,d.teamA,d.teamB);
-                var q=new URLSearchParams({date:"CKS2W"+w+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:s?(s.a+" : "+s.b):"0 : 0",from:"ck_split"});
-                window.location.href="./challengers-korea-match-dark.html?"+q.toString();
-              });
             }
-            card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); card.click(); } });
+            card.addEventListener("click", goToDetail);
+            card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goToDetail(); } });
           })(wk.w, m);
           grid.appendChild(card);
         }
