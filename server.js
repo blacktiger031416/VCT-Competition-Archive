@@ -822,6 +822,20 @@ app.get("/api/attendance/status", requireAuth, async (req, res) => {
   }
 });
 
+/* ── API: 출석 기록 리셋 (Admin 전용) ───────────────── */
+app.delete("/api/admin/attend/:username", requireAdmin, async (req, res) => {
+  const username = req.params.username;
+  const kst  = new Date(Date.now() + 9 * 3600000);
+  const date = kst.toISOString().slice(0, 10);
+  const key  = `attend:${username}:${date}`;
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    res.json({ ok: true, deleted: key });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 출석 체크 (100코인 지급) ────────────────── */
 app.post("/api/attendance", requireAuth, async (req, res) => {
   const username = req.user.username;
