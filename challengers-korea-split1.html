@@ -78,11 +78,8 @@
     #week-3:checked ~ .week-panels .week-panel-3,
     #week-4:checked ~ .week-panels .week-panel-4 { display:block; animation:panel-in 360ms ease both; }
     @keyframes panel-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-    .week-meta { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:20px 24px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .week-meta { padding:20px 24px; border-bottom:1px solid rgba(255,255,255,.06); }
     .week-meta strong { font-size:24px; font-weight:900; color:#fff; }
-    .week-meta .date-label { font-size:14px; font-weight:500; color:rgba(255,255,255,.4); }
-    body:not(.view-only) .week-meta .date-label { cursor:pointer; border-bottom:1px dashed rgba(21,145,148,.4); }
-    body:not(.view-only) .week-meta .date-label:hover { color:var(--acc); }
 
     /* ── MATCH CARD ── */
     .match-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.06); }
@@ -235,31 +232,21 @@
         </div>
         <div class="week-panels">
           <div class="week-panel week-panel-1">
-            <div class="week-meta">
-              <strong>Week 1</strong>
-              <span class="date-label" data-wk="1">날짜 미정</span>
-            </div>
+            <div class="week-meta"><strong>Week 1</strong></div>
             <div class="match-grid" id="mg-1"></div>
           </div>
           <div class="week-panel week-panel-2">
             <div class="week-meta">
               <strong>Week 2</strong>
-              <span class="date-label" data-wk="2">날짜 미정</span>
             </div>
             <div class="match-grid" id="mg-2"></div>
           </div>
           <div class="week-panel week-panel-3">
-            <div class="week-meta">
-              <strong>Week 3</strong>
-              <span class="date-label" data-wk="3">날짜 미정</span>
-            </div>
+            <div class="week-meta"><strong>Week 3</strong></div>
             <div class="match-grid" id="mg-3"></div>
           </div>
           <div class="week-panel week-panel-4">
-            <div class="week-meta">
-              <strong>Week 4</strong>
-              <span class="date-label" data-wk="4">날짜 미정</span>
-            </div>
+            <div class="week-meta"><strong>Week 4</strong></div>
             <div class="match-grid" id="mg-4"></div>
           </div>
         </div>
@@ -348,7 +335,6 @@
     var SLOTS_KEY = PFX + "slots";
     var POOL_KEY  = PFX + "pool";
     var SCORE_PFX = PFX + "sc_";
-    var DATE_PFX  = PFX + "date_w";
 
     /* 8팀 리그 라운드로빈 (고정 스케줄)
        Week1: round1+2 (8경기), Week2: round3+4, Week3: round5+6, Week4: round7 (4경기) */
@@ -521,53 +507,6 @@
         + '</div></div>';
     }
 
-    /* ── 날짜 인라인 편집 ── */
-    function initDates() {
-      document.querySelectorAll(".date-label").forEach(function(el) {
-        var wk = el.dataset.wk;
-        var stored = localStorage.getItem(DATE_PFX + wk);
-        if (stored) el.textContent = stored;
-        if (!_isAdmin) return;
-        el.addEventListener("click", function(e) {
-          e.stopPropagation();
-          var input = document.createElement("input");
-          input.type = "text"; input.value = el.textContent;
-          input.style.cssText = "background:rgba(255,255,255,.08);border:1px solid rgba(21,145,148,.5);border-radius:4px;padding:2px 10px;color:#fff;font-size:14px;font-family:inherit;outline:none;min-width:160px;";
-          el.replaceWith(input); input.focus();
-          function done() {
-            var val = input.value.trim() || "날짜 미정";
-            localStorage.setItem(DATE_PFX + wk, val);
-            var span = document.createElement("span");
-            span.className = "date-label"; span.dataset.wk = wk; span.textContent = val;
-            input.replaceWith(span);
-            initDateEl(span);
-          }
-          input.addEventListener("blur", done);
-          input.addEventListener("keydown", function(e){ if (e.key === "Enter") done(); });
-        });
-      });
-    }
-    function initDateEl(el) {
-      var wk = el.dataset.wk;
-      if (!_isAdmin) return;
-      el.addEventListener("click", function(e) {
-        e.stopPropagation();
-        var input = document.createElement("input");
-        input.type = "text"; input.value = el.textContent;
-        input.style.cssText = "background:rgba(255,255,255,.08);border:1px solid rgba(21,145,148,.5);border-radius:4px;padding:2px 10px;color:#fff;font-size:14px;font-family:inherit;outline:none;min-width:160px;";
-        el.replaceWith(input); input.focus();
-        function done() {
-          var val = input.value.trim() || "날짜 미정";
-          localStorage.setItem(DATE_PFX + wk, val);
-          var span = document.createElement("span");
-          span.className = "date-label"; span.dataset.wk = wk; span.textContent = val;
-          input.replaceWith(span); initDateEl(span);
-        }
-        input.addEventListener("blur", done);
-        input.addEventListener("keydown", function(e){ if (e.key === "Enter") done(); });
-      });
-    }
-
     function renderAll() { renderSlots(); renderMatches(); renderStandings(); }
 
     /* ── 슬롯 피커 모달 ── */
@@ -680,7 +619,6 @@
 
     function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-    initDates();
     renderAll();
   });
   </script>
