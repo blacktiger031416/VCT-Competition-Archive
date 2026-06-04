@@ -196,12 +196,13 @@
      필터 그룹 헬퍼
   ═══════════════════════════════════════════════════════════════ */
   var LEAGUE_LABELS = {
-    pacific:   'Pacific',
-    americas:  'Americas',
-    emea:      'EMEA',
-    cn:        'China',
-    masters:   'Masters',
-    champions: 'Champions',
+    pacific:             'Pacific',
+    americas:            'Americas',
+    emea:                'EMEA',
+    cn:                  'China',
+    masters:             'Masters',
+    champions:           'Champions',
+    'challengers-korea': 'Korea Challengers',
   };
   var TOURNAMENT_LABELS = {
     santiago: 'Santiago',
@@ -216,6 +217,10 @@
     swiss:          'Swiss',
     playoffs:       'Playoffs',
     groupstage:     'Group Stage',
+    ck_split:       'Split 1',
+    ck_split2:      'Split 2',
+    ck_split1_po:   'Split 1 Playoff',
+    ck_split2_po:   'Split 2 Playoff',
   };
 
   /* league + tournament + stage → 표시용 라벨 */
@@ -260,6 +265,12 @@
     if (s === 'stage2playoffs')                                 return  90;
     if (l === 'champions' && (s === 'swiss' || s === 'groupstage')) return 100;
     if (l === 'champions' && s === 'playoffs')                  return 110;
+    /* Challengers Korea */
+    if (l === 'challengers-korea' && s === 'ck_split')         return 200;
+    if (l === 'challengers-korea' && s === 'ck_split1_po')     return 210;
+    if (l === 'challengers-korea' && s === 'ck_split2')        return 220;
+    if (l === 'challengers-korea' && s === 'ck_split2_po')     return 230;
+    if (l === 'challengers-korea')                             return 205; // 기타 CK 스테이지
     return 999; // 알 수 없는 조합 → 숨김
   }
 
