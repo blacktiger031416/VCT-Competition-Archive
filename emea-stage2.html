@@ -48,6 +48,13 @@
       @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
       .group-assign-card { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 18px; }
       .group-assign-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 0 0 14px; }
+      /* ── Challengers Invite ── */
+      .ch-invite-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+      @media (max-width: 900px) { .ch-invite-grid { grid-template-columns: repeat(2, 1fr); } }
+      .ch-invite-card { background: rgba(255,255,255,0.02); border: 1.5px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; }
+      .ch-invite-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin: 0 0 12px; }
+      .ga-btn-save { background: #e8432d; color: #fff; }
+      .ga-btn-save:hover { background: #d43520; }
       .group-slots { display: flex; flex-direction: column; gap: 8px; }
       .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.07); min-height: 52px; transition: background 0.15s; }
       .group-slot.has-team { border-color: rgba(20,100,246,0.35); background: rgba(20,100,246,0.06); }
@@ -228,6 +235,34 @@
       </section>
 
       <!-- 경기 / 순위 -->
+
+      <section class="group-assign-section" style="padding-top:28px" aria-labelledby="ch-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Challengers Invite</p>
+            <h2 id="ch-title">Challengers 초청 팀</h2>
+          </div>
+        </div>
+        <div class="ch-invite-grid">
+          <div class="ch-invite-card">
+            <h3>Japan Challengers</h3>
+            <div id="ch-japan-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>Korea Challengers</h3>
+            <div id="ch-korea-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>Southeast Asia Challengers</h3>
+            <div id="ch-sea-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>South Asia Challengers</h3>
+            <div id="ch-sa-slot"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="week-section" aria-labelledby="weeks-title" id="fixtures-section">
         <div class="section-heading">
           <div>
@@ -282,6 +317,19 @@
       </div>
     </div>
 
+    <!-- Challengers 초청 팀 편집 모달 -->
+    <div class="ga-modal" id="ch-modal" hidden>
+      <div class="ga-backdrop" id="ch-backdrop"></div>
+      <div class="ga-panel" role="dialog" aria-modal="true" style="max-width:400px">
+        <h2 id="ch-modal-title">팀 배정</h2>
+        <p>팀 이름과 로고 URL을 입력하세요.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+          <input type="text" id="ch-name-input" placeholder="팀 이름" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none">
+          <input type="text" id="ch-logo-input" placeholder="로고 URL (선택)" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none">
+        </div>
+        <div class="ga-actions" id="ch-actions"></div>
+      </div>
+    </div>
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {

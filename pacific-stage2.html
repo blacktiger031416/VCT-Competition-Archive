@@ -186,6 +186,13 @@
       @media (max-width: 600px) { .group-assign-grid { grid-template-columns: 1fr; } }
       .group-assign-card { background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 18px; }
       .group-assign-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 0 0 14px; }
+      /* ── Challengers Invite ── */
+      .ch-invite-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+      @media (max-width: 900px) { .ch-invite-grid { grid-template-columns: repeat(2, 1fr); } }
+      .ch-invite-card { background: rgba(255,255,255,0.02); border: 1.5px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; }
+      .ch-invite-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin: 0 0 12px; }
+      .ga-btn-save { background: #e8432d; color: #fff; }
+      .ga-btn-save:hover { background: #d43520; }
       .group-slots { display: flex; flex-direction: column; gap: 8px; }
       .group-slot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.07); min-height: 52px; transition: background 0.15s; }
       .group-slot.has-team { border-color: rgba(232,67,45,0.35); background: rgba(232,67,45,0.06); }
@@ -607,6 +614,34 @@
         </div>
       </section>
 
+
+      <section class="group-assign-section" style="padding-top:28px" aria-labelledby="ch-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Challengers Invite</p>
+            <h2 id="ch-title">Challengers 초청 팀</h2>
+          </div>
+        </div>
+        <div class="ch-invite-grid">
+          <div class="ch-invite-card">
+            <h3>Japan Challengers</h3>
+            <div id="ch-japan-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>Korea Challengers</h3>
+            <div id="ch-korea-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>Southeast Asia Challengers</h3>
+            <div id="ch-sea-slot"></div>
+          </div>
+          <div class="ch-invite-card">
+            <h3>South Asia Challengers</h3>
+            <div id="ch-sa-slot"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="week-section" aria-labelledby="weeks-title">
         <div class="section-heading">
           <div>
@@ -739,6 +774,19 @@
         <p class="fp-step-label" id="fp-step-label">팀을 선택하세요</p>
         <div class="fp-team-grid" id="fp-team-grid"></div>
         <div class="fp-actions" id="fp-actions"></div>
+      </div>
+    </div>
+    <!-- Challengers 초청 팀 편집 모달 -->
+    <div class="ga-modal" id="ch-modal" hidden>
+      <div class="ga-backdrop" id="ch-backdrop"></div>
+      <div class="ga-panel" role="dialog" aria-modal="true" style="max-width:400px">
+        <h2 id="ch-modal-title">팀 배정</h2>
+        <p>팀 이름과 로고 URL을 입력하세요.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+          <input type="text" id="ch-name-input" placeholder="팀 이름" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none">
+          <input type="text" id="ch-logo-input" placeholder="로고 URL (선택)" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none">
+        </div>
+        <div class="ga-actions" id="ch-actions"></div>
       </div>
     </div>
     <script src="./storage.js"></script>
@@ -1144,6 +1192,56 @@
       document.getElementById("ga-backdrop").addEventListener("click", closeModal);
       document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("ga-modal").hidden) closeModal(); });
       renderGroupSlots();
+      // ── Challengers 초청 팀 ──
+      const CH_KEY = "stage2_pacific_ch_invite";
+      const CH_SLOTS = [
+        { id: "ch-japan-slot", key: "japan", label: "Japan" },
+        { id: "ch-korea-slot", key: "korea", label: "Korea" },
+        { id: "ch-sea-slot",   key: "sea",   label: "Southeast Asia" },
+        { id: "ch-sa-slot",    key: "sa",    label: "South Asia" },
+      ];
+      function loadChInvite() { try { return JSON.parse(localStorage.getItem(CH_KEY) || "{}"); } catch { return {}; } }
+      function saveChInvite(d) { localStorage.setItem(CH_KEY, JSON.stringify(d)); }
+      function renderChInvite() {
+        const data = loadChInvite();
+        CH_SLOTS.forEach(({ id, key, label }) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const team = data[key] || {};
+          const slot = document.createElement("div");
+          slot.className = "group-slot" + (team.name ? " has-team" : " empty");
+          const logo = team.logo ? `<img src="${team.logo}" alt="${team.name}" style="width:40px;height:40px;object-fit:contain;">` : "";
+          slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${team.name || "팀 선택"}</span><span class="slot-rank">${label}</span>`;
+          if (isAdmin()) slot.addEventListener("click", () => openChPicker(key, label));
+          el.innerHTML = ""; el.appendChild(slot);
+        });
+      }
+      let _chCtx = null;
+      function openChPicker(key, label) {
+        _chCtx = key;
+        const data = loadChInvite(); const team = data[key] || {};
+        document.getElementById("ch-modal-title").textContent = label + " Challengers 팀 배정";
+        document.getElementById("ch-name-input").value = team.name || "";
+        document.getElementById("ch-logo-input").value = team.logo || "";
+        document.getElementById("ch-actions").innerHTML = `<button class="ga-btn ga-btn-clear" id="ch-clear">비우기</button><button class="ga-btn ga-btn-cancel" id="ch-cancel">취소</button><button class="ga-btn ga-btn-save" id="ch-save">저장</button>`;
+        document.getElementById("ch-cancel").addEventListener("click", closeChModal);
+        document.getElementById("ch-clear").addEventListener("click", () => {
+          const d = loadChInvite(); delete d[_chCtx]; saveChInvite(d); closeChModal(); renderChInvite();
+        });
+        document.getElementById("ch-save").addEventListener("click", () => {
+          const name = document.getElementById("ch-name-input").value.trim();
+          const logo = document.getElementById("ch-logo-input").value.trim();
+          if (!name) return;
+          const d = loadChInvite(); d[_chCtx] = { name, logo }; saveChInvite(d); closeChModal(); renderChInvite();
+        });
+        document.getElementById("ch-modal").hidden = false;
+        setTimeout(() => document.getElementById("ch-name-input").focus(), 60);
+      }
+      function closeChModal() { document.getElementById("ch-modal").hidden = true; _chCtx = null; }
+      document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
+      document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
+      renderChInvite();
+
     });
     </script>
     <script src="./auth.js"></script>
