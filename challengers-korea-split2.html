@@ -351,7 +351,23 @@
     function loadJSON(key, def) { try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
     function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-    function loadPool()  { return loadJSON(POOL_KEY, []); }
+
+      var DEFAULT_POOL = [
+        { name: "BNK FEARX",              code: "BFX",  logo: "./assets/teams/BFX.svg",  color: "#fbe400" },
+        { name: "ONSIDE GAMING",           code: "ONG",  logo: "./assets/teams/ONG.webp", color: "#e3e419" },
+        { name: "T1 Esports Academy",      code: "T1A",  logo: "./assets/teams/T1A.svg",  color: "#e4022b" },
+        { name: "KIWOOM DRX Academy",      code: "KRXA", logo: "./assets/teams/KRXA.svg", color: "#002677" },
+        { name: "Gen.G Global Academy",    code: "GGA",  logo: "./assets/teams/GGA.webp", color: "#cfb887" },
+        { name: "Mir Gaming",              code: "MIR",  logo: "./assets/teams/MIR.png",  color: "#1ead9e" },
+        { name: "Dplus Kia",               code: "DK",   logo: "./assets/teams/DK.svg",   color: "#92e1e6" },
+        { name: "ARETE",                   code: "ART",  logo: "./assets/teams/ART.webp", color: "#000000" },
+        { name: "So:sweet",                code: "SWT",  logo: "./assets/teams/SWT.svg",  color: "#a28a55" },
+        { name: "X-Cast",                  code: "XC",   logo: "./assets/teams/XC.svg",   color: "#5e1ba3" },
+      ];
+      function loadPool()  {
+        var p = loadJSON(POOL_KEY, null);
+        return (Array.isArray(p) && p.length) ? p : DEFAULT_POOL.slice();
+      }
     function savePool(p) { saveJSON(POOL_KEY, p); }
     function loadSlots() {
       var s = loadJSON(SLOTS_KEY, null);
