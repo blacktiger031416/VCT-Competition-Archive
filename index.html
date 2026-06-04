@@ -239,6 +239,25 @@
         box-shadow: 0 12px 40px rgba(0,0,0,0.6);
       }
       .locked-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+      /* ── Admin 공개 토글 버튼 ── */
+      .admin-unlock-btn {
+        display: none; /* 기본 숨김 — Admin에게만 표시 */
+        position: absolute; bottom: 12px; left: 12px; z-index: 3;
+        padding: 4px 11px; border-radius: 4px;
+        background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.18);
+        color: rgba(255,255,255,0.6); font-size: 10px; font-weight: 800;
+        font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+        cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+      }
+      body:not(.view-only) .admin-unlock-btn { display: block; }
+      .admin-unlock-btn:hover { background: rgba(61,220,132,0.2); border-color: rgba(61,220,132,0.45); color: #3ddc84; }
+      .admin-unlock-btn.is-unlocked { background: rgba(61,220,132,0.15); border-color: rgba(61,220,132,0.35); color: #3ddc84; }
+      .admin-unlock-btn.is-unlocked:hover { background: rgba(220,50,50,0.15); border-color: rgba(220,50,50,0.35); color: #ff6b6b; }
+
+      /* 잠금 해제된 카드: 업데이트 예정 배지 숨김 */
+      .challengers-card.unlocked .lock-badge { display: none; }
+
       /* ── Site nav (sticky) ── */
       .site-header {
         position: sticky; top: 0; z-index: 200;
@@ -456,29 +475,33 @@
                 <!-- Slide 1: Challengers -->
                 <div class="grid-slide">
                   <nav class="league-grid challengers-grid" aria-label="VCT Challengers 리그 선택">
-                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Japan">
+                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Japan" data-slug="japan">
                       <span class="lock-badge">업데이트 예정</span>
                       <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
                       <span class="league-name">Japan</span>
                       <span class="league-action">챌린저스 보기</span>
+                      <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
                     </a>
-                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Korea">
+                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Korea" data-slug="korea">
                       <span class="lock-badge">업데이트 예정</span>
                       <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
                       <span class="league-name">Korea</span>
                       <span class="league-action">챌린저스 보기</span>
+                      <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
                     </a>
-                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers South Asia">
+                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers South Asia" data-slug="south-asia">
                       <span class="lock-badge">업데이트 예정</span>
                       <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
                       <span class="league-name">South Asia</span>
                       <span class="league-action">챌린저스 보기</span>
+                      <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
                     </a>
-                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Southeast Asia">
+                    <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Challengers Southeast Asia" data-slug="southeast-asia">
                       <span class="lock-badge">업데이트 예정</span>
                       <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
                       <span class="league-name">Southeast Asia</span>
                       <span class="league-action">챌린저스 보기</span>
+                      <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
                     </a>
                   </nav>
                 </div>
@@ -541,7 +564,7 @@
           t.addEventListener("click", function () { goTo(parseInt(t.dataset.slide)); });
         });
 
-        /* ── Challengers 잠금 (비관리자) ── */
+        /* ── Challengers 잠금 상태 관리 ── */
         var _toastTimer = null;
         function showLockedToast() {
           var existing = document.querySelector(".locked-toast");
@@ -559,10 +582,48 @@
           }, 2000);
         }
 
+        function applyUnlockStates() {
+          document.querySelectorAll(".challengers-card").forEach(function (card) {
+            var slug = card.dataset.slug;
+            var unlocked = localStorage.getItem("challengers-unlocked:" + slug) === "1";
+            card.classList.toggle("unlocked", unlocked);
+            var btn = card.querySelector(".admin-unlock-btn");
+            if (btn) {
+              btn.textContent = unlocked ? "🔒 비공개로" : "🔓 공개하기";
+              btn.classList.toggle("is-unlocked", unlocked);
+            }
+          });
+        }
+
+        /* storageReady 후 상태 적용 */
+        if (window.storageReady) {
+          window.storageReady.then(applyUnlockStates);
+        } else {
+          applyUnlockStates();
+        }
+
+        /* Admin 공개 토글 */
+        document.querySelectorAll(".admin-unlock-btn").forEach(function (btn) {
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var card = btn.closest(".challengers-card");
+            var slug = card.dataset.slug;
+            var key = "challengers-unlocked:" + slug;
+            if (localStorage.getItem(key) === "1") {
+              localStorage.removeItem(key);
+            } else {
+              localStorage.setItem(key, "1");
+            }
+            applyUnlockStates();
+          });
+        });
+
+        /* 카드 클릭: 잠금 여부 체크 */
         document.querySelectorAll(".challengers-card").forEach(function (card) {
           card.addEventListener("click", function (e) {
             var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
-            if (!isAdmin) {
+            if (!isAdmin && !card.classList.contains("unlocked")) {
               e.preventDefault();
               showLockedToast();
             }
