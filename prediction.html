@@ -1117,7 +1117,8 @@
         '</div>';
 
       /* meta */
-      var metaHtml = '<div class="card-meta"><span class="meta-item">참여 ' + (match.betCount || 0) + '명</span>';
+      var metaHtml = '<div class="card-meta"><span class="meta-item">참여 ' + (match.betCount || 0) + '명</span>' +
+        ((match.totalCoins > 0) ? '<span class="meta-item">🪙 총 ' + (match.totalCoins || 0).toLocaleString() + '코인</span>' : '');
       if (myBet) {
         metaHtml += '<span class="my-bet-badge">내 배팅: ' + esc(myBet.team) + ' · ' + myBet.amount.toLocaleString() + '코인</span>';
         if (match.status === "settled") {
@@ -1314,6 +1315,7 @@
         if (bi >= 0) {
           if (!IS_LOGGED_IN || msg.username !== (USER && USER.username))
             matches[bi].betCount = (matches[bi].betCount || 0) + 1;
+          matches[bi].totalCoins = (matches[bi].totalCoins || 0) + (msg.amount || 0);
           render();
         }
       } else if (msg.type === "season-end") {

@@ -643,16 +643,24 @@ app.get("/api/prediction/matches", async (req, res) => {
   try {
     const [matchRes, betRes] = await Promise.all([
       pool.query("SELECT value FROM app_data WHERE key LIKE 'pred-match:%' ORDER BY updated_at DESC"),
-      pool.query("SELECT key FROM app_data WHERE key LIKE 'pred-bet:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'pred-bet:%'"),
     ]);
     const betCounts = {};
+    const betTotals = {};
     betRes.rows.forEach((r) => {
       const parts = r.key.split(":");
-      if (parts[1]) betCounts[parts[1]] = (betCounts[parts[1]] || 0) + 1;
+      const matchId = parts[1];
+      if (!matchId) return;
+      betCounts[matchId] = (betCounts[matchId] || 0) + 1;
+      try {
+        const b = JSON.parse(r.value);
+        betTotals[matchId] = (betTotals[matchId] || 0) + (b.amount || 0);
+      } catch (_) {}
     });
     const matches = matchRes.rows.map((r) => {
       const m = JSON.parse(r.value);
-      m.betCount = betCounts[m.id] || 0;
+      m.betCount   = betCounts[m.id] || 0;
+      m.totalCoins = betTotals[m.id] || 0;
       return m;
     });
     res.json(matches);
