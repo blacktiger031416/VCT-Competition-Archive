@@ -27,20 +27,19 @@
     .playoff-board{max-width:1000px;margin:0 auto;padding:0 48px}
     .bracket-scroll{overflow-x:auto;padding-bottom:20px}
 
-    /* 2-column grids */
-    .bracket-rounds{display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:8px;min-width:420px;margin-bottom:4px}
+    /* 4-column bracket grid (same as region playoff pages) */
+    .bracket-rounds{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:8px;min-width:660px;margin-bottom:4px}
     .bracket-rounds span{font-family:"Barlow Condensed",sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:center;padding:0 0 10px;border-bottom:1px solid rgba(255,255,255,.07)}
     .bracket-section-title{font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);padding:24px 0 10px 12px;border-left:3px solid var(--acc);margin:8px 0 6px}
     .bracket-section-title.lower-title{padding-top:16px}
-    .bracket-grid{display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:8px;min-width:420px;margin-bottom:6px}
-    .upper-bracket{min-height:240px}
-    .lower-bracket{min-height:140px}
-
-    /* GF row (single wide card) */
-    .gf-grid{display:grid;grid-template-columns:minmax(200px,400px);gap:8px;min-width:420px;margin-bottom:6px}
+    .bracket-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:8px;min-width:660px;margin-bottom:6px}
+    .upper-bracket{min-height:280px}
+    .lower-bracket{min-height:160px}
 
     .bracket-column{display:flex;flex-direction:column;justify-content:space-around;gap:8px}
     .bracket-column-center{justify-content:center}
+    .bracket-arrow-column{justify-content:center;align-items:center;font-family:"Barlow Condensed",sans-serif;font-size:20px;color:rgba(255,255,255,.18)}
+    .bracket-empty{}
 
     .bracket-match{background:var(--bg-card);border:1px solid rgba(255,255,255,.07);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .18s,background .18s}
     .bracket-match:hover{border-color:rgba(255,255,255,.18);background:var(--bg-card2)}
@@ -115,10 +114,12 @@
     <section class="playoff-board" aria-label="Split 2 PlayOff 대진표">
       <div class="bracket-scroll">
 
-        <!-- Round labels -->
+        <!-- Round labels (4 cols) -->
         <div class="bracket-rounds" aria-hidden="true">
           <span>UB Round 1</span>
           <span>UB Final</span>
+          <span></span>
+          <span>Grand Finals</span>
         </div>
 
         <!-- ====== 상위조 ====== -->
@@ -138,11 +139,23 @@
             </article>
           </div>
 
-          <!-- Col 2: UB Final — M3 -->
+          <!-- Col 2: UB Final — M3 (centered) -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match">
               <h3>Match 3 · UB Final <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
+            </article>
+          </div>
+
+          <!-- Col 3: arrow -->
+          <div class="bracket-column bracket-arrow-column" aria-hidden="true"><span>→</span></div>
+
+          <!-- Col 4: Grand Finals -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match grand-final-card">
+              <h3>Grand Finals <span>(Bo5)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
             </article>
           </div>
@@ -152,12 +165,14 @@
         <div class="bracket-rounds" aria-hidden="true" style="margin-top:8px">
           <span>LB Round 1</span>
           <span>LB Final</span>
+          <span></span>
+          <span></span>
         </div>
 
         <!-- ====== 하위조 ====== -->
         <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
         <div class="bracket-grid lower-bracket">
-          <!-- Col 1: LB Round 1 — M4 -->
+          <!-- Col 1: LB Round 1 — M4 (centered) -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match">
               <h3>Match 4 <span>(Bo3)</span></h3>
@@ -166,7 +181,7 @@
             </article>
           </div>
 
-          <!-- Col 2: LB Final — M5 -->
+          <!-- Col 2: LB Final — M5 (centered) -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match">
               <h3>Match 5 · LB Final <span>(Bo3)</span></h3>
@@ -174,16 +189,10 @@
               <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
             </article>
           </div>
-        </div>
 
-        <!-- Grand Final -->
-        <h2 class="bracket-section-title" style="padding-top:16px">그랜드 파이널 · 우승 → Stage 2 Play-In 직행</h2>
-        <div class="gf-grid">
-          <article class="bracket-match grand-final-card">
-            <h3>Grand Finals <span>(Bo5)</span></h3>
-            <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
-            <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
-          </article>
+          <!-- Col 3, 4: empty -->
+          <div class="bracket-column bracket-empty" aria-hidden="true"></div>
+          <div class="bracket-column bracket-empty" aria-hidden="true"></div>
         </div>
 
         <div class="bracket-footer">
