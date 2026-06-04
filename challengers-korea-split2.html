@@ -64,19 +64,22 @@
     /* ── WEEK TABS ── */
     .week-section { margin:48px 0; animation:rise-in 560ms ease both; }
     .week-tabs > input { position:absolute; opacity:0; pointer-events:none; }
-    .week-tab-list { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; }
-    .week-tab-list label { min-height:46px; display:grid; place-items:center; border-radius:7px; background:transparent; border:1px solid transparent; font-size:14px; font-weight:700; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s, background .14s, border-color .14s; }
+    .week-tab-list { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; }
+    .week-tab-list label { min-height:46px; display:grid; place-items:center; border-radius:7px; background:transparent; border:1px solid transparent; font-size:13px; font-weight:700; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s, background .14s, border-color .14s; }
     .week-tab-list label:hover { color:rgba(255,255,255,.8); border-color:rgba(255,255,255,.1); }
+    #week-prm:checked ~ .week-tab-list label[for="week-prm"] { color:#fff; background:rgba(232,67,45,.12); border-color:rgba(232,67,45,.35); }
     #week-1:checked ~ .week-tab-list label[for="week-1"],
     #week-2:checked ~ .week-tab-list label[for="week-2"],
     #week-3:checked ~ .week-tab-list label[for="week-3"],
     #week-4:checked ~ .week-tab-list label[for="week-4"] { color:#fff; background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.35); }
     .week-panels { margin-top:12px; }
     .week-panel { display:none; overflow:hidden; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:10px; }
+    #week-prm:checked ~ .week-panels .week-panel-prm,
     #week-1:checked ~ .week-panels .week-panel-1,
     #week-2:checked ~ .week-panels .week-panel-2,
     #week-3:checked ~ .week-panels .week-panel-3,
     #week-4:checked ~ .week-panels .week-panel-4 { display:block; animation:panel-in 360ms ease both; }
+    .week-panel-prm { border-color:rgba(232,67,45,.2) !important; }
     @keyframes panel-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
     .week-meta { padding:20px 24px; border-bottom:1px solid rgba(255,255,255,.06); }
     .week-meta strong { font-size:24px; font-weight:900; color:#fff; }
@@ -220,17 +223,23 @@
         <a class="playoff-link" href="./challengers-korea-split2-playoff.html">PlayOff 대진표</a>
       </div>
       <div class="week-tabs">
+        <input type="radio" name="week" id="week-prm">
         <input type="radio" name="week" id="week-1" checked>
         <input type="radio" name="week" id="week-2">
         <input type="radio" name="week" id="week-3">
         <input type="radio" name="week" id="week-4">
         <div class="week-tab-list" aria-label="주차 선택">
+          <label for="week-prm">승강전</label>
           <label for="week-1">1주차</label>
           <label for="week-2">2주차</label>
           <label for="week-3">3주차</label>
           <label for="week-4">4주차</label>
         </div>
         <div class="week-panels">
+          <div class="week-panel week-panel-prm">
+            <div class="week-meta"><strong>승강전</strong></div>
+            <div class="match-grid" id="mg-prm"></div>
+          </div>
           <div class="week-panel week-panel-1">
             <div class="week-meta"><strong>Week 1</strong></div>
             <div class="match-grid" id="mg-1"></div>
@@ -538,7 +547,115 @@
         +rows+'</div></div>';
     }
 
-    function renderAll() { renderSlots(); renderMatches(); renderStandings(); }
+    /* ── 승강전 렌더 (전체 풀 사용, 슬롯 무관) ── */
+    function renderPromotion() {
+      var grid = document.getElementById("mg-prm");
+      if (!grid) return;
+      grid.innerHTML = "";
+      for (var m = 1; m <= 2; m++) {
+        var data = loadJSON(PFX + "PRM" + m, {});
+        var tA = data.teamA||"", tB = data.teamB||"";
+        var sc = (tA&&tB) ? (function(w,mc,a,b){ try{ var r=localStorage.getItem("result:CKS2PRM"+mc+"|"+(a||"?")+"|"+(b||"?")); if(r){var s=JSON.parse(r);return{a:Number(s.scoreA)||0,b:Number(s.scoreB)||0};} }catch(e){} return null; })(0,m,tA,tB) : null;
+        var scoreText = sc ? sc.a+" : "+sc.b : "VS";
+        var card = document.createElement("article");
+        card.className = "match-card"+(sc?"":" upcoming");
+        card.dataset.prm = m;
+        card.tabIndex = 0; card.setAttribute("role","button");
+        card.innerHTML =
+          '<strong><div class="match-team-wrap">'
+          +'<div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div>'
+          +'<div class="match-team-name">'+esc(tA||"팀 선택")+'</div>'
+          +'</div></strong>'
+          +'<em>'+scoreText+'</em>'
+          +'<strong><div class="match-team-wrap">'
+          +'<div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div>'
+          +'<div class="match-team-name">'+esc(tB||"팀 선택")+'</div>'
+          +'</div></strong>';
+        (function(mc) {
+          var strongs = card.querySelectorAll("strong");
+          function goDetail() {
+            var d=loadJSON(PFX+"PRM"+mc,{}); if(!d.teamA||!d.teamB) return;
+            var s=null; try{ var r=localStorage.getItem("result:CKS2PRM"+mc+"|"+d.teamA+"|"+d.teamB); if(r){var p=JSON.parse(r); s={a:p.scoreA,b:p.scoreB};} }catch(e){}
+            var q=new URLSearchParams({date:"CKS2PRM"+mc,teamA:d.teamA,teamB:d.teamB,score:s?(s.a+" : "+s.b):"0 : 0",from:"ck_split"});
+            window.location.href="./challengers-korea-match-dark.html?"+q.toString();
+          }
+          if (_isAdmin) {
+            /* 승강전: 전체 풀에서 팀 선택 */
+            strongs[0].addEventListener("click", function(e) {
+              e.stopPropagation();
+              openPrmPickModal(mc, "A");
+            });
+            strongs[1].addEventListener("click", function(e) {
+              e.stopPropagation();
+              openPrmPickModal(mc, "B");
+            });
+            card.querySelector("em").addEventListener("click", function(e) {
+              e.stopPropagation();
+              var d=loadJSON(PFX+"PRM"+mc,{}); if(!d.teamA||!d.teamB){alert("먼저 팀을 선택하세요");return;}
+              openPrmScoreModal(mc);
+            });
+          }
+          card.addEventListener("click", goDetail);
+          card.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();goDetail();}});
+        })(m);
+        grid.appendChild(card);
+      }
+    }
+
+    /* 승강전 팀 피커 — 전체 풀 사용 */
+    var _prmCtx = null;
+    function openPrmPickModal(mc, side) {
+      _prmCtx = {mc:mc, side:side};
+      var data = loadJSON(PFX+"PRM"+mc, {});
+      var cur = side==="A" ? data.teamA||"" : data.teamB||"";
+      document.getElementById("ga-modal-title").textContent = "승강전 Match "+mc+" — "+(side==="A"?"왼쪽":"오른쪽")+" 팀 선택 (전체 풀)";
+      var pool = loadPool();  /* 전체 10팀 풀 */
+      var grid = document.getElementById("ga-team-grid");
+      grid.innerHTML = pool.map(function(t) {
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':"";
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("")
+      +'<button class="ga-team-btn" id="btn-add-prm-team" style="border-style:dashed;color:rgba(255,255,255,.5);"><span style="font-size:20px">+</span><span>새 팀 추가</span></button>';
+      grid.querySelectorAll(".ga-team-btn:not(#btn-add-prm-team)").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var d=loadJSON(PFX+"PRM"+_prmCtx.mc,{});
+          if(_prmCtx.side==="A") d.teamA=btn.dataset.team; else d.teamB=btn.dataset.team;
+          saveJSON(PFX+"PRM"+_prmCtx.mc, d);
+          closePrmPickModal(); renderPromotion();
+        });
+      });
+      var addBtn = document.getElementById("btn-add-prm-team");
+      if (addBtn) addBtn.addEventListener("click", function(){ closePrmPickModal(); openAddTeam(); });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click", closePrmPickModal);
+      document.getElementById("ga-clear").addEventListener("click", function() {
+        var d=loadJSON(PFX+"PRM"+_prmCtx.mc,{});
+        if(_prmCtx.side==="A") d.teamA=""; else d.teamB="";
+        saveJSON(PFX+"PRM"+_prmCtx.mc,d); closePrmPickModal(); renderPromotion();
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+    function closePrmPickModal() { document.getElementById("ga-modal").hidden=true; _prmCtx=null; }
+
+    /* 승강전 스코어 모달 */
+    var _prmScCtx = null;
+    function openPrmScoreModal(mc) {
+      var d=loadJSON(PFX+"PRM"+mc,{}); _prmScCtx=mc;
+      var sc=null; try{ var r=localStorage.getItem("result:CKS2PRM"+mc+"|"+d.teamA+"|"+d.teamB); if(r){var p=JSON.parse(r); sc={a:p.scoreA||0,b:p.scoreB||0};} }catch(e){}
+      document.getElementById("score-title").textContent=d.teamA+" vs "+d.teamB;
+      document.getElementById("score-name-a").textContent=d.teamA;
+      document.getElementById("score-name-b").textContent=d.teamB;
+      document.getElementById("score-a").value=sc?sc.a:"";
+      document.getElementById("score-b").value=sc?sc.b:"";
+      document.getElementById("score-modal").hidden=false;
+      document.getElementById("score-a").focus();
+    }
+
+    function renderAll() { renderSlots(); renderPromotion(); renderMatches(); renderStandings(); }
 
     /* ── 팀 선택 모달 ── */
     var _pickCtx = null;
@@ -574,7 +691,11 @@
       document.getElementById("ga-modal").hidden=false;
     }
     function closePickModal() { document.getElementById("ga-modal").hidden=true; _pickCtx=null; }
-    document.getElementById("ga-backdrop").addEventListener("click", function(){ if(_slotCtx!==null) closeSlotModal(); else closePickModal(); });
+    document.getElementById("ga-backdrop").addEventListener("click", function(){
+      if(_slotCtx!==null) closeSlotModal();
+      else if(_prmCtx!==null) closePrmPickModal();
+      else closePickModal();
+    });
 
     /* ── 팀 추가 모달 ── */
     function openAddTeam() {
@@ -607,18 +728,31 @@
       document.getElementById("score-modal").hidden=false;
       document.getElementById("score-a").focus();
     }
-    function closeScoreModal() { document.getElementById("score-modal").hidden=true; _scCtx=null; }
+    function closeScoreModal() {
+      document.getElementById("score-modal").hidden=true;
+      _scCtx=null; _prmScCtx=null;
+    }
     document.getElementById("score-backdrop").addEventListener("click", closeScoreModal);
     document.getElementById("score-cancel").addEventListener("click", closeScoreModal);
     document.getElementById("score-clear").addEventListener("click", function() {
+      if (_prmScCtx !== null) {
+        var d=loadJSON(PFX+"PRM"+_prmScCtx,{});
+        localStorage.removeItem("result:CKS2PRM"+_prmScCtx+"|"+(d.teamA||"?")+"|"+(d.teamB||"?"));
+        closeScoreModal(); renderPromotion(); return;
+      }
       if(!_scCtx) return;
       localStorage.removeItem(sKey(_scCtx.w,_scCtx.m,_scCtx.tA,_scCtx.tB));
       closeScoreModal(); renderAll();
     });
     document.getElementById("score-save").addEventListener("click", function() {
-      if(!_scCtx) return;
       var a=parseInt(document.getElementById("score-a").value)||0;
       var b=parseInt(document.getElementById("score-b").value)||0;
+      if (_prmScCtx !== null) {
+        var d=loadJSON(PFX+"PRM"+_prmScCtx,{});
+        localStorage.setItem("result:CKS2PRM"+_prmScCtx+"|"+(d.teamA||"?")+"|"+(d.teamB||"?"), JSON.stringify({scoreA:a,scoreB:b}));
+        closeScoreModal(); renderPromotion(); return;
+      }
+      if(!_scCtx) return;
       localStorage.setItem(sKey(_scCtx.w,_scCtx.m,_scCtx.tA,_scCtx.tB), JSON.stringify({scoreA:a,scoreB:b}));
       closeScoreModal(); renderAll();
     });
