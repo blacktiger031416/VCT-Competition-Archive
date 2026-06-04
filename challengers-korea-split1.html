@@ -376,19 +376,71 @@
       return '<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="width:40px;height:40px;object-fit:contain;'+f+'">';
     }
 
-    /* ── 참가 팀 표시 (슬롯 없이 풀 전체) ── */
+
+    var SLOTS_KEY = PFX + "slots";
+    function loadSlots() { var s = loadJSON(SLOTS_KEY, null); if(Array.isArray(s)&&s.length===8) return s; return Array(8).fill(""); }
+    function saveSlots(s) { saveJSON(SLOTS_KEY, s); }
+
+    /* ── 참가 팀 (8슬롯 직접 배정) ── */
     function renderSlots() {
-      var pool = loadPool();
+      var slots = loadSlots(), pool = loadPool();
       var container = document.getElementById("ga-slots");
       if (!container) return;
-      container.innerHTML = pool.map(function(t) {
-        return '<div class="group-slot has-team">'
-          + '<div class="slot-logo">'+tSlotLogoHtml(t)+'</div>'
-          + '<span class="slot-name">'+esc(t.name)+'</span>'
-          + '<span class="slot-rank">'+esc(t.code)+'</span>'
-          + '</div>';
+      container.innerHTML = slots.map(function(name, i) {
+        var t = pool.find(function(x){ return x.name===name; });
+        var logoHtml = (t && t.logo)
+          ? '<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:40px;height:40px;object-fit:contain;'+(t.white?'filter:brightness(0) invert(1);':'')+'">'
+          : '<span style="font-size:12px;font-weight:900;color:rgba(255,255,255,.3);">'+(i+1)+'</span>';
+        var cls = name ? "group-slot has-team" : "group-slot empty";
+        return '<div class="'+cls+'" data-slot="'+(i+1)+'">'
+          +'<div class="slot-logo">'+logoHtml+'</div>'
+          +'<span class="slot-name">'+esc(name||"팀 배정")+'</span>'
+          +'<span class="slot-rank">S'+(i+1)+'</span>'
+          +'</div>';
       }).join("");
+      if (_isAdmin) {
+        container.querySelectorAll(".group-slot").forEach(function(el) {
+          el.addEventListener("click", function() { openSlotPicker(parseInt(el.dataset.slot)); });
+        });
+      }
     }
+
+    /* ── 슬롯 피커 ── */
+    var _slotCtx = null;
+    function openSlotPicker(slotIdx) {
+      _slotCtx = slotIdx;
+      var slots = loadSlots(), pool = loadPool();
+      var cur = slots[slotIdx-1];
+      var used = new Set(slots.filter(Boolean));
+      document.getElementById("ga-modal-title").textContent = "슬롯 "+slotIdx+" — 참가 팀 배정";
+      var grid = document.getElementById("ga-team-grid");
+      grid.innerHTML = pool.map(function(t) {
+        var isUsed = used.has(t.name) && t.name !== cur;
+        var f = t.white ? 'filter:brightness(0) invert(1);' : '';
+        var logo = t.logo ? '<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">' : "";
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+(isUsed?" in-other-group":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("")
+      +'<button class="ga-team-btn" id="btn-add-slot-team" style="border-style:dashed;color:rgba(255,255,255,.5);"><span style="font-size:20px">+</span><span>팀 추가</span></button>';
+      grid.querySelectorAll(".ga-team-btn:not(#btn-add-slot-team)").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var s=loadSlots(); s[_slotCtx-1]=btn.dataset.team;
+          saveSlots(s); closeSlotModal(); renderAll();
+        });
+      });
+      var addBtn = document.getElementById("btn-add-slot-team");
+      if (addBtn) addBtn.addEventListener("click", function() { closeSlotModal(); openAddTeam(); });
+      document.getElementById("ga-actions").innerHTML =
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click", closeSlotModal);
+      document.getElementById("ga-clear").addEventListener("click", function() {
+        var s=loadSlots(); s[_slotCtx-1]=""; saveSlots(s); closeSlotModal(); renderAll();
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+    function closeSlotModal() { document.getElementById("ga-modal").hidden=true; _slotCtx=null; }
+
 
     /* ── 경기 카드 렌더 (수동 팀 선택) ── */
     function renderMatches() {
@@ -521,7 +573,7 @@
       document.getElementById("ga-modal").hidden=false;
     }
     function closePickModal() { document.getElementById("ga-modal").hidden=true; _pickCtx=null; }
-    document.getElementById("ga-backdrop").addEventListener("click", closePickModal);
+    document.getElementById("ga-backdrop").addEventListener("click", function(){ if(_slotCtx!==null) closeSlotModal(); else closePickModal(); });
 
     /* ── 팀 추가 모달 ── */
     function openAddTeam() {
