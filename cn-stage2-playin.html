@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VCT CN 2026 Stage 2 Play-In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--acc:#e84057;--ar:232,64,87}
+    body{background:#0f0a0b;color:#e8e4e0;font-family:"Barlow","Noto Sans KR",sans-serif;min-height:100vh}
+    .site-header{display:flex;align-items:center;gap:20px;padding:0 32px;height:56px;background:#0f0a0be8;border-bottom:1px solid rgba(232,64,87,.1);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .home-link{font-family:"Barlow Condensed",sans-serif;font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+    .home-link:hover{color:#fff}
+    .home-link::after{content:" /";margin-left:4px;color:rgba(255,255,255,.18);font-weight:400}
+    .back-link{font-family:"Barlow Condensed",sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none;transition:color .15s}
+    .back-link:hover{color:rgba(255,255,255,.8)}
+    .site-header .auth-header-btn{margin-left:auto !important}
+    .playoff-shell{padding-bottom:60px}
+    .playoff-hero{display:flex;align-items:center;gap:24px;padding:48px 48px 40px;max-width:1280px;margin:0 auto}
+    .playoff-logo-lockup img{width:72px;height:72px;object-fit:contain;filter:brightness(0) invert(1);opacity:.75}
+    .playoff-hero .eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);margin-bottom:6px}
+    .playoff-hero h1{font-family:"Barlow Condensed",sans-serif;font-size:clamp(26px,4vw,42px);font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1;margin-bottom:6px}
+    .playoff-hero p{font-size:13px;color:rgba(255,255,255,.35);font-family:"Noto Sans KR",sans-serif;font-weight:500}
+    .playoff-board{max-width:1280px;margin:0 auto;padding:0 48px}
+    .bracket-scroll{overflow-x:auto;padding-bottom:20px}
+    .bracket-rounds{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:8px;min-width:760px;margin-bottom:4px}
+    .bracket-rounds span{font-family:"Barlow Condensed",sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:center;padding:0 0 10px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .bracket-section-title{font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);padding:24px 0 10px 12px;border-left:3px solid var(--acc);margin:8px 0 6px}
+    .bracket-section-title.lower-title{padding-top:16px}
+    .bracket-grid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:8px;min-width:760px;margin-bottom:6px}
+    .upper-bracket{min-height:500px}.lower-bracket{min-height:380px}
+    .bracket-column{display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+    .bracket-column-center{justify-content:center}
+    .bracket-match{background:#170c0f;border:1px solid rgba(255,255,255,.07);border-radius:4px;overflow:hidden;cursor:pointer;transition:border-color .18s,background .18s}
+    .bracket-match:hover{border-color:rgba(255,255,255,.18);background:#200a0e}
+    .bracket-match:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+    .bracket-match h3{font-family:"Barlow Condensed",sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:6px 10px 5px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:5px}
+    .bracket-match h3 span{color:rgba(255,255,255,.16);font-weight:500;letter-spacing:.05em}
+    .qualifier-card{border-color:rgba(232,64,87,.3) !important;box-shadow:0 0 20px rgba(232,64,87,.08)}
+    .qualifier-card h3{color:rgba(232,64,87,.7);border-bottom-color:rgba(232,64,87,.15)}
+    .bracket-team{display:flex;align-items:center;gap:6px;padding:7px 10px;border-top:1px solid rgba(255,255,255,.04)}
+    .bracket-match .bracket-team:first-of-type{border-top:none}
+    .bracket-seed{font-family:"Barlow Condensed",sans-serif;font-size:9px;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.22);min-width:40px;flex-shrink:0}
+    .bracket-logo{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .bracket-logo img{width:20px;height:20px;object-fit:contain}
+    .bracket-team strong{flex:1;font-family:"Barlow Condensed",sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+    .bracket-team em{font-style:normal;font-family:"Barlow Condensed",sans-serif;font-size:15px;font-weight:900;color:rgba(255,255,255,.3);min-width:14px;text-align:right;flex-shrink:0}
+    .bracket-team.winner{background:rgba(255,255,255,.03)}
+    .bracket-team.winner strong{color:#fff}
+    .bracket-team.winner em{color:rgba(255,255,255,.9)}
+    .bracket-team.qualifier{background:rgba(232,64,87,.1)}
+    .bracket-team.qualifier strong{color:var(--acc)}
+    .bracket-team.qualifier em{color:var(--acc)}
+    .bracket-team.placeholder strong{color:rgba(255,255,255,.2)}
+    body:not(.view-only) .bracket-team[data-seed-slot]{cursor:pointer}
+    body:not(.view-only) .bracket-team[data-seed-slot]:hover{background:rgba(232,64,87,.08)}
+    .bracket-footer{padding:24px 0 8px;border-top:1px solid rgba(255,255,255,.06);margin-top:8px}
+    .kickoff-legend{display:flex;gap:24px;justify-content:center;align-items:center}
+    .kickoff-legend span{display:flex;align-items:center;gap:7px;font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+    .legend-pip{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+    .legend-pip.win-pip{background:rgba(255,255,255,.35)}
+    .legend-pip.qual-pip{background:var(--acc);opacity:.8}
+    .seed-modal{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center}
+    .seed-modal[hidden]{display:none !important}
+    .seed-backdrop{position:absolute;inset:0;background:rgba(5,5,5,.65);backdrop-filter:blur(6px)}
+    .seed-panel{position:relative;z-index:1;width:min(560px,calc(100vw - 24px));max-height:90vh;overflow-y:auto;background:#1a0508;border:1.5px solid rgba(232,64,87,.25);border-radius:18px;padding:24px;animation:panelIn .2s ease}
+    @keyframes panelIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+    .seed-panel h2{font-family:"Barlow Condensed",sans-serif;font-size:18px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin:0 0 4px}
+    .seed-panel p{font-size:13px;color:rgba(255,255,255,.45);margin:0 0 18px;font-family:"Noto Sans KR",sans-serif}
+    .seed-team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+    .seed-team-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);color:#fff;font-family:"Barlow Condensed",sans-serif;cursor:pointer;transition:all .14s;font-size:11px;font-weight:700;text-align:center}
+    .seed-team-btn img{width:32px;height:32px;object-fit:contain}
+    .seed-team-btn .seed-code{font-size:14px;font-weight:900;letter-spacing:.06em}
+    .seed-team-btn:hover{background:rgba(232,64,87,.1);border-color:rgba(232,64,87,.5)}
+    .seed-team-btn.selected{background:rgba(232,64,87,.2);border-color:var(--acc);box-shadow:0 0 0 2px rgba(232,64,87,.25)}
+    .seed-actions{display:flex;gap:10px;justify-content:flex-end}
+    .seed-btn{padding:9px 20px;border-radius:8px;font-family:"Barlow Condensed",sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;border:none}
+    .seed-btn-cancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+    .seed-btn-cancel:hover{background:rgba(255,255,255,.14)}
+    .seed-btn-clear{background:rgba(255,80,80,.12);color:#ff6b6b;border:1px solid rgba(255,80,80,.25)}
+    .seed-btn-clear:hover{background:rgba(255,80,80,.24)}
+    .seed-add-input{width:100%;padding:8px 12px;margin-bottom:10px;background:rgba(255,255,255,.06);border:1px solid rgba(232,64,87,.25);border-radius:8px;color:#fff;font-size:14px;font-family:inherit;outline:none}
+    .seed-add-input::placeholder{color:rgba(255,255,255,.2)}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <a class="back-link" href="./cn-stage2.html">Stage 2</a>
+  </header>
+  <main class="playoff-shell">
+    <section class="playoff-hero" aria-labelledby="pi-title">
+      <div class="playoff-logo-lockup"><img src="./assets/vct-cn.webp" alt="logo"></div>
+      <div>
+        <p class="eyebrow">VCT CN 2026 · Stage 2</p>
+        <h1 id="pi-title">Stage 2 Play-In</h1>
+        <p>12팀 · 더블 엘리미네이션 · 상위 4팀 <a href="./cn-stage2-playoffs.html" style="color:var(--acc);text-decoration:none">PlayOff</a> 진출</p>
+      </div>
+    </section>
+    <section class="playoff-board" aria-label="Play-In 대진표">
+      <div class="bracket-scroll">
+        <div class="bracket-rounds" aria-hidden="true">
+          <span>UB Round 1</span><span>UB Quarterfinals</span><span>UB Semifinals</span><span>UB Final</span>
+        </div>
+        <h2 class="bracket-section-title">상위조 대진표</h2>
+        <div class="bracket-grid upper-bracket">
+          <!-- Col 1: UBR1 — M1~M4 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 1 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">챌린저스</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">α 5/6위</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 2 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">챌린저스</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">α 5/6위</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 3 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">챌린저스</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">ω 5/6위</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 4 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">챌린저스</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">ω 5/6위</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 2: UB QF — M5~M8 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 5 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">α 3위</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 6 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">α 4위</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 7 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">ω 3위</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 8 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">ω 4위</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 3: UB Semis — M9~M10 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 9 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 10 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 4: UB Final — M11 (both qualify) -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match qualifier-card"><h3>Match 11 · UB Final <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+        </div>
+        <div class="bracket-rounds" aria-hidden="true" style="margin-top:8px">
+          <span>LB Round 1</span><span>LB Round 2</span><span>LB Round 3</span><span>LB Final</span>
+        </div>
+        <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
+        <div class="bracket-grid lower-bracket">
+          <!-- Col 1: LBR1 — M12~M15 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 12 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M1 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M8 패자</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 13 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M2 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M7 패자</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 14 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M3 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M6 패자</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 15 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M4 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M5 패자</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 2: LBR2 — M16~M17 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 16 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 17 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 3: LBR3 — M18~M19 -->
+          <div class="bracket-column">
+            <article class="bracket-match"><h3>Match 18 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M10 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+            <article class="bracket-match"><h3>Match 19 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M9 패자</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+          <!-- Col 4: LB Final — M20 (both qualify) -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match qualifier-card"><h3>Match 20 · LB Final <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↘</span><strong>—</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>—</strong><em>0</em></div></article>
+          </div>
+        </div>
+        <div class="bracket-footer">
+          <div class="kickoff-legend">
+            <span><span class="legend-pip win-pip"></span>다음 라운드 진출</span>
+            <span><span class="legend-pip qual-pip"></span>PlayOff 진출 (M11·M20 양 팀 모두)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="seed-modal" id="seed-modal" hidden>
+    <div class="seed-backdrop" id="seed-backdrop"></div>
+    <div class="seed-panel" role="dialog" aria-modal="true">
+      <h2 id="seed-modal-title">팀 배치</h2>
+      <p>배치할 팀을 선택하거나 새 팀을 추가하세요.</p>
+      <div class="seed-team-grid" id="seed-team-grid"></div>
+      <div id="seed-add-row" style="display:flex;gap:8px;margin-bottom:18px">
+        <input class="seed-add-input" id="seed-add-name" type="text" placeholder="새 팀 이름 (챌린저스 팀 등)" style="flex:1">
+        <button class="seed-btn" id="seed-add-btn" style="background:rgba(232,64,87,.15);color:var(--acc);border:1px solid rgba(232,64,87,.3);white-space:nowrap">+ 추가</button>
+      </div>
+      <div class="seed-actions" id="seed-actions"></div>
+    </div>
+  </div>
+  <script src="./storage.js"></script>
+  <script>
+  window.storageReady.then(function(){
+    var SEEDS_KEY = "cn_s2_playin_seeds";
+    var POOL_KEY  = "cn_s2_playin_pool";
+    var teamLogos = {
+        "All Gamers": {src:"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp",white:false},
+        "JD Mall JDG Esports": {src:"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg",white:false},
+        "TYLOO": {src:"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg",white:false},
+        "Wuxi Titan Esports Club": {src:"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg",white:false},
+        "Guangzhou Huadu Bilibili Gaming": {src:"https://dpm.lol/esport/teams/BLG.webp",white:false},
+        "FunPlus Phoenix": {src:"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg",white:false},
+        "Xi Lai Gaming": {src:"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg",white:false},
+        "EDward Gaming": {src:"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png",white:false},
+        "Dragon Ranger Gaming": {src:"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp",white:false},
+        "Trace Esports": {src:"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg",white:false},
+        "Nova Esports": {src:"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp",white:false},
+        "Wolves Esports": {src:"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp",white:false},
+    };
+    var teamCodes = {"All Gamers":"AG","JD Mall JDG Esports":"JDG","TYLOO":"TYL","Wuxi Titan Esports Club":"TEC","Guangzhou Huadu Bilibili Gaming":"BLG","FunPlus Phoenix":"FPX","Xi Lai Gaming":"XLG","EDward Gaming":"EDG","Dragon Ranger Gaming":"DRG","Trace Esports":"TE","Nova Esports":"NOVA","Wolves Esports":"WOL"};
+    function loadPool(){try{var p=JSON.parse(localStorage.getItem(POOL_KEY));return Array.isArray(p)?p:[];}catch(e){return[];}}
+    function savePool(p){localStorage.setItem(POOL_KEY,JSON.stringify(p));}
+    function allTeams(){
+      var builtin=Object.keys(teamLogos);
+      var custom=loadPool().map(function(t){return t.name;}).filter(function(n){return !teamLogos[n];});
+      return builtin.concat(custom);
+    }
+    function tCode(n){var p=loadPool().find(function(t){return t.name===n;});if(p&&p.code)return p.code;return teamCodes[n]||(n?n.slice(0,4).toUpperCase():"");}
+    function tSrc(n){var p=loadPool().find(function(t){return t.name===n&&t.logo;});if(p)return p.logo;return teamLogos[n]?teamLogos[n].src:"";}
+    function tWhite(n){return !!(teamLogos[n]&&teamLogos[n].white);}
+    function loadSeeds(){try{return JSON.parse(localStorage.getItem(SEEDS_KEY)||"{}")}catch(e){return{}}}
+    function saveSeeds(s){localStorage.setItem(SEEDS_KEY,JSON.stringify(s));}
+    var seeds=loadSeeds();
+    var matchLinks={
+      5:[null,{match:1,result:"winner"}],
+      6:[null,{match:2,result:"winner"}],
+      7:[null,{match:3,result:"winner"}],
+      8:[null,{match:4,result:"winner"}],
+      9:[{match:5,result:"winner"},{match:7,result:"winner"}],
+      10:[{match:6,result:"winner"},{match:8,result:"winner"}],
+      11:[{match:9,result:"winner"},{match:10,result:"winner"}],
+      12:[{match:1,result:"loser"},{match:8,result:"loser"}],
+      13:[{match:2,result:"loser"},{match:7,result:"loser"}],
+      14:[{match:3,result:"loser"},{match:6,result:"loser"}],
+      15:[{match:4,result:"loser"},{match:5,result:"loser"}],
+      16:[{match:12,result:"winner"},{match:13,result:"winner"}],
+      17:[{match:14,result:"winner"},{match:15,result:"winner"}],
+      18:[{match:10,result:"loser"},{match:16,result:"winner"}],
+      19:[{match:9,result:"loser"},{match:17,result:"winner"}],
+      20:[{match:18,result:"winner"},{match:19,result:"winner"}],
+    };
+    var QUALIFIER_MATCHES=[11,20];
+    function isSeeded(mid,si){
+      if(mid>=1&&mid<=4)return true;
+      if(mid>=5&&mid<=8)return si===0;
+      return false;
+    }
+    function resolveTeams(mid,states){
+      var links=matchLinks[mid]||[null,null];
+      return[0,1].map(function(i){
+        var sk=mid+"_"+i;
+        if(seeds[sk])return seeds[sk];
+        var lk=links[i];
+        if(lk)return(states[lk.match]&&states[lk.match][lk.result])||"";
+        return"";
+      });
+    }
+    function normScore(v){var n=Number(String(v||"0").trim());return isFinite(n)?n:0;}
+    function readResult(mid,teams){
+      try{
+        var norm=teams.map(function(t){return t||"미정";});
+        var codes=teams.map(function(t){return tCode(t)||t;});
+        var cands=["result:Match "+mid+"|"+norm[0]+"|"+norm[1],"result:Match "+mid+"|"+codes[0]+"|"+codes[1]];
+        for(var i=0;i<cands.length;i++){var r=localStorage.getItem(cands[i]);if(r){var s=JSON.parse(r);return{scoreA:normScore(s.scoreA),scoreB:normScore(s.scoreB)};};}
+      }catch(e){}
+      return{scoreA:0,scoreB:0};
+    }
+    function resolveState(){
+      var st={};
+      for(var mid=1;mid<=20;mid++){
+        var teams=resolveTeams(mid,st);
+        var score=readResult(mid,teams);
+        var hasW=teams[0]&&teams[1]&&score.scoreA!==score.scoreB;
+        st[mid]={teams:teams,score:score,winner:hasW?teams[score.scoreA>score.scoreB?0:1]:"",loser:hasW?teams[score.scoreA>score.scoreB?1:0]:""};
+      }
+      return st;
+    }
+    function cardMatchId(card){
+      var txt=card.querySelector("h3")?card.querySelector("h3").childNodes[0].textContent.trim():"";
+      var m=txt.match(/\d+/);return m?Number(m[0]):null;
+    }
+    function renderRow(row,name,score,isWin,isQual){
+      var logo=row.querySelector(".bracket-logo");
+      var nameEl=row.querySelector("strong");
+      var scoreEl=row.querySelector("em");
+      row.dataset.teamName=name||"";
+      row.classList.toggle("winner",!!(isWin&&name&&!isQual));
+      row.classList.toggle("qualifier",!!(isQual&&name));
+      row.classList.toggle("placeholder",!name);
+      if(name){
+        var src=tSrc(name);var white=tWhite(name);
+        if(!logo){logo=document.createElement("span");logo.className="bracket-logo";var seed=row.querySelector(".bracket-seed");if(seed)seed.insertAdjacentElement("afterend",logo);else row.prepend(logo);}
+        logo.innerHTML=src?'<img src="'+src+'" alt="'+tCode(name)+'"'+(white?' style="filter:brightness(0) invert(1)"':'')+'>':'<span style="font-family:Barlow Condensed;font-size:11px;font-weight:700;color:rgba(255,255,255,.5)">'+tCode(name)+'</span>';
+        if(nameEl)nameEl.style.display="none";
+      }else{if(logo)logo.remove();if(nameEl){nameEl.style.display="";nameEl.textContent="—";};}
+      if(scoreEl)scoreEl.textContent=String(score);
+    }
+    var _isAdmin=typeof window.vctIsAdmin==="function"&&window.vctIsAdmin();
+    function renderBracket(){
+      var st=resolveState();
+      document.querySelectorAll(".bracket-match").forEach(function(card){
+        var mid=cardMatchId(card);if(!mid)return;
+        var state=st[mid];if(!state)return;
+        var rows=card.querySelectorAll(".bracket-team");
+        var isQual=QUALIFIER_MATCHES.indexOf(mid)>=0;
+        var bothAssigned=state.teams[0]&&state.teams[1];
+        renderRow(rows[0],state.teams[0],state.score.scoreA,state.winner===state.teams[0],isQual&&bothAssigned);
+        renderRow(rows[1],state.teams[1],state.score.scoreB,state.winner===state.teams[1],isQual&&bothAssigned);
+        card.tabIndex=0;card.setAttribute("role","link");card.dataset.matchId=String(mid);
+        rows.forEach(function(row,i){
+          if(_isAdmin&&isSeeded(mid,i))row.dataset.seedSlot=mid+"_"+i;
+          else delete row.dataset.seedSlot;
+        });
+      });
+    }
+    var _seedSlot=null;
+    function openSeedPicker(slotKey){
+      _seedSlot=slotKey;
+      var cur=seeds[slotKey]||"";
+      document.getElementById("seed-modal-title").textContent=slotKey+" 슬롯 팀 배치";
+      var pool=loadPool();
+      var used=new Set(Object.values(seeds).filter(Boolean));
+      var teams=allTeams();
+      var grid=document.getElementById("seed-team-grid");
+      grid.innerHTML=teams.map(function(name){
+        var src=tSrc(name);var white=tWhite(name);
+        var isUsed=used.has(name)&&name!==cur;
+        var isSel=name===cur;
+        var logoHtml=src?'<img src="'+src+'" alt="'+tCode(name)+'"'+(white?' style="filter:brightness(0) invert(1)"':'')+'>':'';
+        return'<button class="seed-team-btn'+(isSel?" selected":"")+(isUsed?' in-other-group':'')+'" data-team="'+name.replace(/"/g,"&quot;")+'">'+logoHtml+'<span class="seed-code">'+tCode(name)+'</span><span>'+name+'</span></button>';
+      }).join("");
+      grid.querySelectorAll(".seed-team-btn").forEach(function(btn){
+        btn.addEventListener("click",function(){seeds[_seedSlot]=btn.dataset.team;saveSeeds(seeds);closeModal();renderBracket();});
+      });
+      var actions=document.getElementById("seed-actions");actions.innerHTML="";
+      if(cur){var cb=document.createElement("button");cb.className="seed-btn seed-btn-clear";cb.textContent="배치 초기화";cb.addEventListener("click",function(){delete seeds[_seedSlot];saveSeeds(seeds);closeModal();renderBracket();});actions.appendChild(cb);}
+      var cancel=document.createElement("button");cancel.className="seed-btn seed-btn-cancel";cancel.textContent="취소";cancel.addEventListener("click",closeModal);actions.appendChild(cancel);
+      document.getElementById("seed-add-name").value="";
+      document.getElementById("seed-modal").hidden=false;
+    }
+    function closeModal(){document.getElementById("seed-modal").hidden=true;_seedSlot=null;}
+    document.getElementById("seed-backdrop").addEventListener("click",closeModal);
+    document.getElementById("seed-add-btn").addEventListener("click",function(){
+      var name=document.getElementById("seed-add-name").value.trim();
+      if(!name)return;
+      var pool=loadPool();
+      if(!pool.find(function(t){return t.name===name;})){pool.push({name:name,code:name.slice(0,4).toUpperCase(),logo:""});savePool(pool);}
+      document.getElementById("seed-add-name").value="";
+      if(_seedSlot)openSeedPicker(_seedSlot);
+    });
+    document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!document.getElementById("seed-modal").hidden)closeModal();});
+    function openMatch(card){
+      var mid=card.dataset.matchId;
+      var rows=card.querySelectorAll(".bracket-team");
+      var ta=(rows[0]&&rows[0].dataset.teamName)||"미정";
+      var tb=(rows[1]&&rows[1].dataset.teamName)||"미정";
+      var sa=(rows[0]&&rows[0].querySelector("em")&&rows[0].querySelector("em").textContent)||"0";
+      var sb=(rows[1]&&rows[1].querySelector("em")&&rows[1].querySelector("em").textContent)||"0";
+      var q=new URLSearchParams({date:"Match "+mid,teamA:ta,teamB:tb,score:sa+" : "+sb,from:"s2playin"});
+      window.location.href="./cn-match-dark.html?"+q.toString();
+    }
+    renderBracket();
+    document.querySelectorAll(".bracket-match").forEach(function(card){
+      card.addEventListener("click",function(e){
+        if(_isAdmin){var row=e.target.closest(".bracket-team[data-seed-slot]");if(row&&row.dataset.seedSlot){openSeedPicker(row.dataset.seedSlot);return;}}
+        openMatch(card);
+      });
+      card.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openMatch(card);}});
+    });
+  });
+  </script>
+  <script src="./auth.js"></script>
+  <script src="./help.js" defer></script>
+</body>
+</html>
