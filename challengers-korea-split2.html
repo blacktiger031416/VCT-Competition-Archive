@@ -329,313 +329,258 @@
   <script src="./storage.js"></script>
   <script>
   window.storageReady.then(function () {
-
-    /* ── 상수 ── */
-    var PFX   = "ck_korea_split2_";
-    var SLOTS_KEY = PFX + "slots";
-    var POOL_KEY  = PFX + "pool";
-    var SCORE_PFX = PFX + "sc_";
-
-    /* 8팀 리그 라운드로빈 (고정 스케줄)
-       Week1: round1+2 (8경기), Week2: round3+4, Week3: round5+6, Week4: round7 (4경기) */
-    var SCHEDULE = [
-      [[1,2],[3,4],[5,6],[7,8],[1,3],[2,4],[5,7],[6,8]],
-      [[1,4],[2,3],[5,8],[6,7],[1,5],[2,6],[3,7],[4,8]],
-      [[1,6],[2,5],[3,8],[4,7],[1,7],[2,8],[3,5],[4,6]],
-      [[1,8],[2,7],[3,6],[4,5]]
-    ];
-
+    var PFX      = "ck_korea_split2_";
+    var POOL_KEY = PFX + "pool";
+    var WEEKS    = [{w:1,count:8},{w:2,count:8},{w:3,count:8},{w:4,count:4}];
     var _isAdmin = typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
 
-    /* ── Storage helpers ── */
     function loadJSON(key, def) { try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
     function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-
-      var DEFAULT_POOL = [
-        { name: "BNK FEARX",              code: "BFX",  logo: "./assets/teams/BFX.svg",  color: "#fbe400" },
-        { name: "ONSIDE GAMING",           code: "ONG",  logo: "./assets/teams/ONG.webp", color: "#e3e419" },
-        { name: "T1 Esports Academy",      code: "T1A",  logo: "./assets/teams/T1A.svg",  color: "#e4022b" },
-        { name: "KIWOOM DRX Academy",      code: "KRXA", logo: "./assets/teams/KRXA.svg", color: "#002677" },
-        { name: "Gen.G Global Academy",    code: "GGA",  logo: "./assets/teams/GGA.webp", color: "#cfb887" },
-        { name: "Mir Gaming",              code: "MIR",  logo: "./assets/teams/MIR.png",  color: "#1ead9e" },
-        { name: "Dplus Kia",               code: "DK",   logo: "./assets/teams/DK.svg",   color: "#92e1e6" },
-        { name: "ARETE",                   code: "ART",  logo: "./assets/teams/ART.webp", color: "#000000" },
-        { name: "So:sweet",                code: "SWT",  logo: "./assets/teams/SWT.svg",  color: "#a28a55" },
-        { name: "X-Cast",                  code: "XC",   logo: "./assets/teams/XC.svg",   color: "#5e1ba3" },
-      ];
-      function loadPool()  {
-        var p = loadJSON(POOL_KEY, null);
-        return (Array.isArray(p) && p.length) ? p : DEFAULT_POOL.slice();
-      }
+    var DEFAULT_POOL = [
+      { name:"BNK FEARX",           code:"BFX",  logo:"./assets/teams/BFX.svg",  color:"#fbe400", white:false },
+      { name:"ONSIDE GAMING",        code:"ONG",  logo:"./assets/teams/ONG.webp", color:"#e3e419", white:true  },
+      { name:"T1 Esports Academy",   code:"T1A",  logo:"./assets/teams/T1A.svg",  color:"#e4022b", white:false },
+      { name:"KIWOOM DRX Academy",   code:"KRXA", logo:"./assets/teams/KRXA.svg", color:"#002677", white:false },
+      { name:"Gen.G Global Academy", code:"GGA",  logo:"./assets/teams/GGA.webp", color:"#cfb887", white:true  },
+      { name:"Mir Gaming",           code:"MIR",  logo:"./assets/teams/MIR.png",  color:"#1ead9e", white:false },
+      { name:"Dplus Kia",            code:"DK",   logo:"./assets/teams/DK.svg",   color:"#92e1e6", white:true  },
+      { name:"ARETE",                code:"ART",  logo:"./assets/teams/ART.webp", color:"#000000", white:true  },
+      { name:"So:sweet",             code:"SWT",  logo:"./assets/teams/SWT.svg",  color:"#a28a55", white:false },
+      { name:"X-Cast",               code:"XC",   logo:"./assets/teams/XC.svg",   color:"#5e1ba3", white:false },
+    ];
+    function loadPool() { var p = loadJSON(POOL_KEY, null); return (Array.isArray(p)&&p.length) ? p : DEFAULT_POOL.slice(); }
     function savePool(p) { saveJSON(POOL_KEY, p); }
-    function loadSlots() {
-      var s = loadJSON(SLOTS_KEY, null);
-      if (Array.isArray(s) && s.length === 8) return s;
-      return Array(8).fill("");
-    }
-    function saveSlots(s) { saveJSON(SLOTS_KEY, s); }
 
-    function scKey(a, b) { return SCORE_PFX + Math.min(a,b) + "_" + Math.max(a,b); }
-    function loadScore(a, b) { return loadJSON(scKey(a,b), null); }
-    function saveScore(s1, s2, va, vb) {
-      /* 항상 낮은 슬롯 번호 기준으로 저장 */
-      var lo = Math.min(s1,s2), hi = Math.max(s1,s2);
-      var sa = (s1 < s2) ? va : vb;
-      var sb = (s1 < s2) ? vb : va;
-      saveJSON(scKey(lo,hi), {a: sa, b: sb});
-    }
-    function clearScore(a, b) { localStorage.removeItem(scKey(a,b)); }
-
-    /* 슬롯 번호 → 팀 정보 */
-    function teamOf(slot) {
-      var slots = loadSlots(), pool = loadPool();
-      var name = slots[slot - 1] || "";
-      var t = pool.find(function(x){ return x.name === name; });
-      return { name: name || ("슬롯 " + slot), code: t ? t.code : String(slot), logo: t ? t.logo : "" };
+    /* ── 매치 데이터 (수동 선택) ── */
+    function mKey(w, m) { return PFX + "W" + w + "M" + m; }
+    function loadMT(w, m) { return loadJSON(mKey(w,m), {}); }
+    function saveMT(w, m, d) { saveJSON(mKey(w,m), d); }
+    /* 스코어는 match-dark 호환 포맷 result:date|tA|tB */
+    function sKey(w, m, tA, tB) { return "result:CKS2W"+w+"M"+m+"|"+(tA||"?")+"|"+(tB||"?"); }
+    function loadSc(w, m, tA, tB) {
+      try { var r = localStorage.getItem(sKey(w,m,tA,tB)); if(r) { var s=JSON.parse(r); return {a:Number(s.scoreA)||0,b:Number(s.scoreB)||0}; } } catch(e) {}
+      return null;
     }
 
-    /* ── 팀 슬롯 렌더 ── */
+    function tLogoHtml(name, sz) {
+      var pool = loadPool(); sz = sz||52;
+      var t = pool.find(function(x){ return x.name===name; });
+      if (!t||!t.logo) return '<span style="font-size:11px;font-weight:900;">'+(t?t.code:(name||"?").slice(0,4))+'</span>';
+      var f = t.white ? 'filter:brightness(0) invert(1);' : '';
+      return '<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;'+f+'">';
+    }
+    function tSlotLogoHtml(t) {
+      if (!t||!t.logo) return '<span style="font-size:12px;font-weight:900;color:rgba(255,255,255,.3);">'+esc(t?t.code:"?")+'</span>';
+      var f = t.white ? 'filter:brightness(0) invert(1);' : '';
+      return '<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="width:40px;height:40px;object-fit:contain;'+f+'">';
+    }
+
+    /* ── 참가 팀 표시 (슬롯 없이 풀 전체) ── */
     function renderSlots() {
-      var slots = loadSlots(), pool = loadPool();
+      var pool = loadPool();
       var container = document.getElementById("ga-slots");
       if (!container) return;
-      container.innerHTML = slots.map(function(name, i) {
-        var t = pool.find(function(x){ return x.name === name; });
-        var logoHtml = (t && t.logo)
-          ? '<img src="' + t.logo + '" alt="' + esc(name) + '" style="width:40px;height:40px;object-fit:contain;">'
-          : '<span style="font-size:12px;font-weight:900;color:rgba(255,255,255,.3);">' + (i+1) + '</span>';
-        var cls = name ? "group-slot has-team" : "group-slot empty";
-        return '<div class="' + cls + '" data-slot="' + (i+1) + '">'
-          + '<div class="slot-logo">' + logoHtml + '</div>'
-          + '<span class="slot-name">' + esc(name || "팀 배정") + '</span>'
-          + '<span class="slot-rank">S' + (i+1) + '</span>'
+      container.innerHTML = pool.map(function(t) {
+        return '<div class="group-slot has-team">'
+          + '<div class="slot-logo">'+tSlotLogoHtml(t)+'</div>'
+          + '<span class="slot-name">'+esc(t.name)+'</span>'
+          + '<span class="slot-rank">'+esc(t.code)+'</span>'
           + '</div>';
       }).join("");
-      if (_isAdmin) {
-        container.querySelectorAll(".group-slot").forEach(function(el) {
-          el.addEventListener("click", function() { openSlotPicker(parseInt(el.dataset.slot)); });
-        });
-      }
     }
 
-    /* ── 경기 카드 렌더 ── */
+    /* ── 경기 카드 렌더 (수동 팀 선택) ── */
     function renderMatches() {
-      SCHEDULE.forEach(function(wk, wi) {
-        var grid = document.getElementById("mg-" + (wi+1));
+      WEEKS.forEach(function(wk) {
+        var grid = document.getElementById("mg-"+wk.w);
         if (!grid) return;
-        grid.innerHTML = wk.map(function(pair) {
-          var s1 = pair[0], s2 = pair[1];
-          var ta = teamOf(s1), tb = teamOf(s2);
-          var score = loadScore(s1, s2);
-          var scoreText, upcoming;
-          if (score !== null) {
-            var sa = (s1 <= s2) ? score.a : score.b;
-            var sb = (s1 <= s2) ? score.b : score.a;
-            scoreText = sa + " : " + sb;
-            upcoming = false;
-          } else {
-            scoreText = "VS"; upcoming = true;
-          }
-          var logoA = ta.logo
-            ? '<img src="' + ta.logo + '" alt="' + esc(ta.name) + '" style="width:52px;height:52px;object-fit:contain;">'
-            : '<span style="font-size:11px;font-weight:900;">' + esc(ta.code) + '</span>';
-          var logoB = tb.logo
-            ? '<img src="' + tb.logo + '" alt="' + esc(tb.name) + '" style="width:52px;height:52px;object-fit:contain;">'
-            : '<span style="font-size:11px;font-weight:900;">' + esc(tb.code) + '</span>';
-          return '<article class="match-card' + (upcoming ? ' upcoming' : '') + '" data-s1="' + s1 + '" data-s2="' + s2 + '" tabindex="0" role="button" aria-label="' + esc(ta.name) + ' vs ' + esc(tb.name) + '">'
-            + '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">' + logoA + '</div><div class="match-team-name">' + esc(ta.name) + '</div></div></strong>'
-            + '<em>' + scoreText + '</em>'
-            + '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">' + logoB + '</div><div class="match-team-name">' + esc(tb.name) + '</div></div></strong>'
-            + '</article>';
-        }).join("");
-
-        grid.querySelectorAll(".match-card").forEach(function(card) {
-          var s1 = parseInt(card.dataset.s1), s2 = parseInt(card.dataset.s2);
-          card.addEventListener("click", function() {
-            if (_isAdmin) openScoreModal(s1, s2);
-          });
-          card.addEventListener("keydown", function(e) {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
-          });
-        });
+        grid.innerHTML = "";
+        for (var m=1; m<=wk.count; m++) {
+          var data = loadMT(wk.w, m);
+          var tA = data.teamA||"", tB = data.teamB||"";
+          var sc = (tA&&tB) ? loadSc(wk.w, m, tA, tB) : null;
+          var scoreText = sc ? sc.a+" : "+sc.b : "VS";
+          var card = document.createElement("article");
+          card.className = "match-card"+(sc?"":" upcoming");
+          card.dataset.w = wk.w; card.dataset.m = m;
+          card.tabIndex = 0; card.setAttribute("role","button");
+          card.innerHTML =
+            '<strong style="cursor:'+(tA&&!_isAdmin?'default':'pointer')+'">'
+            +'<div class="match-team-wrap">'
+            +'<div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div>'
+            +'<div class="match-team-name">'+esc(tA||"팀 선택")+'</div>'
+            +'</div></strong>'
+            +'<em>'+scoreText+'</em>'
+            +'<strong style="cursor:'+(tB&&!_isAdmin?'default':'pointer')+'">'
+            +'<div class="match-team-wrap">'
+            +'<div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div>'
+            +'<div class="match-team-name">'+esc(tB||"팀 선택")+'</div>'
+            +'</div></strong>';
+          (function(w,mc) {
+            var strongs = card.querySelectorAll("strong");
+            if (_isAdmin) {
+              strongs[0].addEventListener("click", function(e) { e.stopPropagation(); openPickModal(w,mc,"A"); });
+              strongs[1].addEventListener("click", function(e) { e.stopPropagation(); openPickModal(w,mc,"B"); });
+              card.querySelector("em").addEventListener("click", function(e) {
+                e.stopPropagation();
+                var d=loadMT(w,mc); if(!d.teamA||!d.teamB){ alert("먼저 팀을 선택하세요"); return; }
+                openMatchScoreModal(w,mc);
+              });
+            } else {
+              card.addEventListener("click", function() {
+                var d=loadMT(w,mc); if(!d.teamA||!d.teamB) return;
+                var s=loadSc(w,mc,d.teamA,d.teamB);
+                var q=new URLSearchParams({date:"CKS2W"+w+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:s?(s.a+" : "+s.b):"0 : 0",from:"ck_split"});
+                window.location.href="./challengers-korea-match-dark.html?"+q.toString();
+              });
+            }
+            card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); card.click(); } });
+          })(wk.w, m);
+          grid.appendChild(card);
+        }
       });
     }
 
-    /* ── 순위표 렌더 ── */
+    /* ── 순위표 (팀 이름 기반) ── */
     function renderStandings() {
-      var slots = loadSlots(), pool = loadPool();
-      var stats = Array.from({length: 8}, function(_, i) {
-        return { slot: i+1, name: slots[i] || ("슬롯 " + (i+1)), w:0, l:0, mw:0, ml:0 };
+      var pool = loadPool();
+      var stats = {};
+      pool.forEach(function(t) { stats[t.name]={name:t.name,w:0,l:0,mw:0,ml:0}; });
+      WEEKS.forEach(function(wk) {
+        for (var m=1; m<=wk.count; m++) {
+          var d=loadMT(wk.w,m); if(!d.teamA||!d.teamB) continue;
+          var sc=loadSc(wk.w,m,d.teamA,d.teamB); if(!sc) continue;
+          if(!stats[d.teamA]) stats[d.teamA]={name:d.teamA,w:0,l:0,mw:0,ml:0};
+          if(!stats[d.teamB]) stats[d.teamB]={name:d.teamB,w:0,l:0,mw:0,ml:0};
+          stats[d.teamA].mw+=sc.a; stats[d.teamA].ml+=sc.b;
+          stats[d.teamB].mw+=sc.b; stats[d.teamB].ml+=sc.a;
+          if(sc.a>sc.b){ stats[d.teamA].w++; stats[d.teamB].l++; }
+          else if(sc.b>sc.a){ stats[d.teamB].w++; stats[d.teamA].l++; }
+        }
       });
-
-      SCHEDULE.forEach(function(wk) {
-        wk.forEach(function(pair) {
-          var s1 = pair[0], s2 = pair[1];
-          var score = loadScore(s1, s2);
-          if (!score) return;
-          /* score.a = 낮은 슬롯 점수, score.b = 높은 슬롯 점수 */
-          var lo = Math.min(s1,s2) - 1, hi = Math.max(s1,s2) - 1;
-          var sa = score.a, sb = score.b;
-          stats[lo].mw += sa; stats[lo].ml += sb;
-          stats[hi].mw += sb; stats[hi].ml += sa;
-          if (sa > sb) { stats[lo].w++; stats[hi].l++; }
-          else if (sb > sa) { stats[hi].w++; stats[lo].l++; }
-        });
+      var sorted = Object.values(stats).sort(function(a,b) {
+        if(b.w!==a.w) return b.w-a.w; return (b.mw-b.ml)-(a.mw-a.ml);
       });
-
-      stats.sort(function(a, b) {
-        if (b.w !== a.w) return b.w - a.w;
-        return (b.mw - b.ml) - (a.mw - a.ml);
-      });
-
-      var wrap = document.getElementById("standings-wrap");
-      if (!wrap) return;
-
-      var rows = stats.map(function(s, rank) {
-        var t = pool.find(function(x){ return x.name === s.name; });
-        var logo = (t && t.logo)
-          ? '<img src="' + t.logo + '" alt="' + esc(s.name) + '" style="width:32px;height:32px;object-fit:contain;">'
-          : "";
-        var played = s.w + s.l > 0;
-        var diff = s.mw - s.ml;
-        var diffCls = diff > 0 ? "delta plus" : diff < 0 ? "delta minus" : "delta";
-        var diffStr = played ? (diff > 0 ? "+" + diff : String(diff)) : "-";
-        var advance = rank < 4;
-        var rowCls = "standings-row" + (advance ? " clinched" : " eliminated");
-        return '<div class="' + rowCls + '" role="row">'
-          + '<div class="team-cell">'
-          + '<div class="rank-badge">' + (rank+1) + '</div>'
-          + '<div class="stage-team-logo">' + logo + '</div>'
-          + '<div><strong>' + esc(s.name) + '</strong></div>'
-          + '</div>'
-          + '<span>' + s.w + ' - ' + s.l + '</span>'
-          + '<span>' + s.mw + ' / ' + s.ml + '</span>'
-          + '<span class="' + diffCls + '">' + diffStr + '</span>'
-          + '</div>';
+      var wrap = document.getElementById("standings-wrap"); if(!wrap) return;
+      var rows = sorted.map(function(s,rank) {
+        var t=pool.find(function(x){ return x.name===s.name; });
+        var f=t&&t.white?'filter:brightness(0) invert(1);':'';
+        var logo=(t&&t.logo)?'<img src="'+t.logo+'" alt="'+esc(s.name)+'" style="width:32px;height:32px;object-fit:contain;'+f+'">':'';
+        var played=s.w+s.l>0, diff=s.mw-s.ml;
+        var dCls=diff>0?"delta plus":diff<0?"delta minus":"delta";
+        var dStr=played?(diff>0?"+"+diff:String(diff)):"-";
+        var adv=rank<4;
+        return '<div class="standings-row'+(adv?" clinched":" eliminated")+'" role="row">'
+          +'<div class="team-cell"><div class="rank-badge">'+(rank+1)+'</div>'
+          +'<div class="stage-team-logo">'+logo+'</div>'
+          +'<div><strong>'+esc(s.name)+'</strong></div></div>'
+          +'<span>'+s.w+' - '+s.l+'</span>'
+          +'<span>'+s.mw+' / '+s.ml+'</span>'
+          +'<span class="'+dCls+'">'+dStr+'</span></div>';
       }).join("");
-
-      wrap.innerHTML = '<div class="standings-card">'
-        + '<div class="standings-title"><h3>그룹 스테이지</h3><span>상위 4팀 PlayOff 진출</span></div>'
-        + '<div class="standings-table" role="table">'
-        + '<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
-        + rows
-        + '</div></div>';
+      wrap.innerHTML='<div class="standings-card"><div class="standings-title"><h3>그룹 스테이지</h3><span>상위 4팀 PlayOff 진출</span></div>'
+        +'<div class="standings-table" role="table">'
+        +'<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
+        +rows+'</div></div>';
     }
 
     function renderAll() { renderSlots(); renderMatches(); renderStandings(); }
 
-    /* ── 슬롯 피커 모달 ── */
-    var _slotCtx = null;
-    function openSlotPicker(slotIdx) {
-      _slotCtx = slotIdx;
-      var slots = loadSlots(), pool = loadPool();
-      var cur = slots[slotIdx - 1];
-      var used = new Set(slots.filter(Boolean));
-      document.getElementById("ga-modal-title").textContent = "슬롯 " + slotIdx + " — 팀 배정";
+    /* ── 팀 선택 모달 ── */
+    var _pickCtx = null;
+    function openPickModal(w, m, side) {
+      _pickCtx = {w:w, m:m, side:side};
+      var data = loadMT(w,m);
+      var cur = side==="A" ? data.teamA||"" : data.teamB||"";
+      document.getElementById("ga-modal-title").textContent = "Week "+w+" Match "+m+" — "+(side==="A"?"왼쪽":"오른쪽")+" 팀 선택";
+      var pool = loadPool();
       var grid = document.getElementById("ga-team-grid");
       grid.innerHTML = pool.map(function(t) {
-        var isUsed = used.has(t.name) && t.name !== cur;
-        var isSel  = t.name === cur;
-        var logo = t.logo ? '<img src="' + t.logo + '" alt="' + esc(t.name) + '">' : "";
-        return '<button class="ga-team-btn' + (isSel ? " selected" : "") + (isUsed ? " in-other-group" : "") + '" data-team="' + esc(t.name) + '">'
-          + logo
-          + '<span class="ga-team-code">' + esc(t.code || t.name.slice(0,4)) + '</span>'
-          + '<span>' + esc(t.name) + '</span>'
-          + '</button>';
-      }).join("")
-      + '<button class="ga-team-btn" id="btn-add-team" style="border-style:dashed;color:rgba(255,255,255,.5);">'
-      + '<span style="font-size:20px;line-height:1;">+</span><span>팀 추가</span></button>';
-
-      grid.querySelectorAll(".ga-team-btn:not(#btn-add-team)").forEach(function(btn) {
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':"";
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+esc(t.name)+'">'+logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("");
+      grid.querySelectorAll(".ga-team-btn").forEach(function(btn) {
         btn.addEventListener("click", function() {
-          var s = loadSlots(); s[_slotCtx - 1] = btn.dataset.team;
-          saveSlots(s); closeSlotModal(); renderAll();
+          var d=loadMT(_pickCtx.w,_pickCtx.m);
+          if(_pickCtx.side==="A") d.teamA=btn.dataset.team; else d.teamB=btn.dataset.team;
+          saveMT(_pickCtx.w,_pickCtx.m,d);
+          closePickModal(); renderAll();
         });
       });
-      var addBtn = document.getElementById("btn-add-team");
-      if (addBtn) addBtn.addEventListener("click", function() {
-        closeSlotModal(); openAddTeam();
-      });
-
-      document.getElementById("ga-actions").innerHTML =
+      document.getElementById("ga-actions").innerHTML=
         '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
-        + '<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
-      document.getElementById("ga-cancel").addEventListener("click", closeSlotModal);
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click", closePickModal);
       document.getElementById("ga-clear").addEventListener("click", function() {
-        var s = loadSlots(); s[_slotCtx - 1] = ""; saveSlots(s); closeSlotModal(); renderAll();
+        var d=loadMT(_pickCtx.w,_pickCtx.m);
+        if(_pickCtx.side==="A") d.teamA=""; else d.teamB="";
+        saveMT(_pickCtx.w,_pickCtx.m,d); closePickModal(); renderAll();
       });
-      document.getElementById("ga-modal").hidden = false;
+      document.getElementById("ga-modal").hidden=false;
     }
-    function closeSlotModal() { document.getElementById("ga-modal").hidden = true; _slotCtx = null; }
-    document.getElementById("ga-backdrop").addEventListener("click", closeSlotModal);
+    function closePickModal() { document.getElementById("ga-modal").hidden=true; _pickCtx=null; }
+    document.getElementById("ga-backdrop").addEventListener("click", closePickModal);
 
     /* ── 팀 추가 모달 ── */
     function openAddTeam() {
-      ["at-name","at-code","at-logo"].forEach(function(id){ document.getElementById(id).value = ""; });
-      document.getElementById("add-modal").hidden = false;
+      ["at-name","at-code","at-logo"].forEach(function(id){ document.getElementById(id).value=""; });
+      document.getElementById("add-modal").hidden=false;
       document.getElementById("at-name").focus();
     }
-    document.getElementById("add-backdrop").addEventListener("click", function(){ document.getElementById("add-modal").hidden = true; });
-    document.getElementById("add-cancel").addEventListener("click", function(){ document.getElementById("add-modal").hidden = true; });
+    document.getElementById("add-backdrop").addEventListener("click", function(){ document.getElementById("add-modal").hidden=true; });
+    document.getElementById("add-cancel").addEventListener("click", function(){ document.getElementById("add-modal").hidden=true; });
     document.getElementById("add-save").addEventListener("click", function() {
-      var name = document.getElementById("at-name").value.trim();
-      var code = document.getElementById("at-code").value.trim().toUpperCase();
-      var logo = document.getElementById("at-logo").value.trim();
-      if (!name) return;
-      var pool = loadPool();
-      if (!pool.find(function(t){ return t.name === name; })) {
-        pool.push({ name: name, code: code || name.slice(0,4).toUpperCase(), logo: logo });
-        savePool(pool);
-      }
-      document.getElementById("add-modal").hidden = true;
-      if (_slotCtx) openSlotPicker(_slotCtx);
+      var name=document.getElementById("at-name").value.trim();
+      var code=document.getElementById("at-code").value.trim().toUpperCase();
+      var logo=document.getElementById("at-logo").value.trim();
+      if(!name) return;
+      var pool=loadPool();
+      if(!pool.find(function(t){ return t.name===name; })) { pool.push({name:name,code:code||name.slice(0,4).toUpperCase(),logo:logo,white:false}); savePool(pool); }
+      document.getElementById("add-modal").hidden=true;
     });
 
     /* ── 스코어 모달 ── */
-    var _scoreCtx = null;
-    function openScoreModal(s1, s2) {
-      var ta = teamOf(s1), tb = teamOf(s2);
-      var score = loadScore(s1, s2);
-      document.getElementById("score-title").textContent = ta.name + " vs " + tb.name;
-      document.getElementById("score-name-a").textContent = ta.name;
-      document.getElementById("score-name-b").textContent = tb.name;
-      var sa = "", sb = "";
-      if (score !== null) {
-        sa = String((s1 <= s2) ? score.a : score.b);
-        sb = String((s1 <= s2) ? score.b : score.a);
-      }
-      document.getElementById("score-a").value = sa;
-      document.getElementById("score-b").value = sb;
-      _scoreCtx = {s1: s1, s2: s2};
-      document.getElementById("score-modal").hidden = false;
+    var _scCtx = null;
+    function openMatchScoreModal(w, m) {
+      var d=loadMT(w,m); _scCtx={w:w,m:m,tA:d.teamA,tB:d.teamB};
+      var sc=loadSc(w,m,d.teamA,d.teamB)||{a:"",b:""};
+      document.getElementById("score-title").textContent=d.teamA+" vs "+d.teamB;
+      document.getElementById("score-name-a").textContent=d.teamA;
+      document.getElementById("score-name-b").textContent=d.teamB;
+      document.getElementById("score-a").value=sc.a!==""?sc.a:"";
+      document.getElementById("score-b").value=sc.b!==""?sc.b:"";
+      document.getElementById("score-modal").hidden=false;
       document.getElementById("score-a").focus();
     }
-    function closeScoreModal() { document.getElementById("score-modal").hidden = true; _scoreCtx = null; }
+    function closeScoreModal() { document.getElementById("score-modal").hidden=true; _scCtx=null; }
     document.getElementById("score-backdrop").addEventListener("click", closeScoreModal);
     document.getElementById("score-cancel").addEventListener("click", closeScoreModal);
     document.getElementById("score-clear").addEventListener("click", function() {
-      if (!_scoreCtx) return;
-      clearScore(_scoreCtx.s1, _scoreCtx.s2); closeScoreModal(); renderAll();
+      if(!_scCtx) return;
+      localStorage.removeItem(sKey(_scCtx.w,_scCtx.m,_scCtx.tA,_scCtx.tB));
+      closeScoreModal(); renderAll();
     });
     document.getElementById("score-save").addEventListener("click", function() {
-      if (!_scoreCtx) return;
-      var a = parseInt(document.getElementById("score-a").value) || 0;
-      var b = parseInt(document.getElementById("score-b").value) || 0;
-      saveScore(_scoreCtx.s1, _scoreCtx.s2, a, b); closeScoreModal(); renderAll();
+      if(!_scCtx) return;
+      var a=parseInt(document.getElementById("score-a").value)||0;
+      var b=parseInt(document.getElementById("score-b").value)||0;
+      localStorage.setItem(sKey(_scCtx.w,_scCtx.m,_scCtx.tA,_scCtx.tB), JSON.stringify({scoreA:a,scoreB:b}));
+      closeScoreModal(); renderAll();
     });
 
-    /* ESC 닫기 */
     document.addEventListener("keydown", function(e) {
-      if (e.key !== "Escape") return;
-      if (!document.getElementById("score-modal").hidden) closeScoreModal();
-      else if (!document.getElementById("ga-modal").hidden) closeSlotModal();
-      else if (!document.getElementById("add-modal").hidden) document.getElementById("add-modal").hidden = true;
+      if(e.key!=="Escape") return;
+      if(!document.getElementById("score-modal").hidden) closeScoreModal();
+      else if(!document.getElementById("ga-modal").hidden) closePickModal();
+      else if(!document.getElementById("add-modal").hidden) document.getElementById("add-modal").hidden=true;
     });
 
     function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
     renderAll();
+
   });
   </script>
   <script src="./auth.js"></script>
