@@ -872,6 +872,58 @@
       renderGroupSlots();
       renderWeekPanels();
       renderStandings();
+
+      // ── Challengers 초청 팀 ──────────────────────
+      const CH_KEY = "stage2_americas_ch_invite";
+      const CH_SLOTS = [
+        { id: "ch-japan-slot", key: "japan", label: "Challengers" },
+        { id: "ch-korea-slot", key: "korea", label: "Challengers" },
+        { id: "ch-sea-slot", key: "sea", label: "Challengers" },
+        { id: "ch-sa-slot", key: "sa", label: "Challengers" },
+      ];
+      function loadChInvite() { try { return JSON.parse(localStorage.getItem(CH_KEY) || "{}"); } catch(e) { return {}; } }
+      function saveChInvite(d) { localStorage.setItem(CH_KEY, JSON.stringify(d)); }
+      function renderChInvite() {
+        const data = loadChInvite();
+        CH_SLOTS.forEach(function(s) {
+          const el = document.getElementById(s.id);
+          if (!el) return;
+          const team = data[s.key] || {};
+          const slot = document.createElement("div");
+          slot.className = "group-slot" + (team.name ? " has-team" : " empty");
+          const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;">' : "";
+          slot.innerHTML = '<div class="slot-logo">' + logo + '</div><span class="slot-name">' + (team.name || "팀 선택") + '</span><span class="slot-rank">' + s.label + '</span>';
+          if (isAdmin()) slot.addEventListener("click", function() { openChPicker(s.key, s.label); });
+          el.innerHTML = ""; el.appendChild(slot);
+        });
+      }
+      let _chCtx = null;
+      function openChPicker(key, label) {
+        _chCtx = key;
+        const data = loadChInvite(); const team = data[key] || {};
+        document.getElementById("ch-modal-title").textContent = label + " 팀 배정";
+        document.getElementById("ch-name-input").value = team.name || "";
+        document.getElementById("ch-logo-input").value = team.logo || "";
+        const actions = document.getElementById("ch-actions");
+        actions.innerHTML = '<button class="ga-btn ga-btn-clear" id="ch-clear">비우기</button><button class="ga-btn ga-btn-cancel" id="ch-cancel">취소</button><button class="ga-btn ga-btn-save" id="ch-save">저장</button>';
+        document.getElementById("ch-cancel").addEventListener("click", closeChModal);
+        document.getElementById("ch-clear").addEventListener("click", function() {
+          const d = loadChInvite(); delete d[_chCtx]; saveChInvite(d); closeChModal(); renderChInvite();
+        });
+        document.getElementById("ch-save").addEventListener("click", function() {
+          const name = document.getElementById("ch-name-input").value.trim();
+          const logo = document.getElementById("ch-logo-input").value.trim();
+          if (!name) return;
+          const d = loadChInvite(); d[_chCtx] = { name: name, logo: logo }; saveChInvite(d); closeChModal(); renderChInvite();
+        });
+        document.getElementById("ch-modal").hidden = false;
+        setTimeout(function() { document.getElementById("ch-name-input").focus(); }, 60);
+      }
+      function closeChModal() { document.getElementById("ch-modal").hidden = true; _chCtx = null; }
+      document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
+      document.addEventListener("keydown", function(e) { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
+      renderChInvite();
+
     });
     </script>
     <script src="./auth.js"></script>
