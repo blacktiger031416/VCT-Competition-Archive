@@ -498,7 +498,8 @@
     function renderStandings() {
       var pool = loadPool();
       var stats = {};
-      pool.forEach(function(t) { stats[t.name]={name:t.name,w:0,l:0,mw:0,ml:0}; });
+      /* 순위표는 슬롯에 배정된 8팀만 표시 */
+      loadSlots().filter(Boolean).forEach(function(name) { stats[name]={name:name,w:0,l:0,mw:0,ml:0}; });
       WEEKS.forEach(function(wk) {
         for (var m=1; m<=wk.count; m++) {
           var d=loadMT(wk.w,m); if(!d.teamA||!d.teamB) continue;
