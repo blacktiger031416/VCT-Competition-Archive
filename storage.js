@@ -25,9 +25,24 @@
    * 서버 API 전용 접두사 — localStorage에 캐시하지 않음.
    * 이 키들은 API 엔드포인트로만 관리되므로 storage.js 동기화 대상에서 완전히 제외.
    * (이 키가 localStorage에 남아 있으면 Admin의 syncLocalToDB가 삭제된 데이터를 복원하는 버그 발생)
+   *
+   * ── 유저별 데이터 (Admin localStorage와 완전 분리) ──────────────────────────
+   * Admin ↔ 일반 계정을 오가며 접속해도 서로의 데이터를 덮어쓰지 않도록
+   * 아래 접두사는 항상 API 엔드포인트로만 읽고 쓴다.
    */
   var SERVER_ONLY_PREFIXES = [
-    "tlevt:", "tlpost:", "tllike:", "suggest:",
+    /* 티어리스트 */
+    "tlevt:", "tlpost:", "tllike:",
+    /* 건의함 */
+    "suggest:",
+    /* 유저별 코인·금고·출석 — Admin localStorage가 덮어쓰는 버그 방지 */
+    "coins:", "vault:", "attend:",
+    /* 승부 예측 배팅 기록 */
+    "pred-bet:",
+    /* 승부 예측 경기 데이터 (서버가 broadcast로 배포) */
+    "pred-match:",
+    /* 시즌 기록 */
+    "season:",
   ];
 
   /* 혹시 이전에 DB에 올라간 auth 키가 있으면 즉시 삭제 (보안 픽스) */
