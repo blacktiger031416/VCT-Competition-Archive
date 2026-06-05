@@ -516,9 +516,28 @@
         }
       });
 
+
+      function h2h(nameA, nameB) {
+        for (var _wi=0;_wi<WEEKS.length;_wi++) {
+          var _wk=WEEKS[_wi];
+          for (var _mi=1;_mi<=_wk.count;_mi++) {
+            var _d=loadMT(_wk.w,_mi);
+            if(!_d.teamA||!_d.teamB) continue;
+            if((_d.teamA===nameA&&_d.teamB===nameB)||(_d.teamA===nameB&&_d.teamB===nameA)) {
+              var _sc=loadSc(_wk.w,_mi,_d.teamA,_d.teamB);
+              if(!_sc) continue;
+              if(_d.teamA===nameA) return _sc.a>_sc.b?1:_sc.b>_sc.a?-1:0;
+              else                 return _sc.b>_sc.a?1:_sc.a>_sc.b?-1:0;
+            }
+          }
+        }
+        return 0;
+      }
       var sorted = Object.values(stats).sort(function(a,b) {
-        if(b.w!==a.w) return b.w-a.w;
-        return (b.mw-b.ml)-(a.mw-a.ml);
+        if(b.w!==a.w) return b.w-a.w;              /* 1: 승수 */
+        var md=(b.mw-b.ml)-(a.mw-a.ml);
+        if(md!==0) return md;                       /* 2: 맵 득실차 */
+        return h2h(b.name,a.name);                 /* 3: 승자승 */
       });
       var wrap = document.getElementById("standings-wrap"); if(!wrap) return;
       var rows = sorted.map(function(s,rank) {
