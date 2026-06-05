@@ -522,30 +522,9 @@
         }
       });
 
-      /* 승자승 헬퍼 */
-      function h2h(nameA, nameB) {
-        for (var _wi = 0; _wi < WEEKS.length; _wi++) {
-          var _wk = WEEKS[_wi];
-          for (var _mi = 1; _mi <= _wk.count; _mi++) {
-            var _d = loadMT(_wk.w, _mi);
-            if (!_d.teamA || !_d.teamB) continue;
-            var _mA = _d.teamA, _mB = _d.teamB;
-            if ((_mA===nameA&&_mB===nameB)||(_mA===nameB&&_mB===nameA)) {
-              var _sc = loadSc(_wk.w, _mi, _mA, _mB);
-              if (!_sc) continue;
-              /* _sc.a = _mA 스코어, _sc.b = _mB 스코어 */
-              if (_mA===nameA) return _sc.a>_sc.b ? 1 : _sc.b>_sc.a ? -1 : 0;
-              else             return _sc.b>_sc.a ? 1 : _sc.a>_sc.b ? -1 : 0;
-            }
-          }
-        }
-        return 0; /* 직접 대결 없음 */
-      }
       var sorted = Object.values(stats).sort(function(a,b) {
-        if (b.w!==a.w) return b.w-a.w;         /* 1순위: 승수 */
-        var hh = h2h(b.name, a.name);
-        if (hh!==0) return hh;                  /* 2순위: 승자승 */
-        return (b.mw-b.ml)-(a.mw-a.ml);        /* 3순위: 맵 득실차 */
+        if(b.w!==a.w) return b.w-a.w;
+        return (b.mw-b.ml)-(a.mw-a.ml);
       });
       var wrap = document.getElementById("standings-wrap"); if(!wrap) return;
       var rows = sorted.map(function(s,rank) {
