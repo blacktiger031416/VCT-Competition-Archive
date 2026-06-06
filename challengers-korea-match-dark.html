@@ -3350,7 +3350,7 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
       if (typeof _MATCH_TOURNAMENT !== 'undefined' && _MATCH_TOURNAMENT) _entry.tournament = _MATCH_TOURNAMENT;
       // 스탯 — 유효값이면 세트, null/빈값으로 명시 초기화된 경우 삭제
       if (_slot.agent && _slot.agent.trim()) _entry.agent = _slot.agent.trim();
-      else if (_slot.agent === '' || _slot.agent === null) delete _entry.agent;
+      else delete _entry.agent; /* 빈값/undefined 포함 항상 삭제 */
 
       if (_slot.acs != null && _slot.acs !== '') _entry.acs = _slot.acs;
       else if (_slot.acs === null) delete _entry.acs;
@@ -3366,6 +3366,25 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
         });
       }
       localStorage.setItem(_vk, JSON.stringify(_pd));
+    } else {
+      /* 선수 이름이 지워진 경우: 해당 matchKey+mapIdx 항목을 모든 vct_p에서 제거 */
+      try {
+        for (var _vi = 0; _vi < localStorage.length; _vi++) {
+          var _vkk = localStorage.key(_vi);
+          if (!_vkk || !_vkk.startsWith('vct_p:')) continue;
+          try {
+            var _pdd = JSON.parse(localStorage.getItem(_vkk) || '{}');
+            if (!_pdd.maps) continue;
+            var _before = _pdd.maps.length;
+            _pdd.maps = _pdd.maps.filter(function(e) {
+              return !(e.matchKey === MATCH_KEY && e.mapIdx === mapIdx);
+            });
+            if (_pdd.maps.length !== _before) {
+              localStorage.setItem(_vkk, JSON.stringify(_pdd));
+            }
+          } catch(_ve) {}
+        }
+      } catch(_ve2) {}
     }
   } catch(e3) {}
 }
