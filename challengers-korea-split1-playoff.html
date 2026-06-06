@@ -265,8 +265,24 @@
     var POOL_KEY  = "ck_korea_split1_pool";
     var SLOTS_KEY = "ck_korea_split1_slots";
 
-    /* 그룹 스테이지 팀 풀 로드 */
-    function loadPool() { try { return JSON.parse(localStorage.getItem(POOL_KEY)) || []; } catch(e) { return []; } }
+    var DEFAULT_POOL = [
+      { name:"BNK FEARX",           code:"BFX",  logo:"./assets/teams/BFX.svg",  white:false },
+      { name:"ONSIDE GAMING",        code:"ONG",  logo:"./assets/teams/ONG.webp", white:true  },
+      { name:"T1 Esports Academy",   code:"T1A",  logo:"./assets/teams/T1A.svg",  white:false },
+      { name:"KIWOOM DRX Academy",   code:"KRXA", logo:"./assets/teams/KRXA.svg", white:false },
+      { name:"Gen.G Global Academy", code:"GGA",  logo:"./assets/teams/GGA.webp", white:true  },
+      { name:"Mir Gaming",           code:"MIR",  logo:"./assets/teams/MIR.png",  white:false },
+      { name:"Dplus Kia",            code:"DK",   logo:"./assets/teams/DK.svg",   white:true  },
+      { name:"ARETE",                code:"ART",  logo:"./assets/teams/ART.webp", white:true  },
+      { name:"So:sweet",             code:"SWT",  logo:"./assets/teams/SWT.svg",  white:false },
+      { name:"X-Cast",               code:"XC",   logo:"./assets/teams/XC.svg",   white:false },
+    ];
+
+    /* 그룹 스테이지 팀 풀 로드 (저장된 풀 → DEFAULT_POOL 순 조회) */
+    function loadPool() {
+      try { var p = JSON.parse(localStorage.getItem(POOL_KEY)); if (Array.isArray(p) && p.length) return p; } catch(e) {}
+      return DEFAULT_POOL.slice();
+    }
     /* 참가 팀 슬롯에 배정된 팀 목록 (8팀) */
     function allTeams() {
       var pool = loadPool();
