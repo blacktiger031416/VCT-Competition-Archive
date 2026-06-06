@@ -1721,6 +1721,9 @@ var MATCH_KEY = (function() {
 (function migrateMatchKey() {
   var _oldKey = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
   if (_oldKey === MATCH_KEY) return; // 키가 같으면 마이그레이션 불필요
+  /* 토너먼트가 명시된 키로 마이그레이션 시, 구키에 해당 토너먼트 정보가 없으면 건너뜀
+     → 다른 토너먼트의 같은 매치번호 데이터 오염 방지 (예: 산티아고 vs 런던 동일 팀) */
+  if (_MATCH_TOURNAMENT && _oldKey.indexOf(_MATCH_TOURNAMENT) === -1) return;
   // 구버전 키로 저장된 항목을 모두 찾아 신버전 키로 복사
   var toMove = [];
   for (var i = 0; i < localStorage.length; i++) {
