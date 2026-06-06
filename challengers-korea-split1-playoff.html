@@ -466,7 +466,7 @@
         grid.innerHTML = pool.map(function(t) {
           var code = teamCode(t);
           var src = t.logo;
-          var logoHtml = src ? '<img src="' + src + '" alt="' + code + '">' : "";
+          var logoHtml = src ? '<img src="' + src + '" alt="' + code + '"' + (t.white ? ' style="filter:brightness(0) invert(1)"' : '') + '>' : "";
           return '<button class="seed-team-btn' + (t.name === current ? " selected" : "") + '" data-team="' + t.name.replace(/"/g,"&quot;") + '">'
             + logoHtml
             + '<span class="seed-code">' + code + '</span>'

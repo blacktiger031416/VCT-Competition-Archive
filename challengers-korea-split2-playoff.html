@@ -391,7 +391,7 @@
       } else {
         grid.innerHTML = pool.map(function(t) {
           var src = t.logo; var code = t.code || t.name.slice(0,4).toUpperCase();
-          var logoHtml = src ? '<img src="'+src+'" alt="'+code+'">' : "";
+          var logoHtml = src ? '<img src="'+src+'" alt="'+code+'"'+(t.white?' style="filter:brightness(0) invert(1)"':'')+'>': "";
           return '<button class="seed-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+t.name.replace(/"/g,"&quot;")+'">'+logoHtml+'<span class="seed-code">'+code+'</span><span>'+t.name+'</span></button>';
         }).join("");
         grid.querySelectorAll(".seed-team-btn").forEach(function(btn) {
