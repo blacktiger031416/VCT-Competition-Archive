@@ -199,43 +199,40 @@
         <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
         <div class="bracket-grid lower-bracket">
 
-          <!-- Col 1: LB R1 — M6 (M1L vs M2L) -->
-          <div class="bracket-column bracket-column-center">
+          <!-- Col 1: LB R1 — M6 (M1L vs M4L), M7 (M3L vs M2L) -->
+          <div class="bracket-column">
             <article class="bracket-match">
               <h3>Match 6 <span>(Bo3)</span></h3>
               <div class="bracket-team placeholder"><span class="bracket-seed">M1 패자</span><strong>로고</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M4 패자</span><strong>로고</strong><em>0</em></div>
+            </article>
+            <article class="bracket-match">
+              <h3>Match 7 <span>(Bo3)</span></h3>
+              <div class="bracket-team placeholder"><span class="bracket-seed">M3 패자</span><strong>로고</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">M2 패자</span><strong>로고</strong><em>0</em></div>
             </article>
           </div>
 
-          <!-- Col 2: LB Quarter — M7 (M4L vs M6W) -->
-          <div class="bracket-column bracket-column-center">
-            <article class="bracket-match">
-              <h3>Match 7 <span>(Bo3)</span></h3>
-              <div class="bracket-team placeholder"><span class="bracket-seed">M4 패자</span><strong>로고</strong><em>0</em></div>
-              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
-            </article>
-          </div>
-
-          <!-- Col 3: LB Semi — M8 (M3L vs M7W) -->
+          <!-- Col 2: LB R2 — M8 (M6W vs M7W) -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match">
               <h3>Match 8 <span>(Bo3)</span></h3>
-              <div class="bracket-team placeholder"><span class="bracket-seed">M3 패자</span><strong>로고</strong><em>0</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
             </article>
           </div>
 
-          <!-- Col 4: LB Final — M9 (M5L vs M8W) -->
+          <!-- Col 3: LB Final — M9 (M5L vs M8W) Bo5 -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match">
-              <h3>Match 9 <span>(Bo3)</span></h3>
+              <h3>Match 9 · LB Final <span>(Bo5)</span></h3>
               <div class="bracket-team placeholder"><span class="bracket-seed">M5 패자</span><strong>로고</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗</span><strong>로고</strong><em>0</em></div>
             </article>
           </div>
 
-          <!-- Col 5: empty -->
+          <!-- Col 4, 5: empty -->
+          <div class="bracket-column bracket-empty" aria-hidden="true"></div>
           <div class="bracket-column bracket-empty" aria-hidden="true"></div>
         </div>
 
@@ -283,13 +280,13 @@
                                     = {match, result} → comes from that match's winner/loser */
     var matchLinks = {
       /* M1, M2: both slots seeded → no entry needed */
-      3:  [null,                              {match: 1, result: "winner"}],
-      4:  [null,                              {match: 2, result: "winner"}],
-      5:  [{match: 3, result: "winner"},      {match: 4, result: "winner"}],
-      6:  [{match: 1, result: "loser"},       {match: 2, result: "loser"}],
-      7:  [{match: 4, result: "loser"},       {match: 6, result: "winner"}],
-      8:  [{match: 3, result: "loser"},       {match: 7, result: "winner"}],
-      9:  [{match: 5, result: "loser"},       {match: 8, result: "winner"}],
+      3:  [null,                              {match: 1, result: "winner"}],   // 1위 vs M1W
+      4:  [null,                              {match: 2, result: "winner"}],   // 2위 vs M2W
+      5:  [{match: 3, result: "winner"},      {match: 4, result: "winner"}],   // UB Final
+      6:  [{match: 1, result: "loser"},       {match: 4, result: "loser"}],    // LBR1: M1L vs M4L
+      7:  [{match: 3, result: "loser"},       {match: 2, result: "loser"}],    // LBR1: M3L vs M2L
+      8:  [{match: 6, result: "winner"},      {match: 7, result: "winner"}],   // LBR2: M6W vs M7W
+      9:  [{match: 5, result: "loser"},       {match: 8, result: "winner"}],   // LB Final: M5L vs M8W
       "Grand Finals": [{match: 5, result: "winner"}, {match: 9, result: "winner"}],
     };
 
@@ -492,7 +489,7 @@
       var teamB = (rows[1] && rows[1].dataset.teamName) || "미정";
       var scoreA = (rows[0] && rows[0].querySelector("em") && rows[0].querySelector("em").textContent.trim()) || "0";
       var scoreB = (rows[1] && rows[1].querySelector("em") && rows[1].querySelector("em").textContent.trim()) || "0";
-      var isBo5 = matchId === "Grand Finals" || matchId === "9" || matchId === "5";
+      var isBo5 = matchId === "Grand Finals" || matchId === "9" || matchId === "5"; // 9=LBFinal, 5=UBFinal→GF
       var params = new URLSearchParams({
         date: "Match " + matchId, teamA: teamA, teamB: teamB,
         score: scoreA + " : " + scoreB, from: "ck_split1_playoff",
