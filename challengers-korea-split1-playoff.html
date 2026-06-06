@@ -263,10 +263,22 @@
 
     var SEEDS_KEY = "ck_korea_split1_playoffs_seeds";
     var POOL_KEY  = "ck_korea_split1_pool";
+    var SLOTS_KEY = "ck_korea_split1_slots";
 
     /* 그룹 스테이지 팀 풀 로드 */
     function loadPool() { try { return JSON.parse(localStorage.getItem(POOL_KEY)) || []; } catch(e) { return []; } }
-    function allTeams() { return loadPool(); }
+    /* 참가 팀 슬롯에 배정된 팀 목록 (8팀) */
+    function allTeams() {
+      var pool = loadPool();
+      var slots = [];
+      try { slots = JSON.parse(localStorage.getItem(SLOTS_KEY)) || []; } catch(e) {}
+      /* 슬롯에 배정된 팀만, 풀 객체 매핑 */
+      var assigned = slots.filter(Boolean).map(function(name) {
+        return pool.find(function(t){ return t.name === name; }) || { name: name, code: name.slice(0,4).toUpperCase(), logo: "" };
+      });
+      /* 배정된 팀이 없으면 풀 전체 fallback */
+      return assigned.length ? assigned : pool;
+    }
     function teamCode(t) { return t ? (t.code || t.name.slice(0,4).toUpperCase()) : ""; }
     function teamLogo(t) { return t ? t.logo : ""; }
 
@@ -433,7 +445,7 @@
       var grid = document.getElementById("seed-team-grid");
 
       if (!pool.length) {
-        grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;grid-column:1/-1;">그룹 스테이지에서 팀을 먼저 등록해 주세요.</p>';
+        grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;grid-column:1/-1;">참가 팀에서 팀을 먼저 배정해 주세요.</p>';
       } else {
         grid.innerHTML = pool.map(function(t) {
           var code = teamCode(t);

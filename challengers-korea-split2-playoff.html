@@ -221,8 +221,18 @@
   window.storageReady.then(function () {
     var SEEDS_KEY = "ck_korea_split2_playoffs_seeds";
     var POOL_KEY  = "ck_korea_split2_pool";
+    var SLOTS_KEY = "ck_korea_split2_slots";
 
     function loadPool() { try { return JSON.parse(localStorage.getItem(POOL_KEY)) || []; } catch(e) { return []; } }
+    function allTeams() {
+      var pool = loadPool();
+      var slots = [];
+      try { slots = JSON.parse(localStorage.getItem(SLOTS_KEY)) || []; } catch(e) {}
+      var assigned = slots.filter(Boolean).map(function(name) {
+        return pool.find(function(t){ return t.name===name; }) || { name:name, code:name.slice(0,4).toUpperCase(), logo:"" };
+      });
+      return assigned.length ? assigned : pool;
+    }
     function loadSeeds() { try { return JSON.parse(localStorage.getItem(SEEDS_KEY) || "{}"); } catch(e) { return {}; } }
     function saveSeeds(s) { localStorage.setItem(SEEDS_KEY, JSON.stringify(s)); }
     var seeds = loadSeeds();
@@ -358,10 +368,10 @@
       _seedSlot = slotKey;
       var cur = seeds[slotKey] || "";
       document.getElementById("seed-modal-title").textContent = slotKey + " 슬롯 팀 배치";
-      var pool = loadPool();
+      var pool = allTeams();
       var grid = document.getElementById("seed-team-grid");
       if (!pool.length) {
-        grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;grid-column:1/-1;">그룹 스테이지에서 팀을 먼저 등록해 주세요.</p>';
+        grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;grid-column:1/-1;">참가 팀에서 팀을 먼저 배정해 주세요.</p>';
       } else {
         grid.innerHTML = pool.map(function(t) {
           var src = t.logo; var code = t.code || t.name.slice(0,4).toUpperCase();
