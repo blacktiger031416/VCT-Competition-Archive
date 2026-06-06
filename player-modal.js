@@ -632,9 +632,10 @@
     .pm-agents-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .pm-agent-item {
       display: flex; flex-direction: column; align-items: center; gap: 5px;
-      transition: transform 0.15s;
+      transition: transform 0.15s, opacity 0.15s;
     }
     .pm-agent-item:hover { transform: translateY(-3px); }
+    .pm-agent-clickable { cursor: pointer; }
     .pm-agent-img {
       width: 52px; height: 52px; object-fit: cover; object-position: top center;
       border-radius: 10px;
@@ -1045,30 +1046,68 @@
           '<div class="pm-stat-card"><div class="pm-stat-val">' + avgKD  + '</div><div class="pm-stat-lbl">평균 K/D ' + mapCountLabel + '</div></div>' +
         '</div>';
 
-      /* 사용 요원 집계 */
-      var agentCount = {};
+      /* 사용 요원 집계 + 에이전트별 평균 스탯 */
+      var agentData = {}; /* ag → {count, acsSum, acsN, kdSum, kdN} */
       maps.forEach(function(m) {
         var ag = (m.agent || '').trim();
         if (!ag) return;
-        agentCount[ag] = (agentCount[ag] || 0) + 1;
+        if (!agentData[ag]) agentData[ag] = { count: 0, acsSum: 0, acsN: 0, kdSum: 0, kdN: 0 };
+        agentData[ag].count++;
+        var acs = parseFloat(m.acs);
+        if (!isNaN(acs) && acs > 0) { agentData[ag].acsSum += acs; agentData[ag].acsN++; }
+        var kdParts = (m.kda || '').split('/');
+        var kd = kdParts.length >= 2 ? parseFloat(kdParts[0]) / (parseFloat(kdParts[1]) || 1) : NaN;
+        if (!isNaN(kd)) { agentData[ag].kdSum += kd; agentData[ag].kdN++; }
       });
-      var agentList = Object.keys(agentCount).sort(function(a, b) { return agentCount[b] - agentCount[a]; });
+      var agentList = Object.keys(agentData).sort(function(a, b) { return agentData[b].count - agentData[a].count; });
 
       if (agentList.length) {
         var agentHTML = agentList.map(function(ag) {
           var imgUrl = AGENT_IMGS[ag] || '';
-          var cnt    = agentCount[ag];
-          return '<div class="pm-agent-item">' +
+          var d = agentData[ag];
+          var avgACS = d.acsN ? Math.round(d.acsSum / d.acsN) : null;
+          var avgKD  = d.kdN  ? (d.kdSum / d.kdN).toFixed(2)  : null;
+          var statsAttr = 'data-ag="' + ag.replace(/"/g,'&quot;') + '"' +
+            (avgACS !== null ? ' data-acs="' + avgACS + '"' : '') +
+            (avgKD  !== null ? ' data-kd="'  + avgKD  + '"' : '');
+          return '<div class="pm-agent-item pm-agent-clickable" ' + statsAttr + ' title="' + ag + '">' +
             (imgUrl
-              ? '<img class="pm-agent-img" src="' + imgUrl + '" alt="' + ag + '" title="' + ag + '" />'
+              ? '<img class="pm-agent-img" src="' + imgUrl + '" alt="' + ag + '" />'
               : '<div class="pm-agent-img" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.3)">' + ag + '</div>') +
-            '<span class="pm-agent-count">' + cnt + '</span>' +
+            '<span class="pm-agent-count">' + d.count + '</span>' +
           '</div>';
         }).join('');
 
         agentsWrap.innerHTML =
-          '<div class="pm-section-label">사용 요원</div>' +
-          '<div class="pm-agents-row">' + agentHTML + '</div>';
+          '<div class="pm-section-label">사용 요원 <span style="font-size:10px;font-weight:500;color:rgba(255,255,255,.25);letter-spacing:0">(클릭하면 해당 요원 평균 스탯)</span></div>' +
+          '<div class="pm-agents-row">' + agentHTML + '</div>' +
+          '<div id="pm-agent-stat-box" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;">' +
+            '<span id="pm-agent-stat-name" style="font-size:12px;font-weight:700;color:#f0c040;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;"></span>' +
+            '<div style="display:flex;gap:24px;">' +
+              '<div><div style="font-size:22px;font-weight:900;color:#fff" id="pm-agent-stat-acs">—</div><div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">평균 ACS</div></div>' +
+              '<div><div style="font-size:22px;font-weight:900;color:#fff" id="pm-agent-stat-kd">—</div><div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">평균 K/D</div></div>' +
+            '</div>' +
+          '</div>';
+
+        /* 클릭 이벤트 */
+        agentsWrap.querySelectorAll('.pm-agent-clickable').forEach(function(el) {
+          el.addEventListener('click', function() {
+            var ag  = el.dataset.ag;
+            var acs = el.dataset.acs;
+            var kd  = el.dataset.kd;
+            var box = document.getElementById('pm-agent-stat-box');
+            var isOpen = box.style.display !== 'none' && document.getElementById('pm-agent-stat-name').textContent === ag;
+            /* 같은 요원 다시 클릭하면 닫기 */
+            if (isOpen) { box.style.display = 'none'; return; }
+            document.getElementById('pm-agent-stat-name').textContent = ag;
+            document.getElementById('pm-agent-stat-acs').textContent = acs || '—';
+            document.getElementById('pm-agent-stat-kd').textContent  = kd  || '—';
+            box.style.display = 'block';
+            /* 선택 표시 */
+            agentsWrap.querySelectorAll('.pm-agent-clickable').forEach(function(x) { x.style.opacity = '0.45'; });
+            el.style.opacity = '1';
+          });
+        });
       } else {
         agentsWrap.innerHTML = '';
       }
