@@ -210,10 +210,10 @@
   };
   var STAGE_LABELS = {
     kickoff:        'KickOff',
-    stage1:         'Stage 1',
-    stage1playoffs: 'Stage 1 Playoffs',
-    stage2:         'Stage 2',
-    stage2playoffs: 'Stage 2 Playoffs',
+    stage1:         'Stage 1',        /* Stage 1 + Stage 1 Playoffs 통합 */
+    stage1playoffs: 'Stage 1',        /* → stage1과 같은 라벨로 병합 */
+    stage2:         'Stage 2',        /* Stage 2 + Stage 2 Playoffs 통합 */
+    stage2playoffs: 'Stage 2',        /* → stage2와 같은 라벨로 병합 */
     swiss:          'Swiss',
     playoffs:       'Playoffs',
     groupstage:     'Group Stage',
@@ -222,6 +222,13 @@
     ck_split1_po:   'Split 1 Playoff',
     ck_split2_po:   'Split 2 Playoff',
   };
+
+  /* stage 정규화: Playoffs를 부모 Stage로 묶음 */
+  function normalizeStage(s) {
+    if (s === 'stage1playoffs') return 'stage1';
+    if (s === 'stage2playoffs') return 'stage2';
+    return s || '';
+  }
 
   /* league + tournament + stage → 표시용 라벨 */
   function buildGroupLabel(league, tournament, stage) {
@@ -279,14 +286,16 @@
     var order  = [];
     var groups = {};
     allMaps.forEach(function(m) {
-      var key = (m.league || '') + '|' + (m.tournament || '') + '|' + (m.stage || '');
+      /* stage1playoffs → stage1, stage2playoffs → stage2 로 병합 */
+      var ns = normalizeStage(m.stage);
+      var key = (m.league || '') + '|' + (m.tournament || '') + '|' + ns;
       if (!groups[key]) {
         groups[key] = {
           key:        key,
           league:     m.league      || '',
           tournament: m.tournament  || '',
-          stage:      m.stage       || '',
-          label:      buildGroupLabel(m.league, m.tournament, m.stage),
+          stage:      ns,
+          label:      buildGroupLabel(m.league, m.tournament, ns),
           count:      0,
         };
         order.push(key);
@@ -809,7 +818,7 @@
     var knownKeySet = {};
     groups.forEach(function(g) { knownKeySet[g.key] = true; });
     var recognizedCount = allMaps.filter(function(m) {
-      return knownKeySet[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
+      return knownKeySet[(m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage)];
     }).length;
 
     var items = [{ key: 'all', label: '전체', count: recognizedCount }].concat(groups);
@@ -994,7 +1003,7 @@
     var maps = _activeFilter === 'all'
       ? recognizedMaps  // 기타 맵 제외
       : allMaps.filter(function(m) {
-          var key = (m.league || '') + '|' + (m.tournament || '') + '|' + (m.stage || '');
+          var key = (m.league || '') + '|' + (m.tournament || '') + '|' + normalizeStage(m.stage);
           return key === _activeFilter;
         });
 
