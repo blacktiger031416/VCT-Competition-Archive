@@ -385,6 +385,154 @@
       .team-name { font-size:17px; }
       .picker-grid { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); }
     }
+
+    /* ── Compare Analysis Modal ── */
+    .compare-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      height:26px; padding:0 10px;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:4px;
+      color:rgba(255,255,255,.52); font-family:inherit; font-size:11px; font-weight:700;
+      cursor:pointer; transition:all .14s; white-space:nowrap; flex-shrink:0;
+    }
+    .compare-btn:hover { background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.22); color:rgba(255,255,255,.85); }
+
+    .cm-modal {
+      position:fixed; inset:0; z-index:9800;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cm-modal[hidden] { display:none; }
+    .cm-backdrop {
+      position:absolute; inset:0;
+      background:rgba(4,6,12,.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    }
+    .cm-panel {
+      position:relative; z-index:1;
+      width:min(820px,calc(100vw - 28px));
+      max-height:min(700px,calc(100vh - 48px));
+      display:flex; flex-direction:column;
+      background:#0e1420;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:12px;
+      box-shadow:0 40px 120px rgba(0,0,0,.85);
+      overflow:hidden;
+      animation:cmIn .2s cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes cmIn { from{opacity:0;transform:scale(.96) translateY(12px)} to{opacity:1;transform:none} }
+
+    .cm-header {
+      display:flex; align-items:center; gap:8px;
+      padding:16px 20px 14px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0; position:relative;
+    }
+    .cm-team {
+      flex:1; display:flex; align-items:center; gap:10px;
+      font-size:15px; font-weight:900; color:#fff;
+    }
+    .cm-team img { width:36px; height:36px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .cm-team-logo-placeholder {
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-size:14px; font-weight:900; color:rgba(255,255,255,.4); flex-shrink:0;
+    }
+    .cm-team:last-of-type { flex-direction:row-reverse; text-align:right; }
+    .cm-vs {
+      font-size:13px; font-weight:900; color:rgba(255,255,255,.2);
+      letter-spacing:.08em; flex-shrink:0; padding:0 6px;
+    }
+    .cm-close {
+      position:absolute; top:14px; right:16px;
+      width:28px; height:28px; display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,.1); border-radius:4px;
+      background:rgba(255,255,255,.05); color:rgba(255,255,255,.45);
+      font-size:18px; cursor:pointer; transition:all .12s; line-height:1;
+    }
+    .cm-close:hover { background:rgba(255,255,255,.12); color:#fff; }
+
+    .cm-tabs {
+      display:flex; gap:2px;
+      padding:0 20px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
+    }
+    .cm-tab {
+      position:relative; padding:11px 18px;
+      border:none; background:none; border-radius:4px 4px 0 0;
+      font-family:inherit; font-size:13px; font-weight:700;
+      color:rgba(255,255,255,.35); cursor:pointer; transition:color .15s;
+    }
+    .cm-tab:hover { color:rgba(255,255,255,.72); }
+    .cm-tab.active { color:#f0c040; }
+    .cm-tab.active::after {
+      content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+      background:#f0c040; border-radius:2px 2px 0 0;
+    }
+
+    .cm-filter {
+      display:flex; flex-wrap:wrap; gap:6px;
+      padding:12px 20px 10px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      flex-shrink:0;
+    }
+    .cm-filter-btn {
+      height:26px; padding:0 10px; border:1px solid rgba(255,255,255,.1); border-radius:13px;
+      background:rgba(255,255,255,.04);
+      font-family:inherit; font-size:11px; font-weight:700; color:rgba(255,255,255,.38);
+      cursor:pointer; transition:all .13s; white-space:nowrap;
+    }
+    .cm-filter-btn:hover { background:rgba(255,255,255,.09); color:rgba(255,255,255,.72); border-color:rgba(255,255,255,.2); }
+    .cm-filter-btn.active { background:rgba(240,192,64,.15); border-color:rgba(240,192,64,.35); color:#f0c040; }
+
+    .cm-content {
+      flex:1; overflow-y:auto; padding:18px 20px 24px;
+    }
+
+    .cm-player-table {
+      width:100%; border-collapse:collapse;
+    }
+    .cm-player-table th {
+      font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      color:rgba(255,255,255,.25); padding:0 10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .cm-player-table th.cm-th-left { text-align:left; }
+    .cm-player-table th.cm-th-right { text-align:right; }
+    .cm-player-table th.cm-th-center { text-align:center; }
+    .cm-player-table td {
+      padding:9px 10px; border-bottom:1px solid rgba(255,255,255,.04);
+      font-size:13px; vertical-align:middle;
+    }
+    .cm-player-table tr:last-child td { border-bottom:none; }
+    .cm-player-table .cm-td-avg { font-weight:900; background:rgba(255,255,255,.02); }
+    .cm-player-name { font-weight:700; color:#f0f0f0; }
+    .cm-player-name.cm-right { text-align:right; }
+    .cm-stat { color:rgba(255,255,255,.55); font-size:12px; }
+    .cm-stat-hi { color:#f0c040; font-weight:700; }
+    .cm-stat-lo { color:rgba(255,255,255,.28); }
+    .cm-no-data { padding:32px 0; text-align:center; color:rgba(255,255,255,.28); font-size:13px; }
+
+    .cm-wr-section { margin-bottom:24px; }
+    .cm-wr-label {
+      font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+      color:rgba(255,255,255,.28); margin-bottom:10px;
+    }
+    .cm-wr-row {
+      display:grid; grid-template-columns:1fr auto 1fr;
+      align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .cm-wr-team-label { font-size:13px; font-weight:700; }
+    .cm-wr-team-label.left  { text-align:right; color:#7eb8ff; }
+    .cm-wr-team-label.right { text-align:left;  color:#ff9f7a; }
+    .cm-wr-bar-wrap {
+      display:grid; grid-template-columns:1fr 1fr;
+      height:16px; border-radius:8px; overflow:hidden; min-width:140px;
+    }
+    .cm-wr-bar-a { background:#7eb8ff; height:100%; border-radius:8px 0 0 8px; transition:width .3s; }
+    .cm-wr-bar-b { background:#ff9f7a; height:100%; border-radius:0 8px 8px 0; transition:width .3s; }
+    .cm-wr-pct-a { font-size:13px; font-weight:700; color:#7eb8ff; text-align:right; }
+    .cm-wr-pct-b { font-size:13px; font-weight:700; color:#ff9f7a; }
+    .cm-wr-rank { font-size:11px; color:rgba(255,255,255,.28); margin-top:3px; text-align:center; }
   </style>
 </head>
 <body>
@@ -515,6 +663,25 @@
       <div id="hof-content"></div>
     </div>
 
+  </div>
+
+  <!-- ── Compare Analysis Modal ── -->
+  <div id="cm-modal" class="cm-modal" hidden>
+    <div class="cm-backdrop" id="cm-backdrop"></div>
+    <div class="cm-panel" role="dialog" aria-modal="true" aria-label="비교 분석">
+      <div class="cm-header">
+        <div class="cm-team" id="cm-team-a"></div>
+        <div class="cm-vs">VS</div>
+        <div class="cm-team" id="cm-team-b"></div>
+        <button class="cm-close" id="cm-close" aria-label="닫기">×</button>
+      </div>
+      <div class="cm-tabs">
+        <button class="cm-tab active" data-tab="players">선수 스탯</button>
+        <button class="cm-tab" data-tab="winrates">팀 승률</button>
+      </div>
+      <div class="cm-filter" id="cm-filter"></div>
+      <div class="cm-content" id="cm-content"></div>
+    </div>
   </div>
 
   <script src="./auth.js"></script>
@@ -1132,6 +1299,7 @@
           }
         }
       }
+      metaHtml += '<button class="compare-btn" data-t1="' + esc(match.team1) + '" data-t2="' + esc(match.team2) + '" data-l1="' + esc(match.logo1 || '') + '" data-l2="' + esc(match.logo2 || '') + '">🔍 비교 분석</button>';
       metaHtml += '</div>';
 
       /* bet input */
@@ -1333,6 +1501,510 @@
     function esc(s) {
       return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
+
+    /* ── Compare Analysis Modal ── */
+    var cmState = { t1: '', t2: '', logo1: '', logo2: '', tab: 'players', filter: 'all' };
+
+    /* Build match-level index from vct_p:* data: { matchKey -> { league, stage, tournament } } */
+    function buildMlIdx() {
+      var idx = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || k.indexOf('vct_p:') !== 0) continue;
+        try {
+          var pdata = JSON.parse(localStorage.getItem(k));
+          if (!pdata || !Array.isArray(pdata.maps)) continue;
+          pdata.maps.forEach(function (m) {
+            if (m.matchKey) {
+              idx[m.matchKey] = {
+                league: m.league || '',
+                stage: m.stage || '',
+                tournament: m.tournament || ''
+              };
+            }
+          });
+        } catch (_) {}
+      }
+      return idx;
+    }
+
+    /* Build filter options from vct_p data */
+    function buildFilterOptions() {
+      var seen = { all: true };
+      var opts = [{ key: 'all', label: '전체' }];
+      var leagueMap = {
+        pacific: 'Pacific', americas: 'Americas', emea: 'EMEA', cn: 'CN'
+      };
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || k.indexOf('vct_p:') !== 0) continue;
+        try {
+          var pdata = JSON.parse(localStorage.getItem(k));
+          if (!pdata || !Array.isArray(pdata.maps)) continue;
+          pdata.maps.forEach(function (m) {
+            var lg = (m.league || '').toLowerCase();
+            var tourn = (m.tournament || '').toLowerCase();
+            var stage = (m.stage || '').toLowerCase();
+            // league-level
+            if (lg && leagueMap[lg] && !seen[lg]) {
+              seen[lg] = true;
+              opts.push({ key: lg, label: leagueMap[lg] });
+            }
+            // tournament-level (masters / champions)
+            var tKey = '';
+            if (tourn.indexOf('masters') !== -1) {
+              if (tourn.indexOf('santiago') !== -1 || stage.indexOf('santiago') !== -1) tKey = 'masters|santiago';
+              else if (tourn.indexOf('london') !== -1 || stage.indexOf('london') !== -1) tKey = 'masters|london';
+              else if (tourn.indexOf('bangkok') !== -1 || stage.indexOf('bangkok') !== -1) tKey = 'masters|bangkok';
+              else tKey = 'masters|' + (tourn.replace('masters','').trim() || 'other');
+            } else if (tourn.indexOf('champions') !== -1) {
+              tKey = 'champions';
+            }
+            if (tKey && !seen[tKey]) {
+              seen[tKey] = true;
+              var tLabel = tKey.charAt(0).toUpperCase() + tKey.slice(1).replace('|',' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+              opts.push({ key: tKey, label: tLabel });
+            }
+          });
+        } catch (_) {}
+      }
+      return opts;
+    }
+
+    /* Check if a map entry passes the current filter */
+    function passesFilter(m, filter) {
+      if (filter === 'all') return true;
+      var lg = (m.league || '').toLowerCase();
+      var tourn = (m.tournament || '').toLowerCase();
+      var stage = (m.stage || '').toLowerCase();
+      if (filter === 'pacific' || filter === 'americas' || filter === 'emea' || filter === 'cn') {
+        return lg === filter;
+      }
+      if (filter === 'champions') return tourn.indexOf('champions') !== -1;
+      if (filter.indexOf('masters|') === 0) {
+        var city = filter.split('|')[1];
+        return tourn.indexOf('masters') !== -1 && (tourn.indexOf(city) !== -1 || stage.indexOf(city) !== -1);
+      }
+      return true;
+    }
+
+    /* Get roster players for a team */
+    function getPlayers(team) {
+      try {
+        var r = JSON.parse(localStorage.getItem('vct_roster:' + team));
+        if (!r) return [];
+        return (r.main || []).concat(r.subs || []);
+      } catch (_) { return []; }
+    }
+
+    /* Get avg stats for a player under filter */
+    function getPlayerStats(name, filter) {
+      try {
+        var pdata = JSON.parse(localStorage.getItem('vct_p:' + name));
+        if (!pdata || !Array.isArray(pdata.maps) || !pdata.maps.length) return null;
+        var maps = pdata.maps.filter(function (m) { return passesFilter(m, filter); });
+        if (!maps.length) return null;
+        var totalAcs = 0, totalKd = 0, cnt = 0;
+        maps.forEach(function (m) {
+          var acs = parseFloat(m.acs) || 0;
+          var kda = m.kda || '';
+          var parts = String(kda).split('/');
+          var k = parseFloat(parts[0]) || 0;
+          var d = parseFloat(parts[1]) || 1;
+          totalAcs += acs;
+          totalKd  += (d > 0 ? k / d : k);
+          cnt++;
+        });
+        return { acs: cnt > 0 ? totalAcs / cnt : 0, kd: cnt > 0 ? totalKd / cnt : 0, maps: cnt };
+      } catch (_) { return null; }
+    }
+
+    /* Render players tab */
+    function renderPlayersTab(t1, t2, filter) {
+      var players1 = getPlayers(t1);
+      var players2 = getPlayers(t2);
+
+      if (!players1.length && !players2.length) {
+        return '<div class="cm-no-data">선수 데이터를 찾을 수 없습니다.<br>localStorage에 <code>vct_roster:' + esc(t1) + '</code> / <code>vct_roster:' + esc(t2) + '</code> 키가 있어야 합니다.</div>';
+      }
+
+      /* Build stats arrays */
+      function buildRows(players) {
+        return players.map(function (name) {
+          var s = getPlayerStats(name, filter);
+          return { name: name, acs: s ? s.acs : null, kd: s ? s.kd : null, maps: s ? s.maps : 0 };
+        }).filter(function (r) { return r.acs !== null; })
+          .sort(function (a, b) { return b.acs - a.acs; });
+      }
+
+      var rows1 = buildRows(players1);
+      var rows2 = buildRows(players2);
+
+      function avg(rows, key) {
+        if (!rows.length) return null;
+        var s = rows.reduce(function (a, r) { return a + (r[key] || 0); }, 0);
+        return s / rows.length;
+      }
+
+      var avgAcs1 = avg(rows1, 'acs'), avgKd1 = avg(rows1, 'kd');
+      var avgAcs2 = avg(rows2, 'acs'), avgKd2 = avg(rows2, 'kd');
+
+      var maxRows = Math.max(rows1.length, rows2.length, 1);
+
+      var html = '<table class="cm-player-table">';
+      html += '<thead><tr>' +
+        '<th class="cm-th-left" colspan="3">' + esc(t1) + '</th>' +
+        '<th class="cm-th-center" style="width:20px"></th>' +
+        '<th class="cm-th-right" colspan="3">' + esc(t2) + '</th>' +
+      '</tr><tr>' +
+        '<th class="cm-th-left">선수</th><th class="cm-th-right">ACS</th><th class="cm-th-right">K/D</th>' +
+        '<th class="cm-th-center"></th>' +
+        '<th class="cm-th-left">선수</th><th class="cm-th-right">ACS</th><th class="cm-th-right">K/D</th>' +
+      '</tr></thead><tbody>';
+
+      for (var ri = 0; ri < maxRows; ri++) {
+        var r1 = rows1[ri] || null;
+        var r2 = rows2[ri] || null;
+
+        function fmtAcs(v) { return v !== null && v !== undefined ? Math.round(v) : '—'; }
+        function fmtKd(v)  { return v !== null && v !== undefined ? v.toFixed(2) : '—'; }
+
+        html += '<tr>';
+        if (r1) {
+          html += '<td class="cm-player-name">' + esc(r1.name) + '</td>' +
+            '<td class="cm-stat" style="text-align:right">' + fmtAcs(r1.acs) + '</td>' +
+            '<td class="cm-stat" style="text-align:right">' + fmtKd(r1.kd) + '</td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+        html += '<td></td>';
+        if (r2) {
+          html += '<td class="cm-player-name">' + esc(r2.name) + '</td>' +
+            '<td class="cm-stat" style="text-align:right">' + fmtAcs(r2.acs) + '</td>' +
+            '<td class="cm-stat" style="text-align:right">' + fmtKd(r2.kd) + '</td>';
+        } else {
+          html += '<td colspan="3"></td>';
+        }
+        html += '</tr>';
+      }
+
+      /* Average row */
+      var aAcs1 = avgAcs1 !== null ? Math.round(avgAcs1) : '—';
+      var aKd1  = avgKd1  !== null ? avgKd1.toFixed(2)   : '—';
+      var aAcs2 = avgAcs2 !== null ? Math.round(avgAcs2) : '—';
+      var aKd2  = avgKd2  !== null ? avgKd2.toFixed(2)   : '—';
+
+      /* Highlight higher values */
+      var acsHi = (avgAcs1 !== null && avgAcs2 !== null) ? (avgAcs1 >= avgAcs2 ? '1' : '2') : '0';
+      var kdHi  = (avgKd1  !== null && avgKd2  !== null) ? (avgKd1  >= avgKd2  ? '1' : '2') : '0';
+
+      html += '<tr class="cm-td-avg" style="border-top:1px solid rgba(255,255,255,.08)">' +
+        '<td class="cm-player-name" style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em">팀 평균</td>' +
+        '<td style="text-align:right" class="' + (acsHi === '1' ? 'cm-stat-hi' : 'cm-stat') + '">' + aAcs1 + '</td>' +
+        '<td style="text-align:right"  class="' + (kdHi  === '1' ? 'cm-stat-hi' : 'cm-stat') + '">' + aKd1  + '</td>' +
+        '<td></td>' +
+        '<td class="cm-player-name" style="font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em">팀 평균</td>' +
+        '<td style="text-align:right" class="' + (acsHi === '2' ? 'cm-stat-hi' : 'cm-stat') + '">' + aAcs2 + '</td>' +
+        '<td style="text-align:right"  class="' + (kdHi  === '2' ? 'cm-stat-hi' : 'cm-stat') + '">' + aKd2  + '</td>' +
+      '</tr>';
+
+      html += '</tbody></table>';
+
+      if (!rows1.length && !rows2.length) {
+        return '<div class="cm-no-data">현재 필터에 해당하는 선수 데이터가 없습니다.</div>';
+      }
+
+      return html;
+    }
+
+    /* Render win rates tab */
+    function renderWinratesTab(t1, t2, filter) {
+      var mlIdx = buildMlIdx();
+
+      /* Tally win-rate data for all teams */
+      /* teamStats[teamName] = { pistolW, pistolT, atkW, atkT, defW, defT } */
+      var teamStats = {};
+
+      function ensureTeam(n) {
+        if (!teamStats[n]) teamStats[n] = { pistolW:0, pistolT:0, atkW:0, atkT:0, defW:0, defT:0 };
+      }
+
+      for (var i = 0; i < localStorage.length; i++) {
+        var rk = localStorage.key(i);
+        if (!rk || rk.indexOf('rounds:') !== 0) continue;
+
+        /* parse key: rounds:MATCH_KEY:mapIdx */
+        var withoutPrefix = rk.slice('rounds:'.length);
+        /* matchKey can contain colons if it has time, so mapIdx is the last segment */
+        var lastColon = withoutPrefix.lastIndexOf(':');
+        if (lastColon < 0) continue;
+        var matchKey = withoutPrefix.slice(0, lastColon);
+        var mapIdx   = withoutPrefix.slice(lastColon + 1);
+
+        /* Apply filter based on mlIdx */
+        var mlEntry = mlIdx[matchKey] || {};
+        var fakeMap = { league: mlEntry.league || '', tournament: mlEntry.tournament || '', stage: mlEntry.stage || '' };
+        if (!passesFilter(fakeMap, filter)) continue;
+
+        /* Determine teamA / teamB from matchKey (format: date|teamA|teamB or YYYYMMDD_teamA_teamB etc.) */
+        var parts = matchKey.split('|');
+        var teamA = '', teamB = '';
+        if (parts.length >= 3) {
+          teamA = parts[1];
+          teamB = parts[2];
+        } else {
+          /* fallback: try players: key */
+          try {
+            var pslot = JSON.parse(localStorage.getItem('players:' + matchKey + ':' + mapIdx));
+            if (pslot) {
+              teamA = (pslot.a0 && pslot.a0.team) ? pslot.a0.team : '';
+              teamB = (pslot.b0 && pslot.b0.team) ? pslot.b0.team : '';
+            }
+          } catch (_) {}
+        }
+        if (!teamA || !teamB) continue;
+
+        /* Determine starting sides from stats: key */
+        var aStart = 'atk'; // default
+        try {
+          var statsData = JSON.parse(localStorage.getItem('stats:' + matchKey + ':' + mapIdx));
+          if (statsData && statsData.aStart) aStart = statsData.aStart;
+        } catch (_) {}
+
+        var rounds = [];
+        try { rounds = JSON.parse(localStorage.getItem(rk)) || []; } catch (_) { continue; }
+        if (!Array.isArray(rounds) || !rounds.length) continue;
+
+        ensureTeam(teamA); ensureTeam(teamB);
+
+        rounds.forEach(function (r, ri) {
+          var winner = r.winner; // "a" or "b"
+          if (!winner) return;
+
+          /* Determine sides for this round */
+          var half = ri < 12 ? 0 : 1;
+          var aSide, bSide;
+          if (half === 0) {
+            aSide = aStart;
+            bSide = aStart === 'atk' ? 'def' : 'atk';
+          } else {
+            aSide = aStart === 'atk' ? 'def' : 'atk';
+            bSide = aStart === 'atk' ? 'atk' : 'def';
+          }
+
+          /* Pistol rounds: index 0 and 12 */
+          var isPistol = (ri === 0 || ri === 12);
+
+          /* Tally for teamA */
+          if (aSide === 'atk') {
+            teamStats[teamA].atkT++;
+            if (winner === 'a') teamStats[teamA].atkW++;
+          } else {
+            teamStats[teamA].defT++;
+            if (winner === 'a') teamStats[teamA].defW++;
+          }
+          if (isPistol) {
+            teamStats[teamA].pistolT++;
+            if (winner === 'a') teamStats[teamA].pistolW++;
+          }
+
+          /* Tally for teamB */
+          if (bSide === 'atk') {
+            teamStats[teamB].atkT++;
+            if (winner === 'b') teamStats[teamB].atkW++;
+          } else {
+            teamStats[teamB].defT++;
+            if (winner === 'b') teamStats[teamB].defW++;
+          }
+          if (isPistol) {
+            teamStats[teamB].pistolT++;
+            if (winner === 'b') teamStats[teamB].pistolW++;
+          }
+        });
+      }
+
+      function rate(w, t) { return t > 0 ? w / t : null; }
+
+      /* Build ranking list for a metric */
+      function rankTeams(metric) {
+        return Object.keys(teamStats)
+          .map(function (n) {
+            var s = teamStats[n];
+            var r;
+            if (metric === 'pistol') r = rate(s.pistolW, s.pistolT);
+            else if (metric === 'atk') r = rate(s.atkW, s.atkT);
+            else r = rate(s.defW, s.defT);
+            return { name: n, rate: r };
+          })
+          .filter(function (x) { return x.rate !== null; })
+          .sort(function (a, b) { return b.rate - a.rate; });
+      }
+
+      function getRank(list, name) {
+        var idx = list.findIndex(function (x) { return x.name === name; });
+        return idx >= 0 ? idx + 1 : null;
+      }
+
+      var pistolRanks = rankTeams('pistol');
+      var atkRanks    = rankTeams('atk');
+      var defRanks    = rankTeams('def');
+      var total = Object.keys(teamStats).length;
+
+      var s1 = teamStats[t1] || null;
+      var s2 = teamStats[t2] || null;
+
+      if (!s1 && !s2) {
+        return '<div class="cm-no-data">해당 팀의 라운드 데이터를 찾을 수 없습니다.<br>localStorage에 <code>rounds:*</code> 키가 있어야 합니다.</div>';
+      }
+
+      function pct(v) { return v !== null ? Math.round(v * 100) : null; }
+
+      function renderBar(metric) {
+        var labels = { pistol: '피스톨 라운드', atk: '공격 측', def: '수비 측' };
+        var r1, r2, ranks;
+        if (metric === 'pistol') {
+          r1 = s1 ? rate(s1.pistolW, s1.pistolT) : null;
+          r2 = s2 ? rate(s2.pistolW, s2.pistolT) : null;
+          ranks = pistolRanks;
+        } else if (metric === 'atk') {
+          r1 = s1 ? rate(s1.atkW, s1.atkT) : null;
+          r2 = s2 ? rate(s2.atkW, s2.atkT) : null;
+          ranks = atkRanks;
+        } else {
+          r1 = s1 ? rate(s1.defW, s1.defT) : null;
+          r2 = s2 ? rate(s2.defW, s2.defT) : null;
+          ranks = defRanks;
+        }
+
+        var p1 = pct(r1), p2 = pct(r2);
+        var pctA = p1 !== null ? p1 : 0;
+        var pctB = p2 !== null ? p2 : 0;
+        var total2 = pctA + pctB;
+        var barA = total2 > 0 ? Math.round(pctA / total2 * 100) : 50;
+        var barB = 100 - barA;
+
+        var rankA = getRank(ranks, t1);
+        var rankB = getRank(ranks, t2);
+        var rankStr = '전체 ' + total + '팀 중 ';
+        if (rankA !== null) rankStr += esc(t1) + ' ' + rankA + '위';
+        if (rankA !== null && rankB !== null) rankStr += ' / ';
+        if (rankB !== null) rankStr += esc(t2) + ' ' + rankB + '위';
+
+        return '<div class="cm-wr-section">' +
+          '<div class="cm-wr-label">' + labels[metric] + ' 승률</div>' +
+          '<div class="cm-wr-row">' +
+            '<div class="cm-wr-pct-a cm-wr-team-label left">' + (p1 !== null ? p1 + '%' : '—') + '</div>' +
+            '<div class="cm-wr-bar-wrap">' +
+              '<div class="cm-wr-bar-a" style="width:' + barA + '%"></div>' +
+              '<div class="cm-wr-bar-b" style="width:' + barB + '%"></div>' +
+            '</div>' +
+            '<div class="cm-wr-pct-b cm-wr-team-label right">' + (p2 !== null ? p2 + '%' : '—') + '</div>' +
+          '</div>' +
+          '<div class="cm-wr-rank">' + rankStr + '</div>' +
+        '</div>';
+      }
+
+      var html = '<div style="display:flex;gap:8px;align-items:center;margin-bottom:20px;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:6px;">' +
+        '<div style="width:16px;height:16px;background:#7eb8ff;border-radius:3px;flex-shrink:0"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:#7eb8ff">' + esc(t1) + '</span>' +
+        '<div style="width:16px;height:16px;background:#ff9f7a;border-radius:3px;flex-shrink:0;margin-left:12px"></div>' +
+        '<span style="font-size:13px;font-weight:700;color:#ff9f7a">' + esc(t2) + '</span>' +
+      '</div>';
+
+      html += renderBar('pistol');
+      html += renderBar('atk');
+      html += renderBar('def');
+
+      return html;
+    }
+
+    /* Render modal content */
+    function cmRenderContent() {
+      var t1 = cmState.t1, t2 = cmState.t2, filter = cmState.filter, tab = cmState.tab;
+      var contentEl = document.getElementById('cm-content');
+      if (tab === 'players') {
+        contentEl.innerHTML = renderPlayersTab(t1, t2, filter);
+      } else {
+        contentEl.innerHTML = renderWinratesTab(t1, t2, filter);
+      }
+    }
+
+    /* Build filter bar */
+    function cmBuildFilter() {
+      var filterEl = document.getElementById('cm-filter');
+      var opts = buildFilterOptions();
+      filterEl.innerHTML = opts.map(function (o) {
+        return '<button class="cm-filter-btn' + (cmState.filter === o.key ? ' active' : '') + '" data-fkey="' + esc(o.key) + '">' + esc(o.label) + '</button>';
+      }).join('');
+      filterEl.querySelectorAll('.cm-filter-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          cmState.filter = btn.dataset.fkey;
+          filterEl.querySelectorAll('.cm-filter-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          cmRenderContent();
+        });
+      });
+    }
+
+    /* Team header HTML */
+    function cmTeamHtml(name, logo, alignRight) {
+      var logoHtml = logo
+        ? '<img src="' + esc(logo) + '" alt="" onerror="this.style.opacity=\'0.2\'">'
+        : '<div class="cm-team-logo-placeholder">' + esc((name || '?').charAt(0).toUpperCase()) + '</div>';
+      return logoHtml + '<span>' + esc(name) + '</span>';
+    }
+
+    /* Open modal */
+    function openCompareModal(t1, t2, logo1, logo2) {
+      cmState.t1 = t1; cmState.t2 = t2;
+      cmState.logo1 = logo1; cmState.logo2 = logo2;
+      cmState.tab = 'players'; cmState.filter = 'all';
+
+      document.getElementById('cm-team-a').innerHTML = cmTeamHtml(t1, logo1, false);
+      document.getElementById('cm-team-b').innerHTML = cmTeamHtml(t2, logo2, true);
+
+      /* Reset tabs */
+      document.querySelectorAll('.cm-tab').forEach(function (t) {
+        t.classList.toggle('active', t.dataset.tab === 'players');
+      });
+
+      cmBuildFilter();
+      cmRenderContent();
+
+      document.getElementById('cm-modal').removeAttribute('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    /* Close modal */
+    function closeCompareModal() {
+      document.getElementById('cm-modal').setAttribute('hidden', '');
+      document.body.style.overflow = '';
+    }
+
+    /* Modal events */
+    document.getElementById('cm-close').addEventListener('click', closeCompareModal);
+    document.getElementById('cm-backdrop').addEventListener('click', closeCompareModal);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !document.getElementById('cm-modal').hasAttribute('hidden')) {
+        closeCompareModal();
+      }
+    });
+
+    document.querySelectorAll('.cm-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        cmState.tab = tab.dataset.tab;
+        document.querySelectorAll('.cm-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        cmRenderContent();
+      });
+    });
+
+    /* Event delegation: compare button clicks on matches-list */
+    document.getElementById('matches-list').addEventListener('click', function (e) {
+      var btn = e.target.closest('.compare-btn');
+      if (!btn) return;
+      openCompareModal(btn.dataset.t1, btn.dataset.t2, btn.dataset.l1, btn.dataset.l2);
+    });
   })();
   </script>
 </body>
