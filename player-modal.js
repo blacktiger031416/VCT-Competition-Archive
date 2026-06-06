@@ -572,6 +572,13 @@
     .pm-tag-row {
       display: flex; gap: 6px; padding: 0 20px 12px; flex-wrap: wrap;
     }
+    .pm-del-group-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; padding: 2px 4px; border-radius: 4px;
+      color: rgba(255,80,80,0.45); transition: color 0.12s, background 0.12s;
+      line-height: 1;
+    }
+    .pm-del-group-btn:hover { color: #ff6b6b; background: rgba(255,80,80,0.1); }
     .pm-tag-btn {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
@@ -842,10 +849,14 @@
           }).join('') +
         '</div>';
       }
+      var delBtn = (admin && g.key !== 'all')
+        ? '<button class="pm-del-group-btn" data-del-key="' + g.key + '" title="이 기간 데이터 삭제 (Admin)">🗑</button>'
+        : '';
       return '<div class="pm-filter-item' + (isSel ? ' pm-fi-selected' : '') + '" data-key="' + g.key + '">' +
         '<span class="pm-filter-item-label">' + g.label + (needsTag ? ' <span style="font-size:11px;color:rgba(255,180,60,0.7);font-weight:600">(미상)</span>' : '') + '</span>' +
         '<div class="pm-filter-item-right">' +
           '<span class="pm-filter-item-maps">' + g.count + '맵</span>' +
+          delBtn +
           '<span class="pm-filter-item-check">' + (isSel ? '✓' : '') + '</span>' +
         '</div>' +
       '</div>' + tagRow;
@@ -856,6 +867,27 @@
         _activeFilter = item.dataset.key;
         closeFilterPopup();
         render();
+      });
+    });
+
+    // 어드민: 기간 데이터 삭제 버튼
+    listEl.querySelectorAll('.pm-del-group-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var groupKey = btn.dataset.delKey; // "league|tournament|normalizedStage"
+        if (!confirm('이 기간의 모든 데이터를 삭제하시겠습니까?\n(' + groupKey + ')')) return;
+        var pd = loadVctp(_current.name);
+        var before = pd.maps.length;
+        pd.maps = pd.maps.filter(function(m) {
+          var k = (m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage);
+          return k !== groupKey;
+        });
+        if (pd.maps.length !== before) {
+          saveVctp(_current.name, pd);
+          closeFilterPopup();
+          if (_activeFilter === groupKey) _activeFilter = 'all';
+          render();
+        }
       });
     });
 
