@@ -434,7 +434,7 @@
       var sa = (rows[0] && rows[0].querySelector("em") && rows[0].querySelector("em").textContent) || "0";
       var sb = (rows[1] && rows[1].querySelector("em") && rows[1].querySelector("em").textContent) || "0";
       var q = new URLSearchParams({date:"Match "+mid,teamA:ta,teamB:tb,score:sa+" : "+sb,from:"ck_split2_playoff"});
-      if (mid === "GF") q.set("bo5","1");
+      if (mid === "GF") { q.set("bo5","1"); q.set("gf","1"); } /* 상위조 2밴+첫픽 특별 밴픽 */
       window.location.href = "./challengers-korea-match-dark.html?" + q.toString();
     }
 

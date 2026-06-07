@@ -517,12 +517,14 @@
       var teamB = (rows[1] && rows[1].dataset.teamName) || "미정";
       var scoreA = (rows[0] && rows[0].querySelector("em") && rows[0].querySelector("em").textContent.trim()) || "0";
       var scoreB = (rows[1] && rows[1].querySelector("em") && rows[1].querySelector("em").textContent.trim()) || "0";
-      var isBo5 = matchId === "Grand Finals" || matchId === "9"; // 9=LBFinal(실제는Bo3이지만GF진출전)
+      var isBo5 = matchId === "Grand Finals";
+      var isGF  = matchId === "Grand Finals";  /* 상위조 2밴 + 첫 픽 특별 밴픽 */
       var params = new URLSearchParams({
         date: "Match " + matchId, teamA: teamA, teamB: teamB,
         score: scoreA + " : " + scoreB, from: "ck_split1_playoff",
       });
       if (isBo5) params.set("bo5", "1");
+      if (isGF)  params.set("gf",  "1");
       window.location.href = "./challengers-korea-match-dark.html?" + params.toString();
     }
 
