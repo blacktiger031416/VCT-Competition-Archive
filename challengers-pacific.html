@@ -77,31 +77,6 @@
       .challengers-card { cursor: pointer; }
       .challengers-card::before { display: none; }
       .challengers-card { background: linear-gradient(145deg, rgba(1,210,215,.3), rgba(1,210,215,.07)), #081e22; }
-      .lock-badge { position: absolute; top: 10px; right: 10px; z-index: 2;
-        padding: 3px 9px; border-radius: 4px; background: rgba(0,0,0,.55);
-        border: 1px solid rgba(255,255,255,.13); font-size: 10px; font-weight: 800;
-        color: rgba(255,255,255,.4); font-family: 'Barlow Condensed', sans-serif;
-        letter-spacing: .1em; text-transform: uppercase; }
-      .challengers-card.unlocked .lock-badge { display: none; }
-
-      /* Admin unlock button */
-      .admin-unlock-btn { display: none; padding: 0 11px; height: 34px; border-radius: 999px;
-        background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.18);
-        color: rgba(255,255,255,.6); font-size: 12px; font-weight: 800;
-        font-family: 'Barlow Condensed', sans-serif; letter-spacing: .08em; text-transform: uppercase;
-        cursor: pointer; transition: background .15s, border-color .15s, color .15s; white-space: nowrap; }
-      body:not(.view-only) .admin-unlock-btn { display: inline-flex; align-items: center; }
-      .admin-unlock-btn:hover { background: rgba(61,220,132,.2); border-color: rgba(61,220,132,.45); color: #3ddc84; }
-      .admin-unlock-btn.is-unlocked { background: rgba(61,220,132,.15); border-color: rgba(61,220,132,.35); color: #3ddc84; }
-      .admin-unlock-btn.is-unlocked:hover { background: rgba(220,50,50,.15); border-color: rgba(220,50,50,.35); color: #ff6b6b; }
-
-      /* Locked toast */
-      .locked-toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(14px);
-        background: rgba(12,14,22,.97); border: 1px solid rgba(255,255,255,.11); border-radius: 8px;
-        padding: 12px 26px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,.82);
-        z-index: 99999; opacity: 0; transition: opacity .22s, transform .22s;
-        pointer-events: none; white-space: nowrap; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
-      .locked-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
   </head>
   <body>
@@ -121,94 +96,37 @@
 
       <nav class="league-grid" aria-label="Pacific Challengers 선택">
           <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Japan Challengers" data-slug="japan">
-            <span class="lock-badge">업데이트 예정</span>
             <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
             <span class="league-name">Japan</span>
             <div class="card-action-row">
               <span class="league-action">챌린저스 보기</span>
-              <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
             </div>
           </a>
           <a class="league-card challengers-card" style="--accent:#159194" href="./challengers-korea.html" aria-label="Korea Challengers" data-slug="korea">
-            <span class="lock-badge">업데이트 예정</span>
             <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
             <span class="league-name">Korea</span>
             <div class="card-action-row">
               <span class="league-action">챌린저스 보기</span>
-              <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
             </div>
           </a>
           <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="Southeast Asia Challengers" data-slug="southeast-asia">
-            <span class="lock-badge">업데이트 예정</span>
             <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
             <span class="league-name">Southeast Asia</span>
             <div class="card-action-row">
               <span class="league-action">챌린저스 보기</span>
-              <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
             </div>
           </a>
           <a class="league-card challengers-card" style="--accent:#159194" href="javascript:void(0)" aria-label="South Asia Challengers" data-slug="south-asia">
-            <span class="lock-badge">업데이트 예정</span>
             <span class="league-logo-wrap"><img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="" /></span>
             <span class="league-name">South Asia</span>
             <div class="card-action-row">
               <span class="league-action">챌린저스 보기</span>
-              <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
             </div>
           </a>
       </nav>
     </main>
 
     <script src="./storage.js"></script>
-    <script>
-      (function () {
-        var _toastTimer = null;
-        function showLockedToast() {
-          var existing = document.querySelector(".locked-toast");
-          if (existing) { existing.remove(); clearTimeout(_toastTimer); }
-          var toast = document.createElement("div");
-          toast.className = "locked-toast";
-          toast.textContent = "업데이트 예정입니다.";
-          document.body.appendChild(toast);
-          requestAnimationFrame(function () { requestAnimationFrame(function () { toast.classList.add("show"); }); });
-          _toastTimer = setTimeout(function () {
-            toast.classList.remove("show");
-            setTimeout(function () { toast.remove(); }, 260);
-          }, 2000);
-        }
-
-        function applyUnlockStates() {
-          document.querySelectorAll(".challengers-card").forEach(function (card) {
-            var slug = card.dataset.slug;
-            var unlocked = localStorage.getItem("challengers-unlocked:" + slug) === "1";
-            card.classList.toggle("unlocked", unlocked);
-            var btn = card.querySelector(".admin-unlock-btn");
-            if (btn) { btn.textContent = unlocked ? "🔒 비공개로" : "🔓 공개하기"; btn.classList.toggle("is-unlocked", unlocked); }
-          });
-        }
-
-        if (window.storageReady) { window.storageReady.then(applyUnlockStates); } else { applyUnlockStates(); }
-
-        document.querySelectorAll(".admin-unlock-btn").forEach(function (btn) {
-          btn.addEventListener("click", function (e) {
-            e.preventDefault(); e.stopPropagation();
-            var card = btn.closest(".challengers-card");
-            var slug = card.dataset.slug;
-            var key = "challengers-unlocked:" + slug;
-            if (localStorage.getItem(key) === "1") localStorage.removeItem(key);
-            else localStorage.setItem(key, "1");
-            applyUnlockStates();
-          });
-        });
-
-        document.querySelectorAll(".challengers-card").forEach(function (card) {
-          card.addEventListener("click", function (e) {
-            var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
-            if (!isAdmin && !card.classList.contains("unlocked")) { e.preventDefault(); showLockedToast(); }
-          });
-        });
-      })();
-    </script>
     <script src="./auth.js"></script>
     <script src="./help.js" defer></script>
   </body>

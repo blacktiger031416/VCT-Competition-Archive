@@ -169,19 +169,6 @@
         font-family: 'Barlow', sans-serif; margin-top: 4px;
       }
 
-      /* 잠긴 스플릿 카드 */
-      .tournament-card.locked {
-        opacity: 0.5; pointer-events: none; cursor: default;
-      }
-      .tournament-card.locked::after {
-        content: '업데이트 예정';
-        position: absolute; top: 10px; right: 10px;
-        padding: 2px 8px; border-radius: 3px;
-        background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12);
-        font-family: 'Barlow Condensed', sans-serif;
-        font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-        color: rgba(255,255,255,0.4); text-transform: uppercase;
-      }
 
       /* ── DIVIDER ────────────────────────────── */
       .section-divider { height:1px; background:rgba(21,145,148,0.12); margin:0 0 56px; }
@@ -280,12 +267,10 @@
           <a class="tournament-card" href="./challengers-korea-split1.html" data-split="split1" data-split1-enter>
             <span class="tournament-kicker">2026 Korea Challengers</span>
             <strong>Split 1</strong>
-            <span>준비 중</span>
           </a>
           <a class="tournament-card" href="./challengers-korea-split2.html" data-split="split2">
             <span class="tournament-kicker">2026 Korea Challengers</span>
             <strong>Split 2</strong>
-            <span>준비 중</span>
           </a>
         </div>
       </section>
@@ -369,7 +354,7 @@
     <script>
       (function () {
         var overlay = document.querySelector(".card-transition-overlay");
-        document.querySelectorAll(".tournament-card:not(.locked)").forEach(function (card) {
+        document.querySelectorAll(".tournament-card").forEach(function (card) {
           var href = card.getAttribute("href");
           if (!href || href === "#") return;
           card.addEventListener("click", function (e) {
