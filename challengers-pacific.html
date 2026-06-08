@@ -126,7 +126,36 @@
       </nav>
     </main>
 
+    <style>
+      .locked-toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(14px);
+        background: rgba(12,14,22,.97); border: 1px solid rgba(255,255,255,.11); border-radius: 8px;
+        padding: 12px 26px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,.82);
+        z-index: 99999; opacity: 0; transition: opacity .22s, transform .22s;
+        pointer-events: none; white-space: nowrap; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+      .locked-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
     <script src="./storage.js"></script>
+    <script>
+      (function () {
+        var _toastTimer = null;
+        function showLockedToast() {
+          var existing = document.querySelector(".locked-toast");
+          if (existing) { existing.remove(); clearTimeout(_toastTimer); }
+          var toast = document.createElement("div");
+          toast.className = "locked-toast";
+          toast.textContent = "업데이트 예정입니다.";
+          document.body.appendChild(toast);
+          requestAnimationFrame(function () { requestAnimationFrame(function () { toast.classList.add("show"); }); });
+          _toastTimer = setTimeout(function () {
+            toast.classList.remove("show");
+            setTimeout(function () { toast.remove(); }, 260);
+          }, 2000);
+        }
+        document.querySelectorAll(".challengers-card[href='javascript:void(0)']").forEach(function (card) {
+          card.addEventListener("click", function (e) { e.preventDefault(); showLockedToast(); });
+        });
+      })();
+    </script>
     <script src="./auth.js"></script>
     <script src="./help.js" defer></script>
   </body>
