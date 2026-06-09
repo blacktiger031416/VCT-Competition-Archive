@@ -651,18 +651,20 @@
   <script src="./storage.js"></script>
   <script>
   (function () {
-    /* ── 비Admin 접근 차단 ── */
+    /* ── 비Admin 접근 차단 ── auth.js 로드 후 실행되도록 window.load 사용 */
     function checkAccess() {
       var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
       if (!isAdmin) {
         document.getElementById("wip-overlay").removeAttribute("hidden");
       }
     }
-    if (window.storageReady) {
-      window.storageReady.then(checkAccess);
-    } else {
-      setTimeout(checkAccess, 300);
-    }
+    window.addEventListener("load", function () {
+      if (window.storageReady) {
+        window.storageReady.then(checkAccess);
+      } else {
+        checkAccess();
+      }
+    });
 
     /* ── 샘플 데이터 (실제 구현 전 플레이스홀더) ── */
     var SAMPLE_PLAYERS = [
