@@ -416,17 +416,6 @@
     .flat { color: var(--neutral) !important; }
 
     /* ── 준비 중 오버레이 ── */
-    .wip-overlay {
-      position: fixed; inset: 0; z-index: 9000;
-      background: rgba(8,12,16,.88); backdrop-filter: blur(8px);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-    }
-    .wip-icon { font-size: 56px; line-height: 1; }
-    .wip-title {
-      font-family: "Barlow Condensed", sans-serif;
-      font-size: 28px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff;
-    }
-    .wip-sub { font-size: 14px; color: rgba(255,255,255,.35); }
   </style>
 </head>
 <body>
@@ -437,12 +426,6 @@
     <a class="back-link" href="./index.html">홈</a>
   </header>
 
-  <!-- 준비 중 오버레이 (비Admin) -->
-  <div class="wip-overlay" id="wip-overlay" hidden>
-    <div class="wip-icon">📈</div>
-    <div class="wip-title">선수 주식</div>
-    <div class="wip-sub">업데이트 예정입니다.</div>
-  </div>
 
   <main class="page-shell">
     <!-- 페이지 타이틀 -->
@@ -652,11 +635,6 @@
   <script src="./auth.js"></script>
   <script>
   (function () {
-    /* ── 비Admin 접근 차단 ── auth.js가 이미 로드된 상태 */
-    var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
-    if (!isAdmin) {
-      document.getElementById("wip-overlay").removeAttribute("hidden");
-    }
 
     /* ── 샘플 데이터 (실제 구현 전 플레이스홀더) ── */
     var SAMPLE_PLAYERS = [
