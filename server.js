@@ -133,7 +133,7 @@ app.get("/api/leaderboard", async (req, res) => {
       FROM app_data ad
       JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
       WHERE ad.key LIKE 'coins:%'
-        AND u.role != 'admin'
+        AND u.role NOT IN ('admin', 'test')
       ORDER BY CAST(ad.value AS INTEGER) DESC
       LIMIT 10
     `);
@@ -414,7 +414,7 @@ app.post("/api/season/end", requireAdmin, async (req, res) => {
       SELECT ad.key, ad.value
       FROM app_data ad
       JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
-      WHERE ad.key LIKE 'coins:%' AND u.role != 'admin'
+      WHERE ad.key LIKE 'coins:%' AND u.role NOT IN ('admin', 'test')
       ORDER BY CAST(ad.value AS INTEGER) DESC
       LIMIT 3
     `);
@@ -442,7 +442,7 @@ app.post("/api/season/end", requireAdmin, async (req, res) => {
     const coinsRes = await pool.query(`
       SELECT ad.key, ad.value FROM app_data ad
       JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
-      WHERE ad.key LIKE 'coins:%' AND u.role != 'admin'
+      WHERE ad.key LIKE 'coins:%' AND u.role NOT IN ('admin', 'test')
     `);
     await Promise.all(
       coinsRes.rows.map(async (r) => {
@@ -550,8 +550,8 @@ app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
     // 5. 출석체크 기록
     await pool.query("DELETE FROM app_data WHERE key LIKE 'attend:%'");
 
-    // 6. Admin 제외 모든 계정 삭제
-    await pool.query("DELETE FROM users WHERE role != 'admin'");
+    // 6. Admin·test 제외 모든 계정 삭제
+    await pool.query("DELETE FROM users WHERE role NOT IN ('admin', 'test')");
 
     broadcast({ type: "force-reload" });
     res.json({ ok: true });
@@ -923,6 +923,32 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`VCT Archive server running on port ${PORT}`);
+
+  /* ── 테스트 계정 자동 생성 (없을 때만) ── */
+  try {
+    const exists = await pool.query("SELECT id FROM users WHERE username='test'");
+    if (exists.rows.length === 0) {
+      const hash = await bcrypt.hash("cos070719!!", 10);
+      await pool.query(
+        "INSERT INTO users (username, password_hash, role) VALUES ('test', $1, 'test')",
+        [hash]
+      );
+      await pool.query(
+        `INSERT INTO app_data (key, value) VALUES ('coins:test', '999999')
+         ON CONFLICT (key) DO UPDATE SET value='999999'`
+      );
+      console.log("[init] test 계정 생성 완료 (999999코인, role=test)");
+    } else {
+      /* 이미 있으면 role과 코인만 보정 */
+      await pool.query("UPDATE users SET role='test' WHERE username='test' AND role != 'test'");
+      await pool.query(
+        `INSERT INTO app_data (key, value) VALUES ('coins:test', '999999')
+         ON CONFLICT (key) DO NOTHING`
+      );
+    }
+  } catch (e) {
+    console.error("[init] test 계정 생성 실패:", e.message);
+  }
 });
