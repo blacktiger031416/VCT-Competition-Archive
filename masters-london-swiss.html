@@ -428,7 +428,19 @@
         return './masters-match-dark.html?' + _p.toString();
       }
 
-      function buildMatchRow(m, group, idx) {
+      /* r3에서 탈락한 팀인지 확인 */
+      function isEliminatedInR3(teamName, data) {
+        if (!data || !data.r3) return false;
+        for (let i = 0; i < data.r3.length; i++) {
+          const m = data.r3[i];
+          if (!m.home || !m.away || m.hs === null || m.as === null) continue;
+          const loser = m.hs > m.as ? m.away : m.as > m.hs ? m.home : null;
+          if (loser === teamName) return true;
+        }
+        return false;
+      }
+
+      function buildMatchRow(m, group, idx, data) {
         const w = winnerSide(m);
         const ht = m.home ? findTeam(m.home) : null;
         const at = m.away ? findTeam(m.away) : null;
@@ -440,6 +452,22 @@
         } else if (w === "away") {
           awayClass = "result-" + group.winColor;
           if (group.loseColor) homeClass = "result-" + group.loseColor;
+        }
+
+        /* r2w 패자 / r2l 승자가 r3에서 탈락했으면 라운드 승리 색 제거 */
+        if (data && w !== null) {
+          if (group.key === "r2w") {
+            const loserName = w === "home" ? m.away : m.home;
+            if (loserName && isEliminatedInR3(loserName, data)) {
+              if (w === "home") awayClass = ""; else homeClass = "";
+            }
+          }
+          if (group.key === "r2l") {
+            const winnerName = w === "home" ? m.home : m.away;
+            if (winnerName && isEliminatedInR3(winnerName, data)) {
+              if (w === "home") homeClass = ""; else awayClass = "";
+            }
+          }
         }
 
         const logo = (t, name) => t
@@ -488,7 +516,7 @@
           sep.className = "match-sep";
           sep.innerHTML = `${idx + 1}경기<a class="match-sep-detail" href="${matchDetailUrl(group.key, idx, m)}">상세 ↗</a>`;
           card.appendChild(sep);
-          card.appendChild(buildMatchRow(m, group, idx));
+          card.appendChild(buildMatchRow(m, group, idx, data));
         });
         return card;
       }
