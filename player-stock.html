@@ -697,6 +697,10 @@
         if (!pd.maps || !pd.maps.length) continue;
 
         pd.maps.forEach(function (m) {
+          /* 챌린저스 리그는 완전 제외 */
+          var lg = m.league || "";
+          if (lg.indexOf("challengers") !== -1) return;
+
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
           if (acs <= 0 && !hasKda) return;
@@ -711,8 +715,7 @@
           }
           var e = pMap[pName];
 
-          /* 권역 집계 (regional league 기준) */
-          var lg = m.league || "";
+          /* 권역 집계 (4대 regional league 기준) */
           if (lg === "americas" || lg === "emea" || lg === "pacific" || lg === "cn") {
             e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
           }
