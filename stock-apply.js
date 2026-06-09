@@ -106,10 +106,14 @@
       var pctChange  = (newAcs - data.ref) / data.ref;
       var newPrice   = Math.max(1, Math.round(data.price * (1 + pctChange)));
 
-      data.history = (data.history || [oldPrice]).slice(); /* 복사 */
+      data.history  = (data.history || [oldPrice]).slice();
       data.history.push(newPrice);
-      data.price = newPrice;
-      data.ref   = newAcs;   /* 기준 ACS를 이 맵 ACS로 교체 */
+      data.price    = newPrice;
+      data.ref      = newAcs;   /* 기준 ACS를 이 맵 ACS로 교체 */
+
+      /* ── 반영된 맵들의 누적 ACS (표시용 평균 연동) ── */
+      data.runTotal = (data.runTotal || 0) + newAcs;
+      data.runCount = (data.runCount || 0) + 1;
 
       localStorage.setItem(key, JSON.stringify(data));
 
@@ -177,6 +181,22 @@
   }
 
   window.renderStockButtons = renderStockButtons;
+
+  /* ── Admin 전용: 전체 stock_p: 데이터 리셋 ── */
+  window.resetAllStock = function () {
+    if (!window.vctIsAdmin || !window.vctIsAdmin()) {
+      alert('관리자만 사용할 수 있습니다.'); return;
+    }
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('stock_p:') === 0) keys.push(k);
+    }
+    if (keys.length === 0) { alert('리셋할 주식 데이터가 없습니다.'); return; }
+    if (!confirm('stock_p: 데이터 ' + keys.length + '개를 모두 삭제합니다.\n(가격이 평균 ACS 기준으로 초기화됩니다)\n계속하시겠습니까?')) return;
+    keys.forEach(function (k) { localStorage.removeItem(k); });
+    alert('✅ 리셋 완료 (' + keys.length + '명)');
+  };
 
   /* ── 초기 실행 (DOMContentLoaded 이후 약간 대기: auth.js 로드 보장) ── */
   function tryRender() {

@@ -759,7 +759,7 @@
           ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2))
           : null;
 
-        /* stock_p: 키에서 실제 현재가 / 이전가 / history 로드 */
+        /* stock_p: 키에서 실제 현재가 / 이전가 / history / 누적평균 로드 */
         var stockData = null;
         try { stockData = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null"); } catch (se) {}
         var price   = (stockData && stockData.price)   ? stockData.price   : basePrice;
@@ -768,6 +768,10 @@
                         : price;
         var history = (stockData && stockData.history && stockData.history.length > 0)
                         ? stockData.history : null;
+        /* 반영된 맵들의 누적 평균 ACS가 있으면 우선 사용 */
+        if (stockData && stockData.runCount > 0) {
+          avgAcs = Math.round(stockData.runTotal / stockData.runCount);
+        }
 
         players.push({
           id:       "p" + (idx++),
