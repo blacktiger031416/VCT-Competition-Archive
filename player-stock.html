@@ -213,7 +213,7 @@
     /* 정렬 헤더 */
     .st-head {
       display: grid;
-      grid-template-columns: 1fr 80px 80px 72px;
+      grid-template-columns: minmax(0,1fr) 70px 70px 68px;
       padding: 6px 14px;
       background: rgba(255,255,255,.03);
       border-bottom: 1px solid var(--border);
@@ -235,7 +235,7 @@
     .stock-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
     .stock-row {
       display: grid;
-      grid-template-columns: 1fr 80px 80px 72px;
+      grid-template-columns: minmax(0,1fr) 70px 70px 68px;
       padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.04);
       cursor: pointer; transition: background .12s; align-items: center;
     }
@@ -500,24 +500,16 @@
             <span class="chart-stat-value" id="stat-open">—</span>
           </div>
           <div class="chart-stat">
-            <span class="chart-stat-label">고가</span>
-            <span class="chart-stat-value up" id="stat-high">—</span>
-          </div>
-          <div class="chart-stat">
-            <span class="chart-stat-label">저가</span>
-            <span class="chart-stat-value down" id="stat-low">—</span>
-          </div>
-          <div class="chart-stat">
             <span class="chart-stat-label">현재가</span>
             <span class="chart-stat-value" id="stat-close">—</span>
           </div>
           <div class="chart-stat">
-            <span class="chart-stat-label">거래량</span>
-            <span class="chart-stat-value" id="stat-vol">—</span>
+            <span class="chart-stat-label">등락</span>
+            <span class="chart-stat-value" id="stat-chg">—</span>
           </div>
           <div class="chart-stat">
-            <span class="chart-stat-label">시가총액</span>
-            <span class="chart-stat-value" id="stat-cap">—</span>
+            <span class="chart-stat-label">등락률</span>
+            <span class="chart-stat-value" id="stat-rate">—</span>
           </div>
         </div>
       </div>
@@ -616,11 +608,6 @@
             <th data-sort="price">현재가</th>
             <th data-sort="change">전일비</th>
             <th data-sort="rate">등락률</th>
-            <th data-sort="high">고가</th>
-            <th data-sort="low">저가</th>
-            <th data-sort="vol">거래량</th>
-            <th data-sort="cap">시가총액</th>
-            <th>보유</th>
           </tr>
         </thead>
         <tbody id="ft-tbody">
@@ -710,8 +697,6 @@
       var html  = "";
       SAMPLE_PLAYERS.forEach(function (p) {
         var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
-        var h = myHoldings[p.id];
-        var qtyTxt = h && h.qty > 0 ? h.qty + "주" : "—";
         var initial = p.name.charAt(0).toUpperCase();
         html += '<tr class="' + (p.id === selectedId ? "active" : "") + '" data-id="' + p.id + '">' +
           '<td><div class="ft-player-cell">' +
@@ -721,11 +706,6 @@
           '<td>' + fmtPrice(p.price) + '</td>' +
           '<td class="' + cls + '">' + fmtChg(chg) + '</td>' +
           '<td class="' + cls + '">' + fmtRate(rate) + '</td>' +
-          '<td class="up">'   + fmtPrice(p.high) + '</td>' +
-          '<td class="down">' + fmtPrice(p.low)  + '</td>' +
-          '<td>' + p.vol.toLocaleString() + '</td>' +
-          '<td>' + fmtPrice(p.price * p.shares) + '</td>' +
-          '<td>' + qtyTxt + '</td>' +
         '</tr>';
       });
       tbody.innerHTML = html;
@@ -750,11 +730,13 @@
       document.getElementById("chart-logo").textContent   = p.name.charAt(0).toUpperCase();
 
       document.getElementById("stat-open").textContent  = fmtPrice(p.prev);
-      document.getElementById("stat-high").textContent  = fmtPrice(p.high);
-      document.getElementById("stat-low").textContent   = fmtPrice(p.low);
       document.getElementById("stat-close").textContent = fmtPrice(p.price);
-      document.getElementById("stat-vol").textContent   = p.vol.toLocaleString();
-      document.getElementById("stat-cap").textContent   = fmtPrice(p.price * p.shares);
+      var statChgEl  = document.getElementById("stat-chg");
+      var statRateEl = document.getElementById("stat-rate");
+      statChgEl.textContent  = fmtChg(chg);
+      statChgEl.className    = "chart-stat-value " + cls;
+      statRateEl.textContent = fmtRate(rate);
+      statRateEl.className   = "chart-stat-value " + cls;
 
       document.getElementById("trade-price-input").value = p.price;
 
