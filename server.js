@@ -696,21 +696,38 @@ app.post("/api/prediction/matches", requireAdmin, async (req, res) => {
 
 /* ── API: 예측 경기 상태 변경 open↔closed (admin) ── */
 app.patch("/api/prediction/matches/:id", requireAdmin, async (req, res) => {
-  const { status } = req.body || {};
-  if (!["open", "closed"].includes(status))
-    return res.status(400).json({ error: "status must be open or closed" });
+  const { status, odds1, odds2 } = req.body || {};
   const key = `pred-match:${req.params.id}`;
   try {
     const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
     if (!result.rows[0]) return res.status(404).json({ error: "not found" });
     const match = JSON.parse(result.rows[0].value);
-    match.status = status;
+
+    /* status 변경 */
+    if (status !== undefined) {
+      if (!["open", "closed"].includes(status))
+        return res.status(400).json({ error: "status must be open or closed" });
+      match.status = status;
+    }
+
+    /* 배당률 변경 (open 상태일 때만) */
+    if (odds1 !== undefined || odds2 !== undefined) {
+      if (match.status !== "open")
+        return res.status(400).json({ error: "배당률은 배팅 진행 중인 경기에서만 수정할 수 있습니다." });
+      const o1 = parseFloat(odds1);
+      const o2 = parseFloat(odds2);
+      if (isNaN(o1) || isNaN(o2) || o1 < 1.01 || o2 < 1.01)
+        return res.status(400).json({ error: "배당률은 1.01 이상이어야 합니다." });
+      match.odds1 = o1;
+      match.odds2 = o2;
+    }
+
     await pool.query(
       `UPDATE app_data SET value=$2, updated_at=NOW() WHERE key=$1`,
       [key, JSON.stringify(match)]
     );
     broadcast({ type: "pred-match-update", match });
-    res.json({ ok: true });
+    res.json({ ok: true, match });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

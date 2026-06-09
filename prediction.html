@@ -287,6 +287,14 @@
 
     .settle-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .settle-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; }
+    /* 배당률 수정 영역 */
+    .odds-edit-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:none; align-items:center; gap:8px; flex-wrap:wrap; }
+    .odds-edit-area.open { display:flex; }
+    .odds-edit-label { font-size:11px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.1em; text-transform:uppercase; flex-shrink:0; }
+    .odds-edit-input { width:72px; height:30px; padding:0 8px; border-radius:6px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:#fff; font-size:13px; font-weight:700; text-align:center; outline:none; }
+    .odds-edit-input:focus { border-color:rgba(240,192,64,.5); background:rgba(240,192,64,.06); }
+    .odds-edit-team { font-size:12px; color:rgba(255,255,255,.4); font-weight:700; }
+    .odds-edit-error { font-size:11px; color:#ff7070; display:none; width:100%; }
 
     /* ── Hall of Fame ── */
     .hof-season { margin-bottom:36px; }
@@ -1219,8 +1227,10 @@
         '<span class="match-label">' + esc(match.label || "") + '</span>';
       if (IS_ADMIN) {
         topHtml += '<div class="card-admin-btns">';
-        if (match.status === "open")
+        if (match.status === "open") {
+          topHtml += '<button class="btn btn-muted btn-sm" data-action="edit-odds" title="배당률 수정">✏️ 배당률</button>';
           topHtml += '<button class="btn btn-muted btn-sm" data-action="close">배팅 마감</button>';
+        }
         topHtml += '<button class="btn btn-danger btn-sm" data-action="delete">삭제</button>';
         topHtml += '</div>';
       }
@@ -1310,7 +1320,24 @@
           '</div>';
       }
 
-      card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml;
+      /* odds edit panel (admin, open only) */
+      var oddsEditHtml = "";
+      if (IS_ADMIN && match.status === "open") {
+        oddsEditHtml =
+          '<div class="odds-edit-area" id="odds-edit-' + match.id + '">' +
+            '<span class="odds-edit-label">배당률 수정</span>' +
+            '<span class="odds-edit-team">' + esc(match.team1) + '</span>' +
+            '<input class="odds-edit-input" data-odds="1" type="number" step="0.01" min="1.01" value="' + match.odds1 + '" />' +
+            '<span class="odds-edit-team" style="opacity:0.3">vs</span>' +
+            '<span class="odds-edit-team">' + esc(match.team2) + '</span>' +
+            '<input class="odds-edit-input" data-odds="2" type="number" step="0.01" min="1.01" value="' + match.odds2 + '" />' +
+            '<button class="btn btn-primary btn-sm" data-action="save-odds" style="height:30px;padding:0 14px">저장</button>' +
+            '<button class="btn btn-muted btn-sm" data-action="cancel-odds" style="height:30px">취소</button>' +
+            '<span class="odds-edit-error"></span>' +
+          '</div>';
+      }
+
+      card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml + oddsEditHtml;
 
       /* ── handlers ── */
       if (canBet) {
@@ -1351,6 +1378,48 @@
             })
             .catch(function () { errEl.textContent = "서버 오류"; errEl.style.display = "block"; betBtn.disabled = false; betBtn.textContent = "배팅"; });
         });
+      }
+
+      /* ── 배당률 수정 버튼 ── */
+      var editOddsBtn = card.querySelector("[data-action='edit-odds']");
+      var oddsEditArea = card.querySelector(".odds-edit-area");
+      if (editOddsBtn && oddsEditArea) {
+        editOddsBtn.addEventListener("click", function () {
+          var isOpen = oddsEditArea.classList.contains("open");
+          oddsEditArea.classList.toggle("open", !isOpen);
+          editOddsBtn.textContent = isOpen ? "✏️ 배당률" : "✖ 닫기";
+        });
+        var saveOddsBtn = card.querySelector("[data-action='save-odds']");
+        var cancelOddsBtn = card.querySelector("[data-action='cancel-odds']");
+        var oddsErr = oddsEditArea.querySelector(".odds-edit-error");
+        if (saveOddsBtn) {
+          saveOddsBtn.addEventListener("click", function () {
+            var i1 = oddsEditArea.querySelector("[data-odds='1']");
+            var i2 = oddsEditArea.querySelector("[data-odds='2']");
+            var o1 = parseFloat(i1.value), o2 = parseFloat(i2.value);
+            oddsErr.style.display = "none";
+            if (isNaN(o1) || isNaN(o2) || o1 < 1.01 || o2 < 1.01) {
+              oddsErr.textContent = "배당률은 1.01 이상이어야 합니다."; oddsErr.style.display = "block"; return;
+            }
+            saveOddsBtn.disabled = true; saveOddsBtn.textContent = "저장 중...";
+            fetch("/api/prediction/matches/" + match.id, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+              body: JSON.stringify({ odds1: o1, odds2: o2 }),
+            }).then(function (r) { return r.json(); })
+              .then(function (d) {
+                if (d.error) { oddsErr.textContent = d.error; oddsErr.style.display = "block"; saveOddsBtn.disabled = false; saveOddsBtn.textContent = "저장"; }
+                else { /* WebSocket broadcast가 render() 호출 */ }
+              })
+              .catch(function () { oddsErr.textContent = "서버 오류"; oddsErr.style.display = "block"; saveOddsBtn.disabled = false; saveOddsBtn.textContent = "저장"; });
+          });
+        }
+        if (cancelOddsBtn) {
+          cancelOddsBtn.addEventListener("click", function () {
+            oddsEditArea.classList.remove("open");
+            editOddsBtn.textContent = "✏️ 배당률";
+          });
+        }
       }
 
       var closeBtn = card.querySelector("[data-action='close']");
