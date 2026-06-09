@@ -531,10 +531,10 @@
         </div>
 
         <div class="chart-period-tabs">
-          <button class="period-tab active" data-period="1d">1일</button>
-          <button class="period-tab" data-period="1w">1주</button>
-          <button class="period-tab" data-period="1m">1달</button>
-          <button class="period-tab" data-period="3m">3달</button>
+          <button class="period-tab active" data-period="5">5맵</button>
+          <button class="period-tab" data-period="10">10맵</button>
+          <button class="period-tab" data-period="20">20맵</button>
+          <button class="period-tab" data-period="30">30맵</button>
           <button class="period-tab" data-period="all">전체</button>
         </div>
 
@@ -942,7 +942,18 @@
       canvas.width = W; canvas.height = H;
       ctx.clearRect(0, 0, W, H);
 
-      var data = p.history && p.history.length > 1 ? p.history : null;
+      /* 선택된 period 탭에 맞게 history 슬라이싱 */
+      var activePeriod = (document.querySelector(".period-tab.active") || {}).dataset
+                          ? document.querySelector(".period-tab.active").dataset.period
+                          : "all";
+      var fullHistory = p.history && p.history.length > 1 ? p.history : null;
+      var data = fullHistory;
+      if (fullHistory && activePeriod !== "all") {
+        var n = parseInt(activePeriod, 10);
+        if (!isNaN(n) && fullHistory.length > n) {
+          data = fullHistory.slice(-n);   /* 최근 N개 */
+        }
+      }
 
       if (!data) {
         /* 거래 기록 없음 → 빈 상태 */
