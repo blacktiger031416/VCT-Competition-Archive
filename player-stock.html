@@ -542,6 +542,14 @@
             <span class="chart-stat-label">등락률</span>
             <span class="chart-stat-value" id="stat-rate">—</span>
           </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">평균 ACS</span>
+            <span class="chart-stat-value" id="stat-avgacs">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">맵 수</span>
+            <span class="chart-stat-value" id="stat-mapcount">—</span>
+          </div>
         </div>
       </div>
 
@@ -681,8 +689,11 @@
           (state.rows || []).forEach(function (row) {
             function add(pName, team, acsStr) {
               if (!pName || pName === "-" || pName === "") return;
+              pName = pName.trim();
+              if (!pName) return;
               var acs = parseFloat(acsStr);
-              if (isNaN(acs) || acs <= 0) return;
+              /* 50 미만은 입력 오류로 판단 (실제 VCT ACS는 최소 50 이상) */
+              if (isNaN(acs) || acs < 50) return;
               var pid = pName + "|" + team;
               if (!playerMap[pid]) {
                 playerMap[pid] = {
@@ -829,6 +840,8 @@
       statChgEl.className    = "chart-stat-value " + cls;
       statRateEl.textContent = fmtRate(rate);
       statRateEl.className   = "chart-stat-value " + cls;
+      document.getElementById("stat-avgacs").textContent   = p.avgAcs != null ? p.avgAcs : "—";
+      document.getElementById("stat-mapcount").textContent = p.mapCount != null ? p.mapCount + "맵" : "—";
       document.getElementById("trade-unit-price").innerHTML = fmtPrice(p.price) + ' <span>코인</span>';
       var h = myHoldings[p.id];
       document.getElementById("holding-qty").textContent  = (h && h.qty > 0 ? h.qty : 0) + " 주";
@@ -951,6 +964,56 @@
       var p = selectedId ? findPlayer(selectedId) : null;
       if (p) drawChart(p);
     });
+
+    /* ── 콘솔 디버그 도구 ──
+       window.debugStock("Silvan")  → 해당 선수의 모든 raw ACS 목록 출력
+       window.debugStock()          → 전체 선수 목록 + avgAcs + mapCount 출력
+    ── */
+    window.debugStock = function (searchName) {
+      var playerMap = {};
+      Object.keys(localStorage).forEach(function (lsKey) {
+        if (lsKey.indexOf("set:") !== 0) return;
+        var colonParts = lsKey.split(":");
+        if (colonParts.length < 3) return;
+        var baseParts = colonParts[1].split("|");
+        if (baseParts.length < 3) return;
+        var teamA = baseParts[1], teamB = baseParts[2];
+        try {
+          var state = JSON.parse(localStorage.getItem(lsKey) || "{}");
+          (state.rows || []).forEach(function (row) {
+            [[row.aPlayer, teamA, row.aAcs], [row.bPlayer, teamB, row.bAcs]].forEach(function (e) {
+              var pName = (e[0] || "").trim(), team = e[1], acsRaw = e[2];
+              if (!pName || pName === "-") return;
+              var pid = pName + "|" + team;
+              if (!playerMap[pid]) playerMap[pid] = { name: pName, team: team, entries: [] };
+              playerMap[pid].entries.push({ key: lsKey, acsRaw: acsRaw, acsParsed: parseFloat(acsRaw) });
+            });
+          });
+        } catch (e) {}
+      });
+      if (searchName) {
+        var q = searchName.toLowerCase();
+        Object.keys(playerMap).forEach(function (pid) {
+          var p = playerMap[pid];
+          if (p.name.toLowerCase().indexOf(q) === -1) return;
+          var valid = p.entries.filter(function (e) { return !isNaN(e.acsParsed) && e.acsParsed >= 50; });
+          var invalid = p.entries.filter(function (e) { return isNaN(e.acsParsed) || e.acsParsed < 50; });
+          var avg = valid.length ? (valid.reduce(function (s, e) { return s + e.acsParsed; }, 0) / valid.length) : 0;
+          console.group("[debugStock] " + p.name + " / " + p.team);
+          console.log("유효 ACS:", valid.map(function (e) { return e.acsParsed + " (" + e.key + ")"; }));
+          console.log("제외된 ACS (50 미만/비어있음):", invalid.map(function (e) { return '"' + e.acsRaw + '" (' + e.key + ')'; }));
+          console.log("평균 ACS:", Math.round(avg), "→", Math.max(1, Math.round(avg / 10)), "코인");
+          console.groupEnd();
+        });
+      } else {
+        console.table(Object.keys(playerMap).map(function (pid) {
+          var p = playerMap[pid];
+          var valid = p.entries.filter(function (e) { return !isNaN(e.acsParsed) && e.acsParsed >= 50; });
+          var avg = valid.length ? (valid.reduce(function (s, e) { return s + e.acsParsed; }, 0) / valid.length) : 0;
+          return { 선수: p.name, 팀: p.team, 유효맵수: valid.length, 평균ACS: Math.round(avg), 코인: Math.max(1, Math.round(avg / 10)) };
+        }).sort(function (a, b) { return b.코인 - a.코인; }));
+      }
+    };
 
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
