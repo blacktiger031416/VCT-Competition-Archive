@@ -226,10 +226,10 @@
     }
     .region-tab:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.7); }
     .region-tab.active { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.25); }
-    .region-tab[data-region="americas"].active { background: rgba(255,100,60,.15); color: #ff7744; border-color: rgba(255,100,60,.3); }
-    .region-tab[data-region="emea"].active     { background: rgba(80,160,255,.15); color: #60b0ff; border-color: rgba(80,160,255,.3); }
-    .region-tab[data-region="pacific"].active  { background: rgba(80,220,160,.15); color: #50dda0; border-color: rgba(80,220,160,.3); }
-    .region-tab[data-region="korea"].active    { background: rgba(200,80,255,.15); color: #cc66ff; border-color: rgba(200,80,255,.3); }
+    .region-tab[data-region="americas"].active { background: rgba(255,100,60,.15);  color: #ff7744; border-color: rgba(255,100,60,.3); }
+    .region-tab[data-region="emea"].active     { background: rgba(80,160,255,.15);  color: #60b0ff; border-color: rgba(80,160,255,.3); }
+    .region-tab[data-region="pacific"].active  { background: rgba(80,220,160,.15);  color: #50dda0; border-color: rgba(80,220,160,.3); }
+    .region-tab[data-region="cn"].active       { background: rgba(255,200,50,.15);  color: #ffcc44; border-color: rgba(255,200,50,.3); }
 
     /* 권역 뱃지 (전체 뷰에서) */
     .region-badge {
@@ -240,7 +240,7 @@
     .region-badge.americas { background: rgba(255,100,60,.2);  color: #ff7744; }
     .region-badge.emea     { background: rgba(80,160,255,.2);  color: #60b0ff; }
     .region-badge.pacific  { background: rgba(80,220,160,.2);  color: #50dda0; }
-    .region-badge.korea    { background: rgba(200,80,255,.2);  color: #cc66ff; }
+    .region-badge.cn       { background: rgba(255,200,50,.2);  color: #ffcc44; }
 
     /* 정렬 헤더 */
     .st-head {
@@ -483,9 +483,9 @@
         <span class="ticker-change flat">오늘 기준</span>
       </div>
       <div class="ticker-item">
-        <span class="ticker-label">총 거래량</span>
+        <span class="ticker-label">종목 수</span>
         <span class="ticker-value" id="tk-vol">—</span>
-        <span class="ticker-change flat" id="tk-vol-sub">코인</span>
+        <span class="ticker-change flat" id="tk-vol-sub">명</span>
       </div>
       <div class="ticker-item">
         <span class="ticker-label">내 보유 자산</span>
@@ -553,10 +553,10 @@
         </div>
         <div class="region-tabs">
           <button class="region-tab active" data-region="all">전체</button>
-          <button class="region-tab" data-region="americas">AMR</button>
+          <button class="region-tab" data-region="americas">Americas</button>
           <button class="region-tab" data-region="emea">EMEA</button>
-          <button class="region-tab" data-region="pacific">PAC</button>
-          <button class="region-tab" data-region="korea">KR</button>
+          <button class="region-tab" data-region="pacific">Pacific</button>
+          <button class="region-tab" data-region="cn">CN</button>
         </div>
         <div class="st-head">
           <div class="st-head-cell sorted" data-sort="name">선수 <span class="sort-arrow">↕</span></div>
@@ -639,92 +639,132 @@
   <script>
   (function () {
 
-    /* ── 선수 데이터 (평균 ACS ÷ 10 = 초기 단가) ── */
-    var SAMPLE_PLAYERS = [
-      /* ── Americas ── */
-      { id: "aspas",    name: "aspas",    team: "LOUD",           region: "americas", logo: null, price: 29, prev: 27, vol: 180, shares: 10000 },
-      { id: "demon1",   name: "Demon1",   team: "Evil Geniuses",  region: "americas", logo: null, price: 27, prev: 25, vol: 160, shares: 10000 },
-      { id: "tenz",     name: "TenZ",     team: "Sentinels",      region: "americas", logo: null, price: 24, prev: 25, vol: 145, shares: 10000 },
-      { id: "zekken",   name: "zekken",   team: "Sentinels",      region: "americas", logo: null, price: 25, prev: 24, vol: 120, shares: 10000 },
-      { id: "victor",   name: "Victor",   team: "NRG",            region: "americas", logo: null, price: 25, prev: 26, vol: 110, shares: 10000 },
-      { id: "kingg",    name: "kiNgg",    team: "Leviatán",       region: "americas", logo: null, price: 25, prev: 24, vol: 100, shares: 10000 },
-      { id: "yay",      name: "yay",      team: "Cloud9",         region: "americas", logo: null, price: 25, prev: 25, vol: 130, shares: 10000 },
-      { id: "less",     name: "Less",     team: "LOUD",           region: "americas", logo: null, price: 24, prev: 23, vol:  90, shares: 10000 },
-      { id: "jawgemo",  name: "jawgemo",  team: "Sentinels",      region: "americas", logo: null, price: 24, prev: 24, vol:  85, shares: 10000 },
-      { id: "s0m",      name: "s0m",      team: "NRG",            region: "americas", logo: null, price: 22, prev: 23, vol:  80, shares: 10000 },
-      /* ── EMEA ── */
-      { id: "derke",    name: "Derke",    team: "Fnatic",         region: "emea",     logo: null, price: 28, prev: 27, vol: 170, shares: 10000 },
-      { id: "alfajer",  name: "Alfajer",  team: "Fnatic",         region: "emea",     logo: null, price: 26, prev: 25, vol: 125, shares: 10000 },
-      { id: "cned",     name: "cNed",     team: "Team Vitality",  region: "emea",     logo: null, price: 27, prev: 26, vol: 140, shares: 10000 },
-      { id: "sh1n",     name: "Sh1n",     team: "BBL Esports",    region: "emea",     logo: null, price: 26, prev: 27, vol: 105, shares: 10000 },
-      { id: "nats",     name: "nAts",     team: "Team Liquid",    region: "emea",     logo: null, price: 23, prev: 24, vol: 110, shares: 10000 },
-      { id: "leo",      name: "Leo",      team: "Team Liquid",    region: "emea",     logo: null, price: 22, prev: 21, vol:  80, shares: 10000 },
-      { id: "ardiis",   name: "ardiis",   team: "Team Liquid",    region: "emea",     logo: null, price: 24, prev: 23, vol:  95, shares: 10000 },
-      { id: "boaster",  name: "Boaster",  team: "Fnatic",         region: "emea",     logo: null, price: 20, prev: 20, vol:  60, shares: 10000 },
-      /* ── Pacific ── */
-      { id: "something",name: "Something",team: "Paper Rex",      region: "pacific",  logo: null, price: 28, prev: 27, vol: 165, shares: 10000 },
-      { id: "forsaken",  name: "f0rsakeN", team: "Paper Rex",      region: "pacific",  logo: null, price: 26, prev: 25, vol: 130, shares: 10000 },
-      { id: "cgrs",      name: "CGRS",     team: "Paper Rex",      region: "pacific",  logo: null, price: 25, prev: 26, vol: 100, shares: 10000 },
-      { id: "d4v41",     name: "d4v41",    team: "Paper Rex",      region: "pacific",  logo: null, price: 24, prev: 24, vol:  80, shares: 10000 },
-      { id: "lakia",     name: "Lakia",    team: "Paper Rex",      region: "pacific",  logo: null, price: 23, prev: 22, vol:  70, shares: 10000 },
-      { id: "crow",      name: "crow",     team: "ZETA DIVISION",  region: "pacific",  logo: null, price: 25, prev: 24, vol:  90, shares: 10000 },
-      { id: "foxy9",     name: "Foxy9",    team: "ZETA DIVISION",  region: "pacific",  logo: null, price: 24, prev: 25, vol:  75, shares: 10000 },
-      { id: "suggest",   name: "SugarZ3ro",team: "Gen.G",          region: "pacific",  logo: null, price: 23, prev: 22, vol:  70, shares: 10000 },
-      /* ── Korea ── */
-      { id: "rb",        name: "Rb",       team: "DRX",            region: "korea",    logo: null, price: 27, prev: 26, vol: 155, shares: 10000 },
-      { id: "stax",      name: "stax",     team: "DRX",            region: "korea",    logo: null, price: 24, prev: 23, vol: 115, shares: 10000 },
-      { id: "buzz",      name: "BuZz",     team: "DRX",            region: "korea",    logo: null, price: 25, prev: 26, vol: 100, shares: 10000 },
-      { id: "zest",      name: "Zest",     team: "DRX",            region: "korea",    logo: null, price: 24, prev: 24, vol:  90, shares: 10000 },
-      { id: "secret",    name: "Secret",   team: "T1",             region: "korea",    logo: null, price: 25, prev: 24, vol: 125, shares: 10000 },
-      { id: "karon",     name: "Karon",    team: "T1",             region: "korea",    logo: null, price: 24, prev: 25, vol:  85, shares: 10000 },
-      { id: "carpe",     name: "Carpe",    team: "T1",             region: "korea",    logo: null, price: 23, prev: 22, vol:  80, shares: 10000 },
-    ];
+    /* ── 팀 → 권역 매핑 (match 페이지와 동일한 팀명 사용) ── */
+    var REGION_MAP = {
+      /* Americas */
+      "Sentinels":"americas","G2 Esports":"americas","NRG":"americas",
+      "100 Thieves":"americas","Cloud9":"americas","MIBR":"americas",
+      "LOUD":"americas","FURIA":"americas","KRÜ Esports":"americas",
+      "Leviatán":"americas","Evil Geniuses":"americas","ENVY":"americas",
+      /* EMEA */
+      "Gentle Mates":"emea","Team Liquid":"emea","Team Heretics":"emea",
+      "Natus Vincere":"emea","Karmine Corp":"emea","FUT Esports":"emea",
+      "BBL Esports":"emea","Fnatic":"emea","Team Vitality":"emea",
+      "Eternal Fire":"emea","PCIFIC Esports":"emea","ULF Esports":"emea",
+      "GIANTX":"emea","NAVI":"emea",
+      /* Pacific */
+      "DetonatioN FocusMe":"pacific","Global Esports":"pacific",
+      "Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
+      "Paper Rex":"pacific","Rex Regum Qeon":"pacific",
+      "Team Secret":"pacific","ZETA DIVISION":"pacific",
+      "FULL SENSE":"pacific","Gen.G":"pacific","VARREL":"pacific","T1":"pacific",
+      /* CN */
+      "Wuxi Titan Esports Club":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
+      "FunPlus Phoenix":"cn","EDward Gaming":"cn",
+      "Trace Esports":"cn","Nova Esports":"cn",
+    };
 
-    function calcChange(p) { return p.price - p.prev; }
-    function calcRate(p)   { return ((p.price - p.prev) / p.prev * 100); }
-    function fmtPrice(n)   { return n.toLocaleString(); }
-    function fmtRate(r)    { return (r >= 0 ? "+" : "") + r.toFixed(2) + "%"; }
-    function fmtChg(c)     { return (c >= 0 ? "▲" : "▼") + " " + Math.abs(c).toLocaleString(); }
-    function colorCls(n)   { return n > 0 ? "up" : n < 0 ? "down" : "flat"; }
+    /* ── localStorage 경기 기록에서 선수 ACS 집계 ── */
+    function buildPlayersFromStorage() {
+      var playerMap = {}; /* key: "이름|팀" */
+      Object.keys(localStorage).forEach(function (lsKey) {
+        if (lsKey.indexOf("set:") !== 0) return;
+        /* set:DATE|TEAMA|TEAMB:INDEX:MAPNAME */
+        var colonParts = lsKey.split(":");
+        if (colonParts.length < 3) return;
+        var baseParts = colonParts[1].split("|");
+        if (baseParts.length < 3) return;
+        var teamA = baseParts[1];
+        var teamB = baseParts[2];
+        try {
+          var state = JSON.parse(localStorage.getItem(lsKey) || "{}");
+          (state.rows || []).forEach(function (row) {
+            function add(pName, team, acsStr) {
+              if (!pName || pName === "-" || pName === "") return;
+              var acs = parseFloat(acsStr);
+              if (isNaN(acs) || acs <= 0) return;
+              var pid = pName + "|" + team;
+              if (!playerMap[pid]) {
+                playerMap[pid] = {
+                  name: pName, team: team,
+                  region: REGION_MAP[team] || "americas",
+                  acsList: []
+                };
+              }
+              playerMap[pid].acsList.push(acs);
+            }
+            add(row.aPlayer, teamA, row.aAcs);
+            add(row.bPlayer, teamB, row.bAcs);
+          });
+        } catch (e) {}
+      });
 
+      var players = [];
+      var idx = 0;
+      Object.keys(playerMap).forEach(function (pid) {
+        var p = playerMap[pid];
+        if (!p.acsList.length) return;
+        var avg = p.acsList.reduce(function (a, b) { return a + b; }, 0) / p.acsList.length;
+        var price = Math.max(1, Math.round(avg / 10));
+        players.push({
+          id: "p" + (idx++),
+          name: p.name, team: p.team, region: p.region, logo: null,
+          price: price, prev: price,   /* 최초 기준가 = 현재가 (변동 없음) */
+          mapCount: p.acsList.length,
+          avgAcs: Math.round(avg),
+          shares: 10000,
+        });
+      });
+      /* 가격 높은 순 정렬 */
+      players.sort(function (a, b) { return b.price - a.price; });
+      return players;
+    }
+
+    /* ── 상태 변수 ── */
+    var PLAYERS       = [];
     var selectedId    = null;
-    var tradeMode     = "buy"; /* buy | sell */
+    var tradeMode     = "buy";
     var myCoins       = 0;
-    var myHoldings    = {}; /* { playerId: { qty } } */
+    var myHoldings    = {};
     var currentRegion = "all";
+
+    function calcChange(p)  { return p.price - p.prev; }
+    function calcRate(p)    { return p.prev > 0 ? ((p.price - p.prev) / p.prev * 100) : 0; }
+    function fmtPrice(n)    { return n.toLocaleString(); }
+    function fmtRate(r)     { return (r >= 0 ? "+" : "") + r.toFixed(2) + "%"; }
+    function fmtChg(c)      { return (c >= 0 ? "▲" : "▼") + " " + Math.abs(c).toLocaleString(); }
+    function colorCls(n)    { return n > 0 ? "up" : n < 0 ? "down" : "flat"; }
+    function findPlayer(id) { return PLAYERS.find(function (x) { return x.id === id; }); }
+
+    var REGION_LABEL = { americas: "AMR", emea: "EMEA", pacific: "PAC", cn: "CN" };
 
     /* ── 티커 바 업데이트 ── */
     function updateTicker() {
-      var upCnt = 0, downCnt = 0, totalVol = 0;
-      SAMPLE_PLAYERS.forEach(function (p) {
+      var upCnt = 0, downCnt = 0;
+      PLAYERS.forEach(function (p) {
         var c = calcChange(p);
         if (c > 0) upCnt++;
         else if (c < 0) downCnt++;
-        totalVol += p.vol * p.price;
       });
-      document.getElementById("tk-up").textContent   = upCnt;
-      document.getElementById("tk-down").textContent  = downCnt;
-      document.getElementById("tk-vol").textContent   = Math.round(totalVol / 1000) + "K";
-      document.getElementById("tk-index").textContent = "VCT-IDX";
-      document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
+      document.getElementById("tk-up").textContent    = upCnt;
+      document.getElementById("tk-down").textContent   = downCnt;
+      document.getElementById("tk-vol").textContent    = PLAYERS.length;
+      document.getElementById("tk-index").textContent  = "VCT-IDX";
+      document.getElementById("tk-asset").textContent  = myCoins.toLocaleString();
     }
-
-    var REGION_LABEL = { americas: "AMR", emea: "EMEA", pacific: "PAC", korea: "KR" };
 
     /* ── 종목 리스트 렌더링 ── */
     function renderStockList(filter) {
       var list   = document.getElementById("stock-list");
       var search = (filter || "").toLowerCase();
       var html   = "";
-      SAMPLE_PLAYERS.forEach(function (p) {
-        /* 권역 필터 */
+      PLAYERS.forEach(function (p) {
         if (currentRegion !== "all" && p.region !== currentRegion) return;
-        /* 검색 필터 */
         if (search && p.name.toLowerCase().indexOf(search) === -1 && p.team.toLowerCase().indexOf(search) === -1) return;
         var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
         var initial = p.name.charAt(0).toUpperCase();
         var regionBadge = currentRegion === "all"
-          ? '<span class="region-badge ' + p.region + '">' + REGION_LABEL[p.region] + '</span>'
+          ? '<span class="region-badge ' + p.region + '">' + (REGION_LABEL[p.region] || "?") + '</span>'
           : "";
         html += '<div class="stock-row' + (p.id === selectedId ? " active" : "") + '" data-id="' + p.id + '">' +
           '<div class="stock-player">' +
@@ -749,7 +789,7 @@
     function renderFullTable() {
       var tbody = document.getElementById("ft-tbody");
       var html  = "";
-      SAMPLE_PLAYERS.forEach(function (p) {
+      PLAYERS.forEach(function (p) {
         var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
         var initial = p.name.charAt(0).toUpperCase();
         html += '<tr class="' + (p.id === selectedId ? "active" : "") + '" data-id="' + p.id + '">' +
@@ -762,7 +802,7 @@
           '<td class="' + cls + '">' + fmtRate(rate) + '</td>' +
         '</tr>';
       });
-      tbody.innerHTML = html;
+      tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.25);padding:24px;">데이터 없음</td></tr>';
       tbody.querySelectorAll("tr").forEach(function (tr) {
         tr.addEventListener("click", function () { selectPlayer(tr.dataset.id); });
       });
@@ -770,98 +810,72 @@
 
     /* ── 선수 선택 ── */
     function selectPlayer(id) {
-      var p = SAMPLE_PLAYERS.find(function (x) { return x.id === id; });
+      var p = findPlayer(id);
       if (!p) return;
       selectedId = id;
-
       var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
       document.getElementById("chart-name").textContent   = p.name;
       document.getElementById("chart-team").textContent   = p.team;
       document.getElementById("chart-price").textContent  = fmtPrice(p.price) + " 코인";
       var cpEl = document.getElementById("chart-price-change");
-      cpEl.textContent  = fmtChg(chg) + " (" + fmtRate(rate) + ")";
-      cpEl.className    = "chart-price-change " + cls;
+      cpEl.textContent = fmtChg(chg) + " (" + fmtRate(rate) + ")";
+      cpEl.className   = "chart-price-change " + cls;
       document.getElementById("chart-logo").textContent   = p.name.charAt(0).toUpperCase();
-
-      document.getElementById("stat-open").textContent  = fmtPrice(p.prev);
-      document.getElementById("stat-close").textContent = fmtPrice(p.price);
+      document.getElementById("stat-open").textContent    = fmtPrice(p.prev);
+      document.getElementById("stat-close").textContent   = fmtPrice(p.price);
       var statChgEl  = document.getElementById("stat-chg");
       var statRateEl = document.getElementById("stat-rate");
       statChgEl.textContent  = fmtChg(chg);
       statChgEl.className    = "chart-stat-value " + cls;
       statRateEl.textContent = fmtRate(rate);
       statRateEl.className   = "chart-stat-value " + cls;
-
-      /* 매수/매도 패널 업데이트 */
       document.getElementById("trade-unit-price").innerHTML = fmtPrice(p.price) + ' <span>코인</span>';
       var h = myHoldings[p.id];
-      document.getElementById("holding-qty").textContent = (h && h.qty > 0 ? h.qty : 0) + " 주";
-      document.getElementById("trade-qty-input").value = "";
-
+      document.getElementById("holding-qty").textContent  = (h && h.qty > 0 ? h.qty : 0) + " 주";
+      document.getElementById("trade-qty-input").value    = "";
       drawChart(p);
       renderStockList(document.getElementById("stock-search").value);
       renderFullTable();
       updateTotal();
     }
 
-    /* ── 차트 그리기 (샘플 캔들 데이터) ── */
+    /* ── 차트 그리기 ── */
     function drawChart(p) {
       var canvas = document.getElementById("stock-chart");
       var ctx    = canvas.getContext("2d");
-      var W      = canvas.parentElement.offsetWidth - 40;
-      var H      = canvas.parentElement.offsetHeight;
-      canvas.width  = W;
-      canvas.height = H;
-
-      /* 샘플 선형 차트 */
-      var pts = 30;
-      var data = [];
-      var cur = p.prev;
+      var W = canvas.parentElement.offsetWidth - 40;
+      var H = canvas.parentElement.offsetHeight;
+      canvas.width = W; canvas.height = H;
+      var pts = 30, data = [], cur = p.prev;
       for (var i = 0; i < pts; i++) {
-        cur += (Math.random() - 0.48) * (p.price * 0.015);
+        cur += (Math.random() - 0.48) * Math.max(p.price * 0.015, 0.5);
         data.push(cur);
       }
       data.push(p.price);
-
       var minV = Math.min.apply(null, data) * 0.998;
       var maxV = Math.max.apply(null, data) * 1.002;
-      var toX  = function (i) { return (i / (data.length - 1)) * W; };
-      var toY  = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
-
+      var toX = function (i) { return (i / (data.length - 1)) * W; };
+      var toY = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
       var isUp = p.price >= p.prev;
       var lineColor = isUp ? "#e84444" : "#3b8fff";
       var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
-
-      /* 그리드 */
       ctx.clearRect(0, 0, W, H);
-      ctx.strokeStyle = "rgba(255,255,255,.05)";
-      ctx.lineWidth   = 1;
+      ctx.strokeStyle = "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
       for (var g = 0; g < 5; g++) {
         var gy = H * 0.05 + (H * 0.85 / 4) * g;
         ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
       }
-
-      /* 채우기 */
       ctx.beginPath();
       ctx.moveTo(toX(0), H);
       data.forEach(function (v, i) { ctx.lineTo(toX(i), toY(v)); });
       ctx.lineTo(toX(data.length - 1), H);
-      ctx.closePath();
-      ctx.fillStyle = fillColor;
-      ctx.fill();
-
-      /* 선 */
+      ctx.closePath(); ctx.fillStyle = fillColor; ctx.fill();
       ctx.beginPath();
       data.forEach(function (v, i) {
         if (i === 0) ctx.moveTo(toX(i), toY(v));
         else         ctx.lineTo(toX(i), toY(v));
       });
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth   = 2;
-      ctx.lineJoin    = "round";
-      ctx.stroke();
-
-      /* 현재가 점 */
+      ctx.strokeStyle = lineColor; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke();
       var lx = toX(data.length - 1), ly = toY(data[data.length - 1]);
       ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
       ctx.fillStyle = lineColor; ctx.fill();
@@ -869,37 +883,31 @@
 
     /* ── 총액 계산 ── */
     function updateTotal() {
-      var p     = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
-      var price = p ? p.price : 0;
-      var qty   = parseInt(document.getElementById("trade-qty-input").value) || 0;
-      var total = price * qty;
-      document.getElementById("trade-total").innerHTML = fmtPrice(total) + ' <span>코인</span>';
+      var p   = selectedId ? findPlayer(selectedId) : null;
+      var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
+      document.getElementById("trade-total").innerHTML = fmtPrice((p ? p.price : 0) * qty) + ' <span>코인</span>';
     }
 
-    /* ── 매수/매도 탭 ── */
+    /* ── 이벤트 리스너 ── */
     document.getElementById("tab-buy").addEventListener("click", function () {
       tradeMode = "buy";
       document.getElementById("tab-buy").className  = "trade-tab active-buy";
       document.getElementById("tab-sell").className = "trade-tab";
       document.getElementById("trade-btn").textContent = "매수";
-      document.getElementById("trade-btn").className  = "trade-btn buy-btn";
+      document.getElementById("trade-btn").className   = "trade-btn buy-btn";
     });
     document.getElementById("tab-sell").addEventListener("click", function () {
       tradeMode = "sell";
       document.getElementById("tab-buy").className  = "trade-tab";
       document.getElementById("tab-sell").className = "trade-tab active-sell";
       document.getElementById("trade-btn").textContent = "매도";
-      document.getElementById("trade-btn").className  = "trade-btn sell-btn";
+      document.getElementById("trade-btn").className   = "trade-btn sell-btn";
     });
-
-    /* ── 입력 이벤트 ── */
     document.getElementById("trade-qty-input").addEventListener("input", updateTotal);
-
-    /* ── 주문 버튼 ── */
     document.getElementById("trade-btn").addEventListener("click", function () {
-      var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+      var p = selectedId ? findPlayer(selectedId) : null;
       if (!p) { alert("선수를 먼저 선택해 주세요."); return; }
-      var qty   = parseInt(document.getElementById("trade-qty-input").value) || 0;
+      var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
       if (qty < 1) { alert("수량을 입력해 주세요."); return; }
       var total = p.price * qty;
       if (tradeMode === "buy") {
@@ -918,17 +926,11 @@
       document.getElementById("trade-qty-input").value = "";
       document.getElementById("holding-qty").textContent = (myHoldings[p.id] ? myHoldings[p.id].qty : 0) + " 주";
       document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-      updateTotal();
-      updateTicker();
-      renderFullTable();
+      updateTotal(); updateTicker(); renderFullTable();
     });
-
-    /* ── 검색 ── */
     document.getElementById("stock-search").addEventListener("input", function () {
       renderStockList(this.value);
     });
-
-    /* ── 권역 탭 ── */
     document.querySelectorAll(".region-tab").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.querySelectorAll(".region-tab").forEach(function (b) { b.classList.remove("active"); });
@@ -937,39 +939,52 @@
         renderStockList(document.getElementById("stock-search").value);
       });
     });
-
-    /* ── 기간 탭 ── */
     document.querySelectorAll(".period-tab").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.querySelectorAll(".period-tab").forEach(function (b) { b.classList.remove("active"); });
         btn.classList.add("active");
-        var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+        var p = selectedId ? findPlayer(selectedId) : null;
         if (p) drawChart(p);
       });
     });
-
-    /* ── 코인 잔고 로드 ── */
-    function loadCoins() {
-      if (window.storageReady) {
-        window.storageReady.then(function () {
-          var raw = localStorage.getItem("vct_coins");
-          try { myCoins = raw ? (JSON.parse(raw) || 0) : 0; } catch(e) { myCoins = 0; }
-          document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-          document.getElementById("tk-asset").textContent     = myCoins.toLocaleString();
-        });
-      }
-    }
-    loadCoins();
-
-    /* ── 초기 렌더링 ── */
-    updateTicker();
-    renderStockList();
-    renderFullTable();
-    selectPlayer(SAMPLE_PLAYERS[0].id);
-
     window.addEventListener("resize", function () {
-      var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+      var p = selectedId ? findPlayer(selectedId) : null;
       if (p) drawChart(p);
+    });
+
+    /* ── storageReady 후 초기화 ── */
+    (window.storageReady || Promise.resolve()).then(function () {
+      /* 코인 로드: coins:{username} 키 사용 */
+      try {
+        var userRaw = localStorage.getItem("vct_auth_user");
+        if (userRaw) {
+          var user = JSON.parse(userRaw);
+          if (user && user.username) {
+            var coinRaw = localStorage.getItem("coins:" + user.username);
+            myCoins = coinRaw ? (parseInt(coinRaw, 10) || 0) : 0;
+          }
+        }
+      } catch (e) { myCoins = 0; }
+      document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+
+      /* 경기 기록에서 선수 집계 */
+      PLAYERS = buildPlayersFromStorage();
+
+      if (PLAYERS.length === 0) {
+        document.getElementById("stock-list").innerHTML =
+          '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.3);font-size:13px;line-height:1.6;">' +
+          '아직 입력된 경기 데이터가 없습니다.<br><span style="font-size:11px;opacity:.6;">ACS가 입력된 경기 기록이 생기면 자동으로 표시됩니다.</span></div>';
+        document.getElementById("chart-name").textContent = "선수를 선택하세요";
+        document.getElementById("tk-vol").textContent = "0";
+        document.getElementById("tk-up").textContent  = "0";
+        document.getElementById("tk-down").textContent = "0";
+        return;
+      }
+
+      updateTicker();
+      renderStockList();
+      renderFullTable();
+      selectPlayer(PLAYERS[0].id);
     });
 
   })();
