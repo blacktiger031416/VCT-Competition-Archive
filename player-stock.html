@@ -817,6 +817,7 @@
     var myCoins       = 0;
     var myHoldings    = {};
     var currentRegion = "all";
+    var TOKEN         = localStorage.getItem("vct_auth_token");
 
     function calcChange(p)  { return p.price - p.prev; }
     function calcRate(p)    { return p.prev > 0 ? ((p.price - p.prev) / p.prev * 100) : 0; }
@@ -1129,18 +1130,19 @@
 
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      /* 코인 로드: coins:{username} 키 사용 */
-      try {
-        var userRaw = localStorage.getItem("vct_auth_user");
-        if (userRaw) {
-          var user = JSON.parse(userRaw);
-          if (user && user.username) {
-            var coinRaw = localStorage.getItem("coins:" + user.username);
-            myCoins = coinRaw ? (parseInt(coinRaw, 10) || 0) : 0;
-          }
-        }
-      } catch (e) { myCoins = 0; }
-      document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+      /* 코인 로드: /api/coins (coins: 키는 SERVER_ONLY라 localStorage에 없음) */
+      if (TOKEN) {
+        fetch("/api/coins", { headers: { Authorization: "Bearer " + TOKEN } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.coins === "number") {
+              myCoins = d.coins;
+              document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+              document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
+            }
+          })
+          .catch(function () {});
+      }
       /* Admin이면 리셋 버튼 표시 */
       if (window.vctIsAdmin && window.vctIsAdmin()) {
         document.getElementById("admin-reset-btn").style.display = "";
