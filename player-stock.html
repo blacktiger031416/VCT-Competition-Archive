@@ -754,10 +754,20 @@
         }
 
         var avgAcs  = Math.round(e.totalAcs / e.acsMaps);
-        var price   = Math.max(1, Math.round(avgAcs / 10));
+        var basePrice = Math.max(1, Math.round(avgAcs / 10));
         var kd      = e.kdMaps > 0
           ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2))
           : null;
+
+        /* stock_p: 키에서 실제 현재가 / 이전가 / history 로드 */
+        var stockData = null;
+        try { stockData = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null"); } catch (se) {}
+        var price   = (stockData && stockData.price)   ? stockData.price   : basePrice;
+        var prev    = (stockData && stockData.history && stockData.history.length >= 2)
+                        ? stockData.history[stockData.history.length - 2]
+                        : price;
+        var history = (stockData && stockData.history && stockData.history.length > 0)
+                        ? stockData.history : null;
 
         players.push({
           id:       "p" + (idx++),
@@ -766,7 +776,8 @@
           region:   region,
           logo:     null,
           price:    price,
-          prev:     price,
+          prev:     prev,
+          history:  history,
           mapCount: e.acsMaps,
           avgAcs:   avgAcs,
           kd:       kd,
