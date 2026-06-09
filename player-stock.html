@@ -297,15 +297,21 @@
 
     .trade-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
-    /* 보유 정보 */
-    .holding-info {
-      background: rgba(255,255,255,.03); border: 1px solid var(--border);
-      border-radius: 6px; padding: 10px 14px;
+    /* 주당 가격 표시 */
+    .trade-price-display {
       display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px;
+      background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 6px;
     }
-    .holding-label { font-size: 11px; color: rgba(255,255,255,.3); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-    .holding-value { font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 900; color: #fff; }
-    .holding-sub { font-size: 11px; color: rgba(255,255,255,.28); margin-top: 2px; text-align: right; }
+    .trade-price-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.35); }
+    .trade-price-value { font-family: "Barlow Condensed", sans-serif; font-size: 18px; font-weight: 900; color: #fff; }
+    .trade-price-value span { font-size: 12px; color: rgba(255,255,255,.35); margin-left: 4px; }
+
+    /* 보유 수량 (간단) */
+    .trade-holding-simple {
+      font-size: 12px; color: rgba(255,255,255,.35); text-align: right;
+    }
+    .trade-holding-simple strong { font-family: "Barlow Condensed", sans-serif; font-size: 14px; color: rgba(255,255,255,.7); font-weight: 900; }
 
     /* 입력 행 */
     .trade-row { display: flex; flex-direction: column; gap: 5px; }
@@ -320,23 +326,16 @@
     }
     .trade-input-wrap:focus-within { border-color: rgba(255,255,255,.2); }
     .trade-input {
-      flex: 1; height: 38px; padding: 0 12px;
+      flex: 1; height: 44px; padding: 0 14px;
       background: none; border: none; color: #fff;
-      font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 700;
+      font-family: "Barlow Condensed", sans-serif; font-size: 22px; font-weight: 700;
       outline: none;
     }
-    .trade-input::placeholder { color: rgba(255,255,255,.18); font-size: 14px; font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
+    .trade-input::placeholder { color: rgba(255,255,255,.18); font-size: 16px; font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
     .trade-input-unit {
-      padding: 0 12px; font-size: 12px; font-weight: 700;
+      padding: 0 14px; font-size: 13px; font-weight: 700;
       color: rgba(255,255,255,.3); letter-spacing: .05em; flex-shrink: 0;
     }
-    .trade-quick-btns { display: flex; gap: 4px; margin-top: 4px; }
-    .trade-quick-btn {
-      flex: 1; height: 26px; border: 1px solid var(--border); border-radius: 4px;
-      background: rgba(255,255,255,.04); color: rgba(255,255,255,.4);
-      font-size: 11px; font-weight: 700; cursor: pointer; transition: all .12s;
-    }
-    .trade-quick-btn:hover { background: rgba(255,255,255,.09); color: #fff; border-color: rgba(255,255,255,.2); }
 
     /* 총액 표시 */
     .trade-total {
@@ -539,47 +538,25 @@
         </div>
         <div class="trade-body">
 
-          <!-- 보유 정보 -->
-          <div class="holding-info">
-            <div>
-              <div class="holding-label">보유 수량</div>
-              <div class="holding-value" id="holding-qty">0 주</div>
-              <div class="holding-sub" id="holding-avg">평균단가 —</div>
-            </div>
-            <div style="text-align:right">
-              <div class="holding-label">평가손익</div>
-              <div class="holding-value flat" id="holding-pnl">—</div>
-              <div class="holding-sub" id="holding-pnl-rate">—</div>
-            </div>
+          <!-- 주당 가격 + 보유 수량 -->
+          <div class="trade-price-display">
+            <span class="trade-price-label">주당 가격</span>
+            <span class="trade-price-value" id="trade-unit-price">— <span>코인</span></span>
           </div>
+          <div class="trade-holding-simple">보유 수량 <strong id="holding-qty">0 주</strong></div>
 
-          <!-- 가격 -->
-          <div class="trade-row">
-            <span class="trade-label">주문 단가</span>
-            <div class="trade-input-wrap">
-              <input class="trade-input" id="trade-price-input" type="number" min="1" placeholder="주문 단가" />
-              <span class="trade-input-unit">코인</span>
-            </div>
-          </div>
-
-          <!-- 수량 -->
+          <!-- 수량 입력 -->
           <div class="trade-row">
             <span class="trade-label">수량</span>
             <div class="trade-input-wrap">
               <input class="trade-input" id="trade-qty-input" type="number" min="1" placeholder="0" />
               <span class="trade-input-unit">주</span>
             </div>
-            <div class="trade-quick-btns">
-              <button class="trade-quick-btn" data-pct="10">10%</button>
-              <button class="trade-quick-btn" data-pct="25">25%</button>
-              <button class="trade-quick-btn" data-pct="50">50%</button>
-              <button class="trade-quick-btn" data-pct="100">최대</button>
-            </div>
           </div>
 
           <!-- 총액 -->
           <div class="trade-total">
-            <span class="trade-total-label">주문 총액</span>
+            <span class="trade-total-label">총액</span>
             <div class="trade-total-value" id="trade-total">0 <span>코인</span></div>
           </div>
 
@@ -738,9 +715,12 @@
       statRateEl.textContent = fmtRate(rate);
       statRateEl.className   = "chart-stat-value " + cls;
 
-      document.getElementById("trade-price-input").value = p.price;
+      /* 매수/매도 패널 업데이트 */
+      document.getElementById("trade-unit-price").innerHTML = fmtPrice(p.price) + ' <span>코인</span>';
+      var h = myHoldings[p.id];
+      document.getElementById("holding-qty").textContent = (h && h.qty > 0 ? h.qty : 0) + " 주";
+      document.getElementById("trade-qty-input").value = "";
 
-      updateHoldingInfo(p);
       drawChart(p);
       renderStockList(document.getElementById("stock-search").value);
       renderFullTable();
@@ -810,25 +790,11 @@
       ctx.fillStyle = lineColor; ctx.fill();
     }
 
-    /* ── 보유 정보 업데이트 ── */
-    function updateHoldingInfo(p) {
-      var h = myHoldings[p.id];
-      var qty  = h ? h.qty  : 0;
-      var avg  = h ? h.avgPrice : 0;
-      document.getElementById("holding-qty").textContent  = qty + " 주";
-      document.getElementById("holding-avg").textContent  = qty > 0 ? "평균단가 " + fmtPrice(avg) : "평균단가 —";
-      var pnl = qty > 0 ? (p.price - avg) * qty : 0;
-      var pnlRate = qty > 0 && avg > 0 ? ((p.price - avg) / avg * 100) : 0;
-      var pnlEl = document.getElementById("holding-pnl");
-      pnlEl.textContent = qty > 0 ? (pnl >= 0 ? "+" : "") + fmtPrice(pnl) + " 코인" : "—";
-      pnlEl.className   = "holding-value " + (qty > 0 ? colorCls(pnl) : "flat");
-      document.getElementById("holding-pnl-rate").textContent = qty > 0 ? fmtRate(pnlRate) : "—";
-    }
-
     /* ── 총액 계산 ── */
     function updateTotal() {
-      var price = parseFloat(document.getElementById("trade-price-input").value) || 0;
-      var qty   = parseInt(document.getElementById("trade-qty-input").value)     || 0;
+      var p     = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+      var price = p ? p.price : 0;
+      var qty   = parseInt(document.getElementById("trade-qty-input").value) || 0;
       var total = price * qty;
       document.getElementById("trade-total").innerHTML = fmtPrice(total) + ' <span>코인</span>';
     }
@@ -849,54 +815,32 @@
       document.getElementById("trade-btn").className  = "trade-btn sell-btn";
     });
 
-    /* ── 퀵 버튼 (10%/25%/50%/최대) ── */
-    document.querySelectorAll(".trade-quick-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var pct   = parseInt(btn.dataset.pct);
-        var price = parseFloat(document.getElementById("trade-price-input").value) || 1;
-        var p     = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
-        if (!p) return;
-        var maxQty;
-        if (tradeMode === "buy") {
-          maxQty = Math.floor(myCoins / price);
-        } else {
-          maxQty = (myHoldings[p.id] ? myHoldings[p.id].qty : 0);
-        }
-        document.getElementById("trade-qty-input").value = Math.floor(maxQty * pct / 100);
-        updateTotal();
-      });
-    });
-
     /* ── 입력 이벤트 ── */
-    document.getElementById("trade-price-input").addEventListener("input", updateTotal);
-    document.getElementById("trade-qty-input").addEventListener("input",   updateTotal);
+    document.getElementById("trade-qty-input").addEventListener("input", updateTotal);
 
     /* ── 주문 버튼 ── */
     document.getElementById("trade-btn").addEventListener("click", function () {
       var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
       if (!p) { alert("선수를 먼저 선택해 주세요."); return; }
-      var price = parseFloat(document.getElementById("trade-price-input").value) || 0;
-      var qty   = parseInt(document.getElementById("trade-qty-input").value)     || 0;
-      if (price < 1 || qty < 1) { alert("단가와 수량을 입력해 주세요."); return; }
-      var total = price * qty;
+      var qty   = parseInt(document.getElementById("trade-qty-input").value) || 0;
+      if (qty < 1) { alert("수량을 입력해 주세요."); return; }
+      var total = p.price * qty;
       if (tradeMode === "buy") {
         if (total > myCoins) { alert("코인이 부족합니다."); return; }
         myCoins -= total;
-        if (!myHoldings[p.id]) myHoldings[p.id] = { qty: 0, avgPrice: 0 };
-        var h = myHoldings[p.id];
-        h.avgPrice = Math.round((h.avgPrice * h.qty + price * qty) / (h.qty + qty));
-        h.qty += qty;
+        if (!myHoldings[p.id]) myHoldings[p.id] = { qty: 0 };
+        myHoldings[p.id].qty += qty;
         alert("✅ " + p.name + " " + qty + "주 매수 완료 (" + fmtPrice(total) + " 코인)");
       } else {
-        var h2 = myHoldings[p.id];
-        if (!h2 || h2.qty < qty) { alert("보유 수량이 부족합니다."); return; }
-        h2.qty -= qty;
+        var h = myHoldings[p.id];
+        if (!h || h.qty < qty) { alert("보유 수량이 부족합니다."); return; }
+        h.qty -= qty;
         myCoins += total;
         alert("✅ " + p.name + " " + qty + "주 매도 완료 (" + fmtPrice(total) + " 코인)");
       }
       document.getElementById("trade-qty-input").value = "";
+      document.getElementById("holding-qty").textContent = (myHoldings[p.id] ? myHoldings[p.id].qty : 0) + " 주";
       document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-      updateHoldingInfo(p);
       updateTotal();
       updateTicker();
       renderFullTable();
