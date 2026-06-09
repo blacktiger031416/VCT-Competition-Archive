@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>선수 주식 — VCT Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    a { text-decoration: none; color: inherit; }
+
+    :root {
+      --bg:       #080c10;
+      --bg-card:  #0d1117;
+      --bg-card2: #111820;
+      --border:   rgba(255,255,255,.07);
+      --up:       #e84444;   /* 상승 빨강 */
+      --down:     #3b8fff;   /* 하락 파랑 */
+      --neutral:  rgba(255,255,255,.45);
+      --accent:   #ff2638;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Noto Sans KR", "Barlow", system-ui, sans-serif;
+      color: #f0f0f0;
+      background: var(--bg);
+    }
+    body::before {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none; content: "";
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.5), transparent 80%);
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px; height: 52px;
+      background: rgba(8,12,16,.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 13px; font-weight: 900; color: var(--accent);
+      letter-spacing: .09em; text-transform: uppercase; flex-shrink: 0;
+    }
+    .nav-sep { width: 1px; height: 16px; background: rgba(255,255,255,.1); margin: 0 4px; flex-shrink: 0; }
+    .back-link {
+      display: inline-flex; align-items: center; height: 30px; padding: 0 13px;
+      border: 1px solid rgba(255,255,255,.08); border-radius: 4px;
+      background: rgba(255,255,255,.04); font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,.5); transition: background .15s, color .15s;
+    }
+    .back-link:hover { background: rgba(255,255,255,.09); color: #fff; }
+    .site-header .auth-header-btn { margin-left: auto !important; }
+
+    /* ── PAGE SHELL ── */
+    .page-shell {
+      width: min(1400px, calc(100% - 32px));
+      margin: 0 auto; padding: 28px 0 64px;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title-row {
+      display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px;
+    }
+    .page-title {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 32px; font-weight: 900; letter-spacing: .04em;
+      text-transform: uppercase; color: #fff;
+    }
+    .page-subtitle { font-size: 13px; color: rgba(255,255,255,.3); }
+
+    /* ── MARKET TICKER (상단 요약 바) ── */
+    .ticker-bar {
+      display: flex; gap: 0; overflow: hidden;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg-card); margin-bottom: 20px;
+    }
+    .ticker-item {
+      flex: 1; display: flex; flex-direction: column; gap: 2px;
+      padding: 12px 18px; border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .ticker-item:last-child { border-right: none; }
+    .ticker-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+    .ticker-value { font-family: "Barlow Condensed", sans-serif; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: .02em; }
+    .ticker-change { font-size: 12px; font-weight: 700; }
+    .ticker-change.up   { color: var(--up); }
+    .ticker-change.down { color: var(--down); }
+    .ticker-change.flat { color: var(--neutral); }
+
+    /* ── LAYOUT ── */
+    .stock-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .stock-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── CHART PANEL ── */
+    .chart-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .chart-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .chart-player-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .chart-player-logo {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 900; flex-shrink: 0;
+    }
+    .chart-player-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+    .chart-player-name {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 22px; font-weight: 900; letter-spacing: .03em; color: #fff;
+    }
+    .chart-player-team { font-size: 11px; color: rgba(255,255,255,.38); margin-top: 1px; }
+    .chart-price-block { text-align: right; }
+    .chart-current-price {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 28px; font-weight: 900; color: #fff;
+    }
+    .chart-price-change {
+      font-size: 13px; font-weight: 700; margin-top: 2px;
+    }
+    .chart-price-change.up   { color: var(--up); }
+    .chart-price-change.down { color: var(--down); }
+    .chart-price-change.flat { color: var(--neutral); }
+
+    /* 기간 탭 */
+    .chart-period-tabs {
+      display: flex; gap: 4px; padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .period-tab {
+      padding: 4px 12px; border-radius: 4px; border: none; background: none;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      color: rgba(255,255,255,.3); cursor: pointer; transition: background .15s, color .15s;
+    }
+    .period-tab:hover  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); }
+    .period-tab.active { background: rgba(255,255,255,.1);  color: #fff; }
+
+    /* 캔들/라인 차트 영역 */
+    .chart-area {
+      position: relative; height: 300px; padding: 16px 20px 8px;
+    }
+    .chart-canvas { width: 100%; height: 100%; display: block; }
+
+    /* 차트 눈금 */
+    .chart-y-axis {
+      position: absolute; right: 20px; top: 16px; bottom: 24px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      pointer-events: none;
+    }
+    .chart-y-label { font-size: 10px; color: rgba(255,255,255,.22); font-family: "Barlow Condensed", sans-serif; text-align: right; }
+
+    /* 차트 하단 정보 바 */
+    .chart-info-bar {
+      display: flex; gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .chart-stat {
+      flex: 1; padding: 10px 16px; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .chart-stat:last-child { border-right: none; }
+    .chart-stat-label { font-size: 10px; color: rgba(255,255,255,.28); letter-spacing: .08em; text-transform: uppercase; }
+    .chart-stat-value { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+    .chart-stat-value.up   { color: var(--up); }
+    .chart-stat-value.down { color: var(--down); }
+
+    /* ── 종목 리스트 (테이블) ── */
+    .stock-table-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      grid-row: 1 / 3;
+    }
+    .panel-header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .panel-title {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+    }
+    .panel-search {
+      width: 130px; height: 28px; padding: 0 10px;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 4px; color: #fff; font-size: 12px; outline: none;
+    }
+    .panel-search:focus { border-color: rgba(255,255,255,.2); }
+    .panel-search::placeholder { color: rgba(255,255,255,.2); }
+
+    /* 정렬 헤더 */
+    .st-head {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 72px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .st-head-cell {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.28); cursor: pointer; user-select: none;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .st-head-cell:not(:first-child) { justify-content: flex-end; }
+    .st-head-cell:hover { color: rgba(255,255,255,.6); }
+    .sort-arrow { opacity: .4; font-size: 9px; }
+    .st-head-cell.sorted .sort-arrow { opacity: 1; color: #fff; }
+
+    /* 종목 행 */
+    .stock-list { max-height: 560px; overflow-y: auto; }
+    .stock-list::-webkit-scrollbar { width: 4px; }
+    .stock-list::-webkit-scrollbar-track { background: transparent; }
+    .stock-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+    .stock-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 72px;
+      padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.04);
+      cursor: pointer; transition: background .12s; align-items: center;
+    }
+    .stock-row:last-child { border-bottom: none; }
+    .stock-row:hover { background: rgba(255,255,255,.04); }
+    .stock-row.active { background: rgba(255,255,255,.07); }
+    .stock-player { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .stock-player-logo {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; flex-shrink: 0; overflow: hidden;
+    }
+    .stock-player-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .stock-player-info { min-width: 0; }
+    .stock-player-name {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: .03em; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .stock-player-team { font-size: 10px; color: rgba(255,255,255,.3); }
+    .stock-price {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 700; color: #fff; text-align: right;
+    }
+    .stock-change {
+      font-size: 12px; font-weight: 700; text-align: right;
+    }
+    .stock-change.up   { color: var(--up); }
+    .stock-change.down { color: var(--down); }
+    .stock-change.flat { color: var(--neutral); }
+    .stock-rate {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 13px; font-weight: 700; text-align: right;
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .stock-rate.up   { background: rgba(232,68,68,.14); color: var(--up); }
+    .stock-rate.down { background: rgba(59,143,255,.14); color: var(--down); }
+    .stock-rate.flat { color: var(--neutral); background: rgba(255,255,255,.05); }
+
+    /* ── 매수 / 매도 패널 ── */
+    .trade-panel {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .trade-tabs {
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .trade-tab {
+      padding: 13px 0; border: none; cursor: pointer;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      background: rgba(255,255,255,.04); color: rgba(255,255,255,.35);
+      border-bottom: 2px solid transparent; transition: all .15s;
+    }
+    .trade-tab:hover { color: rgba(255,255,255,.7); }
+    .trade-tab.active-buy  { background: rgba(232,68,68,.1);  color: var(--up);   border-bottom-color: var(--up); }
+    .trade-tab.active-sell { background: rgba(59,143,255,.1); color: var(--down); border-bottom-color: var(--down); }
+
+    .trade-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* 보유 정보 */
+    .holding-info {
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .holding-label { font-size: 11px; color: rgba(255,255,255,.3); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .holding-value { font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 900; color: #fff; }
+    .holding-sub { font-size: 11px; color: rgba(255,255,255,.28); margin-top: 2px; text-align: right; }
+
+    /* 입력 행 */
+    .trade-row { display: flex; flex-direction: column; gap: 5px; }
+    .trade-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+    }
+    .trade-input-wrap {
+      display: flex; align-items: center;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden; transition: border-color .15s;
+    }
+    .trade-input-wrap:focus-within { border-color: rgba(255,255,255,.2); }
+    .trade-input {
+      flex: 1; height: 38px; padding: 0 12px;
+      background: none; border: none; color: #fff;
+      font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 700;
+      outline: none;
+    }
+    .trade-input::placeholder { color: rgba(255,255,255,.18); font-size: 14px; font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
+    .trade-input-unit {
+      padding: 0 12px; font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,.3); letter-spacing: .05em; flex-shrink: 0;
+    }
+    .trade-quick-btns { display: flex; gap: 4px; margin-top: 4px; }
+    .trade-quick-btn {
+      flex: 1; height: 26px; border: 1px solid var(--border); border-radius: 4px;
+      background: rgba(255,255,255,.04); color: rgba(255,255,255,.4);
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: all .12s;
+    }
+    .trade-quick-btn:hover { background: rgba(255,255,255,.09); color: #fff; border-color: rgba(255,255,255,.2); }
+
+    /* 총액 표시 */
+    .trade-total {
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .trade-total-label { font-size: 11px; color: rgba(255,255,255,.3); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .trade-total-value {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 20px; font-weight: 900; color: #fff;
+    }
+    .trade-total-value span { font-size: 12px; color: rgba(255,255,255,.3); margin-left: 4px; font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
+
+    /* 주문 버튼 */
+    .trade-btn {
+      width: 100%; height: 44px; border: none; border-radius: 6px;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 17px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer; transition: filter .15s, opacity .15s;
+    }
+    .trade-btn:hover:not(:disabled) { filter: brightness(1.12); }
+    .trade-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .trade-btn.buy-btn  { background: var(--up);   color: #fff; }
+    .trade-btn.sell-btn { background: var(--down); color: #fff; }
+
+    /* 코인 잔고 */
+    .coin-balance {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0 0; border-top: 1px solid var(--border);
+    }
+    .coin-balance-label { font-size: 11px; color: rgba(255,255,255,.28); }
+    .coin-balance-value {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 15px; font-weight: 900; color: rgba(255,255,255,.7);
+    }
+
+    /* ── 하단 테이블 (전체 종목) ── */
+    .full-table-panel {
+      grid-column: 1 / 2;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; margin-top: 0;
+    }
+    .ft-table { width: 100%; border-collapse: collapse; }
+    .ft-table th {
+      padding: 9px 14px; text-align: right;
+      font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.28); background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+      white-space: nowrap;
+    }
+    .ft-table th:first-child { text-align: left; }
+    .ft-table th:hover { color: rgba(255,255,255,.6); }
+    .ft-table td {
+      padding: 10px 14px; text-align: right;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700; color: #fff;
+      white-space: nowrap;
+    }
+    .ft-table td:first-child { text-align: left; }
+    .ft-table tr { cursor: pointer; transition: background .12s; }
+    .ft-table tr:hover { background: rgba(255,255,255,.04); }
+    .ft-table tr.active { background: rgba(255,255,255,.07); }
+    .ft-player-cell { display: flex; align-items: center; gap: 10px; }
+    .ft-player-logo {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; flex-shrink: 0; overflow: hidden;
+    }
+    .ft-player-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .ft-player-name { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+    .ft-player-team { font-size: 10px; color: rgba(255,255,255,.3); font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
+
+    .up   { color: var(--up) !important; }
+    .down { color: var(--down) !important; }
+    .flat { color: var(--neutral) !important; }
+
+    /* ── 준비 중 오버레이 ── */
+    .wip-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(8,12,16,.88); backdrop-filter: blur(8px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    }
+    .wip-icon { font-size: 56px; line-height: 1; }
+    .wip-title {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 28px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff;
+    }
+    .wip-sub { font-size: 14px; color: rgba(255,255,255,.35); }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="site-header">
+    <a class="nav-brand" href="./index.html">VCT Archive</a>
+    <span class="nav-sep"></span>
+    <a class="back-link" href="./index.html">홈</a>
+  </header>
+
+  <!-- 준비 중 오버레이 (비Admin) -->
+  <div class="wip-overlay" id="wip-overlay" hidden>
+    <div class="wip-icon">📈</div>
+    <div class="wip-title">선수 주식</div>
+    <div class="wip-sub">업데이트 예정입니다.</div>
+  </div>
+
+  <main class="page-shell">
+    <!-- 페이지 타이틀 -->
+    <div class="page-title-row">
+      <h1 class="page-title">📈 선수 주식</h1>
+      <span class="page-subtitle">VCT 선수들의 퍼포먼스 기반 가상 주식 시장</span>
+    </div>
+
+    <!-- 상단 시장 요약 -->
+    <div class="ticker-bar" id="ticker-bar">
+      <div class="ticker-item">
+        <span class="ticker-label">시장 지수</span>
+        <span class="ticker-value" id="tk-index">—</span>
+        <span class="ticker-change flat" id="tk-index-chg">—</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">상승 종목</span>
+        <span class="ticker-value up" id="tk-up">—</span>
+        <span class="ticker-change flat">오늘 기준</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">하락 종목</span>
+        <span class="ticker-value down" id="tk-down">—</span>
+        <span class="ticker-change flat">오늘 기준</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">총 거래량</span>
+        <span class="ticker-value" id="tk-vol">—</span>
+        <span class="ticker-change flat" id="tk-vol-sub">코인</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">내 보유 자산</span>
+        <span class="ticker-value" id="tk-asset">—</span>
+        <span class="ticker-change flat" id="tk-asset-chg">코인 환산</span>
+      </div>
+    </div>
+
+    <!-- 메인 레이아웃 -->
+    <div class="stock-layout">
+
+      <!-- 차트 패널 (왼쪽 상단) -->
+      <div class="chart-panel" id="chart-panel">
+        <div class="chart-header">
+          <div class="chart-player-info">
+            <div class="chart-player-logo" id="chart-logo">?</div>
+            <div>
+              <div class="chart-player-name" id="chart-name">선수를 선택하세요</div>
+              <div class="chart-player-team" id="chart-team">—</div>
+            </div>
+          </div>
+          <div class="chart-price-block">
+            <div class="chart-current-price" id="chart-price">—</div>
+            <div class="chart-price-change flat" id="chart-price-change">— (—%)</div>
+          </div>
+        </div>
+
+        <div class="chart-period-tabs">
+          <button class="period-tab active" data-period="1d">1일</button>
+          <button class="period-tab" data-period="1w">1주</button>
+          <button class="period-tab" data-period="1m">1달</button>
+          <button class="period-tab" data-period="3m">3달</button>
+          <button class="period-tab" data-period="all">전체</button>
+        </div>
+
+        <div class="chart-area">
+          <canvas class="chart-canvas" id="stock-chart"></canvas>
+        </div>
+
+        <div class="chart-info-bar">
+          <div class="chart-stat">
+            <span class="chart-stat-label">시가</span>
+            <span class="chart-stat-value" id="stat-open">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">고가</span>
+            <span class="chart-stat-value up" id="stat-high">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">저가</span>
+            <span class="chart-stat-value down" id="stat-low">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">현재가</span>
+            <span class="chart-stat-value" id="stat-close">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">거래량</span>
+            <span class="chart-stat-value" id="stat-vol">—</span>
+          </div>
+          <div class="chart-stat">
+            <span class="chart-stat-label">시가총액</span>
+            <span class="chart-stat-value" id="stat-cap">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 종목 리스트 (오른쪽, 2행 걸침) -->
+      <div class="stock-table-panel" style="grid-row: 1 / 3;">
+        <div class="panel-header">
+          <span class="panel-title">종목</span>
+          <input class="panel-search" type="text" id="stock-search" placeholder="선수 검색..." autocomplete="off" />
+        </div>
+        <div class="st-head">
+          <div class="st-head-cell sorted" data-sort="name">선수 <span class="sort-arrow">↕</span></div>
+          <div class="st-head-cell" data-sort="price">현재가 <span class="sort-arrow">↕</span></div>
+          <div class="st-head-cell" data-sort="change">등락 <span class="sort-arrow">↕</span></div>
+          <div class="st-head-cell" data-sort="rate">등락률 <span class="sort-arrow">↕</span></div>
+        </div>
+        <div class="stock-list" id="stock-list">
+          <!-- JS로 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 매수 / 매도 패널 (왼쪽 하단) -->
+      <div class="trade-panel" id="trade-panel">
+        <div class="trade-tabs">
+          <button class="trade-tab active-buy" id="tab-buy">매수</button>
+          <button class="trade-tab" id="tab-sell">매도</button>
+        </div>
+        <div class="trade-body">
+
+          <!-- 보유 정보 -->
+          <div class="holding-info">
+            <div>
+              <div class="holding-label">보유 수량</div>
+              <div class="holding-value" id="holding-qty">0 주</div>
+              <div class="holding-sub" id="holding-avg">평균단가 —</div>
+            </div>
+            <div style="text-align:right">
+              <div class="holding-label">평가손익</div>
+              <div class="holding-value flat" id="holding-pnl">—</div>
+              <div class="holding-sub" id="holding-pnl-rate">—</div>
+            </div>
+          </div>
+
+          <!-- 가격 -->
+          <div class="trade-row">
+            <span class="trade-label">주문 단가</span>
+            <div class="trade-input-wrap">
+              <input class="trade-input" id="trade-price-input" type="number" min="1" placeholder="주문 단가" />
+              <span class="trade-input-unit">코인</span>
+            </div>
+          </div>
+
+          <!-- 수량 -->
+          <div class="trade-row">
+            <span class="trade-label">수량</span>
+            <div class="trade-input-wrap">
+              <input class="trade-input" id="trade-qty-input" type="number" min="1" placeholder="0" />
+              <span class="trade-input-unit">주</span>
+            </div>
+            <div class="trade-quick-btns">
+              <button class="trade-quick-btn" data-pct="10">10%</button>
+              <button class="trade-quick-btn" data-pct="25">25%</button>
+              <button class="trade-quick-btn" data-pct="50">50%</button>
+              <button class="trade-quick-btn" data-pct="100">최대</button>
+            </div>
+          </div>
+
+          <!-- 총액 -->
+          <div class="trade-total">
+            <span class="trade-total-label">주문 총액</span>
+            <div class="trade-total-value" id="trade-total">0 <span>코인</span></div>
+          </div>
+
+          <!-- 주문 버튼 -->
+          <button class="trade-btn buy-btn" id="trade-btn">매수</button>
+
+          <!-- 잔고 -->
+          <div class="coin-balance">
+            <span class="coin-balance-label">보유 코인</span>
+            <span class="coin-balance-value" id="coin-balance">— 코인</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /stock-layout -->
+
+    <!-- 전체 종목 상세 테이블 -->
+    <div class="full-table-panel" style="margin-top:16px;">
+      <div class="panel-header">
+        <span class="panel-title">전체 종목</span>
+      </div>
+      <table class="ft-table" id="ft-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">선수</th>
+            <th data-sort="price">현재가</th>
+            <th data-sort="change">전일비</th>
+            <th data-sort="rate">등락률</th>
+            <th data-sort="high">고가</th>
+            <th data-sort="low">저가</th>
+            <th data-sort="vol">거래량</th>
+            <th data-sort="cap">시가총액</th>
+            <th>보유</th>
+          </tr>
+        </thead>
+        <tbody id="ft-tbody">
+          <!-- JS 렌더링 -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script src="./storage.js"></script>
+  <script>
+  (function () {
+    /* ── 비Admin 접근 차단 ── */
+    function checkAccess() {
+      var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+      if (!isAdmin) {
+        document.getElementById("wip-overlay").removeAttribute("hidden");
+      }
+    }
+    if (window.storageReady) {
+      window.storageReady.then(checkAccess);
+    } else {
+      setTimeout(checkAccess, 300);
+    }
+
+    /* ── 샘플 데이터 (실제 구현 전 플레이스홀더) ── */
+    var SAMPLE_PLAYERS = [
+      { id: "tenz",    name: "TenZ",     team: "Sentinels",    logo: null, price: 3200, prev: 3050, high: 3280, low: 2990, vol: 1240, shares: 10000 },
+      { id: "aspas",   name: "aspas",    team: "LOUD",         logo: null, price: 4100, prev: 4250, high: 4300, low: 4080, vol:  870, shares: 10000 },
+      { id: "derke",   name: "Derke",    team: "Fnatic",       logo: null, price: 3750, prev: 3700, high: 3800, low: 3680, vol:  560, shares: 10000 },
+      { id: "zekken",  name: "zekken",   team: "Sentinels",    logo: null, price: 2900, prev: 2850, high: 2950, low: 2820, vol:  430, shares: 10000 },
+      { id: "leviatan",name: "C0M",      team: "Leviatán",     logo: null, price: 2100, prev: 2200, high: 2220, low: 2090, vol:  310, shares: 10000 },
+      { id: "primmie", name: "PRIME",    team: "Paper Rex",    logo: null, price: 2650, prev: 2650, high: 2700, low: 2600, vol:  290, shares: 10000 },
+      { id: "something",name:"Something",team: "Paper Rex",   logo: null, price: 3100, prev: 2980, high: 3150, low: 2970, vol:  780, shares: 10000 },
+      { id: "nats",    name: "nAts",     team: "Team Liquid",  logo: null, price: 3450, prev: 3500, high: 3520, low: 3420, vol:  620, shares: 10000 },
+    ];
+
+    function calcChange(p) { return p.price - p.prev; }
+    function calcRate(p)   { return ((p.price - p.prev) / p.prev * 100); }
+    function fmtPrice(n)   { return n.toLocaleString(); }
+    function fmtRate(r)    { return (r >= 0 ? "+" : "") + r.toFixed(2) + "%"; }
+    function fmtChg(c)     { return (c >= 0 ? "▲" : "▼") + " " + Math.abs(c).toLocaleString(); }
+    function colorCls(n)   { return n > 0 ? "up" : n < 0 ? "down" : "flat"; }
+
+    var selectedId = null;
+    var tradeMode  = "buy"; /* buy | sell */
+    var myCoins    = 0;
+    var myHoldings = {}; /* { playerId: { qty, avgPrice } } */
+
+    /* ── 티커 바 업데이트 ── */
+    function updateTicker() {
+      var upCnt = 0, downCnt = 0, totalVol = 0;
+      SAMPLE_PLAYERS.forEach(function (p) {
+        var c = calcChange(p);
+        if (c > 0) upCnt++;
+        else if (c < 0) downCnt++;
+        totalVol += p.vol * p.price;
+      });
+      document.getElementById("tk-up").textContent   = upCnt;
+      document.getElementById("tk-down").textContent  = downCnt;
+      document.getElementById("tk-vol").textContent   = Math.round(totalVol / 1000) + "K";
+      document.getElementById("tk-index").textContent = "VCT-IDX";
+      document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
+    }
+
+    /* ── 종목 리스트 렌더링 ── */
+    function renderStockList(filter) {
+      var list   = document.getElementById("stock-list");
+      var search = (filter || "").toLowerCase();
+      var html   = "";
+      SAMPLE_PLAYERS.forEach(function (p) {
+        if (search && p.name.toLowerCase().indexOf(search) === -1 && p.team.toLowerCase().indexOf(search) === -1) return;
+        var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
+        var initial = p.name.charAt(0).toUpperCase();
+        html += '<div class="stock-row' + (p.id === selectedId ? " active" : "") + '" data-id="' + p.id + '">' +
+          '<div class="stock-player">' +
+            '<div class="stock-player-logo">' + initial + '</div>' +
+            '<div class="stock-player-info">' +
+              '<div class="stock-player-name">' + p.name + '</div>' +
+              '<div class="stock-player-team">' + p.team + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="stock-price">' + fmtPrice(p.price) + '</div>' +
+          '<div class="stock-change ' + cls + '">' + fmtChg(chg) + '</div>' +
+          '<div class="stock-rate ' + cls + '">' + fmtRate(rate) + '</div>' +
+        '</div>';
+      });
+      list.innerHTML = html || '<div style="padding:24px;text-align:center;color:rgba(255,255,255,.25);font-size:13px;">검색 결과 없음</div>';
+      list.querySelectorAll(".stock-row").forEach(function (row) {
+        row.addEventListener("click", function () { selectPlayer(row.dataset.id); });
+      });
+    }
+
+    /* ── 전체 테이블 렌더링 ── */
+    function renderFullTable() {
+      var tbody = document.getElementById("ft-tbody");
+      var html  = "";
+      SAMPLE_PLAYERS.forEach(function (p) {
+        var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
+        var h = myHoldings[p.id];
+        var qtyTxt = h && h.qty > 0 ? h.qty + "주" : "—";
+        var initial = p.name.charAt(0).toUpperCase();
+        html += '<tr class="' + (p.id === selectedId ? "active" : "") + '" data-id="' + p.id + '">' +
+          '<td><div class="ft-player-cell">' +
+            '<div class="ft-player-logo">' + initial + '</div>' +
+            '<div><div class="ft-player-name">' + p.name + '</div>' +
+            '<div class="ft-player-team">' + p.team + '</div></div></div></td>' +
+          '<td>' + fmtPrice(p.price) + '</td>' +
+          '<td class="' + cls + '">' + fmtChg(chg) + '</td>' +
+          '<td class="' + cls + '">' + fmtRate(rate) + '</td>' +
+          '<td class="up">'   + fmtPrice(p.high) + '</td>' +
+          '<td class="down">' + fmtPrice(p.low)  + '</td>' +
+          '<td>' + p.vol.toLocaleString() + '</td>' +
+          '<td>' + fmtPrice(p.price * p.shares) + '</td>' +
+          '<td>' + qtyTxt + '</td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+      tbody.querySelectorAll("tr").forEach(function (tr) {
+        tr.addEventListener("click", function () { selectPlayer(tr.dataset.id); });
+      });
+    }
+
+    /* ── 선수 선택 ── */
+    function selectPlayer(id) {
+      var p = SAMPLE_PLAYERS.find(function (x) { return x.id === id; });
+      if (!p) return;
+      selectedId = id;
+
+      var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
+      document.getElementById("chart-name").textContent   = p.name;
+      document.getElementById("chart-team").textContent   = p.team;
+      document.getElementById("chart-price").textContent  = fmtPrice(p.price) + " 코인";
+      var cpEl = document.getElementById("chart-price-change");
+      cpEl.textContent  = fmtChg(chg) + " (" + fmtRate(rate) + ")";
+      cpEl.className    = "chart-price-change " + cls;
+      document.getElementById("chart-logo").textContent   = p.name.charAt(0).toUpperCase();
+
+      document.getElementById("stat-open").textContent  = fmtPrice(p.prev);
+      document.getElementById("stat-high").textContent  = fmtPrice(p.high);
+      document.getElementById("stat-low").textContent   = fmtPrice(p.low);
+      document.getElementById("stat-close").textContent = fmtPrice(p.price);
+      document.getElementById("stat-vol").textContent   = p.vol.toLocaleString();
+      document.getElementById("stat-cap").textContent   = fmtPrice(p.price * p.shares);
+
+      document.getElementById("trade-price-input").value = p.price;
+
+      updateHoldingInfo(p);
+      drawChart(p);
+      renderStockList(document.getElementById("stock-search").value);
+      renderFullTable();
+      updateTotal();
+    }
+
+    /* ── 차트 그리기 (샘플 캔들 데이터) ── */
+    function drawChart(p) {
+      var canvas = document.getElementById("stock-chart");
+      var ctx    = canvas.getContext("2d");
+      var W      = canvas.parentElement.offsetWidth - 40;
+      var H      = canvas.parentElement.offsetHeight;
+      canvas.width  = W;
+      canvas.height = H;
+
+      /* 샘플 선형 차트 */
+      var pts = 30;
+      var data = [];
+      var cur = p.prev;
+      for (var i = 0; i < pts; i++) {
+        cur += (Math.random() - 0.48) * (p.price * 0.015);
+        data.push(cur);
+      }
+      data.push(p.price);
+
+      var minV = Math.min.apply(null, data) * 0.998;
+      var maxV = Math.max.apply(null, data) * 1.002;
+      var toX  = function (i) { return (i / (data.length - 1)) * W; };
+      var toY  = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
+
+      var isUp = p.price >= p.prev;
+      var lineColor = isUp ? "#e84444" : "#3b8fff";
+      var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
+
+      /* 그리드 */
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(255,255,255,.05)";
+      ctx.lineWidth   = 1;
+      for (var g = 0; g < 5; g++) {
+        var gy = H * 0.05 + (H * 0.85 / 4) * g;
+        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+      }
+
+      /* 채우기 */
+      ctx.beginPath();
+      ctx.moveTo(toX(0), H);
+      data.forEach(function (v, i) { ctx.lineTo(toX(i), toY(v)); });
+      ctx.lineTo(toX(data.length - 1), H);
+      ctx.closePath();
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+
+      /* 선 */
+      ctx.beginPath();
+      data.forEach(function (v, i) {
+        if (i === 0) ctx.moveTo(toX(i), toY(v));
+        else         ctx.lineTo(toX(i), toY(v));
+      });
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth   = 2;
+      ctx.lineJoin    = "round";
+      ctx.stroke();
+
+      /* 현재가 점 */
+      var lx = toX(data.length - 1), ly = toY(data[data.length - 1]);
+      ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+      ctx.fillStyle = lineColor; ctx.fill();
+    }
+
+    /* ── 보유 정보 업데이트 ── */
+    function updateHoldingInfo(p) {
+      var h = myHoldings[p.id];
+      var qty  = h ? h.qty  : 0;
+      var avg  = h ? h.avgPrice : 0;
+      document.getElementById("holding-qty").textContent  = qty + " 주";
+      document.getElementById("holding-avg").textContent  = qty > 0 ? "평균단가 " + fmtPrice(avg) : "평균단가 —";
+      var pnl = qty > 0 ? (p.price - avg) * qty : 0;
+      var pnlRate = qty > 0 && avg > 0 ? ((p.price - avg) / avg * 100) : 0;
+      var pnlEl = document.getElementById("holding-pnl");
+      pnlEl.textContent = qty > 0 ? (pnl >= 0 ? "+" : "") + fmtPrice(pnl) + " 코인" : "—";
+      pnlEl.className   = "holding-value " + (qty > 0 ? colorCls(pnl) : "flat");
+      document.getElementById("holding-pnl-rate").textContent = qty > 0 ? fmtRate(pnlRate) : "—";
+    }
+
+    /* ── 총액 계산 ── */
+    function updateTotal() {
+      var price = parseFloat(document.getElementById("trade-price-input").value) || 0;
+      var qty   = parseInt(document.getElementById("trade-qty-input").value)     || 0;
+      var total = price * qty;
+      document.getElementById("trade-total").innerHTML = fmtPrice(total) + ' <span>코인</span>';
+    }
+
+    /* ── 매수/매도 탭 ── */
+    document.getElementById("tab-buy").addEventListener("click", function () {
+      tradeMode = "buy";
+      document.getElementById("tab-buy").className  = "trade-tab active-buy";
+      document.getElementById("tab-sell").className = "trade-tab";
+      document.getElementById("trade-btn").textContent = "매수";
+      document.getElementById("trade-btn").className  = "trade-btn buy-btn";
+    });
+    document.getElementById("tab-sell").addEventListener("click", function () {
+      tradeMode = "sell";
+      document.getElementById("tab-buy").className  = "trade-tab";
+      document.getElementById("tab-sell").className = "trade-tab active-sell";
+      document.getElementById("trade-btn").textContent = "매도";
+      document.getElementById("trade-btn").className  = "trade-btn sell-btn";
+    });
+
+    /* ── 퀵 버튼 (10%/25%/50%/최대) ── */
+    document.querySelectorAll(".trade-quick-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var pct   = parseInt(btn.dataset.pct);
+        var price = parseFloat(document.getElementById("trade-price-input").value) || 1;
+        var p     = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+        if (!p) return;
+        var maxQty;
+        if (tradeMode === "buy") {
+          maxQty = Math.floor(myCoins / price);
+        } else {
+          maxQty = (myHoldings[p.id] ? myHoldings[p.id].qty : 0);
+        }
+        document.getElementById("trade-qty-input").value = Math.floor(maxQty * pct / 100);
+        updateTotal();
+      });
+    });
+
+    /* ── 입력 이벤트 ── */
+    document.getElementById("trade-price-input").addEventListener("input", updateTotal);
+    document.getElementById("trade-qty-input").addEventListener("input",   updateTotal);
+
+    /* ── 주문 버튼 ── */
+    document.getElementById("trade-btn").addEventListener("click", function () {
+      var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+      if (!p) { alert("선수를 먼저 선택해 주세요."); return; }
+      var price = parseFloat(document.getElementById("trade-price-input").value) || 0;
+      var qty   = parseInt(document.getElementById("trade-qty-input").value)     || 0;
+      if (price < 1 || qty < 1) { alert("단가와 수량을 입력해 주세요."); return; }
+      var total = price * qty;
+      if (tradeMode === "buy") {
+        if (total > myCoins) { alert("코인이 부족합니다."); return; }
+        myCoins -= total;
+        if (!myHoldings[p.id]) myHoldings[p.id] = { qty: 0, avgPrice: 0 };
+        var h = myHoldings[p.id];
+        h.avgPrice = Math.round((h.avgPrice * h.qty + price * qty) / (h.qty + qty));
+        h.qty += qty;
+        alert("✅ " + p.name + " " + qty + "주 매수 완료 (" + fmtPrice(total) + " 코인)");
+      } else {
+        var h2 = myHoldings[p.id];
+        if (!h2 || h2.qty < qty) { alert("보유 수량이 부족합니다."); return; }
+        h2.qty -= qty;
+        myCoins += total;
+        alert("✅ " + p.name + " " + qty + "주 매도 완료 (" + fmtPrice(total) + " 코인)");
+      }
+      document.getElementById("trade-qty-input").value = "";
+      document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+      updateHoldingInfo(p);
+      updateTotal();
+      updateTicker();
+      renderFullTable();
+    });
+
+    /* ── 검색 ── */
+    document.getElementById("stock-search").addEventListener("input", function () {
+      renderStockList(this.value);
+    });
+
+    /* ── 기간 탭 ── */
+    document.querySelectorAll(".period-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".period-tab").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+        if (p) drawChart(p);
+      });
+    });
+
+    /* ── 코인 잔고 로드 ── */
+    function loadCoins() {
+      if (window.storageReady) {
+        window.storageReady.then(function () {
+          var raw = localStorage.getItem("vct_coins");
+          try { myCoins = raw ? (JSON.parse(raw) || 0) : 0; } catch(e) { myCoins = 0; }
+          document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+          document.getElementById("tk-asset").textContent     = myCoins.toLocaleString();
+        });
+      }
+    }
+    loadCoins();
+
+    /* ── 초기 렌더링 ── */
+    updateTicker();
+    renderStockList();
+    renderFullTable();
+    selectPlayer(SAMPLE_PLAYERS[0].id);
+
+    window.addEventListener("resize", function () {
+      var p = selectedId ? SAMPLE_PLAYERS.find(function (x) { return x.id === selectedId; }) : null;
+      if (p) drawChart(p);
+    });
+
+  })();
+  </script>
+  <script src="./auth.js"></script>
+  <script src="./help.js" defer></script>
+</body>
+</html>
