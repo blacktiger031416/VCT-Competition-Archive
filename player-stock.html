@@ -647,86 +647,127 @@
   <script>
   (function () {
 
-    /* ── 팀 → 권역 매핑 (match 페이지와 동일한 팀명 사용) ── */
+    /* ── 팀 → 권역 fallback (vct_roster: 에 없는 팀 대비) ── */
     var REGION_MAP = {
-      /* Americas */
       "Sentinels":"americas","G2 Esports":"americas","NRG":"americas",
       "100 Thieves":"americas","Cloud9":"americas","MIBR":"americas",
       "LOUD":"americas","FURIA":"americas","KRÜ Esports":"americas",
       "Leviatán":"americas","Evil Geniuses":"americas","ENVY":"americas",
-      /* EMEA */
       "Gentle Mates":"emea","Team Liquid":"emea","Team Heretics":"emea",
       "Natus Vincere":"emea","Karmine Corp":"emea","FUT Esports":"emea",
       "BBL Esports":"emea","Fnatic":"emea","Team Vitality":"emea",
       "Eternal Fire":"emea","PCIFIC Esports":"emea","ULF Esports":"emea",
       "GIANTX":"emea","NAVI":"emea",
-      /* Pacific */
       "DetonatioN FocusMe":"pacific","Global Esports":"pacific",
       "Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
       "Paper Rex":"pacific","Rex Regum Qeon":"pacific",
       "Team Secret":"pacific","ZETA DIVISION":"pacific",
       "FULL SENSE":"pacific","Gen.G":"pacific","VARREL":"pacific","T1":"pacific",
-      /* CN */
       "Wuxi Titan Esports Club":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
       "FunPlus Phoenix":"cn","EDward Gaming":"cn",
       "Trace Esports":"cn","Nova Esports":"cn",
     };
 
-    /* ── localStorage 경기 기록에서 선수 ACS 집계 ── */
+    /* ── leaderboard.html과 동일한 방식으로 vct_p: / vct_roster: 키에서 집계 ── */
     function buildPlayersFromStorage() {
-      var playerMap = {}; /* key: "이름|팀" */
-      Object.keys(localStorage).forEach(function (lsKey) {
-        if (lsKey.indexOf("set:") !== 0) return;
-        /* set:DATE|TEAMA|TEAMB:INDEX:MAPNAME */
-        var colonParts = lsKey.split(":");
-        if (colonParts.length < 3) return;
-        var baseParts = colonParts[1].split("|");
-        if (baseParts.length < 3) return;
-        var teamA = baseParts[1];
-        var teamB = baseParts[2];
+      /* 1. vct_roster:팀명 → 선수-팀 매핑 */
+      var playerTeamMap = {};
+      for (var ri = 0; ri < localStorage.length; ri++) {
+        var rk = localStorage.key(ri);
+        if (!rk || rk.indexOf("vct_roster:") !== 0) continue;
+        var rTeam = rk.slice(11);
         try {
-          var state = JSON.parse(localStorage.getItem(lsKey) || "{}");
-          (state.rows || []).forEach(function (row) {
-            function add(pName, team, acsStr) {
-              if (!pName || pName === "-" || pName === "") return;
-              pName = pName.trim();
-              if (!pName) return;
-              var acs = parseFloat(acsStr);
-              /* 50 미만은 입력 오류로 판단 (실제 VCT ACS는 최소 50 이상) */
-              if (isNaN(acs) || acs < 50) return;
-              var pid = pName + "|" + team;
-              if (!playerMap[pid]) {
-                playerMap[pid] = {
-                  name: pName, team: team,
-                  region: REGION_MAP[team] || "americas",
-                  acsList: []
-                };
-              }
-              playerMap[pid].acsList.push(acs);
-            }
-            add(row.aPlayer, teamA, row.aAcs);
-            add(row.bPlayer, teamB, row.bAcs);
+          var r = JSON.parse(localStorage.getItem(rk) || "{}");
+          ((r.main || []).concat(r.subs || [])).forEach(function (p) {
+            if (p) playerTeamMap[p.trim()] = rTeam;
           });
         } catch (e) {}
-      });
+      }
 
+      /* 2. vct_p:선수명 → ACS / KDA 집계 */
+      var pMap = {};
+      for (var pi = 0; pi < localStorage.length; pi++) {
+        var pk = localStorage.key(pi);
+        if (!pk || pk.indexOf("vct_p:") !== 0) continue;
+        var pName = pk.slice(6);
+        var pdRaw = localStorage.getItem(pk);
+        if (!pdRaw) continue;
+        var pd;
+        try { pd = JSON.parse(pdRaw); } catch (e) { continue; }
+        if (!pd.maps || !pd.maps.length) continue;
+
+        pd.maps.forEach(function (m) {
+          var acs = parseFloat(m.acs) || 0;
+          var hasKda = m.kda && m.kda.indexOf("/") !== -1;
+          if (acs <= 0 && !hasKda) return;
+
+          if (!pMap[pName]) {
+            pMap[pName] = {
+              name: pName,
+              acsMaps: 0, totalAcs: 0,
+              totalK: 0, totalD: 0, kdMaps: 0,
+              regionCounts: {},   /* 권역별 맵 수 */
+            };
+          }
+          var e = pMap[pName];
+
+          /* 권역 집계 (regional league 기준) */
+          var lg = m.league || "";
+          if (lg === "americas" || lg === "emea" || lg === "pacific" || lg === "cn") {
+            e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
+          }
+
+          if (acs > 0) { e.acsMaps++; e.totalAcs += acs; }
+          if (hasKda) {
+            var pts = m.kda.split("/");
+            e.totalK += parseFloat(pts[0]) || 0;
+            e.totalD += parseFloat(pts[1]) || 0;
+            e.kdMaps++;
+          }
+        });
+      }
+
+      /* 3. 선수 목록 생성 */
       var players = [];
       var idx = 0;
-      Object.keys(playerMap).forEach(function (pid) {
-        var p = playerMap[pid];
-        if (!p.acsList.length) return;
-        var avg = p.acsList.reduce(function (a, b) { return a + b; }, 0) / p.acsList.length;
-        var price = Math.max(1, Math.round(avg / 10));
+      Object.keys(pMap).forEach(function (pName) {
+        var e = pMap[pName];
+        if (e.acsMaps === 0) return;
+
+        /* 가장 많이 나온 regional league = 권역 */
+        var region = "americas";
+        var maxCnt = 0;
+        Object.keys(e.regionCounts).forEach(function (r) {
+          if (e.regionCounts[r] > maxCnt) { maxCnt = e.regionCounts[r]; region = r; }
+        });
+
+        /* 팀: vct_roster 우선, 없으면 REGION_MAP 역방향 미적용 (공백) */
+        var team = playerTeamMap[pName] || playerTeamMap[pName.trim()] || "";
+        if (!team) {
+          /* REGION_MAP 역으로 찾기 어려우므로 권역명만 표시 */
+        }
+
+        var avgAcs  = Math.round(e.totalAcs / e.acsMaps);
+        var price   = Math.max(1, Math.round(avgAcs / 10));
+        var kd      = e.kdMaps > 0
+          ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2))
+          : null;
+
         players.push({
-          id: "p" + (idx++),
-          name: p.name, team: p.team, region: p.region, logo: null,
-          price: price, prev: price,   /* 최초 기준가 = 현재가 (변동 없음) */
-          mapCount: p.acsList.length,
-          avgAcs: Math.round(avg),
-          shares: 10000,
+          id:       "p" + (idx++),
+          name:     pName,
+          team:     team,
+          region:   region,
+          logo:     null,
+          price:    price,
+          prev:     price,
+          mapCount: e.acsMaps,
+          avgAcs:   avgAcs,
+          kd:       kd,
+          shares:   10000,
         });
       });
-      /* 가격 높은 순 정렬 */
+
       players.sort(function (a, b) { return b.price - a.price; });
       return players;
     }
@@ -970,48 +1011,41 @@
        window.debugStock()          → 전체 선수 목록 + avgAcs + mapCount 출력
     ── */
     window.debugStock = function (searchName) {
-      var playerMap = {};
-      Object.keys(localStorage).forEach(function (lsKey) {
-        if (lsKey.indexOf("set:") !== 0) return;
-        var colonParts = lsKey.split(":");
-        if (colonParts.length < 3) return;
-        var baseParts = colonParts[1].split("|");
-        if (baseParts.length < 3) return;
-        var teamA = baseParts[1], teamB = baseParts[2];
-        try {
-          var state = JSON.parse(localStorage.getItem(lsKey) || "{}");
-          (state.rows || []).forEach(function (row) {
-            [[row.aPlayer, teamA, row.aAcs], [row.bPlayer, teamB, row.bAcs]].forEach(function (e) {
-              var pName = (e[0] || "").trim(), team = e[1], acsRaw = e[2];
-              if (!pName || pName === "-") return;
-              var pid = pName + "|" + team;
-              if (!playerMap[pid]) playerMap[pid] = { name: pName, team: team, entries: [] };
-              playerMap[pid].entries.push({ key: lsKey, acsRaw: acsRaw, acsParsed: parseFloat(acsRaw) });
-            });
-          });
-        } catch (e) {}
-      });
-      if (searchName) {
-        var q = searchName.toLowerCase();
-        Object.keys(playerMap).forEach(function (pid) {
-          var p = playerMap[pid];
-          if (p.name.toLowerCase().indexOf(q) === -1) return;
-          var valid = p.entries.filter(function (e) { return !isNaN(e.acsParsed) && e.acsParsed >= 50; });
-          var invalid = p.entries.filter(function (e) { return isNaN(e.acsParsed) || e.acsParsed < 50; });
-          var avg = valid.length ? (valid.reduce(function (s, e) { return s + e.acsParsed; }, 0) / valid.length) : 0;
-          console.group("[debugStock] " + p.name + " / " + p.team);
-          console.log("유효 ACS:", valid.map(function (e) { return e.acsParsed + " (" + e.key + ")"; }));
-          console.log("제외된 ACS (50 미만/비어있음):", invalid.map(function (e) { return '"' + e.acsRaw + '" (' + e.key + ')'; }));
-          console.log("평균 ACS:", Math.round(avg), "→", Math.max(1, Math.round(avg / 10)), "코인");
-          console.groupEnd();
+      /* vct_p: 키에서 raw 데이터 확인 (leaderboard와 동일한 소스) */
+      var q = searchName ? searchName.toLowerCase() : null;
+      var found = false;
+      for (var pi = 0; pi < localStorage.length; pi++) {
+        var pk = localStorage.key(pi);
+        if (!pk || pk.indexOf("vct_p:") !== 0) continue;
+        var pName = pk.slice(6);
+        if (q && pName.toLowerCase().indexOf(q) === -1) continue;
+        found = true;
+        var pd;
+        try { pd = JSON.parse(localStorage.getItem(pk) || "{}"); } catch (e) { continue; }
+        if (!pd.maps) { console.log("[debugStock]", pName, "→ maps 없음"); continue; }
+        var entries = pd.maps.map(function (m) {
+          return { league: m.league || "?", stage: m.stage || "?", acs: m.acs, kda: m.kda, matchKey: m.matchKey };
         });
-      } else {
-        console.table(Object.keys(playerMap).map(function (pid) {
-          var p = playerMap[pid];
-          var valid = p.entries.filter(function (e) { return !isNaN(e.acsParsed) && e.acsParsed >= 50; });
-          var avg = valid.length ? (valid.reduce(function (s, e) { return s + e.acsParsed; }, 0) / valid.length) : 0;
-          return { 선수: p.name, 팀: p.team, 유효맵수: valid.length, 평균ACS: Math.round(avg), 코인: Math.max(1, Math.round(avg / 10)) };
-        }).sort(function (a, b) { return b.코인 - a.코인; }));
+        var validAcs   = entries.filter(function (e) { return parseFloat(e.acs) > 0; });
+        var avgAcs     = validAcs.length ? Math.round(validAcs.reduce(function (s, e) { return s + parseFloat(e.acs); }, 0) / validAcs.length) : 0;
+        console.group("[debugStock] " + pName + " (" + validAcs.length + "맵, 평균ACS " + avgAcs + " → " + Math.max(1, Math.round(avgAcs / 10)) + "코인)");
+        console.table(entries);
+        console.groupEnd();
+      }
+      if (!found) console.log("[debugStock] '" + searchName + "' 해당 선수 없음 (vct_p: 키 없음)");
+      if (!searchName) {
+        /* 전체 테이블 */
+        var rows = [];
+        for (var ai = 0; ai < localStorage.length; ai++) {
+          var ak = localStorage.key(ai);
+          if (!ak || ak.indexOf("vct_p:") !== 0) continue;
+          var apd; try { apd = JSON.parse(localStorage.getItem(ak) || "{}"); } catch (e) { continue; }
+          if (!apd.maps) continue;
+          var valid = apd.maps.filter(function (m) { return parseFloat(m.acs) > 0; });
+          var avg = valid.length ? Math.round(valid.reduce(function (s, m) { return s + parseFloat(m.acs); }, 0) / valid.length) : 0;
+          rows.push({ 선수: ak.slice(6), 맵수: valid.length, 평균ACS: avg, 코인: Math.max(1, Math.round(avg / 10)) });
+        }
+        console.table(rows.sort(function (a, b) { return b.코인 - a.코인; }));
       }
     };
 
