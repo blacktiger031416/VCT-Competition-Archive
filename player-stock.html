@@ -608,6 +608,10 @@
             <span class="trade-price-value" id="trade-unit-price">— <span>코인</span></span>
           </div>
           <div class="trade-holding-simple">보유 수량 <strong id="holding-qty">0 주</strong></div>
+          <div class="trade-holding-simple" id="holding-avg-row" style="display:none">
+            평균 단가 <strong id="holding-avg">— 코인</strong>
+            &nbsp;|&nbsp; 평가 손익 <strong id="holding-pnl">—</strong>
+          </div>
 
           <!-- 수량 입력 -->
           <div class="trade-row">
@@ -825,6 +829,23 @@
     function fmtRate(r)     { return (r >= 0 ? "+" : "") + r.toFixed(2) + "%"; }
     function fmtChg(c)      { return (c >= 0 ? "▲" : "▼") + " " + Math.abs(c).toLocaleString(); }
     function colorCls(n)    { return n > 0 ? "up" : n < 0 ? "down" : "flat"; }
+
+    function updateHoldingDisplay(p) {
+      var h   = p ? myHoldings[p.name] : null;
+      var qty = h ? h.qty : 0;
+      document.getElementById("holding-qty").textContent = qty + " 주";
+      var avgRow = document.getElementById("holding-avg-row");
+      if (h && h.qty > 0 && p) {
+        var pnl     = (p.price - h.avgPrice) * h.qty;
+        var pnlEl   = document.getElementById("holding-pnl");
+        pnlEl.textContent = (pnl >= 0 ? "+" : "") + pnl.toLocaleString() + " 코인";
+        pnlEl.style.color = pnl > 0 ? "var(--up)" : pnl < 0 ? "var(--down)" : "rgba(255,255,255,.4)";
+        document.getElementById("holding-avg").textContent = h.avgPrice.toLocaleString() + " 코인";
+        avgRow.style.display = "";
+      } else {
+        avgRow.style.display = "none";
+      }
+    }
     function findPlayer(id) { return PLAYERS.find(function (x) { return x.id === id; }); }
 
     var REGION_LABEL = { americas: "AMR", emea: "EMEA", pacific: "PAC", cn: "CN" };
@@ -923,9 +944,8 @@
       document.getElementById("stat-avgacs").textContent   = p.avgAcs != null ? p.avgAcs : "—";
       document.getElementById("stat-mapcount").textContent = p.mapCount != null ? p.mapCount + "맵" : "—";
       document.getElementById("trade-unit-price").innerHTML = fmtPrice(p.price) + ' <span>코인</span>';
-      var h = myHoldings[p.id];
-      document.getElementById("holding-qty").textContent  = (h && h.qty > 0 ? h.qty : 0) + " 주";
-      document.getElementById("trade-qty-input").value    = "";
+      document.getElementById("trade-qty-input").value = "";
+      updateHoldingDisplay(p);
       drawChart(p);
       renderStockList(document.getElementById("stock-search").value);
       renderFullTable();
@@ -1026,26 +1046,34 @@
     document.getElementById("trade-btn").addEventListener("click", function () {
       var p = selectedId ? findPlayer(selectedId) : null;
       if (!p) { alert("선수를 먼저 선택해 주세요."); return; }
+      if (!TOKEN) { alert("로그인이 필요합니다."); return; }
       var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
       if (qty < 1) { alert("수량을 입력해 주세요."); return; }
       var total = p.price * qty;
-      if (tradeMode === "buy") {
-        if (total > myCoins) { alert("코인이 부족합니다."); return; }
-        myCoins -= total;
-        if (!myHoldings[p.id]) myHoldings[p.id] = { qty: 0 };
-        myHoldings[p.id].qty += qty;
-        alert("✅ " + p.name + " " + qty + "주 매수 완료 (" + fmtPrice(total) + " 코인)");
-      } else {
-        var h = myHoldings[p.id];
-        if (!h || h.qty < qty) { alert("보유 수량이 부족합니다."); return; }
-        h.qty -= qty;
-        myCoins += total;
-        alert("✅ " + p.name + " " + qty + "주 매도 완료 (" + fmtPrice(total) + " 코인)");
-      }
-      document.getElementById("trade-qty-input").value = "";
-      document.getElementById("holding-qty").textContent = (myHoldings[p.id] ? myHoldings[p.id].qty : 0) + " 주";
-      document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-      updateTotal(); updateTicker(); renderFullTable();
+      var btn = document.getElementById("trade-btn");
+      btn.disabled = true;
+
+      var endpoint = tradeMode === "buy" ? "/api/stock/buy" : "/api/stock/sell";
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+        body: JSON.stringify({ playerName: p.name, qty: qty, price: p.price }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.error) { alert("❌ " + d.error); return; }
+          myCoins    = d.coins;
+          myHoldings = d.holdings;
+          document.getElementById("trade-qty-input").value = "";
+          document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+          document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
+          updateHoldingDisplay(p);
+          updateTotal(); updateTicker(); renderFullTable();
+          var label = tradeMode === "buy" ? "매수" : "매도";
+          alert("✅ " + p.name + " " + qty + "주 " + label + " 완료 (" + fmtPrice(total) + " 코인)");
+        })
+        .catch(function () { alert("❌ 서버 오류가 발생했습니다."); })
+        .finally(function () { btn.disabled = false; });
     });
     document.getElementById("stock-search").addEventListener("input", function () {
       renderStockList(this.value);
@@ -1130,18 +1158,22 @@
 
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      /* 코인 로드: /api/coins (coins: 키는 SERVER_ONLY라 localStorage에 없음) */
+      /* 코인 + 보유주식 로드 (SERVER_ONLY라 localStorage에 없음) */
       if (TOKEN) {
-        fetch("/api/coins", { headers: { Authorization: "Bearer " + TOKEN } })
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (typeof d.coins === "number") {
-              myCoins = d.coins;
-              document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-              document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
-            }
-          })
-          .catch(function () {});
+        Promise.all([
+          fetch("/api/coins",          { headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
+          fetch("/api/stock/holdings", { headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
+        ]).then(function (results) {
+          var coinData = results[0], holdData = results[1];
+          if (typeof coinData.coins === "number") {
+            myCoins = coinData.coins;
+            document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+            document.getElementById("tk-asset").textContent = myCoins.toLocaleString();
+          }
+          if (holdData.holdings) {
+            myHoldings = holdData.holdings;
+          }
+        }).catch(function () {});
       }
       /* Admin이면 리셋 버튼 표시 */
       if (window.vctIsAdmin && window.vctIsAdmin()) {

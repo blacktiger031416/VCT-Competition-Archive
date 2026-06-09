@@ -550,6 +550,9 @@ app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
     // 5. 출석체크 기록
     await pool.query("DELETE FROM app_data WHERE key LIKE 'attend:%'");
 
+    // 5-1. 보유 주식 초기화
+    await pool.query("DELETE FROM app_data WHERE key LIKE 'holdings:%'");
+
     // 6. Admin·test 제외 모든 계정 삭제
     await pool.query("DELETE FROM users WHERE role NOT IN ('admin', 'test')");
 
@@ -622,6 +625,112 @@ app.delete("/api/suggestions/:ts", requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 보유 주식 조회 ────────────────────────────── */
+app.get("/api/stock/holdings", requireAuth, async (req, res) => {
+  const key = `holdings:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    const holdings = result.rows[0] ? JSON.parse(result.rows[0].value) : {};
+    res.json({ holdings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 주식 매수 ─────────────────────────────────── */
+app.post("/api/stock/buy", requireAuth, async (req, res) => {
+  const { playerName, qty, price } = req.body || {};
+  const qtyN = parseInt(qty, 10), priceN = parseInt(price, 10);
+  if (!playerName || qtyN < 1 || priceN < 1)
+    return res.status(400).json({ error: "잘못된 요청입니다." });
+
+  const username    = req.user.username;
+  const coinKey     = `coins:${username}`;
+  const holdingsKey = `holdings:${username}`;
+  const total       = priceN * qtyN;
+
+  try {
+    const coinRes    = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
+    const curCoins   = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 1000;
+    if (curCoins < total)
+      return res.status(400).json({ error: "코인이 부족합니다." });
+
+    const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
+    const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
+
+    /* 평균 단가 갱신 */
+    if (holdings[playerName]) {
+      const old    = holdings[playerName];
+      const newQty = old.qty + qtyN;
+      holdings[playerName] = {
+        qty:      newQty,
+        avgPrice: Math.round((old.avgPrice * old.qty + priceN * qtyN) / newQty),
+      };
+    } else {
+      holdings[playerName] = { qty: qtyN, avgPrice: priceN };
+    }
+
+    const newCoins = curCoins - total;
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [coinKey, String(newCoins)]
+    );
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [holdingsKey, JSON.stringify(holdings)]
+    );
+    res.json({ ok: true, coins: newCoins, holdings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 주식 매도 ─────────────────────────────────── */
+app.post("/api/stock/sell", requireAuth, async (req, res) => {
+  const { playerName, qty, price } = req.body || {};
+  const qtyN = parseInt(qty, 10), priceN = parseInt(price, 10);
+  if (!playerName || qtyN < 1 || priceN < 1)
+    return res.status(400).json({ error: "잘못된 요청입니다." });
+
+  const username    = req.user.username;
+  const coinKey     = `coins:${username}`;
+  const holdingsKey = `holdings:${username}`;
+  const total       = priceN * qtyN;
+
+  try {
+    const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
+    const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
+
+    const cur = holdings[playerName];
+    if (!cur || cur.qty < qtyN)
+      return res.status(400).json({ error: "보유 수량이 부족합니다." });
+
+    const coinRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
+    const curCoins = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 1000;
+    const newCoins = curCoins + total;
+
+    const newQty = cur.qty - qtyN;
+    if (newQty === 0) delete holdings[playerName];
+    else holdings[playerName] = { qty: newQty, avgPrice: cur.avgPrice };
+
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [coinKey, String(newCoins)]
+    );
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [holdingsKey, JSON.stringify(holdings)]
+    );
+    res.json({ ok: true, coins: newCoins, holdings });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

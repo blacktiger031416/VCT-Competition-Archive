@@ -35,8 +35,8 @@
     "tlevt:", "tlpost:", "tllike:",
     /* 건의함 */
     "suggest:",
-    /* 유저별 코인·금고·출석 — Admin localStorage가 덮어쓰는 버그 방지 */
-    "coins:", "vault:", "attend:",
+    /* 유저별 코인·금고·출석·보유주식 — Admin localStorage가 덮어쓰는 버그 방지 */
+    "coins:", "vault:", "attend:", "holdings:",
     /* 승부 예측 배팅 기록 */
     "pred-bet:",
     /* 승부 예측 경기 데이터 (서버가 broadcast로 배포) */
