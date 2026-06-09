@@ -69,7 +69,7 @@
 
     /* ── PAGE TITLE ── */
     .page-title-row {
-      display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
     }
     .page-title {
       font-family: "Barlow Condensed", sans-serif;
@@ -77,6 +77,22 @@
       text-transform: uppercase; color: #fff;
     }
     .page-subtitle { font-size: 13px; color: rgba(255,255,255,.3); }
+    #admin-reset-btn {
+      margin-left: auto;
+      padding: 7px 16px;
+      background: rgba(255,60,60,.12);
+      border: 1px solid rgba(255,60,60,.35);
+      border-radius: 6px;
+      color: #ff6060;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    #admin-reset-btn:hover {
+      background: rgba(255,60,60,.25);
+      border-color: rgba(255,60,60,.6);
+    }
 
     /* ── MARKET TICKER (상단 요약 바) ── */
     .ticker-bar {
@@ -463,6 +479,7 @@
     <div class="page-title-row">
       <h1 class="page-title">📈 선수 주식</h1>
       <span class="page-subtitle">VCT 선수들의 퍼포먼스 기반 가상 주식 시장</span>
+      <button id="admin-reset-btn" onclick="adminResetStock()" style="display:none">🔄 주식 데이터 리셋</button>
     </div>
 
     <!-- 상단 시장 요약 -->
@@ -1085,6 +1102,20 @@
       }
     };
 
+    /* ── Admin 주식 데이터 리셋 ── */
+    window.adminResetStock = function () {
+      if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
+      if (!confirm("정말로 모든 주식 데이터를 리셋하시겠습니까?\n\n반영된 가격 변동과 차트 기록이 모두 삭제되며\n되돌릴 수 없습니다.")) return;
+      var keys = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf("stock_p:") === 0) keys.push(k);
+      }
+      keys.forEach(function (k) { localStorage.removeItem(k); });
+      alert("✅ 리셋 완료 (" + keys.length + "명)\n주식 데이터가 평균 ACS 기준으로 초기화됩니다.");
+      location.reload();
+    };
+
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
       /* 코인 로드: coins:{username} 키 사용 */
@@ -1099,6 +1130,10 @@
         }
       } catch (e) { myCoins = 0; }
       document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
+      /* Admin이면 리셋 버튼 표시 */
+      if (window.vctIsAdmin && window.vctIsAdmin()) {
+        document.getElementById("admin-reset-btn").style.display = "";
+      }
 
       /* 경기 기록에서 선수 집계 */
       PLAYERS = buildPlayersFromStorage();
