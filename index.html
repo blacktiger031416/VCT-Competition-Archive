@@ -262,6 +262,66 @@
       /* 잠금 해제된 카드: 업데이트 예정 배지 숨김 */
       .challengers-card.unlocked .lock-badge { display: none; }
 
+      /* ── 공지사항 배너 ── */
+      .notice-banner {
+        display: none;
+        position: relative;
+        background: linear-gradient(90deg, rgba(240,192,64,.13) 0%, rgba(240,192,64,.07) 100%);
+        border-bottom: 1px solid rgba(240,192,64,.22);
+        padding: 11px 52px 11px 20px;
+        z-index: 150;
+      }
+      .notice-banner.visible { display: block; }
+      .notice-banner-inner { max-width: 900px; margin: 0 auto; }
+      .notice-banner-title {
+        font-size: 12px; font-weight: 800; color: rgba(240,192,64,.9);
+        letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px;
+      }
+      .notice-banner-body { font-size: 13px; color: rgba(255,255,255,.75); line-height: 1.5; white-space: pre-wrap; }
+      .notice-banner-close {
+        position: absolute; top: 50%; right: 14px; transform: translateY(-50%);
+        background: none; border: none; color: rgba(255,255,255,.35); font-size: 18px;
+        cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color .15s;
+      }
+      .notice-banner-close:hover { color: rgba(255,255,255,.7); }
+
+      /* ── Admin 공지 관리 패널 ── */
+      .notice-admin-panel {
+        display: none;
+        max-width: 900px; margin: 0 auto 28px; padding: 20px 24px;
+        background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+        border-radius: 12px;
+      }
+      .notice-admin-panel.visible { display: block; }
+      .notice-admin-title {
+        font-size: 11px; font-weight: 700; color: rgba(255,255,255,.3);
+        letter-spacing: .14em; text-transform: uppercase; margin-bottom: 14px;
+      }
+      .notice-input {
+        width: 100%; box-sizing: border-box;
+        background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+        border-radius: 7px; color: #fff; font-size: 13px; padding: 8px 12px;
+        outline: none; font-family: inherit; margin-bottom: 8px;
+      }
+      .notice-input:focus { border-color: rgba(240,192,64,.4); background: rgba(255,255,255,.07); }
+      .notice-textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
+      .notice-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+      .notice-item {
+        display: flex; align-items: flex-start; gap: 10px;
+        padding: 10px 12px; background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.07); border-radius: 8px;
+      }
+      .notice-item-body { flex: 1; min-width: 0; }
+      .notice-item-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.75); margin-bottom: 2px; }
+      .notice-item-content { font-size: 12px; color: rgba(255,255,255,.4); white-space: pre-wrap; }
+      .notice-item-date { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 3px; }
+      .notice-del-btn {
+        flex-shrink: 0; background: none; border: 1px solid rgba(255,80,80,.3);
+        color: rgba(255,100,100,.6); border-radius: 5px; padding: 3px 9px;
+        font-size: 11px; cursor: pointer; transition: background .15s;
+      }
+      .notice-del-btn:hover { background: rgba(255,80,80,.1); color: #ff7070; }
+
       /* ── Site nav (sticky) ── */
       .site-header {
         position: sticky; top: 0; z-index: 200;
@@ -417,7 +477,26 @@
       <!-- auth.js 버튼 자동 주입 -->
     </header>
 
+    <!-- ── 공지사항 배너 ── -->
+    <div class="notice-banner" id="notice-banner">
+      <div class="notice-banner-inner">
+        <div class="notice-banner-title" id="notice-banner-title"></div>
+        <div class="notice-banner-body" id="notice-banner-body"></div>
+      </div>
+      <button class="notice-banner-close" id="notice-banner-close" aria-label="닫기">✕</button>
+    </div>
+
     <main class="page-shell">
+      <!-- ── Admin 공지사항 관리 패널 ── -->
+      <div class="notice-admin-panel" id="notice-admin-panel">
+        <div class="notice-admin-title">📢 공지사항 관리</div>
+        <input class="notice-input" id="notice-title-input" type="text" placeholder="공지 제목" maxlength="80" />
+        <textarea class="notice-input notice-textarea" id="notice-body-input" placeholder="공지 내용을 입력하세요..."></textarea>
+        <button class="btn btn-primary" id="notice-submit-btn" style="height:36px;padding:0 18px;font-size:13px">공지 등록</button>
+        <p id="notice-admin-error" style="font-size:12px;color:#ff7070;margin-top:6px;display:none"></p>
+        <div class="notice-list" id="notice-admin-list"></div>
+      </div>
+
       <section class="hero" aria-labelledby="site-title">
         <div class="hero-copy">
           <img class="vct-logo" src="./assets/vct-logo.png" alt="VCT" />
@@ -635,6 +714,121 @@
             }
           });
         });
+      })();
+
+      /* ── 공지사항 ─────────────────────────────────── */
+      (function () {
+        var TOKEN = localStorage.getItem("vct_auth_token");
+
+        function dismissedKey(id) { return "notice_dismissed:" + id; }
+        function isDismissed(id) { return localStorage.getItem(dismissedKey(id)) === "1"; }
+        function markDismissed(id) { localStorage.setItem(dismissedKey(id), "1"); }
+
+        var banner     = document.getElementById("notice-banner");
+        var bannerTitle = document.getElementById("notice-banner-title");
+        var bannerBody  = document.getElementById("notice-banner-body");
+        var closeBtn    = document.getElementById("notice-banner-close");
+
+        function showBanner(notice) {
+          bannerTitle.textContent = notice.title;
+          bannerBody.textContent  = notice.content;
+          banner.dataset.id = notice.id;
+          banner.classList.add("visible");
+        }
+
+        closeBtn.addEventListener("click", function () {
+          var id = banner.dataset.id;
+          if (id) markDismissed(id);
+          banner.classList.remove("visible");
+        });
+
+        /* 공지 목록 가져오기 */
+        function loadNotices() {
+          fetch("/api/notices")
+            .then(function (r) { return r.json(); })
+            .then(function (list) {
+              /* 최신 공지 중 안 읽은 것 배너 표시 */
+              var unread = list.find(function (n) { return !isDismissed(n.id); });
+              if (unread) showBanner(unread);
+
+              /* Admin 패널 */
+              var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+              if (!isAdmin) return;
+              var panel = document.getElementById("notice-admin-panel");
+              panel.classList.add("visible");
+              renderAdminList(list);
+            })
+            .catch(function () {});
+        }
+
+        function renderAdminList(list) {
+          var el = document.getElementById("notice-admin-list");
+          if (!list.length) { el.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,.25);margin-top:10px">등록된 공지가 없습니다.</p>'; return; }
+          el.innerHTML = list.map(function (n) {
+            var date = new Date(n.createdAt).toLocaleString("ko-KR", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" });
+            return '<div class="notice-item">' +
+              '<div class="notice-item-body">' +
+                '<div class="notice-item-title">' + esc(n.title) + '</div>' +
+                '<div class="notice-item-content">' + esc(n.content) + '</div>' +
+                '<div class="notice-item-date">' + date + '</div>' +
+              '</div>' +
+              '<button class="notice-del-btn" data-id="' + n.id + '">삭제</button>' +
+            '</div>';
+          }).join("");
+          el.querySelectorAll(".notice-del-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              if (!confirm("이 공지를 삭제하시겠습니까?")) return;
+              fetch("/api/notices/" + btn.dataset.id, {
+                method: "DELETE",
+                headers: { Authorization: "Bearer " + TOKEN },
+              }).then(function () { loadNotices(); });
+            });
+          });
+        }
+
+        function esc(s) {
+          return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        }
+
+        /* 공지 등록 */
+        document.getElementById("notice-submit-btn").addEventListener("click", function () {
+          var title   = document.getElementById("notice-title-input").value.trim();
+          var content = document.getElementById("notice-body-input").value.trim();
+          var errEl   = document.getElementById("notice-admin-error");
+          errEl.style.display = "none";
+          if (!title)   { errEl.textContent = "제목을 입력해 주세요."; errEl.style.display = "block"; return; }
+          if (!content) { errEl.textContent = "내용을 입력해 주세요."; errEl.style.display = "block"; return; }
+          fetch("/api/notices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + TOKEN },
+            body: JSON.stringify({ title: title, content: content }),
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) { errEl.textContent = d.error; errEl.style.display = "block"; return; }
+              document.getElementById("notice-title-input").value = "";
+              document.getElementById("notice-body-input").value = "";
+              loadNotices();
+            });
+        });
+
+        /* SSE로 새 공지 실시간 수신 */
+        var _noticeEs = new EventSource("/api/events");
+        _noticeEs.onmessage = function (e) {
+          try {
+            var msg = JSON.parse(e.data);
+            if (msg.type === "notice-new" && msg.notice) {
+              showBanner(msg.notice);
+              var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+              if (isAdmin) loadNotices();
+            } else if (msg.type === "notice-delete") {
+              if (banner.dataset.id === String(msg.id)) banner.classList.remove("visible");
+              var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+              if (isAdmin) loadNotices();
+            }
+          } catch (_) {}
+        };
+
+        loadNotices();
       })();
     </script>
     <script src="./auth.js"></script>

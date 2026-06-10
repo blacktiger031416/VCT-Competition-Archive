@@ -1030,6 +1030,48 @@ app.get("/api/prediction/my-bets", requireAuth, async (req, res) => {
   }
 });
 
+/* ── API: 공지사항 목록 ────────────────────────────── */
+app.get("/api/notices", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT value FROM app_data WHERE key LIKE 'notice:%' ORDER BY updated_at DESC"
+    );
+    res.json(result.rows.map((r) => JSON.parse(r.value)));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 공지사항 등록 (admin) ─────────────────────── */
+app.post("/api/notices", requireAdmin, async (req, res) => {
+  const { title, content } = req.body || {};
+  if (!title || !content)
+    return res.status(400).json({ error: "title, content 필수" });
+  const id = Date.now().toString();
+  const notice = { id, title, content, createdAt: new Date().toISOString() };
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [`notice:${id}`, JSON.stringify(notice)]
+    );
+    broadcast({ type: "notice-new", notice });
+    res.json({ ok: true, id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 공지사항 삭제 (admin) ─────────────────────── */
+app.delete("/api/notices/:id", requireAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1", [`notice:${req.params.id}`]);
+    broadcast({ type: "notice-delete", id: req.params.id });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── SPA fallback ─────────────────────────────────── */
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
