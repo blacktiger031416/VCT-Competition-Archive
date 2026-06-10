@@ -1151,6 +1151,12 @@ async function applyAcsToStock(playerName, newAcs) {
   const state = await getStockState(playerName);
   if (!state) return; /* DB에 없는 선수 — 무시 */
 
+  /* 이미 동일 ACS로 반영된 경우 중복 방지 */
+  if (newAcs === state.ref) {
+    console.log(`[stock] ${playerName}: ACS ${newAcs} 이미 반영됨 — 건너뜀`);
+    return;
+  }
+
   const pctChange = (newAcs - state.ref) / state.ref;
   const newPrice  = Math.max(1, Math.round(state.price * (1 + pctChange)));
   const newState  = {
@@ -1374,16 +1380,17 @@ async function pollAutoMatches(allEventMatches) {
           );
           broadcast({ type: "set", key: playersKey, value: playersVal });
 
-          /* ── 선수 주식 즉시 반영 ─────────────────────────────────── */
-          for (const p of players) {
-            if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-              await applyAcsToStock(p.nickname, p.averageCombatScore);
+          /* ── 선수 주식 즉시 반영 (processMatch가 이미 처리한 맵은 skip) ── */
+          const _alreadyDone = (processedMaps[tsMatchId] || []).includes(map.id);
+          if (!_alreadyDone) {
+            for (const p of players) {
+              if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
+                await applyAcsToStock(p.nickname, p.averageCombatScore);
+              }
             }
-          }
-          /* processMatch의 processedMaps에도 등록해 중복 처리 방지 */
-          if (!processedMaps[am.thespikeMatchId]) processedMaps[am.thespikeMatchId] = [];
-          if (!processedMaps[am.thespikeMatchId].includes(map.id)) {
-            processedMaps[am.thespikeMatchId].push(map.id);
+            /* processedMaps에 등록해 다음 사이클에서 processMatch 중복 방지 */
+            if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
+            processedMaps[tsMatchId].push(map.id);
           }
 
           /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
