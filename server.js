@@ -1335,6 +1335,7 @@ async function pollAutoMatches(allEventMatches) {
           const map = maps[mapIdx];
           if ((am.filledMaps || []).includes(map.id)) continue;
           const players = map.players || [];
+          /* ACS는 맵 종료 후에만 채워지므로 완료 판단으로 유효 */
           if (!players.some((p) => p.averageCombatScore > 0)) continue; // 미완료 맵
 
           /* ACS > 0인 선수만 (서브/미출전 로스터 제외), ACS 내림차순 정렬 후 5명으로 제한 */
