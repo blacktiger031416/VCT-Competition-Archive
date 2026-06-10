@@ -991,7 +991,8 @@
       if (maxV === minV) { maxV += 1; minV -= 1; }
       var toX = function (i) { return (i / (data.length - 1)) * W; };
       var toY = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
-      var isUp = data[data.length - 1] >= data[0];
+      /* 차트 색 = 우측 등락 표시와 동일 기준 (직전 업데이트 대비) */
+      var isUp = p.price >= p.prev;
       var lineColor = isUp ? "#e84444" : "#3b8fff";
       var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
 
