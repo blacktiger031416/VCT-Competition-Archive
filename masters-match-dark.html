@@ -1445,9 +1445,19 @@
       letter-spacing:0.1em; text-transform:uppercase;
       color:rgba(255,255,255,0.4);
       text-decoration:none;
-      
+
       transition: color 0.15s;
     ">–</a>
+    <span style="flex:1"></span>
+    <!-- 자동 입력 토글 -->
+    <button id="auto-fill-btn" style="
+      display:none;
+      padding:0 14px; height:32px; border-radius:6px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
+      color:rgba(255,255,255,.5); font-size:11px; font-weight:700;
+      font-family:'Barlow Condensed',sans-serif; letter-spacing:.1em; text-transform:uppercase;
+      cursor:pointer; transition:background .15s, border-color .15s, color .15s;
+    ">🤖 자동입력 OFF</button>
   </header>
 
   <!-- ── MATCH OVERVIEW ──────────────────────────── -->
@@ -3929,6 +3939,86 @@ function toggleMode() {
   maps.forEach(function(m, i) { renderMap(m, i); });
 }
 
+</script>
+<script>
+/* ── 자동 경기 입력 토글 ──────────────────────────────── */
+(function () {
+  var TOKEN = localStorage.getItem("vct_auth_token");
+  var btn   = document.getElementById("auto-fill-btn");
+  if (!btn || !TOKEN) return;
+
+  var isOn = false;
+
+  function setStyle(on) {
+    isOn = on;
+    if (on) {
+      btn.textContent = "🤖 자동입력 ON";
+      btn.style.background    = "rgba(61,220,132,.15)";
+      btn.style.borderColor   = "rgba(61,220,132,.4)";
+      btn.style.color         = "#3ddc84";
+    } else {
+      btn.textContent = "🤖 자동입력 OFF";
+      btn.style.background    = "rgba(255,255,255,.06)";
+      btn.style.borderColor   = "rgba(255,255,255,.15)";
+      btn.style.color         = "rgba(255,255,255,.5)";
+    }
+  }
+
+  /* admin 여부 확인 후 버튼 표시 */
+  function initBtn() {
+    var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+    if (!isAdmin) return;
+    btn.style.display = "inline-flex";
+    btn.style.alignItems = "center";
+
+    /* 현재 상태 서버에서 복원 */
+    fetch("/api/auto-match", { headers: { Authorization: "Bearer " + TOKEN } })
+      .then(function (r) { return r.json(); })
+      .then(function (list) {
+        var found = list.find(function (m) { return m.matchKey === MATCH_KEY; });
+        setStyle(!!found);
+      }).catch(function () {});
+  }
+
+  btn.addEventListener("click", function () {
+    if (isOn) {
+      /* OFF */
+      fetch("/api/auto-match/" + encodeURIComponent(MATCH_KEY), {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + TOKEN },
+      }).then(function () { setStyle(false); });
+    } else {
+      /* ON */
+      fetch("/api/auto-match", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + TOKEN },
+        body: JSON.stringify({ matchKey: MATCH_KEY, team1: MATCH_TEAM_A, team2: MATCH_TEAM_B }),
+      }).then(function () { setStyle(true); });
+    }
+  });
+
+  /* SSE: auto-match-filled 수신 → 해당 맵 자동 갱신 */
+  var _sse = new EventSource("/api/events");
+  _sse.onmessage = function (e) {
+    try {
+      var msg = JSON.parse(e.data);
+      if (msg.type === "auto-match-filled" && msg.matchKey === MATCH_KEY) {
+        var mapIdx = msg.mapIdx;
+        /* localStorage가 storage.js SSE로 이미 업데이트됨 → 렌더링만 갱신 */
+        setTimeout(function () {
+          loadPlayersSync(mapIdx);
+          renderMap(maps[mapIdx], mapIdx);
+          console.log("[auto-match] 맵" + (mapIdx + 1) + "(" + (msg.mapName || "") + ") 자동 입력 반영");
+        }, 500); /* storage.js SSE 처리 후 실행되도록 약간 딜레이 */
+      }
+    } catch (_) {}
+  };
+
+  /* auth.js 로드 완료 후 초기화 */
+  window.addEventListener("load", function () {
+    setTimeout(initBtn, 300);
+  });
+})();
 </script>
 <script src="./auth.js"></script>
 <script src="./stock-apply.js"></script>

@@ -1077,6 +1077,36 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+/* ── API: 자동입력 활성화 (admin) ─────────────────── */
+app.put("/api/auto-match", requireAdmin, async (req, res) => {
+  const { matchKey, team1, team2 } = req.body || {};
+  if (!matchKey || !team1 || !team2)
+    return res.status(400).json({ error: "matchKey, team1, team2 필수" });
+  const record = { matchKey, team1, team2, active: true, thespikeMatchId: null, filledMaps: [] };
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [`auto-match:${matchKey}`, JSON.stringify(record)]
+    );
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete("/api/auto-match/:matchKey", requireAdmin, async (req, res) => {
+  try {
+    const key = `auto-match:${decodeURIComponent(req.params.matchKey)}`;
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/api/auto-match", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key LIKE 'auto-match:%'");
+    res.json(result.rows.map((r) => JSON.parse(r.value)));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 /* ══════════════════════════════════════════════════════
    자동 주가 업데이트 — thespike.gg API 폴링
    감시 대상: VCT 2026 메인 이벤트 (챌린저스 제외)
@@ -1179,12 +1209,15 @@ async function processMatch(matchId) {
 
 /* 폴링 메인 함수 — 진행 중인 경기도 포함 */
 async function pollVctMatches() {
+  const allEventMatches = {}; /* eventId → matches[] — auto-match에도 재사용 */
+
   for (const eventId of WATCHED_EVENT_IDS) {
     try {
       const res  = await fetch(`https://api.thespike.gg/matches?eventId=${eventId}`);
       if (!res.ok) continue;
       const data = await res.json();
       const matches = Array.isArray(data) ? data : (data.matches || data.data || []);
+      allEventMatches[eventId] = matches;
 
       for (const match of matches) {
         const id = match.id;
@@ -1193,12 +1226,7 @@ async function pollVctMatches() {
         /* 완전히 끝난 매치 + 모든 맵 처리 완료 → skip */
         if (match.isFinished) {
           const done = processedMaps[id] || [];
-          /* stats에서 맵 수를 모르니 isFinished면 일단 한 번은 체크 */
-          if (done.length > 0) {
-            /* 이미 최소 1맵 이상 처리한 완료 경기 — 추가 처리 불필요 */
-            /* (새 맵이 생길 리 없으므로) */
-            continue;
-          }
+          if (done.length > 0) continue;
         }
 
         await processMatch(id);
@@ -1207,6 +1235,9 @@ async function pollVctMatches() {
       console.error(`[stock] eventId ${eventId} 폴링 오류:`, e.message);
     }
   }
+
+  /* auto-match 경기 입력 처리 */
+  await pollAutoMatches(allEventMatches);
 }
 
 /* 서버 재시작 시 처리 완료 맵 복원 */
@@ -1234,6 +1265,129 @@ async function saveProcessedMaps() {
     );
   } catch (e) {
     console.error("[stock] 처리 완료 맵 저장 오류:", e.message);
+  }
+}
+
+/* ── 자동 경기 입력 (Auto-match) ────────────────────────
+   match-dark 페이지에서 ON된 경기를 thespike.gg에서 찾아
+   K/D/A·ACS·에이전트를 자동으로 DB에 저장
+   ──────────────────────────────────────────────────── */
+
+/* 에이전트 영어 → 한국어 매핑 */
+const AGENT_EN_TO_KO = {
+  "Brimstone":"브림스톤","Viper":"바이퍼","Omen":"오멘","Killjoy":"킬조이",
+  "Cypher":"사이퍼","Sova":"소바","Sage":"세이지","Phoenix":"피닉스",
+  "Jett":"제트","Reyna":"레이나","Raze":"레이즈","Breach":"브리치",
+  "Skye":"스카이","Yoru":"요루","Astra":"아스트라","KAY/O":"케이오",
+  "Chamber":"체임버","Neon":"네온","Fade":"페이드","Harbor":"하버",
+  "Gekko":"게코","Deadlock":"데드록","Iso":"아이소","Clove":"클로브",
+  "Vyse":"바이스","Tejo":"테호","Waylay":"웨이레이","Gecko":"게코",
+  "Mix":"믹스",
+};
+
+/* 맵 영어 → 한국어 매핑 */
+const MAP_EN_TO_KO = {
+  "Ascent":"어센트","Bind":"바인드","Split":"스플릿","Sunset":"선셋",
+  "Abyss":"어비스","Pearl":"펄","Breeze":"브리즈","Haven":"헤이븐",
+  "Fracture":"프랙처","Lotus":"로터스","Icebox":"아이스박스","Corrode":"코로드",
+};
+
+function normalizeTeamName(name) {
+  return (name || "").toLowerCase().replace(/\s+/g, "");
+}
+
+async function pollAutoMatches(allEventMatches) {
+  try {
+    const result = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'");
+    const autoMatches = result.rows.map((r) => JSON.parse(r.value)).filter((m) => m.active);
+    if (!autoMatches.length) return;
+
+    for (const am of autoMatches) {
+      try {
+        /* thespike 매치 ID 찾기 (이미 알고 있으면 skip) */
+        let tsMatchId = am.thespikeMatchId;
+        if (!tsMatchId) {
+          for (const matches of Object.values(allEventMatches)) {
+            const found = matches.find((m) => {
+              const teams = (m.teams || []).map((t) => normalizeTeamName(t.title || ""));
+              return teams.includes(normalizeTeamName(am.team1)) &&
+                     teams.includes(normalizeTeamName(am.team2));
+            });
+            if (found) { tsMatchId = found.id; break; }
+          }
+          if (!tsMatchId) continue; // 아직 thespike에 없음
+
+          /* 찾은 matchId 저장 */
+          am.thespikeMatchId = tsMatchId;
+          await pool.query(
+            `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+            [`auto-match:${am.matchKey}`, JSON.stringify(am)]
+          );
+        }
+
+        /* 맵별 스탯 가져와서 저장 */
+        const statsRes = await fetch(`https://api.thespike.gg/match/${tsMatchId}/stats`);
+        if (!statsRes.ok) continue;
+        const statsData = await statsRes.json();
+        const maps = statsData.maps || [];
+
+        for (let mapIdx = 0; mapIdx < maps.length; mapIdx++) {
+          const map = maps[mapIdx];
+          if ((am.filledMaps || []).includes(map.id)) continue;
+          const players = map.players || [];
+          if (!players.some((p) => p.averageCombatScore > 0)) continue; // 미완료 맵
+
+          const teamAPlayers = players
+            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1))
+            .sort((a, b) => b.averageCombatScore - a.averageCombatScore);
+          const teamBPlayers = players
+            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2))
+            .sort((a, b) => b.averageCombatScore - a.averageCombatScore);
+
+          const playersData = {};
+          teamAPlayers.forEach((p, i) => {
+            playersData[`a${i}`] = {
+              name  : p.nickname,
+              agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+              acs   : p.averageCombatScore,
+              kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+            };
+          });
+          teamBPlayers.forEach((p, i) => {
+            playersData[`b${i}`] = {
+              name  : p.nickname,
+              agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+              acs   : p.averageCombatScore,
+              kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+            };
+          });
+
+          const playersKey = `players:${am.matchKey}:${mapIdx}`;
+          const playersVal = JSON.stringify(playersData);
+          await pool.query(
+            `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+            [playersKey, playersVal]
+          );
+          broadcast({ type: "set", key: playersKey, value: playersVal });
+          broadcast({ type: "auto-match-filled", matchKey: am.matchKey, mapIdx,
+                      mapName: MAP_EN_TO_KO[map.title] || map.title || "" });
+
+          if (!am.filledMaps) am.filledMaps = [];
+          am.filledMaps.push(map.id);
+          console.log(`[auto-match] ${am.team1} vs ${am.team2} 맵${mapIdx+1}(${map.title}) 자동 입력 완료`);
+        }
+
+        /* filledMaps 업데이트 저장 */
+        await pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [`auto-match:${am.matchKey}`, JSON.stringify(am)]
+        );
+      } catch (e) {
+        console.error(`[auto-match] ${am.team1} vs ${am.team2} 오류:`, e.message);
+      }
+    }
+  } catch (e) {
+    console.error("[auto-match] 전체 오류:", e.message);
   }
 }
 
