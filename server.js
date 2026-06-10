@@ -160,47 +160,6 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
-/* ── [일회용] 주식 중복 히스토리 수정 ─────────────── */
-app.post("/api/admin/fix-stock-history", async (req, res) => {
-  const ADMIN_SECRET = process.env.ADMIN_FIX_SECRET || "vct-fix-2026";
-  if (req.headers["x-fix-secret"] !== ADMIN_SECRET) {
-    return res.status(403).json({ error: "forbidden" });
-  }
-  const players = [
-    "mada","skuba","Ethan","brawk","keiko",
-    "s0pp","yetujey","sociablEE","xeus","KROSTALY",
-  ];
-  const results = [];
-  for (const name of players) {
-    const key = `stock_p:${name}`;
-    const row = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    if (!row.rows[0]) { results.push({ name, status: "not found" }); continue; }
-    let data;
-    try { data = JSON.parse(row.rows[0].value); } catch { results.push({ name, status: "parse error" }); continue; }
-    /* 숫자/객체 혼합 포맷 모두 숫자로 정규화 */
-    const raw = data.history || [];
-    const h = raw.map(e => (typeof e === "object" && e !== null ? e.price : e))
-                  .filter(e => typeof e === "number" && !isNaN(e));
-    const changed = h.length !== raw.length ||
-                    (h.length >= 2 && h[h.length - 1] === h[h.length - 2]);
-    if (changed) {
-      /* 끝 중복 제거 */
-      if (h.length >= 2 && h[h.length - 1] === h[h.length - 2]) h.pop();
-      data.history = h;
-      const newVal = JSON.stringify(data);
-      await pool.query(
-        `UPDATE app_data SET value=$2, updated_at=NOW() WHERE key=$1`,
-        [key, newVal]
-      );
-      broadcast({ type: "set", key, value: newVal });
-      results.push({ name, status: "fixed", historyLen: h.length, lastPrice: h[h.length - 1] });
-    } else {
-      results.push({ name, status: "no duplicate", historyLen: h.length });
-    }
-  }
-  res.json({ ok: true, results });
-});
-
 /* ── 인증 미들웨어 ────────────────────────────────── */
 function requireAuth(req, res, next) {
   const auth = req.headers.authorization || "";
