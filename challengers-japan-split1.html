@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Challengers Japan 2026 · Split 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --acc: #159194; --acc-dim: rgba(21,145,148,.7); --acc-bg: rgba(21,145,148,.1); --bg: #071515; --bg-card: #0d1f1f; --bg-card2: #112525; }
+    body { background: var(--bg); color: #f0f0f0; font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .site-header { display:flex; align-items:center; gap:20px; padding:0 32px; height:56px; background:rgba(7,21,21,.92); border-bottom:1px solid rgba(21,145,148,.15); position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+    .home-link { font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.55); text-decoration:none; transition:color .15s; }
+    .home-link:hover { color:#fff; }
+    .home-link::after { content:" /"; margin-left:4px; color:rgba(255,255,255,.18); font-weight:400; }
+    .back-link { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.4); text-decoration:none; transition:color .15s; }
+    .back-link:hover { color:rgba(255,255,255,.8); }
+    .site-header .auth-header-btn { margin-left:auto !important; }
+
+    /* ── SHELL ── */
+    .league-shell { max-width:1280px; margin:0 auto; padding:0 40px 80px; }
+    @media (max-width:600px) { .league-shell { padding:0 16px 60px; } }
+
+    /* ── HERO ── */
+    .stage-hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(240px,360px); gap:28px; align-items:end; padding:48px 0 52px; animation:rise-in 520ms ease both; }
+    @media (max-width:680px) { .stage-hero { grid-template-columns:1fr; } }
+    .stage-hero h1 { font-size:clamp(36px,6vw,68px); font-weight:900; line-height:1; color:#fff; margin-bottom:14px; }
+    .stage-hero p.intro { font-size:14px; color:rgba(255,255,255,.45); font-weight:500; line-height:1.7; max-width:540px; }
+    .eyebrow { font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:8px; }
+    .stage-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .stage-summary div { min-height:110px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03); animation:pop-in 520ms ease both; }
+    .stage-summary div:nth-child(2) { animation-delay:80ms; }
+    .stage-summary div:nth-child(3) { animation-delay:160ms; }
+    .stage-summary strong { color:#fff; font-size:42px; line-height:1; font-weight:900; }
+    .stage-summary span { margin-top:8px; color:rgba(255,255,255,.4); font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+
+    /* ── STAGE TABS ── */
+    .stage-tabs-wrap { position:sticky; top:56px; z-index:80; background:var(--bg); border-bottom:1px solid rgba(255,255,255,.06); margin-bottom:40px; }
+    .stage-tabs-nav { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; max-width:1280px; margin:0 auto; padding:0 40px; }
+    .stage-tabs-nav::-webkit-scrollbar { display:none; }
+    .stage-tab-btn { flex-shrink:0; padding:14px 20px; border:none; background:none; color:rgba(255,255,255,.4); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s, border-color .15s; white-space:nowrap; }
+    .stage-tab-btn:hover { color:rgba(255,255,255,.75); }
+    .stage-tab-btn.active { color:#fff; border-bottom-color:var(--acc); }
+
+    /* ── STAGE PANELS ── */
+    .stage-panel { display:none; }
+    .stage-panel.active { display:block; animation:rise-in 360ms ease both; }
+
+    /* ── SECTION HEADING ── */
+    .section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
+    .section-heading h2 { font-size:clamp(20px,3vw,28px); font-weight:900; color:#fff; line-height:1.1; }
+
+    /* ── ROUND NAV ── */
+    .round-nav { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .round-nav-btn { width:32px; height:32px; border-radius:6px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; display:grid; place-items:center; transition:background .14s, color .14s; line-height:1; }
+    .round-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,.12); color:#fff; }
+    .round-nav-btn:disabled { opacity:.25; cursor:default; }
+    .round-label { font-size:13px; font-weight:700; color:rgba(255,255,255,.6); min-width:70px; text-align:center; white-space:nowrap; }
+
+    /* ── TEAM SLOTS ── */
+    .group-assign-section { padding:40px 0 0; }
+    .group-assign-section .section-heading { margin-bottom:20px; }
+    .group-assign-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .group-assign-grid.slots-10 { grid-template-columns:repeat(5,1fr); }
+    .group-assign-grid.slots-8  { grid-template-columns:repeat(4,1fr); }
+    .group-assign-grid.slots-4  { grid-template-columns:repeat(4,1fr); }
+    @media (max-width:700px) { .group-assign-grid, .group-assign-grid.slots-10, .group-assign-grid.slots-8, .group-assign-grid.slots-4 { grid-template-columns:repeat(2,1fr); } }
+    .group-slot { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.07); min-height:52px; transition:background .15s; }
+    .group-slot.has-team { border-color:rgba(21,145,148,.4); background:rgba(21,145,148,.07); }
+    .group-slot .slot-logo { width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .group-slot .slot-logo img { width:40px; height:40px; object-fit:contain; }
+    .group-slot .slot-name { font-size:13px; font-weight:700; flex:1; color:rgba(255,255,255,.85); }
+    .group-slot.empty .slot-name { opacity:.35; font-weight:500; }
+    .group-slot .slot-rank { font-size:11px; font-weight:700; color:rgba(255,255,255,.25); margin-left:auto; white-space:nowrap; }
+    body:not(.view-only) .group-slot { cursor:pointer; }
+    body:not(.view-only) .group-slot:hover { background:rgba(21,145,148,.14); border-color:rgba(21,145,148,.55); }
+
+    /* ── WEEK / ROUND SECTION ── */
+    .week-section { margin:48px 0; }
+
+    /* ── MATCH CARD ── */
+    .match-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.06); border-radius:10px; overflow:hidden; }
+    @media (max-width:540px) { .match-grid { grid-template-columns:1fr; } }
+    .match-card { position:relative; min-height:130px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; padding:20px 16px 16px; background:var(--bg-card); cursor:pointer; transition:background .18s; overflow:hidden; }
+    .match-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--acc),rgba(21,145,148,.3)); transform:translateX(-100%); transition:transform 320ms ease; }
+    .match-card:hover { background:var(--bg-card2); }
+    .match-card:hover::before { transform:translateX(0); }
+    .match-card strong { position:relative; z-index:1; min-width:0; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
+    .match-team-mini-logo { width:52px; height:52px; display:flex; align-items:center; justify-content:center; }
+    .match-team-mini-logo img { width:52px; height:52px; object-fit:contain; display:block; }
+    .match-team-name { font-size:11px; font-weight:700; text-align:center; color:rgba(255,255,255,.6); margin-top:4px; }
+    .match-team-wrap { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .match-card em { position:relative; z-index:1; min-width:52px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:7px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.85); font-size:15px; font-style:normal; font-weight:900; transition:transform .18s; }
+    .match-card:hover em { transform:scale(1.06); }
+    .match-card.upcoming em { color:rgba(255,255,255,.5); background:rgba(21,145,148,.08); border-color:rgba(21,145,148,.25); animation:vs-pulse 1.8s ease-in-out infinite; }
+
+    /* ── STANDINGS ── */
+    .standings-section { margin-top:16px; }
+    .standings-card { overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.02); }
+    .standings-title { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px; background:rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.06); }
+    .standings-title h3 { font-size:20px; font-weight:900; color:#fff; }
+    .standings-title span { min-height:26px; display:inline-flex; align-items:center; padding:0 10px; border-radius:999px; background:var(--acc-bg); border:1px solid rgba(21,145,148,.3); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--acc); white-space:nowrap; }
+    .standings-table { width:100%; }
+    .standings-row { position:relative; display:grid; grid-template-columns:minmax(160px,1fr) 70px 70px 60px; align-items:stretch; min-height:80px; border-top:1px solid rgba(255,255,255,.05); color:rgba(255,255,255,.85); }
+    .standings-row::before { position:absolute; top:0; bottom:0; left:0; width:4px; content:''; background:rgba(255,255,255,.06); }
+    .standings-row.advance::before { background:rgba(21,145,148,.55); }
+    .standings-row.clinched { background:rgba(21,145,148,.05); }
+    .standings-row.clinched::before { background:var(--acc); animation:adv-pulse 2.4s ease-in-out infinite; }
+    .standings-row.eliminated { background:rgba(239,74,94,.05); }
+    .standings-row.eliminated::before { background:#ef4a5e; }
+    .standings-row:not(.standings-head) { animation:row-in 420ms ease both; }
+    .standings-head { min-height:44px; background:rgba(255,255,255,.025); color:rgba(255,255,255,.3); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .standings-head::before { display:none; }
+    .standings-row > span, .team-cell { display:flex; align-items:center; border-left:1px solid rgba(255,255,255,.05); }
+    .standings-row > span { justify-content:center; padding:0 8px; font-size:14px; font-weight:700; text-align:center; }
+    .standings-head > span { font-size:11px; }
+    .team-cell { gap:10px; min-width:0; padding:12px 14px; border-left:0; }
+    .rank-badge { width:24px; height:24px; display:flex; flex:0 0 auto; align-items:center; justify-content:center; border-radius:999px; background:rgba(255,255,255,.08); font-size:12px; font-weight:900; color:rgba(255,255,255,.7); }
+    .stage-team-logo { width:44px; height:44px; display:flex; flex:0 0 auto; align-items:center; justify-content:center; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:6px; overflow:hidden; }
+    .stage-team-logo img { width:32px; height:32px; object-fit:contain; display:block; }
+    .team-cell strong { font-size:13px; font-weight:700; color:#fff; }
+    .delta.plus { color:#3ddc84; } .delta.minus { color:#ff6b6b; }
+
+    /* ── GA MODAL ── */
+    .ga-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
+    .ga-modal[hidden] { display:none !important; }
+    .ga-backdrop { position:absolute; inset:0; background:rgba(5,5,5,.65); backdrop-filter:blur(6px); }
+    .ga-panel { position:relative; z-index:1; width:min(540px,calc(100vw - 24px)); max-height:90vh; overflow-y:auto; background:#0a1e1e; border:1.5px solid rgba(21,145,148,.3); border-radius:18px; padding:24px; animation:modal-in .2s ease; }
+    @keyframes modal-in { from { opacity:0; transform:translateY(16px) scale(.97); } to { opacity:1; transform:none; } }
+    .ga-panel h2 { font-size:18px; font-weight:900; margin:0 0 4px; color:#fff; }
+    .ga-panel p { font-size:13px; opacity:.5; margin:0 0 18px; color:#fff; }
+    .ga-team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px; }
+    @media (max-width:400px) { .ga-team-grid { grid-template-columns:repeat(2,1fr); } }
+    .ga-team-btn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 6px; border-radius:10px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.09); color:#fff; font-family:inherit; cursor:pointer; transition:all .14s; font-size:10px; font-weight:700; line-height:1.2; text-align:center; }
+    .ga-team-btn img { width:28px; height:28px; object-fit:contain; }
+    .ga-team-btn .ga-team-code { font-size:12px; font-weight:900; }
+    .ga-team-btn:hover { background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.5); }
+    .ga-team-btn.selected { background:rgba(21,145,148,.22); border-color:var(--acc); box-shadow:0 0 0 2px rgba(21,145,148,.25); }
+    .ga-team-btn.in-other-group { opacity:.22; pointer-events:none; }
+    .ga-actions { display:flex; gap:10px; justify-content:flex-end; }
+    .ga-btn { padding:9px 20px; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; border:none; }
+    .ga-btn-cancel { background:rgba(255,255,255,.08); color:rgba(255,255,255,.7); }
+    .ga-btn-cancel:hover { background:rgba(255,255,255,.14); }
+    .ga-btn-save { background:var(--acc); color:#fff; }
+    .ga-btn-save:hover { background:#127a7d; }
+    .ga-btn-clear { background:rgba(255,80,80,.12); color:#ff6b6b; border:1px solid rgba(255,80,80,.25); }
+    .ga-btn-clear:hover { background:rgba(255,80,80,.24); }
+
+    /* ── SCORE MODAL ── */
+    .score-modal { position:fixed; inset:0; z-index:9900; display:flex; align-items:center; justify-content:center; }
+    .score-modal[hidden] { display:none !important; }
+    .score-panel { position:relative; z-index:1; background:#0a1e1e; border:1.5px solid rgba(21,145,148,.3); border-radius:18px; padding:28px; width:min(380px,calc(100vw - 24px)); animation:modal-in .2s ease; }
+    .score-panel h2 { font-size:16px; font-weight:900; color:#fff; margin-bottom:20px; text-align:center; }
+    .score-inputs { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:24px; }
+    .score-team { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .score-team-name { font-size:12px; font-weight:700; color:rgba(255,255,255,.5); text-align:center; max-width:100px; word-break:break-word; }
+    .score-input { width:72px; height:72px; background:rgba(255,255,255,.06); border:1.5px solid rgba(21,145,148,.35); border-radius:10px; color:#fff; font-size:32px; font-weight:900; text-align:center; outline:none; font-family:inherit; transition:border-color .15s; }
+    .score-input:focus { border-color:var(--acc); background:rgba(21,145,148,.08); }
+    .score-vs { font-size:20px; font-weight:900; color:rgba(255,255,255,.3); padding-bottom:28px; }
+    .score-actions { display:flex; gap:8px; justify-content:flex-end; }
+
+    /* ── ADD TEAM MODAL ── */
+    .add-team-inputs { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+    .add-team-input { background:rgba(255,255,255,.06); border:1px solid rgba(21,145,148,.25); border-radius:8px; padding:10px 14px; color:#fff; font-size:14px; font-family:inherit; outline:none; transition:border-color .15s; }
+    .add-team-input:focus { border-color:var(--acc); }
+    .add-team-input::placeholder { color:rgba(255,255,255,.2); }
+    .add-team-input-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:4px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    @keyframes pop-in { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:none; } }
+    @keyframes row-in { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:none; } }
+    @keyframes vs-pulse { 0%,100% { opacity:1; } 50% { opacity:.55; } }
+    @keyframes adv-pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  </style>
+</head>
+<body class="league-page stage-page challengers-page">
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <a class="back-link" href="./challengers-japan.html">Japan Challengers</a>
+  </header>
+
+  <main class="league-shell">
+
+    <!-- ── HERO ── -->
+    <section class="stage-hero" aria-labelledby="stage-title">
+      <div>
+        <p class="eyebrow">Challengers Japan 2026</p>
+        <h1 id="stage-title">Split 1</h1>
+        <p class="intro">Advance Stage A/B/C, Phase 1/2를 거쳐 상위 4팀이 PlayOffs에 진출하는 방식입니다.</p>
+      </div>
+      <div class="stage-summary" aria-label="Split 1 진행 방식">
+        <div><strong>6</strong><span>단계</span></div>
+        <div><strong>23</strong><span>팀</span></div>
+        <div><strong>4</strong><span>진출</span></div>
+      </div>
+    </section>
+
+  </main><!-- league-shell will be reopened after sticky tabs -->
+
+  <!-- ── STAGE TABS (sticky) ── -->
+  <div class="stage-tabs-wrap">
+    <div class="stage-tabs-nav">
+      <button class="stage-tab-btn active" data-stage="adva">Advance Stage A</button>
+      <button class="stage-tab-btn" data-stage="advb">Advance Stage B</button>
+      <button class="stage-tab-btn" data-stage="advc">Advance Stage C</button>
+      <button class="stage-tab-btn" data-stage="ph1">Phase 1</button>
+      <button class="stage-tab-btn" data-stage="ph2">Phase 2</button>
+      <button class="stage-tab-btn" data-stage="po">PlayOffs</button>
+    </div>
+  </div>
+
+  <div class="league-shell" style="padding-top:8px;">
+
+    <!-- ── ADVANCE STAGE A ── -->
+    <div class="stage-panel active" id="panel-adva">
+      <section class="group-assign-section" aria-labelledby="ga-title-adva">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Advance Stage A</p><h2 id="ga-title-adva">참가 팀 (5)</h2></div>
+        </div>
+        <div class="group-assign-grid" id="slots-adva"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-adva" onclick="changeRound('adva',-1)">‹</button>
+            <span class="round-label" id="rlabel-adva">Round 1</span>
+            <button class="round-nav-btn" id="next-adva" onclick="changeRound('adva',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-adva"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-adva"></div></section>
+    </div>
+
+    <!-- ── ADVANCE STAGE B ── -->
+    <div class="stage-panel" id="panel-advb">
+      <section class="group-assign-section" aria-labelledby="ga-title-advb">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Advance Stage B</p><h2 id="ga-title-advb">참가 팀 (5)</h2></div>
+        </div>
+        <div class="group-assign-grid" id="slots-advb"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-advb" onclick="changeRound('advb',-1)">‹</button>
+            <span class="round-label" id="rlabel-advb">Round 1</span>
+            <button class="round-nav-btn" id="next-advb" onclick="changeRound('advb',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-advb"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-advb"></div></section>
+    </div>
+
+    <!-- ── ADVANCE STAGE C ── -->
+    <div class="stage-panel" id="panel-advc">
+      <section class="group-assign-section" aria-labelledby="ga-title-advc">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Advance Stage C</p><h2 id="ga-title-advc">참가 팀 (5)</h2></div>
+        </div>
+        <div class="group-assign-grid" id="slots-advc"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-advc" onclick="changeRound('advc',-1)">‹</button>
+            <span class="round-label" id="rlabel-advc">Round 1</span>
+            <button class="round-nav-btn" id="next-advc" onclick="changeRound('advc',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-advc"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-advc"></div></section>
+    </div>
+
+    <!-- ── PHASE 1 ── -->
+    <div class="stage-panel" id="panel-ph1">
+      <section class="group-assign-section" aria-labelledby="ga-title-ph1">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Phase 1</p><h2 id="ga-title-ph1">참가 팀 (10)</h2></div>
+        </div>
+        <div class="group-assign-grid slots-10" id="slots-ph1"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-ph1" onclick="changeRound('ph1',-1)">‹</button>
+            <span class="round-label" id="rlabel-ph1">Round 1</span>
+            <button class="round-nav-btn" id="next-ph1" onclick="changeRound('ph1',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-ph1"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-ph1"></div></section>
+    </div>
+
+    <!-- ── PHASE 2 ── -->
+    <div class="stage-panel" id="panel-ph2">
+      <section class="group-assign-section" aria-labelledby="ga-title-ph2">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Phase 2</p><h2 id="ga-title-ph2">참가 팀 (8)</h2></div>
+        </div>
+        <div class="group-assign-grid slots-8" id="slots-ph2"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-ph2" onclick="changeRound('ph2',-1)">‹</button>
+            <span class="round-label" id="rlabel-ph2">Round 1</span>
+            <button class="round-nav-btn" id="next-ph2" onclick="changeRound('ph2',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-ph2"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-ph2"></div></section>
+    </div>
+
+    <!-- ── PLAYOFFS ── -->
+    <div class="stage-panel" id="panel-po">
+      <section class="group-assign-section" aria-labelledby="ga-title-po">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · PlayOffs</p><h2 id="ga-title-po">참가 팀 (4)</h2></div>
+        </div>
+        <div class="group-assign-grid slots-4" id="slots-po"></div>
+      </section>
+      <section class="week-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
+          <div class="round-nav">
+            <button class="round-nav-btn" id="prev-po" onclick="changeRound('po',-1)">‹</button>
+            <span class="round-label" id="rlabel-po">Semi Finals</span>
+            <button class="round-nav-btn" id="next-po" onclick="changeRound('po',1)">›</button>
+          </div>
+        </div>
+        <div class="match-grid" id="mg-po"></div>
+      </section>
+      <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-po"></div></section>
+    </div>
+
+  </div><!-- /.league-shell -->
+
+  <!-- ── GA MODAL (slot / match picker) ── -->
+  <div class="ga-modal" id="ga-modal" hidden>
+    <div class="ga-backdrop" id="ga-backdrop"></div>
+    <div class="ga-panel" role="dialog" aria-modal="true">
+      <h2 id="ga-modal-title">팀 배정</h2>
+      <p id="ga-modal-sub">팀을 선택하거나 새 팀을 추가하세요.</p>
+      <div class="ga-team-grid" id="ga-team-grid"></div>
+      <div class="ga-actions" id="ga-actions"></div>
+    </div>
+  </div>
+
+  <!-- ── SCORE MODAL ── -->
+  <div class="score-modal" id="score-modal" hidden>
+    <div class="ga-backdrop" id="score-backdrop"></div>
+    <div class="score-panel" role="dialog" aria-modal="true">
+      <h2 id="score-title">스코어 입력</h2>
+      <div class="score-inputs">
+        <div class="score-team"><div class="score-team-name" id="score-name-a">팀 A</div><input class="score-input" id="score-a" type="number" min="0" max="9" placeholder="0"></div>
+        <div class="score-vs">:</div>
+        <div class="score-team"><div class="score-team-name" id="score-name-b">팀 B</div><input class="score-input" id="score-b" type="number" min="0" max="9" placeholder="0"></div>
+      </div>
+      <div class="score-actions">
+        <button class="ga-btn ga-btn-clear" id="score-clear">초기화</button>
+        <button class="ga-btn ga-btn-cancel" id="score-cancel">취소</button>
+        <button class="ga-btn ga-btn-save" id="score-save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD TEAM MODAL ── -->
+  <div class="ga-modal" id="add-modal" hidden>
+    <div class="ga-backdrop" id="add-backdrop"></div>
+    <div class="ga-panel" role="dialog" aria-modal="true" style="max-width:360px;">
+      <h2>새 팀 추가</h2>
+      <p>이 Split에 참가하는 팀을 등록하세요.</p>
+      <div class="add-team-inputs">
+        <div><div class="add-team-input-label">팀 이름 *</div><input class="add-team-input" id="at-name" type="text" placeholder="예: ZETA DIVISION"></div>
+        <div><div class="add-team-input-label">팀 코드 (최대 5자)</div><input class="add-team-input" id="at-code" type="text" maxlength="5" placeholder="예: ZETA"></div>
+        <div><div class="add-team-input-label">로고 URL (선택)</div><input class="add-team-input" id="at-logo" type="text" placeholder="https://..."></div>
+      </div>
+      <div class="ga-actions">
+        <button class="ga-btn ga-btn-cancel" id="add-cancel">취소</button>
+        <button class="ga-btn ga-btn-save" id="add-save">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./storage.js"></script>
+  <script>
+  window.storageReady.then(function () {
+
+    var PFX = "cj_japan_split1_";
+    var POOL_KEY = PFX + "pool";
+    var _isAdmin = typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+    /* ── STAGE CONFIG ── */
+    var STAGES = {
+      adva: { label:"Advance Stage A", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
+      advb: { label:"Advance Stage B", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
+      advc: { label:"Advance Stage C", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
+      ph1:  { label:"Phase 1",         slots:10, rounds:[{r:1,n:5},{r:2,n:5},{r:3,n:5}],                    rLabels:["Round 1","Round 2","Round 3"], advance:8 },
+      ph2:  { label:"Phase 2",         slots:8,  rounds:[{r:1,n:4},{r:2,n:4},{r:3,n:4}],                    rLabels:["Round 1","Round 2","Round 3"], advance:4 },
+      po:   { label:"PlayOffs",        slots:4,  rounds:[{r:1,n:2},{r:2,n:2}],                              rLabels:["Semi Finals","Final / 3rd"], advance:1 },
+    };
+
+    /* current round index per stage (0-based) */
+    var curRound = { adva:0, advb:0, advc:0, ph1:0, ph2:0, po:0 };
+
+    /* ── DEFAULT POOL (Japan 23팀) ── */
+    var DEFAULT_POOL = [
+      { name:"Murash Gaming",          code:"MRG",   logo:"./assets/teams/MRG.png",   white:false },
+      { name:"Insomnia",               code:"INS",   logo:"./assets/teams/INS.png",   white:false },
+      { name:"SCARZ",                  code:"SZ",    logo:"./assets/teams/SZ.png",    white:false },
+      { name:"BLUE BEES.ESP",          code:"BB",    logo:"./assets/teams/BB.png",    white:false },
+      { name:"DFM Academy",            code:"DFMA",  logo:"./assets/teams/DFMA.png",  white:false },
+      { name:"CREST GAMING Zst",       code:"CGZ",   logo:"./assets/teams/CGZ.png",   white:false },
+      { name:"AGELITE",                code:"AGL",   logo:"./assets/teams/AGL.png",   white:false },
+      { name:"IGZIST",                 code:"IGZ",   logo:"./assets/teams/IGZ.png",   white:false },
+      { name:"Delight",                code:"DLT",   logo:"./assets/teams/DLT.png",   white:false },
+      { name:"Team SEIBI",             code:"SIB",   logo:"./assets/teams/SIB.png",   white:false },
+      { name:"QT DIG∞",          code:"QTD",   logo:"./assets/teams/QTD.png",   white:false },
+      { name:"WEC C",                  code:"WECC",  logo:"./assets/teams/WECC.png",  white:false },
+      { name:"ZETA DIVISION Academy",  code:"ZETAA", logo:"./assets/teams/ZETAA.png", white:false },
+      { name:"BC SWELL",               code:"BCS",   logo:"./assets/teams/BCS.png",   white:false },
+      { name:"NORTHEPTION Youth",      code:"NTHY",  logo:"./assets/teams/NTHY.png",  white:false },
+      { name:"REIGNITE FOXX",          code:"RIGX",  logo:"./assets/teams/RIGX.png",  white:false },
+      { name:"FENNEL",                 code:"FL",    logo:"./assets/teams/FL.png",    white:false },
+      { name:"RIDDLE ORDER",           code:"RID",   logo:"./assets/teams/RID.png",   white:false },
+      { name:"REJECT",                 code:"RC",    logo:"./assets/teams/RC.png",    white:false },
+      { name:"Kirihana Academy",       code:"KRHN",  logo:"./assets/teams/KRHN.png",  white:false },
+      { name:"KING GUY",               code:"KG",    logo:"./assets/teams/KG.png",    white:false },
+      { name:"PARON",                  code:"PRN",   logo:"./assets/teams/PRN.png",   white:false },
+      { name:"ALESTAR",                code:"ALES",  logo:"./assets/teams/ALES.png",  white:false },
+    ];
+
+    function loadJSON(key, def) { try { var v=localStorage.getItem(key); return v?JSON.parse(v):def; } catch(e){ return def; } }
+    function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    function loadPool()  { var p=loadJSON(POOL_KEY,null); return (Array.isArray(p)&&p.length)?p:DEFAULT_POOL.slice(); }
+    function savePool(p) { saveJSON(POOL_KEY,p); }
+
+    function slotsKey(sid)  { return PFX+sid+"_slots"; }
+    function loadSlots(sid) { var s=loadJSON(slotsKey(sid),null); var n=STAGES[sid].slots; if(Array.isArray(s)&&s.length===n) return s; return Array(n).fill(""); }
+    function saveSlots(sid,s){ saveJSON(slotsKey(sid),s); }
+
+    function mKey(sid,r,m) { return PFX+sid+"_R"+r+"M"+m; }
+    function loadMT(sid,r,m){ return loadJSON(mKey(sid,r,m),{}); }
+    function saveMT(sid,r,m,d){ saveJSON(mKey(sid,r,m),d); }
+
+    function scKey(sid,r,m,tA,tB){ return "result:CJS1_"+sid+"_R"+r+"M"+m+"|"+(tA||"?")+"|"+(tB||"?"); }
+    function loadSc(sid,r,m,tA,tB){ try{ var x=localStorage.getItem(scKey(sid,r,m,tA,tB)); if(x){ var s=JSON.parse(x); return {a:Number(s.scoreA)||0,b:Number(s.scoreB)||0}; } }catch(e){} return null; }
+
+    function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    function tLogoHtml(name,sz){
+      var pool=loadPool(); sz=sz||52;
+      var t=pool.find(function(x){ return x.name===name; });
+      if(!t||!t.logo) return '<span style="font-size:10px;font-weight:900;color:rgba(255,255,255,.5);">'+(t?t.code:(name||"?").slice(0,4))+'</span>';
+      var f=t.white?'filter:brightness(0) invert(1);':'';
+      return '<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;'+f+'">';
+    }
+
+    /* ── 슬롯 렌더 ── */
+    function renderSlots(sid){
+      var slots=loadSlots(sid), pool=loadPool();
+      var el=document.getElementById("slots-"+sid); if(!el) return;
+      el.innerHTML=slots.map(function(name,i){
+        var t=pool.find(function(x){ return x.name===name; });
+        var logoHtml=(t&&t.logo)
+          ?'<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:40px;height:40px;object-fit:contain;'+(t.white?'filter:brightness(0) invert(1);':'')+'">'
+          :'<span style="font-size:11px;font-weight:900;color:rgba(255,255,255,.3);">'+(i+1)+'</span>';
+        var cls=name?"group-slot has-team":"group-slot empty";
+        return '<div class="'+cls+'" data-slot="'+(i+1)+'" data-sid="'+sid+'"><div class="slot-logo">'+logoHtml+'</div><span class="slot-name">'+esc(name||"팀 배정")+'</span><span class="slot-rank">S'+(i+1)+'</span></div>';
+      }).join("");
+      if(_isAdmin){
+        el.querySelectorAll(".group-slot").forEach(function(el2){
+          el2.addEventListener("click",function(){ openSlotPicker(sid,parseInt(el2.dataset.slot)); });
+        });
+      }
+    }
+
+    /* ── 경기 렌더 ── */
+    function renderMatches(sid){
+      var cfg=STAGES[sid];
+      var ri=curRound[sid];
+      var round=cfg.rounds[ri];
+      var grid=document.getElementById("mg-"+sid); if(!grid) return;
+      grid.innerHTML="";
+      for(var m=1;m<=round.n;m++){
+        var data=loadMT(sid,round.r,m);
+        var tA=data.teamA||"", tB=data.teamB||"";
+        var sc=(tA&&tB)?loadSc(sid,round.r,m,tA,tB):null;
+        var scoreText=sc?sc.a+" : "+sc.b:"VS";
+        var card=document.createElement("article");
+        card.className="match-card"+(sc?"":" upcoming");
+        card.dataset.sid=sid; card.dataset.r=round.r; card.dataset.m=m;
+        card.tabIndex=0; card.setAttribute("role","button");
+        card.innerHTML=
+          '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div><div class="match-team-name">'+esc(tA||"팀 선택")+'</div></div></strong>'
+          +'<em>'+scoreText+'</em>'
+          +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div><div class="match-team-name">'+esc(tB||"팀 선택")+'</div></div></strong>';
+        (function(s,r,mc){
+          var strongs=card.querySelectorAll("strong");
+          function goDetail(){
+            var d=loadMT(s,r,mc); if(!d.teamA||!d.teamB) return;
+            var sc2=loadSc(s,r,mc,d.teamA,d.teamB);
+            var q=new URLSearchParams({date:"CJS1_"+s+"_R"+r+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:sc2?(sc2.a+" : "+sc2.b):"0 : 0",from:"cj_split1"});
+            window.location.href="./challengers-japan-match-dark.html?"+q.toString();
+          }
+          if(_isAdmin){
+            strongs[0].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,r,mc,"A"); });
+            strongs[1].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,r,mc,"B"); });
+            card.querySelector("em").addEventListener("click",function(e){
+              e.stopPropagation();
+              var d=loadMT(s,r,mc); if(!d.teamA||!d.teamB){ alert("먼저 팀을 선택하세요"); return; }
+              openScoreModal(s,r,mc);
+            });
+          }
+          card.addEventListener("click",goDetail);
+          card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goDetail(); } });
+        })(sid,round.r,m);
+        grid.appendChild(card);
+      }
+      /* 라운드 네비 업데이트 */
+      var labelEl=document.getElementById("rlabel-"+sid);
+      if(labelEl) labelEl.textContent=cfg.rLabels[ri];
+      var prevBtn=document.getElementById("prev-"+sid);
+      var nextBtn=document.getElementById("next-"+sid);
+      if(prevBtn) prevBtn.disabled=(ri===0);
+      if(nextBtn) nextBtn.disabled=(ri===cfg.rounds.length-1);
+    }
+
+    /* ── 순위표 렌더 ── */
+    function renderStandings(sid){
+      var cfg=STAGES[sid], pool=loadPool();
+      var stats={};
+      loadSlots(sid).filter(Boolean).forEach(function(name){ stats[name]={name:name,w:0,l:0,mw:0,ml:0}; });
+      cfg.rounds.forEach(function(rk){
+        for(var m=1;m<=rk.n;m++){
+          var d=loadMT(sid,rk.r,m); if(!d.teamA||!d.teamB) continue;
+          var sc=loadSc(sid,rk.r,m,d.teamA,d.teamB); if(!sc) continue;
+          if(!stats[d.teamA]) stats[d.teamA]={name:d.teamA,w:0,l:0,mw:0,ml:0};
+          if(!stats[d.teamB]) stats[d.teamB]={name:d.teamB,w:0,l:0,mw:0,ml:0};
+          stats[d.teamA].mw+=sc.a; stats[d.teamA].ml+=sc.b;
+          stats[d.teamB].mw+=sc.b; stats[d.teamB].ml+=sc.a;
+          if(sc.a>sc.b){ stats[d.teamA].w++; stats[d.teamB].l++; }
+          else if(sc.b>sc.a){ stats[d.teamB].w++; stats[d.teamA].l++; }
+        }
+      });
+      var sorted=Object.values(stats).sort(function(a,b){
+        if(b.w!==a.w) return b.w-a.w;
+        return (b.mw-b.ml)-(a.mw-a.ml);
+      });
+      var wrap=document.getElementById("std-"+sid); if(!wrap) return;
+      if(!sorted.length){ wrap.innerHTML=""; return; }
+      var rows=sorted.map(function(s,rank){
+        var t=pool.find(function(x){ return x.name===s.name; });
+        var f=t&&t.white?'filter:brightness(0) invert(1);':'';
+        var logo=(t&&t.logo)?'<img src="'+t.logo+'" alt="'+esc(s.name)+'" style="width:32px;height:32px;object-fit:contain;'+f+'">':'';
+        var played=s.w+s.l>0, diff=s.mw-s.ml;
+        var dCls=diff>0?"delta plus":diff<0?"delta minus":"delta";
+        var dStr=played?(diff>0?"+"+diff:String(diff)):"-";
+        var adv=rank<cfg.advance;
+        return '<div class="standings-row'+(adv?" clinched":" eliminated")+'" role="row">'
+          +'<div class="team-cell"><div class="rank-badge">'+(rank+1)+'</div>'
+          +'<div class="stage-team-logo">'+logo+'</div>'
+          +'<div><strong>'+esc(s.name)+'</strong></div></div>'
+          +'<span>'+s.w+' - '+s.l+'</span>'
+          +'<span>'+s.mw+' / '+s.ml+'</span>'
+          +'<span class="'+dCls+'">'+dStr+'</span></div>';
+      }).join("");
+      var advLabel=cfg.advance===1?"우승":"상위 "+cfg.advance+"팀 다음 단계 진출";
+      wrap.innerHTML='<div class="standings-card"><div class="standings-title"><h3>'+esc(cfg.label)+'</h3><span>'+esc(advLabel)+'</span></div>'
+        +'<div class="standings-table" role="table">'
+        +'<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
+        +rows+'</div></div>';
+    }
+
+    function renderStage(sid){
+      renderSlots(sid);
+      renderMatches(sid);
+      renderStandings(sid);
+    }
+
+    /* ── 탭 전환 ── */
+    var activeStage="adva";
+    document.querySelectorAll(".stage-tab-btn").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        document.querySelectorAll(".stage-tab-btn").forEach(function(b){ b.classList.remove("active"); });
+        document.querySelectorAll(".stage-panel").forEach(function(p){ p.classList.remove("active"); });
+        btn.classList.add("active");
+        var sid=btn.dataset.stage;
+        var panel=document.getElementById("panel-"+sid);
+        if(panel) panel.classList.add("active");
+        activeStage=sid;
+        renderStage(sid);
+      });
+    });
+
+    /* ── 라운드 네비 ── */
+    window.changeRound=function(sid,delta){
+      var cfg=STAGES[sid];
+      curRound[sid]=Math.max(0,Math.min(cfg.rounds.length-1, curRound[sid]+delta));
+      renderMatches(sid);
+    };
+
+    /* ── 슬롯 피커 ── */
+    var _slotCtx=null;
+    function openSlotPicker(sid,slotIdx){
+      _slotCtx={type:"slot",sid:sid,idx:slotIdx};
+      var slots=loadSlots(sid), pool=loadPool();
+      var cur=slots[slotIdx-1];
+      var used=new Set(slots.filter(Boolean));
+      document.getElementById("ga-modal-title").textContent=STAGES[sid].label+" — 슬롯 "+slotIdx+" 팀 배정";
+      document.getElementById("ga-modal-sub").textContent="팀을 선택하세요.";
+      var grid=document.getElementById("ga-team-grid");
+      grid.innerHTML=pool.map(function(t){
+        var isUsed=used.has(t.name)&&t.name!==cur;
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':'';
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+(isUsed?" in-other-group":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("")
+      +'<button class="ga-team-btn" id="btn-add-slot-team" style="border-style:dashed;color:rgba(255,255,255,.5);"><span style="font-size:20px">+</span><span>팀 추가</span></button>';
+      grid.querySelectorAll(".ga-team-btn:not(#btn-add-slot-team)").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          var s=loadSlots(sid); s[slotIdx-1]=btn.dataset.team; saveSlots(sid,s);
+          closeGaModal(); renderStage(sid);
+        });
+      });
+      document.getElementById("btn-add-slot-team").addEventListener("click",function(){ closeGaModal(); openAddTeam(sid); });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click",closeGaModal);
+      document.getElementById("ga-clear").addEventListener("click",function(){
+        var s=loadSlots(sid); s[slotIdx-1]=""; saveSlots(sid,s); closeGaModal(); renderStage(sid);
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+
+    /* ── 경기 팀 피커 ── */
+    var _pickCtx=null;
+    function openPickModal(sid,r,m,side){
+      _pickCtx={type:"pick",sid:sid,r:r,m:m,side:side};
+      var data=loadMT(sid,r,m);
+      var cur=side==="A"?data.teamA||"":data.teamB||"";
+      document.getElementById("ga-modal-title").textContent="R"+r+" Match "+m+" — "+(side==="A"?"왼쪽":"오른쪽")+" 팀 선택";
+      document.getElementById("ga-modal-sub").textContent="";
+      var pool=loadPool();
+      var grid=document.getElementById("ga-team-grid");
+      grid.innerHTML=pool.map(function(t){
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':'';
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("");
+      grid.querySelectorAll(".ga-team-btn").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          var d=loadMT(sid,r,m);
+          if(side==="A") d.teamA=btn.dataset.team; else d.teamB=btn.dataset.team;
+          saveMT(sid,r,m,d); closeGaModal(); renderStage(sid);
+        });
+      });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click",closeGaModal);
+      document.getElementById("ga-clear").addEventListener("click",function(){
+        var d=loadMT(sid,r,m);
+        if(side==="A") d.teamA=""; else d.teamB="";
+        saveMT(sid,r,m,d); closeGaModal(); renderStage(sid);
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+
+    function closeGaModal(){ document.getElementById("ga-modal").hidden=true; _slotCtx=null; _pickCtx=null; }
+    document.getElementById("ga-backdrop").addEventListener("click",closeGaModal);
+
+    /* ── 팀 추가 ── */
+    function openAddTeam(sid){
+      ["at-name","at-code","at-logo"].forEach(function(id){ document.getElementById(id).value=""; });
+      document.getElementById("add-modal").hidden=false;
+      document.getElementById("at-name").focus();
+    }
+    document.getElementById("add-backdrop").addEventListener("click",function(){ document.getElementById("add-modal").hidden=true; });
+    document.getElementById("add-cancel").addEventListener("click",function(){ document.getElementById("add-modal").hidden=true; });
+    document.getElementById("add-save").addEventListener("click",function(){
+      var name=document.getElementById("at-name").value.trim();
+      var code=document.getElementById("at-code").value.trim().toUpperCase();
+      var logo=document.getElementById("at-logo").value.trim();
+      if(!name) return;
+      var pool=loadPool();
+      if(!pool.find(function(t){ return t.name===name; })){ pool.push({name:name,code:code||name.slice(0,5).toUpperCase(),logo:logo,white:false}); savePool(pool); }
+      document.getElementById("add-modal").hidden=true;
+      renderStage(activeStage);
+    });
+
+    /* ── 스코어 모달 ── */
+    var _scCtx=null;
+    function openScoreModal(sid,r,m){
+      var d=loadMT(sid,r,m); _scCtx={sid:sid,r:r,m:m,tA:d.teamA,tB:d.teamB};
+      var sc=loadSc(sid,r,m,d.teamA,d.teamB)||{a:"",b:""};
+      document.getElementById("score-title").textContent=d.teamA+" vs "+d.teamB;
+      document.getElementById("score-name-a").textContent=d.teamA;
+      document.getElementById("score-name-b").textContent=d.teamB;
+      document.getElementById("score-a").value=sc.a!==""?sc.a:"";
+      document.getElementById("score-b").value=sc.b!==""?sc.b:"";
+      document.getElementById("score-modal").hidden=false;
+      document.getElementById("score-a").focus();
+    }
+    function closeScoreModal(){ document.getElementById("score-modal").hidden=true; _scCtx=null; }
+    document.getElementById("score-backdrop").addEventListener("click",closeScoreModal);
+    document.getElementById("score-cancel").addEventListener("click",closeScoreModal);
+    document.getElementById("score-clear").addEventListener("click",function(){
+      if(!_scCtx) return;
+      localStorage.removeItem(scKey(_scCtx.sid,_scCtx.r,_scCtx.m,_scCtx.tA,_scCtx.tB));
+      closeScoreModal(); renderStage(_scCtx?_scCtx.sid:activeStage);
+    });
+    document.getElementById("score-save").addEventListener("click",function(){
+      if(!_scCtx) return;
+      var a=parseInt(document.getElementById("score-a").value)||0;
+      var b=parseInt(document.getElementById("score-b").value)||0;
+      localStorage.setItem(scKey(_scCtx.sid,_scCtx.r,_scCtx.m,_scCtx.tA,_scCtx.tB),JSON.stringify({scoreA:a,scoreB:b}));
+      var sid=_scCtx.sid; closeScoreModal(); renderStage(sid);
+    });
+
+    document.addEventListener("keydown",function(e){
+      if(e.key!=="Escape") return;
+      if(!document.getElementById("score-modal").hidden) closeScoreModal();
+      else if(!document.getElementById("ga-modal").hidden) closeGaModal();
+      else if(!document.getElementById("add-modal").hidden) document.getElementById("add-modal").hidden=true;
+    });
+
+    /* 초기 렌더 */
+    renderStage("adva");
+  });
+  </script>
+  <script src="./auth.js"></script>
+  <script src="./help.js" defer></script>
+</body>
+</html>
