@@ -160,21 +160,6 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
-/* ── [일회용] keiko 소문자 키 삭제 ──────────────── */
-app.post("/api/admin/rename-keiko", async (req, res) => {
-  if (req.headers["x-fix-secret"] !== "vct-fix-2026") return res.status(403).json({ error: "forbidden" });
-  const keys = ["vct_p:keiko", "stock_p:keiko"];
-  const results = [];
-  for (const key of keys) {
-    const row = await pool.query("SELECT key FROM app_data WHERE key=$1", [key]);
-    if (!row.rows[0]) { results.push({ key, status: "not found" }); continue; }
-    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
-    broadcast({ type: "delete", key });
-    results.push({ key, status: "deleted" });
-  }
-  res.json({ ok: true, results });
-});
-
 /* ── 인증 미들웨어 ────────────────────────────────── */
 function requireAuth(req, res, next) {
   const auth = req.headers.authorization || "";
