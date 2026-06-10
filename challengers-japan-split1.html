@@ -407,9 +407,9 @@
 
     /* ── STAGE CONFIG ── */
     var STAGES = {
-      adva: { label:"Advance Stage A", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
-      advb: { label:"Advance Stage B", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
-      advc: { label:"Advance Stage C", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:3 },
+      adva: { label:"Advance Stage A", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
+      advb: { label:"Advance Stage B", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
+      advc: { label:"Advance Stage C", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
       ph1:  { label:"Phase 1",         slots:10, rounds:[{r:1,n:5},{r:2,n:5},{r:3,n:5}],                    rLabels:["Round 1","Round 2","Round 3"], advance:8 },
       ph2:  { label:"Phase 2",         slots:8,  rounds:[{r:1,n:4},{r:2,n:4},{r:3,n:4}],                    rLabels:["Round 1","Round 2","Round 3"], advance:4 },
       po:   { label:"PlayOffs",        slots:4,  rounds:[{r:1,n:2},{r:2,n:2}],                              rLabels:["Semi Finals","Final / 3rd"], advance:1 },
@@ -580,7 +580,8 @@
           +'<span>'+s.mw+' / '+s.ml+'</span>'
           +'<span class="'+dCls+'">'+dStr+'</span></div>';
       }).join("");
-      var advLabel=cfg.advance===1?"우승":"상위 "+cfg.advance+"팀 다음 단계 진출";
+      var _nextStage = {adva:"Phase 1 진출", advb:"Phase 1 진출", advc:"Phase 1 진출", ph1:"Phase 2 진출", ph2:"PlayOffs 진출", po:"우승"};
+      var advLabel=cfg.advance===1?(_nextStage[sid]||"우승"):"상위 "+cfg.advance+"팀 "+(_nextStage[sid]||"다음 단계 진출");
       wrap.innerHTML='<div class="standings-card"><div class="standings-title"><h3>'+esc(cfg.label)+'</h3><span>'+esc(advLabel)+'</span></div>'
         +'<div class="standings-table" role="table">'
         +'<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
