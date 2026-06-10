@@ -1157,7 +1157,7 @@ async function applyAcsToStock(playerName, newAcs) {
     ...state,
     price    : newPrice,
     ref      : newAcs,
-    history  : [...(state.history || []), { price: newPrice, ts: Date.now() }].slice(-200),
+    history  : [...(state.history || []), newPrice].slice(-200),
     runTotal : (state.runTotal || 0) + newAcs,
     runCount : (state.runCount || 0) + 1,
   };

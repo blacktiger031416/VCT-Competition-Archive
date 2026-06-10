@@ -783,6 +783,12 @@
         /* stock_p: 키에서 실제 현재가 / 이전가 / history / 누적평균 로드 */
         var stockData = null;
         try { stockData = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null"); } catch (se) {}
+        /* history 항목이 { price, ts } 객체일 수도 있으므로 숫자로 정규화 */
+        if (stockData && Array.isArray(stockData.history)) {
+          stockData.history = stockData.history.map(function (h) {
+            return typeof h === "object" && h !== null ? h.price : h;
+          }).filter(function (h) { return typeof h === "number" && !isNaN(h); });
+        }
         var price   = (stockData && stockData.price)   ? stockData.price   : basePrice;
         var prev    = (stockData && stockData.history && stockData.history.length >= 2)
                         ? stockData.history[stockData.history.length - 2]
