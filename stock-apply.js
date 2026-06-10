@@ -172,7 +172,10 @@
       btn.className   = 'stock-apply-btn';
       btn.textContent = '📈 주식 반영하기';
       (function (idx) {
-        btn.addEventListener('click', function () { window.applyMapToStock(idx); });
+        btn.addEventListener('click', function () {
+          if (!confirm('이 맵의 결과를 주식에 반영하시겠습니까?')) return;
+          window.applyMapToStock(idx);
+        });
       }(i - 1));
 
       row.appendChild(btn);
