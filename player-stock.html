@@ -884,6 +884,7 @@
       if (held.length === 0) { section.style.display = "none"; return; }
 
       section.style.display = "block";
+      list.innerHTML = "";
       list.innerHTML = held.map(function (name) {
         var h = myHoldings[name];
         var p = PLAYERS.find(function (x) { return x.name === name; });
@@ -893,10 +894,7 @@
         var pnlIcon = pnl > 0 ? "▲" : pnl < 0 ? "▼" : "━";
         var pnlSign = pnl > 0 ? "+" : "";
         var initial = name.charAt(0).toUpperCase();
-        return '<div class="holding-card" onclick="(function(){' +
-          'var pl=PLAYERS.find(function(x){return x.name===\'' + name.replace(/'/g, "\\'") + '\';});' +
-          'if(pl)selectPlayer(pl.id);' +
-          '})()">' +
+        return '<div class="holding-card" data-player-name="' + name.replace(/"/g, '&quot;') + '">' +
           '<div class="holding-card-logo">' + initial + '</div>' +
           '<div class="holding-card-info">' +
             '<div class="holding-card-name">' + name + '</div>' +
@@ -908,6 +906,20 @@
           '</div>' +
         '</div>';
       }).join("");
+
+      /* 카드 클릭 → 해당 선수 차트로 이동 */
+      list.querySelectorAll(".holding-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+          var pName = card.getAttribute("data-player-name");
+          var pl = PLAYERS.find(function (x) { return x.name === pName; });
+          if (pl) {
+            selectPlayer(pl.id);
+            /* 스크롤을 차트 패널로 */
+            var chartPanel = document.getElementById("chart-panel");
+            if (chartPanel) chartPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
     }
 
     function calcChange(p)  { return p.price - p.prev; }
