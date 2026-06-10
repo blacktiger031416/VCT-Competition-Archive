@@ -1374,6 +1374,18 @@ async function pollAutoMatches(allEventMatches) {
           );
           broadcast({ type: "set", key: playersKey, value: playersVal });
 
+          /* ── 선수 주식 즉시 반영 ─────────────────────────────────── */
+          for (const p of players) {
+            if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
+              await applyAcsToStock(p.nickname, p.averageCombatScore);
+            }
+          }
+          /* processMatch의 processedMaps에도 등록해 중복 처리 방지 */
+          if (!processedMaps[am.thespikeMatchId]) processedMaps[am.thespikeMatchId] = [];
+          if (!processedMaps[am.thespikeMatchId].includes(map.id)) {
+            processedMaps[am.thespikeMatchId].push(map.id);
+          }
+
           /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
           try {
             /* teamId → "a" | "b" 매핑 (ACS > 0인 실제 출전 선수만으로 팀 판별) */
