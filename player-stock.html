@@ -1267,7 +1267,30 @@
 
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      /* 코인 + 보유주식 로드 (SERVER_ONLY라 localStorage에 없음) */
+      /* Admin이면 리셋 버튼 표시 */
+      if (window.vctIsAdmin && window.vctIsAdmin()) {
+        document.getElementById("admin-reset-btn").style.display = "";
+      }
+
+      /* 경기 기록에서 선수 집계 (PLAYERS 먼저 빌드) */
+      PLAYERS = buildPlayersFromStorage();
+
+      if (PLAYERS.length === 0) {
+        document.getElementById("stock-list").innerHTML =
+          '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.3);font-size:13px;line-height:1.6;">' +
+          '아직 입력된 경기 데이터가 없습니다.<br><span style="font-size:11px;opacity:.6;">ACS가 입력된 경기 기록이 생기면 자동으로 표시됩니다.</span></div>';
+        document.getElementById("chart-name").textContent = "선수를 선택하세요";
+        document.getElementById("tk-vol").textContent = "0";
+        document.getElementById("tk-up").textContent  = "0";
+        document.getElementById("tk-down").textContent = "0";
+      } else {
+        updateTicker();
+        renderStockList();
+        renderFullTable();
+        selectPlayer(PLAYERS[0].id);
+      }
+
+      /* 코인 + 보유주식 로드 — PLAYERS 빌드 후에 호출해야 renderHoldingsSection이 정상 동작 */
       if (TOKEN) {
         Promise.all([
           fetch("/api/coins",          { headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
@@ -1282,32 +1305,11 @@
           if (holdData.holdings) {
             myHoldings = holdData.holdings;
             renderHoldingsSection();
+            /* 보유 주식 선택 상태 업데이트 */
+            if (selectedId) updateHoldingDisplay(findPlayer(selectedId));
           }
         }).catch(function () {});
       }
-      /* Admin이면 리셋 버튼 표시 */
-      if (window.vctIsAdmin && window.vctIsAdmin()) {
-        document.getElementById("admin-reset-btn").style.display = "";
-      }
-
-      /* 경기 기록에서 선수 집계 */
-      PLAYERS = buildPlayersFromStorage();
-
-      if (PLAYERS.length === 0) {
-        document.getElementById("stock-list").innerHTML =
-          '<div style="padding:32px;text-align:center;color:rgba(255,255,255,.3);font-size:13px;line-height:1.6;">' +
-          '아직 입력된 경기 데이터가 없습니다.<br><span style="font-size:11px;opacity:.6;">ACS가 입력된 경기 기록이 생기면 자동으로 표시됩니다.</span></div>';
-        document.getElementById("chart-name").textContent = "선수를 선택하세요";
-        document.getElementById("tk-vol").textContent = "0";
-        document.getElementById("tk-up").textContent  = "0";
-        document.getElementById("tk-down").textContent = "0";
-        return;
-      }
-
-      updateTicker();
-      renderStockList();
-      renderFullTable();
-      selectPlayer(PLAYERS[0].id);
     });
 
   })();
