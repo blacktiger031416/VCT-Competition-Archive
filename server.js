@@ -1391,18 +1391,7 @@ async function pollAutoMatches(allEventMatches) {
           );
           broadcast({ type: "set", key: playersKey, value: playersVal });
 
-          /* ── 선수 주식 즉시 반영 (processMatch가 이미 처리한 맵은 skip) ── */
-          const _alreadyDone = (processedMaps[tsMatchId] || []).includes(map.id);
-          if (!_alreadyDone) {
-            for (const p of players) {
-              if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-                await applyAcsToStock(p.nickname, p.averageCombatScore);
-              }
-            }
-            /* processedMaps에 등록해 다음 사이클에서 processMatch 중복 방지 */
-            if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
-            processedMaps[tsMatchId].push(map.id);
-          }
+          /* 주식 반영은 클라이언트 stock-apply.js가 auto-match-filled SSE 수신 후 처리 */
 
           /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
           try {
