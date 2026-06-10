@@ -160,6 +160,24 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
+/* ── [일회용] keiko → Keiko 키 이름 수정 ────────── */
+app.post("/api/admin/rename-keiko", async (req, res) => {
+  if (req.headers["x-fix-secret"] !== "vct-fix-2026") return res.status(403).json({ error: "forbidden" });
+  const pairs = [["vct_p:keiko", "vct_p:Keiko"], ["stock_p:keiko", "stock_p:Keiko"]];
+  const results = [];
+  for (const [oldKey, newKey] of pairs) {
+    const row = await pool.query("SELECT value FROM app_data WHERE key=$1", [oldKey]);
+    if (!row.rows[0]) { results.push({ oldKey, status: "not found" }); continue; }
+    const val = row.rows[0].value;
+    await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [newKey, val]);
+    await pool.query("DELETE FROM app_data WHERE key=$1", [oldKey]);
+    broadcast({ type: "delete", key: oldKey });
+    broadcast({ type: "set", key: newKey, value: val });
+    results.push({ oldKey, newKey, status: "renamed" });
+  }
+  res.json({ ok: true, results });
+});
+
 /* ── 인증 미들웨어 ────────────────────────────────── */
 function requireAuth(req, res, next) {
   const auth = req.headers.authorization || "";
