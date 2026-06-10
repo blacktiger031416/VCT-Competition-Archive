@@ -158,7 +158,7 @@
           actionDelay: 500 },
         { sel: ".challengers-grid, .challengers-card",
           title: "Challengers 리그",
-          desc: "Pacific, EMEA, Americas Challengers 리그 결과를 볼 수 있습니다. 처음 클릭 시 잠금 해제 확인 후 접근됩니다.",
+          desc: "Challengers 리그 결과를 볼 수 있습니다. 현재 Pacific Challengers가 공개되어 있으며, 처음 클릭 시 잠금 해제 확인 후 접근됩니다.",
           action: function () {
             var tab = document.querySelector(".gst-tab[data-slide='1']");
             if (tab) tab.click();
@@ -423,6 +423,44 @@
       ],
     },
 
+    /* ── Challengers 허브 (challengers-pacific.html 등) */
+    challengers_hub: {
+      title: "Challengers 도움말",
+      items: [
+        { sel: ".hero-copy",
+          title: "Challengers 허브",
+          desc: "이 권역의 Challengers 서브 리그 목록 페이지입니다. Pacific은 Korea, Japan, Southeast Asia, South Asia 4개 리그로 구성됩니다." },
+        { sel: ".league-card.challengers-card, .league-grid",
+          title: "리그 선택",
+          desc: "서브 리그 카드를 클릭하면 해당 리그 결과 페이지로 이동합니다." },
+        { sel: ".back-link",
+          title: "홈으로",
+          desc: "메인 페이지로 돌아갑니다." },
+      ],
+    },
+
+    /* ── Challengers 스플릿 (challengers-korea-split1.html 등) */
+    challengers_split: {
+      title: "스플릿 도움말",
+      items: [
+        { sel: ".group-assign-section, .group-assign-grid",
+          title: "참가 팀",
+          desc: "이 스플릿에 참가하는 팀 목록입니다." },
+        { sel: ".week-section, .week-panels",
+          title: "주차별 경기",
+          desc: "각 주차별 경기 결과를 보여줍니다. 탭을 클릭해 주차를 전환합니다." },
+        { sel: "a.playoff-link",
+          title: "PlayOff",
+          desc: "그룹 스테이지 이후의 PlayOff 대진표 페이지로 이동합니다." },
+        { sel: ".standings-section, #standings-wrap",
+          title: "순위표",
+          desc: "현재 각 팀의 스플릿 순위를 보여줍니다." },
+        { sel: ".back-link",
+          title: "Korea Challengers로",
+          desc: "Korea Challengers 메인 페이지로 돌아갑니다." },
+      ],
+    },
+
     /* ── 맵 상세 데이터 (match-dark) */
     match_dark: {
       title: "경기 상세 도움말",
@@ -458,6 +496,15 @@
 
     if (path.includes("tierlist")) {
       return qs.includes("id=") ? HELP_CONFIG.tierlist_detail : HELP_CONFIG.tierlist_list;
+    }
+
+    /* challengers 페이지 — pacific/cn 등 체크보다 먼저 처리 */
+    if (path.includes("challengers")) {
+      if (path.includes("playoff") || path.includes("swiss")) return HELP_CONFIG.stage;
+      if (path.includes("split"))   return HELP_CONFIG.challengers_split;
+      /* 허브 페이지 (challengers-pacific, challengers-emea 등) vs 리그 페이지 (challengers-korea 등) */
+      if (/challengers-(pacific|emea|americas|cn|sea)/.test(path)) return HELP_CONFIG.challengers_hub;
+      return HELP_CONFIG.league;
     }
 
     /* masters/champions: 내부 playoffs·swiss는 브래킷, 나머지는 팀 배정/그룹 */
