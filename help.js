@@ -423,6 +423,38 @@
       ],
     },
 
+    /* ── Challengers 리그 메인 (challengers-korea.html 등) */
+    challengers_league: {
+      title: "Challengers 리그 도움말",
+      items: [
+        { sel: ".stage-nav a, .nav-list a, .tournament-card, .stage-link",
+          title: "대회 선택",
+          desc: "Split 1, Split 2 각 스플릿 결과 페이지로 이동합니다." },
+        { sel: ".league-mark img, .league-hero img",
+          title: "리그 로고",
+          desc: "현재 보고 있는 Challengers 리그의 공식 로고입니다." },
+        { sel: ".teams-section .team-grid, .team-grid",
+          title: "참가팀",
+          desc: "팀 카드를 클릭하면 선수 명단을 볼 수 있습니다." },
+        { sel: "#roster-main-list",
+          title: "선수 명단",
+          desc: "선수들의 이름을 클릭하여 개인 평균 ACS, K/D, 국적, 사용 요원 등을 볼 수 있습니다.",
+          action: function () {
+            var card = document.querySelector(".teams-section .team-card");
+            if (card) card.click();
+          },
+          actionDelay: 500 },
+        { sel: ".back-link",
+          title: "Pacific Challengers로",
+          desc: "Pacific Challengers 허브 페이지로 돌아갑니다.",
+          action: function () {
+            var closeBtn = document.getElementById("roster-modal-close");
+            if (closeBtn) closeBtn.click();
+          },
+          actionDelay: 350 },
+      ],
+    },
+
     /* ── Challengers 허브 (challengers-pacific.html 등) */
     challengers_hub: {
       title: "Challengers 도움말",
@@ -504,7 +536,7 @@
       if (path.includes("split"))   return HELP_CONFIG.challengers_split;
       /* 허브 페이지 (challengers-pacific, challengers-emea 등) vs 리그 페이지 (challengers-korea 등) */
       if (/challengers-(pacific|emea|americas|cn|sea)/.test(path)) return HELP_CONFIG.challengers_hub;
-      return HELP_CONFIG.league;
+      return HELP_CONFIG.challengers_league;
     }
 
     /* masters/champions: 내부 playoffs·swiss는 브래킷, 나머지는 팀 배정/그룹 */
