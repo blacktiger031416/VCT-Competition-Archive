@@ -1337,12 +1337,15 @@ async function pollAutoMatches(allEventMatches) {
           const players = map.players || [];
           if (!players.some((p) => p.averageCombatScore > 0)) continue; // 미완료 맵
 
+          /* ACS > 0인 선수만 (서브/미출전 로스터 제외), ACS 내림차순 정렬 후 5명으로 제한 */
           const teamAPlayers = players
-            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1))
-            .sort((a, b) => b.averageCombatScore - a.averageCombatScore);
+            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1) && p.averageCombatScore > 0)
+            .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
+            .slice(0, 5);
           const teamBPlayers = players
-            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2))
-            .sort((a, b) => b.averageCombatScore - a.averageCombatScore);
+            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2) && p.averageCombatScore > 0)
+            .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
+            .slice(0, 5);
 
           const playersData = {};
           teamAPlayers.forEach((p, i) => {
@@ -1372,10 +1375,10 @@ async function pollAutoMatches(allEventMatches) {
 
           /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
           try {
-            /* teamId → "a" | "b" 매핑 */
+            /* teamId → "a" | "b" 매핑 (ACS > 0인 실제 출전 선수만으로 팀 판별) */
             const teamIdMap = {}; // teamId -> "a" | "b"
             players.forEach((p) => {
-              if (p.teamId == null) return;
+              if (p.teamId == null || p.averageCombatScore <= 0) return;
               const id = String(p.teamId);
               if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1)) teamIdMap[id] = "a";
               else if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2)) teamIdMap[id] = "b";
