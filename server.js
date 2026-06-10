@@ -1125,17 +1125,26 @@ const WATCHED_EVENT_IDS = [
    맵 단위로 추적 — 경기 중간에 끝난 맵부터 바로 반영 */
 let processedMaps = {};
 
-/* DB에서 stock_p:{name} 읽기 */
+/* DB에서 stock_p:{name} 읽기 — 대소문자 무관 조회 후 정확한 키 반환 */
 async function getStockState(playerName) {
+  /* 1) 정확한 키로 먼저 시도 */
   const key = `stock_p:${playerName}`;
   const res = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-  if (!res.rows[0]) return null;
-  try { return JSON.parse(res.rows[0].value); } catch { return null; }
+  if (res.rows[0]) {
+    try { return { state: JSON.parse(res.rows[0].value), resolvedKey: key }; } catch { return null; }
+  }
+  /* 2) 대소문자 무관 fallback */
+  const res2 = await pool.query(
+    "SELECT key, value FROM app_data WHERE lower(key)=lower($1) AND key LIKE 'stock_p:%'",
+    [key]
+  );
+  if (!res2.rows[0]) return null;
+  try { return { state: JSON.parse(res2.rows[0].value), resolvedKey: res2.rows[0].key }; } catch { return null; }
 }
 
 /* DB에 stock_p:{name} 저장 + SSE 브로드캐스트 */
-async function saveStockState(playerName, state) {
-  const key   = `stock_p:${playerName}`;
+async function saveStockState(playerName, state, resolvedKey) {
+  const key   = resolvedKey || `stock_p:${playerName}`;
   const value = JSON.stringify(state);
   await pool.query(
     `INSERT INTO app_data (key, value)
@@ -1148,8 +1157,10 @@ async function saveStockState(playerName, state) {
 
 /* 선수 한 명의 주가 적용 */
 async function applyAcsToStock(playerName, newAcs) {
-  const state = await getStockState(playerName);
-  if (!state) return; /* DB에 없는 선수 — 무시 */
+  const found = await getStockState(playerName);
+  if (!found) return; /* DB에 없는 선수 — 무시 */
+
+  const { state, resolvedKey } = found;
 
   /* 이미 동일 ACS로 반영된 경우 중복 방지 */
   if (newAcs === state.ref) {
@@ -1167,8 +1178,8 @@ async function applyAcsToStock(playerName, newAcs) {
     runTotal : (state.runTotal || 0) + newAcs,
     runCount : (state.runCount || 0) + 1,
   };
-  await saveStockState(playerName, newState);
-  console.log(`[stock] ${playerName}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
+  await saveStockState(playerName, newState, resolvedKey);
+  console.log(`[stock] ${resolvedKey}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
 }
 
 /* 매치 한 건 처리 — 완료된 맵만 골라서 적용 */
