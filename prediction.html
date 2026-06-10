@@ -227,6 +227,7 @@
       padding:10px 14px 9px; border-bottom:1px solid rgba(255,255,255,.05); flex-wrap:wrap;
     }
     .status-badge { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:3px; flex-shrink:0; }
+    .deadline-badge { font-size:10px; font-weight:700; color:rgba(240,192,64,.75); background:rgba(240,192,64,.1); border:1px solid rgba(240,192,64,.2); padding:2px 8px; border-radius:3px; flex-shrink:0; }
     .status-badge.open    { background:rgba(240,192,64,.18); color:#f0c040; }
     .status-badge.closed  { background:rgba(255,255,255,.07); color:rgba(255,255,255,.38); }
     .status-badge.settled { background:rgba(61,220,132,.14);  color:#3ddc84; }
@@ -582,6 +583,10 @@
           <div class="form-group" style="max-width:130px">
             <label class="form-label">배당률 팀 2</label>
             <input class="form-input" name="odds2" type="number" step="0.01" min="1.01" placeholder="2.10" required />
+          </div>
+          <div class="form-group" style="min-width:180px">
+            <label class="form-label">배팅 마감 시각 (선택)</label>
+            <input class="form-input" name="deadline" type="datetime-local" style="color-scheme:dark" />
           </div>
           <button class="btn btn-primary" type="submit">경기 추가</button>
         </div>
@@ -1221,9 +1226,27 @@
       var canBet = match.status === "open" && IS_LOGGED_IN && !myBet;
       var stText = { open: "OPEN", closed: "마감", settled: "정산완료" }[match.status] || match.status;
 
+      /* 마감 시각 표시 문자열 */
+      var deadlineHtml = "";
+      if (match.deadline && match.status === "open") {
+        var dlDate = new Date(match.deadline);
+        var now    = new Date();
+        var diff   = dlDate - now;
+        var dlStr;
+        if (diff < 0) {
+          dlStr = "마감됨";
+        } else if (diff < 60 * 60 * 1000) {
+          dlStr = "⏱ " + Math.ceil(diff / 60000) + "분 후 마감";
+        } else {
+          dlStr = "⏱ " + dlDate.toLocaleString("ko-KR", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" }) + " 마감";
+        }
+        deadlineHtml = '<span class="deadline-badge">' + dlStr + '</span>';
+      }
+
       /* top */
       var topHtml = '<div class="card-top">' +
         '<span class="status-badge ' + match.status + '">' + stText + '</span>' +
+        deadlineHtml +
         '<span class="match-label">' + esc(match.label || "") + '</span>';
       if (IS_ADMIN) {
         topHtml += '<div class="card-admin-btns">';
@@ -1493,6 +1516,9 @@
       var odds2 = parseFloat(f.querySelector("[name=odds2]").value);
       if (!odds1 || !odds2 || odds1 < 1.01 || odds2 < 1.01) { errEl.textContent = "배당률은 1.01 이상이어야 합니다."; errEl.style.display = "block"; return; }
 
+      var deadlineVal = f.querySelector("[name=deadline]").value;
+      var deadlineISO = deadlineVal ? new Date(deadlineVal).toISOString() : null;
+
       var sub = f.querySelector("[type=submit]"); sub.disabled = true; sub.textContent = "추가 중...";
       fetch("/api/prediction/matches", {
         method: "POST",
@@ -1502,6 +1528,7 @@
           team1: t1.name, logo1: t1.logo,
           team2: t2.name, logo2: t2.logo,
           odds1: odds1,   odds2: odds2,
+          deadline: deadlineISO,
         }),
       }).then(function (r) { return r.json(); })
         .then(function (d) {

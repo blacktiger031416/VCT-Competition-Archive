@@ -780,7 +780,7 @@ app.get("/api/prediction/matches", async (req, res) => {
 
 /* ── API: 예측 경기 생성 (admin) ─────────────────── */
 app.post("/api/prediction/matches", requireAdmin, async (req, res) => {
-  const { team1, team2, odds1, odds2, label, logo1, logo2 } = req.body || {};
+  const { team1, team2, odds1, odds2, label, logo1, logo2, deadline } = req.body || {};
   if (!team1 || !team2 || !odds1 || !odds2)
     return res.status(400).json({ error: "team1, team2, odds1, odds2 필수" });
   const id = Date.now().toString();
@@ -790,6 +790,7 @@ app.post("/api/prediction/matches", requireAdmin, async (req, res) => {
     logo1: logo1 || "", logo2: logo2 || "",
     status: "open", winner: null,
     createdAt: new Date().toISOString(),
+    deadline: deadline || null,
   };
   try {
     await pool.query(
@@ -868,6 +869,8 @@ app.post("/api/prediction/matches/:id/bet", requireAuth, async (req, res) => {
     if (!matchRes.rows[0]) return res.status(404).json({ error: "경기를 찾을 수 없습니다." });
     const match = JSON.parse(matchRes.rows[0].value);
     if (match.status !== "open") return res.status(400).json({ error: "배팅이 마감되었습니다." });
+    if (match.deadline && new Date() > new Date(match.deadline))
+      return res.status(400).json({ error: "배팅 마감 시각이 지났습니다." });
     if (team !== match.team1 && team !== match.team2)
       return res.status(400).json({ error: "올바른 팀을 선택해 주세요." });
 
@@ -1220,6 +1223,27 @@ app.listen(PORT, async () => {
   } catch (e) {
     console.error("[init] test 계정 생성 실패:", e.message);
   }
+
+  /* ── 배팅 마감 시각 자동 처리 (1분마다) ── */
+  setInterval(async () => {
+    try {
+      const result = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'pred-match:%'");
+      for (const row of result.rows) {
+        const match = JSON.parse(row.value);
+        if (match.status !== "open" || !match.deadline) continue;
+        if (new Date() < new Date(match.deadline)) continue;
+        match.status = "closed";
+        await pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [row.key, JSON.stringify(match)]
+        );
+        broadcast({ type: "pred-match-update", match });
+        console.log(`[pred] 경기 ${match.id} (${match.team1} vs ${match.team2}) 배팅 자동 마감`);
+      }
+    } catch (e) {
+      console.error("[pred] 자동 마감 오류:", e.message);
+    }
+  }, 60 * 1000);
 
   /* ── 자동 주가 폴링 시작 ── */
   await initProcessedMaps();
