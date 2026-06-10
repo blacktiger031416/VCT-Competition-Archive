@@ -1032,6 +1032,137 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+/* ══════════════════════════════════════════════════════
+   자동 주가 업데이트 — thespike.gg API 폴링
+   감시 대상: VCT 2026 메인 이벤트 (챌린저스 제외)
+   주기: 5분마다
+   ══════════════════════════════════════════════════════ */
+
+const WATCHED_EVENT_IDS = [
+  4148, // Masters London 2026
+  4157, // Americas Stage 2
+  4158, // EMEA Stage 2
+  4159, // China Stage 2
+  4160, // Pacific Stage 2
+];
+
+/* 이미 처리한 매치 ID 집합 (서버 재시작시 리셋 — 중복 처리 방지용) */
+let processedMatchIds = new Set();
+
+/* DB에서 stock_p:{name} 읽기 */
+async function getStockState(playerName) {
+  const key = `stock_p:${playerName}`;
+  const res = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+  if (!res.rows[0]) return null;
+  try { return JSON.parse(res.rows[0].value); } catch { return null; }
+}
+
+/* DB에 stock_p:{name} 저장 + SSE 브로드캐스트 */
+async function saveStockState(playerName, state) {
+  const key   = `stock_p:${playerName}`;
+  const value = JSON.stringify(state);
+  await pool.query(
+    `INSERT INTO app_data (key, value)
+     VALUES ($1, $2)
+     ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+    [key, value]
+  );
+  broadcast({ type: "set", key, value });
+}
+
+/* 선수 한 명의 주가 적용 */
+async function applyAcsToStock(playerName, newAcs) {
+  const state = await getStockState(playerName);
+  if (!state) return; /* DB에 없는 선수 — 무시 */
+
+  const pctChange = (newAcs - state.ref) / state.ref;
+  const newPrice  = Math.max(1, Math.round(state.price * (1 + pctChange)));
+  const newState  = {
+    ...state,
+    price    : newPrice,
+    ref      : newAcs,
+    history  : [...(state.history || []), { price: newPrice, ts: Date.now() }].slice(-200),
+    runTotal : (state.runTotal || 0) + newAcs,
+    runCount : (state.runCount || 0) + 1,
+  };
+  await saveStockState(playerName, newState);
+  console.log(`[stock] ${playerName}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
+}
+
+/* 매치 한 건 처리 */
+async function processMatch(matchId) {
+  try {
+    const res  = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const maps = data.maps || [];
+    for (const map of maps) {
+      const players = map.players || [];
+      for (const p of players) {
+        if (p.nickname && typeof p.averageCombatScore === "number") {
+          await applyAcsToStock(p.nickname, p.averageCombatScore);
+        }
+      }
+    }
+    console.log(`[stock] 매치 ${matchId} 처리 완료 (${maps.length}맵)`);
+  } catch (e) {
+    console.error(`[stock] 매치 ${matchId} 처리 오류:`, e.message);
+  }
+}
+
+/* 폴링 메인 함수 */
+async function pollVctMatches() {
+  for (const eventId of WATCHED_EVENT_IDS) {
+    try {
+      const res  = await fetch(`https://api.thespike.gg/matches?eventId=${eventId}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const matches = Array.isArray(data) ? data : (data.matches || data.data || []);
+
+      for (const match of matches) {
+        const id = match.id;
+        if (!id || !match.isFinished) continue;
+        if (processedMatchIds.has(id)) continue;
+
+        processedMatchIds.add(id);
+        console.log(`[stock] 새 매치 발견 — ID ${id} (eventId ${eventId})`);
+        await processMatch(id);
+      }
+    } catch (e) {
+      console.error(`[stock] eventId ${eventId} 폴링 오류:`, e.message);
+    }
+  }
+}
+
+/* 서버 재시작 시 기존 처리 완료 매치 ID 복원 */
+async function initProcessedMatchIds() {
+  try {
+    const res = await pool.query("SELECT value FROM app_data WHERE key='stock:processed_matches'");
+    if (res.rows[0]) {
+      const ids = JSON.parse(res.rows[0].value);
+      processedMatchIds = new Set(ids);
+      console.log(`[stock] 처리 완료 매치 ${processedMatchIds.size}건 복원`);
+    }
+  } catch (e) {
+    console.error("[stock] 처리 완료 매치 복원 오류:", e.message);
+  }
+}
+
+/* 처리 완료 매치 ID를 DB에 주기적으로 저장 (재시작 내구성) */
+async function saveProcessedMatchIds() {
+  try {
+    const ids = [...processedMatchIds];
+    await pool.query(
+      `INSERT INTO app_data (key, value)
+       VALUES ('stock:processed_matches', $1)
+       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
+      [JSON.stringify(ids)]
+    );
+  } catch (e) {
+    console.error("[stock] 처리 완료 매치 저장 오류:", e.message);
+  }
+}
+
 app.listen(PORT, async () => {
   console.log(`VCT Archive server running on port ${PORT}`);
 
@@ -1060,4 +1191,13 @@ app.listen(PORT, async () => {
   } catch (e) {
     console.error("[init] test 계정 생성 실패:", e.message);
   }
+
+  /* ── 자동 주가 폴링 시작 ── */
+  await initProcessedMatchIds();
+  pollVctMatches(); /* 서버 시작 즉시 1회 실행 */
+  setInterval(async () => {
+    await pollVctMatches();
+    await saveProcessedMatchIds();
+  }, 5 * 60 * 1000); /* 5분마다 */
+  console.log("[stock] 자동 주가 폴링 시작 (5분 주기)");
 });
