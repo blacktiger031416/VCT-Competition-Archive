@@ -1670,7 +1670,7 @@
       try {
         var r = JSON.parse(localStorage.getItem('vct_roster:' + team));
         if (!r) return [];
-        return (r.main || []).concat(r.subs || []);
+        return (r.main || []);  /* 메인 로스터 5명만 — 서브 제외 */
       } catch (_) { return []; }
     }
 
