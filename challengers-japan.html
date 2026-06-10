@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Challengers Japan 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --accent: #159194;
+        --accent-dim: rgba(21,145,148,0.7);
+        --accent-bg:  rgba(21,145,148,0.12);
+        --bg-base:    #071515;
+        --bg-card:    #0d1f1f;
+        --bg-card2:   #112222;
+      }
+
+      body {
+        background: var(--bg-base);
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(7,21,21,0.92);
+        border-bottom: 1px solid rgba(21,145,148,0.15);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.55); text-decoration: none;
+        transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: rgba(255,255,255,0.4); text-decoration: none;
+        transition: color 0.15s;
+      }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      /* ── HERO ───────────────────────────────── */
+      .league-hero {
+        position: relative;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 32px; padding: 72px 48px 80px;
+        max-width: 1080px; margin: 0 auto; overflow: hidden;
+      }
+      .league-hero::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(21,145,148,0.18) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--accent); margin-bottom: 10px;
+      }
+      .league-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(42px, 7vw, 80px); font-weight: 900;
+        letter-spacing: 0.03em; text-transform: uppercase;
+        line-height: 0.95; color: #fff; margin-bottom: 20px;
+      }
+      .league-hero .intro {
+        font-size: 14px; line-height: 1.7;
+        color: rgba(255,255,255,0.45); max-width: 420px;
+        font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all;
+      }
+      .league-mark {
+        flex-shrink: 0; position: relative; z-index: 1; padding: 16px;
+      }
+      .league-mark img {
+        width: clamp(120px, 18vw, 200px); height: clamp(120px, 18vw, 200px);
+        object-fit: contain; opacity: 0.9;
+        filter: drop-shadow(0 4px 24px rgba(21,145,148,0.35));
+      }
+
+      /* ── SECTIONS ───────────────────────────── */
+      .league-shell {
+        max-width: 1080px; margin: 0 auto; padding: 0 32px 80px;
+      }
+      .section-heading {
+        margin-bottom: 24px;
+        border-left: 3px solid var(--accent);
+        padding-left: 16px;
+      }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 28px; font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+      }
+
+      /* ── TOURNAMENT GRID ─────────────────────── */
+      .tournament-section { margin-bottom: 64px; }
+      .tournament-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 640px) {
+        .tournament-grid { grid-template-columns: 1fr; }
+      }
+      .tournament-card {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 24px 22px;
+        background: var(--bg-card);
+        border: 1px solid rgba(21,145,148,0.12);
+        border-radius: 4px; text-decoration: none;
+        color: #e8e4e0; position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        cursor: pointer;
+      }
+      .tournament-card::before {
+        content: '';
+        position: absolute; inset: 0 0 0 0;
+        border-bottom: 2px solid var(--accent);
+        transform: scaleX(0); transform-origin: left;
+        transition: transform 0.25s ease;
+      }
+      .tournament-card:hover {
+        border-color: rgba(21,145,148,0.4);
+        background: var(--bg-card2);
+        transform: translateY(-2px);
+      }
+      .tournament-card:hover::before { transform: scaleX(1); }
+      .tournament-kicker {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 0.2em; text-transform: uppercase;
+        color: var(--accent-dim);
+      }
+      .tournament-card strong {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 26px; font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        color: #fff; line-height: 1;
+      }
+      .tournament-card > span:last-child {
+        font-size: 12px; color: rgba(255,255,255,0.35);
+        font-family: 'Barlow', sans-serif; margin-top: 4px;
+      }
+
+      /* ── DIVIDER ────────────────────────────── */
+      .section-divider { height:1px; background:rgba(21,145,148,0.12); margin:0 0 56px; }
+
+      /* ── TEAM GRID ── */
+      .teams-section { margin-top:56px; }
+      .team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+      @media (max-width:480px) { .team-grid { grid-template-columns:repeat(2,1fr); } }
+      .team-card { display:flex; flex-direction:column; align-items:center; gap:10px; padding:22px 12px 18px;
+        background:var(--bg-card); border:1px solid rgba(255,255,255,0.06); border-radius:4px;
+        cursor:pointer; transition:border-color .18s, background .18s, transform .18s; position:relative; overflow:hidden; }
+      .team-card:hover { border-color:rgba(21,145,148,0.4); background:var(--bg-card2); transform:translateY(-2px); }
+      .team-logo-placeholder { width:60px; height:60px; display:flex; align-items:center; justify-content:center; }
+      .team-logo-placeholder img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6)); transition:filter .18s; }
+      .team-card:hover .team-logo-placeholder img { filter:drop-shadow(0 2px 12px rgba(255,255,255,0.15)); }
+      .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.6)); }
+      .team-card:hover .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 12px rgba(255,255,255,0.15)); }
+      .team-logo-placeholder .team-abbr {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 18px; font-weight: 900; letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.25);
+      }
+      .team-card h3 { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; text-align:center; line-height:1.2; }
+      .team-card p { font-size:11px; color:rgba(255,255,255,0.35); font-family:'Noto Sans KR',sans-serif; font-weight:500; text-align:center; }
+
+      /* ── ROSTER MODAL ── */
+      .roster-modal { position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; }
+      .roster-modal[hidden] { display:none; }
+      .roster-modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); }
+      .roster-modal-panel { position:relative; z-index:1; background:#111a28; border:1px solid rgba(255,255,255,0.1); border-radius:8px; width:92vw; max-width:440px; overflow:hidden; box-shadow:0 24px 64px rgba(0,0,0,0.7); }
+      .roster-modal-header { display:flex; align-items:center; gap:14px; padding:18px 20px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.03); }
+      .roster-modal-logo { width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+      .roster-modal-logo img { width:100%; height:100%; object-fit:contain; }
+      .roster-modal-header-text { flex:1; }
+      .roster-modal-header-text .eyebrow { font-size:10px; margin-bottom:2px; }
+      #roster-modal-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; color:#fff; }
+      .roster-modal-close { background:none; border:none; color:rgba(255,255,255,0.4); font-size:22px; cursor:pointer; padding:4px; line-height:1; transition:color .15s; flex-shrink:0; }
+      .roster-modal-close:hover { color:#fff; }
+      .roster-section-label { display:block; padding:12px 20px 6px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,0.45); }
+      .roster-player-list { list-style:none; max-height:300px; overflow-y:auto; padding:8px 0; }
+      .roster-player-list li { display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid rgba(255,255,255,0.04); transition:background .12s; }
+      .roster-player-list li:hover { background:rgba(255,255,255,0.04); }
+      .roster-player-list li:last-child { border-bottom:none; }
+      .roster-player-list li > span:not(.player-index) { flex:1; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; letter-spacing:.04em; color:rgba(255,255,255,0.85); }
+      .roster-empty-msg { color:rgba(255,255,255,0.3); font-size:13px; text-align:center; padding:20px !important; font-family:'Noto Sans KR',sans-serif; }
+      .roster-main-item { display:flex; align-items:center; gap:8px; padding:8px 20px !important; }
+      .roster-main-input { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:6px 10px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:600; letter-spacing:.04em; color:#fff; outline:none; }
+      .roster-main-input:focus { border-color:rgba(21,145,148,0.5); background:rgba(21,145,148,0.05); }
+      .roster-player-remove { background:none; border:none; color:rgba(255,255,255,0.2); font-size:16px; cursor:pointer; padding:2px 4px; transition:color .12s; line-height:1; }
+      .roster-player-remove:hover { color:rgba(232,67,45,0.85); }
+      .roster-add-row { display:flex; gap:0; border-top:1px solid rgba(255,255,255,0.07); }
+      #roster-add-input { flex:1; background:transparent; border:none; padding:14px 20px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:600; letter-spacing:.04em; color:#fff; outline:none; }
+      #roster-add-input::placeholder { color:rgba(255,255,255,0.2); }
+      .roster-add-btn { background:rgba(21,145,148,0.15); border:none; border-left:1px solid rgba(255,255,255,0.07); color:var(--accent); font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:0 20px; cursor:pointer; transition:background .15s; }
+      .roster-add-btn:hover { background:rgba(21,145,148,0.28); }
+
+      /* ── PAGE TRANSITION ────────────────────── */
+      .card-transition-overlay {
+        position: fixed; inset: 0;
+        background: var(--bg-base);
+        pointer-events: none; opacity: 0; z-index: 9999;
+        transition: opacity 0.4s ease;
+      }
+      body.card-transitioning .card-transition-overlay { opacity: 1; }
+    </style>
+  </head>
+  <body class="league-page challengers-japan-page">
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./challengers-pacific.html">Pacific Challengers</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title" style="padding:72px 0 80px;">
+        <div class="hero-text">
+          <p class="eyebrow">VCT Challengers 2026</p>
+          <h1 id="league-title">Japan<br>Challengers</h1>
+          <p class="intro">
+            2026 VCT Challengers Japan의 Split 1, Split 2, Finals 결과를
+            정리하는 리그 페이지입니다.<br>
+            각 대회의 경기 결과와 참가 팀 정보를 이곳에서 확인할 수 있습니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="VCT Challengers Japan" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <section class="tournament-section" aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournaments</p>
+          <h2 id="tournament-title">대회 선택</h2>
+        </div>
+
+        <div class="tournament-grid">
+          <a class="tournament-card" href="./challengers-japan-split1.html">
+            <span class="tournament-kicker">2026 Japan Challengers</span>
+            <strong>Split 1</strong>
+          </a>
+          <a class="tournament-card" href="./challengers-japan-split2.html">
+            <span class="tournament-kicker">2026 Japan Challengers</span>
+            <strong>Split 2</strong>
+          </a>
+          <a class="tournament-card" href="./challengers-japan-finals.html">
+            <span class="tournament-kicker">2026 Japan Challengers</span>
+            <strong>Finals</strong>
+          </a>
+        </div>
+      </section>
+
+      <section class="teams-section" aria-labelledby="teams-title">
+        <div class="section-heading">
+          <p class="eyebrow">Teams</p>
+          <h2 id="teams-title">2026 Japan Challengers 참가 팀</h2>
+        </div>
+        <div class="team-grid">
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/zeta.png" alt="ZETA DIVISION" /></div>
+            <h3>ZETA DIVISION</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/dfm.svg" alt="DetonatioN FocusMe" /></div>
+            <h3>DetonatioN FocusMe</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">FNL</span></div>
+            <h3>FENNEL</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">NTH</span></div>
+            <h3>NORTHEPTION</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">RJ</span></div>
+            <h3>REJECT</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">GCR</span></div>
+            <h3>G-Core</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">SG</span></div>
+            <h3>Sengoku Gaming</h3><p>일본</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><span class="team-abbr">AMP</span></div>
+            <h3>AMPLID</h3><p>일본</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="card-transition-overlay" aria-hidden="true"></div>
+
+    <!-- Roster Modal -->
+    <div id="roster-modal" class="roster-modal" role="dialog" aria-modal="true" aria-labelledby="roster-modal-title" hidden>
+      <div class="roster-modal-backdrop"></div>
+      <div class="roster-modal-panel">
+        <div class="roster-modal-header">
+          <div class="roster-modal-logo" id="roster-modal-logo"></div>
+          <div class="roster-modal-header-text">
+            <p class="eyebrow">선수 명단</p>
+            <h2 id="roster-modal-title">팀</h2>
+          </div>
+          <button class="roster-modal-close" id="roster-modal-close" aria-label="닫기">×</button>
+        </div>
+        <span class="roster-section-label">메인 선수 <span style="opacity:0.5;font-size:10px">(5명)</span></span>
+        <ul class="roster-player-list" id="roster-main-list"></ul>
+        <span class="roster-section-label" style="margin-top:2px">서브 선수</span>
+        <ul class="roster-player-list" id="roster-sub-list"></ul>
+        <div class="roster-add-row" id="roster-add-row">
+          <input type="text" id="roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
+          <button class="roster-add-btn" id="roster-add-btn">추가</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var overlay = document.querySelector(".card-transition-overlay");
+        document.querySelectorAll(".tournament-card").forEach(function (card) {
+          var href = card.getAttribute("href");
+          if (!href || href === "#") return;
+          card.addEventListener("click", function (e) {
+            e.preventDefault();
+            card.classList.add("selected");
+            document.body.classList.add("card-transitioning");
+            setTimeout(function () { window.location.href = href; }, 400);
+          });
+        });
+      })();
+    </script>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+      (function () {
+        var defaultRosters = {
+          "ZETA DIVISION":       [], "DetonatioN FocusMe":  [],
+          "FENNEL":              [], "NORTHEPTION":          [],
+          "REJECT":              [], "G-Core":               [],
+          "Sengoku Gaming":      [], "AMPLID":               [],
+        };
+        function key(team) { return "vct_roster:" + team; }
+        function load(team) {
+          try {
+            var s = localStorage.getItem(key(team));
+            if (s) { var p = JSON.parse(s); if (p && !Array.isArray(p) && p.main) return p; if (Array.isArray(p)) return { main: p.slice(0,5), subs: p.slice(5) }; }
+          } catch(e) {}
+          var def = defaultRosters[team] || [];
+          return { main: def.slice(0,5), subs: def.slice(5) };
+        }
+        function save(team, data) { try { localStorage.setItem(key(team), JSON.stringify(data)); } catch(e) {} }
+
+        var modal   = document.getElementById("roster-modal");
+        var logoEl  = document.getElementById("roster-modal-logo");
+        var titleEl = document.getElementById("roster-modal-title");
+        var mainEl  = document.getElementById("roster-main-list");
+        var subEl   = document.getElementById("roster-sub-list");
+        var input   = document.getElementById("roster-add-input");
+        var current = null;
+
+        function open(teamName, logoHTML) {
+          current = teamName; titleEl.textContent = teamName;
+          logoEl.innerHTML = logoHTML || ""; render();
+          modal.removeAttribute("hidden"); document.body.classList.add("roster-open");
+          var addRow = document.getElementById("roster-add-row");
+          if (addRow) addRow.style.display = (window.vctIsAdmin && window.vctIsAdmin()) ? "flex" : "none";
+          input.value = "";
+          if (window.vctIsAdmin && window.vctIsAdmin()) setTimeout(function(){ input.focus(); }, 260);
+        }
+        function close() { modal.setAttribute("hidden",""); document.body.classList.remove("roster-open"); current = null; }
+        function saveMain() {
+          if (!current) return;
+          var d = load(current);
+          d.main = Array.from(mainEl.querySelectorAll(".roster-main-input")).map(function(i){ return i.value.trim(); });
+          save(current, d);
+        }
+        function getLogoHTML() { var el = document.getElementById("roster-modal-logo"); return el ? el.innerHTML : ""; }
+        function attachPlayerClick(el) {
+          var pName = el.getAttribute("data-player"); if (!pName) return;
+          el.addEventListener("click", function() { if (window.openPlayerModal) window.openPlayerModal(pName, current, getLogoHTML()); });
+          el.style.cursor = "pointer";
+        }
+        function render() {
+          if (!current) return;
+          var d = load(current); var admin = window.vctIsAdmin && window.vctIsAdmin();
+          mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
+            var nameVal = d.main[i] || '';
+            if (admin) return '<li class="roster-main-item"><input class="roster-main-input" data-i="'+i+'" value="'+nameVal.replace(/"/g,'&quot;')+'" placeholder="선수 이름" />'+(nameVal?'<button class="pm-roster-btn" data-player="'+nameVal.replace(/"/g,'&quot;')+'" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↗</button>':'')+'</li>';
+            return '<li class="roster-main-item"><span data-player="'+nameVal.replace(/"/g,'&quot;')+'" style="opacity:0.85">'+(nameVal||'—')+'</span></li>';
+          }).join("");
+          mainEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
+          if (admin) { mainEl.querySelectorAll(".roster-main-input").forEach(function(inp){ inp.addEventListener("blur", saveMain); inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){saveMain();inp.blur();} }); }); }
+          if (!d.subs.length) { subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>'; }
+          else {
+            subEl.innerHTML = d.subs.map(function(p,i){ return '<li><span data-player="'+p.replace(/"/g,'&quot;')+'" style="flex:1;opacity:0.85">'+p+'</span>'+(admin?'<button class="roster-player-remove" data-sub="'+i+'" aria-label="'+p+' 삭제">×</button>':'')+'</li>'; }).join("");
+            subEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
+            if (admin) { subEl.querySelectorAll(".roster-player-remove").forEach(function(btn){ btn.addEventListener("click", function(){ var d=load(current); d.subs.splice(Number(btn.dataset.sub),1); save(current,d); render(); }); }); }
+          }
+        }
+        function add() { var name=input.value.trim(); if(!name||!current) return; var d=load(current); d.subs.push(name); save(current,d); input.value=""; render(); }
+        document.querySelector(".roster-modal-backdrop").addEventListener("click", close);
+        document.getElementById("roster-modal-close").addEventListener("click", close);
+        document.addEventListener("keydown", function(e){ if(e.key==="Escape") close(); });
+        document.getElementById("roster-add-btn").addEventListener("click", add);
+        input.addEventListener("keydown", function(e){ if(e.key==="Enter") add(); });
+        document.querySelectorAll(".teams-section .team-card").forEach(function(card){
+          var nameEl = card.querySelector("h3"); if (!nameEl) return;
+          var teamName = nameEl.textContent.trim();
+          var logoPlaceholder = card.querySelector(".team-logo-placeholder");
+          var logoHTML = logoPlaceholder ? logoPlaceholder.innerHTML : "";
+          card.addEventListener("click", function(){ open(teamName, logoHTML); });
+        });
+      })();
+    });
+    </script>
+    <script src="./player-modal.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
