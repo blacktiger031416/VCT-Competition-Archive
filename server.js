@@ -1369,6 +1369,84 @@ async function pollAutoMatches(allEventMatches) {
             [playersKey, playersVal]
           );
           broadcast({ type: "set", key: playersKey, value: playersVal });
+
+          /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
+          try {
+            /* teamId → "a" | "b" 매핑 */
+            const teamIdMap = {}; // teamId -> "a" | "b"
+            players.forEach((p) => {
+              if (p.teamId == null) return;
+              const id = String(p.teamId);
+              if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1)) teamIdMap[id] = "a";
+              else if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2)) teamIdMap[id] = "b";
+            });
+
+            const rawRounds = map.rounds || [];
+
+            /* firstAttacker: 라운드1 공격팀이 team A이면 "a", B이면 "b" */
+            let firstAttacker = null;
+            if (rawRounds.length > 0) {
+              const r1 = rawRounds[0];
+              firstAttacker = teamIdMap[String(r1.attackingTeamId)] || null;
+            }
+
+            /* 라운드별 winner/type 변환 */
+            const roundsArr = rawRounds.map((r) => {
+              const atkSide = teamIdMap[String(r.attackingTeamId)]; // "a" | "b"
+              const defSide = atkSide === "a" ? "b" : "a";
+              const winSide = teamIdMap[String(r.winningTeamId)];
+              if (!atkSide || !winSide) return { winner: null, type: null };
+
+              const atkWon = winSide === atkSide;
+              let type;
+              if (atkWon) {
+                // 공격팀 승리
+                type = r.winningAction === 1 ? "attack_spike" : "attack_kill";
+              } else {
+                // 수비팀 승리
+                switch (r.winningAction) {
+                  case 2: type = "def_defuse";  break; // 스파이크 해체
+                  case 3: type = "def_kill";    break; // 수비 처치 (공격팀 전멸)
+                  case 4: type = "def_timeout"; break; // 설치 실패
+                  default: type = "def_kill";
+                }
+              }
+              return { winner: winSide, type };
+            });
+
+            /* 스코어 계산 */
+            const aScore = roundsArr.filter((r) => r.winner === "a").length;
+            const bScore = roundsArr.filter((r) => r.winner === "b").length;
+
+            /* rounds 저장 & broadcast */
+            const roundsKey = `rounds:${am.matchKey}:${mapIdx}`;
+            const roundsVal = JSON.stringify(roundsArr);
+            await pool.query(
+              `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+              [roundsKey, roundsVal]
+            );
+            broadcast({ type: "set", key: roundsKey, value: roundsVal });
+
+            /* stats 저장 (기존 teamStats 보존, 스코어+firstAttacker만 갱신) */
+            const statsKey = `stats:${am.matchKey}:${mapIdx}`;
+            let existingStats = { teamStats: [] };
+            try {
+              const sr = await pool.query("SELECT value FROM app_data WHERE key=$1", [statsKey]);
+              if (sr.rows.length > 0) existingStats = JSON.parse(sr.rows[0].value);
+            } catch (_) {}
+            existingStats.aScore       = aScore;
+            existingStats.bScore       = bScore;
+            existingStats.firstAttacker = firstAttacker;
+            const statsVal = JSON.stringify(existingStats);
+            await pool.query(
+              `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+              [statsKey, statsVal]
+            );
+            broadcast({ type: "set", key: statsKey, value: statsVal });
+          } catch (roundErr) {
+            console.error(`[auto-match] 라운드 처리 오류:`, roundErr.message);
+          }
+
           broadcast({ type: "auto-match-filled", matchKey: am.matchKey, mapIdx,
                       mapName: MAP_EN_TO_KO[map.title] || map.title || "" });
 

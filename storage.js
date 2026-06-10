@@ -21,6 +21,11 @@
     "vct_auth_token", "vct_auth_user", "sg_last_viewed",
   ];
 
+  /* LOCAL_ONLY 접두사 — 해당 접두사로 시작하는 모든 키를 localStorage 전용으로 처리 */
+  var LOCAL_ONLY_PREFIXES = [
+    "__vct_am:", /* 자동입력 ON/OFF 상태 로컬 백업 (auto-match 페이지별) */
+  ];
+
   /*
    * 서버 API 전용 접두사 — localStorage에 캐시하지 않음.
    * 이 키들은 API 엔드포인트로만 관리되므로 storage.js 동기화 대상에서 완전히 제외.
@@ -45,6 +50,8 @@
     "season:",
     /* 공지사항 */
     "notice:",
+    /* 자동 경기 입력 설정 (API 전용) */
+    "auto-match:",
   ];
 
   /* 혹시 이전에 DB에 올라간 auth 키가 있으면 즉시 삭제 (보안 픽스) */
@@ -53,7 +60,11 @@
   });
 
   function isLocalOnly(key) {
-    return LOCAL_ONLY.indexOf(key) !== -1;
+    if (LOCAL_ONLY.indexOf(key) !== -1) return true;
+    for (var i = 0; i < LOCAL_ONLY_PREFIXES.length; i++) {
+      if (key.indexOf(LOCAL_ONLY_PREFIXES[i]) === 0) return true;
+    }
+    return false;
   }
 
   function isServerOnly(key) {

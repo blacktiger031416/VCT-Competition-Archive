@@ -2981,9 +2981,10 @@ function saveStatsState(mapIdx) {
     var key = 'stats:' + MATCH_KEY + ':' + mapIdx;
     var m = maps[mapIdx];
     localStorage.setItem(key, JSON.stringify({
-      aScore: m.rtState.stats.aScore,
-      bScore: m.rtState.stats.bScore,
-      teamStats: m.teamStats.map(function(ts) { return { label: ts.label, a: ts.a, b: ts.b }; })
+      aScore       : m.rtState.stats.aScore,
+      bScore       : m.rtState.stats.bScore,
+      firstAttacker: m.rtState.firstAttacker || null,
+      teamStats    : m.teamStats.map(function(ts) { return { label: ts.label, a: ts.a, b: ts.b }; })
     }));
   } catch(e) {}
 }
@@ -3003,6 +3004,10 @@ function loadStatsState(mapIdx) {
     if (saved.bScore != null) {
       m.rtState.stats.bScore = saved.bScore;
       if (scoreState[scoreId]) { scoreState[scoreId].r = saved.bScore; applyScoreClasses(scoreId); }
+    }
+    /* firstAttacker 복원 — 베토 정보 없어도 라운드 아이콘 정상 표시 */
+    if (saved.firstAttacker) {
+      m.rtState.firstAttacker = saved.firstAttacker;
     }
     if (Array.isArray(saved.teamStats)) {
       saved.teamStats.forEach(function(ts, i) {
@@ -3839,7 +3844,10 @@ function syncVetoMaps() {
     var fa = null;
     if (chooser === "A") fa = (side === "attack") ? "a" : "b";
     if (chooser === "B") fa = (side === "attack") ? "b" : "a";
-    if (maps[i]) maps[i].rtState.firstAttacker = fa;
+    if (maps[i]) {
+      /* fa가 null이면 베토 미설정 → 자동입력으로 세팅된 firstAttacker 보존 */
+      if (fa !== null) maps[i].rtState.firstAttacker = fa;
+    }
   });
 }
 
@@ -3943,9 +3951,11 @@ function toggleMode() {
 <script>
 /* ── 자동 경기 입력 토글 ──────────────────────────────── */
 (function () {
-  var TOKEN = localStorage.getItem("vct_auth_token");
-  var btn   = document.getElementById("auto-fill-btn");
-  if (!btn || !TOKEN) return;
+  var LS_KEY = "__vct_am:" + MATCH_KEY; /* localStorage 백업 키 (LOCAL_ONLY_PREFIXES에 등록됨) */
+  var btn    = document.getElementById("auto-fill-btn");
+  if (!btn) return;
+
+  function getToken() { return localStorage.getItem("vct_auth_token") || ""; }
 
   var isOn = false;
 
@@ -3953,14 +3963,14 @@ function toggleMode() {
     isOn = on;
     if (on) {
       btn.textContent = "🤖 자동입력 ON";
-      btn.style.background    = "rgba(61,220,132,.15)";
-      btn.style.borderColor   = "rgba(61,220,132,.4)";
-      btn.style.color         = "#3ddc84";
+      btn.style.background  = "rgba(61,220,132,.15)";
+      btn.style.borderColor = "rgba(61,220,132,.4)";
+      btn.style.color       = "#3ddc84";
     } else {
       btn.textContent = "🤖 자동입력 OFF";
-      btn.style.background    = "rgba(255,255,255,.06)";
-      btn.style.borderColor   = "rgba(255,255,255,.15)";
-      btn.style.color         = "rgba(255,255,255,.5)";
+      btn.style.background  = "rgba(255,255,255,.06)";
+      btn.style.borderColor = "rgba(255,255,255,.15)";
+      btn.style.color       = "rgba(255,255,255,.5)";
     }
   }
 
@@ -3968,32 +3978,46 @@ function toggleMode() {
   function initBtn() {
     var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
     if (!isAdmin) return;
-    btn.style.display = "inline-flex";
+    btn.style.display    = "inline-flex";
     btn.style.alignItems = "center";
 
-    /* 현재 상태 서버에서 복원 */
-    fetch("/api/auto-match", { headers: { Authorization: "Bearer " + TOKEN } })
-      .then(function (r) { return r.json(); })
+    /* 1) localStorage에서 즉시 복원 (서버 응답 기다리지 않음) */
+    if (localStorage.getItem(LS_KEY) === "1") setStyle(true);
+
+    /* 2) 서버에서 확인 후 동기화 */
+    fetch("/api/auto-match", { headers: { Authorization: "Bearer " + getToken() } })
+      .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (list) {
+        if (!Array.isArray(list)) return;
         var found = list.find(function (m) { return m.matchKey === MATCH_KEY; });
         setStyle(!!found);
-      }).catch(function () {});
+        /* localStorage와 서버 상태 동기화 */
+        if (found) localStorage.setItem(LS_KEY, "1");
+        else        localStorage.removeItem(LS_KEY);
+      })
+      .catch(function () {
+        /* 서버 실패 시 localStorage 상태 유지 */
+      });
   }
 
   btn.addEventListener("click", function () {
+    var TOKEN = getToken();
     if (isOn) {
       /* OFF */
+      localStorage.removeItem(LS_KEY);
+      setStyle(false);
       fetch("/api/auto-match/" + encodeURIComponent(MATCH_KEY), {
-        method: "DELETE",
-        headers: { Authorization: "Bearer " + TOKEN },
-      }).then(function () { setStyle(false); });
+        method: "DELETE", headers: { Authorization: "Bearer " + TOKEN },
+      }).catch(function () {});
     } else {
       /* ON */
+      localStorage.setItem(LS_KEY, "1");
+      setStyle(true);
       fetch("/api/auto-match", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + TOKEN },
         body: JSON.stringify({ matchKey: MATCH_KEY, team1: MATCH_TEAM_A, team2: MATCH_TEAM_B }),
-      }).then(function () { setStyle(true); });
+      }).catch(function () {});
     }
   });
 
@@ -4004,20 +4028,26 @@ function toggleMode() {
       var msg = JSON.parse(e.data);
       if (msg.type === "auto-match-filled" && msg.matchKey === MATCH_KEY) {
         var mapIdx = msg.mapIdx;
-        /* localStorage가 storage.js SSE로 이미 업데이트됨 → 렌더링만 갱신 */
+        /* storage.js SSE가 set 이벤트로 localStorage를 먼저 업데이트하므로 약간 대기 */
         setTimeout(function () {
-          loadPlayersSync(mapIdx);
+          loadPlayersSync(mapIdx);   /* 선수 스탯 */
+          loadRoundState(mapIdx);    /* 라운드 결과 */
+          loadStatsState(mapIdx);    /* 스코어 + firstAttacker */
           renderMap(maps[mapIdx], mapIdx);
-          console.log("[auto-match] 맵" + (mapIdx + 1) + "(" + (msg.mapName || "") + ") 자동 입력 반영");
-        }, 500); /* storage.js SSE 처리 후 실행되도록 약간 딜레이 */
+          renderRoundTracker(maps[mapIdx], mapIdx);
+          renderTeamStats(maps[mapIdx], mapIdx);
+          console.log("[auto-match] 맵" + (mapIdx + 1) + "(" + (msg.mapName || "") + ") 자동 입력 완료 (선수·라운드·스코어)");
+        }, 600);
       }
     } catch (_) {}
   };
 
   /* auth.js 로드 완료 후 초기화 */
-  window.addEventListener("load", function () {
-    setTimeout(initBtn, 300);
-  });
+  if (document.readyState === "complete") {
+    setTimeout(initBtn, 100);
+  } else {
+    window.addEventListener("load", function () { setTimeout(initBtn, 100); });
+  }
 })();
 </script>
 <script src="./auth.js"></script>
