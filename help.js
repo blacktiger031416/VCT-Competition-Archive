@@ -142,12 +142,36 @@
         { sel: ".nav-links a[href*='prediction'], .nav-link[href*='prediction']",
           title: "승부 예측",
           desc: "경기 결과를 예측하고 코인을 베팅합니다. 맞히면 코인을 획득합니다." },
-        { sel: ".league-grid .league-card, .hero",
-          title: "리그 / 대회 카드",
-          desc: "Pacific, CN, Americas, EMEA 리그 및 Masters, Champions 대회 페이지로 이동합니다." },
+        { sel: "#stock-nav-btn, .nav-link[href*='player-stock']",
+          title: "선수 주식",
+          desc: "VCT 선수들의 ACS 퍼포먼스를 기반으로 오르내리는 가상 주식 시장입니다. 코인으로 선수 주식을 사고 팔 수 있습니다." },
+        { sel: ".gst-tab[data-slide='0']",
+          title: "VCT 탭",
+          desc: "Pacific, CN, Americas, EMEA 4개 리그와 Masters, Champions 국제 대회 페이지로 이동합니다." },
+        { sel: ".gst-tab[data-slide='1']",
+          title: "Challengers 탭",
+          desc: "Challengers 탭으로 전환하면 각 권역의 챌린저스 리그 페이지로 이동할 수 있습니다. 한 번 잠금 해제하면 이후에는 바로 접근 가능합니다.",
+          action: function () {
+            var tab = document.querySelector(".gst-tab[data-slide='1']");
+            if (tab) tab.click();
+          },
+          actionDelay: 500 },
+        { sel: ".challengers-grid, .challengers-card",
+          title: "Challengers 리그",
+          desc: "Pacific, EMEA, Americas Challengers 리그 결과를 볼 수 있습니다. 처음 클릭 시 잠금 해제 확인 후 접근됩니다.",
+          action: function () {
+            var tab = document.querySelector(".gst-tab[data-slide='1']");
+            if (tab) tab.click();
+          },
+          actionDelay: 500 },
         { sel: ".suggest-trigger-btn",
           title: "건의함",
-          desc: "운영자에게 익명으로 건의사항을 전달할 수 있습니다." },
+          desc: "운영자에게 익명으로 건의사항을 전달할 수 있습니다.",
+          action: function () {
+            var tab = document.querySelector(".gst-tab[data-slide='0']");
+            if (tab) tab.click();
+          },
+          actionDelay: 400 },
       ],
     },
 
@@ -377,6 +401,28 @@
       ],
     },
 
+    /* ── 선수 주식 */
+    player_stock: {
+      title: "선수 주식 도움말",
+      items: [
+        { sel: ".ticker-bar",
+          title: "시장 현황",
+          desc: "시장 지수, 오늘 상승·하락 종목 수, 거래 참여 인원, 내 보유 자산(코인 환산)을 실시간으로 보여줍니다." },
+        { sel: ".stock-table-panel",
+          title: "선수 목록",
+          desc: "전체 VCT 선수들의 현재 주가, 등락폭, 등락률을 확인할 수 있습니다. 선수 이름으로 검색도 가능합니다." },
+        { sel: "#chart-panel",
+          title: "가격 차트",
+          desc: "목록에서 선수를 클릭하면 해당 선수의 주가 흐름 차트가 표시됩니다. 1W·1M·전체 기간으로 조회 가능합니다." },
+        { sel: "#trade-panel",
+          title: "매수 / 매도",
+          desc: "선수를 선택한 뒤 수량을 입력하고 매수·매도 버튼을 눌러 거래합니다. 보유 코인과 보유 주식 수량이 함께 표시됩니다." },
+        { sel: ".back-link",
+          title: "돌아가기",
+          desc: "메인 페이지로 돌아갑니다." },
+      ],
+    },
+
     /* ── 맵 상세 데이터 (match-dark) */
     match_dark: {
       title: "경기 상세 도움말",
@@ -408,6 +454,7 @@
     if (path.includes("match-dark"))    return HELP_CONFIG.match_dark;
     if (path.includes("prediction"))    return HELP_CONFIG.prediction;
     if (path.includes("records"))       return HELP_CONFIG.records;
+    if (path.includes("player-stock"))  return HELP_CONFIG.player_stock;
 
     if (path.includes("tierlist")) {
       return qs.includes("id=") ? HELP_CONFIG.tierlist_detail : HELP_CONFIG.tierlist_list;
