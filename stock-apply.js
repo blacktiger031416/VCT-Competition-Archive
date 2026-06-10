@@ -221,37 +221,4 @@
     setTimeout(tryRender, 200);
   }
 
-  /* ── auto-match-filled 수신 시 주식 자동 반영 ────────────────────
-   * match-dark 페이지에서 자동 입력이 완료되면 해당 맵의 주식 반영하기를
-   * 자동으로 실행합니다. 관리자 전용, 버튼이 이미 반영된 경우 건너뜀.
-   * ──────────────────────────────────────────────────────────────── */
-  (function initAutoStockSSE() {
-    if (typeof EventSource === 'undefined') return;
-    var _sse = new EventSource('/api/events');
-    _sse.onmessage = function (e) {
-      try {
-        var msg = JSON.parse(e.data);
-        if (msg.type !== 'auto-match-filled') return;
-        /* 현재 페이지의 MATCH_KEY와 일치하는 경우에만 */
-        if (typeof window.MATCH_KEY === 'undefined') return;
-        if (msg.matchKey !== window.MATCH_KEY) return;
-        if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
-        var mapIdx = msg.mapIdx;
-        /* match-dark 페이지의 600ms 렌더 딜레이보다 약간 늦게 실행 */
-        setTimeout(function () {
-          var card = document.getElementById('map-' + (mapIdx + 1));
-          if (!card) return;
-          var btn = card.querySelector('.stock-apply-btn');
-          /* 이미 반영된 맵은 건너뜀 */
-          if (!btn || btn.classList.contains('applied') || btn.disabled) return;
-          console.log('[stock-apply] 맵' + (mapIdx + 1) + ' 자동 주식 반영');
-          window.applyMapToStock(mapIdx);
-          /* 버튼 "반영됨" 상태로 변경 */
-          btn.classList.add('applied');
-          btn.textContent = '✅ 자동 반영됨';
-          btn.disabled = true;
-        }, 900);
-      } catch (_) {}
-    };
-  })();
 }());
