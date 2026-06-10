@@ -160,20 +160,17 @@ app.delete("/api/data/:key", async (req, res) => {
   }
 });
 
-/* ── [일회용] keiko → Keiko 키 이름 수정 ────────── */
+/* ── [일회용] keiko 소문자 키 삭제 ──────────────── */
 app.post("/api/admin/rename-keiko", async (req, res) => {
   if (req.headers["x-fix-secret"] !== "vct-fix-2026") return res.status(403).json({ error: "forbidden" });
-  const pairs = [["vct_p:keiko", "vct_p:Keiko"], ["stock_p:keiko", "stock_p:Keiko"]];
+  const keys = ["vct_p:keiko", "stock_p:keiko"];
   const results = [];
-  for (const [oldKey, newKey] of pairs) {
-    const row = await pool.query("SELECT value FROM app_data WHERE key=$1", [oldKey]);
-    if (!row.rows[0]) { results.push({ oldKey, status: "not found" }); continue; }
-    const val = row.rows[0].value;
-    await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [newKey, val]);
-    await pool.query("DELETE FROM app_data WHERE key=$1", [oldKey]);
-    broadcast({ type: "delete", key: oldKey });
-    broadcast({ type: "set", key: newKey, value: val });
-    results.push({ oldKey, newKey, status: "renamed" });
+  for (const key of keys) {
+    const row = await pool.query("SELECT key FROM app_data WHERE key=$1", [key]);
+    if (!row.rows[0]) { results.push({ key, status: "not found" }); continue; }
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    broadcast({ type: "delete", key });
+    results.push({ key, status: "deleted" });
   }
   res.json({ ok: true, results });
 });
