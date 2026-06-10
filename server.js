@@ -1046,8 +1046,9 @@ const WATCHED_EVENT_IDS = [
   4160, // Pacific Stage 2
 ];
 
-/* 이미 처리한 매치 ID 집합 (서버 재시작시 리셋 — 중복 처리 방지용) */
-let processedMatchIds = new Set();
+/* 처리 완료 맵 추적: { "matchId": [mapId, ...] }
+   맵 단위로 추적 — 경기 중간에 끝난 맵부터 바로 반영 */
+let processedMaps = {};
 
 /* DB에서 stock_p:{name} 읽기 */
 async function getStockState(playerName) {
@@ -1089,28 +1090,49 @@ async function applyAcsToStock(playerName, newAcs) {
   console.log(`[stock] ${playerName}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
 }
 
-/* 매치 한 건 처리 */
+/* 매치 한 건 처리 — 완료된 맵만 골라서 적용 */
 async function processMatch(matchId) {
   try {
     const res  = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
     if (!res.ok) return;
     const data = await res.json();
     const maps = data.maps || [];
+
+    if (!processedMaps[matchId]) processedMaps[matchId] = [];
+    const done = processedMaps[matchId];
+
+    let newMapCount = 0;
     for (const map of maps) {
+      const mapId   = map.id;
       const players = map.players || [];
+
+      /* 이미 처리한 맵이면 skip */
+      if (done.includes(mapId)) continue;
+
+      /* 플레이어 ACS 데이터가 없으면 아직 끝나지 않은 맵 */
+      const hasData = players.some(p => typeof p.averageCombatScore === "number" && p.averageCombatScore > 0);
+      if (!hasData) continue;
+
+      /* 새로 완료된 맵 — 주가 적용 */
+      console.log(`[stock] 매치 ${matchId} / 맵 ${map.title || mapId} 완료 감지`);
       for (const p of players) {
         if (p.nickname && typeof p.averageCombatScore === "number") {
           await applyAcsToStock(p.nickname, p.averageCombatScore);
         }
       }
+      done.push(mapId);
+      newMapCount++;
     }
-    console.log(`[stock] 매치 ${matchId} 처리 완료 (${maps.length}맵)`);
+
+    if (newMapCount > 0) {
+      console.log(`[stock] 매치 ${matchId}: ${newMapCount}개 맵 신규 처리`);
+    }
   } catch (e) {
     console.error(`[stock] 매치 ${matchId} 처리 오류:`, e.message);
   }
 }
 
-/* 폴링 메인 함수 */
+/* 폴링 메인 함수 — 진행 중인 경기도 포함 */
 async function pollVctMatches() {
   for (const eventId of WATCHED_EVENT_IDS) {
     try {
@@ -1121,11 +1143,19 @@ async function pollVctMatches() {
 
       for (const match of matches) {
         const id = match.id;
-        if (!id || !match.isFinished) continue;
-        if (processedMatchIds.has(id)) continue;
+        if (!id) continue;
 
-        processedMatchIds.add(id);
-        console.log(`[stock] 새 매치 발견 — ID ${id} (eventId ${eventId})`);
+        /* 완전히 끝난 매치 + 모든 맵 처리 완료 → skip */
+        if (match.isFinished) {
+          const done = processedMaps[id] || [];
+          /* stats에서 맵 수를 모르니 isFinished면 일단 한 번은 체크 */
+          if (done.length > 0) {
+            /* 이미 최소 1맵 이상 처리한 완료 경기 — 추가 처리 불필요 */
+            /* (새 맵이 생길 리 없으므로) */
+            continue;
+          }
+        }
+
         await processMatch(id);
       }
     } catch (e) {
@@ -1134,32 +1164,31 @@ async function pollVctMatches() {
   }
 }
 
-/* 서버 재시작 시 기존 처리 완료 매치 ID 복원 */
-async function initProcessedMatchIds() {
+/* 서버 재시작 시 처리 완료 맵 복원 */
+async function initProcessedMaps() {
   try {
-    const res = await pool.query("SELECT value FROM app_data WHERE key='stock:processed_matches'");
+    const res = await pool.query("SELECT value FROM app_data WHERE key='stock:processed_maps'");
     if (res.rows[0]) {
-      const ids = JSON.parse(res.rows[0].value);
-      processedMatchIds = new Set(ids);
-      console.log(`[stock] 처리 완료 매치 ${processedMatchIds.size}건 복원`);
+      processedMaps = JSON.parse(res.rows[0].value);
+      const total = Object.values(processedMaps).reduce((s, v) => s + v.length, 0);
+      console.log(`[stock] 처리 완료 맵 ${total}건 복원`);
     }
   } catch (e) {
-    console.error("[stock] 처리 완료 매치 복원 오류:", e.message);
+    console.error("[stock] 처리 완료 맵 복원 오류:", e.message);
   }
 }
 
-/* 처리 완료 매치 ID를 DB에 주기적으로 저장 (재시작 내구성) */
-async function saveProcessedMatchIds() {
+/* 처리 완료 맵을 DB에 주기적으로 저장 */
+async function saveProcessedMaps() {
   try {
-    const ids = [...processedMatchIds];
     await pool.query(
       `INSERT INTO app_data (key, value)
-       VALUES ('stock:processed_matches', $1)
+       VALUES ('stock:processed_maps', $1)
        ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
-      [JSON.stringify(ids)]
+      [JSON.stringify(processedMaps)]
     );
   } catch (e) {
-    console.error("[stock] 처리 완료 매치 저장 오류:", e.message);
+    console.error("[stock] 처리 완료 맵 저장 오류:", e.message);
   }
 }
 
@@ -1193,11 +1222,11 @@ app.listen(PORT, async () => {
   }
 
   /* ── 자동 주가 폴링 시작 ── */
-  await initProcessedMatchIds();
+  await initProcessedMaps();
   pollVctMatches(); /* 서버 시작 즉시 1회 실행 */
   setInterval(async () => {
     await pollVctMatches();
-    await saveProcessedMatchIds();
+    await saveProcessedMaps();
   }, 5 * 60 * 1000); /* 5분마다 */
-  console.log("[stock] 자동 주가 폴링 시작 (5분 주기)");
+  console.log("[stock] 자동 주가 폴링 시작 (5분 주기, 맵별 감지)");
 });
