@@ -1155,10 +1155,39 @@ async function saveStockState(playerName, state, resolvedKey) {
   broadcast({ type: "set", key, value });
 }
 
+/* vct_p:{name} 에서 평균 ACS 계산 → 초기 stock_p 세팅 (버튼과 동일 로직) */
+async function initStockFromVctP(playerName) {
+  const vctKey = `vct_p:${playerName}`;
+  /* 대소문자 무관 조회 */
+  const res = await pool.query(
+    "SELECT key, value FROM app_data WHERE lower(key)=lower($1)",
+    [vctKey]
+  );
+  if (!res.rows[0]) return null;
+  let vctData;
+  try { vctData = JSON.parse(res.rows[0].value); } catch { return null; }
+  const maps = vctData.maps || [];
+  let total = 0, cnt = 0;
+  maps.forEach(m => {
+    const lg = m.league || "";
+    if (!["americas","emea","pacific","cn"].includes(lg)) return;
+    const a = parseFloat(m.acs) || 0;
+    if (a > 0) { total += a; cnt++; }
+  });
+  const avgAcs   = cnt > 0 ? Math.round(total / cnt) : 200;
+  const initPrice = Math.max(1, Math.round(avgAcs / 10));
+  /* 실제 저장된 vct_p 키 이름 기준으로 stock_p 키 결정 */
+  const resolvedPlayerName = res.rows[0].key.slice(6); /* "vct_p:" 이후 */
+  return { state: { price: initPrice, ref: avgAcs, history: [initPrice], runTotal: 0, runCount: 0 },
+           resolvedKey: `stock_p:${resolvedPlayerName}` };
+}
+
 /* 선수 한 명의 주가 적용 */
 async function applyAcsToStock(playerName, newAcs) {
-  const found = await getStockState(playerName);
-  if (!found) return; /* DB에 없는 선수 — 무시 */
+  let found = await getStockState(playerName);
+  /* stock_p 없으면 vct_p 기록으로 초기화 (버튼 동일 방식) */
+  if (!found) found = await initStockFromVctP(playerName);
+  if (!found) return; /* vct_p도 없는 선수 — 무시 */
 
   const { state, resolvedKey } = found;
 
