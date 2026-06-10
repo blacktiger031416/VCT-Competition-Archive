@@ -890,6 +890,7 @@
         var price   = p ? p.price : h.avgPrice;
         var pnl     = (price - h.avgPrice) * h.qty;
         var pnlCls  = pnl > 0 ? "up" : pnl < 0 ? "down" : "flat";
+        var pnlIcon = pnl > 0 ? "▲" : pnl < 0 ? "▼" : "━";
         var pnlSign = pnl > 0 ? "+" : "";
         var initial = name.charAt(0).toUpperCase();
         return '<div class="holding-card" onclick="(function(){' +
@@ -903,7 +904,7 @@
           '</div>' +
           '<div class="holding-card-right">' +
             '<div class="holding-card-qty">' + h.qty + '주 · ' + price.toLocaleString() + '코인</div>' +
-            '<div class="holding-card-pnl ' + pnlCls + '">' + pnlSign + pnl.toLocaleString() + ' 코인</div>' +
+            '<div class="holding-card-pnl ' + pnlCls + '">' + pnlIcon + ' ' + pnlSign + Math.abs(pnl).toLocaleString() + ' 코인</div>' +
           '</div>' +
         '</div>';
       }).join("");
