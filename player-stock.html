@@ -1009,7 +1009,7 @@
             '<div class="stock-player-info">' +
               '<div class="stock-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '">' +
                 '<span class="pname-text">' + p.name + '</span>' +
-                (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button><button class="admin-rename-btn" onclick="event.stopPropagation();startDelete(this)" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
+                (isAdminMode ? '<button class="admin-rename-btn" data-action="rename" title="이름 수정">✏</button><button class="admin-rename-btn" data-action="delete" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
                 regionBadge +
               '</div>' +
               '<div class="stock-player-team">' + p.team + '</div>' +
@@ -1024,6 +1024,18 @@
       list.querySelectorAll(".stock-row").forEach(function (row) {
         row.addEventListener("click", function () { selectPlayer(row.dataset.id); });
       });
+      if (isAdminMode) {
+        list.querySelectorAll('.admin-rename-btn').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var nameDiv = btn.closest('[data-pname]');
+            if (!nameDiv) return;
+            var pname = nameDiv.getAttribute('data-pname');
+            if (btn.dataset.action === 'rename') startRename(pname);
+            else if (btn.dataset.action === 'delete') startDelete(pname);
+          });
+        });
+      }
     }
 
     /* ── 전체 테이블 렌더링 ── */
@@ -1038,7 +1050,7 @@
             '<div class="ft-player-logo">' + initial + '</div>' +
             '<div><div class="ft-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:4px;">' +
               '<span class="pname-text">' + p.name + '</span>' +
-              (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button><button class="admin-rename-btn" onclick="event.stopPropagation();startDelete(this)" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
+              (isAdminMode ? '<button class="admin-rename-btn" data-action="rename" title="이름 수정">✏</button><button class="admin-rename-btn" data-action="delete" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
             '</div>' +
             '<div class="ft-player-team">' + p.team + '</div></div></div></td>' +
           '<td>' + fmtPrice(p.price) + '</td>' +
@@ -1050,6 +1062,18 @@
       tbody.querySelectorAll("tr").forEach(function (tr) {
         tr.addEventListener("click", function () { selectPlayer(tr.dataset.id); });
       });
+      if (isAdminMode) {
+        tbody.querySelectorAll('.admin-rename-btn').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var nameDiv = btn.closest('[data-pname]');
+            if (!nameDiv) return;
+            var pname = nameDiv.getAttribute('data-pname');
+            if (btn.dataset.action === 'rename') startRename(pname);
+            else if (btn.dataset.action === 'delete') startDelete(pname);
+          });
+        });
+      }
     }
 
     /* ── 선수 선택 ── */
@@ -1312,20 +1336,14 @@
     };
 
     /* ── Admin 선수 이름 수정 (prompt 방식) ── */
-    function startRename(btn) {
-      var nameDiv = btn.closest('[data-pname]');
-      if (!nameDiv) return;
-      var oldName = nameDiv.getAttribute('data-pname');
+    function startRename(oldName) {
       var newName = prompt('선수 이름 수정', oldName);
       if (!newName || newName.trim() === oldName) return;
       adminRenamePlayer(oldName, newName.trim());
     }
 
     /* ── Admin 선수 삭제 ── */
-    function startDelete(btn) {
-      var nameDiv = btn.closest('[data-pname]');
-      if (!nameDiv) return;
-      var name = nameDiv.getAttribute('data-pname');
+    function startDelete(name) {
       if (!confirm('"' + name + '" 선수 데이터를 완전히 삭제하시겠습니까?\n(주가 기록, 경기 기록 집계 모두 삭제됩니다)')) return;
       var tok = localStorage.getItem('vct_auth_token') || '';
       fetch('/api/admin/delete-player', {
