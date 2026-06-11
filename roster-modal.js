@@ -258,10 +258,10 @@
 
     // 5. 현재 열려 있는 경기 상세 페이지에 즉시 반영
     //    같은 탭이면 직접 호출, 다른 탭이면 storage 이벤트로 알림
-    if (typeof window._matchDetailRenamePlayer === 'function') {
-      window._matchDetailRenamePlayer(oldName, newName);
-    }
     localStorage.setItem('_playerRenameEvent', JSON.stringify({ from: oldName, to: newName, t: Date.now() }));
+    if (typeof window._matchDetailRenamePlayer === 'function') {
+      window._matchDetailRenamePlayer();
+    }
   }
 
   function saveMain() {

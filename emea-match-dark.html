@@ -3915,30 +3915,17 @@ function toggleMode() {
   maps.forEach(function(m, i) { renderMap(m, i); });
 }
 
-// ── 로스터 이름 변경 → 현재 페이지 즉시 반영 ──────────────
-window._matchDetailRenamePlayer = function(oldName, newName) {
+// ── 로스터 이름 변경 → localStorage 재로드 후 즉시 반영 ──────
+window._matchDetailRenamePlayer = function() {
   maps.forEach(function(m, mapIdx) {
-    if (!m || !m.players) return;
-    var changed = false;
-    m.players.forEach(function(p) {
-      if (p && p.name === oldName) {
-        p.name = newName;
-        changed = true;
-      }
-    });
-    if (changed) {
-      renderMap(m, mapIdx);
-      renderTeamStats(m, mapIdx);
-    }
+    loadPlayersSync(mapIdx);
+    renderMap(m, mapIdx);
+    renderTeamStats(m, mapIdx);
   });
 };
-// 다른 탭(로스터 모달)에서 이름 변경 시 storage 이벤트로 수신
+// 같은 탭 직접 호출 + 다른 탭 storage 이벤트 수신
 window.addEventListener('storage', function(e) {
-  if (e.key !== '_playerRenameEvent') return;
-  try {
-    var ev = JSON.parse(e.newValue || '{}');
-    if (ev.from && ev.to) window._matchDetailRenamePlayer(ev.from, ev.to);
-  } catch(e2) {}
+  if (e.key === '_playerRenameEvent') window._matchDetailRenamePlayer();
 });
 
 </script>
