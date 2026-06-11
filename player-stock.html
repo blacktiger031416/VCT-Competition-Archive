@@ -303,6 +303,31 @@
       font-family: "Barlow Condensed", sans-serif;
       font-size: 14px; font-weight: 700; letter-spacing: .03em; color: #fff;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .admin-rename-btn {
+      flex-shrink: 0;
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,.25); font-size: 11px; line-height: 1;
+      padding: 1px 3px; border-radius: 3px;
+      transition: color .12s, background .12s;
+    }
+    .admin-rename-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .rename-input {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(21,145,148,.5);
+      border-radius: 4px; color: #fff; font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: .03em;
+      padding: 2px 6px; width: 130px; outline: none;
+    }
+    .rename-ok-btn {
+      background: rgba(21,145,148,.25); border: 1px solid rgba(21,145,148,.5);
+      border-radius: 3px; color: #0e9381; font-size: 11px; font-weight: 700;
+      padding: 2px 7px; cursor: pointer;
+    }
+    .rename-cancel-btn {
+      background: none; border: 1px solid rgba(255,255,255,.15);
+      border-radius: 3px; color: rgba(255,255,255,.4); font-size: 11px;
+      padding: 2px 6px; cursor: pointer;
     }
     .stock-player-team { font-size: 10px; color: rgba(255,255,255,.3); }
     .stock-price {
@@ -870,6 +895,7 @@
     var myHoldings    = {};
     var currentRegion = "all";
     var TOKEN         = localStorage.getItem("vct_auth_token");
+    var isAdminMode   = false;
 
     /* ── 보유 주식 섹션 렌더 ── */
     function renderHoldingsSection() {
@@ -981,7 +1007,11 @@
           '<div class="stock-player">' +
             '<div class="stock-player-logo">' + initial + '</div>' +
             '<div class="stock-player-info">' +
-              '<div class="stock-player-name">' + p.name + regionBadge + '</div>' +
+              '<div class="stock-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '">' +
+                '<span class="pname-text">' + p.name + '</span>' +
+                (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button>' : '') +
+                regionBadge +
+              '</div>' +
               '<div class="stock-player-team">' + p.team + '</div>' +
             '</div>' +
           '</div>' +
@@ -1006,7 +1036,10 @@
         html += '<tr class="' + (p.id === selectedId ? "active" : "") + '" data-id="' + p.id + '">' +
           '<td><div class="ft-player-cell">' +
             '<div class="ft-player-logo">' + initial + '</div>' +
-            '<div><div class="ft-player-name">' + p.name + '</div>' +
+            '<div><div class="ft-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:4px;">' +
+              '<span class="pname-text">' + p.name + '</span>' +
+              (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button>' : '') +
+            '</div>' +
             '<div class="ft-player-team">' + p.team + '</div></div></div></td>' +
           '<td>' + fmtPrice(p.price) + '</td>' +
           '<td class="' + cls + '">' + fmtChg(chg) + '</td>' +
@@ -1278,11 +1311,83 @@
       alert("✅ " + p.name + " 리셋 완료");
     };
 
+    /* ── Admin 선수 이름 수정 ── */
+    function startRename(btn) {
+      var nameDiv = btn.closest('[data-pname]');
+      if (!nameDiv) return;
+      var oldName = nameDiv.getAttribute('data-pname');
+      var textSpan = nameDiv.querySelector('.pname-text');
+      if (!textSpan) return;
+      // 이미 편집 중이면 무시
+      if (nameDiv.querySelector('.rename-input')) return;
+      textSpan.style.display = 'none';
+      btn.style.display = 'none';
+      var input = document.createElement('input');
+      input.className = 'rename-input';
+      input.value = oldName;
+      var okBtn = document.createElement('button');
+      okBtn.className = 'rename-ok-btn';
+      okBtn.textContent = '확인';
+      var cancelBtn = document.createElement('button');
+      cancelBtn.className = 'rename-cancel-btn';
+      cancelBtn.textContent = '취소';
+      function restore() {
+        input.remove(); okBtn.remove(); cancelBtn.remove();
+        textSpan.style.display = ''; btn.style.display = '';
+      }
+      function doRename() {
+        var newName = input.value.trim();
+        if (!newName || newName === oldName) { restore(); return; }
+        adminRenamePlayer(oldName, newName, restore);
+      }
+      okBtn.onclick = function(e) { e.stopPropagation(); doRename(); };
+      cancelBtn.onclick = function(e) { e.stopPropagation(); restore(); };
+      input.onkeydown = function(e) {
+        if (e.key === 'Enter') doRename();
+        if (e.key === 'Escape') restore();
+        e.stopPropagation();
+      };
+      nameDiv.insertBefore(cancelBtn, btn.nextSibling);
+      nameDiv.insertBefore(okBtn, cancelBtn);
+      nameDiv.insertBefore(input, okBtn);
+      input.focus(); input.select();
+    }
+
+    function adminRenamePlayer(oldName, newName, onDone) {
+      var tok = localStorage.getItem('vct_auth_token') || '';
+      fetch('/api/admin/rename-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ from: oldName, to: newName })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) { alert('❌ ' + (data.error || '오류')); if (onDone) onDone(); return; }
+        /* localStorage 키 rename */
+        ['vct_p:', 'stock_p:'].forEach(function(prefix) {
+          var val = localStorage.getItem(prefix + oldName);
+          if (val !== null) {
+            localStorage.setItem(prefix + newName, val);
+            localStorage.removeItem(prefix + oldName);
+          }
+        });
+        /* PLAYERS 배열 업데이트 */
+        PLAYERS.forEach(function(p) { if (p.name === oldName) p.name = newName; });
+        /* 다시 렌더 */
+        renderStockList(document.getElementById('stock-search').value);
+        renderFullTable();
+        renderHoldingsSection();
+        if (onDone) onDone();
+      })
+      .catch(function(e) { alert('❌ ' + e.message); if (onDone) onDone(); });
+    }
+
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
       /* Admin이면 리셋 버튼 표시 */
       if (window.vctIsAdmin && window.vctIsAdmin()) {
         document.getElementById("admin-reset-btn").style.display = "";
+        isAdminMode = true;
       }
 
       /* 경기 기록에서 선수 집계 (PLAYERS 먼저 빌드) */
