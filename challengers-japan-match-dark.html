@@ -3978,7 +3978,11 @@ function spikeImport() {
     + '?teamA=' + encodeURIComponent(MATCH_TEAM_A)
     + '&teamB=' + encodeURIComponent(MATCH_TEAM_B);
 
-  fetch(url, { credentials: 'include' })
+  var _tok = localStorage.getItem('vct_auth_token') || '';
+  fetch(url, {
+    credentials: 'include',
+    headers: _tok ? { 'Authorization': 'Bearer ' + _tok } : {}
+  })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || ('HTTP ' + r.status)); });
       return r.json();
