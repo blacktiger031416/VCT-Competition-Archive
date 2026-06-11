@@ -1128,16 +1128,62 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
         };
       });
 
-      /* 라운드 데이터 */
-      const teamIdMap = {};
-      players.forEach(p => {
-        if (!p.participantId) return;
-        const id = String(p.participantId);
-        if      (norm(p.teamTitle) === norm(sideA)) teamIdMap[id] = "a";
-        else if (norm(p.teamTitle) === norm(sideB)) teamIdMap[id] = "b";
-      });
-
+      /* 라운드 데이터 ── teamIdMap 빌드 (여러 필드 시도) */
       const rawRounds = map.rounds || [];
+      const teamIdMap = {};
+
+      // 1단계: 플레이어의 여러 ID 필드를 시도
+      const ID_FIELDS = ["participantId", "teamId", "organizationId", "teamParticipantId"];
+      for (const field of ID_FIELDS) {
+        players.forEach(p => {
+          const val = p[field];
+          if (val == null) return;
+          const id = String(val);
+          if (norm(p.teamTitle) === norm(sideA)) teamIdMap[id] = "a";
+          else if (norm(p.teamTitle) === norm(sideB)) teamIdMap[id] = "b";
+        });
+        // 이 필드로 빌드된 teamIdMap이 실제 라운드 ID와 매칭되는지 확인
+        if (rawRounds.length > 0) {
+          const r0 = rawRounds[0];
+          if (teamIdMap[String(r0.attackingTeamId)] || teamIdMap[String(r0.winningTeamId)]) break;
+        } else break;
+        // 매칭 안 되면 초기화 후 다음 필드 시도
+        Object.keys(teamIdMap).forEach(k => delete teamIdMap[k]);
+      }
+
+      // 2단계: 그래도 안 되면 라운드의 고유 팀 ID를 플레이어 전체 필드 브루트포스로 매핑
+      if (rawRounds.length > 0 && !teamIdMap[String(rawRounds[0].attackingTeamId)]) {
+        const roundTeamIds = [...new Set(
+          rawRounds.flatMap(r => [r.attackingTeamId, r.winningTeamId].filter(v => v != null).map(String))
+        )];
+        if (roundTeamIds.length >= 2) {
+          const sampleA = players.find(p => norm(p.teamTitle) === norm(sideA));
+          const sampleB = players.find(p => norm(p.teamTitle) === norm(sideB));
+          if (sampleA) {
+            for (const [k, v] of Object.entries(sampleA)) {
+              if (roundTeamIds.includes(String(v))) {
+                teamIdMap[String(v)] = "a";
+                const other = roundTeamIds.find(id => id !== String(v));
+                if (other) teamIdMap[other] = "b";
+                break;
+              }
+            }
+          } else if (sampleB) {
+            for (const [k, v] of Object.entries(sampleB)) {
+              if (roundTeamIds.includes(String(v))) {
+                teamIdMap[String(v)] = "b";
+                const other = roundTeamIds.find(id => id !== String(v));
+                if (other) teamIdMap[other] = "a";
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      console.log(`[spike-match] map ${mapIdx} teamIdMap:`, teamIdMap,
+        "round0:", rawRounds[0] ? { atk: rawRounds[0].attackingTeamId, win: rawRounds[0].winningTeamId } : "none");
+
       let firstAttacker = null;
       if (rawRounds.length > 0) {
         firstAttacker = teamIdMap[String(rawRounds[0].attackingTeamId)] || null;
@@ -1165,6 +1211,12 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
       const aScore = roundsArr.filter(r => r.winner === "a").length;
       const bScore = roundsArr.filter(r => r.winner === "b").length;
 
+      // 디버그: teamIdMap이 비어 있을 경우 플레이어 샘플 & 라운드 샘플 반환
+      const _dbg = Object.keys(teamIdMap).length === 0 ? {
+        samplePlayerKeys: Object.keys(players[0] || {}),
+        round0Raw: rawRounds[0] || null,
+      } : undefined;
+
       return {
         mapIdx,
         title   : MAP_EN_TO_KO[map.title] || map.title || `Map ${mapIdx + 1}`,
@@ -1174,6 +1226,7 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
         aScore, bScore, firstAttacker,
         players : playersData,
         rounds  : roundsArr,
+        ..._dbg && { _debug: _dbg },
       };
     });
 
