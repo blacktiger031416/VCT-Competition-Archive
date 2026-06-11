@@ -685,6 +685,14 @@
                 if (chg) localStorage.setItem(k, JSON.stringify(obj));
               } catch(e) {}
             });
+            // vct_p: / stock_p: 키도 rename
+            ['vct_p:', 'stock_p:'].forEach(function(prefix) {
+              var val = localStorage.getItem(prefix + oldName);
+              if (val !== null) {
+                localStorage.setItem(prefix + newName, val);
+                localStorage.removeItem(prefix + oldName);
+              }
+            });
             localStorage.setItem('_playerRenameEvent', JSON.stringify({ from: oldName, to: newName, t: Date.now() }));
           });
         }

@@ -1311,4 +1311,21 @@
   /* ── 마이그레이션 실행 (로드 시 1회) ── */
   runMigration();
 
+  /* ── 선수 이름 변경 시 열려 있는 모달 즉시 갱신 ── */
+  window.addEventListener('storage', function(e) {
+    if (e.key !== '_playerRenameEvent') return;
+    if (!_current) return;
+    try {
+      var ev = JSON.parse(e.newValue || '{}');
+      if (!ev.from || !ev.to) return;
+      if (_current.name === ev.from) {
+        // 이름이 바뀐 선수의 모달이 열려 있으면 새 이름으로 갱신
+        _current.name = ev.to;
+        document.getElementById('pm-name').textContent = ev.to;
+        document.getElementById('pm-key-badge').textContent = 'vct_p:' + ev.to;
+        render();
+      }
+    } catch(e2) {}
+  });
+
 })();
