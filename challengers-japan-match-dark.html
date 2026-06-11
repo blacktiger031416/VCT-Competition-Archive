@@ -1551,7 +1551,7 @@
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
         <div class="sb-center">
-          <img class="sb-map-img" id="m1-sb-map-img" src="https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/b79528c1c15525072a138c2648be78a4b7fa3fd9-1920x1080.jpg?accountingTag=VAL" alt="브리즈" />
+          <img class="sb-map-img" id="m1-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="m1-sb-map-name">브리즈</div>
         </div>
         <div class="sb-team-block sb-team-block-r">
@@ -1603,7 +1603,7 @@
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
         <div class="sb-center">
-          <img class="sb-map-img" id="m2-sb-map-img" src="https://i.namu.wiki/i/jZZ5MO422Qh787ca2wzFHuFZrYeiR1bnmDToV4g-I22zhZWLvDvZg1kW9ryyemJ592-I2L70_HL6kWTOKrJQHA.webp" alt="프랙처" />
+          <img class="sb-map-img" id="m2-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="m2-sb-map-name">프랙처</div>
         </div>
         <div class="sb-team-block sb-team-block-r">
@@ -1655,7 +1655,7 @@
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
         <div class="sb-center">
-          <img class="sb-map-img" id="m3-sb-map-img" src="https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/041e8693f35c192f6968420aeccc170007607e49-1920x1080.jpg?accountingTag=VAL&auto=format&fit=crop&q=80&h=537&w=956&crop=center" alt="펄" />
+          <img class="sb-map-img" id="m3-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="m3-sb-map-name">펄</div>
         </div>
         <div class="sb-team-block sb-team-block-r">
@@ -1852,7 +1852,7 @@ function createBlankMapData(mapIdx) {
   var n = mapIdx + 1;
   var blank5 = function(side) {
     return [0,1,2,3,4].map(function() {
-      return { side: side, name: "-", agent: "제트", k: "-", d: "-", a: "-", acs: "-" };
+      return { side: side, name: "-", agent: "", k: "-", d: "-", a: "-", acs: "-" };
     });
   };
   return {
@@ -1890,7 +1890,7 @@ function buildMapCardHtml(n) {
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
         <div class="sb-center">
-          <img class="sb-map-img" id="${mid}-sb-map-img" src="" alt="" />
+          <img class="sb-map-img" id="${mid}-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="${mid}-sb-map-name">-</div>
         </div>
         <div class="sb-team-block sb-team-block-r">
@@ -2422,9 +2422,10 @@ function kdaHtml(p, mapIdx, playerIdx) {
 }
 
 function agentCell(agent) {
+  if (!agent) return `<img class="agent-portrait" src="images/Agent.webp" alt="요원" />`;
   const src = agentImages[agent];
   if (src) return `<img class="agent-portrait" src="${src}" alt="${agent}" />`;
-  return `<div class="agent-placeholder">${agent.charAt(0)}</div>`;
+  return `<img class="agent-portrait" src="images/Agent.webp" alt="${agent}" />`;
 }
 
 function hexRgb(hex) {
@@ -3871,7 +3872,7 @@ function syncVetoMaps() {
     var imgSrc   = MAP_IMGS[mapName] || "";
     var imgEl    = document.getElementById("m" + (i+1) + "-sb-map-img");
     var nameEl   = document.getElementById("m" + (i+1) + "-sb-map-name");
-    if (imgEl  && imgSrc)  { imgEl.src = imgSrc; imgEl.alt = mapName; }
+    if (imgEl) { imgEl.src = imgSrc || "images/Map.png"; imgEl.alt = mapName || ""; }
     if (nameEl && mapName) { nameEl.textContent = mapName; }
 
     // 베토 사이드 → firstAttacker 자동 계산
