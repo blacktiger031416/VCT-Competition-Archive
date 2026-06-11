@@ -2705,11 +2705,21 @@ function migrateFromWhiteMode() {
 
 // ── UI 팀 정보 적용 ────────────────────────────────────────────
 function applyMatchUI() {
-  // CSS 변수 설정 (팀 색상)
+  // CSS 변수 설정 (테두리·텍스트용)
   document.documentElement.style.setProperty('--color-a', TEAM_A_COLOR);
   document.documentElement.style.setProperty('--color-b', TEAM_B_COLOR);
   document.documentElement.style.setProperty('--color-a-rgb', hexRgb(TEAM_A_COLOR));
   document.documentElement.style.setProperty('--color-b-rgb', hexRgb(TEAM_B_COLOR));
+
+  // 팀 헤더 + 승부예측 그라데이션: HEX + 16진수 알파 직접 인라인 적용
+  var _sideA = document.querySelector('.mo-team-side-a');
+  var _sideB = document.querySelector('.mo-team-side-b');
+  var _predA = document.querySelector('.mo-pred-a');
+  var _predB = document.querySelector('.mo-pred-b');
+  if (_sideA) _sideA.style.background = 'linear-gradient(to right, ' + TEAM_A_COLOR + '80 0%, ' + TEAM_A_COLOR + '1F 55%, transparent 100%)';
+  if (_sideB) _sideB.style.background = 'linear-gradient(to left, '  + TEAM_B_COLOR + '80 0%, ' + TEAM_B_COLOR + '1F 55%, transparent 100%)';
+  if (_predA) { _predA.style.background = 'linear-gradient(to right, ' + TEAM_A_COLOR + '8C, ' + TEAM_A_COLOR + '1A)'; _predA.style.borderTop = '1px solid ' + TEAM_A_COLOR + '66'; }
+  if (_predB) { _predB.style.background = 'linear-gradient(to left, '  + TEAM_B_COLOR + '80, ' + TEAM_B_COLOR + '1A)'; _predB.style.borderTop = '1px solid ' + TEAM_B_COLOR + '66'; }
 
   // 네비게이션 뒤로 링크
   var navLink = document.getElementById('nav-back-link');
