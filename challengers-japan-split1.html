@@ -54,6 +54,11 @@
     .section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
     .section-heading h2 { font-size:clamp(20px,3vw,28px); font-weight:900; color:#fff; line-height:1.1; }
 
+    /* ── ALL-ROUNDS (Advance Stage) ── */
+    .all-rounds-label { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.35); padding:18px 4px 8px; }
+    .all-rounds-label:first-child { padding-top:0; }
+    .all-rounds-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.06); border-radius:10px; overflow:hidden; margin-bottom:4px; }
+
     /* ── ROUND NAV ── */
     .round-nav { display:flex; align-items:center; gap:10px; flex-shrink:0; }
     .round-nav-btn { width:32px; height:32px; border-radius:6px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); font-size:18px; cursor:pointer; display:grid; place-items:center; transition:background .14s, color .14s; line-height:1; }
@@ -227,13 +232,8 @@
       <section class="week-section">
         <div class="section-heading">
           <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
-          <div class="round-nav">
-            <button class="round-nav-btn" id="prev-adva" onclick="changeRound('adva',-1)">‹</button>
-            <span class="round-label" id="rlabel-adva">Round 1</span>
-            <button class="round-nav-btn" id="next-adva" onclick="changeRound('adva',1)">›</button>
-          </div>
         </div>
-        <div class="match-grid" id="mg-adva"></div>
+        <div id="mg-adva"></div>
       </section>
       <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-adva"></div></section>
     </div>
@@ -249,13 +249,8 @@
       <section class="week-section">
         <div class="section-heading">
           <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
-          <div class="round-nav">
-            <button class="round-nav-btn" id="prev-advb" onclick="changeRound('advb',-1)">‹</button>
-            <span class="round-label" id="rlabel-advb">Round 1</span>
-            <button class="round-nav-btn" id="next-advb" onclick="changeRound('advb',1)">›</button>
-          </div>
         </div>
-        <div class="match-grid" id="mg-advb"></div>
+        <div id="mg-advb"></div>
       </section>
       <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-advb"></div></section>
     </div>
@@ -271,13 +266,8 @@
       <section class="week-section">
         <div class="section-heading">
           <div><p class="eyebrow">경기 목록</p><h2>경기</h2></div>
-          <div class="round-nav">
-            <button class="round-nav-btn" id="prev-advc" onclick="changeRound('advc',-1)">‹</button>
-            <span class="round-label" id="rlabel-advc">Round 1</span>
-            <button class="round-nav-btn" id="next-advc" onclick="changeRound('advc',1)">›</button>
-          </div>
         </div>
-        <div class="match-grid" id="mg-advc"></div>
+        <div id="mg-advc"></div>
       </section>
       <section class="standings-section"><div class="section-heading"><p class="eyebrow">순위표</p><h2>순위</h2></div><div id="std-advc"></div></section>
     </div>
@@ -407,9 +397,9 @@
 
     /* ── STAGE CONFIG ── */
     var STAGES = {
-      adva: { label:"Advance Stage A", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
-      advb: { label:"Advance Stage B", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
-      advc: { label:"Advance Stage C", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2 },
+      adva: { label:"Advance Stage A", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2, showAll:true },
+      advb: { label:"Advance Stage B", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2, showAll:true },
+      advc: { label:"Advance Stage C", slots:5,  rounds:[{r:1,n:2},{r:2,n:2},{r:3,n:2},{r:4,n:2},{r:5,n:2}], rLabels:["Round 1","Round 2","Round 3","Round 4","Round 5"], advance:2, showAll:true },
       ph1:  { label:"Phase 1",         slots:10, rounds:[{r:1,n:5},{r:2,n:5},{r:3,n:5}],                    rLabels:["Round 1","Round 2","Round 3"], advance:8 },
       ph2:  { label:"Phase 2",         slots:8,  rounds:[{r:1,n:4},{r:2,n:4},{r:3,n:4}],                    rLabels:["Round 1","Round 2","Round 3"], advance:4 },
       po:   { label:"PlayOffs",        slots:4,  rounds:[{r:1,n:2},{r:2,n:2}],                              rLabels:["Semi Finals","Final / 3rd"], advance:1 },
@@ -490,55 +480,80 @@
       }
     }
 
+    /* ── 경기 카드 생성 ── */
+    function makeMatchCard(sid, r, m){
+      var data=loadMT(sid,r,m);
+      var tA=data.teamA||"", tB=data.teamB||"";
+      var sc=(tA&&tB)?loadSc(sid,r,m,tA,tB):null;
+      var scoreText=sc?sc.a+" : "+sc.b:"VS";
+      var card=document.createElement("article");
+      card.className="match-card"+(sc?"":" upcoming");
+      card.dataset.sid=sid; card.dataset.r=r; card.dataset.m=m;
+      card.tabIndex=0; card.setAttribute("role","button");
+      card.innerHTML=
+        '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div><div class="match-team-name">'+esc(tA||"팀 선택")+'</div></div></strong>'
+        +'<em>'+scoreText+'</em>'
+        +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div><div class="match-team-name">'+esc(tB||"팀 선택")+'</div></div></strong>';
+      (function(s,rr,mc){
+        var strongs=card.querySelectorAll("strong");
+        function goDetail(){
+          var d=loadMT(s,rr,mc); if(!d.teamA||!d.teamB) return;
+          var sc2=loadSc(s,rr,mc,d.teamA,d.teamB);
+          var q=new URLSearchParams({date:"CJS1_"+s+"_R"+rr+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:sc2?(sc2.a+" : "+sc2.b):"0 : 0",from:"cj_split1"});
+          window.location.href="./challengers-japan-match-dark.html?"+q.toString();
+        }
+        if(_isAdmin){
+          strongs[0].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,rr,mc,"A"); });
+          strongs[1].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,rr,mc,"B"); });
+          card.querySelector("em").addEventListener("click",function(e){
+            e.stopPropagation();
+            var d=loadMT(s,rr,mc); if(!d.teamA||!d.teamB){ alert("먼저 팀을 선택하세요"); return; }
+            openScoreModal(s,rr,mc);
+          });
+        }
+        card.addEventListener("click",goDetail);
+        card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goDetail(); } });
+      })(sid,r,m);
+      return card;
+    }
+
     /* ── 경기 렌더 ── */
     function renderMatches(sid){
       var cfg=STAGES[sid];
-      var ri=curRound[sid];
-      var round=cfg.rounds[ri];
-      var grid=document.getElementById("mg-"+sid); if(!grid) return;
-      grid.innerHTML="";
-      for(var m=1;m<=round.n;m++){
-        var data=loadMT(sid,round.r,m);
-        var tA=data.teamA||"", tB=data.teamB||"";
-        var sc=(tA&&tB)?loadSc(sid,round.r,m,tA,tB):null;
-        var scoreText=sc?sc.a+" : "+sc.b:"VS";
-        var card=document.createElement("article");
-        card.className="match-card"+(sc?"":" upcoming");
-        card.dataset.sid=sid; card.dataset.r=round.r; card.dataset.m=m;
-        card.tabIndex=0; card.setAttribute("role","button");
-        card.innerHTML=
-          '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div><div class="match-team-name">'+esc(tA||"팀 선택")+'</div></div></strong>'
-          +'<em>'+scoreText+'</em>'
-          +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div><div class="match-team-name">'+esc(tB||"팀 선택")+'</div></div></strong>';
-        (function(s,r,mc){
-          var strongs=card.querySelectorAll("strong");
-          function goDetail(){
-            var d=loadMT(s,r,mc); if(!d.teamA||!d.teamB) return;
-            var sc2=loadSc(s,r,mc,d.teamA,d.teamB);
-            var q=new URLSearchParams({date:"CJS1_"+s+"_R"+r+"M"+mc,teamA:d.teamA,teamB:d.teamB,score:sc2?(sc2.a+" : "+sc2.b):"0 : 0",from:"cj_split1"});
-            window.location.href="./challengers-japan-match-dark.html?"+q.toString();
-          }
-          if(_isAdmin){
-            strongs[0].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,r,mc,"A"); });
-            strongs[1].addEventListener("click",function(e){ e.stopPropagation(); openPickModal(s,r,mc,"B"); });
-            card.querySelector("em").addEventListener("click",function(e){
-              e.stopPropagation();
-              var d=loadMT(s,r,mc); if(!d.teamA||!d.teamB){ alert("먼저 팀을 선택하세요"); return; }
-              openScoreModal(s,r,mc);
-            });
-          }
-          card.addEventListener("click",goDetail);
-          card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goDetail(); } });
-        })(sid,round.r,m);
-        grid.appendChild(card);
+      var wrap=document.getElementById("mg-"+sid); if(!wrap) return;
+      wrap.innerHTML="";
+
+      if(cfg.showAll){
+        /* Advance Stage: 전체 라운드를 한번에 표시 */
+        var navEl=wrap.closest(".week-section")&&wrap.closest(".week-section").querySelector(".round-nav");
+        if(navEl) navEl.style.display="none";
+
+        cfg.rounds.forEach(function(round, ri){
+          /* 라운드 레이블 */
+          var lbl=document.createElement("div");
+          lbl.className="all-rounds-label";
+          lbl.textContent=cfg.rLabels[ri];
+          wrap.appendChild(lbl);
+          /* 2-column 미니 그리드 */
+          var grid=document.createElement("div");
+          grid.className="match-grid all-rounds-grid";
+          for(var m=1;m<=round.n;m++) grid.appendChild(makeMatchCard(sid,round.r,m));
+          wrap.appendChild(grid);
+        });
+      } else {
+        /* 기존 방식: 라운드 단위 페이지네이션 */
+        var ri=curRound[sid];
+        var round=cfg.rounds[ri];
+        wrap.className="match-grid";
+        for(var m=1;m<=round.n;m++) wrap.appendChild(makeMatchCard(sid,round.r,m));
+        /* 라운드 네비 업데이트 */
+        var labelEl=document.getElementById("rlabel-"+sid);
+        if(labelEl) labelEl.textContent=cfg.rLabels[ri];
+        var prevBtn=document.getElementById("prev-"+sid);
+        var nextBtn=document.getElementById("next-"+sid);
+        if(prevBtn) prevBtn.disabled=(ri===0);
+        if(nextBtn) nextBtn.disabled=(ri===cfg.rounds.length-1);
       }
-      /* 라운드 네비 업데이트 */
-      var labelEl=document.getElementById("rlabel-"+sid);
-      if(labelEl) labelEl.textContent=cfg.rLabels[ri];
-      var prevBtn=document.getElementById("prev-"+sid);
-      var nextBtn=document.getElementById("next-"+sid);
-      if(prevBtn) prevBtn.disabled=(ri===0);
-      if(nextBtn) nextBtn.disabled=(ri===cfg.rounds.length-1);
     }
 
     /* ── 순위표 렌더 ── */

@@ -1191,11 +1191,19 @@ async function initStockFromVctP(playerName, fallbackAcs) {
 /* 선수 한 명의 주가 적용 */
 async function applyAcsToStock(playerName, newAcs) {
   let found = await getStockState(playerName);
+  const isNew = !found;
   /* stock_p 없으면 vct_p 기록으로 초기화, vct_p도 없으면 현재 ACS로 초기화 */
   if (!found) found = await initStockFromVctP(playerName, newAcs);
   if (!found) return;
 
   const { state, resolvedKey } = found;
+
+  /* 신규 선수: 초기 상태를 DB에 저장하고 종료 (ref === newAcs 이므로 변동 없음) */
+  if (isNew) {
+    await saveStockState(playerName, state, resolvedKey);
+    console.log(`[stock] ${resolvedKey}: 신규 등록 가격=${state.price} (ACS ${newAcs})`);
+    return;
+  }
 
   /* 이미 동일 ACS로 반영된 경우 중복 방지 */
   if (newAcs === state.ref) {
