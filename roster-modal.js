@@ -208,10 +208,69 @@
     el.style.cursor = 'pointer';
   }
 
+  /* ── 선수 이름 변경 시 전체 데이터 연동 ── */
+  function propagateRename(oldName, newName) {
+    if (!oldName || !newName || oldName === newName) return;
+
+    // 1. vct_p: (경기 기록 집계) localStorage rename
+    var vctVal = localStorage.getItem('vct_p:' + oldName);
+    if (vctVal !== null) {
+      localStorage.setItem('vct_p:' + newName, vctVal);
+      localStorage.removeItem('vct_p:' + oldName);
+    }
+
+    // 2. stock_p: (주가 데이터) localStorage rename
+    var stockVal = localStorage.getItem('stock_p:' + oldName);
+    if (stockVal !== null) {
+      localStorage.setItem('stock_p:' + newName, stockVal);
+      localStorage.removeItem('stock_p:' + oldName);
+    }
+
+    // 3. players:*:* — 모든 상세 경기 선수 이름 교체
+    var pKeys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('players:') === 0) pKeys.push(k);
+    }
+    pKeys.forEach(function(k) {
+      try {
+        var obj = JSON.parse(localStorage.getItem(k) || '{}');
+        var changed = false;
+        Object.keys(obj).forEach(function(slot) {
+          if (obj[slot] && obj[slot].name === oldName) {
+            obj[slot].name = newName;
+            changed = true;
+          }
+        });
+        if (changed) localStorage.setItem(k, JSON.stringify(obj));
+      } catch(e) {}
+    });
+
+    // 4. 서버 DB rename (fire-and-forget)
+    var tok = localStorage.getItem('vct_auth_token') || '';
+    if (tok) {
+      fetch('/api/admin/rename-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ from: oldName, to: newName })
+      }).catch(function() {});
+    }
+  }
+
   function saveMain() {
     if (!current) return;
     var d = loadRoster(current);
-    d.main = Array.from(mainEl.querySelectorAll('.roster-main-input')).map(function(i) { return i.value.trim(); });
+    var oldMain = (d.main || []).slice(); // 변경 전 이름 저장
+    d.main = Array.from(mainEl.querySelectorAll('.roster-main-input')).map(function(inp) { return inp.value.trim(); });
+
+    // 이름이 바뀐 슬롯에 대해 전체 데이터 연동
+    oldMain.forEach(function(oldName, i) {
+      var newName = d.main[i];
+      if (oldName && newName && oldName !== newName) {
+        propagateRename(oldName, newName);
+      }
+    });
+
     saveRoster(current, d);
   }
 
