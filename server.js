@@ -1072,6 +1072,118 @@ app.delete("/api/notices/:id", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── API: thespike.gg 경기 데이터 프록시 (admin) ────── */
+app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
+  const matchId = req.params.id;
+  const teamA   = (req.query.teamA || "").trim();
+  const teamB   = (req.query.teamB || "").trim();
+
+  function norm(s) { return (s || "").toLowerCase().replace(/\s+/g, ""); }
+
+  try {
+    const r = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
+    if (!r.ok) return res.status(r.status).json({ error: `thespike API ${r.status}` });
+    const data = await r.json();
+    const rawMaps = (data.maps || []).filter(m =>
+      (m.players || []).some(p => p.averageCombatScore > 0)
+    );
+
+    const result = rawMaps.map((map, mapIdx) => {
+      const players = map.players || [];
+
+      /* 어느 팀이 A/B인지 결정 */
+      const titles = [...new Set(players.map(p => p.teamTitle).filter(Boolean))];
+      let sideA = titles[0] || "", sideB = titles[1] || "";
+      if (teamA) {
+        const matchedA = titles.find(t => norm(t) === norm(teamA)) || titles[0];
+        const matchedB = titles.find(t => t !== matchedA) || titles[1];
+        sideA = matchedA || sideA;
+        sideB = matchedB || sideB;
+      }
+
+      const filterSide = (side, max) =>
+        players
+          .filter(p => norm(p.teamTitle) === norm(side) && p.averageCombatScore > 0)
+          .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
+          .slice(0, max);
+
+      const playersA = filterSide(sideA, 5);
+      const playersB = filterSide(sideB, 5);
+
+      const playersData = {};
+      playersA.forEach((p, i) => {
+        playersData[`a${i}`] = {
+          name  : p.nickname,
+          agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+          acs   : p.averageCombatScore,
+          kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+        };
+      });
+      playersB.forEach((p, i) => {
+        playersData[`b${i}`] = {
+          name  : p.nickname,
+          agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+          acs   : p.averageCombatScore,
+          kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+        };
+      });
+
+      /* 라운드 데이터 */
+      const teamIdMap = {};
+      players.forEach(p => {
+        if (!p.participantId) return;
+        const id = String(p.participantId);
+        if      (norm(p.teamTitle) === norm(sideA)) teamIdMap[id] = "a";
+        else if (norm(p.teamTitle) === norm(sideB)) teamIdMap[id] = "b";
+      });
+
+      const rawRounds = map.rounds || [];
+      let firstAttacker = null;
+      if (rawRounds.length > 0) {
+        firstAttacker = teamIdMap[String(rawRounds[0].attackingTeamId)] || null;
+      }
+
+      const roundsArr = rawRounds.map(r => {
+        const atkSide = teamIdMap[String(r.attackingTeamId)];
+        const winSide = teamIdMap[String(r.winningTeamId)];
+        if (!atkSide || !winSide) return { winner: null, type: null };
+        const atkWon = winSide === atkSide;
+        let type;
+        if (atkWon) {
+          type = r.winningAction === 1 ? "attack_spike" : "attack_kill";
+        } else {
+          switch (r.winningAction) {
+            case 2: type = "def_defuse";  break;
+            case 3: type = "def_kill";    break;
+            case 4: type = "def_timeout"; break;
+            default: type = "def_kill";
+          }
+        }
+        return { winner: winSide, type };
+      });
+
+      const aScore = roundsArr.filter(r => r.winner === "a").length;
+      const bScore = roundsArr.filter(r => r.winner === "b").length;
+
+      return {
+        mapIdx,
+        title   : MAP_EN_TO_KO[map.title] || map.title || `Map ${mapIdx + 1}`,
+        titleEn : map.title || "",
+        teamATitle: sideA,
+        teamBTitle: sideB,
+        aScore, bScore, firstAttacker,
+        players : playersData,
+        rounds  : roundsArr,
+      };
+    });
+
+    res.json({ maps: result });
+  } catch (err) {
+    console.error("[spike-match] 오류:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── SPA fallback ─────────────────────────────────── */
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
