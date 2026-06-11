@@ -31,8 +31,8 @@
 
     /* Round labels */
     .bracket-rounds { display:grid; gap:8px; min-width:900px; margin-bottom:4px; }
-    .upper-rounds { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(50px,60px) minmax(120px,1fr); }
-    .lower-rounds { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(120px,1fr); }
+    .upper-rounds { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr); }
+    .lower-rounds { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr); }
     .bracket-rounds span { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.28); text-align:center; padding:0 0 10px; border-bottom:1px solid rgba(255,255,255,.07); }
     .bracket-rounds span.empty-col { border-bottom:none; }
 
@@ -40,8 +40,8 @@
     .bracket-section-title.lower-title { padding-top:14px; }
 
     .bracket-grid { display:grid; gap:8px; min-width:900px; margin-bottom:6px; }
-    .upper-grid { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(50px,60px) minmax(120px,1fr); min-height:420px; }
-    .lower-grid { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(120px,1fr); min-height:240px; }
+    .upper-grid { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr); min-height:420px; }
+    .lower-grid { grid-template-columns: minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr) minmax(160px,1fr); min-height:240px; }
 
     .bracket-column { display:flex; flex-direction:column; justify-content:space-around; gap:8px; }
     .bracket-arrow-col { justify-content:center; align-items:center; font-family:'Barlow Condensed',sans-serif; font-size:20px; color:rgba(255,255,255,.18); }
@@ -128,8 +128,6 @@
           <span>Upper Quarterfinals</span>
           <span>Upper Semifinals</span>
           <span>Upper Final</span>
-          <span class="empty-col"></span>
-          <span>Qualified</span>
         </div>
 
         <h2 class="bracket-section-title">상위조 대진표</h2>
@@ -182,17 +180,6 @@
             </article>
           </div>
 
-          <!-- Col 4: arrow -->
-          <div class="bracket-column bracket-arrow-col" aria-hidden="true"><span>→</span></div>
-
-          <!-- Col 5: Qualified -->
-          <div class="bracket-column bracket-column-center">
-            <div class="qualified-box">
-              <div class="qualified-label">✅ Qualified</div>
-              <div class="qualified-team" id="qual-upper-name">—</div>
-            </div>
-          </div>
-
         </div><!-- /upper-grid -->
 
         <!-- Lower round labels -->
@@ -201,7 +188,6 @@
           <span>Lower Round 2</span>
           <span>Lower Round 3</span>
           <span>Lower Final</span>
-          <span>Qualified</span>
         </div>
 
         <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
@@ -251,14 +237,6 @@
               <div class="bracket-team placeholder"><span class="bracket-seed">M7패</span><strong>TBD</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗M12</span><strong>TBD</strong><em>0</em></div>
             </article>
-          </div>
-
-          <!-- Col 5: Qualified -->
-          <div class="bracket-column bracket-column-center">
-            <div class="qualified-box">
-              <div class="qualified-label">✅ Qualified</div>
-              <div class="qualified-team" id="qual-lower-name">—</div>
-            </div>
           </div>
 
         </div><!-- /lower-grid -->
@@ -439,24 +417,6 @@
         });
       });
 
-      updateQualBox("qual-upper-name", states[7]  && states[7].winner);
-      updateQualBox("qual-lower-name", states[13] && states[13].winner);
-    }
-
-    function updateQualBox(elId, teamName) {
-      var el = document.getElementById(elId); if (!el) return;
-      if (teamName) {
-        var pool = loadPool();
-        var t = pool.find(function(x){ return x.name === teamName; });
-        var code = t ? teamCode(t) : teamName.slice(0,4).toUpperCase();
-        var src = t ? t.logo : "";
-        var img = src ? '<img src="'+src+'" class="qual-logo" alt="'+code+'"'+(t&&t.white?' style="filter:brightness(0) invert(1)"':'')+' onerror="this.style.display=\'none\'">' : "";
-        el.innerHTML = img + code;
-        el.className = "qualified-team filled";
-      } else {
-        el.textContent = "—";
-        el.className = "qualified-team";
-      }
     }
 
     /* Seed picker */
