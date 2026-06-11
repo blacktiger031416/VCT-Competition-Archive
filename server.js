@@ -529,6 +529,39 @@ app.get("/api/tierlist/user/:username/posts", async (req, res) => {
   }
 });
 
+/* ── API: 선수 이름 rename (admin 전용) ─────────── */
+app.post("/api/admin/rename-player", requireAdmin, async (req, res) => {
+  const { from, to } = req.body;
+  if (!from || !to) return res.status(400).json({ error: "from, to 필요" });
+  try {
+    const prefixes = ["stock_p:", "vct_p:"];
+    let renamed = [];
+    for (const prefix of prefixes) {
+      const oldKey = `${prefix}${from}`;
+      const newKey = `${prefix}${to}`;
+      // 기존 키 조회 (대소문자 무관)
+      const found = await pool.query(
+        "SELECT key, value FROM app_data WHERE lower(key)=lower($1)",
+        [oldKey]
+      );
+      if (found.rows.length === 0) continue;
+      const { key: realOldKey, value } = found.rows[0];
+      // 새 키가 이미 있으면 덮어쓰기, 없으면 insert
+      await pool.query(
+        `INSERT INTO app_data (key, value) VALUES ($1, $2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [newKey, value]
+      );
+      // 구 키 삭제
+      await pool.query("DELETE FROM app_data WHERE key=$1", [realOldKey]);
+      renamed.push({ from: realOldKey, to: newKey });
+    }
+    res.json({ ok: true, renamed });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ── API: 전체 데이터 리셋 (admin 전용) ─────────── */
 app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
   try {
