@@ -1009,7 +1009,7 @@
             '<div class="stock-player-info">' +
               '<div class="stock-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '">' +
                 '<span class="pname-text">' + p.name + '</span>' +
-                (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button>' : '') +
+                (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button><button class="admin-rename-btn" onclick="event.stopPropagation();startDelete(this)" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
                 regionBadge +
               '</div>' +
               '<div class="stock-player-team">' + p.team + '</div>' +
@@ -1038,7 +1038,7 @@
             '<div class="ft-player-logo">' + initial + '</div>' +
             '<div><div class="ft-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:4px;">' +
               '<span class="pname-text">' + p.name + '</span>' +
-              (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button>' : '') +
+              (isAdminMode ? '<button class="admin-rename-btn" onclick="event.stopPropagation();startRename(this)" title="이름 수정">✏</button><button class="admin-rename-btn" onclick="event.stopPropagation();startDelete(this)" title="삭제" style="color:rgba(255,80,80,.4)">🗑</button>' : '') +
             '</div>' +
             '<div class="ft-player-team">' + p.team + '</div></div></div></td>' +
           '<td>' + fmtPrice(p.price) + '</td>' +
@@ -1311,49 +1311,45 @@
       alert("✅ " + p.name + " 리셋 완료");
     };
 
-    /* ── Admin 선수 이름 수정 ── */
+    /* ── Admin 선수 이름 수정 (prompt 방식) ── */
     function startRename(btn) {
       var nameDiv = btn.closest('[data-pname]');
       if (!nameDiv) return;
       var oldName = nameDiv.getAttribute('data-pname');
-      var textSpan = nameDiv.querySelector('.pname-text');
-      if (!textSpan) return;
-      // 이미 편집 중이면 무시
-      if (nameDiv.querySelector('.rename-input')) return;
-      textSpan.style.display = 'none';
-      btn.style.display = 'none';
-      var input = document.createElement('input');
-      input.className = 'rename-input';
-      input.value = oldName;
-      var okBtn = document.createElement('button');
-      okBtn.className = 'rename-ok-btn';
-      okBtn.textContent = '확인';
-      var cancelBtn = document.createElement('button');
-      cancelBtn.className = 'rename-cancel-btn';
-      cancelBtn.textContent = '취소';
-      function restore() {
-        input.remove(); okBtn.remove(); cancelBtn.remove();
-        textSpan.style.display = ''; btn.style.display = '';
-      }
-      function doRename() {
-        var newName = input.value.trim();
-        if (!newName || newName === oldName) { restore(); return; }
-        adminRenamePlayer(oldName, newName, restore);
-      }
-      okBtn.onclick = function(e) { e.stopPropagation(); doRename(); };
-      cancelBtn.onclick = function(e) { e.stopPropagation(); restore(); };
-      input.onkeydown = function(e) {
-        if (e.key === 'Enter') doRename();
-        if (e.key === 'Escape') restore();
-        e.stopPropagation();
-      };
-      nameDiv.insertBefore(cancelBtn, btn.nextSibling);
-      nameDiv.insertBefore(okBtn, cancelBtn);
-      nameDiv.insertBefore(input, okBtn);
-      input.focus(); input.select();
+      var newName = prompt('선수 이름 수정', oldName);
+      if (!newName || newName.trim() === oldName) return;
+      adminRenamePlayer(oldName, newName.trim());
     }
 
-    function adminRenamePlayer(oldName, newName, onDone) {
+    /* ── Admin 선수 삭제 ── */
+    function startDelete(btn) {
+      var nameDiv = btn.closest('[data-pname]');
+      if (!nameDiv) return;
+      var name = nameDiv.getAttribute('data-pname');
+      if (!confirm('"' + name + '" 선수 데이터를 완전히 삭제하시겠습니까?\n(주가 기록, 경기 기록 집계 모두 삭제됩니다)')) return;
+      var tok = localStorage.getItem('vct_auth_token') || '';
+      fetch('/api/admin/delete-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ name: name })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) { alert('❌ ' + (data.error || '오류')); return; }
+        /* localStorage 정리 */
+        ['vct_p:', 'stock_p:'].forEach(function(prefix) {
+          localStorage.removeItem(prefix + name);
+        });
+        /* PLAYERS 배열에서 제거 */
+        PLAYERS = PLAYERS.filter(function(p) { return p.name !== name; });
+        renderStockList(document.getElementById('stock-search').value);
+        renderFullTable();
+        renderHoldingsSection();
+      })
+      .catch(function(e) { alert('❌ ' + e.message); });
+    }
+
+    function adminRenamePlayer(oldName, newName) {
       var tok = localStorage.getItem('vct_auth_token') || '';
       fetch('/api/admin/rename-player', {
         method: 'POST',
@@ -1362,7 +1358,7 @@
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (!data.ok) { alert('❌ ' + (data.error || '오류')); if (onDone) onDone(); return; }
+        if (!data.ok) { alert('❌ ' + (data.error || '오류')); return; }
         /* localStorage 키 rename */
         ['vct_p:', 'stock_p:'].forEach(function(prefix) {
           var val = localStorage.getItem(prefix + oldName);
@@ -1377,9 +1373,8 @@
         renderStockList(document.getElementById('stock-search').value);
         renderFullTable();
         renderHoldingsSection();
-        if (onDone) onDone();
       })
-      .catch(function(e) { alert('❌ ' + e.message); if (onDone) onDone(); });
+      .catch(function(e) { alert('❌ ' + e.message); });
     }
 
     /* ── storageReady 후 초기화 ── */

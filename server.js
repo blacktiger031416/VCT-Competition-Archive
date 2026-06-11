@@ -562,6 +562,27 @@ app.post("/api/admin/rename-player", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── API: 선수 데이터 삭제 (admin 전용) ─────────── */
+app.post("/api/admin/delete-player", requireAdmin, async (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: "name 필요" });
+  try {
+    const prefixes = ["stock_p:", "vct_p:"];
+    let deleted = [];
+    for (const prefix of prefixes) {
+      const key = `${prefix}${name}`;
+      const r = await pool.query(
+        "DELETE FROM app_data WHERE lower(key)=lower($1) RETURNING key",
+        [key]
+      );
+      if (r.rows.length > 0) deleted.push(r.rows[0].key);
+    }
+    res.json({ ok: true, deleted });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ── API: 전체 데이터 리셋 (admin 전용) ─────────── */
 app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
   try {
