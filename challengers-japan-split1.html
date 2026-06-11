@@ -524,22 +524,13 @@
       wrap.innerHTML="";
 
       if(cfg.showAll){
-        /* Advance Stage: 전체 라운드를 한번에 표시 */
-        var navEl=wrap.closest(".week-section")&&wrap.closest(".week-section").querySelector(".round-nav");
-        if(navEl) navEl.style.display="none";
-
-        cfg.rounds.forEach(function(round, ri){
-          /* 라운드 레이블 */
-          var lbl=document.createElement("div");
-          lbl.className="all-rounds-label";
-          lbl.textContent=cfg.rLabels[ri];
-          wrap.appendChild(lbl);
-          /* 2-column 미니 그리드 */
-          var grid=document.createElement("div");
-          grid.className="match-grid all-rounds-grid";
+        /* Advance Stage: 전체 라운드를 하나의 그리드에 표시 */
+        var grid=document.createElement("div");
+        grid.className="match-grid";
+        cfg.rounds.forEach(function(round){
           for(var m=1;m<=round.n;m++) grid.appendChild(makeMatchCard(sid,round.r,m));
-          wrap.appendChild(grid);
         });
+        wrap.appendChild(grid);
       } else {
         /* 기존 방식: 라운드 단위 페이지네이션 */
         var ri=curRound[sid];
