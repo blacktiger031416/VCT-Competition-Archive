@@ -3955,19 +3955,14 @@ function toggleMode() {
 }
 
 /* ── thespike.gg 데이터 import (Admin 전용) ────────────────── */
-(function initSpikeImportBar() {
+// auth.js가 모든 스크립트 로드 후 window.vctIsAdmin을 세팅하므로
+// window load 이벤트에서 확인
+window.addEventListener('load', function() {
   if (window.vctIsAdmin && window.vctIsAdmin()) {
     var bar = document.getElementById('spike-import-bar');
     if (bar) bar.style.display = 'block';
   }
-  // auth.js 로드 후 재확인
-  window.addEventListener('vct-auth-ready', function() {
-    if (window.vctIsAdmin && window.vctIsAdmin()) {
-      var bar = document.getElementById('spike-import-bar');
-      if (bar) bar.style.display = 'block';
-    }
-  });
-})();
+});
 
 function spikeImport() {
   var idInput = document.getElementById('spike-match-id-input');
