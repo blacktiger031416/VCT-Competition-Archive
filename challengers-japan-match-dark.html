@@ -1798,14 +1798,26 @@ var _TCo = {
 };
 var _TW  = {};
 
-var TEAM_A_CODE  = _TC[MATCH_TEAM_A]  || MATCH_TEAM_A.substring(0,3).toUpperCase();
-var TEAM_B_CODE  = _TC[MATCH_TEAM_B]  || MATCH_TEAM_B.substring(0,3).toUpperCase();
-var TEAM_A_LOGO  = _TL[MATCH_TEAM_A]  || '';
-var TEAM_B_LOGO  = _TL[MATCH_TEAM_B]  || '';
-var TEAM_A_COLOR = _TCo[MATCH_TEAM_A] || '#888';
-var TEAM_B_COLOR = _TCo[MATCH_TEAM_B] || '#888';
-var TEAM_A_LOGO_WHITE = !!_TW[MATCH_TEAM_A];
-var TEAM_B_LOGO_WHITE = !!_TW[MATCH_TEAM_B];
+/* 대소문자 무관 딕셔너리 룩업 헬퍼 */
+function _dictGet(dict, name) {
+  if (!name) return undefined;
+  if (dict[name] !== undefined) return dict[name];
+  var lower = name.toLowerCase();
+  var keys = Object.keys(dict);
+  for (var _i = 0; _i < keys.length; _i++) {
+    if (keys[_i].toLowerCase() === lower) return dict[keys[_i]];
+  }
+  return undefined;
+}
+
+var TEAM_A_CODE  = _dictGet(_TC,  MATCH_TEAM_A) || MATCH_TEAM_A.substring(0,3).toUpperCase();
+var TEAM_B_CODE  = _dictGet(_TC,  MATCH_TEAM_B) || MATCH_TEAM_B.substring(0,3).toUpperCase();
+var TEAM_A_LOGO  = _dictGet(_TL,  MATCH_TEAM_A) || '';
+var TEAM_B_LOGO  = _dictGet(_TL,  MATCH_TEAM_B) || '';
+var TEAM_A_COLOR = _dictGet(_TCo, MATCH_TEAM_A) || '#888';
+var TEAM_B_COLOR = _dictGet(_TCo, MATCH_TEAM_B) || '#888';
+var TEAM_A_LOGO_WHITE = !!_dictGet(_TW, MATCH_TEAM_A);
+var TEAM_B_LOGO_WHITE = !!_dictGet(_TW, MATCH_TEAM_B);
 
 var _sp = MATCH_SCORE.split(':');
 var _sA = parseInt((_sp[0]||'').trim()) || 0;
