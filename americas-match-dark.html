@@ -3931,6 +3931,14 @@ window._matchDetailRenamePlayer = function(oldName, newName) {
     }
   });
 };
+// 다른 탭(로스터 모달)에서 이름 변경 시 storage 이벤트로 수신
+window.addEventListener('storage', function(e) {
+  if (e.key !== '_playerRenameEvent') return;
+  try {
+    var ev = JSON.parse(e.newValue || '{}');
+    if (ev.from && ev.to) window._matchDetailRenamePlayer(ev.from, ev.to);
+  } catch(e2) {}
+});
 
 </script>
 <script src="./auth.js"></script>

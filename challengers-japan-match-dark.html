@@ -3993,6 +3993,14 @@ window._matchDetailRenamePlayer = function(oldName, newName) {
     }
   });
 };
+// 다른 탭(로스터 모달)에서 이름 변경 시 storage 이벤트로 수신
+window.addEventListener('storage', function(e) {
+  if (e.key !== '_playerRenameEvent') return;
+  try {
+    var ev = JSON.parse(e.newValue || '{}');
+    if (ev.from && ev.to) window._matchDetailRenamePlayer(ev.from, ev.to);
+  } catch(e2) {}
+});
 
 /* ── thespike.gg 데이터 import (Admin 전용) ────────────────── */
 // auth.js가 모든 스크립트 로드 후 window.vctIsAdmin을 세팅하므로
