@@ -1134,6 +1134,18 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
 
   function norm(s) { return (s || "").toLowerCase().replace(/\s+/g, ""); }
 
+  /* 팀 이름 퍼지 매칭: 정확 일치 → 포함 관계 → 단어 토큰 겹침 순으로 시도 */
+  function teamFuzzyMatch(apiTitle, queryName) {
+    if (!apiTitle || !queryName) return false;
+    const t = norm(apiTitle), q = norm(queryName);
+    if (t === q) return true;
+    if (t.includes(q) || q.includes(t)) return true;
+    // 단어 단위 매칭: 쿼리 단어 중 3글자 이상인 것이 API 타이틀 단어에 포함되거나 시작하면 매칭
+    const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/);
+    const qWords = queryName.toLowerCase().split(/[\s\-_]+/);
+    return qWords.some(qw => qw.length >= 3 && tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)));
+  }
+
   try {
     const r = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
     if (!r.ok) return res.status(r.status).json({ error: `thespike API ${r.status}` });
@@ -1149,7 +1161,9 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
       const titles = [...new Set(players.map(p => p.teamTitle).filter(Boolean))];
       let sideA = titles[0] || "", sideB = titles[1] || "";
       if (teamA) {
-        const matchedA = titles.find(t => norm(t) === norm(teamA)) || titles[0];
+        const matchedA = titles.find(t => norm(t) === norm(teamA))
+          || titles.find(t => teamFuzzyMatch(t, teamA))
+          || titles[0];
         const matchedB = titles.find(t => t !== matchedA) || titles[1];
         sideA = matchedA || sideA;
         sideB = matchedB || sideB;

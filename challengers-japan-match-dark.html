@@ -1462,6 +1462,12 @@
         데이터 가져오기
       </button>
       <span id="spike-import-status" style="font-size:12px; color:rgba(255,255,255,.45); font-family:'Barlow Condensed',sans-serif; flex-shrink:0;"></span>
+      <button id="spike-swap-btn" onclick="spikeSwap()"
+        style="display:none; background:rgba(180,80,80,.18); border:1px solid rgba(255,120,120,.4); border-radius:6px; color:#ffaaaa; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:8px 14px; cursor:pointer; flex-shrink:0; transition:background .15s;"
+        onmouseover="this.style.background='rgba(180,80,80,.35)'" onmouseout="this.style.background='rgba(180,80,80,.18)'"
+        title="팀 A/B가 반대로 가져와진 경우 사용">
+        ⇄ 팀 반전
+      </button>
     </div>
   </div>
 
@@ -4108,6 +4114,8 @@ function spikeImport() {
       updateMapCards();
       statusEl.style.color = '#7dd8da';
       statusEl.textContent = '✅ ' + importedMaps.length + '맵 완료 (팀A:' + (data.maps[0].teamATitle||MATCH_TEAM_A) + ')';
+      var swapBtn = document.getElementById('spike-swap-btn');
+      if (swapBtn) swapBtn.style.display = 'inline-block';
     })
     .catch(function(err) {
       statusEl.style.color = '#ff6b6b';
@@ -4116,6 +4124,79 @@ function spikeImport() {
     .finally(function() {
       btn.disabled = false;
     });
+}
+
+function spikeSwap() {
+  /* 가져온 데이터에서 팀 A/B를 반전시킨다 */
+  maps.forEach(function(mp, idx) {
+    /* 1) players localStorage 스왑 */
+    var pKey = PLAYERS_MATCH_KEY + ':' + idx;
+    try {
+      var pd = JSON.parse(localStorage.getItem(pKey) || '{}');
+      var swapped = {};
+      for (var i = 0; i < 5; i++) {
+        swapped['a' + i] = pd['b' + i] || null;
+        swapped['b' + i] = pd['a' + i] || null;
+      }
+      Object.keys(swapped).forEach(function(k) { if (!swapped[k]) delete swapped[k]; });
+      localStorage.setItem(pKey, JSON.stringify(swapped));
+    } catch(e) {}
+
+    /* 2) rounds localStorage 스왑 */
+    var rKey = 'rounds:' + MATCH_KEY + ':' + idx;
+    try {
+      var rounds = JSON.parse(localStorage.getItem(rKey) || '[]');
+      rounds = rounds.map(function(r) {
+        if (!r || !r.winner) return r;
+        return Object.assign({}, r, { winner: r.winner === 'a' ? 'b' : 'a' });
+      });
+      localStorage.setItem(rKey, JSON.stringify(rounds));
+    } catch(e) {}
+
+    /* 3) stats localStorage 스왑 */
+    var sKey = 'stats:' + MATCH_KEY + ':' + idx;
+    try {
+      var st = JSON.parse(localStorage.getItem(sKey) || '{}');
+      var tmpA = st.aScore; st.aScore = st.bScore; st.bScore = tmpA;
+      if (st.firstAttacker === 'a') st.firstAttacker = 'b';
+      else if (st.firstAttacker === 'b') st.firstAttacker = 'a';
+      localStorage.setItem(sKey, JSON.stringify(st));
+    } catch(e) {}
+
+    /* 4) in-memory 갱신 */
+    loadPlayersSync(idx);
+    var rs = mp.rtState;
+    if (rs) {
+      var ta = rs.stats.aScore; rs.stats.aScore = rs.stats.bScore; rs.stats.bScore = ta;
+      if (rs.firstAttacker === 'a') rs.firstAttacker = 'b';
+      else if (rs.firstAttacker === 'b') rs.firstAttacker = 'a';
+      rs.rounds = (rs.rounds || []).map(function(r) {
+        if (!r || !r.winner) return r;
+        return Object.assign({}, r, { winner: r.winner === 'a' ? 'b' : 'a' });
+      });
+    }
+    renderMap(mp, idx);
+    renderRoundTracker(mp, idx);
+    renderTeamStats(mp, idx);
+    var sid = 'm' + (idx + 1);
+    if (scoreState[sid]) { var ts = scoreState[sid].l; scoreState[sid].l = scoreState[sid].r; scoreState[sid].r = ts; }
+    applyScoreClasses(sid);
+  });
+
+  /* 5) result 스왑 */
+  try {
+    var resRaw = localStorage.getItem('result:' + MATCH_KEY);
+    var resObj = resRaw ? JSON.parse(resRaw) : {};
+    var tA = resObj.scoreA; resObj.scoreA = resObj.scoreB; resObj.scoreB = tA;
+    localStorage.setItem('result:' + MATCH_KEY, JSON.stringify(resObj));
+    var scA = document.getElementById('score-a');
+    var scB = document.getElementById('score-b');
+    if (scA && scB) { var tv = scA.value; scA.value = scB.value; scB.value = tv; }
+  } catch(e) {}
+
+  updateMapCards();
+  var statusEl = document.getElementById('spike-import-status');
+  if (statusEl) { statusEl.style.color = '#ffaaaa'; statusEl.textContent = '⇄ 팀 반전 적용됨'; }
 }
 
 </script>
