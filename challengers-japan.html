@@ -520,25 +520,53 @@
           var d = load(current); var admin = window.vctIsAdmin && window.vctIsAdmin();
           mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
             var nameVal = d.main[i] || '';
-            if (admin) return '<li class="roster-main-item"><input class="roster-main-input" data-i="'+i+'" value="'+nameVal.replace(/"/g,'&quot;')+'" placeholder="선수 이름" />'+(nameVal?'<button class="pm-roster-btn" data-player="'+nameVal.replace(/"/g,'&quot;')+'" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↗</button>':'')+'</li>';
+            if (admin) return '<li class="roster-main-item"><input class="roster-main-input" data-i="'+i+'" value="'+nameVal.replace(/"/g,'&quot;')+'" placeholder="선수 이름" />'+(nameVal?'<button class="pm-roster-btn" data-player="'+nameVal.replace(/"/g,'&quot;')+'" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↗</button>'+'<button class="roster-demote-btn" data-main="'+i+'" title="서브로 내리기" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↓</button>':'')+'</li>';
             return '<li class="roster-main-item"><span data-player="'+nameVal.replace(/"/g,'&quot;')+'" style="opacity:0.85">'+(nameVal||'—')+'</span></li>';
           }).join("");
           mainEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
           if (admin) { mainEl.querySelectorAll(".roster-main-input").forEach(function(inp){ inp.addEventListener("blur", saveMain); inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){saveMain();inp.blur();} }); }); }
+          if (admin) { mainEl.querySelectorAll(".roster-demote-btn").forEach(function(btn){ btn.addEventListener("click",function(){ demoteToSub(Number(btn.dataset.main)); }); }); }
           if (!d.subs.length) { subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>'; }
           else {
             subEl.innerHTML = d.subs.map(function(p,i){
-              if(admin) return '<li class="roster-main-item"><input class="roster-main-input roster-sub-input" data-sub="'+i+'" value="'+p.replace(/"/g,'&quot;')+'" placeholder="서브 선수 이름" /><button class="roster-player-remove" data-sub="'+i+'" style="flex-shrink:0">×</button></li>';
+              if(admin) return '<li class="roster-main-item"><button class="roster-promote-btn" data-sub="'+i+'" title="메인으로 올리기" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↑</button><input class="roster-main-input roster-sub-input" data-sub="'+i+'" value="'+p.replace(/"/g,'&quot;')+'" placeholder="서브 선수 이름" /><button class="roster-player-remove" data-sub="'+i+'" style="flex-shrink:0">×</button></li>';
               return '<li><span data-player="'+p.replace(/"/g,'&quot;')+'" style="flex:1;opacity:0.85">'+p+'</span></li>';
             }).join("");
             subEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
             if (admin) {
               subEl.querySelectorAll(".roster-sub-input").forEach(function(inp){ inp.addEventListener("blur",function(){ saveSub(Number(inp.dataset.sub),inp.value); }); inp.addEventListener("keydown",function(e){ if(e.key==="Enter"){saveSub(Number(inp.dataset.sub),inp.value);inp.blur();} }); });
+              subEl.querySelectorAll(".roster-promote-btn").forEach(function(btn){ btn.addEventListener("click",function(){ promoteToMain(Number(btn.dataset.sub)); }); });
               subEl.querySelectorAll(".roster-player-remove").forEach(function(btn){ btn.addEventListener("click", function(){ var d=load(current); d.subs.splice(Number(btn.dataset.sub),1); save(current,d); render(); }); });
             }
           }
         }
-        function saveSub(idx, newName) {
+        function demoteToSub(idx) {
+          if (!current) return;
+          var d = load(current);
+          var name = (d.main[idx] || '').trim();
+          if (!name) return;
+          d.main[idx] = '';
+          if (!d.subs) d.subs = [];
+          d.subs.push(name);
+          save(current, d);
+          render();
+        }
+        function promoteToMain(subIdx) {
+          if (!current) return;
+          var d = load(current);
+          var name = (d.subs[subIdx] || '').trim();
+          if (!name) return;
+          var emptySlot = -1;
+          for (var i = 0; i < 5; i++) {
+            if (!d.main[i] || !d.main[i].trim()) { emptySlot = i; break; }
+          }
+          if (emptySlot === -1) { alert('메인 슬롯이 모두 찼습니다. 먼저 한 명을 서브로 내리세요.'); return; }
+          d.main[emptySlot] = name;
+          d.subs.splice(subIdx, 1);
+          save(current, d);
+          render();
+        }
+                function saveSub(idx, newName) {
           if (!current) return;
           var d = load(current); var oldName = (d.subs[idx]||'').trim(); newName = (newName||'').trim();
           if (!oldName || !newName || oldName === newName) return;
