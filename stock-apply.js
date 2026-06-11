@@ -87,7 +87,7 @@
             var total = 0, cnt = 0;
             (vctData.maps || []).forEach(function (m) {
               var lg = m.league || '';
-              if (lg !== 'americas' && lg !== 'emea' && lg !== 'pacific' && lg !== 'cn') return;
+              if (lg !== 'americas' && lg !== 'emea' && lg !== 'pacific' && lg !== 'cn' && lg !== 'masters' && lg !== 'champions') return;
               var a = parseFloat(m.acs) || 0;
               if (a > 0) { total += a; cnt++; }
             });

@@ -1393,7 +1393,7 @@ async function initStockFromVctP(playerName, fallbackAcs) {
     let total = 0, cnt = 0;
     maps.forEach(m => {
       const lg = m.league || "";
-      if (!["americas","emea","pacific","cn"].includes(lg)) return;
+      if (!["americas","emea","pacific","cn","masters","champions"].includes(lg)) return;
       const a = parseFloat(m.acs) || 0;
       if (a > 0) { total += a; cnt++; }
     });
