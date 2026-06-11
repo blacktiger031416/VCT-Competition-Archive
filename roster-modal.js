@@ -255,6 +255,11 @@
         body: JSON.stringify({ from: oldName, to: newName })
       }).catch(function() {});
     }
+
+    // 5. 현재 열려 있는 경기 상세 페이지에 즉시 반영
+    if (typeof window._matchDetailRenamePlayer === 'function') {
+      window._matchDetailRenamePlayer(oldName, newName);
+    }
   }
 
   function saveMain() {

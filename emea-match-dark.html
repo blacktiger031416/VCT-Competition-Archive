@@ -3915,6 +3915,24 @@ function toggleMode() {
   maps.forEach(function(m, i) { renderMap(m, i); });
 }
 
+// ── 로스터 이름 변경 → 현재 페이지 즉시 반영 ──────────────
+window._matchDetailRenamePlayer = function(oldName, newName) {
+  maps.forEach(function(m, mapIdx) {
+    if (!m || !m.players) return;
+    var changed = false;
+    m.players.forEach(function(p) {
+      if (p && p.name === oldName) {
+        p.name = newName;
+        changed = true;
+      }
+    });
+    if (changed) {
+      renderMap(m, mapIdx);
+      renderTeamStats(m, mapIdx);
+    }
+  });
+};
+
 </script>
 <script src="./auth.js"></script>
 <script src="./stock-apply.js"></script>
