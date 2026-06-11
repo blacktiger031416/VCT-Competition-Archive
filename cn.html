@@ -696,7 +696,42 @@
           el.style.cursor = "pointer";
         }
 
-        function render() {
+        function saveSub(idx, newName) {
+          if (!current) return;
+          var d = load(current);
+          var oldName = (d.subs[idx] || '').trim();
+          newName = (newName || '').trim();
+          if (!oldName || !newName || oldName === newName) return;
+          d.subs[idx] = newName;
+          save(current, d);
+          // players:* localStorage 업데이트
+          var pKeys = [];
+          for (var ki = 0; ki < localStorage.length; ki++) {
+            var k = localStorage.key(ki);
+            if (k && k.indexOf('players:') === 0) pKeys.push(k);
+          }
+          pKeys.forEach(function(k) {
+            try {
+              var obj = JSON.parse(localStorage.getItem(k) || '{}');
+              var chg = false;
+              Object.keys(obj).forEach(function(slot) {
+                if (obj[slot] && obj[slot].name === oldName) { obj[slot].name = newName; chg = true; }
+              });
+              if (chg) localStorage.setItem(k, JSON.stringify(obj));
+            } catch(e) {}
+          });
+          // vct_p: / stock_p: 키 rename
+          ['vct_p:', 'stock_p:'].forEach(function(prefix) {
+            var val = localStorage.getItem(prefix + oldName);
+            if (val !== null) {
+              localStorage.setItem(prefix + newName, val);
+              localStorage.removeItem(prefix + oldName);
+            }
+          });
+          localStorage.setItem('_playerRenameEvent', JSON.stringify({ from: oldName, to: newName, t: Date.now() }));
+        }
+
+                function render() {
           if (!current) return;
           var d = load(current);
           var admin = window.vctIsAdmin && window.vctIsAdmin();
@@ -729,13 +764,22 @@
             subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
           } else {
             subEl.innerHTML = d.subs.map(function(p, i) {
+              if (admin) {
+                return '<li class="roster-main-item">' +
+                  '<input class="roster-main-input roster-sub-input" data-sub="' + i + '" value="' + p.replace(/"/g,'&quot;') + '" placeholder="서브 선수 이름" />' +
+                  '<button class="roster-player-remove" data-sub="' + i + '" style="flex-shrink:0">×</button>' +
+                  '</li>';
+              }
               return '<li>' +
                 '<span data-player="' + p.replace(/"/g,'&quot;') + '" style="flex:1;opacity:0.85">' + p + '</span>' +
-                (admin ? '<button class="roster-player-remove" data-sub="' + i + '" aria-label="' + p + ' 삭제">×</button>' : '') +
                 '</li>';
             }).join("");
             subEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
             if (admin) {
+              subEl.querySelectorAll(".roster-sub-input").forEach(function(inp) {
+                inp.addEventListener("blur", function() { saveSub(Number(inp.dataset.sub), inp.value); });
+                inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveSub(Number(inp.dataset.sub), inp.value); inp.blur(); } });
+              });
               subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
                 btn.addEventListener("click", function() {
                   var d = load(current);
