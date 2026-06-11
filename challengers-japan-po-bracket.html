@@ -377,7 +377,9 @@
       var teamB = (rows[1] && rows[1].dataset.teamName) || "미정";
       var sA = (rows[0] && rows[0].querySelector("em") && rows[0].querySelector("em").textContent.trim()) || "0";
       var sB = (rows[1] && rows[1].querySelector("em") && rows[1].querySelector("em").textContent.trim()) || "0";
-      var params = new URLSearchParams({ date:"PO_Match "+mid, teamA:teamA, teamB:teamB, score:sA+" : "+sB, from:"cj_japan_po_bracket" });
+      var obj = { date:"PO_Match "+mid, teamA:teamA, teamB:teamB, score:sA+" : "+sB, from:"cj_japan_po_bracket" };
+      if (String(mid) === "3") obj.bo5 = "1"; // Grand Final = Bo5
+      var params = new URLSearchParams(obj);
       window.location.href = "./challengers-japan-match-dark.html?" + params.toString();
     }
 
