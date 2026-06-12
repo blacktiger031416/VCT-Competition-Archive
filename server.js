@@ -1691,7 +1691,7 @@ async function pollAutoMatches(allEventMatches) {
           for (const p of [...teamAPlayers, ...teamBPlayers]) {
             if (!p.nickname || !(p.averageCombatScore > 0)) continue;
             const vk = `vct_p:${p.nickname}`;
-            const vRow = await pool.query("SELECT value FROM app_data WHERE lower(key)=lower($1)", [vk]);
+            const vRow = await pool.query("SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]);
             let vData = {};
             let vKey = vk;
             if (vRow.rows[0]) {
