@@ -2421,11 +2421,12 @@ function kdaHtml(p, mapIdx, playerIdx) {
     </button>`;
 }
 
-function agentCell(agent) {
-  if (!agent) return `<img class="agent-portrait" src="images/Agent.webp" alt="요원" />`;
+function agentCell(agent, side) {
+  const placeholder = (side === "b") ? "images/Agent_right.webp" : "images/Agent.webp";
+  if (!agent) return `<img class="agent-portrait" src="${placeholder}" alt="요원" />`;
   const src = agentImages[agent];
   if (src) return `<img class="agent-portrait" src="${src}" alt="${agent}" />`;
-  return `<img class="agent-portrait" src="images/Agent.webp" alt="${agent}" />`;
+  return `<img class="agent-portrait" src="${placeholder}" alt="${agent}" />`;
 }
 
 function hexRgb(hex) {
@@ -2594,8 +2595,8 @@ function renderMap(mapData, mapIdx) {
     const ai = a ? mapData.players.indexOf(a) : -1;
     const bi = b ? mapData.players.indexOf(b) : -1;
 
-    const agentA = a ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${ai})">${agentCell(a.agent)}</div>` : "";
-    const agentB = b ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${bi})">${agentCell(b.agent)}</div>` : "";
+    const agentA = a ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${ai})">${agentCell(a.agent, "a")}</div>` : "";
+    const agentB = b ? `<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker(${mapIdx},${bi})">${agentCell(b.agent, "b")}</div>` : "";
 
     html += `<tr>
       <td class="cell-skills">${a ? makeSkillStack(a) : ""}</td>
