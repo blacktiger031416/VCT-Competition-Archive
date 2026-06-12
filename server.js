@@ -1458,6 +1458,21 @@ async function applyAcsToStock(playerName, newAcs) {
   console.log(`[stock] ${resolvedKey}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
 }
 
+/* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
+app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
+  try {
+    const players = req.body.players || []; // [{ name, acs }]
+    for (const p of players) {
+      if (p.name && typeof p.acs === "number" && p.acs > 0) {
+        await applyAcsToStock(p.name, p.acs);
+      }
+    }
+    res.json({ ok: true, applied: players.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* 매치 한 건 처리 — 완료된 맵만 골라서 적용 */
 async function processMatch(matchId) {
   try {
