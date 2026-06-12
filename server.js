@@ -1133,18 +1133,7 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
   const teamB   = (req.query.teamB || "").trim();
 
   function norm(s) { return (s || "").toLowerCase().replace(/\s+/g, ""); }
-
-  /* 팀 이름 퍼지 매칭: 정확 일치 → 포함 관계 → 단어 토큰 겹침 순으로 시도 */
-  function teamFuzzyMatch(apiTitle, queryName) {
-    if (!apiTitle || !queryName) return false;
-    const t = norm(apiTitle), q = norm(queryName);
-    if (t === q) return true;
-    if (t.includes(q) || q.includes(t)) return true;
-    // 단어 단위 매칭: 쿼리 단어 중 3글자 이상인 것이 API 타이틀 단어에 포함되거나 시작하면 매칭
-    const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/);
-    const qWords = queryName.toLowerCase().split(/[\s\-_]+/);
-    return qWords.some(qw => qw.length >= 3 && tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)));
-  }
+  /* teamFuzzyMatch는 모듈 레벨 함수 사용 */
 
   try {
     const r = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
@@ -1604,6 +1593,22 @@ function normalizeTeamName(name) {
   return (name || "").toLowerCase().replace(/\s+/g, "");
 }
 
+/* 팀 이름 퍼지 매칭: 정확 일치 → 포함 관계 → 단어 토큰 겹침 → 악센트 제거 비교 */
+function teamFuzzyMatch(apiTitle, queryName) {
+  if (!apiTitle || !queryName) return false;
+  const t = normalizeTeamName(apiTitle);
+  const q = normalizeTeamName(queryName);
+  if (t === q) return true;
+  if (t.includes(q) || q.includes(t)) return true;
+  // 단어 단위 매칭
+  const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/);
+  const qWords = queryName.toLowerCase().split(/[\s\-_]+/);
+  if (qWords.some(qw => qw.length >= 3 && tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)))) return true;
+  // 악센트 제거 비교 (é→e, á→a 등)
+  const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return strip(t) === strip(q) || strip(t).includes(strip(q)) || strip(q).includes(strip(t));
+}
+
 async function pollAutoMatches(allEventMatches) {
   try {
     const result = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'");
@@ -1617,9 +1622,9 @@ async function pollAutoMatches(allEventMatches) {
         if (!tsMatchId) {
           for (const matches of Object.values(allEventMatches)) {
             const found = matches.find((m) => {
-              const teams = (m.teams || []).map((t) => normalizeTeamName(t.title || ""));
-              return teams.includes(normalizeTeamName(am.team1)) &&
-                     teams.includes(normalizeTeamName(am.team2));
+              const titles = (m.teams || []).map((t) => t.title || "");
+              return titles.some(t => teamFuzzyMatch(t, am.team1)) &&
+                     titles.some(t => teamFuzzyMatch(t, am.team2));
             });
             if (found) { tsMatchId = found.id; break; }
           }
