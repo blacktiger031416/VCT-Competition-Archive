@@ -1714,29 +1714,58 @@ async function pollAutoMatches(allEventMatches) {
             broadcast({ type: "set", key: vKey, value: vVal });
           }
 
-          /* ── 선수 주식 즉시 반영 (processMatch가 이미 처리한 맵은 skip) ── */
-          if (!(processedMaps[tsMatchId] || []).includes(map.id)) {
-            for (const p of players) {
-              if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-                await applyAcsToStock(p.nickname, p.averageCombatScore);
-              }
+          /* ── 선수 주식 즉시 반영 (applyAcsToStock 내부에서 중복 방지) ── */
+          for (const p of [...teamAPlayers, ...teamBPlayers]) {
+            if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
+              await applyAcsToStock(p.nickname, p.averageCombatScore);
             }
-            if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
-            processedMaps[tsMatchId].push(map.id);
           }
+          if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
+          if (!processedMaps[tsMatchId].includes(map.id)) processedMaps[tsMatchId].push(map.id);
 
           /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
           try {
-            /* teamId → "a" | "b" 매핑 (ACS > 0인 실제 출전 선수만으로 팀 판별) */
-            const teamIdMap = {}; // teamId -> "a" | "b"
-            players.forEach((p) => {
-              if (p.teamId == null || p.averageCombatScore <= 0) return;
-              const id = String(p.teamId);
-              if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1)) teamIdMap[id] = "a";
-              else if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2)) teamIdMap[id] = "b";
-            });
+            /* teamId → "a" | "b" 매핑: 여러 ID 필드를 순서대로 시도 (spike-match와 동일 로직) */
+            const teamIdMap = {};
+            const ID_FIELDS = ["participantId", "teamId", "organizationId", "teamParticipantId"];
+            const rawRounds0 = map.rounds || [];
+            for (const field of ID_FIELDS) {
+              players.forEach((p) => {
+                const val = p[field];
+                if (val == null || p.averageCombatScore <= 0) return;
+                const id = String(val);
+                if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1)) teamIdMap[id] = "a";
+                else if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2)) teamIdMap[id] = "b";
+              });
+              if (rawRounds0.length > 0) {
+                const r0 = rawRounds0[0];
+                if (teamIdMap[String(r0.attackingTeamId)] || teamIdMap[String(r0.winningTeamId)]) break;
+              } else break;
+              Object.keys(teamIdMap).forEach(k => delete teamIdMap[k]);
+            }
+            /* 여전히 매핑 실패 시 브루트포스 */
+            if (rawRounds0.length > 0 && !teamIdMap[String(rawRounds0[0].attackingTeamId)]) {
+              const roundTeamIds = [...new Set(
+                rawRounds0.flatMap(r => [r.attackingTeamId, r.winningTeamId].filter(v => v != null).map(String))
+              )];
+              if (roundTeamIds.length >= 2) {
+                const sampleA = players.find(p => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1));
+                const sampleB = players.find(p => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2));
+                const sample = sampleA || sampleB;
+                if (sample) {
+                  for (const [, v] of Object.entries(sample)) {
+                    if (roundTeamIds.includes(String(v))) {
+                      teamIdMap[String(v)] = sampleA ? "a" : "b";
+                      const other = roundTeamIds.find(id => id !== String(v));
+                      if (other) teamIdMap[other] = sampleA ? "b" : "a";
+                      break;
+                    }
+                  }
+                }
+              }
+            }
 
-            const rawRounds = map.rounds || [];
+            const rawRounds = rawRounds0; // rawRounds0 = map.rounds || [] (위에서 선언)
 
             /* firstAttacker: 라운드1 공격팀이 team A이면 "a", B이면 "b" */
             let firstAttacker = null;

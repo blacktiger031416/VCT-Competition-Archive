@@ -3990,8 +3990,6 @@ function spikeImport() {
       var importedMaps = data.maps || [];
       if (!importedMaps.length) throw new Error('완료된 맵 데이터 없음');
 
-      var stockPlayers = [];
-
       importedMaps.forEach(function(m) {
         var idx = m.mapIdx;
 
@@ -4040,10 +4038,6 @@ function spikeImport() {
               p.a = parseInt(pts[2]) || 0;
             }
             applyAgentData(p);
-            /* 주식 반영용 수집 */
-            if (src.name && src.name !== '-' && src.acs != null) {
-              stockPlayers.push({ name: src.name, acs: src.acs });
-            }
           });
         });
 
@@ -4080,17 +4074,6 @@ function spikeImport() {
       var swapBtn = document.getElementById('spike-swap-btn');
       if (swapBtn) swapBtn.style.display = 'inline-block';
 
-      /* ── 서버에 주식 즉시 반영 ── */
-      if (stockPlayers.length > 0) {
-        fetch('/api/admin/stock-apply-players', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
-          body: JSON.stringify({ players: stockPlayers })
-        }).then(function(r) {
-          if (r.ok) { statusEl.textContent += ' · 주식 반영됨'; }
-        }).catch(function() {});
-      }
     })
     .catch(function(err) {
       statusEl.style.color = '#ff6b6b';
