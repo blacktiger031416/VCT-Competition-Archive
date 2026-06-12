@@ -1653,11 +1653,11 @@ async function pollAutoMatches(allEventMatches) {
 
           /* ACS > 0인 선수만 (서브/미출전 로스터 제외), ACS 내림차순 정렬 후 5명으로 제한 */
           const teamAPlayers = players
-            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1) && p.averageCombatScore > 0)
+            .filter((p) => teamFuzzyMatch(p.teamTitle, am.team1) && p.averageCombatScore > 0)
             .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
             .slice(0, 5);
           const teamBPlayers = players
-            .filter((p) => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2) && p.averageCombatScore > 0)
+            .filter((p) => teamFuzzyMatch(p.teamTitle, am.team2) && p.averageCombatScore > 0)
             .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
             .slice(0, 5);
 
@@ -1739,8 +1739,8 @@ async function pollAutoMatches(allEventMatches) {
                 const val = p[field];
                 if (val == null || p.averageCombatScore <= 0) return;
                 const id = String(val);
-                if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1)) teamIdMap[id] = "a";
-                else if (normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2)) teamIdMap[id] = "b";
+                if (teamFuzzyMatch(p.teamTitle, am.team1)) teamIdMap[id] = "a";
+                else if (teamFuzzyMatch(p.teamTitle, am.team2)) teamIdMap[id] = "b";
               });
               if (rawRounds0.length > 0) {
                 const r0 = rawRounds0[0];
@@ -1754,8 +1754,8 @@ async function pollAutoMatches(allEventMatches) {
                 rawRounds0.flatMap(r => [r.attackingTeamId, r.winningTeamId].filter(v => v != null).map(String))
               )];
               if (roundTeamIds.length >= 2) {
-                const sampleA = players.find(p => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team1));
-                const sampleB = players.find(p => normalizeTeamName(p.teamTitle) === normalizeTeamName(am.team2));
+                const sampleA = players.find(p => teamFuzzyMatch(p.teamTitle, am.team1));
+                const sampleB = players.find(p => teamFuzzyMatch(p.teamTitle, am.team2));
                 const sample = sampleA || sampleB;
                 if (sample) {
                   for (const [, v] of Object.entries(sample)) {
