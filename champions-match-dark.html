@@ -374,6 +374,7 @@
     }
     /* 오른팀 요원 사진 좌우 반전 */
     .player-cell-r .agent-portrait { transform: scaleX(-1); }
+    .player-cell-r .agent-portrait.agent-no-flip { transform: scaleX(1); }
 
     /* Header row */
     .player-table thead th {
@@ -2398,10 +2399,10 @@ function kdaHtml(p, mapIdx, playerIdx) {
 
 function agentCell(agent, side) {
   const placeholder = (side === "b") ? "images/Agent_right.webp" : "images/Agent.webp";
-  if (!agent) return `<img class="agent-portrait" src="${placeholder}" alt="요원" />`;
+  if (!agent) return `<img class="agent-portrait agent-no-flip" src="${placeholder}" alt="요원" />`;
   const src = agentImages[agent];
   if (src) return `<img class="agent-portrait" src="${src}" alt="${agent}" />`;
-  return `<img class="agent-portrait" src="${placeholder}" alt="${agent}" />`;
+  return `<img class="agent-portrait agent-no-flip" src="${placeholder}" alt="${agent}" />`;
 }
 
 function hexRgb(hex) {
