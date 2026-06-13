@@ -963,19 +963,7 @@
     if (d && d.coins) showRewardToast(d.coins, d.message || "");
   });
 
-  /* fallback: 페이지 자체 SSE가 없을 때만 연결 (중복 방지: 1초 후 체크) */
-  setTimeout(function () {
-    if (window.__vctSseConnected) return; /* 페이지 SSE가 이미 연결됨 */
-    try {
-      var _sseAuth = new EventSource("/api/events");
-      _sseAuth.onmessage = function (e) {
-        try {
-          var msg = JSON.parse(e.data);
-          if (msg.type === "reward") showRewardToast(msg.coins, msg.message || "");
-        } catch (_) {}
-      };
-    } catch (_) {}
-  }, 1000);
+  /* reward 이벤트는 storage.js SSE가 모든 페이지에서 relay함 — 별도 SSE 불필요 */
 
   function showRewardToast(coins, message) {
     var toast = document.createElement("div");

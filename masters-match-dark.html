@@ -4078,10 +4078,7 @@ window.addEventListener('storage', function(e) {
           console.log("[auto-match] 맵" + (mapIdx + 1) + "(" + (msg.mapName || "") + ") 자동 입력 완료 (선수·라운드·스코어)");
         }, 600);
       }
-      /* 보상 이벤트 → auth.js 토스트 */
-      if (msg.type === "reward") {
-        window.dispatchEvent(new CustomEvent("vct-sse-reward", { detail: msg }));
-      }
+      /* reward 이벤트는 storage.js SSE에서 처리 */
     } catch (_) {}
   };
 

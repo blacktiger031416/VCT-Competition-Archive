@@ -204,6 +204,12 @@
           return;
         }
 
+        /* 보상 이벤트 → auth.js 토스트로 relay */
+        if (update.type === "reward") {
+          window.dispatchEvent(new CustomEvent("vct-sse-reward", { detail: update }));
+          return;
+        }
+
         if (!update.key || isLocalOnly(update.key) || isServerOnly(update.key)) return;
 
         /* localStorage 즉시 반영 (push 없이 원본 메서드로) */
