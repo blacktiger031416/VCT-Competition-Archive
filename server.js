@@ -1559,6 +1559,23 @@ async function applyAcsToStock(playerName, newAcs) {
 app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
   try {
     const players = req.body.players || []; // [{ name, acs }]
+    const matchKey = req.body.matchKey || null;
+
+    /* matchKey가 있으면 auto-match가 이미 처리했는지 확인 */
+    if (matchKey) {
+      const amRow = await pool.query(
+        "SELECT value FROM app_data WHERE key=$1",
+        [`auto-match:${matchKey}`]
+      );
+      if (amRow.rows.length > 0) {
+        const am = JSON.parse(amRow.rows[0].value || "{}");
+        if (am.filledMaps && am.filledMaps.length > 0) {
+          console.log(`[stock-apply] ${matchKey} auto-match이 이미 처리함 (filledMaps=${am.filledMaps.length}) → 수동 주식 적용 skip`);
+          return res.json({ ok: true, applied: 0, skipped: "auto-match already applied" });
+        }
+      }
+    }
+
     for (const p of players) {
       if (p.name && typeof p.acs === "number" && p.acs > 0) {
         await applyAcsToStock(p.name, p.acs);

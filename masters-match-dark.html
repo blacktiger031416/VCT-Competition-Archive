@@ -4281,9 +4281,15 @@ function spikeImport() {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
-          body: JSON.stringify({ players: stockPlayers })
+          body: JSON.stringify({ players: stockPlayers, matchKey: MATCH_KEY })
         }).then(function(r) {
-          if (r.ok) { statusEl.textContent += ' · 주식 반영됨'; }
+          return r.json();
+        }).then(function(j) {
+          if (j.skipped) {
+            statusEl.textContent += ' · 주식(자동 적용됨)';
+          } else {
+            statusEl.textContent += ' · 주식 반영됨';
+          }
         }).catch(function() {});
       }
     })
