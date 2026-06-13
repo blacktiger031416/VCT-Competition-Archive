@@ -322,29 +322,6 @@
   var authBtn = document.createElement("button");
   authBtn.type = "button";
 
-  function refreshAuthButtons() {
-    var user = getCachedUser();
-    rewardBtn.style.display = (user && user.role === "admin") ? "" : "none";
-    if (!user) {
-      authBtn.textContent = "로그인";
-      authBtn.className = "auth-header-btn";
-      refreshBtn.style.display = "none";
-      authBtn.onclick = openLoginModal;
-    } else if (user.role === "admin") {
-      authBtn.textContent = "Admin";
-      authBtn.className = "auth-header-btn auth-header-btn--on";
-      refreshBtn.style.display = "";
-      authBtn.onclick = openLogoutConfirm;
-    } else {
-      authBtn.textContent = user.username;
-      authBtn.className = "auth-header-btn auth-header-btn--user";
-      refreshBtn.style.display = "none";
-      authBtn.onclick = openLogoutConfirm;
-    }
-  }
-
-  refreshAuthButtons();
-
   /* 도움말 버튼 */
   var helpBtn = document.createElement("button");
   helpBtn.type = "button";
@@ -382,10 +359,30 @@
   rewardBtn.style.display = "none";
   rewardBtn.addEventListener("click", openRewardModal);
 
+  /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn 상태 동기화 */
   function refreshAuthButtons() {
     var user = getCachedUser();
+    /* 보상 버튼: admin만 표시 */
     rewardBtn.style.display = (user && user.role === "admin") ? "" : "none";
+    if (!user) {
+      authBtn.textContent = "로그인";
+      authBtn.className = "auth-header-btn";
+      refreshBtn.style.display = "none";
+      authBtn.onclick = openLoginModal;
+    } else if (user.role === "admin") {
+      authBtn.textContent = "Admin";
+      authBtn.className = "auth-header-btn auth-header-btn--on";
+      refreshBtn.style.display = "";
+      authBtn.onclick = openLogoutConfirm;
+    } else {
+      authBtn.textContent = user.username;
+      authBtn.className = "auth-header-btn auth-header-btn--user";
+      refreshBtn.style.display = "none";
+      authBtn.onclick = openLogoutConfirm;
+    }
   }
+
+  refreshAuthButtons();
 
   if (header) {
     /* 우측 버튼 그룹 wrapper */
