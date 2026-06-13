@@ -4100,32 +4100,46 @@ window.addEventListener('storage', function(e) {
         .catch(function () { return {}; });
     });
     Promise.all(fetches).then(function (results) {
-      var updated = false;
+      var changedMaps = {};
       results.forEach(function (data) {
         Object.keys(data).forEach(function (key) {
-          if (data[key] !== null && data[key] !== undefined) {
-            localStorage.setItem(key, data[key]);
-            updated = true;
-          }
+          var val = data[key];
+          if (val === null || val === undefined) return;
+          /* 변화가 있을 때만 localStorage 갱신 */
+          if (localStorage.getItem(key) === val) return;
+          localStorage.setItem(key, val);
+          /* 어떤 mapIdx가 바뀌었는지 추적 */
+          var m = key.match(/:(\d+)$/);
+          if (m) changedMaps[parseInt(m[1], 10)] = true;
+          else   changedMaps[-1] = true; /* mapIdx 없는 키 */
         });
       });
-      if (updated) {
-        /* 데이터가 채워졌으면 각 맵 다시 렌더링 */
-        maps.forEach(function (map, idx) {
-          loadPlayersSync(idx);
-          loadRoundState(idx);
-          loadStatsState(idx);
-          renderMap(map, idx);
-          renderRoundTracker(map, idx);
-          renderTeamStats(map, idx);
-        });
-        console.log("[sync] 서버에서 경기 데이터 복구 완료 (" + MATCH_KEY + ")");
-      }
+      var changedIdxs = Object.keys(changedMaps).map(Number);
+      if (changedIdxs.length === 0) return;
+      /* 변화된 맵만 다시 렌더링 */
+      maps.forEach(function (map, idx) {
+        if (!changedMaps[idx] && !changedMaps[-1]) return;
+        loadPlayersSync(idx);
+        loadRoundState(idx);
+        loadStatsState(idx);
+        renderMap(map, idx);
+        renderRoundTracker(map, idx);
+        renderTeamStats(map, idx);
+      });
+      console.log("[sync] 서버 데이터 반영 완료 — 변경된 맵:", changedIdxs);
     });
   }
 
   window.addEventListener("load", function () {
+    /* 초기 1회 즉시 동기화 */
     setTimeout(syncMatchDataFromServer, 800);
+
+    /* 자동입력 ON 상태이면 60초마다 서버 폴링 (SSE를 놓쳐도 자동 반영) */
+    setInterval(function () {
+      if (localStorage.getItem(LS_KEY) === "1") {
+        syncMatchDataFromServer();
+      }
+    }, 60 * 1000);
   });
 
   /* auth.js 로드 완료 후 초기화 */
