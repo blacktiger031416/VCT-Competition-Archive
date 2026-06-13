@@ -684,6 +684,48 @@ app.delete("/api/suggestions/:ts", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── API: 전체 보상 지급 (Admin 전용) ───────────────── */
+app.post("/api/admin/reward-all", requireAdmin, async (req, res) => {
+  const coins   = parseInt(req.body.coins,  10);
+  const message = String(req.body.message || "").trim();
+  if (!coins || coins < 1) return res.status(400).json({ error: "코인 수를 1 이상 입력하세요." });
+  if (!message)            return res.status(400).json({ error: "메시지를 입력하세요." });
+  try {
+    /* admin·test 제외 전체 유저 코인 지급 */
+    const usersRes = await pool.query(`
+      SELECT ad.key, ad.value
+      FROM app_data ad
+      JOIN users u ON u.username = SUBSTRING(ad.key FROM 7)
+      WHERE ad.key LIKE 'coins:%' AND u.role NOT IN ('admin','test')
+    `);
+    let count = 0;
+    for (const row of usersRes.rows) {
+      const cur = parseInt(row.value, 10) || 0;
+      const next = cur + coins;
+      await pool.query(
+        `UPDATE app_data SET value=$1, updated_at=NOW() WHERE key=$2`,
+        [String(next), row.key]
+      );
+      /* 실시간 브로드캐스트 — 개별 유저 코인 갱신 */
+      broadcast({ type: "set", key: row.key, value: String(next) });
+      count++;
+    }
+    /* 보상 공지 저장 (reward: 키) */
+    const rewardKey = `reward:${Date.now()}`;
+    const rewardVal = JSON.stringify({ coins, message, at: new Date().toISOString() });
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,
+      [rewardKey, rewardVal]
+    );
+    /* 전체 브로드캐스트 — 보상 공지 */
+    broadcast({ type: "reward", coins, message, at: new Date().toISOString() });
+    console.log(`[admin] 전체 보상 지급: ${coins}코인 × ${count}명 | "${message}"`);
+    res.json({ ok: true, count, coins, message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ── API: 보유 주식 조회 ────────────────────────────── */
 app.get("/api/stock/holdings", requireAuth, async (req, res) => {
   const key = `holdings:${req.user.username}`;

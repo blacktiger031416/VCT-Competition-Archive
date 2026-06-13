@@ -4060,6 +4060,7 @@ window.addEventListener('storage', function(e) {
   });
 
   /* SSE: auto-match-filled 수신 → 해당 맵 자동 갱신 */
+  window.__vctSseConnected = true;   /* auth.js fallback SSE 중복 방지 */
   var _sse = new EventSource("/api/events");
   _sse.onmessage = function (e) {
     try {
@@ -4076,6 +4077,10 @@ window.addEventListener('storage', function(e) {
           renderTeamStats(maps[mapIdx], mapIdx);
           console.log("[auto-match] 맵" + (mapIdx + 1) + "(" + (msg.mapName || "") + ") 자동 입력 완료 (선수·라운드·스코어)");
         }, 600);
+      }
+      /* 보상 이벤트 → auth.js 토스트 */
+      if (msg.type === "reward") {
+        window.dispatchEvent(new CustomEvent("vct-sse-reward", { detail: msg }));
       }
     } catch (_) {}
   };

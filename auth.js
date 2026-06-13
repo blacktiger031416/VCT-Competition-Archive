@@ -324,20 +324,18 @@
 
   function refreshAuthButtons() {
     var user = getCachedUser();
+    rewardBtn.style.display = (user && user.role === "admin") ? "" : "none";
     if (!user) {
-      /* 미로그인 */
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
       refreshBtn.style.display = "none";
       authBtn.onclick = openLoginModal;
     } else if (user.role === "admin") {
-      /* Admin */
       authBtn.textContent = "Admin";
       authBtn.className = "auth-header-btn auth-header-btn--on";
       refreshBtn.style.display = "";
       authBtn.onclick = openLogoutConfirm;
     } else {
-      /* 일반 유저 */
       authBtn.textContent = user.username;
       authBtn.className = "auth-header-btn auth-header-btn--user";
       refreshBtn.style.display = "none";
@@ -375,11 +373,26 @@
     }
   })();
 
+  /* 보상 버튼 (admin만) */
+  var rewardBtn = document.createElement("button");
+  rewardBtn.type = "button";
+  rewardBtn.className = "suggest-trigger-btn";
+  rewardBtn.innerHTML = "🎁 보상";
+  rewardBtn.title = "전체 유저에게 코인 보상 지급";
+  rewardBtn.style.display = "none";
+  rewardBtn.addEventListener("click", openRewardModal);
+
+  function refreshAuthButtons() {
+    var user = getCachedUser();
+    rewardBtn.style.display = (user && user.role === "admin") ? "" : "none";
+  }
+
   if (header) {
     /* 우측 버튼 그룹 wrapper */
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
+    rightGroup.appendChild(rewardBtn);
     if (suggestBtn) rightGroup.appendChild(suggestBtn);
     rightGroup.appendChild(helpBtn);
     rightGroup.appendChild(authBtn);
@@ -397,6 +410,7 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
+    floatWrap.appendChild(rewardBtn);
     if (suggestBtn) floatWrap.appendChild(suggestBtn);
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
@@ -855,6 +869,150 @@
     }).then(function (r) { return r.json(); })
       .then(function (data) { renderList(Array.isArray(data) ? data : []); })
       .catch(function () { listEl.innerHTML = '<div class="sg-empty">불러오기 실패.</div>'; });
+  }
+
+  /* ── 보상 지급 모달 (Admin) ── */
+  function openRewardModal() {
+    var existing = document.querySelector(".login-modal");
+    if (existing) existing.remove();
+
+    var modal = document.createElement("div");
+    modal.className = "login-modal";
+    modal.innerHTML = [
+      '<div class="login-box" style="width:380px">',
+        '<div class="login-header">',
+          '<span class="login-title">🎁 전체 보상 지급</span>',
+          '<button class="login-close" id="reward-close">✕</button>',
+        '</div>',
+        '<div class="login-body" style="display:flex;flex-direction:column;gap:14px">',
+          '<div style="background:rgba(255,200,60,.07);border:1px solid rgba(255,200,60,.2);border-radius:6px;padding:10px 14px;font-size:12px;color:rgba(255,200,60,.85);line-height:1.6">',
+            'admin·test 계정을 제외한 모든 유저에게 코인을 지급합니다.',
+          '</div>',
+          '<div>',
+            '<label style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px">지급 코인 수</label>',
+            '<input id="reward-coins" type="number" min="1" placeholder="예: 500" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:9px 12px;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700;outline:none">',
+          '</div>',
+          '<div>',
+            '<label style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px">공지 메시지</label>',
+            '<textarea id="reward-msg" class="sg-textarea" placeholder="예: 점검 보상으로 코인을 지급드립니다 :)" style="height:90px"></textarea>',
+            '<div id="reward-msg-char" class="sg-char">0 / 200</div>',
+          '</div>',
+          '<div id="reward-status" style="font-size:12px;min-height:16px;text-align:center"></div>',
+          '<button id="reward-send-btn" class="login-submit" style="margin-top:2px">지급하기</button>',
+        '</div>',
+      '</div>',
+    ].join("");
+
+    document.body.appendChild(modal);
+
+    var msgEl   = modal.querySelector("#reward-msg");
+    var charEl  = modal.querySelector("#reward-msg-char");
+    var sendBtn = modal.querySelector("#reward-send-btn");
+    var statusEl= modal.querySelector("#reward-status");
+
+    msgEl.addEventListener("input", function () {
+      var len = msgEl.value.length;
+      charEl.textContent = len + " / 200";
+      charEl.className = "sg-char" + (len > 200 ? " over" : "");
+    });
+
+    modal.querySelector("#reward-close").addEventListener("click", function () { modal.remove(); });
+    modal.addEventListener("click", function (e) { if (e.target === modal) modal.remove(); });
+
+    sendBtn.addEventListener("click", function () {
+      var coins = parseInt(modal.querySelector("#reward-coins").value, 10);
+      var msg   = msgEl.value.trim();
+      if (!coins || coins < 1) { statusEl.style.color="#ff6b6b"; statusEl.textContent="코인 수를 입력하세요."; return; }
+      if (!msg)                 { statusEl.style.color="#ff6b6b"; statusEl.textContent="메시지를 입력하세요."; return; }
+      if (msg.length > 200)     { statusEl.style.color="#ff6b6b"; statusEl.textContent="200자 이하로 입력하세요."; return; }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = "지급 중...";
+      statusEl.textContent = "";
+
+      fetch("/api/admin/reward-all", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() },
+        body: JSON.stringify({ coins: coins, message: msg }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            statusEl.style.color = "#3ddc84";
+            statusEl.textContent = "✅ " + d.count + "명에게 " + d.coins + "코인 지급 완료!";
+            sendBtn.textContent  = "지급 완료";
+          } else {
+            statusEl.style.color = "#ff6b6b";
+            statusEl.textContent = "❌ " + (d.error || "오류 발생");
+            sendBtn.disabled = false;
+            sendBtn.textContent = "지급하기";
+          }
+        })
+        .catch(function () {
+          statusEl.style.color = "#ff6b6b";
+          statusEl.textContent = "❌ 네트워크 오류";
+          sendBtn.disabled = false;
+          sendBtn.textContent = "지급하기";
+        });
+    });
+  }
+
+  /* ── SSE: 보상 수신 (일반 유저 — 토스트 알림)
+       각 페이지의 SSE 연결이 reward 이벤트를 window에 dispatch하면 여기서 받습니다.
+       페이지에 SSE가 없는 경우(로그인 페이지 등)를 위해 별도 연결도 fallback으로 유지. ── */
+  window.addEventListener("vct-sse-reward", function (e) {
+    var d = e.detail;
+    if (d && d.coins) showRewardToast(d.coins, d.message || "");
+  });
+
+  /* fallback: 페이지 자체 SSE가 없을 때만 연결 (중복 방지: 1초 후 체크) */
+  setTimeout(function () {
+    if (window.__vctSseConnected) return; /* 페이지 SSE가 이미 연결됨 */
+    try {
+      var _sseAuth = new EventSource("/api/events");
+      _sseAuth.onmessage = function (e) {
+        try {
+          var msg = JSON.parse(e.data);
+          if (msg.type === "reward") showRewardToast(msg.coins, msg.message || "");
+        } catch (_) {}
+      };
+    } catch (_) {}
+  }, 1000);
+
+  function showRewardToast(coins, message) {
+    var toast = document.createElement("div");
+    toast.style.cssText = [
+      "position:fixed", "bottom:28px", "left:50%", "transform:translateX(-50%)",
+      "z-index:99999", "background:#0d1f0d", "border:1px solid rgba(61,220,132,.35)",
+      "border-radius:10px", "padding:16px 24px", "min-width:280px", "max-width:400px",
+      "box-shadow:0 8px 32px rgba(0,0,0,.6)", "font-family:'Noto Sans KR','Barlow',sans-serif",
+      "text-align:center", "animation:rewardToastIn .3s ease",
+    ].join(";");
+    toast.innerHTML = [
+      '<div style="font-size:22px;margin-bottom:6px">🎁</div>',
+      '<div style="font-size:15px;font-weight:700;color:#3ddc84;margin-bottom:4px">+' + coins + ' 코인 지급!</div>',
+      '<div style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.5;word-break:break-word">' + escapeHtml(message) + '</div>',
+    ].join("");
+
+    /* 애니메이션 키프레임 */
+    if (!document.querySelector("#reward-toast-style")) {
+      var s = document.createElement("style");
+      s.id = "reward-toast-style";
+      s.textContent = "@keyframes rewardToastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}";
+      document.head.appendChild(s);
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(function () {
+      toast.style.transition = "opacity .4s";
+      toast.style.opacity = "0";
+      setTimeout(function () { toast.remove(); }, 400);
+    }, 5000);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
   /* ── 전역 노출 ── */
