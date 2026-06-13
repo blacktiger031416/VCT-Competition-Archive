@@ -4082,6 +4082,52 @@ window.addEventListener('storage', function(e) {
     } catch (_) {}
   };
 
+  /* ── 페이지 로드 시 서버 DB에서 이 경기 데이터 초기 동기화 ──
+     localStorage가 비어있어도 서버에 저장된 players/rounds/stats를
+     가져와서 채운 뒤 각 맵을 렌더링.
+     (SSE 신호를 놓친 경우 새로고침하면 복구됨)                    ── */
+  function syncMatchDataFromServer() {
+    var prefixes = [
+      "players:" + MATCH_KEY + ":",
+      "rounds:"  + MATCH_KEY + ":",
+      "stats:"   + MATCH_KEY + ":",
+      "set:"     + MATCH_KEY + ":",
+      "vct_bo:"  + MATCH_KEY,
+    ];
+    var fetches = prefixes.map(function (prefix) {
+      return fetch("/api/data-prefix?prefix=" + encodeURIComponent(prefix))
+        .then(function (r) { return r.ok ? r.json() : {}; })
+        .catch(function () { return {}; });
+    });
+    Promise.all(fetches).then(function (results) {
+      var updated = false;
+      results.forEach(function (data) {
+        Object.keys(data).forEach(function (key) {
+          if (data[key] !== null && data[key] !== undefined) {
+            localStorage.setItem(key, data[key]);
+            updated = true;
+          }
+        });
+      });
+      if (updated) {
+        /* 데이터가 채워졌으면 각 맵 다시 렌더링 */
+        maps.forEach(function (map, idx) {
+          loadPlayersSync(idx);
+          loadRoundState(idx);
+          loadStatsState(idx);
+          renderMap(map, idx);
+          renderRoundTracker(map, idx);
+          renderTeamStats(map, idx);
+        });
+        console.log("[sync] 서버에서 경기 데이터 복구 완료 (" + MATCH_KEY + ")");
+      }
+    });
+  }
+
+  window.addEventListener("load", function () {
+    setTimeout(syncMatchDataFromServer, 800);
+  });
+
   /* auth.js 로드 완료 후 초기화 */
   if (document.readyState === "complete") {
     setTimeout(initBtn, 100);

@@ -94,6 +94,23 @@ app.get("/api/data/all", async (req, res) => {
   }
 });
 
+/* ── API: prefix로 키 목록 조회 (매치 페이지 초기 로드용) ── */
+app.get("/api/data-prefix", async (req, res) => {
+  const prefix = req.query.prefix;
+  if (!prefix) return res.status(400).json({ error: "prefix required" });
+  try {
+    const result = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE $1",
+      [prefix + "%"]
+    );
+    const data = {};
+    result.rows.forEach((row) => { data[row.key] = row.value; });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 단일 키 조회 ────────────────────────────── */
 app.get("/api/data/:key", async (req, res) => {
   const key = decodeURIComponent(req.params.key);
