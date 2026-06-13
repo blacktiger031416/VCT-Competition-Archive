@@ -2005,6 +2005,6 @@ app.listen(PORT, async () => {
   setInterval(async () => {
     await pollVctMatches();
     await saveProcessedMaps();
-  }, 5 * 60 * 1000); /* 5분마다 */
-  console.log("[stock] 자동 주가 폴링 시작 (5분 주기, 맵별 감지)");
+  }, 60 * 1000); /* 1분마다 */
+  console.log("[stock] 자동 주가 폴링 시작 (1분 주기, 맵별 감지)");
 });
