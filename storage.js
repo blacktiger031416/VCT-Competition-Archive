@@ -210,6 +210,12 @@
           return;
         }
 
+        /* 새 공지 이벤트 → auth.js 배지로 relay */
+        if (update.type === "new-notice") {
+          window.dispatchEvent(new CustomEvent("vct-new-notice", { detail: update }));
+          return;
+        }
+
         if (!update.key || isLocalOnly(update.key) || isServerOnly(update.key)) return;
 
         /* localStorage 즉시 반영 (push 없이 원본 메서드로) */

@@ -684,6 +684,53 @@ app.delete("/api/suggestions/:ts", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── API: 공지 작성 (Admin 전용) ────────────────────── */
+app.post("/api/notices", requireAdmin, async (req, res) => {
+  const title = String((req.body && req.body.title) || "").trim();
+  const text  = String((req.body && req.body.text)  || "").trim();
+  if (!title) return res.status(400).json({ error: "제목을 입력해주세요." });
+  if (!text)  return res.status(400).json({ error: "내용을 입력해주세요." });
+  if (title.length > 100) return res.status(400).json({ error: "제목은 100자 이하로 입력해주세요." });
+  if (text.length  > 1000) return res.status(400).json({ error: "내용은 1000자 이하로 입력해주세요." });
+  const key = `notice:${Date.now()}`;
+  try {
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,
+      [key, JSON.stringify({ title, text, at: new Date().toISOString() })]
+    );
+    broadcast({ type: "new-notice", at: new Date().toISOString() });
+    res.json({ ok: true, key });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 공지 목록 (로그인 유저 전체) ──────────────── */
+app.get("/api/notices", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'notice:%' ORDER BY key DESC"
+    );
+    res.json(result.rows.map((r) => {
+      const v = JSON.parse(r.value);
+      return { key: r.key, title: v.title, text: v.text, at: v.at };
+    }));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 공지 삭제 (Admin 전용) ────────────────────── */
+app.delete("/api/notices/:ts", requireAdmin, async (req, res) => {
+  const key = `notice:${req.params.ts}`;
+  try {
+    await pool.query("DELETE FROM app_data WHERE key=$1", [key]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 전체 보상 지급 (Admin 전용) ───────────────── */
 app.post("/api/admin/reward-all", requireAdmin, async (req, res) => {
   const coins   = parseInt(req.body.coins,  10);

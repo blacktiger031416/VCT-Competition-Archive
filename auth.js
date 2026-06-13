@@ -332,6 +332,24 @@
     if (window.vctHelpOpen) window.vctHelpOpen();
   });
 
+  /* 공지 버튼 (index 페이지만) */
+  var noticeBtn = null;
+  (function () {
+    var p = window.location.pathname;
+    var onIndex = (p === "/" || p === "" || p.endsWith("/index.html"));
+    if (!onIndex) return;
+    noticeBtn = document.createElement("button");
+    noticeBtn.type = "button";
+    noticeBtn.className = "suggest-trigger-btn";
+    if (isAdmin()) {
+      noticeBtn.innerHTML = "📢 공지 작성";
+      noticeBtn.addEventListener("click", openNoticeAdminModal);
+    } else {
+      noticeBtn.innerHTML = "📢 공지<span class='sg-badge' id='nc-badge'></span>";
+      noticeBtn.addEventListener("click", openNoticeUserModal);
+    }
+  })();
+
   /* 건의함 버튼 (index 페이지만) */
   var suggestBtn = null;
   (function () {
@@ -390,6 +408,7 @@
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
     rightGroup.appendChild(rewardBtn);
+    if (noticeBtn) rightGroup.appendChild(noticeBtn);
     if (suggestBtn) rightGroup.appendChild(suggestBtn);
     rightGroup.appendChild(helpBtn);
     rightGroup.appendChild(authBtn);
@@ -408,15 +427,19 @@
     ].join(";");
     floatWrap.appendChild(refreshBtn);
     floatWrap.appendChild(rewardBtn);
+    if (noticeBtn) floatWrap.appendChild(noticeBtn);
     if (suggestBtn) floatWrap.appendChild(suggestBtn);
     floatWrap.appendChild(helpBtn);
     floatWrap.appendChild(authBtn);
     document.body.appendChild(floatWrap);
   }
 
-  /* 건의함 배지 초기 확인 (Admin + index) */
+  /* 배지 초기 확인 (index) */
   if (isAdmin() && suggestBtn) {
     checkSuggestBadge();
+  }
+  if (!isAdmin() && noticeBtn) {
+    checkNoticeBadge();
   }
 
   /* ── 토큰 서버 검증 (백그라운드) ─────────────────── */
@@ -664,6 +687,242 @@
       options.onSubmit();
       close();
     });
+  }
+
+  /* ── 공지 배지 헬퍼 (일반 유저) ────────────────────── */
+  function showNoticeBadge() {
+    var b = document.getElementById("nc-badge");
+    if (b) b.style.display = "block";
+  }
+  function hideNoticeBadge() {
+    var b = document.getElementById("nc-badge");
+    if (b) b.style.display = "none";
+  }
+  function checkNoticeBadge() {
+    fetch("/api/notices", {
+      headers: { Authorization: "Bearer " + getToken() },
+    }).then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!Array.isArray(data) || !data.length) { hideNoticeBadge(); return; }
+        var lastViewed = localStorage.getItem("nc_last_viewed") || "";
+        var hasNew = data.some(function (item) { return item.at > lastViewed; });
+        if (hasNew) showNoticeBadge(); else hideNoticeBadge();
+      })
+      .catch(function () {});
+  }
+
+  /* SSE: 새 공지 → 일반 유저 배지 표시 */
+  window.addEventListener("vct-new-notice", function () {
+    if (!isAdmin()) showNoticeBadge();
+  });
+
+  /* ── 공지 작성·관리 모달 (Admin) ────────────────────── */
+  function openNoticeAdminModal() {
+    var existing = document.querySelector(".login-modal");
+    if (existing) existing.remove();
+
+    var modal = document.createElement("div");
+    modal.className = "login-modal";
+    modal.innerHTML =
+      '<div class="login-backdrop"></div>' +
+      '<div class="login-panel" style="width:min(560px,calc(100vw - 32px));" role="dialog" aria-modal="true">' +
+        '<div class="login-panel-header">' +
+          '<h2>📢 공지 작성</h2>' +
+          '<button class="login-close" type="button" aria-label="닫기">×</button>' +
+        '</div>' +
+        '<div class="login-form" style="display:flex;flex-direction:column;gap:14px;">' +
+          /* 작성 폼 */
+          '<div style="display:flex;flex-direction:column;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08);">' +
+            '<div>' +
+              '<input id="nc-title" type="text" class="sg-textarea" placeholder="제목 (최대 100자)" maxlength="100"' +
+                ' style="height:auto;padding:9px 12px;font-size:14px;font-weight:700;">' +
+            '</div>' +
+            '<div>' +
+              '<textarea id="nc-text" class="sg-textarea" placeholder="내용을 입력해주세요. (최대 1000자)" maxlength="1000" style="height:110px;"></textarea>' +
+              '<div class="sg-char"><span id="nc-count">0</span> / 1000</div>' +
+            '</div>' +
+            '<p class="login-error" id="nc-error" hidden></p>' +
+            '<p class="login-success" id="nc-ok" hidden>공지가 등록되었습니다!</p>' +
+            '<div class="login-actions">' +
+              '<button type="button" class="login-submit" id="nc-submit">공지 등록</button>' +
+            '</div>' +
+          '</div>' +
+          /* 기존 공지 목록 */
+          '<div class="sg-list" id="nc-list"><div class="sg-empty">불러오는 중…</div></div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var titleEl  = modal.querySelector("#nc-title");
+    var textEl   = modal.querySelector("#nc-text");
+    var countEl  = modal.querySelector("#nc-count");
+    var errEl    = modal.querySelector("#nc-error");
+    var okEl     = modal.querySelector("#nc-ok");
+    var submitBtn = modal.querySelector("#nc-submit");
+    var listEl   = modal.querySelector("#nc-list");
+
+    textEl.addEventListener("input", function () {
+      var len = textEl.value.length;
+      countEl.textContent = len;
+      countEl.parentElement.className = "sg-char" + (len > 1000 ? " over" : "");
+    });
+
+    function close() { modal.remove(); document.removeEventListener("keydown", escH); }
+    modal.querySelector(".login-backdrop").addEventListener("click", close);
+    modal.querySelector(".login-close").addEventListener("click", close);
+    function escH(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", escH);
+
+    function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function fmtDate(iso) {
+      try {
+        var d = new Date(iso);
+        var kst = new Date(d.getTime() + 9 * 3600000);
+        return kst.toISOString().replace("T"," ").slice(0,16) + " KST";
+      } catch(e) { return iso; }
+    }
+
+    function renderList(items) {
+      if (!items.length) { listEl.innerHTML = '<div class="sg-empty">등록된 공지가 없습니다.</div>'; return; }
+      listEl.innerHTML = items.map(function (item) {
+        var ts = item.key.replace("notice:", "");
+        return '<div class="sg-item" data-ts="' + esc(ts) + '">' +
+          '<div class="sg-item-meta">' +
+            '<span style="font-weight:700;color:rgba(255,255,255,.85)">' + esc(item.title) + '</span>' +
+            '<span>' + fmtDate(item.at) + '</span>' +
+            '<button class="sg-item-del" type="button">삭제</button>' +
+          '</div>' +
+          '<div class="sg-item-text">' + esc(item.text) + '</div>' +
+        '</div>';
+      }).join("");
+
+      listEl.querySelectorAll(".sg-item-del").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var item = btn.closest(".sg-item");
+          var ts = item.dataset.ts;
+          btn.disabled = true; btn.textContent = "…";
+          fetch("/api/notices/" + encodeURIComponent(ts), {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + getToken() },
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.ok) {
+                item.remove();
+                if (!listEl.querySelector(".sg-item"))
+                  listEl.innerHTML = '<div class="sg-empty">등록된 공지가 없습니다.</div>';
+              } else { btn.disabled = false; btn.textContent = "삭제"; }
+            })
+            .catch(function () { btn.disabled = false; btn.textContent = "삭제"; });
+        });
+      });
+    }
+
+    function loadList() {
+      fetch("/api/notices", { headers: { Authorization: "Bearer " + getToken() } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { renderList(Array.isArray(data) ? data : []); })
+        .catch(function () { listEl.innerHTML = '<div class="sg-empty">불러오기 실패.</div>'; });
+    }
+    loadList();
+
+    submitBtn.addEventListener("click", function () {
+      var title = titleEl.value.trim();
+      var text  = textEl.value.trim();
+      errEl.hidden = true; okEl.hidden = true;
+      if (!title) { errEl.textContent = "제목을 입력해주세요."; errEl.hidden = false; return; }
+      if (!text)  { errEl.textContent = "내용을 입력해주세요."; errEl.hidden = false; return; }
+      if (title.length > 100)  { errEl.textContent = "제목은 100자 이하로 입력해주세요."; errEl.hidden = false; return; }
+      if (text.length  > 1000) { errEl.textContent = "내용은 1000자 이하로 입력해주세요."; errEl.hidden = false; return; }
+      submitBtn.disabled = true; submitBtn.textContent = "등록 중...";
+      fetch("/api/notices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + getToken() },
+        body: JSON.stringify({ title: title, text: text }),
+      }).then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            okEl.hidden = false;
+            titleEl.value = ""; textEl.value = ""; countEl.textContent = "0";
+            submitBtn.disabled = false; submitBtn.textContent = "공지 등록";
+            loadList();
+            setTimeout(function () { okEl.hidden = true; }, 2500);
+          } else {
+            errEl.textContent = d.error || "오류가 발생했습니다.";
+            errEl.hidden = false;
+            submitBtn.disabled = false; submitBtn.textContent = "공지 등록";
+          }
+        })
+        .catch(function () {
+          errEl.textContent = "서버에 연결할 수 없습니다.";
+          errEl.hidden = false;
+          submitBtn.disabled = false; submitBtn.textContent = "공지 등록";
+        });
+    });
+
+    setTimeout(function () { titleEl.focus(); }, 60);
+  }
+
+  /* ── 공지 열람 모달 (일반 유저) ─────────────────────── */
+  function openNoticeUserModal() {
+    var existing = document.querySelector(".login-modal");
+    if (existing) existing.remove();
+
+    /* 열리는 순간 "확인함" 기록 → 배지 숨김 */
+    localStorage.setItem("nc_last_viewed", new Date().toISOString());
+    hideNoticeBadge();
+
+    var modal = document.createElement("div");
+    modal.className = "login-modal";
+    modal.innerHTML =
+      '<div class="login-backdrop"></div>' +
+      '<div class="login-panel" style="width:min(520px,calc(100vw - 32px));" role="dialog" aria-modal="true">' +
+        '<div class="login-panel-header">' +
+          '<h2>📢 공지사항</h2>' +
+          '<button class="login-close" type="button" aria-label="닫기">×</button>' +
+        '</div>' +
+        '<div class="login-form" style="display:flex;flex-direction:column;gap:12px;">' +
+          '<div class="sg-list" id="nc-list-user"><div class="sg-empty">불러오는 중…</div></div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var listEl = modal.querySelector("#nc-list-user");
+
+    function close() { modal.remove(); document.removeEventListener("keydown", escH); }
+    modal.querySelector(".login-backdrop").addEventListener("click", close);
+    modal.querySelector(".login-close").addEventListener("click", close);
+    function escH(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", escH);
+
+    function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function fmtDate(iso) {
+      try {
+        var d = new Date(iso);
+        var kst = new Date(d.getTime() + 9 * 3600000);
+        return kst.toISOString().replace("T"," ").slice(0,16) + " KST";
+      } catch(e) { return iso; }
+    }
+
+    fetch("/api/notices", { headers: { Authorization: "Bearer " + getToken() } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!Array.isArray(data) || !data.length) {
+          listEl.innerHTML = '<div class="sg-empty">등록된 공지가 없습니다.</div>';
+          return;
+        }
+        listEl.innerHTML = data.map(function (item) {
+          return '<div class="sg-item">' +
+            '<div class="sg-item-meta">' +
+              '<span style="font-weight:700;color:rgba(255,255,255,.85);font-size:14px;">' + esc(item.title) + '</span>' +
+              '<span>' + fmtDate(item.at) + '</span>' +
+            '</div>' +
+            '<div class="sg-item-text" style="white-space:pre-wrap;">' + esc(item.text) + '</div>' +
+          '</div>';
+        }).join("");
+      })
+      .catch(function () { listEl.innerHTML = '<div class="sg-empty">불러오기 실패.</div>'; });
   }
 
   /* ── 건의함 제출 모달 (일반 유저) ──────────────────── */
