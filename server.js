@@ -1390,10 +1390,10 @@ app.get("*", (req, res) => {
 
 /* ── API: 자동입력 활성화 (admin) ─────────────────── */
 app.put("/api/auto-match", requireAdmin, async (req, res) => {
-  const { matchKey, team1, team2 } = req.body || {};
+  const { matchKey, team1, team2, league } = req.body || {};
   if (!matchKey || !team1 || !team2)
     return res.status(400).json({ error: "matchKey, team1, team2 필수" });
-  const record = { matchKey, team1, team2, active: true, thespikeMatchId: null, filledMaps: [] };
+  const record = { matchKey, team1, team2, league: league || "", active: true, thespikeMatchId: null, filledMaps: [] };
   try {
     await pool.query(
       `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
@@ -1509,11 +1509,13 @@ async function applyAcsToStock(playerName, newAcs) {
 
   const { state, resolvedKey } = found;
 
-  /* 신규 선수: 초기 상태를 DB에 저장하고 종료 (ref === newAcs 이므로 변동 없음) */
+  /* 신규 선수: 초기 상태 먼저 저장 */
   if (isNew) {
     await saveStockState(playerName, state, resolvedKey);
-    console.log(`[stock] ${resolvedKey}: 신규 등록 가격=${state.price} (ACS ${newAcs})`);
-    return;
+    console.log(`[stock] ${resolvedKey}: 신규 등록 기준가격=${state.price} (기준ACS ${state.ref})`);
+    /* 현재 ACS = 기준 ACS 이면 변동 없음 (이력 없는 완전 신규 선수) */
+    if (newAcs === state.ref) return;
+    /* 이력이 있어서 기준이 역사 평균인 경우 → 현재 ACS와 비교해 변동 적용 (fall-through) */
   }
 
   /* 이미 동일 ACS로 반영된 경우 중복 방지 */
