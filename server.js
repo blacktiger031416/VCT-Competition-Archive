@@ -1678,17 +1678,22 @@ function normalizeTeamName(name) {
 }
 
 /* 팀 이름 퍼지 매칭: 정확 일치 → 포함 관계 → 단어 토큰 겹침 → 악센트 제거 비교 */
+/* 팀 이름 fuzzy 매칭
+   - 정확일치 → contains → 단어 토큰(공통단어 제외) → 악센트 제거
+   - "Team Heretics"·"Team Vitality" 처럼 "team" 공유 → false 여야 함 */
+const TEAM_GENERIC_WORDS = new Set(["team","esports","esport","gaming","games","club","fc","sc","gg","gc","red","blue"]);
 function teamFuzzyMatch(apiTitle, queryName) {
   if (!apiTitle || !queryName) return false;
   const t = normalizeTeamName(apiTitle);
   const q = normalizeTeamName(queryName);
   if (t === q) return true;
   if (t.includes(q) || q.includes(t)) return true;
-  // 단어 단위 매칭
-  const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/);
-  const qWords = queryName.toLowerCase().split(/[\s\-_]+/);
-  if (qWords.some(qw => qw.length >= 3 && tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)))) return true;
-  // 악센트 제거 비교 (é→e, á→a 등)
+  // 단어 토큰 매칭 — 공통 단어(team, esports 등) 제외, 길이 4 이상만
+  const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 4 && !TEAM_GENERIC_WORDS.has(w));
+  const qWords = queryName.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 4 && !TEAM_GENERIC_WORDS.has(w));
+  if (tWords.length > 0 && qWords.length > 0 &&
+      qWords.some(qw => tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)))) return true;
+  // 악센트 제거 비교 (é→e, á→a, Ü→U 등)
   const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
   return strip(t) === strip(q) || strip(t).includes(strip(q)) || strip(q).includes(strip(t));
 }
