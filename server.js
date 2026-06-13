@@ -1813,7 +1813,11 @@ async function pollAutoMatches(allEventMatches) {
           /* ── 선수 주식 즉시 반영 (applyAcsToStock 내부에서 중복 방지) ── */
           for (const p of [...teamAPlayers, ...teamBPlayers]) {
             if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-              await applyAcsToStock(p.nickname, p.averageCombatScore);
+              try {
+                await applyAcsToStock(p.nickname, p.averageCombatScore);
+              } catch (stockErr) {
+                console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, stockErr.message);
+              }
             }
           }
           if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
@@ -1933,13 +1937,13 @@ async function pollAutoMatches(allEventMatches) {
           if (!am.filledMaps) am.filledMaps = [];
           am.filledMaps.push(map.id);
           console.log(`[auto-match] ${am.team1} vs ${am.team2} 맵${mapIdx+1}(${map.title}) 자동 입력 완료`);
-        }
 
-        /* filledMaps 업데이트 저장 */
-        await pool.query(
-          `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-          [`auto-match:${am.matchKey}`, JSON.stringify(am)]
-        );
+          /* filledMaps를 맵 처리 직후 즉시 저장 (중간 오류 시 재처리 방지) */
+          await pool.query(
+            `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+            [`auto-match:${am.matchKey}`, JSON.stringify(am)]
+          );
+        }
       } catch (e) {
         console.error(`[auto-match] ${am.team1} vs ${am.team2} 오류:`, e.message);
       }
