@@ -1485,13 +1485,8 @@ async function processMatch(matchId) {
       const hasData = players.some(p => typeof p.averageCombatScore === "number" && p.averageCombatScore > 0);
       if (!hasData) continue;
 
-      /* 새로 완료된 맵 — 주가 적용 */
-      console.log(`[stock] 매치 ${matchId} / 맵 ${map.title || mapId} 완료 감지`);
-      for (const p of players) {
-        if (p.nickname && typeof p.averageCombatScore === "number") {
-          await applyAcsToStock(p.nickname, p.averageCombatScore);
-        }
-      }
+      /* 새로 완료된 맵 감지 — 주식은 pollAutoMatches(자동입력 ON) 또는 수동 import에서만 적용 */
+      console.log(`[stock] 매치 ${matchId} / 맵 ${map.title || mapId} 완료 감지 (주식 적용은 auto-match 등록 경기만)`);
       done.push(mapId);
       newMapCount++;
     }
