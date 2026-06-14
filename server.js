@@ -1556,6 +1556,106 @@ async function applyAcsToStock(playerName, newAcs) {
 }
 
 /* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
+/* ── vct_p 일괄 재처리 (tournament·stage 누락 경기 복구) ── */
+app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
+  try {
+    const MK_TOURNAMENTS = new Set(["london", "santiago"]);
+    const MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2",
+                                     "stage1playoffs", "stage2playoffs", "kickoff"]);
+    /* league 추론: matchKey에 알려진 tournament가 포함되면 "masters" */
+    function inferLeague(mkParts) {
+      if (mkParts.some(p => MK_TOURNAMENTS.has(p.toLowerCase()))) return "masters";
+      /* 기타 league는 auto-match 레코드에서 읽음 (아래에서 처리) */
+      return "";
+    }
+
+    /* 모든 players: 키 조회 */
+    const rows = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'players:%'"
+    );
+
+    /* auto-match 레코드 전부 미리 로드 (league 참조용) */
+    const amRows = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"
+    );
+    const amMap = {};
+    amRows.rows.forEach(r => {
+      try { amMap[r.key] = JSON.parse(r.value); } catch {}
+    });
+
+    let updated = 0, skipped = 0;
+
+    for (const row of rows.rows) {
+      /* key 형식: players:MATCH_KEY:mapIdx */
+      const keyParts = row.key.split(":");
+      if (keyParts.length < 3) { skipped++; continue; }
+      const mapIdx   = parseInt(keyParts[keyParts.length - 1]);
+      const matchKey = keyParts.slice(1, -1).join(":");
+
+      let playersData;
+      try { playersData = JSON.parse(row.value); } catch { skipped++; continue; }
+
+      /* matchKey → tournament, stage 파싱 */
+      const mkParts   = matchKey.split("|");
+      const tournament = mkParts.find(p => MK_TOURNAMENTS.has(p.toLowerCase()))?.toLowerCase() || "";
+      const stage      = mkParts.find(p => MK_STAGES.has(p.toLowerCase()))?.toLowerCase() || "";
+
+      /* league: auto-match 레코드 우선, 없으면 추론 */
+      const amRec = amMap[`auto-match:${matchKey}`];
+      const league = (amRec?.league) || inferLeague(mkParts);
+
+      /* 각 선수 슬롯 처리 */
+      for (const slot of Object.values(playersData)) {
+        if (!slot || !slot.name || slot.name === "-") continue;
+        const pName = slot.name.trim();
+        const vk    = `vct_p:${pName}`;
+
+        /* 기존 vct_p 읽기 */
+        const vRow = await pool.query(
+          "SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]
+        );
+        let vData = {}, vKey = vk;
+        if (vRow.rows[0]) {
+          vKey = vRow.rows[0].key;
+          try { vData = JSON.parse(vRow.rows[0].value); } catch {}
+        }
+        if (!vData.maps) vData.maps = [];
+
+        /* 이미 올바른 entry가 있으면 tournament/stage만 보완, 없으면 추가 */
+        const existIdx = vData.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
+        const entry = existIdx >= 0 ? { ...vData.maps[existIdx] } : { matchKey, mapIdx };
+
+        entry.league = league;
+        if (tournament) entry.tournament = tournament;
+        if (stage)      entry.stage      = stage;
+        if (slot.acs != null) entry.acs  = slot.acs;
+        if (slot.kda && slot.kda.includes("/")) entry.kda = slot.kda;
+        if (slot.agent) entry.agent = slot.agent;
+
+        /* acs나 kda가 없으면 스탯 없는 항목 — 스킵 */
+        if (!("acs" in entry) && !("kda" in entry)) { skipped++; continue; }
+
+        if (existIdx >= 0) vData.maps[existIdx] = entry;
+        else vData.maps.push(entry);
+
+        const vVal = JSON.stringify(vData);
+        await pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [vKey, vVal]
+        );
+        broadcast({ type: "set", key: vKey, value: vVal });
+        updated++;
+      }
+    }
+
+    console.log(`[rebuild-vct-p] 완료: ${updated}건 업데이트, ${skipped}건 스킵`);
+    res.json({ ok: true, updated, skipped });
+  } catch (e) {
+    console.error("[rebuild-vct-p]", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
   try {
     const players = req.body.players || []; // [{ name, acs }]

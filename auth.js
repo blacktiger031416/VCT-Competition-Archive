@@ -377,11 +377,42 @@
   rewardBtn.style.display = "none";
   rewardBtn.addEventListener("click", openRewardModal);
 
-  /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn 상태 동기화 */
+  /* 기록 재처리 버튼 (Admin 전용) */
+  var rebuildBtn = document.createElement("button");
+  rebuildBtn.type = "button";
+  rebuildBtn.className = "suggest-trigger-btn";
+  rebuildBtn.innerHTML = "🔄 기록 재처리";
+  rebuildBtn.title = "players: 데이터로 vct_p 기록 일괄 재처리";
+  rebuildBtn.style.display = "none";
+  rebuildBtn.addEventListener("click", function() {
+    if (!confirm("모든 경기 기록(vct_p)을 DB에서 재처리합니다.\n잠시 시간이 걸릴 수 있어요.")) return;
+    rebuildBtn.disabled = true;
+    rebuildBtn.innerHTML = "⏳ 처리중...";
+    var tok = localStorage.getItem("vct_auth_token") || "";
+    fetch("/api/admin/rebuild-vct-p", {
+      method: "POST",
+      credentials: "include",
+      headers: tok ? { "Authorization": "Bearer " + tok } : {}
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(j) {
+        alert("✅ 기록 재처리 완료\n업데이트: " + j.updated + "건\n스킵: " + j.skipped + "건");
+      })
+      .catch(function(e) {
+        alert("❌ 오류: " + e.message);
+      })
+      .finally(function() {
+        rebuildBtn.disabled = false;
+        rebuildBtn.innerHTML = "🔄 기록 재처리";
+      });
+  });
+
+  /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn + rebuildBtn 상태 동기화 */
   function refreshAuthButtons() {
     var user = getCachedUser();
-    /* 보상 버튼: admin만 표시 */
-    rewardBtn.style.display = (user && user.role === "admin") ? "" : "none";
+    /* admin 전용 버튼 */
+    rewardBtn.style.display   = (user && user.role === "admin") ? "" : "none";
+    rebuildBtn.style.display  = (user && user.role === "admin") ? "" : "none";
     if (!user) {
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
@@ -407,6 +438,7 @@
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
+    rightGroup.appendChild(rebuildBtn);
     rightGroup.appendChild(rewardBtn);
     if (noticeBtn) rightGroup.appendChild(noticeBtn);
     if (suggestBtn) rightGroup.appendChild(suggestBtn);
@@ -426,6 +458,7 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
+    floatWrap.appendChild(rebuildBtn);
     floatWrap.appendChild(rewardBtn);
     if (noticeBtn) floatWrap.appendChild(noticeBtn);
     if (suggestBtn) floatWrap.appendChild(suggestBtn);
