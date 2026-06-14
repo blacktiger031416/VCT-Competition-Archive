@@ -152,15 +152,24 @@
     .then(function (data) {
       var dbKeys = Object.keys(data);
 
+      /* vct_p: 키는 admin도 DB 우선으로 처리 (rebuild 후 손상 복구) */
+      var DB_PRIORITY_PREFIXES = ["vct_p:", "vct_roster:"];
+      function isDbPriority(key) {
+        for (var i = 0; i < DB_PRIORITY_PREFIXES.length; i++) {
+          if (key.indexOf(DB_PRIORITY_PREFIXES[i]) === 0) return true;
+        }
+        return false;
+      }
+
       dbKeys.forEach(function (key) {
         if (isLocalOnly(key) || isServerOnly(key)) return;
-        if (_isAdmin) {
-          /* 관리자: localStorage에 없는 키만 DB에서 채움 (슬립 중 저장 보호) */
+        if (_isAdmin && !isDbPriority(key)) {
+          /* 관리자: vct_p/vct_roster 제외한 키는 localStorage 우선 (슬립 중 저장 보호) */
           if (localStorage.getItem(key) === null) {
             _origSet(key, data[key]);
           }
         } else {
-          /* 일반 방문자: DB가 항상 우선 (최신 데이터 표시) */
+          /* 일반 방문자 + admin의 vct_p/vct_roster: DB가 항상 우선 */
           _origSet(key, data[key]);
         }
       });

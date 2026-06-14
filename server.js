@@ -1673,7 +1673,7 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
           `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
           [vKey, vVal]
         );
-        broadcast({ type: "set", key: vKey, value: vVal });
+        /* broadcast 제거: SSE가 admin localStorage를 덮어써서 더 완전한 데이터를 잃는 버그 방지 */
         updated++;
       }
     }
@@ -1702,7 +1702,7 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
         `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
         [rKey, rVal]
       );
-      broadcast({ type: "set", key: rKey, value: rVal });
+      /* vct_roster도 broadcast 하지 않음 — 페이지 새로고침으로 DB에서 pull */
       rosterCreated++;
       console.log(`[rebuild-vct-p] vct_roster 보완: ${teamName} (${merged.main.length}명)`);
     }
