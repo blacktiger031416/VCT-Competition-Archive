@@ -1562,10 +1562,9 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     const MK_TOURNAMENTS = new Set(["london", "santiago"]);
     const MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2",
                                      "stage1playoffs", "stage2playoffs", "kickoff"]);
-    /* league 추론: matchKey에 알려진 tournament가 포함되면 "masters" */
+
     function inferLeague(mkParts) {
       if (mkParts.some(p => MK_TOURNAMENTS.has(p.toLowerCase()))) return "masters";
-      /* 기타 league는 auto-match 레코드에서 읽음 (아래에서 처리) */
       return "";
     }
 
@@ -1574,7 +1573,7 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       "SELECT key, value FROM app_data WHERE key LIKE 'players:%'"
     );
 
-    /* auto-match 레코드 전부 미리 로드 (league 참조용) */
+    /* auto-match 레코드 전부 미리 로드 (league + 팀명 참조용) */
     const amRows = await pool.query(
       "SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"
     );
@@ -1583,20 +1582,36 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       try { amMap[r.key] = JSON.parse(r.value); } catch {}
     });
 
+    /* 기존 vct_roster: 전부 로드 */
+    const rosterRows = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"
+    );
+    const rosterMap = {};
+    rosterRows.rows.forEach(r => {
+      try { rosterMap[r.key] = JSON.parse(r.value); } catch {}
+    });
+
+    /* matchKey별 팀→선수 맵 (vct_roster 보완용) */
+    /* { teamName: Set<playerName> } */
+    const teamPlayerMap = {};
+
     let updated = 0, skipped = 0;
+    const processedMatchKeys = new Set();
 
     for (const row of rows.rows) {
       /* key 형식: players:MATCH_KEY:mapIdx */
       const keyParts = row.key.split(":");
       if (keyParts.length < 3) { skipped++; continue; }
       const mapIdx   = parseInt(keyParts[keyParts.length - 1]);
+      if (isNaN(mapIdx)) { skipped++; continue; }
       const matchKey = keyParts.slice(1, -1).join(":");
 
       let playersData;
       try { playersData = JSON.parse(row.value); } catch { skipped++; continue; }
+      if (Array.isArray(playersData)) { skipped++; continue; } /* 구 포맷 스킵 */
 
       /* matchKey → tournament, stage 파싱 */
-      const mkParts   = matchKey.split("|");
+      const mkParts    = matchKey.split("|");
       const tournament = mkParts.find(p => MK_TOURNAMENTS.has(p.toLowerCase()))?.toLowerCase() || "";
       const stage      = mkParts.find(p => MK_STAGES.has(p.toLowerCase()))?.toLowerCase() || "";
 
@@ -1604,9 +1619,26 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       const amRec = amMap[`auto-match:${matchKey}`];
       const league = (amRec?.league) || inferLeague(mkParts);
 
+      /* auto-match의 team1/team2 → 선수-팀 매핑 수집 */
+      if (amRec?.team1 && amRec?.team2) {
+        const t1 = amRec.team1, t2 = amRec.team2;
+        if (!teamPlayerMap[t1]) teamPlayerMap[t1] = new Set();
+        if (!teamPlayerMap[t2]) teamPlayerMap[t2] = new Set();
+        ["a0","a1","a2","a3","a4"].forEach(slot => {
+          const p = playersData[slot];
+          if (p?.name && p.name !== "-") teamPlayerMap[t1].add(p.name.trim());
+        });
+        ["b0","b1","b2","b3","b4"].forEach(slot => {
+          const p = playersData[slot];
+          if (p?.name && p.name !== "-") teamPlayerMap[t2].add(p.name.trim());
+        });
+      }
+
+      processedMatchKeys.add(matchKey);
+
       /* 각 선수 슬롯 처리 */
       for (const slot of Object.values(playersData)) {
-        if (!slot || !slot.name || slot.name === "-") continue;
+        if (!slot || typeof slot !== "object" || !slot.name || slot.name === "-") continue;
         const pName = slot.name.trim();
         const vk    = `vct_p:${pName}`;
 
@@ -1621,7 +1653,6 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
         }
         if (!vData.maps) vData.maps = [];
 
-        /* 이미 올바른 entry가 있으면 tournament/stage만 보완, 없으면 추가 */
         const existIdx = vData.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
         const entry = existIdx >= 0 ? { ...vData.maps[existIdx] } : { matchKey, mapIdx };
 
@@ -1632,7 +1663,6 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
         if (slot.kda && slot.kda.includes("/")) entry.kda = slot.kda;
         if (slot.agent) entry.agent = slot.agent;
 
-        /* acs나 kda가 없으면 스탯 없는 항목 — 스킵 */
         if (!("acs" in entry) && !("kda" in entry)) { skipped++; continue; }
 
         if (existIdx >= 0) vData.maps[existIdx] = entry;
@@ -1648,8 +1678,44 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       }
     }
 
-    console.log(`[rebuild-vct-p] 완료: ${updated}건 업데이트, ${skipped}건 스킵`);
-    res.json({ ok: true, updated, skipped });
+    /* ── vct_roster 보완: auto-match로 수집한 팀→선수 맵으로 roster 없는 팀 생성 ── */
+    let rosterCreated = 0;
+    for (const [teamName, playerSet] of Object.entries(teamPlayerMap)) {
+      const rKey = `vct_roster:${teamName}`;
+      const existing = rosterMap[rKey];
+      const existingPlayers = new Set([
+        ...(existing?.main || []),
+        ...(existing?.subs || [])
+      ]);
+      const newPlayers = [...playerSet].filter(p => !existingPlayers.has(p));
+      if (newPlayers.length === 0 && existing) continue; /* 이미 있고 변화 없음 */
+
+      const merged = {
+        main: [...existingPlayers, ...newPlayers],
+        subs: existing?.subs || []
+      };
+      /* main 중복 제거 */
+      merged.main = [...new Set(merged.main)];
+
+      const rVal = JSON.stringify(merged);
+      await pool.query(
+        `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [rKey, rVal]
+      );
+      broadcast({ type: "set", key: rKey, value: rVal });
+      rosterCreated++;
+      console.log(`[rebuild-vct-p] vct_roster 보완: ${teamName} (${merged.main.length}명)`);
+    }
+
+    const report = {
+      ok: true,
+      updated,
+      skipped,
+      rosterCreated,
+      matchKeys: [...processedMatchKeys],
+    };
+    console.log(`[rebuild-vct-p] 완료: vct_p ${updated}건, vct_roster ${rosterCreated}건, 스킵 ${skipped}건`);
+    res.json(report);
   } catch (e) {
     console.error("[rebuild-vct-p]", e);
     res.status(500).json({ error: e.message });
