@@ -1556,19 +1556,17 @@ async function applyAcsToStock(playerName, newAcs) {
 }
 
 /* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
-/* ── vct_p 일괄 재처리 (tournament·stage 누락 경기 복구) ── */
+/* ── vct_p 일괄 재처리 (tournament·stage 누락 경기 복구) — 배치 최적화 버전 ── */
 app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
   try {
     const MK_TOURNAMENTS = new Set(["london", "santiago"]);
     const MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2",
                                      "stage1playoffs", "stage2playoffs", "kickoff"]);
-
     const MK_LEAGUE_KEYWORDS = {
-      "pacific": "pacific", "emea": "emea", "americas": "americas", "cn": "cn",
-      "masters": "masters", "champions": "champions",
+      "pacific":"pacific","emea":"emea","americas":"americas","cn":"cn",
+      "masters":"masters","champions":"champions",
     };
     function inferLeague(mkParts) {
-      /* matchKey 파트에서 league 키워드 감지 */
       for (const part of mkParts) {
         const pl = part.toLowerCase();
         if (MK_TOURNAMENTS.has(pl)) return "masters";
@@ -1577,38 +1575,33 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       return "";
     }
 
-    /* 모든 players: 키 조회 */
-    const rows = await pool.query(
-      "SELECT key, value FROM app_data WHERE key LIKE 'players:%'"
-    );
+    /* ── 1단계: 필요한 모든 데이터를 한 번에 로드 ── */
+    const [playersRows, amRows, vctpRows, rosterRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+    ]);
 
-    /* auto-match 레코드 전부 미리 로드 (league + 팀명 참조용) */
-    const amRows = await pool.query(
-      "SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"
-    );
+    /* 메모리 맵 구성 */
     const amMap = {};
-    amRows.rows.forEach(r => {
-      try { amMap[r.key] = JSON.parse(r.value); } catch {}
+    amRows.rows.forEach(r => { try { amMap[r.key] = JSON.parse(r.value); } catch {} });
+
+    const vctpMap = {}; /* lower(key) → { key, data } */
+    vctpRows.rows.forEach(r => {
+      try { vctpMap[r.key.toLowerCase()] = { key: r.key, data: JSON.parse(r.value) }; } catch {}
     });
 
-    /* 기존 vct_roster: 전부 로드 */
-    const rosterRows = await pool.query(
-      "SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"
-    );
     const rosterMap = {};
-    rosterRows.rows.forEach(r => {
-      try { rosterMap[r.key] = JSON.parse(r.value); } catch {}
-    });
+    rosterRows.rows.forEach(r => { try { rosterMap[r.key] = JSON.parse(r.value); } catch {} });
 
-    /* matchKey별 팀→선수 맵 (vct_roster 보완용) */
-    /* { teamName: Set<playerName> } */
+    /* ── 2단계: 메모리에서 vct_p 갱신 ── */
+    const vctpUpdated = {}; /* key → 갱신된 data (마지막에 일괄 저장) */
     const teamPlayerMap = {};
-
     let updated = 0, skipped = 0;
     const processedMatchKeys = new Set();
 
-    for (const row of rows.rows) {
-      /* key 형식: players:MATCH_KEY:mapIdx */
+    for (const row of playersRows.rows) {
       const keyParts = row.key.split(":");
       if (keyParts.length < 3) { skipped++; continue; }
       const mapIdx   = parseInt(keyParts[keyParts.length - 1]);
@@ -1617,106 +1610,89 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
 
       let playersData;
       try { playersData = JSON.parse(row.value); } catch { skipped++; continue; }
-      if (Array.isArray(playersData)) { skipped++; continue; } /* 구 포맷 스킵 */
+      if (Array.isArray(playersData)) { skipped++; continue; }
 
-      /* matchKey → tournament, stage 파싱 */
       const mkParts    = matchKey.split("|");
       const tournament = mkParts.find(p => MK_TOURNAMENTS.has(p.toLowerCase()))?.toLowerCase() || "";
       const stage      = mkParts.find(p => MK_STAGES.has(p.toLowerCase()))?.toLowerCase() || "";
+      const amRec      = amMap[`auto-match:${matchKey}`];
+      const league     = (amRec?.league) || inferLeague(mkParts);
 
-      /* league: auto-match 레코드 우선, 없으면 추론 */
-      const amRec = amMap[`auto-match:${matchKey}`];
-      const league = (amRec?.league) || inferLeague(mkParts);
-
-      /* auto-match의 team1/team2 → 선수-팀 매핑 수집 */
+      /* vct_roster 보완용 팀→선수 수집 */
       if (amRec?.team1 && amRec?.team2) {
         const t1 = amRec.team1, t2 = amRec.team2;
         if (!teamPlayerMap[t1]) teamPlayerMap[t1] = new Set();
         if (!teamPlayerMap[t2]) teamPlayerMap[t2] = new Set();
-        ["a0","a1","a2","a3","a4"].forEach(slot => {
-          const p = playersData[slot];
-          if (p?.name && p.name !== "-") teamPlayerMap[t1].add(p.name.trim());
+        ["a0","a1","a2","a3","a4"].forEach(s => {
+          const p = playersData[s]; if (p?.name && p.name !== "-") teamPlayerMap[t1].add(p.name.trim());
         });
-        ["b0","b1","b2","b3","b4"].forEach(slot => {
-          const p = playersData[slot];
-          if (p?.name && p.name !== "-") teamPlayerMap[t2].add(p.name.trim());
+        ["b0","b1","b2","b3","b4"].forEach(s => {
+          const p = playersData[s]; if (p?.name && p.name !== "-") teamPlayerMap[t2].add(p.name.trim());
         });
       }
-
       processedMatchKeys.add(matchKey);
 
-      /* 각 선수 슬롯 처리 */
       for (const slot of Object.values(playersData)) {
         if (!slot || typeof slot !== "object" || !slot.name || slot.name === "-") continue;
         const pName = slot.name.trim();
-        const vk    = `vct_p:${pName}`;
+        const vkLow = `vct_p:${pName}`.toLowerCase();
 
-        /* 기존 vct_p 읽기 */
-        const vRow = await pool.query(
-          "SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]
-        );
-        let vData = {}, vKey = vk;
-        if (vRow.rows[0]) {
-          vKey = vRow.rows[0].key;
-          try { vData = JSON.parse(vRow.rows[0].value); } catch {}
-        }
-        if (!vData.maps) vData.maps = [];
+        /* 메모리에서 기존 데이터 가져오기 (없으면 새로 만들기) */
+        if (!vctpMap[vkLow]) vctpMap[vkLow] = { key: `vct_p:${pName}`, data: { maps: [] } };
+        const vEntry = vctpMap[vkLow];
+        if (!vEntry.data.maps) vEntry.data.maps = [];
 
-        const existIdx = vData.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
-        const entry = existIdx >= 0 ? { ...vData.maps[existIdx] } : { matchKey, mapIdx };
+        const existIdx = vEntry.data.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
+        const entry = existIdx >= 0 ? { ...vEntry.data.maps[existIdx] } : { matchKey, mapIdx };
 
-        /* league/tournament/stage: 새 값이 있을 때만 덮어씀 (빈 값으로 기존 데이터 손상 방지) */
         if (league)     entry.league     = league;
         if (tournament) entry.tournament = tournament;
         if (stage)      entry.stage      = stage;
-        /* 스탯: players: 데이터가 있으면 업데이트 */
-        if (slot.acs != null) entry.acs   = slot.acs;
+        if (slot.acs != null) entry.acs  = slot.acs;
         if (slot.kda && slot.kda.includes("/")) entry.kda = slot.kda;
         if (slot.agent) entry.agent = slot.agent;
 
         if (!("acs" in entry) && !("kda" in entry)) { skipped++; continue; }
 
-        if (existIdx >= 0) vData.maps[existIdx] = entry;
-        else vData.maps.push(entry);
+        if (existIdx >= 0) vEntry.data.maps[existIdx] = entry;
+        else vEntry.data.maps.push(entry);
 
-        const vVal = JSON.stringify(vData);
-        await pool.query(
-          `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-          [vKey, vVal]
-        );
-        /* broadcast 제거: SSE가 admin localStorage를 덮어써서 더 완전한 데이터를 잃는 버그 방지 */
+        vctpUpdated[vEntry.key] = vEntry.data;
         updated++;
       }
     }
 
-    /* ── vct_roster 보완: auto-match로 수집한 팀→선수 맵으로 roster 없는 팀 생성 ── */
+    /* ── 3단계: 변경된 vct_p 일괄 저장 ── */
+    const vctpEntries = Object.entries(vctpUpdated);
+    for (let i = 0; i < vctpEntries.length; i += 50) {
+      const batch = vctpEntries.slice(i, i + 50);
+      await Promise.all(batch.map(([k, v]) =>
+        pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [k, JSON.stringify(v)]
+        )
+      ));
+    }
+
+    /* ── 4단계: vct_roster 보완 ── */
     let rosterCreated = 0;
+    const rosterUpdates = [];
     for (const [teamName, playerSet] of Object.entries(teamPlayerMap)) {
       const rKey = `vct_roster:${teamName}`;
       const existing = rosterMap[rKey];
-      const existingPlayers = new Set([
-        ...(existing?.main || []),
-        ...(existing?.subs || [])
-      ]);
+      const existingPlayers = new Set([...(existing?.main || []), ...(existing?.subs || [])]);
       const newPlayers = [...playerSet].filter(p => !existingPlayers.has(p));
-      if (newPlayers.length === 0 && existing) continue; /* 이미 있고 변화 없음 */
-
-      const merged = {
-        main: [...existingPlayers, ...newPlayers],
-        subs: existing?.subs || []
-      };
-      /* main 중복 제거 */
-      merged.main = [...new Set(merged.main)];
-
-      const rVal = JSON.stringify(merged);
-      await pool.query(
-        `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [rKey, rVal]
-      );
-      /* vct_roster도 broadcast 하지 않음 — 페이지 새로고침으로 DB에서 pull */
+      if (newPlayers.length === 0 && existing) continue;
+      const merged = { main: [...new Set([...existingPlayers, ...newPlayers])], subs: existing?.subs || [] };
+      rosterUpdates.push([rKey, JSON.stringify(merged)]);
       rosterCreated++;
-      console.log(`[rebuild-vct-p] vct_roster 보완: ${teamName} (${merged.main.length}명)`);
     }
+    await Promise.all(rosterUpdates.map(([k, v]) =>
+      pool.query(
+        `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [k, v]
+      )
+    ));
 
     const report = {
       ok: true,
