@@ -1826,13 +1826,22 @@ async function pollAutoMatches(allEventMatches) {
             if (!vData.maps) vData.maps = [];
             /* 이미 이 맵 항목이 있으면 덮어쓰기, 없으면 추가 */
             const existIdx = vData.maps.findIndex(m => m.matchKey === am.matchKey && m.mapIdx === mapIdx);
+            /* matchKey에서 tournament·stage 파싱 ("london|playoffs|m1", "london|swiss|groupA|0" 등) */
+            const _MK_TOURNAMENTS = new Set(["london", "santiago"]);
+            const _MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2", "stage1playoffs", "stage2playoffs", "kickoff"]);
+            const _mkParts = (am.matchKey || "").split("|");
+            const _mkTournament = _mkParts.find(p => _MK_TOURNAMENTS.has(p.toLowerCase())) || "";
+            const _mkStage      = _mkParts.find(p => _MK_STAGES.has(p.toLowerCase())) || "";
+
             const entry = {
-              matchKey : am.matchKey,
+              matchKey   : am.matchKey,
               mapIdx,
-              league   : am.league || "",
-              acs      : p.averageCombatScore,
-              kda      : `${p.kills}/${p.deaths}/${p.assists}`,
-              agent    : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+              league     : am.league || "",
+              ..._mkTournament && { tournament: _mkTournament.toLowerCase() },
+              ..._mkStage      && { stage:      _mkStage.toLowerCase() },
+              acs        : p.averageCombatScore,
+              kda        : `${p.kills}/${p.deaths}/${p.assists}`,
+              agent      : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
             };
             if (existIdx >= 0) vData.maps[existIdx] = entry;
             else vData.maps.push(entry);
