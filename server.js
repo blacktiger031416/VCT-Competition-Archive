@@ -1563,8 +1563,17 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     const MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2",
                                      "stage1playoffs", "stage2playoffs", "kickoff"]);
 
+    const MK_LEAGUE_KEYWORDS = {
+      "pacific": "pacific", "emea": "emea", "americas": "americas", "cn": "cn",
+      "masters": "masters", "champions": "champions",
+    };
     function inferLeague(mkParts) {
-      if (mkParts.some(p => MK_TOURNAMENTS.has(p.toLowerCase()))) return "masters";
+      /* matchKey 파트에서 league 키워드 감지 */
+      for (const part of mkParts) {
+        const pl = part.toLowerCase();
+        if (MK_TOURNAMENTS.has(pl)) return "masters";
+        if (MK_LEAGUE_KEYWORDS[pl]) return MK_LEAGUE_KEYWORDS[pl];
+      }
       return "";
     }
 
@@ -1656,10 +1665,12 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
         const existIdx = vData.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
         const entry = existIdx >= 0 ? { ...vData.maps[existIdx] } : { matchKey, mapIdx };
 
-        entry.league = league;
+        /* league/tournament/stage: 새 값이 있을 때만 덮어씀 (빈 값으로 기존 데이터 손상 방지) */
+        if (league)     entry.league     = league;
         if (tournament) entry.tournament = tournament;
         if (stage)      entry.stage      = stage;
-        if (slot.acs != null) entry.acs  = slot.acs;
+        /* 스탯: players: 데이터가 있으면 업데이트 */
+        if (slot.acs != null) entry.acs   = slot.acs;
         if (slot.kda && slot.kda.includes("/")) entry.kda = slot.kda;
         if (slot.agent) entry.agent = slot.agent;
 
