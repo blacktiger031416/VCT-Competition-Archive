@@ -399,12 +399,9 @@
         var msg = "✅ 기록 재처리 완료\n"
           + "vct_p 업데이트: " + j.updated + "건\n"
           + "vct_roster 보완: " + j.rosterCreated + "건\n"
-          + "스킵: " + j.skipped + "건";
-        if (j.matchKeys && j.matchKeys.length) {
-          msg += "\n\n처리된 경기:\n" + j.matchKeys.slice(0, 10).join("\n");
-          if (j.matchKeys.length > 10) msg += "\n... 외 " + (j.matchKeys.length - 10) + "건";
-        }
+          + "확인을 누르면 페이지가 새로고침됩니다.";
         alert(msg);
+        window.location.reload();
       })
       .catch(function(e) {
         alert("❌ 오류: " + e.message);
