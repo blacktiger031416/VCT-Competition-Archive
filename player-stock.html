@@ -536,6 +536,7 @@
       <h1 class="page-title">📈 선수 주식</h1>
       <span class="page-subtitle">VCT 선수들의 퍼포먼스 기반 가상 주식 시장</span>
       <button id="admin-reset-btn" onclick="adminResetStock()" style="display:none">🔄 주식 데이터 리셋</button>
+      <button id="admin-refund-btn" onclick="adminRefundAll()" style="display:none;background:rgba(255,180,0,.15);border:1px solid rgba(255,180,0,.35);color:#ffb400;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;">💰 전체 환불 (매입가 기준)</button>
     </div>
 
     <!-- 상단 시장 요약 -->
@@ -1335,6 +1336,50 @@
       alert("✅ " + p.name + " 리셋 완료");
     };
 
+    /* ── Admin 전체 환불 (매입가 기준) ── */
+    window.adminRefundAll = function () {
+      if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
+      if (!confirm(
+        "💰 전체 환불을 진행합니다.\n\n" +
+        "모든 유저의 보유 주식을 매입가 기준으로 환불하고\n" +
+        "holdings를 초기화합니다.\n\n" +
+        "⚠️ 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?"
+      )) return;
+
+      var btn = document.getElementById("admin-refund-btn");
+      btn.disabled = true;
+      btn.textContent = "⏳ 처리중...";
+
+      var tok = localStorage.getItem("vct_auth_token") || "";
+      fetch("/api/admin/stock-refund-all", {
+        method: "POST",
+        credentials: "include",
+        headers: tok ? { "Authorization": "Bearer " + tok } : {}
+      })
+        .then(function(r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function(j) {
+          var detail = (j.detail || []).map(function(d) {
+            return d.username + " → +" + d.refund.toLocaleString() + "코인 (보유→0)";
+          }).join("\n");
+          alert(
+            "✅ 전체 환불 완료\n\n" +
+            "환불 인원: " + j.totalUsers + "명\n" +
+            "총 환불 코인: " + (j.totalRefund || 0).toLocaleString() + "\n\n" +
+            (detail || "보유 주식 없음")
+          );
+        })
+        .catch(function(err) {
+          alert("❌ 환불 오류: " + (err.message || err));
+        })
+        .finally(function() {
+          btn.disabled = false;
+          btn.textContent = "💰 전체 환불 (매입가 기준)";
+        });
+    };
+
     /* ── Admin 선수 이름 수정 (prompt 방식) ── */
     function startRename(oldName) {
       var newName = prompt('선수 이름 수정', oldName);
@@ -1414,8 +1459,9 @@
         return; /* 이하 초기화 전부 스킵 */
       }
 
-      /* Admin이면 리셋 버튼 표시 */
+      /* Admin이면 리셋/환불 버튼 표시 */
       document.getElementById("admin-reset-btn").style.display = "";
+      document.getElementById("admin-refund-btn").style.display = "";
       isAdminMode = true;
 
       /* 경기 기록에서 선수 집계 (PLAYERS 먼저 빌드) */

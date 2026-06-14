@@ -1747,6 +1747,74 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── 선수 주식 전체 환불 (매입가 기준) ─────────────────────────────────────
+   모든 유저의 holdings:* 를 읽어 avgPrice × qty 합산 후 coins: 에 환불,
+   holdings: 는 {} 로 초기화. 폐쇄 시 일괄 정산용.                         */
+app.post("/api/admin/stock-refund-all", requireAdmin, async (req, res) => {
+  try {
+    /* 1. 모든 holdings: 와 coins: 로드 */
+    const [holdRows, coinRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'holdings:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'coins:%'"),
+    ]);
+
+    /* coins 맵: username → 현재 코인 */
+    const coinMap = {};
+    coinRows.rows.forEach(r => {
+      const uname = r.key.slice(6); /* "coins:XXX" → "XXX" */
+      coinMap[uname] = parseInt(r.value, 10) || 0;
+    });
+
+    const report = []; /* { username, refund, holdingsBefore } */
+    const updates = []; /* DB upsert 목록 */
+
+    holdRows.rows.forEach(r => {
+      const uname = r.key.slice(9); /* "holdings:XXX" → "XXX" */
+      let holdings;
+      try { holdings = JSON.parse(r.value); } catch { return; }
+      if (!holdings || typeof holdings !== "object") return;
+
+      /* 환불액 계산: avgPrice × qty 합산 */
+      let refund = 0;
+      const holdingsBefore = {};
+      Object.entries(holdings).forEach(([pName, h]) => {
+        if (!h || !h.qty || h.qty <= 0) return;
+        const amt = (h.avgPrice || 0) * h.qty;
+        refund += amt;
+        holdingsBefore[pName] = { qty: h.qty, avgPrice: h.avgPrice || 0, refund: amt };
+      });
+
+      if (refund === 0 && Object.keys(holdingsBefore).length === 0) return; /* 보유 없으면 스킵 */
+
+      const newCoins = (coinMap[uname] || 0) + refund;
+      report.push({ username: uname, refund, holdingsBefore, newCoins });
+
+      /* coins 갱신 */
+      updates.push(pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [`coins:${uname}`, String(newCoins)]
+      ));
+      /* holdings 초기화 */
+      updates.push(pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [`holdings:${uname}`, "{}"]
+      ));
+    });
+
+    await Promise.all(updates);
+
+    const totalRefund  = report.reduce((s, r) => s + r.refund, 0);
+    const totalUsers   = report.length;
+    console.log(`[stock-refund-all] ${totalUsers}명 환불 완료, 총 ${totalRefund}코인 반환`);
+    res.json({ ok: true, totalUsers, totalRefund, detail: report });
+  } catch (e) {
+    console.error("[stock-refund-all]", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
   try {
     const players = req.body.players || []; // [{ name, acs }]
