@@ -1397,11 +1397,26 @@
 
     /* ── storageReady 후 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      /* Admin이면 리셋 버튼 표시 */
-      if (window.vctIsAdmin && window.vctIsAdmin()) {
-        document.getElementById("admin-reset-btn").style.display = "";
-        isAdminMode = true;
+      /* ── 폐쇄 조치: Admin만 접근 허용 ── */
+      if (!window.vctIsAdmin || !window.vctIsAdmin()) {
+        document.querySelector("main.page-shell").innerHTML =
+          '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:24px;text-align:center;padding:40px 24px;">' +
+          '<div style="font-size:56px;">🚧</div>' +
+          '<div>' +
+          '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:28px;font-weight:700;letter-spacing:.04em;color:#fff;margin-bottom:8px;">선수 주식 서비스 점검 중</div>' +
+          '<div style="font-size:14px;color:rgba(255,255,255,.45);line-height:1.8;max-width:380px;">' +
+          '더 나은 선수 주식 시스템을 개발 중입니다.<br>' +
+          '리뉴얼 후 다시 찾아올게요. 기대해 주세요! 🙏' +
+          '</div>' +
+          '</div>' +
+          '<a href="./index.html" style="margin-top:8px;padding:10px 24px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:13px;text-decoration:none;">← 홈으로 돌아가기</a>' +
+          '</div>';
+        return; /* 이하 초기화 전부 스킵 */
       }
+
+      /* Admin이면 리셋 버튼 표시 */
+      document.getElementById("admin-reset-btn").style.display = "";
+      isAdminMode = true;
 
       /* 경기 기록에서 선수 집계 (PLAYERS 먼저 빌드) */
       PLAYERS = buildPlayersFromStorage();
