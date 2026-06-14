@@ -1739,6 +1739,20 @@ var MATCH_KEY = (function() {
   return MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
 })();
 
+/* ── match-meta 저장: rebuild시 league/stage 추론용 ── */
+(function saveMatchMeta() {
+  try {
+    var _mk = 'match-meta:' + MATCH_KEY;
+    var _mo = {}; try { _mo = JSON.parse(localStorage.getItem(_mk) || '{}'); } catch(e) {}
+    _mo.league = LEAGUE;
+    _mo.stage  = MATCH_FROM;
+    if (_MATCH_TOURNAMENT) _mo.tournament = _MATCH_TOURNAMENT;
+    _mo.teamA  = MATCH_TEAM_A;
+    _mo.teamB  = MATCH_TEAM_B;
+    localStorage.setItem(_mk, JSON.stringify(_mo));
+  } catch(e) {}
+})();
+
 /* ── MATCH_KEY 마이그레이션: 구버전(date|teamA|teamB) → 신버전 키 ── */
 (function migrateMatchKey() {
   function migrateFrom(oldKey) {
@@ -4102,6 +4116,27 @@ function spikeImport() {
             /* 주식 반영용 수집 */
             if (src.name && src.name !== '-' && src.acs != null) {
               stockPlayers.push({ name: src.name, acs: src.acs });
+            }
+            /* vct_p 업데이트 */
+            if (src.name && src.name !== '-') {
+              try {
+                var _vk = 'vct_p:' + src.name.trim();
+                var _pd2 = {}; try { _pd2 = JSON.parse(localStorage.getItem(_vk) || '{}'); } catch(e2) {}
+                if (!_pd2.maps) _pd2.maps = [];
+                var _ei = -1;
+                for (var _ii = 0; _ii < _pd2.maps.length; _ii++) {
+                  if (_pd2.maps[_ii].matchKey === MATCH_KEY && _pd2.maps[_ii].mapIdx === idx) { _ei = _ii; break; }
+                }
+                var _me = _ei >= 0 ? Object.assign({}, _pd2.maps[_ei]) : { matchKey: MATCH_KEY, mapIdx: idx };
+                _me.league = LEAGUE;
+                _me.stage  = MATCH_FROM;
+                if (_MATCH_TOURNAMENT) _me.tournament = _MATCH_TOURNAMENT;
+                if (src.acs  != null) _me.acs   = src.acs;
+                if (src.kda && src.kda.indexOf('/') !== -1) _me.kda = src.kda;
+                if (src.agent) _me.agent = src.agent;
+                if (_ei >= 0) _pd2.maps[_ei] = _me; else _pd2.maps.push(_me);
+                localStorage.setItem(_vk, JSON.stringify(_pd2));
+              } catch(e3) {}
             }
           });
         });

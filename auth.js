@@ -470,37 +470,54 @@
   rebuildBtn.type = "button";
   rebuildBtn.className = "suggest-trigger-btn";
   rebuildBtn.innerHTML = "🔄 기록 재처리";
-  rebuildBtn.title = "localStorage players: 데이터로 vct_p 기록 일괄 재처리";
+  rebuildBtn.title = "로컬 players: 데이터를 서버에 전송 후 vct_p 완전 재구성";
   rebuildBtn.style.display = "none";
   rebuildBtn.addEventListener("click", function() {
-    if (!confirm("경기 기록(vct_p)을 재처리합니다.\n로컬 → DB 순서로 복구해요.")) return;
+    if (!confirm("경기 기록(vct_p)을 완전히 재처리합니다.\n로컬 데이터를 서버에 올리고 DB 기반으로 재구성해요.")) return;
     rebuildBtn.disabled = true;
     rebuildBtn.innerHTML = "⏳ 처리중...";
 
-    /* 1단계: 로컬 players: → vct_p 즉시 재처리 */
-    var localResult = rebuildVctpFromLocal();
+    /* ── 로컬 players:* / vct_roster:* / match-meta:* 전부 수집 ── */
+    var localData = {};
+    var localCount = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+      var lk = localStorage.key(i);
+      if (!lk) continue;
+      if (lk.indexOf("players:")    === 0 ||
+          lk.indexOf("vct_roster:") === 0 ||
+          lk.indexOf("match-meta:") === 0) {
+        var lv = localStorage.getItem(lk);
+        if (lv) { localData[lk] = lv; localCount++; }
+      }
+    }
 
-    /* 2단계: 서버 DB players: → vct_p 재처리 (DB에만 있는 경기 보완) */
+    /* ── 서버에 전송: localData 포함 → 서버가 DB 저장 후 vct_p 재구성 ── */
     var tok = localStorage.getItem("vct_auth_token") || "";
     fetch("/api/admin/rebuild-vct-p", {
       method: "POST",
       credentials: "include",
-      headers: tok ? { "Authorization": "Bearer " + tok } : {}
+      headers: Object.assign(
+        { "Content-Type": "application/json" },
+        tok ? { "Authorization": "Bearer " + tok } : {}
+      ),
+      body: JSON.stringify({ localData: localData })
     })
-      .then(function(r) { return r.ok ? r.json() : { updated: 0, rosterCreated: 0 }; })
+      .then(function(r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
       .then(function(j) {
         var msg = "✅ 기록 재처리 완료\n"
-          + "로컬 복구: " + localResult.updated + "건\n"
-          + "DB 복구: " + (j.updated || 0) + "건\n"
+          + "로컬→DB: " + (j.localSaved || localCount) + "건 저장\n"
+          + "vct_p 갱신: " + (j.updated || 0) + "건\n"
+          + "vct_roster 생성: " + (j.rosterCreated || 0) + "건\n"
+          + "처리 경기: " + (j.matchKeys ? j.matchKeys.length : 0) + "경기\n"
           + "확인을 누르면 페이지가 새로고침됩니다.";
         alert(msg);
         window.location.reload();
       })
-      .catch(function() {
-        alert("✅ 로컬 복구 완료 (" + localResult.updated + "건)\n확인을 누르면 새로고침됩니다.");
-        window.location.reload();
-      })
-      .finally(function() {
+      .catch(function(err) {
+        alert("❌ 재처리 오류: " + (err.message || err) + "\n잠시 후 다시 시도해주세요.");
         rebuildBtn.disabled = false;
         rebuildBtn.innerHTML = "🔄 기록 재처리";
       });

@@ -47,7 +47,7 @@ async function initDB() {
 initDB().catch((e) => console.error("DB init error:", e.message));
 
 /* ── 미들웨어 ─────────────────────────────────────── */
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); /* rebuild-vct-p에서 localData 대량 전송 허용 */
 app.use(express.static(path.join(__dirname)));
 
 /* ── SSE: 실시간 브로드캐스트 ────────────────────── */
@@ -1556,7 +1556,10 @@ async function applyAcsToStock(playerName, newAcs) {
 }
 
 /* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
-/* ── vct_p 일괄 재처리 (tournament·stage 누락 경기 복구) — 배치 최적화 버전 ── */
+/* ── vct_p 일괄 재처리 (갈아엎기 버전) ────────────────────────────────────────
+   클라이언트가 보낸 localData(admin localStorage의 players:/vct_roster: 키들)를
+   DB에 먼저 UPSERT한 뒤, DB 전체를 스캔해서 vct_p를 완전히 재구성한다.
+   이렇게 하면 Render 슬립 중 저장 실패로 DB에 없는 경기도 복구된다.           */
 app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
   try {
     const MK_TOURNAMENTS = new Set(["london", "santiago"]);
@@ -1575,12 +1578,34 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       return "";
     }
 
+    /* ── 0단계: 클라이언트가 보낸 로컬 데이터를 DB에 먼저 저장 ── */
+    const localData = req.body.localData || {};
+    const localEntries = Object.entries(localData).filter(
+      ([k]) => k.startsWith("players:") || k.startsWith("vct_roster:") || k.startsWith("match-meta:")
+    );
+    let localSaved = 0;
+    for (let i = 0; i < localEntries.length; i += 50) {
+      const batch = localEntries.slice(i, i + 50);
+      await Promise.all(batch.map(([k, v]) =>
+        pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1,$2)
+           ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [k, String(v)]
+        )
+      ));
+      localSaved += batch.length;
+    }
+    if (localSaved > 0) {
+      console.log(`[rebuild-vct-p] 클라이언트 로컬 데이터 ${localSaved}건 DB 저장 완료`);
+    }
+
     /* ── 1단계: 필요한 모든 데이터를 한 번에 로드 ── */
-    const [playersRows, amRows, vctpRows, rosterRows] = await Promise.all([
+    const [playersRows, amRows, vctpRows, rosterRows, metaRows] = await Promise.all([
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
     ]);
 
     /* 메모리 맵 구성 */
@@ -1594,6 +1619,12 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
 
     const rosterMap = {};
     rosterRows.rows.forEach(r => { try { rosterMap[r.key] = JSON.parse(r.value); } catch {} });
+
+    /* match-meta: matchKey → { league, stage, tournament, teamA, teamB } */
+    const metaMap = {};
+    metaRows.rows.forEach(r => {
+      try { metaMap[r.key.slice(11)] = JSON.parse(r.value); } catch {} /* "match-meta:XXX" → "XXX" */
+    });
 
     /* ── 2단계: 메모리에서 vct_p 갱신 ── */
     const vctpUpdated = {}; /* key → 갱신된 data (마지막에 일괄 저장) */
@@ -1616,11 +1647,16 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       const tournament = mkParts.find(p => MK_TOURNAMENTS.has(p.toLowerCase()))?.toLowerCase() || "";
       const stage      = mkParts.find(p => MK_STAGES.has(p.toLowerCase()))?.toLowerCase() || "";
       const amRec      = amMap[`auto-match:${matchKey}`];
-      const league     = (amRec?.league) || inferLeague(mkParts);
+      const metaRec    = metaMap[matchKey];
+      /* league 우선순위: auto-match > match-meta > matchKey 추론 */
+      const league     = (amRec?.league) || (metaRec?.league) || inferLeague(mkParts);
+      /* stage도 match-meta에서 보완 (matchKey에 stage 명시 없을 경우) */
+      const stageVal   = stage || (metaRec?.stage) || "";
 
-      /* vct_roster 보완용 팀→선수 수집 */
-      if (amRec?.team1 && amRec?.team2) {
-        const t1 = amRec.team1, t2 = amRec.team2;
+      /* vct_roster 보완용 팀→선수 수집 (auto-match 또는 match-meta에서 팀 정보 획득) */
+      const t1 = amRec?.team1 || metaRec?.teamA;
+      const t2 = amRec?.team2 || metaRec?.teamB;
+      if (t1 && t2) {
         if (!teamPlayerMap[t1]) teamPlayerMap[t1] = new Set();
         if (!teamPlayerMap[t2]) teamPlayerMap[t2] = new Set();
         ["a0","a1","a2","a3","a4"].forEach(s => {
@@ -1645,9 +1681,9 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
         const existIdx = vEntry.data.maps.findIndex(m => m.matchKey === matchKey && m.mapIdx === mapIdx);
         const entry = existIdx >= 0 ? { ...vEntry.data.maps[existIdx] } : { matchKey, mapIdx };
 
-        if (league)     entry.league     = league;
+        if (league)    entry.league     = league;
         if (tournament) entry.tournament = tournament;
-        if (stage)      entry.stage      = stage;
+        if (stageVal)  entry.stage      = stageVal;
         if (slot.acs != null) entry.acs  = slot.acs;
         if (slot.kda && slot.kda.includes("/")) entry.kda = slot.kda;
         if (slot.agent) entry.agent = slot.agent;
@@ -1696,12 +1732,13 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
 
     const report = {
       ok: true,
+      localSaved,
       updated,
       skipped,
       rosterCreated,
       matchKeys: [...processedMatchKeys],
     };
-    console.log(`[rebuild-vct-p] 완료: vct_p ${updated}건, vct_roster ${rosterCreated}건, 스킵 ${skipped}건`);
+    console.log(`[rebuild-vct-p] 완료: 로컬→DB ${localSaved}건, vct_p ${updated}건, vct_roster ${rosterCreated}건, 스킵 ${skipped}건`);
     res.json(report);
   } catch (e) {
     console.error("[rebuild-vct-p]", e);
