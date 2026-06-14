@@ -1581,7 +1581,8 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     /* ── 0단계: 클라이언트가 보낸 로컬 데이터를 DB에 먼저 저장 ── */
     const localData = req.body.localData || {};
     const localEntries = Object.entries(localData).filter(
-      ([k]) => k.startsWith("players:") || k.startsWith("vct_roster:") || k.startsWith("match-meta:")
+      ([k]) => k.startsWith("players:") || k.startsWith("vct_roster:") ||
+               k.startsWith("match-meta:") || k.startsWith("vct_p:")
     );
     let localSaved = 0;
     for (let i = 0; i < localEntries.length; i += 50) {

@@ -477,7 +477,7 @@
     rebuildBtn.disabled = true;
     rebuildBtn.innerHTML = "⏳ 처리중...";
 
-    /* ── 로컬 players:* / vct_roster:* / match-meta:* 전부 수집 ── */
+    /* ── 로컬 players:* / vct_roster:* / match-meta:* / vct_p:* 전부 수집 ── */
     var localData = {};
     var localCount = 0;
     for (var i = 0; i < localStorage.length; i++) {
@@ -485,7 +485,8 @@
       if (!lk) continue;
       if (lk.indexOf("players:")    === 0 ||
           lk.indexOf("vct_roster:") === 0 ||
-          lk.indexOf("match-meta:") === 0) {
+          lk.indexOf("match-meta:") === 0 ||
+          lk.indexOf("vct_p:")      === 0) {
         var lv = localStorage.getItem(lk);
         if (lv) { localData[lk] = lv; localCount++; }
       }
