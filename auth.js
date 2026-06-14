@@ -377,34 +377,128 @@
   rewardBtn.style.display = "none";
   rewardBtn.addEventListener("click", openRewardModal);
 
+  /* ── 클라이언트 사이드 vct_p 재처리 ── */
+  var MK_TOURNAMENTS_CL = { "london": 1, "santiago": 1 };
+  var MK_STAGES_CL      = { "swiss":1,"playoffs":1,"groupstage":1,"stage1":1,"stage2":1,
+                             "stage1playoffs":1,"stage2playoffs":1,"kickoff":1 };
+  var MK_LEAGUES_CL     = { "pacific":"pacific","emea":"emea","americas":"americas",
+                             "cn":"cn","masters":"masters","champions":"champions" };
+
+  function inferLeagueCl(parts) {
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].toLowerCase();
+      if (MK_TOURNAMENTS_CL[p]) return "masters";
+      if (MK_LEAGUES_CL[p])     return MK_LEAGUES_CL[p];
+    }
+    return "";
+  }
+
+  function rebuildVctpFromLocal() {
+    var updated = 0, skipped = 0;
+    /* localStorage에서 players: 키 전부 수집 */
+    var playerKeys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf("players:") === 0) playerKeys.push(k);
+    }
+
+    playerKeys.forEach(function(key) {
+      /* key: players:MATCH_KEY:mapIdx */
+      var parts    = key.split(":");
+      if (parts.length < 3) { skipped++; return; }
+      var mapIdx   = parseInt(parts[parts.length - 1]);
+      if (isNaN(mapIdx)) { skipped++; return; }
+      var matchKey = parts.slice(1, -1).join(":");
+
+      var playersData;
+      try { playersData = JSON.parse(localStorage.getItem(key) || "null"); } catch(e) { skipped++; return; }
+      if (!playersData || Array.isArray(playersData)) { skipped++; return; }
+
+      var mkParts    = matchKey.split("|");
+      var tournament = "";
+      var stage      = "";
+      var league     = inferLeagueCl(mkParts);
+      mkParts.forEach(function(p) {
+        var pl = p.toLowerCase();
+        if (MK_TOURNAMENTS_CL[pl]) tournament = pl;
+        if (MK_STAGES_CL[pl])      stage      = pl;
+      });
+
+      /* 각 선수 슬롯 처리 */
+      var slots = ["a0","a1","a2","a3","a4","b0","b1","b2","b3","b4"];
+      slots.forEach(function(slotKey) {
+        var slot = playersData[slotKey];
+        if (!slot || !slot.name || slot.name === "-") return;
+        var pName = slot.name.trim();
+        var vk    = "vct_p:" + pName;
+
+        var vData = {};
+        try { vData = JSON.parse(localStorage.getItem(vk) || "{}"); } catch(e) {}
+        if (!vData.maps) vData.maps = [];
+
+        var existIdx = -1;
+        for (var ei = 0; ei < vData.maps.length; ei++) {
+          if (vData.maps[ei].matchKey === matchKey && vData.maps[ei].mapIdx === mapIdx) {
+            existIdx = ei; break;
+          }
+        }
+        var entry = existIdx >= 0 ? Object.assign({}, vData.maps[existIdx]) : { matchKey: matchKey, mapIdx: mapIdx };
+
+        if (league)     entry.league     = league;
+        if (tournament) entry.tournament = tournament;
+        if (stage)      entry.stage      = stage;
+        if (slot.acs != null) entry.acs  = slot.acs;
+        if (slot.kda && slot.kda.indexOf("/") !== -1) entry.kda = slot.kda;
+        if (slot.agent) entry.agent = slot.agent;
+
+        if (!("acs" in entry) && !("kda" in entry)) { skipped++; return; }
+
+        if (existIdx >= 0) vData.maps[existIdx] = entry;
+        else vData.maps.push(entry);
+
+        /* setItem override가 DB에도 push함 */
+        localStorage.setItem(vk, JSON.stringify(vData));
+        updated++;
+      });
+    });
+
+    return { updated: updated, skipped: skipped, total: playerKeys.length };
+  }
+
   /* 기록 재처리 버튼 (Admin 전용) */
   var rebuildBtn = document.createElement("button");
   rebuildBtn.type = "button";
   rebuildBtn.className = "suggest-trigger-btn";
   rebuildBtn.innerHTML = "🔄 기록 재처리";
-  rebuildBtn.title = "players: 데이터로 vct_p 기록 일괄 재처리";
+  rebuildBtn.title = "localStorage players: 데이터로 vct_p 기록 일괄 재처리";
   rebuildBtn.style.display = "none";
   rebuildBtn.addEventListener("click", function() {
-    if (!confirm("모든 경기 기록(vct_p)을 DB에서 재처리합니다.\n잠시 시간이 걸릴 수 있어요.")) return;
+    if (!confirm("경기 기록(vct_p)을 재처리합니다.\n로컬 → DB 순서로 복구해요.")) return;
     rebuildBtn.disabled = true;
     rebuildBtn.innerHTML = "⏳ 처리중...";
+
+    /* 1단계: 로컬 players: → vct_p 즉시 재처리 */
+    var localResult = rebuildVctpFromLocal();
+
+    /* 2단계: 서버 DB players: → vct_p 재처리 (DB에만 있는 경기 보완) */
     var tok = localStorage.getItem("vct_auth_token") || "";
     fetch("/api/admin/rebuild-vct-p", {
       method: "POST",
       credentials: "include",
       headers: tok ? { "Authorization": "Bearer " + tok } : {}
     })
-      .then(function(r) { return r.json(); })
+      .then(function(r) { return r.ok ? r.json() : { updated: 0, rosterCreated: 0 }; })
       .then(function(j) {
         var msg = "✅ 기록 재처리 완료\n"
-          + "vct_p 업데이트: " + j.updated + "건\n"
-          + "vct_roster 보완: " + j.rosterCreated + "건\n"
+          + "로컬 복구: " + localResult.updated + "건\n"
+          + "DB 복구: " + (j.updated || 0) + "건\n"
           + "확인을 누르면 페이지가 새로고침됩니다.";
         alert(msg);
         window.location.reload();
       })
-      .catch(function(e) {
-        alert("❌ 오류: " + e.message);
+      .catch(function() {
+        alert("✅ 로컬 복구 완료 (" + localResult.updated + "건)\n확인을 누르면 새로고침됩니다.");
+        window.location.reload();
       })
       .finally(function() {
         rebuildBtn.disabled = false;
