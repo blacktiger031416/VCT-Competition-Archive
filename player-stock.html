@@ -867,19 +867,24 @@
       return playerTeam;
     }
 
+    /* 1부 리그 소속 팀 집합 (2부 필터링용) */
+    var TIER1_TEAMS = new Set(Object.keys(HARDCODED_ROSTERS));
+
     /* ── 선수 데이터 빌드 (서버 DB 기반) ── */
     function buildPlayersFromData(playerTeam, vcpMap, stockMap) {
       /* DB에 없는 팀도 하드코드로 보완 */
       playerTeam = enrichPlayerTeam(playerTeam);
       var VALID_LEAGUES = { americas:1, emea:1, pacific:1, cn:1, masters:1, champions:1 };
 
-      /* 1단계: vct_p 데이터에서 ACS/KDA 집계 */
+      /* 1단계: vct_p 데이터에서 ACS/KDA 집계 — 1부 리그 맵만 */
       var pMap = {};
       Object.keys(vcpMap).forEach(function (pName) {
         var pd = vcpMap[pName];
         if (!pd || !pd.maps || !pd.maps.length) return;
         pd.maps.forEach(function (m) {
           var lg = m.league || "";
+          /* 2부(challengers-*) 등 VALID_LEAGUES 외 리그는 스킵 */
+          if (!VALID_LEAGUES[lg]) return;
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
           if (hasKda) {
@@ -889,8 +894,7 @@
           if (acs <= 0 && !hasKda) return;
           if (!pMap[pName]) pMap[pName] = { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
           var e = pMap[pName];
-          /* league가 있으면 regionCounts에도 반영 */
-          if (lg && VALID_LEAGUES[lg]) e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
+          e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
           if (acs > 0) { e.acsMaps++; e.totalAcs += acs; }
           if (hasKda) {
             var kpts = m.kda.split("/");
@@ -901,17 +905,28 @@
         });
       });
 
-      /* 2단계: stock_p 기준으로 playerTeam에도 없는 선수 보충
-         — vct_p가 없거나 league 데이터가 없어도 주가가 있으면 표시 */
-      var allNames = new Set(Object.keys(pMap));
-      Object.keys(stockMap).forEach(function (n) { allNames.add(n); });
-      /* localStorage stock_p도 보충 */
+      /* 2단계: 표시할 선수 집합 구성
+         — 1부 리그 팀 소속이거나, 1부 리그 vct_p 맵이 있는 선수만 포함 */
+      var allNames = new Set();
+      /* vct_p에서 1부 리그 맵이 있는 선수 */
+      Object.keys(pMap).forEach(function (n) { allNames.add(n); });
+      /* stock_p가 있고 1부 팀 소속인 선수 (DB + localStorage) */
+      function addIfTier1(n) {
+        var team = playerTeam[n] || "";
+        if (team && TIER1_TEAMS.has(team)) allNames.add(n);
+      }
+      Object.keys(stockMap).forEach(addIfTier1);
       for (var li = 0; li < localStorage.length; li++) {
         var lk = localStorage.key(li);
-        if (lk && lk.indexOf("stock_p:") === 0) allNames.add(lk.slice(8));
+        if (lk && lk.indexOf("stock_p:") === 0) addIfTier1(lk.slice(8));
       }
-      /* playerTeam에 있는 선수도 포함 (vct_p 없어도) */
-      Object.keys(playerTeam).forEach(function (n) { allNames.add(n); });
+      /* HARDCODED_ROSTERS 선수 중 stock_p가 있는 경우도 포함 */
+      Object.keys(playerTeam).forEach(function (n) {
+        var team = playerTeam[n] || "";
+        if (team && TIER1_TEAMS.has(team)) {
+          if (stockMap[n] || localStorage.getItem("stock_p:" + n)) allNames.add(n);
+        }
+      });
 
       /* top 30% threshold for 우량주 */
       var allMapCounts = Object.keys(pMap).map(function (k) { return pMap[k].acsMaps; });
@@ -920,10 +935,14 @@
 
       var players = [], idx = 0;
       allNames.forEach(function (pName) {
-        /* stock_p 또는 vct_p 중 하나라도 있어야 표시 */
         var hasVcp = !!pMap[pName];
+        var team = playerTeam[pName] || "";
+
+        /* 2부 팀이거나 1부 팀 소속도 아니고 vct_p 1부 맵도 없으면 스킵 */
+        if (!hasVcp && (!team || !TIER1_TEAMS.has(team))) return;
+
         var stockData = stockMap[pName] || null;
-        /* localStorage에서도 병합 (어드민이 로컬에서 반영한 경우) */
+        /* localStorage에서도 병합 */
         try {
           var lsStock = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null");
           if (lsStock && (!stockData || (lsStock.runCount || 0) > (stockData.runCount || 0))) stockData = lsStock;
@@ -939,7 +958,6 @@
           if (e.regionCounts[r] > maxCnt) { maxCnt = e.regionCounts[r]; region = r; }
         });
 
-        var team = playerTeam[pName] || "";
         if (team && REGION_MAP[team]) region = REGION_MAP[team];
 
         var avgAcs = e.acsMaps > 0 ? Math.round(e.totalAcs / e.acsMaps) : 0;
