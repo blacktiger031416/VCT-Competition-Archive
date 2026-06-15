@@ -1699,11 +1699,12 @@ app.get("/api/records/compute", async (req, res) => {
       "Global Esports":"pacific","Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
       "Paper Rex":"pacific","Rex Regum Qeon":"pacific","T1":"pacific",
       "Team Secret":"pacific","VARREL":"pacific","ZETA DIVISION":"pacific",
-      /* CN (VCT 파트너팀만 — 챌린저스/아카데미 팀 제외) */
+      /* CN */
       "Dragon Ranger Gaming":"cn","EDward Gaming":"cn","FunPlus Phoenix":"cn",
       "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
       "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
       "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn",
+      "JD Mall JDG Esports":"cn","JDG":"cn",
       /* Americas */
       "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
       "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
@@ -1714,6 +1715,7 @@ app.get("/api/records/compute", async (req, res) => {
       "Natus Vincere":"emea","Team Vitality":"emea","BBL Esports":"emea",
       "FUT Esports":"emea","Karmine Corp":"emea","GIANTX":"emea",
       "WEC C":"emea","Gentle Mates":"emea","ARETE":"emea","Mir Gaming":"emea",
+      "Eternal Fire":"emea","PCIFIC Esports":"emea","ULF Esports":"emea",
     };
 
     /* ── 1. DB 병렬 로드 ── */
@@ -1933,6 +1935,9 @@ app.get("/api/records/compute", async (req, res) => {
     /* 팀이 해당 league에 속하는지 확인 */
     function teamMatchesLeague(teamName, tgt) {
       var tl = TEAM_LEAGUE_MAP[teamName] || "";
+      /* TEAM_LEAGUE_MAP에 없는 팀(미등록)은 필터 통과 — 타 리그 팀이 아님을 증명 못하므로 허용
+         (프론트 LEAGUE_TEAMS가 최종 표시 팀을 결정함) */
+      if (!tl) return true;
       if (tgt === "global")    return tl === "pacific" || tl === "cn" || tl === "americas" || tl === "emea";
       if (tgt === "pacific")   return tl === "pacific";
       if (tgt === "cn")        return tl === "cn";
@@ -2054,6 +2059,7 @@ app.get("/api/records/team-detail", async (req, res) => {
       "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
       "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
       "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn",
+      "JD Mall JDG Esports":"cn","JDG":"cn",
       "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
       "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
       "Leviatán":"americas","FURIA":"americas","KRÜ Esports":"americas",
@@ -2062,6 +2068,7 @@ app.get("/api/records/team-detail", async (req, res) => {
       "Natus Vincere":"emea","Team Vitality":"emea","BBL Esports":"emea",
       "FUT Esports":"emea","Karmine Corp":"emea","GIANTX":"emea",
       "WEC C":"emea","Gentle Mates":"emea","ARETE":"emea","Mir Gaming":"emea",
+      "Eternal Fire":"emea","PCIFIC Esports":"emea","ULF Esports":"emea",
     };
     function inferLeagueFromTeam2(t1, t2) {
       if (t1 && TEAM_LEAGUE_MAP2[t1]) return TEAM_LEAGUE_MAP2[t1];
