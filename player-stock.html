@@ -302,7 +302,7 @@
       overflow: hidden;
     }
     .detail-logo img {
-      width: 28px; height: 28px; object-fit: contain; display: block;
+      width: 36px; height: 36px; object-fit: contain; display: block;
     }
     .detail-logo img.logo-invert { filter: invert(1); }
     .detail-name-block { flex: 1; min-width: 0; }
@@ -975,12 +975,11 @@
       "Paper Rex","Team Secret","VARREL","ZETA DIVISION",
       "ENVY","Evil Geniuses","MIBR","Gentle Mates","GIANTX","Team Liquid","ULF Esports",
     ]);
-    function teamLogoHTML(teamName, size) {
+    function teamLogoHTML(teamName, _size) {
       var src = TEAM_LOGOS[teamName];
       if (!src) return teamName ? teamName.charAt(0).toUpperCase() : "?";
       var inv = TEAM_LOGO_INVERT.has(teamName) ? " logo-invert" : "";
-      var s = size || 22;
-      return '<img src="' + src + '" alt="' + teamName + '" class="' + inv.trim() + '" style="width:' + s + 'px;height:' + s + 'px;object-fit:contain" onerror="this.parentNode.textContent=\'' + (teamName ? teamName.charAt(0) : "?") + '\'">';
+      return '<img src="' + src + '" alt="' + teamName + '" class="' + inv.trim() + '" onerror="this.parentNode.textContent=\'' + (teamName ? teamName.charAt(0) : "?") + '\'">';
     }
 
     /* ── 상태 ── */
