@@ -1556,6 +1556,686 @@ async function applyAcsToStock(playerName, newAcs) {
 }
 
 /* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
+/* ── 기록 DB 진단 (어드민 전용) ───────────────────────────────────────────────
+   /api/admin/records-diag 에 GET 요청하면 DB에 저장된 기록 데이터 현황을 반환.
+   league별 vct_p 맵 엔트리 수, vct_roster 팀 수, players/rounds/veto 키 수 확인용. */
+app.get("/api/admin/records-diag", async (req, res) => {
+  try {
+    const [vctpRows, rosterRows, playersRows, roundsRows, vetoRows, autoRows, metaRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key FROM app_data WHERE key LIKE 'players:%'"),
+      pool.query("SELECT key FROM app_data WHERE key LIKE 'rounds:%'"),
+      pool.query("SELECT key FROM app_data WHERE key LIKE 'veto:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
+    ]);
+
+    /* vct_p league별 집계 */
+    const leagueCounts = {};
+    const sampleByLeague = {};
+    let totalMaps = 0;
+    let emptyLeague = 0;
+    vctpRows.rows.forEach(r => {
+      try {
+        const pd = JSON.parse(r.value);
+        (pd.maps || []).forEach(m => {
+          const lg = m.league || "";
+          totalMaps++;
+          if (!lg) { emptyLeague++; return; }
+          leagueCounts[lg] = (leagueCounts[lg] || 0) + 1;
+          if (!sampleByLeague[lg]) sampleByLeague[lg] = [];
+          if (sampleByLeague[lg].length < 3) {
+            sampleByLeague[lg].push({ player: r.key.slice(6), matchKey: m.matchKey, stage: m.stage });
+          }
+        });
+      } catch {}
+    });
+
+    /* auto-match league 집계 */
+    const autoByLeague = {};
+    const autoSamples = {};
+    autoRows.rows.forEach(r => {
+      try {
+        const v = JSON.parse(r.value);
+        const lg = (v.league || "").toLowerCase();
+        autoByLeague[lg] = (autoByLeague[lg] || 0) + 1;
+        if (!autoSamples[lg]) autoSamples[lg] = [];
+        if (autoSamples[lg].length < 3) autoSamples[lg].push({ key: r.key, league: v.league, team1: v.team1, team2: v.team2 });
+      } catch {}
+    });
+
+    /* match-meta league 집계 */
+    const metaByLeague = {};
+    metaRows.rows.forEach(r => {
+      try {
+        const v = JSON.parse(r.value);
+        const lg = (v.league || "").toLowerCase();
+        metaByLeague[lg] = (metaByLeague[lg] || 0) + 1;
+      } catch {}
+    });
+
+    /* players: 샘플 키 5개 */
+    const playerSampleKeys = playersRows.rows.slice(0, 5).map(r => r.key);
+
+    res.json({
+      ok: true,
+      vctP: {
+        players: vctpRows.rows.length,
+        totalMapEntries: totalMaps,
+        emptyLeague,
+        byLeague: leagueCounts,
+        samples: sampleByLeague,
+      },
+      vctRoster: { teams: rosterRows.rows.length, keys: rosterRows.rows.map(r => r.key.slice(11)) },
+      players: { count: playersRows.rows.length, sampleKeys: playerSampleKeys },
+      rounds:  { count: roundsRows.rows.length },
+      veto:    { count: vetoRows.rows.length },
+      autoMatch: { total: autoRows.rows.length, byLeague: autoByLeague, samples: autoSamples },
+      matchMeta: { total: metaRows.rows.length, byLeague: metaByLeague },
+    });
+  } catch (e) {
+    console.error("[records-diag]", e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ── 기록 페이지: 전체 데이터 덤프 ─────────────────────────────────────────────
+   records.html이 localStorage 대신 DB에서 직접 읽기 위해 사용하는 엔드포인트.
+   vct_p, vct_roster, players, rounds, veto, 참가팀 키를 한 번에 반환한다.       */
+app.get("/api/records/dump", async (req, res) => {
+  try {
+    const [vctpRows, rosterRows, playersRows, roundsRows, vetoRows, miscRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'veto:%'"),
+      pool.query(
+        "SELECT key, value FROM app_data WHERE key IN ($1,$2,$3)",
+        ["masters_santiago_participants", "masters_london_participants", "champions_participants"]
+      ),
+    ]);
+
+    const data = {};
+    [vctpRows, rosterRows, playersRows, roundsRows, vetoRows, miscRows].forEach(result => {
+      result.rows.forEach(row => { data[row.key] = row.value; });
+    });
+
+    res.json({ ok: true, data });
+  } catch (e) {
+    console.error("[records/dump]", e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ── 기록 페이지: 서버 계산 (원본 데이터에서 직접 집계) ─────────────────────
+   vct_p: 키에 의존하지 않고 auto-match/match-meta/players/rounds/veto/vct_roster
+   에서 직접 계산한다. league=X&stage=Y 파라미터로 필터.                        */
+app.get("/api/records/compute", async (req, res) => {
+  try {
+    const league = (req.query.league || "pacific").toLowerCase();
+    const stage  = (req.query.stage  || "all").toLowerCase();
+
+    /* ── 헬퍼: matchKey → league 추론 ── */
+    const MK_LEAGUE_KW = { pacific:"pacific", emea:"emea", americas:"americas", cn:"cn",
+                           masters:"masters", champions:"champions", london:"masters", santiago:"masters" };
+    function inferLeagueFromKey(mk) {
+      var parts = mk.split("|");
+      for (var i = 0; i < parts.length; i++) {
+        var pl = parts[i].toLowerCase();
+        if (MK_LEAGUE_KW[pl]) return MK_LEAGUE_KW[pl];
+      }
+      return "";
+    }
+
+    /* ── 헬퍼: matchKey → stage 추론 ── */
+    const MK_STAGE_KW = { kickoff:"kickoff", stage1:"stage1", stage2:"stage2",
+                          stage1playoffs:"stage1playoffs", stage2playoffs:"stage2playoffs",
+                          swiss:"swiss", playoffs:"playoffs", groupstage:"groupstage" };
+    function inferStageFromKey(mk) {
+      var parts = mk.split("|");
+      var p0 = (parts[0] || "").toLowerCase();
+      if (p0.indexOf("stage1playoffs") !== -1) return "stage1playoffs";
+      if (p0.indexOf("stage2playoffs") !== -1) return "stage2playoffs";
+      if (MK_STAGE_KW[p0]) return MK_STAGE_KW[p0];
+      for (var i = 0; i < parts.length; i++) {
+        var pl = parts[i].toLowerCase();
+        if (MK_STAGE_KW[pl]) return MK_STAGE_KW[pl];
+      }
+      return "";
+    }
+
+    /* ── 헬퍼: meta + league/stage → 필터 매칭 ── */
+    function matchesLeague(meta, tgt) {
+      var l = meta.league || "";
+      if (tgt === "global")           return l === "pacific" || l === "cn" || l === "americas" || l === "emea";
+      if (tgt === "pacific")          return l === "pacific";
+      if (tgt === "cn")               return l === "cn";
+      if (tgt === "americas")         return l === "americas";
+      if (tgt === "emea")             return l === "emea";
+      if (tgt === "masters-santiago") return l === "masters" && (meta.tournament || "") === "santiago";
+      if (tgt === "masters-london")   return l === "masters" && (meta.tournament || "") === "london";
+      if (tgt === "champions")        return l === "champions";
+      return false;
+    }
+    function matchesStage(meta, tgt) {
+      if (tgt === "all") return true;
+      var s = meta.stage || "";
+      if (tgt === "kickoff")    return s === "kickoff";
+      if (tgt === "stage1")     return s === "stage1" || s === "stage1playoffs";
+      if (tgt === "stage2")     return s === "stage2" || s === "stage2playoffs";
+      if (tgt === "swiss")      return s === "swiss";
+      if (tgt === "playoffs")   return s === "playoffs";
+      if (tgt === "groupstage") return s === "groupstage" || s === "swiss";
+      return true;
+    }
+
+    /* ── 1. DB 병렬 로드 ── */
+    const [autoRows, metaRows, playersRows, roundsRows, rosterRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+    ]);
+
+    /* ── 2. matchKey → meta 맵 구성 ── */
+    const matchMeta = {};  /* mk → { league, stage, tournament, teamA, teamB } */
+    metaRows.rows.forEach(function(row) {
+      var mk = row.key.slice("match-meta:".length);
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      matchMeta[mk] = {
+        league:     v.league     || inferLeagueFromKey(mk),
+        stage:      v.stage      || inferStageFromKey(mk),
+        tournament: v.tournament || "",
+        teamA:      v.teamA      || v.team1 || "",
+        teamB:      v.teamB      || v.team2 || "",
+      };
+    });
+    autoRows.rows.forEach(function(row) {
+      var mk = row.key.slice("auto-match:".length);
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
+      /* auto-match 우선 적용 */
+      if (v.league) matchMeta[mk].league = v.league;
+      if (!matchMeta[mk].teamA && (v.teamA || v.team1)) matchMeta[mk].teamA = v.teamA || v.team1;
+      if (!matchMeta[mk].teamB && (v.teamB || v.team2)) matchMeta[mk].teamB = v.teamB || v.team2;
+      if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
+    });
+
+    /* players 키에서 matchKey 추가 보강 */
+    playersRows.rows.forEach(function(row) {
+      var withoutPrefix = row.key.slice("players:".length);
+      var lastColon = withoutPrefix.lastIndexOf(":");
+      if (lastColon < 0) return;
+      var mk = withoutPrefix.slice(0, lastColon);
+      if (!matchMeta[mk]) {
+        matchMeta[mk] = {
+          league:     inferLeagueFromKey(mk),
+          stage:      inferStageFromKey(mk),
+          tournament: "",
+          teamA:      "",
+          teamB:      "",
+        };
+      }
+    });
+
+    /* ── 3. 필터 통과 matchKey 집합 ── */
+    const matchSet = new Set();
+    Object.keys(matchMeta).forEach(function(mk) {
+      var meta = matchMeta[mk];
+      if (matchesLeague(meta, league) && matchesStage(meta, stage)) {
+        matchSet.add(mk);
+      }
+    });
+
+    /* ── 4. vct_roster: 선수→팀 맵 ── */
+    const playerTeam = {};
+    rosterRows.rows.forEach(function(row) {
+      var teamName = row.key.slice("vct_roster:".length);
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      var all = (v.main || []).concat(v.subs || []);
+      all.forEach(function(pn) { if (pn && pn !== "-") playerTeam[pn] = teamName; });
+    });
+
+    /* ── 5. players: 에서 선수 스탯 집계 ── */
+    const playerStats = {};  /* name → { totalAcs, totalKills, totalDeaths, maps } */
+    playersRows.rows.forEach(function(row) {
+      var withoutPrefix = row.key.slice("players:".length);
+      var lastColon = withoutPrefix.lastIndexOf(":");
+      if (lastColon < 0) return;
+      var mk = withoutPrefix.slice(0, lastColon);
+      if (!matchSet.has(mk)) return;
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      ["a","b"].forEach(function(side) {
+        for (var si = 0; si < 5; si++) {
+          var slot = v[side + si];
+          if (!slot) continue;
+          var name = (slot.name || "").trim();
+          if (!name || name === "-") continue;
+          var acs = parseInt(slot.acs) || 0;
+          if (acs === 0) continue;
+          var kdaStr = slot.kda || "0/0/0";
+          if (kdaStr === "0/0/0") continue;
+          var kdaParts = kdaStr.split("/");
+          var kills  = parseInt(kdaParts[0]) || 0;
+          var deaths = parseInt(kdaParts[1]) || 0;
+          if (!playerStats[name]) playerStats[name] = { totalAcs:0, totalKills:0, totalDeaths:0, maps:0 };
+          playerStats[name].totalAcs    += acs;
+          playerStats[name].totalKills  += kills;
+          playerStats[name].totalDeaths += deaths;
+          playerStats[name].maps        += 1;
+        }
+      });
+    });
+
+    /* ── 6. 상위 ACS / K/D ── */
+    var playerList = Object.keys(playerStats).map(function(name) {
+      var s = playerStats[name];
+      return {
+        name: name,
+        team: playerTeam[name] || "",
+        maps: s.maps,
+        acs:  s.maps > 0 ? Math.round(s.totalAcs / s.maps) : 0,
+        kd:   s.totalDeaths > 0 ? parseFloat((s.totalKills / s.totalDeaths).toFixed(2)) : parseFloat(s.totalKills.toFixed(2)),
+      };
+    });
+    var topAcs = playerList.slice().sort(function(a,b){ return b.acs - a.acs; }).slice(0, 10);
+    var topKd  = playerList.slice().sort(function(a,b){ return b.kd  - a.kd;  }).slice(0, 10);
+
+    /* ── 7. rounds: 에서 팀 통계 ── */
+    const teamStats = {};  /* teamName → { maps, mapWins, pistolTotal, pistolWins, atkTotal, atkWins, defTotal, defWins } */
+    function ensureTeam(t) {
+      if (!t) return;
+      if (!teamStats[t]) teamStats[t] = { maps:0, mapWins:0, pistolTotal:0, pistolWins:0, atkTotal:0, atkWins:0, defTotal:0, defWins:0 };
+    }
+
+    roundsRows.rows.forEach(function(row) {
+      var withoutPrefix = row.key.slice("rounds:".length);
+      var lastColon = withoutPrefix.lastIndexOf(":");
+      if (lastColon < 0) return;
+      var mk = withoutPrefix.slice(0, lastColon);
+      if (!matchSet.has(mk)) return;
+      var mapIdx = parseInt(withoutPrefix.slice(lastColon + 1)) || 0;
+      var meta = matchMeta[mk] || {};
+      var teamA = meta.teamA || "";
+      var teamB = meta.teamB || "";
+      if (!teamA || !teamB) return;
+
+      var rounds;
+      try { rounds = JSON.parse(row.value); } catch(e) { return; }
+      if (!Array.isArray(rounds) || !rounds.length) return;
+
+      ensureTeam(teamA);
+      ensureTeam(teamB);
+      teamStats[teamA].maps += 1;
+      teamStats[teamB].maps += 1;
+
+      /* 맵 승자 판별 (라운드 수 카운트) */
+      var aWins = 0, bWins = 0;
+      rounds.forEach(function(r) { if (r.winner === "a") aWins++; else if (r.winner === "b") bWins++; });
+      if (aWins > bWins) teamStats[teamA].mapWins++;
+      else if (bWins > aWins) teamStats[teamB].mapWins++;
+
+      rounds.forEach(function(r, idx) {
+        var isPistol = (idx === 0 || idx === 12);
+        var type = r.type || "";
+        var winner = r.winner || "";
+
+        /* 공격/수비 판별:
+           팀A 기준: attack_* && winner=a → ATK win; def_* && winner=a → DEF win
+           팀B 기준: attack_* && winner=b → ATK win; def_* && winner=b → DEF win */
+        var isAtk  = type.indexOf("attack_") === 0;
+        var isDef  = type.indexOf("def_") === 0;
+
+        if (isAtk) {
+          /* 팀A가 공격 (round type이 attack) */
+          teamStats[teamA].atkTotal++;
+          if (winner === "a") teamStats[teamA].atkWins++;
+          /* 팀B가 수비 */
+          teamStats[teamB].defTotal++;
+          if (winner === "b") teamStats[teamB].defWins++;
+        } else if (isDef) {
+          /* 팀A가 수비 */
+          teamStats[teamA].defTotal++;
+          if (winner === "a") teamStats[teamA].defWins++;
+          /* 팀B가 공격 */
+          teamStats[teamB].atkTotal++;
+          if (winner === "b") teamStats[teamB].atkWins++;
+        }
+
+        if (isPistol) {
+          teamStats[teamA].pistolTotal++;
+          teamStats[teamB].pistolTotal++;
+          if (winner === "a") teamStats[teamA].pistolWins++;
+          else if (winner === "b") teamStats[teamB].pistolWins++;
+        }
+      });
+    });
+
+    res.json({
+      ok: true,
+      league,
+      stage,
+      matchCount: matchSet.size,
+      topAcs,
+      topKd,
+      teamStats,
+    });
+  } catch(e) {
+    console.error("[records/compute]", e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ── 기록 페이지: 팀 상세 (조합, 맵 승률, 밴픽) ─────────────────────────────
+   /api/records/team-detail?league=X&stage=Y&team=T                            */
+app.get("/api/records/team-detail", async (req, res) => {
+  try {
+    const league   = (req.query.league || "pacific").toLowerCase();
+    const stage    = (req.query.stage  || "all").toLowerCase();
+    const teamName = (req.query.team   || "").trim();
+    if (!teamName) return res.status(400).json({ ok: false, error: "team 파라미터 필요" });
+
+    /* ── 헬퍼 (compute와 동일한 로직 복사) ── */
+    const MK_LEAGUE_KW = { pacific:"pacific", emea:"emea", americas:"americas", cn:"cn",
+                           masters:"masters", champions:"champions", london:"masters", santiago:"masters" };
+    function inferLeagueFromKey(mk) {
+      var parts = mk.split("|");
+      for (var i = 0; i < parts.length; i++) {
+        var pl = parts[i].toLowerCase();
+        if (MK_LEAGUE_KW[pl]) return MK_LEAGUE_KW[pl];
+      }
+      return "";
+    }
+    const MK_STAGE_KW = { kickoff:"kickoff", stage1:"stage1", stage2:"stage2",
+                          stage1playoffs:"stage1playoffs", stage2playoffs:"stage2playoffs",
+                          swiss:"swiss", playoffs:"playoffs", groupstage:"groupstage" };
+    function inferStageFromKey(mk) {
+      var parts = mk.split("|");
+      var p0 = (parts[0] || "").toLowerCase();
+      if (p0.indexOf("stage1playoffs") !== -1) return "stage1playoffs";
+      if (p0.indexOf("stage2playoffs") !== -1) return "stage2playoffs";
+      if (MK_STAGE_KW[p0]) return MK_STAGE_KW[p0];
+      for (var i = 0; i < parts.length; i++) {
+        var pl = parts[i].toLowerCase();
+        if (MK_STAGE_KW[pl]) return MK_STAGE_KW[pl];
+      }
+      return "";
+    }
+    function matchesLeague(meta, tgt) {
+      var l = meta.league || "";
+      if (tgt === "global")           return l === "pacific" || l === "cn" || l === "americas" || l === "emea";
+      if (tgt === "pacific")          return l === "pacific";
+      if (tgt === "cn")               return l === "cn";
+      if (tgt === "americas")         return l === "americas";
+      if (tgt === "emea")             return l === "emea";
+      if (tgt === "masters-santiago") return l === "masters" && (meta.tournament || "") === "santiago";
+      if (tgt === "masters-london")   return l === "masters" && (meta.tournament || "") === "london";
+      if (tgt === "champions")        return l === "champions";
+      return false;
+    }
+    function matchesStage(meta, tgt) {
+      if (tgt === "all") return true;
+      var s = meta.stage || "";
+      if (tgt === "kickoff")    return s === "kickoff";
+      if (tgt === "stage1")     return s === "stage1" || s === "stage1playoffs";
+      if (tgt === "stage2")     return s === "stage2" || s === "stage2playoffs";
+      if (tgt === "swiss")      return s === "swiss";
+      if (tgt === "playoffs")   return s === "playoffs";
+      if (tgt === "groupstage") return s === "groupstage" || s === "swiss";
+      return true;
+    }
+
+    /* ── DB 로드 ── */
+    const [autoRows, metaRows, playersRows, roundsRows, vetoRows, rosterRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'veto:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+    ]);
+
+    /* matchKey → meta */
+    const matchMeta = {};
+    metaRows.rows.forEach(function(row) {
+      var mk = row.key.slice("match-meta:".length);
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      matchMeta[mk] = { league: v.league || inferLeagueFromKey(mk), stage: v.stage || inferStageFromKey(mk),
+                        tournament: v.tournament || "", teamA: v.teamA||v.team1||"", teamB: v.teamB||v.team2||"" };
+    });
+    autoRows.rows.forEach(function(row) {
+      var mk = row.key.slice("auto-match:".length);
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
+      if (v.league) matchMeta[mk].league = v.league;
+      if (!matchMeta[mk].teamA && (v.teamA||v.team1)) matchMeta[mk].teamA = v.teamA||v.team1;
+      if (!matchMeta[mk].teamB && (v.teamB||v.team2)) matchMeta[mk].teamB = v.teamB||v.team2;
+      if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
+    });
+    playersRows.rows.forEach(function(row) {
+      var withoutPrefix = row.key.slice("players:".length);
+      var lc = withoutPrefix.lastIndexOf(":");
+      if (lc < 0) return;
+      var mk = withoutPrefix.slice(0, lc);
+      if (!matchMeta[mk]) matchMeta[mk] = { league: inferLeagueFromKey(mk), stage: inferStageFromKey(mk),
+                                             tournament:"", teamA:"", teamB:"" };
+    });
+
+    /* 필터 통과 matchKey */
+    const matchSet = new Set();
+    Object.keys(matchMeta).forEach(function(mk) {
+      var meta = matchMeta[mk];
+      if (matchesLeague(meta, league) && matchesStage(meta, stage)) matchSet.add(mk);
+    });
+
+    /* vct_roster: 팀 선수 목록 */
+    const teamLower = teamName.toLowerCase();
+    var teamPlayers = [];
+    rosterRows.rows.forEach(function(row) {
+      var tn = row.key.slice("vct_roster:".length);
+      if (tn.toLowerCase() !== teamLower && tn.toLowerCase().indexOf(teamLower) === -1 && teamLower.indexOf(tn.toLowerCase()) === -1) return;
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      var all = (v.main||[]).concat(v.subs||[]);
+      if (all.length > teamPlayers.length) teamPlayers = all;
+    });
+
+    /* veto: matchKey → veto 맵 */
+    const vetoMap = {};
+    vetoRows.rows.forEach(function(row) {
+      var mk = row.key.slice("veto:".length);
+      if (!matchSet.has(mk)) return;
+      try { vetoMap[mk] = JSON.parse(row.value); } catch(e) {}
+    });
+
+    /* getMapName 헬퍼 */
+    function getMapName(mk, mi, matchMaxIdx) {
+      var veto = vetoMap[mk];
+      if (!veto) return null;
+      var maps = veto.maps;
+      if (!Array.isArray(maps) || !maps.length) return null;
+      var isBo5 = !!(veto.gf || veto.bo5);
+      if (!isBo5) isBo5 = (parseInt(matchMaxIdx) || 0) >= 3;
+      if (!isBo5 && veto.sides) isBo5 = veto.sides[4] !== undefined || veto.sides[5] !== undefined;
+      if (!isBo5) {
+        var dp = (String(mk).split("|")[0] || "").toLowerCase();
+        isBo5 = dp.indexOf("grand") !== -1 || dp.indexOf(" gf") !== -1 || dp.indexOf("_gf") !== -1 || dp.startsWith("gf");
+      }
+      var stepPos;
+      if      (mi === 0) stepPos = 2;
+      else if (mi === 1) stepPos = 3;
+      else if (mi === 2) stepPos = isBo5 ? 4 : 6;
+      else if (mi === 3) stepPos = 5;
+      else if (mi === 4) stepPos = 6;
+      else return null;
+      return maps[stepPos] || null;
+    }
+
+    const MAP_NAME_KO = {
+      "Ascent":"어센트","Split":"스플릿","Fracture":"프랙처","Bind":"바인드",
+      "Breeze":"브리즈","Abyss":"어비스","Lotus":"로터스","Sunset":"선셋",
+      "Pearl":"펄","Icebox":"아이스박스","Corrode":"코로드","Haven":"헤이븐","헤이브":"헤이븐",
+    };
+    function normMap(n) { return MAP_NAME_KO[n] || n; }
+
+    /* players 키 그룹화: mk → [mapIdx, ...] */
+    const mkMapIdxSet = {};  /* mk → Set(mapIdx) */
+    playersRows.rows.forEach(function(row) {
+      var wp = row.key.slice("players:".length);
+      var lc = wp.lastIndexOf(":");
+      if (lc < 0) return;
+      var mk = wp.slice(0, lc);
+      if (!matchSet.has(mk)) return;
+      var mi = parseInt(wp.slice(lc+1)) || 0;
+      if (!mkMapIdxSet[mk]) mkMapIdxSet[mk] = new Set();
+      mkMapIdxSet[mk].add(mi);
+    });
+
+    /* players: 에서 팀 사이드 판별 + 에이전트 수집 */
+    const compositions = {};  /* mapName → [{ agents:[...], count, matches:[...] }] */
+    const mapWinRates  = {};  /* mapName → { wins, total } */
+    const banPick      = {};  /* mapName → { picks, bans } */
+
+    const playerSet = new Set(teamPlayers.map(function(p){ return p.toLowerCase(); }));
+
+    /* players 키 → rows 맵 */
+    const playersData = {};
+    playersRows.rows.forEach(function(row) {
+      playersData[row.key] = row.value;
+    });
+    const roundsData = {};
+    roundsRows.rows.forEach(function(row) {
+      roundsData[row.key] = row.value;
+    });
+
+    matchSet.forEach(function(mk) {
+      var mapIdxes = mkMapIdxSet[mk];
+      if (!mapIdxes) return;
+      var maxIdx = 0;
+      mapIdxes.forEach(function(mi) { if (mi > maxIdx) maxIdx = mi; });
+
+      /* veto 밴픽 처리 */
+      var veto = vetoMap[mk];
+      if (veto && Array.isArray(veto.maps)) {
+        var vetoMaps = veto.maps;
+        var isBo5 = !!(veto.gf || veto.bo5) || maxIdx >= 3;
+        if (!isBo5 && veto.sides) isBo5 = veto.sides[4] !== undefined || veto.sides[5] !== undefined;
+
+        /* 픽 위치: bo3=[2,3,6] bo5=[2,3,4,5,6] */
+        var pickSteps = isBo5 ? [2,3,4,5,6] : [2,3,6];
+        /* 밴 위치: bo3=[0,1,4,5] bo5=[0,1] */
+        var banSteps = isBo5 ? [0,1] : [0,1,4,5];
+
+        /* 팀이 어느 사이드인지: firstBan="A"면 팀A가 먼저 밴
+           teamA vs teamB 에서 team이 어느쪽인지 판별 */
+        var meta = matchMeta[mk] || {};
+        var mTA = (meta.teamA||"").toLowerCase();
+        var mTB = (meta.teamB||"").toLowerCase();
+        var teamSideInVeto = null;
+        if (mTA && mTA.indexOf(teamLower) !== -1) teamSideInVeto = "A";
+        else if (mTB && mTB.indexOf(teamLower) !== -1) teamSideInVeto = "B";
+        else if (teamLower && mTA && teamLower.indexOf(mTA) !== -1) teamSideInVeto = "A";
+        else if (teamLower && mTB && teamLower.indexOf(mTB) !== -1) teamSideInVeto = "B";
+
+        if (teamSideInVeto) {
+          var firstBan = veto.firstBan || "A";
+          /* 팀 밴/픽 스텝 인덱스:
+             step 0,2,4 → firstBan 팀 (홀수: 상대팀)
+             step 1,3,5 → !firstBan 팀 */
+          var pickAndBanAll = [];
+          vetoMaps.forEach(function(mapName, stepIdx) {
+            if (!mapName) return;
+            var mn = normMap(mapName);
+            var isTeamStep = (stepIdx % 2 === 0) ? (firstBan === teamSideInVeto) : (firstBan !== teamSideInVeto);
+            var isPick = pickSteps.indexOf(stepIdx) !== -1;
+            var isBan  = banSteps.indexOf(stepIdx) !== -1;
+            if (!isPick && !isBan) return;
+            if (!banPick[mn]) banPick[mn] = { picks:0, bans:0 };
+            if (isPick)        banPick[mn].picks++;
+            if (isBan && isTeamStep) banPick[mn].bans++;
+          });
+        }
+      }
+
+      mapIdxes.forEach(function(mi) {
+        var pkey = "players:" + mk + ":" + mi;
+        var praw = playersData[pkey];
+        if (!praw) return;
+        var pdata; try { pdata = JSON.parse(praw); } catch(e) { return; }
+
+        /* 팀 사이드 판별 */
+        var aCnt = 0, bCnt = 0;
+        for (var si = 0; si < 5; si++) {
+          var aSlot = pdata["a" + si]; if (aSlot && aSlot.name && playerSet.has(aSlot.name.toLowerCase())) aCnt++;
+          var bSlot = pdata["b" + si]; if (bSlot && bSlot.name && playerSet.has(bSlot.name.toLowerCase())) bCnt++;
+        }
+        var side = null;
+        if (aCnt >= 3) side = "a";
+        else if (bCnt >= 3) side = "b";
+        else return;  /* 팀 선수 3명 미만이면 스킵 */
+
+        /* 에이전트 5개 추출 */
+        var agents = [];
+        for (var si2 = 0; si2 < 5; si2++) {
+          var slot = pdata[side + si2];
+          if (slot && slot.agent && slot.agent !== "-") agents.push(slot.agent);
+        }
+        if (agents.length < 5) return;
+
+        /* 맵 이름 */
+        var rawMapName = getMapName(mk, mi, maxIdx);
+        var mapName = rawMapName ? normMap(rawMapName) : null;
+        if (!mapName) return;
+
+        /* 조합 집계 */
+        var agentKey = agents.slice().sort().join(",");
+        if (!compositions[mapName]) compositions[mapName] = {};
+        if (!compositions[mapName][agentKey]) compositions[mapName][agentKey] = { agents: agents, count: 0, matches: [] };
+        compositions[mapName][agentKey].count++;
+        compositions[mapName][agentKey].matches.push(mk + "|" + mi);
+
+        /* 맵 승률: rounds에서 확인 */
+        var rkey = "rounds:" + mk + ":" + mi;
+        var rraw = roundsData[rkey];
+        if (rraw) {
+          var rounds; try { rounds = JSON.parse(rraw); } catch(e) { rounds = null; }
+          if (Array.isArray(rounds) && rounds.length) {
+            var aWins = 0, bWins = 0;
+            rounds.forEach(function(r) { if (r.winner==="a") aWins++; else if (r.winner==="b") bWins++; });
+            var won = (side === "a" && aWins > bWins) || (side === "b" && bWins > aWins);
+            if (!mapWinRates[mapName]) mapWinRates[mapName] = { wins:0, total:0 };
+            mapWinRates[mapName].total++;
+            if (won) mapWinRates[mapName].wins++;
+          }
+        }
+      });
+    });
+
+    /* compositions 맵별 배열 변환 */
+    const compositionsOut = {};
+    Object.keys(compositions).forEach(function(mapName) {
+      compositionsOut[mapName] = Object.values(compositions[mapName]).sort(function(a,b){ return b.count - a.count; });
+    });
+
+    res.json({
+      ok: true,
+      team: teamName,
+      compositions: compositionsOut,
+      mapWinRates,
+      banPick,
+    });
+  } catch(e) {
+    console.error("[records/team-detail]", e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 /* ── vct_p 일괄 재처리 (갈아엎기 버전) ────────────────────────────────────────
    클라이언트가 보낸 localData(admin localStorage의 players:/vct_roster: 키들)를
    DB에 먼저 UPSERT한 뒤, DB 전체를 스캔해서 vct_p를 완전히 재구성한다.
