@@ -108,6 +108,16 @@
 
       localStorage.setItem(key, JSON.stringify(data));
 
+      /* ── 서버 DB 동기화 (비동기, 실패해도 로컬에는 반영됨) ── */
+      (function (k, v) {
+        fetch('/api/data/' + encodeURIComponent(k), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ value: v }),
+        }).catch(function () {});
+      }(key, JSON.stringify(data)));
+
       var diff = newPrice - oldPrice;
       var pctStr = pctChange === null
         ? '첫 반영'

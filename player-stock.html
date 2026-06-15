@@ -569,6 +569,7 @@
         <span class="admin-toolbar-label">⚙ 관리자</span>
         <button class="admin-tool-btn danger" onclick="adminResetStock()">주가 전체 초기화 (→0)</button>
         <button class="admin-tool-btn warn"   onclick="adminRefundAll()">전체 환불 (매입가 기준)</button>
+        <button class="admin-tool-btn" style="background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4);color:#818cf8" onclick="adminSyncToServer()">💾 로컬→서버 동기화</button>
       </div>
 
       <!-- Filter bar -->
@@ -808,17 +809,14 @@
     /* ── 선수 데이터 빌드 (서버 DB 기반) ── */
     function buildPlayersFromData(playerTeam, vcpMap, stockMap) {
       var VALID_LEAGUES = { americas:1, emea:1, pacific:1, cn:1, masters:1, champions:1 };
-      var pMap = {};
 
+      /* 1단계: vct_p 데이터에서 ACS/KDA 집계 */
+      var pMap = {};
       Object.keys(vcpMap).forEach(function (pName) {
-        /* 로스터에 없는 선수 제외 */
-        if (!playerTeam[pName]) return;
         var pd = vcpMap[pName];
         if (!pd || !pd.maps || !pd.maps.length) return;
-
         pd.maps.forEach(function (m) {
           var lg = m.league || "";
-          if (!VALID_LEAGUES[lg]) return;
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
           if (hasKda) {
@@ -828,7 +826,8 @@
           if (acs <= 0 && !hasKda) return;
           if (!pMap[pName]) pMap[pName] = { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
           var e = pMap[pName];
-          e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
+          /* league가 있으면 regionCounts에도 반영 */
+          if (lg && VALID_LEAGUES[lg]) e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
           if (acs > 0) { e.acsMaps++; e.totalAcs += acs; }
           if (hasKda) {
             var kpts = m.kda.split("/");
@@ -839,15 +838,38 @@
         });
       });
 
+      /* 2단계: stock_p 기준으로 playerTeam에도 없는 선수 보충
+         — vct_p가 없거나 league 데이터가 없어도 주가가 있으면 표시 */
+      var allNames = new Set(Object.keys(pMap));
+      Object.keys(stockMap).forEach(function (n) { allNames.add(n); });
+      /* localStorage stock_p도 보충 */
+      for (var li = 0; li < localStorage.length; li++) {
+        var lk = localStorage.key(li);
+        if (lk && lk.indexOf("stock_p:") === 0) allNames.add(lk.slice(8));
+      }
+      /* playerTeam에 있는 선수도 포함 (vct_p 없어도) */
+      Object.keys(playerTeam).forEach(function (n) { allNames.add(n); });
+
       /* top 30% threshold for 우량주 */
       var allMapCounts = Object.keys(pMap).map(function (k) { return pMap[k].acsMaps; });
       allMapCounts.sort(function (a, b) { return b - a; });
       var topThreshold = allMapCounts.length > 0 ? (allMapCounts[Math.floor(allMapCounts.length * 0.3)] || 1) : 1;
 
       var players = [], idx = 0;
-      Object.keys(pMap).forEach(function (pName) {
-        var e = pMap[pName];
-        if (e.acsMaps === 0) return;
+      allNames.forEach(function (pName) {
+        /* stock_p 또는 vct_p 중 하나라도 있어야 표시 */
+        var hasVcp = !!pMap[pName];
+        var stockData = stockMap[pName] || null;
+        /* localStorage에서도 병합 (어드민이 로컬에서 반영한 경우) */
+        try {
+          var lsStock = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null");
+          if (lsStock && (!stockData || (lsStock.runCount || 0) > (stockData.runCount || 0))) stockData = lsStock;
+        } catch (se) {}
+
+        /* vct_p도 없고 stock_p도 없으면 스킵 */
+        if (!hasVcp && !stockData) return;
+
+        var e = pMap[pName] || { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
 
         var region = "americas", maxCnt = 0;
         Object.keys(e.regionCounts).forEach(function (r) {
@@ -857,15 +879,8 @@
         var team = playerTeam[pName] || "";
         if (team && REGION_MAP[team]) region = REGION_MAP[team];
 
-        var avgAcs = Math.round(e.totalAcs / e.acsMaps);
+        var avgAcs = e.acsMaps > 0 ? Math.round(e.totalAcs / e.acsMaps) : 0;
         var kd = e.kdMaps > 0 ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2)) : null;
-
-        var stockData = stockMap[pName] || null;
-        /* localStorage에서도 병합 (어드민이 로컬에서 반영한 경우) */
-        try {
-          var lsStock = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null");
-          if (lsStock && (!stockData || (lsStock.runCount || 0) > (stockData.runCount || 0))) stockData = lsStock;
-        } catch (se) {}
 
         if (stockData && Array.isArray(stockData.history)) {
           stockData.history = stockData.history.map(function (h) {
@@ -880,9 +895,12 @@
                         ? stockData.history : null;
         if (stockData && stockData.runCount > 0) avgAcs = Math.round(stockData.runTotal / stockData.runCount);
 
+        /* stock_p나 vct_p가 없어 주가가 0이고 vct_p도 없으면 표시 가치 없음 */
+        if (price === 0 && !hasVcp) return;
+
         var changeRate = prev > 0 ? (price - prev) / prev * 100 : 0;
         var stockType;
-        if (!stockData) stockType = "pre-ipo";
+        if (!stockData || price === 0) stockType = "pre-ipo";
         else if (e.acsMaps >= 20 && price >= topThreshold) stockType = "blue-chip";
         else if (e.acsMaps >= 10 && changeRate >= 0) stockType = "growth";
         else if (e.acsMaps < 10) stockType = "ipo";
@@ -1571,6 +1589,50 @@
         alert(p.name + " 리셋 완료");
       });
     };
+    /* 로컬 stock_p / vct_p / vct_roster 데이터를 서버 DB에 일괄 업로드 */
+    window.adminSyncToServer = function () {
+      if (!isAdminMode) return;
+      var PREFIXES = ["stock_p:", "vct_p:", "vct_roster:"];
+      var entries = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        for (var pi = 0; pi < PREFIXES.length; pi++) {
+          if (k.indexOf(PREFIXES[pi]) === 0) {
+            var v = localStorage.getItem(k);
+            if (v) entries.push([k, v]);
+            break;
+          }
+        }
+      }
+      if (entries.length === 0) {
+        alert("동기화할 로컬 데이터가 없습니다.");
+        return;
+      }
+      if (!confirm("로컬스토리지의 선수 데이터 " + entries.length + "건을 서버 DB에 업로드합니다.\n계속하시겠습니까?")) return;
+
+      var done = 0, failed = 0;
+      var BATCH = 20;
+      function uploadBatch(idx) {
+        if (idx >= entries.length) {
+          alert("✅ 동기화 완료: " + done + "건 업로드" + (failed ? ", " + failed + "건 실패" : ""));
+          loadMarketData(function (players) { PLAYERS = players; renderStockList(); });
+          return;
+        }
+        var batch = entries.slice(idx, idx + BATCH);
+        Promise.all(batch.map(function (kv) {
+          return fetch("/api/data/" + encodeURIComponent(kv[0]), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ value: kv[1] }),
+          }).then(function (r) { if (r.ok) done++; else failed++; })
+            .catch(function () { failed++; });
+        })).then(function () { uploadBatch(idx + BATCH); });
+      }
+      uploadBatch(0);
+    };
+
     window.adminRefundAll = function () {
       if (!isAdminMode) return;
       if (!confirm("전체 환불을 진행합니다. 되돌릴 수 없습니다.")) return;

@@ -3383,6 +3383,8 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
         });
       }
       localStorage.setItem(_vk, JSON.stringify(_pd));
+      /* ── 서버 DB 동기화 (비동기, 실패해도 무시) ── */
+      (function(k,v){fetch('/api/data/'+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({value:v})}).catch(function(){});})(_vk, JSON.stringify(_pd));
     } else {
       /* 선수 이름이 지워진 경우: 해당 matchKey+mapIdx 항목을 모든 vct_p에서 제거 */
       try {
