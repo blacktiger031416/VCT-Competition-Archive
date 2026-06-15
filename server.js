@@ -2261,9 +2261,11 @@ app.get("/api/records/team-detail", async (req, res) => {
             var isPick = pickSteps.indexOf(stepIdx) !== -1;
             var isBan  = banSteps.indexOf(stepIdx) !== -1;
             if (!isPick && !isBan) return;
-            if (!banPick[mn]) banPick[mn] = { picks:0, bans:0 };
-            if (isPick)        banPick[mn].picks++;
-            if (isBan && isTeamStep) banPick[mn].bans++;
+            if (!banPick[mn]) banPick[mn] = { teamPick:0, opponentPick:0, teamBan:0, opponentBan:0 };
+            if (isPick && isTeamStep)   banPick[mn].teamPick++;
+            if (isPick && !isTeamStep)  banPick[mn].opponentPick++;
+            if (isBan && isTeamStep)    banPick[mn].teamBan++;
+            if (isBan && !isTeamStep)   banPick[mn].opponentBan++;
           });
         }
       }
