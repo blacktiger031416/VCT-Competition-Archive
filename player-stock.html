@@ -71,6 +71,31 @@
     #admin-refund-btn { background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3);  color: #fcd34d; }
     #admin-refund-btn:hover { background: rgba(234,179,8,.15); }
 
+    /* ── ADMIN TOOLBAR ── */
+    .admin-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; margin-bottom: 10px;
+      background: rgba(232,68,68,.06);
+      border: 1px solid rgba(232,68,68,.2);
+      border-radius: 8px;
+    }
+    .admin-toolbar-label {
+      font-size: 11px; font-weight: 700; color: rgba(232,68,68,.7);
+      letter-spacing: .05em; text-transform: uppercase; margin-right: 4px;
+    }
+    .admin-tool-btn {
+      padding: 5px 14px; border-radius: 5px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: .15s;
+    }
+    .admin-tool-btn.danger {
+      background: rgba(232,68,68,.12); border: 1px solid rgba(232,68,68,.35); color: var(--up);
+    }
+    .admin-tool-btn.danger:hover { background: rgba(232,68,68,.22); }
+    .admin-tool-btn.warn {
+      background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3); color: #fcd34d;
+    }
+    .admin-tool-btn.warn:hover { background: rgba(234,179,8,.15); }
+
     /* ── TOP TABS ── */
     .top-tabs {
       display: flex; border-bottom: 1px solid var(--border);
@@ -483,7 +508,7 @@
     <div class="header-right">
       <span class="header-coins">코인 <strong id="coin-balance">—</strong></span>
       <div class="admin-btns">
-        <button class="admin-btn" id="admin-reset-btn"  onclick="adminResetStock()">전체 리셋</button>
+        <button class="admin-btn" id="admin-reset-btn"  onclick="adminResetStock()">주가 전체 초기화 (→0)</button>
         <button class="admin-btn" id="admin-refund-btn" onclick="adminRefundAll()">전체 환불</button>
       </div>
     </div>
@@ -527,6 +552,13 @@
           <span class="mkt-label">총 자산</span>
           <span class="mkt-value" id="tk-asset">—</span>
         </div>
+      </div>
+
+      <!-- Admin toolbar (관리자 전용 — isAdminMode 시 표시) -->
+      <div class="admin-toolbar" id="admin-toolbar" style="display:none">
+        <span class="admin-toolbar-label">⚙ 관리자</span>
+        <button class="admin-tool-btn danger" onclick="adminResetStock()">주가 전체 초기화 (→0)</button>
+        <button class="admin-tool-btn warn"   onclick="adminRefundAll()">전체 환불 (매입가 기준)</button>
       </div>
 
       <!-- Filter bar -->
@@ -836,7 +868,7 @@
         if (team && REGION_MAP[team]) region = REGION_MAP[team];
 
         var avgAcs = Math.round(e.totalAcs / e.acsMaps);
-        var basePrice = Math.max(1, Math.round(avgAcs / 10));
+        var basePrice = 0; /* 모든 선수의 초기가는 0 */
         var kd = e.kdMaps > 0 ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2)) : null;
 
         var stockData = null;
@@ -846,7 +878,8 @@
             return typeof h === "object" && h !== null ? h.price : h;
           }).filter(function (h) { return typeof h === "number" && !isNaN(h); });
         }
-        var price   = (stockData && stockData.price)   ? stockData.price   : basePrice;
+        /* price=0도 유효한 값이므로 !== undefined 체크 */
+        var price   = (stockData && stockData.price !== undefined) ? stockData.price : basePrice;
         var prev    = (stockData && stockData.history && stockData.history.length >= 2)
                         ? stockData.history[stockData.history.length - 2] : price;
         var history = (stockData && stockData.history && stockData.history.length > 0)
@@ -1361,14 +1394,39 @@
     /* ── Admin ── */
     window.adminResetStock = function () {
       if (!isAdminMode) return;
-      if (!confirm("모든 주식 데이터를 리셋하시겠습니까?")) return;
+      if (!confirm("모든 선수의 주가를 0으로 초기화합니다.\nlocalStorage + DB가 모두 삭제됩니다.\n계속하시겠습니까?")) return;
+
+      /* 1) localStorage stock_p: 전체 삭제 */
       var keys = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
         if (k && k.indexOf("stock_p:") === 0) keys.push(k);
       }
       keys.forEach(function (k) { localStorage.removeItem(k); });
-      alert("리셋 완료 (" + keys.length + "명)"); location.reload();
+
+      /* 2) DB stock_p: 전체 삭제 */
+      /* 버튼들 비활성화 (헤더 + 툴바 둘 다) */
+      ["admin-reset-btn"].forEach(function (id) {
+        var b = document.getElementById(id);
+        if (b) { b.disabled = true; b.textContent = "초기화 중..."; }
+      });
+      document.querySelectorAll(".admin-tool-btn.danger").forEach(function (b) {
+        b.disabled = true; b.textContent = "초기화 중...";
+      });
+
+      fetch("/api/admin/stock-reset-all", {
+        method: "POST",
+        headers: TOKEN ? { "Authorization": "Bearer " + TOKEN } : {}
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          alert("✅ 초기화 완료\nlocalStorage: " + keys.length + "명\nDB: " + (j.deleted || 0) + "건 삭제\n\n모든 현재가가 0으로 리셋됩니다.");
+          location.reload();
+        })
+        .catch(function (e) {
+          alert("⚠️ localStorage는 초기화됨, DB 오류: " + e.message);
+          location.reload();
+        });
     };
     window.adminResetPlayerStock = function () {
       if (!isAdminMode) return;
@@ -1431,13 +1489,29 @@
         });
     }
 
+    /* ── 어드민 UI 표시 헬퍼 (타이밍 무관하게 여러 번 호출 가능) ── */
+    function applyAdminMode() {
+      var admin = !!(window.vctIsAdmin && window.vctIsAdmin());
+      if (admin === isAdminMode) return; /* 변화 없으면 스킵 */
+      isAdminMode = admin;
+      /* 헤더 버튼 (있으면 표시) */
+      var rb = document.getElementById("admin-reset-btn");
+      var fb = document.getElementById("admin-refund-btn");
+      if (rb) rb.style.display = admin ? "" : "none";
+      if (fb) fb.style.display = admin ? "" : "none";
+      /* 본문 어드민 툴바 */
+      var tb = document.getElementById("admin-toolbar");
+      if (tb) tb.style.display = admin ? "flex" : "none";
+    }
+
     /* ── 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      isAdminMode = !!(window.vctIsAdmin && window.vctIsAdmin());
-      if (isAdminMode) {
-        document.getElementById("admin-reset-btn").style.display  = "";
-        document.getElementById("admin-refund-btn").style.display = "";
-      }
+      applyAdminMode();
+      /* auth.js 가 늦게 로드되는 경우를 대비해 최대 3초간 재확인 */
+      var checks = [300, 700, 1200, 2000, 3000];
+      checks.forEach(function (ms) {
+        setTimeout(applyAdminMode, ms);
+      });
 
       PLAYERS = buildPlayersFromStorage();
       updateMarketBar();

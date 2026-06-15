@@ -77,34 +77,25 @@
       var data = {};
       try { data = JSON.parse(localStorage.getItem(key) || 'null') || {}; } catch (e) {}
 
-      /* ── 최초: vct_p: 에서 평균 ACS로 초기 가격 세팅 ── */
-      if (!data.price || !data.ref) {
-        var avgAcs = newAcs; /* fallback: 이 맵 ACS */
-        try {
-          var vctRaw = localStorage.getItem('vct_p:' + name);
-          if (vctRaw) {
-            var vctData = JSON.parse(vctRaw);
-            var total = 0, cnt = 0;
-            (vctData.maps || []).forEach(function (m) {
-              var lg = m.league || '';
-              if (lg !== 'americas' && lg !== 'emea' && lg !== 'pacific' && lg !== 'cn' && lg !== 'masters' && lg !== 'champions') return;
-              var a = parseFloat(m.acs) || 0;
-              if (a > 0) { total += a; cnt++; }
-            });
-            if (cnt > 0) avgAcs = Math.round(total / cnt);
-          }
-        } catch (e) {}
-
-        var initPrice = Math.max(1, Math.round(avgAcs / 10));
-        data.price   = initPrice;
-        data.ref     = avgAcs;
-        data.history = [initPrice];
+      /* ── 최초: 가격 0으로 시작 (히스토리 적용 전 초기 상태) ── */
+      if (data.price === undefined || data.price === null) {
+        data.price   = 0;
+        data.ref     = 0;
+        data.history = [0];
       }
 
       /* ── 변동률 계산 후 새 가격 적용 ── */
       var oldPrice   = data.price;
-      var pctChange  = (newAcs - data.ref) / data.ref;
-      var newPrice   = Math.max(1, Math.round(data.price * (1 + pctChange)));
+      var pctChange  = 0;
+      var newPrice;
+      if (data.ref === 0 || data.price === 0) {
+        /* 첫 번째 맵 적용: ACS → 가격 부트스트랩 */
+        newPrice  = Math.max(1, Math.round(newAcs / 10));
+        pctChange = null; /* 부트스트랩이므로 변동률 없음 */
+      } else {
+        pctChange = (newAcs - data.ref) / data.ref;
+        newPrice  = Math.max(1, Math.round(data.price * (1 + pctChange)));
+      }
 
       data.history  = (data.history || [oldPrice]).slice();
       data.history.push(newPrice);
@@ -118,13 +109,16 @@
       localStorage.setItem(key, JSON.stringify(data));
 
       var diff = newPrice - oldPrice;
+      var pctStr = pctChange === null
+        ? '첫 반영'
+        : (parseFloat((pctChange * 100).toFixed(1)) > 0 ? '+' : '') + (pctChange * 100).toFixed(1) + '%';
       results.push({
         name:     name,
         oldPrice: oldPrice,
         newPrice: newPrice,
         acs:      newAcs,
         diff:     diff,
-        pct:      (pctChange * 100).toFixed(1),
+        pct:      pctStr,
         sign:     diff > 0 ? '▲' : diff < 0 ? '▼' : '━',
       });
     });
@@ -139,8 +133,7 @@
     results.forEach(function (r) {
       msg += r.name + '  '
            + r.oldPrice + ' → ' + r.newPrice + ' 코인  '
-           + r.sign + Math.abs(r.diff) + ' ('
-           + (parseFloat(r.pct) > 0 ? '+' : '') + r.pct + '%)\n';
+           + r.sign + Math.abs(r.diff) + ' (' + r.pct + ')\n';
     });
     alert(msg);
 
@@ -185,20 +178,39 @@
 
   window.renderStockButtons = renderStockButtons;
 
-  /* ── Admin 전용: 전체 stock_p: 데이터 리셋 ── */
+  /* ── Admin 전용: 전체 stock_p: 데이터 리셋 (localStorage + DB) ── */
   window.resetAllStock = function () {
     if (!window.vctIsAdmin || !window.vctIsAdmin()) {
       alert('관리자만 사용할 수 있습니다.'); return;
     }
+    /* localStorage에서 stock_p: 키 수집 */
     var keys = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (k && k.indexOf('stock_p:') === 0) keys.push(k);
     }
-    if (keys.length === 0) { alert('리셋할 주식 데이터가 없습니다.'); return; }
-    if (!confirm('stock_p: 데이터 ' + keys.length + '개를 모두 삭제합니다.\n(가격이 평균 ACS 기준으로 초기화됩니다)\n계속하시겠습니까?')) return;
+    if (!confirm(
+      'stock_p: 데이터(localStorage ' + keys.length + '개 + DB 전체)를 삭제합니다.\n' +
+      '모든 선수의 주가가 0으로 초기화되며, 경기 반영 시 새로 산정됩니다.\n' +
+      '계속하시겠습니까?'
+    )) return;
+
+    /* localStorage 삭제 */
     keys.forEach(function (k) { localStorage.removeItem(k); });
-    alert('✅ 리셋 완료 (' + keys.length + '명)');
+
+    /* DB 삭제 요청 */
+    fetch('/api/admin/stock-reset-all', { method: 'POST', credentials: 'include' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) {
+          alert('✅ 리셋 완료 (localStorage ' + keys.length + '명 / DB ' + d.deleted + '건 삭제)');
+        } else {
+          alert('⚠️ localStorage 리셋 완료, DB 오류: ' + (d.error || '알 수 없음'));
+        }
+      })
+      .catch(function (err) {
+        alert('⚠️ localStorage 리셋 완료, DB 연결 오류: ' + err.message);
+      });
   };
 
   /* ── 초기 실행 (DOMContentLoaded 이후 약간 대기: auth.js 로드 보장) ── */

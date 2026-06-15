@@ -1595,8 +1595,8 @@ async function initStockFromVctP(playerName, fallbackAcs) {
     return null; /* vct_p도 없고 fallback도 없으면 포기 */
   }
 
-  const initPrice = Math.max(1, Math.round(avgAcs / 10));
-  return { state: { price: initPrice, ref: avgAcs, history: [initPrice], runTotal: 0, runCount: 0 },
+  /* 가격은 0에서 시작 — 첫 맵 적용 시 ACS 기반으로 부트스트랩됨 */
+  return { state: { price: 0, ref: 0, history: [0], runTotal: 0, runCount: 0 },
            resolvedKey: `stock_p:${resolvedPlayerName}` };
 }
 
@@ -1604,39 +1604,47 @@ async function initStockFromVctP(playerName, fallbackAcs) {
 async function applyAcsToStock(playerName, newAcs) {
   let found = await getStockState(playerName);
   const isNew = !found;
-  /* stock_p 없으면 vct_p 기록으로 초기화, vct_p도 없으면 현재 ACS로 초기화 */
+  /* stock_p 없으면 초기 상태(price=0)로 등록 */
   if (!found) found = await initStockFromVctP(playerName, newAcs);
   if (!found) return;
 
   const { state, resolvedKey } = found;
 
-  /* 신규 선수: 초기 상태 먼저 저장 */
+  /* 신규 선수: 초기 상태(price=0) 먼저 저장 */
   if (isNew) {
     await saveStockState(playerName, state, resolvedKey);
-    console.log(`[stock] ${resolvedKey}: 신규 등록 기준가격=${state.price} (기준ACS ${state.ref})`);
-    /* 현재 ACS = 기준 ACS 이면 변동 없음 (이력 없는 완전 신규 선수) */
-    if (newAcs === state.ref) return;
-    /* 이력이 있어서 기준이 역사 평균인 경우 → 현재 ACS와 비교해 변동 적용 (fall-through) */
+    console.log(`[stock] ${resolvedKey}: 신규 등록 — 가격 0에서 시작`);
+    /* fall-through: 첫 맵 ACS로 부트스트랩 적용 */
   }
 
-  /* 이미 동일 ACS로 반영된 경우 중복 방지 */
-  if (newAcs === state.ref) {
+  /* ref=0 이면 같은 ACS라도 건너뛰지 않음 (부트스트랩 필요) */
+  if (state.ref !== 0 && newAcs === state.ref) {
     console.log(`[stock] ${playerName}: ACS ${newAcs} 이미 반영됨 — 건너뜀`);
     return;
   }
 
-  const pctChange = (newAcs - state.ref) / state.ref;
-  const newPrice  = Math.max(1, Math.round(state.price * (1 + pctChange)));
+  let newPrice;
+  let logSuffix;
+  if (state.ref === 0 || state.price === 0) {
+    /* 첫 번째 맵: ACS 기반으로 초기 가격 부트스트랩 */
+    newPrice  = Math.max(1, Math.round(newAcs / 10));
+    logSuffix = `첫 맵 부트스트랩 ACS ${newAcs} → 가격 0→${newPrice}`;
+  } else {
+    const pctChange = (newAcs - state.ref) / state.ref;
+    newPrice  = Math.max(1, Math.round(state.price * (1 + pctChange)));
+    logSuffix = `ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`;
+  }
+
   const newState  = {
     ...state,
     price    : newPrice,
     ref      : newAcs,
-    history  : [...(state.history || []), newPrice].slice(-200),
+    history  : [...(state.history || [0]), newPrice].slice(-200),
     runTotal : (state.runTotal || 0) + newAcs,
     runCount : (state.runCount || 0) + 1,
   };
   await saveStockState(playerName, newState, resolvedKey);
-  console.log(`[stock] ${resolvedKey}: ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`);
+  console.log(`[stock] ${resolvedKey}: ${logSuffix}`);
 }
 
 /* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
@@ -2918,6 +2926,23 @@ app.post("/api/admin/stock-refund-all", requireAdmin, async (req, res) => {
     res.json({ ok: true, totalUsers, totalRefund, detail: report });
   } catch (e) {
     console.error("[stock-refund-all]", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/* ── 선수 주식 전체 초기화 (price=0 리셋) ─────────────────────────────────
+   DB의 모든 stock_p: 키를 삭제해 가격을 0으로 초기화.
+   이후 경기 반영 시 첫 맵 ACS 기준으로 부트스트랩됨.                       */
+app.post("/api/admin/stock-reset-all", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM app_data WHERE key LIKE 'stock_p:%'"
+    );
+    const deleted = result.rowCount;
+    console.log(`[stock-reset-all] stock_p: 키 ${deleted}개 삭제 완료`);
+    res.json({ ok: true, deleted });
+  } catch (e) {
+    console.error("[stock-reset-all]", e);
     res.status(500).json({ error: e.message });
   }
 });
