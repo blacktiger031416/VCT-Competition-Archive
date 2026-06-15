@@ -2328,6 +2328,23 @@ app.get("/api/records/team-detail", async (req, res) => {
       }
     });
 
+    /* matchMeta teamA/B 보강: matchKey 형식 "Match N|Team1|Team2" 에서 추출 */
+    (function() {
+      var isTeamN = function(s) { return s && s.length > 2 && !/^(playoffs|swiss|gf|groups|groupstage|bo[0-9]|r[0-9]+|m[0-9]+|[0-9]+)$/i.test(s.trim()); };
+      Object.keys(matchMeta).forEach(function(mk) {
+        var meta = matchMeta[mk];
+        if (meta.teamA && meta.teamB) return;
+        var parts = mk.split("|");
+        if (parts.length >= 3) {
+          var t1 = parts[1].trim(), t2 = parts[2].trim();
+          if (isTeamN(t1) && isTeamN(t2)) {
+            if (!meta.teamA) meta.teamA = t1;
+            if (!meta.teamB) meta.teamB = t2;
+          }
+        }
+      });
+    })();
+
     /* 필터 통과 matchKey */
     const matchSet = new Set();
     Object.keys(matchMeta).forEach(function(mk) {
@@ -2432,6 +2449,16 @@ app.get("/api/records/team-detail", async (req, res) => {
       else if (bCnt > aCnt) teamSideByMatch[mk] = "B";
     });
 
+    /* teamSideByMatch 폴백: playerSet이 비어있거나 판별 못 한 경우 matchMeta.teamA/B 사용 */
+    matchSet.forEach(function(mk) {
+      if (teamSideByMatch[mk]) return;  /* 이미 판별됨 */
+      var meta = matchMeta[mk];
+      if (!meta) return;
+      var tA = (meta.teamA || "").toLowerCase(), tB = (meta.teamB || "").toLowerCase();
+      if (tA === teamLower) teamSideByMatch[mk] = "A";
+      else if (tB === teamLower) teamSideByMatch[mk] = "B";
+    });
+
     matchSet.forEach(function(mk) {
       var mapIdxes = mkMapIdxSet[mk];
       if (!mapIdxes) return;
@@ -2483,7 +2510,13 @@ app.get("/api/records/team-detail", async (req, res) => {
         var side = null;
         if (aCnt >= 3) side = "a";
         else if (bCnt >= 3) side = "b";
-        else return;  /* 팀 선수 3명 미만이면 스킵 */
+        else {
+          /* playerSet이 비어있는 팀(vct_roster 미등록)은 matchMeta teamA/B로 판별 */
+          var sbm = teamSideByMatch[mk];
+          if      (sbm === "A") side = "a";
+          else if (sbm === "B") side = "b";
+          else return;
+        }
 
         /* 에이전트 5개 추출 */
         var agents = [];
