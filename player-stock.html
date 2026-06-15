@@ -1293,20 +1293,17 @@
       var toY = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
       var isUp = p.price >= p.prev;
       var lineColor = isUp ? "#e84444" : "#3b8fff";
-      var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
+      /* 가로 그리드 선 */
       ctx.strokeStyle = "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
       for (var g = 0; g < 5; g++) {
         var gy = H * 0.05 + (H * 0.85 / 4) * g;
         ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
       }
-      ctx.beginPath();
-      ctx.moveTo(toX(0), H);
-      data.forEach(function (v, i) { ctx.lineTo(toX(i), toY(v)); });
-      ctx.lineTo(toX(data.length - 1), H);
-      ctx.closePath(); ctx.fillStyle = fillColor; ctx.fill();
+      /* 선만 그리기 (fill 없음) */
       ctx.beginPath();
       data.forEach(function (v, i) { if (i === 0) ctx.moveTo(toX(i), toY(v)); else ctx.lineTo(toX(i), toY(v)); });
-      ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.stroke();
+      ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.stroke();
+      /* 끝점 점 */
       var lx = toX(data.length - 1), ly = toY(data[data.length - 1]);
       ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
       ctx.fillStyle = lineColor; ctx.fill();
