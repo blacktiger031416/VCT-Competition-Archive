@@ -1769,6 +1769,19 @@ app.get("/api/records/compute", async (req, res) => {
       }
       var teamA = Object.keys(aCnt).sort(function(x,y){ return aCnt[y]-aCnt[x]; })[0] || "";
       var teamB = Object.keys(bCnt).sort(function(x,y){ return bCnt[y]-bCnt[x]; })[0] || "";
+      /* vct_roster 미등록 팀은 matchKey에서 직접 추출 */
+      if (!teamA || !teamB) {
+        var mkP = mk.split("|");
+        if (mkP.length >= 3) {
+          var mt1 = mkP[1].trim(), mt2 = mkP[2].trim();
+          var isTeamN = function(s){ return s.length > 2 && !/^(playoffs|swiss|gf|groups|bo[0-9]|r[0-9]+|m[0-9]+|[0-9]+)$/i.test(s); };
+          if (isTeamN(mt1) && isTeamN(mt2)) {
+            if (teamA && !teamB) { teamB = (mt1 === teamA) ? mt2 : mt1; }
+            else if (!teamA && teamB) { teamA = (mt2 === teamB) ? mt1 : mt2; }
+            else { teamA = mt1; teamB = mt2; }
+          }
+        }
+      }
       if (teamA || teamB) matchTeams[mk] = { teamA: teamA, teamB: teamB };
     });
 
@@ -1962,13 +1975,41 @@ app.get("/api/records/compute", async (req, res) => {
       /* rounds 항목의 matchKey가 필터된 집합에 없으면 건너뜀 */
       if (!filteredMatchKeys.has(mk)) return;
 
-      /* 팀 이름: auto-match → players+roster 추론 순 */
+      /* 팀 이름: auto-match → players+roster 추론 → matchKey 직접 추출 순 */
       var am = autoMatch[mk];
       var teamA = (am && (am.team1 || am.teamA)) || "";
       var teamB = (am && (am.team2 || am.teamB)) || "";
       if (!teamA || !teamB) {
         var mt = matchTeams[mk];
         if (mt) { teamA = mt.teamA || ""; teamB = mt.teamB || ""; }
+      }
+      /* fallback: matchKey 형식 "Match N|Team1|Team2" 또는 "date|Team1|Team2" 에서 추출 */
+      if (!teamA || !teamB) {
+        var mkParts = mk.split("|");
+        if (mkParts.length >= 3) {
+          var mk_t1 = mkParts[1].trim();
+          var mk_t2 = mkParts[2].trim();
+          /* 팀 이름으로 유효한지 확인 (숫자·키워드 제외) */
+          var isTeamName = function(s) {
+            return s.length > 2 && !/^(playoffs|swiss|gf|groups|groupstage|bo[0-9]|r[0-9]+|m[0-9]+|[0-9]+)$/i.test(s);
+          };
+          if (isTeamName(mk_t1) && isTeamName(mk_t2)) {
+            if (teamA && !teamB) {
+              /* teamA는 알고 있음 → 매칭으로 teamB 결정 */
+              if (mk_t1 === teamA)      teamB = mk_t2;
+              else if (mk_t2 === teamA) teamB = mk_t1;
+              else                       teamB = mk_t2;
+            } else if (!teamA && teamB) {
+              /* teamB는 알고 있음 → 매칭으로 teamA 결정 */
+              if (mk_t2 === teamB)      teamA = mk_t1;
+              else if (mk_t1 === teamB) teamA = mk_t2;
+              else                       teamA = mk_t1;
+            } else {
+              /* 둘 다 모름 → matchKey 순서 그대로 */
+              teamA = mk_t1; teamB = mk_t2;
+            }
+          }
+        }
       }
       if (!teamA || !teamB) return;
 
