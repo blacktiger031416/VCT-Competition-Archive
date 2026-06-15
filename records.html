@@ -1115,15 +1115,16 @@
       html += renderStatPanel("K/D Ratio Top 10", data.topKd, "kd");
       html += '</div>';
 
-      /* 팀 통계 캐러셀: global 이 아니고 팀 선택기 있는 리그에서만 */
-      if (hasPicker && currentLeague !== "global") {
+      /* 팀 통계 캐러셀: 모든 리그에서 표시 (teamStats 데이터 있을 때) */
+      var tsKeys = Object.keys(data.teamStats || {});
+      if (tsKeys.length > 0) {
         html += renderCarouselSection(data.teamStats, accent);
       }
 
       document.getElementById("contentArea").innerHTML = html;
 
       /* 캐러셀 초기화 */
-      if (hasPicker && currentLeague !== "global") {
+      if (tsKeys.length > 0) {
         initCarousel();
       }
     }
@@ -1187,18 +1188,20 @@
     function renderTeamStatPage(title, field, teamStats) {
       var isGlobal = (currentLeague === "global");
 
-      /* 전체 리그: teamStats에 있는 팀만 (데이터 있는 팀), Top 10 */
-      /* 권역별: LEAGUE_TEAMS 12팀 전체 포함, 데이터 없으면 맨 아래 "—" */
+      /* 전체(global): teamStats 팀만, Top 10
+         권역별(pacific/cn/…): LEAGUE_TEAMS 12팀 전체 포함, 데이터 없으면 맨 아래 "—"
+         Masters/Champions: teamStats 팀만, 전부 표시 */
+      var isRegional = ["pacific","cn","americas","emea"].indexOf(currentLeague) !== -1;
       var baseTeams;
-      if (isGlobal) {
-        baseTeams = Object.keys(teamStats || {});
-      } else {
+      if (isRegional) {
         /* LEAGUE_TEAMS 기준 12팀 + teamStats에 추가로 있는 팀 */
         var fixedTeams = (LEAGUE_TEAMS[currentLeague] || []).slice();
         Object.keys(teamStats || {}).forEach(function(t) {
           if (fixedTeams.indexOf(t) === -1) fixedTeams.push(t);
         });
         baseTeams = fixedTeams;
+      } else {
+        baseTeams = Object.keys(teamStats || {});
       }
 
       if (!baseTeams.length) {
@@ -1225,7 +1228,7 @@
         return b.rate - a.rate;
       });
 
-      /* 전체 리그: 데이터 있는 팀만 Top 10 */
+      /* 전체(global) / qualifier: 데이터 있는 팀만 Top 10 */
       if (isGlobal) rows = rows.filter(function(r){ return r.hasData; }).slice(0, 10);
 
       if (!rows.length) {
