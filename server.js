@@ -1610,8 +1610,17 @@ app.get("/api/admin/records-diag", async (req, res) => {
       } catch {}
     });
 
-    /* players: 샘플 키 5개 */
-    const playerSampleKeys = playersRows.rows.slice(0, 5).map(r => r.key);
+    /* players: 샘플 키 10개 + □utumn류 이상 이름 탐지 */
+    const playerSampleKeys = playersRows.rows.slice(0, 10).map(r => r.key);
+    /* vct_p pacific 샘플에서 matchKey 수집 */
+    const pacificMatchKeys = new Set();
+    (sampleByLeague["pacific"] || []).forEach(s => s.matchKey && pacificMatchKeys.add(s.matchKey));
+    /* players 키 중 pacific matchKey와 매칭되는 건수 */
+    let pacificPlayerEntries = 0;
+    playersRows.rows.forEach(r => {
+      const mk = r.key.slice("players:".length).replace(/:(\d+)$/, "");
+      if (pacificMatchKeys.has(mk)) pacificPlayerEntries++;
+    });
 
     res.json({
       ok: true,
@@ -1623,7 +1632,8 @@ app.get("/api/admin/records-diag", async (req, res) => {
         samples: sampleByLeague,
       },
       vctRoster: { teams: rosterRows.rows.length, keys: rosterRows.rows.map(r => r.key.slice(11)) },
-      players: { count: playersRows.rows.length, sampleKeys: playerSampleKeys },
+      players: { count: playersRows.rows.length, sampleKeys: playerSampleKeys,
+                 pacificVctpMatchKeys: [...pacificMatchKeys], pacificPlayerEntries },
       rounds:  { count: roundsRows.rows.length },
       veto:    { count: vetoRows.rows.length },
       autoMatch: { total: autoRows.rows.length, byLeague: autoByLeague, samples: autoSamples },

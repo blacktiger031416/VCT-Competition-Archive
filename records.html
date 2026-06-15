@@ -917,6 +917,15 @@
           lines.push("■ vct_p:    " + (d.vctP    && d.vctP.players  || 0) + "명 / " + (d.vctP && d.vctP.totalMapEntries || 0) + "맵");
           lines.push("  league별: " + JSON.stringify((d.vctP && d.vctP.byLeague) || {}));
           lines.push("  emptyLeague: " + (d.vctP && d.vctP.emptyLeague || 0) + "건");
+          /* vct_p league별 샘플 matchKey 표시 */
+          if (d.vctP && d.vctP.samples) {
+            Object.keys(d.vctP.samples).forEach(function(lg) {
+              lines.push("  [" + lg + "] 샘플:");
+              (d.vctP.samples[lg] || []).forEach(function(s) {
+                lines.push("    " + s.player + " | matchKey=" + s.matchKey + " | stage=" + s.stage);
+              });
+            });
+          }
           lines.push("");
           lines.push("■ vct_roster: " + (d.vctRoster && d.vctRoster.teams || 0) + "팀");
           lines.push("  " + ((d.vctRoster && d.vctRoster.keys) || []).join(", "));
@@ -924,6 +933,12 @@
             lines.push("");
             lines.push("■ players 키 샘플:");
             d.players.sampleKeys.forEach(function(k){ lines.push("  " + k); });
+          }
+          if (d.players && d.players.pacificVctpMatchKeys && d.players.pacificVctpMatchKeys.length) {
+            lines.push("");
+            lines.push("■ vct_p pacific matchKey 목록 (→ players: 연결 확인용):");
+            d.players.pacificVctpMatchKeys.forEach(function(mk){ lines.push("  matchKey=" + mk); });
+            lines.push("  → players: 엔트리 중 매칭: " + (d.players.pacificPlayerEntries || 0) + "건");
           }
           /* auto-match 샘플 — 모든 league 키 표시 */
           if (d.autoMatch && d.autoMatch.samples) {
