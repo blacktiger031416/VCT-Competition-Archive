@@ -860,12 +860,17 @@
       /* 스테이지 필터 렌더 */
       renderStageFilter(league);
 
-      /* 팀 선택기: global/masters/champions 는 숨김 */
+      /* 팀 선택기: global만 숨김 / regional은 LEAGUE_TEAMS / Masters·Champions는 로드 후 채움 */
       var hasPicker = !!LEAGUE_TEAMS[league];
+      var isIntl = (league === "masters-santiago" || league === "masters-london" || league === "champions");
       var picker = document.getElementById("teamPicker");
       if (hasPicker) {
         picker.classList.remove("hidden");
         renderTeamPicker(league);
+      } else if (isIntl) {
+        picker.classList.remove("hidden");
+        document.getElementById("teamGrid").innerHTML =
+          '<div style="color:rgba(255,255,255,0.25);font-size:12px;padding:6px 4px;">로딩 중...</div>';
       } else {
         picker.classList.add("hidden");
       }
@@ -941,11 +946,11 @@
       }
     }
 
-    /* ── 팀 선택기 렌더 ── */
-    function renderTeamPicker(league) {
+    /* ── 팀 선택기 렌더 (league 기반 또는 customTeams 목록) ── */
+    function renderTeamPicker(league, customTeams) {
       var grid = document.getElementById("teamGrid");
       grid.innerHTML = "";
-      var teams = LEAGUE_TEAMS[league] || [];
+      var teams = customTeams || LEAGUE_TEAMS[league] || [];
       teams.forEach(function(t) {
         var chip = document.createElement("div");
         chip.className = "team-chip" + (t === currentTeam ? " active" : "");
@@ -1070,6 +1075,15 @@
             console.log("[records compute debug]", data._debug);
           }
           lastComputeData = data;
+          /* Masters·Champions: teamStats 팀 목록으로 선택기 채우기 */
+          var isIntlLeague = (currentLeague === "masters-santiago" || currentLeague === "masters-london" || currentLeague === "champions");
+          if (isIntlLeague) {
+            var intlTeams = Object.keys(data.teamStats || {}).sort(function(a, b) {
+              var sa = data.teamStats[a], sb = data.teamStats[b];
+              return (sb.maps || 0) - (sa.maps || 0);  /* 맵 수 내림차순 */
+            });
+            renderTeamPicker(currentLeague, intlTeams);
+          }
           if (currentTeam) {
             loadTeamDetail(currentTeam);
           } else {
