@@ -144,6 +144,7 @@
         user-select: none;
       }
       .team-chip img { width: 22px; height: 22px; object-fit: contain; }
+      .logo-invert { filter: brightness(0) invert(1); }
       .team-chip .chip-code {
         font-family: "Barlow Condensed", sans-serif;
         font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
@@ -612,6 +613,12 @@
     ===================================================================== */
 
     /* ── 팀 로고 ── */
+    /* 검은 로고 → 흰색으로 반전 처리가 필요한 팀 목록 */
+    var TEAM_LOGO_INVERT = new Set([
+      "Paper Rex","Team Secret","VARREL","ZETA DIVISION",
+      "ENVY","Evil Geniuses","MIBR","Gentle Mates","GIANTX","Team Liquid","ULF Esports",
+    ]);
+
     var TEAM_LOGOS = {
       "DetonatioN FocusMe":"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png",
       "Global Esports":"./assets/teams/ge.webp",
@@ -957,7 +964,8 @@
         var color = TEAM_COLORS[t] || "#888";
         chip.style.setProperty("--chip-color", color);
         var logo = TEAM_LOGOS[t] || "";
-        chip.innerHTML = (logo ? '<img src="'+esc(logo)+'" alt="" onerror="this.style.display=\'none\'">' : "") +
+        var logoInvCls = TEAM_LOGO_INVERT.has(t) ? ' class="logo-invert"' : '';
+        chip.innerHTML = (logo ? '<img'+logoInvCls+' src="'+esc(logo)+'" alt="" onerror="this.style.display=\'none\'">' : "") +
           '<span class="chip-code">'+ esc(TEAM_CODES[t] || t) +'</span>';
         chip.onclick = function() {
           if (currentTeam === t) {
@@ -1160,7 +1168,7 @@
         html += '<div class="stat-row">'
           + '<div class="stat-rank '+ rankCls +'">'+ (i+1) +'</div>'
           + '<div class="stat-player">'
-          +   (teamLogo ? '<img class="stat-team-logo" src="'+ esc(teamLogo) +'" alt="" onerror="this.style.display=\'none\'">' : '')
+          +   (teamLogo ? '<img class="stat-team-logo'+(TEAM_LOGO_INVERT.has(p.team)?' logo-invert':'')+'" src="'+ esc(teamLogo) +'" alt="" onerror="this.style.display=\'none\'">' : '')
           +   '<div class="stat-player-info">'
           +     '<div class="stat-player-name">'+ esc(p.name) +'</div>'
           +     '<div class="stat-player-team">'+ esc(teamCode) +'</div>'
@@ -1265,7 +1273,7 @@
         var dimStyle = r.hasData ? "" : "opacity:0.35;";
         html += '<div class="team-stat-row" style="'+ dimStyle +'">'
           + '<div class="ts-rank '+ rankCls +'">'+ rankStr +'</div>'
-          + (logo ? '<img class="ts-logo" src="'+ esc(logo) +'" alt="" onerror="this.style.display=\'none\'">' : '<div style="width:24px"></div>')
+          + (logo ? '<img class="ts-logo'+(TEAM_LOGO_INVERT.has(r.name)?' logo-invert':'')+'" src="'+ esc(logo) +'" alt="" onerror="this.style.display=\'none\'">' : '<div style="width:24px"></div>')
           + '<div class="ts-team-name">'+ esc(TEAM_CODES[r.name] || r.name) +'</div>'
           + '<div class="ts-bar-wrap"><div class="ts-bar-bg"><div class="ts-bar-fill" style="width:'+ barW +'%"></div></div></div>'
           + '<div class="ts-rate">'+ pct +'</div>'
@@ -1360,7 +1368,7 @@
 
       /* 헤더 */
       html += '<div class="team-detail-header">';
-      if (logo) html += '<img class="team-detail-logo" src="'+ esc(logo) +'" alt="" onerror="this.style.display=\'none\'">';
+      if (logo) html += '<img class="team-detail-logo'+(TEAM_LOGO_INVERT.has(teamName)?' logo-invert':'')+'" src="'+ esc(logo) +'" alt="" onerror="this.style.display=\'none\'">';
       html += '<div class="team-detail-name">'+ esc(teamName) +'</div>';
       html += '<button class="team-detail-back" onclick="clearTeam()">← 돌아가기</button>';
       html += '</div>';
