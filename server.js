@@ -1674,15 +1674,16 @@ app.get("/api/records/dump", async (req, res) => {
   }
 });
 
-/* ── 기록 페이지: 서버 계산 (원본 데이터에서 직접 집계) ─────────────────────
-   vct_p: 키에 의존하지 않고 auto-match/match-meta/players/rounds/veto/vct_roster
-   에서 직접 계산한다. league=X&stage=Y 파라미터로 필터.                        */
+/* ── 기록 페이지: 서버 계산 (vct_p 기반) ──────────────────────────────────
+   vct_p 엔트리에 저장된 per-map stats (stage/tournament/acs/kda) +
+   vct_roster 팀 정보를 결합해서 league/stage 필터링.
+   league=X&stage=Y 파라미터로 필터.                                         */
 app.get("/api/records/compute", async (req, res) => {
   try {
     const league = (req.query.league || "pacific").toLowerCase();
     const stage  = (req.query.stage  || "all").toLowerCase();
 
-    /* ── 팀 → 리그 매핑 (hardcoded) ── */
+    /* ══ 팀 → 리그 매핑 ══ */
     const TEAM_LEAGUE_MAP = {
       /* Pacific */
       "DetonatioN FocusMe":"pacific","FULL SENSE":"pacific","Gen.G":"pacific",
@@ -1706,62 +1707,65 @@ app.get("/api/records/compute", async (req, res) => {
       "FUT Esports":"emea","Karmine Corp":"emea","GIANTX":"emea",
       "WEC C":"emea","Gentle Mates":"emea","ARETE":"emea","Mir Gaming":"emea",
     };
-    function inferLeagueFromTeam(t1, t2) {
-      if (t1 && TEAM_LEAGUE_MAP[t1]) return TEAM_LEAGUE_MAP[t1];
-      if (t2 && TEAM_LEAGUE_MAP[t2]) return TEAM_LEAGUE_MAP[t2];
-      return "";
+
+    /* ── 1. DB 병렬 로드 ── */
+    const [vctpRows, rosterRows, roundsRows, autoRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+    ]);
+
+    /* ── 2. vct_roster: 선수→팀 맵 ── */
+    const playerTeam = {};  /* playerName → teamName */
+    rosterRows.rows.forEach(function(row) {
+      var teamName = row.key.slice("vct_roster:".length);
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      var all = (v.main || []).concat(v.subs || []);
+      all.forEach(function(pn) { if (pn && pn !== "-") playerTeam[pn] = teamName; });
+    });
+
+    /* ── 3. auto-match: matchKey → { team1, team2 } ── */
+    const autoMatch = {};  /* mk → { team1, team2 } */
+    autoRows.rows.forEach(function(row) {
+      var mk = row.key.slice("auto-match:".length);
+      var v;
+      try { v = JSON.parse(row.value); } catch(e) { return; }
+      autoMatch[mk] = {
+        team1: v.team1 || v.teamA || "",
+        team2: v.team2 || v.teamB || "",
+      };
+    });
+
+    /* ── 4. league/stage 필터 헬퍼 ── */
+    /* 각 vct_p map 엔트리에 대해 effectiveLeague와 effectiveTournament를 결정 */
+    function getEffectiveLeague(mapEntry, playerLeague) {
+      var t = mapEntry.tournament || "";
+      if (t === "santiago") return { effectiveLeague: "masters", tournament: "santiago" };
+      if (t === "london")   return { effectiveLeague: "masters", tournament: "london" };
+      if (t.indexOf("champions") !== -1) return { effectiveLeague: "champions", tournament: t };
+      return { effectiveLeague: playerLeague, tournament: t };
     }
 
-    /* ── 헬퍼: matchKey → league 추론 ── */
-    const MK_LEAGUE_KW = { pacific:"pacific", emea:"emea", americas:"americas", cn:"cn",
-                           masters:"masters", champions:"champions", london:"masters", santiago:"masters" };
-    function inferLeagueFromKey(mk) {
-      var parts = mk.split("|");
-      for (var i = 0; i < parts.length; i++) {
-        var pl = parts[i].toLowerCase();
-        if (MK_LEAGUE_KW[pl]) return MK_LEAGUE_KW[pl];
-      }
-      /* 구형 matchKey: date|TeamA|TeamB 형식 → 팀 이름으로 추론 */
-      if (parts.length >= 3) {
-        var lg = inferLeagueFromTeam(parts[1], parts[2]);
-        if (lg) return lg;
-      }
-      return "";
-    }
-
-    /* ── 헬퍼: matchKey → stage 추론 ── */
-    const MK_STAGE_KW = { kickoff:"kickoff", stage1:"stage1", stage2:"stage2",
-                          stage1playoffs:"stage1playoffs", stage2playoffs:"stage2playoffs",
-                          swiss:"swiss", playoffs:"playoffs", groupstage:"groupstage" };
-    function inferStageFromKey(mk) {
-      var parts = mk.split("|");
-      var p0 = (parts[0] || "").toLowerCase();
-      if (p0.indexOf("stage1playoffs") !== -1) return "stage1playoffs";
-      if (p0.indexOf("stage2playoffs") !== -1) return "stage2playoffs";
-      if (MK_STAGE_KW[p0]) return MK_STAGE_KW[p0];
-      for (var i = 0; i < parts.length; i++) {
-        var pl = parts[i].toLowerCase();
-        if (MK_STAGE_KW[pl]) return MK_STAGE_KW[pl];
-      }
-      return "";
-    }
-
-    /* ── 헬퍼: meta + league/stage → 필터 매칭 ── */
-    function matchesLeague(meta, tgt) {
-      var l = meta.league || "";
-      if (tgt === "global")           return l === "pacific" || l === "cn" || l === "americas" || l === "emea";
-      if (tgt === "pacific")          return l === "pacific";
-      if (tgt === "cn")               return l === "cn";
-      if (tgt === "americas")         return l === "americas";
-      if (tgt === "emea")             return l === "emea";
-      if (tgt === "masters-santiago") return l === "masters" && (meta.tournament || "") === "santiago";
-      if (tgt === "masters-london")   return l === "masters" && (meta.tournament || "") === "london";
-      if (tgt === "champions")        return l === "champions";
+    function mapEntryMatchesLeague(mapEntry, playerLeague, tgt) {
+      var eff = getEffectiveLeague(mapEntry, playerLeague);
+      var el = eff.effectiveLeague;
+      var et = eff.tournament;
+      if (tgt === "global")           return el === "pacific" || el === "cn" || el === "americas" || el === "emea";
+      if (tgt === "pacific")          return el === "pacific";
+      if (tgt === "cn")               return el === "cn";
+      if (tgt === "americas")         return el === "americas";
+      if (tgt === "emea")             return el === "emea";
+      if (tgt === "masters-santiago") return et === "santiago";
+      if (tgt === "masters-london")   return et === "london";
+      if (tgt === "champions")        return el === "champions";
       return false;
     }
-    function matchesStage(meta, tgt) {
+
+    function mapEntryMatchesStage(mapEntry, tgt) {
       if (tgt === "all") return true;
-      var s = meta.stage || "";
+      var s = mapEntry.stage || "";
       if (tgt === "kickoff")    return s === "kickoff";
       if (tgt === "stage1")     return s === "stage1" || s === "stage1playoffs";
       if (tgt === "stage2")     return s === "stage2" || s === "stage2playoffs";
@@ -1771,151 +1775,90 @@ app.get("/api/records/compute", async (req, res) => {
       return true;
     }
 
-    /* ── 1. DB 병렬 로드 ── */
-    const [autoRows, metaRows, playersRows, roundsRows, rosterRows, vctpRows] = await Promise.all([
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
-      pool.query("SELECT value FROM app_data WHERE key LIKE 'vct_p:%'"),
-    ]);
+    /* ── 5. vct_p 순회: 선수 스탯 집계 + 필터된 matchKey 수집 ── */
+    const playerStats = {};  /* name → { totalAcs, totalKills, totalDeaths, maps } */
+    const filteredMatchKeys = new Set();
+    var totalVctpPlayers = 0;
+    var playersWithLeague = 0;
+    var filteredMaps = 0;
 
-    /* ── 2. matchKey → meta 맵 구성 ── */
-    const matchMeta = {};  /* mk → { league, stage, tournament, teamA, teamB } */
-    metaRows.rows.forEach(function(row) {
-      var mk = row.key.slice("match-meta:".length);
-      var v;
-      try { v = JSON.parse(row.value); } catch(e) { return; }
-      matchMeta[mk] = {
-        league:     v.league     || inferLeagueFromKey(mk),
-        stage:      v.stage      || inferStageFromKey(mk),
-        tournament: v.tournament || "",
-        teamA:      v.teamA      || v.team1 || "",
-        teamB:      v.teamB      || v.team2 || "",
-      };
-    });
-    autoRows.rows.forEach(function(row) {
-      var mk = row.key.slice("auto-match:".length);
-      var v;
-      try { v = JSON.parse(row.value); } catch(e) { return; }
-      if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
-      /* auto-match 우선 적용 */
-      var t1 = v.team1 || v.teamA || "";
-      var t2 = v.team2 || v.teamB || "";
-      /* league: auto-match.league 우선, 없으면 팀 이름으로 추론 */
-      if (v.league) matchMeta[mk].league = v.league;
-      else if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromTeam(t1, t2);
-      if (!matchMeta[mk].teamA && t1) matchMeta[mk].teamA = t1;
-      if (!matchMeta[mk].teamB && t2) matchMeta[mk].teamB = t2;
-      if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
-    });
-
-    /* vct_p 에서 matchKey → league 보강 (league 태그가 있는 entries만) */
     vctpRows.rows.forEach(function(row) {
+      var playerName = row.key.slice("vct_p:".length);
       var pd;
       try { pd = JSON.parse(row.value); } catch(e) { return; }
-      (pd.maps || []).forEach(function(m) {
-        if (!m.matchKey || !m.league) return;
-        var mk = m.matchKey;
-        if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
-        if (!matchMeta[mk].league) matchMeta[mk].league = m.league;
-        if (!matchMeta[mk].stage && m.stage) matchMeta[mk].stage = m.stage;
-      });
-    });
+      if (!pd || !Array.isArray(pd.maps)) return;
 
-    /* players 키에서 matchKey 추가 보강 */
-    playersRows.rows.forEach(function(row) {
-      var withoutPrefix = row.key.slice("players:".length);
-      var lastColon = withoutPrefix.lastIndexOf(":");
-      if (lastColon < 0) return;
-      var mk = withoutPrefix.slice(0, lastColon);
-      if (!matchMeta[mk]) {
-        matchMeta[mk] = {
-          league:     inferLeagueFromKey(mk),
-          stage:      inferStageFromKey(mk),
-          tournament: "",
-          teamA:      "",
-          teamB:      "",
-        };
-      } else if (!matchMeta[mk].league) {
-        /* league 아직 미확인이면 matchKey에서 다시 추론 */
-        matchMeta[mk].league = inferLeagueFromKey(mk);
-      }
-    });
+      totalVctpPlayers++;
 
-    /* ── 3. 필터 통과 matchKey 집합 ── */
-    const matchSet = new Set();
-    Object.keys(matchMeta).forEach(function(mk) {
-      var meta = matchMeta[mk];
-      if (matchesLeague(meta, league) && matchesStage(meta, stage)) {
-        matchSet.add(mk);
-      }
-    });
+      /* 선수 팀→리그 결정 */
+      var team = playerTeam[playerName] || "";
+      var playerLeague = TEAM_LEAGUE_MAP[team] || "";
+      if (playerLeague) playersWithLeague++;
 
-    /* ── 4. vct_roster: 선수→팀 맵 ── */
-    const playerTeam = {};
-    rosterRows.rows.forEach(function(row) {
-      var teamName = row.key.slice("vct_roster:".length);
-      var v;
-      try { v = JSON.parse(row.value); } catch(e) { return; }
-      var all = (v.main || []).concat(v.subs || []);
-      all.forEach(function(pn) { if (pn && pn !== "-") playerTeam[pn] = teamName; });
-    });
+      pd.maps.forEach(function(mapEntry) {
+        if (!mapEntry || !mapEntry.matchKey) return;
 
-    /* ── 5. players: 에서 선수 스탯 집계 ── */
-    /* 한국어 완성형/자모/한자 포함 여부 체크 (닉네임 오입력 필터) */
-    function hasKorean(s) {
-      return /[가-힣ᄀ-ᇿ㄰-㆏一-鿿]/.test(s);
-    }
-    const playerStats = {};  /* name → { totalAcs, totalKills, totalDeaths, maps } */
-    playersRows.rows.forEach(function(row) {
-      var withoutPrefix = row.key.slice("players:".length);
-      var lastColon = withoutPrefix.lastIndexOf(":");
-      if (lastColon < 0) return;
-      var mk = withoutPrefix.slice(0, lastColon);
-      if (!matchSet.has(mk)) return;
-      var v;
-      try { v = JSON.parse(row.value); } catch(e) { return; }
-      ["a","b"].forEach(function(side) {
-        for (var si = 0; si < 5; si++) {
-          var slot = v[side + si];
-          if (!slot) continue;
-          var name = (slot.name || "").trim();
-          if (!name || name === "-") continue;
-          /* 전체가 한글인 이름(팀명/선수명 오입력) 제외 */
-          if (hasKorean(name) && !/[a-zA-Z0-9]/.test(name)) continue;
-          var acs = parseInt(slot.acs) || 0;
-          if (acs === 0) continue;
-          var kdaStr = slot.kda || "0/0/0";
-          if (kdaStr === "0/0/0") continue;
-          var kdaParts = kdaStr.split("/");
-          var kills  = parseInt(kdaParts[0]) || 0;
-          var deaths = parseInt(kdaParts[1]) || 0;
-          if (!playerStats[name]) playerStats[name] = { totalAcs:0, totalKills:0, totalDeaths:0, maps:0 };
-          playerStats[name].totalAcs    += acs;
-          playerStats[name].totalKills  += kills;
-          playerStats[name].totalDeaths += deaths;
-          playerStats[name].maps        += 1;
+        /* league 필터 */
+        if (!mapEntryMatchesLeague(mapEntry, playerLeague, league)) return;
+        /* stage 필터 */
+        if (!mapEntryMatchesStage(mapEntry, stage)) return;
+
+        /* acs / kda 유효성 검사 */
+        var acs = parseInt(mapEntry.acs) || 0;
+        if (acs === 0) return;
+        var kdaStr = mapEntry.kda || "0/0/0";
+        if (kdaStr === "0/0/0") return;
+        var kdaParts = kdaStr.split("/");
+        var kills  = parseInt(kdaParts[0]) || 0;
+        var deaths = parseInt(kdaParts[1]) || 0;
+
+        /* 집계 */
+        if (!playerStats[playerName]) {
+          playerStats[playerName] = { totalAcs:0, totalKills:0, totalDeaths:0, maps:0 };
         }
+        playerStats[playerName].totalAcs    += acs;
+        playerStats[playerName].totalKills  += kills;
+        playerStats[playerName].totalDeaths += deaths;
+        playerStats[playerName].maps        += 1;
+
+        filteredMatchKeys.add(mapEntry.matchKey);
+        filteredMaps++;
       });
     });
 
-    /* ── 6. 상위 ACS / K/D ── */
-    var playerList = Object.keys(playerStats).map(function(name) {
-      var s = playerStats[name];
-      return {
-        name: name,
-        team: playerTeam[name] || "",
-        maps: s.maps,
-        acs:  s.maps > 0 ? Math.round(s.totalAcs / s.maps) : 0,
-        kd:   s.totalDeaths > 0 ? parseFloat((s.totalKills / s.totalDeaths).toFixed(2)) : parseFloat(s.totalKills.toFixed(2)),
-      };
-    });
+    /* ── 6. 상위 ACS / K/D (최소 2맵) ── */
+    var playerList = Object.keys(playerStats)
+      .filter(function(name) { return playerStats[name].maps >= 2; })
+      .map(function(name) {
+        var s = playerStats[name];
+        return {
+          name: name,
+          team: playerTeam[name] || "",
+          maps: s.maps,
+          acs:  s.maps > 0 ? Math.round(s.totalAcs / s.maps) : 0,
+          kd:   s.totalDeaths > 0
+                  ? parseFloat((s.totalKills / s.totalDeaths).toFixed(2))
+                  : parseFloat(s.totalKills.toFixed(2)),
+        };
+      });
+
     var topAcs = playerList.slice().sort(function(a,b){ return b.acs - a.acs; }).slice(0, 10);
     var topKd  = playerList.slice().sort(function(a,b){ return b.kd  - a.kd;  }).slice(0, 10);
 
     /* ── 7. rounds: 에서 팀 통계 ── */
+    /* 팀이 해당 league에 속하는지 확인 */
+    function teamMatchesLeague(teamName, tgt) {
+      var tl = TEAM_LEAGUE_MAP[teamName] || "";
+      if (tgt === "global")    return tl === "pacific" || tl === "cn" || tl === "americas" || tl === "emea";
+      if (tgt === "pacific")   return tl === "pacific";
+      if (tgt === "cn")        return tl === "cn";
+      if (tgt === "americas")  return tl === "americas";
+      if (tgt === "emea")      return tl === "emea";
+      /* masters/champions: 모든 참가팀 포함 */
+      if (tgt === "masters-santiago" || tgt === "masters-london" || tgt === "champions") return true;
+      return false;
+    }
+
     const teamStats = {};  /* teamName → { maps, mapWins, pistolTotal, pistolWins, atkTotal, atkWins, defTotal, defWins } */
     function ensureTeam(t) {
       if (!t) return;
@@ -1927,11 +1870,14 @@ app.get("/api/records/compute", async (req, res) => {
       var lastColon = withoutPrefix.lastIndexOf(":");
       if (lastColon < 0) return;
       var mk = withoutPrefix.slice(0, lastColon);
-      if (!matchSet.has(mk)) return;
-      var mapIdx = parseInt(withoutPrefix.slice(lastColon + 1)) || 0;
-      var meta = matchMeta[mk] || {};
-      var teamA = meta.teamA || "";
-      var teamB = meta.teamB || "";
+      /* rounds 항목의 matchKey가 필터된 집합에 없으면 건너뜀 */
+      if (!filteredMatchKeys.has(mk)) return;
+
+      /* 팀 이름: auto-match 에서 가져옴 */
+      var am = autoMatch[mk];
+      if (!am) return;
+      var teamA = am.team1 || "";
+      var teamB = am.team2 || "";
       if (!teamA || !teamB) return;
 
       var rounds;
@@ -1943,7 +1889,7 @@ app.get("/api/records/compute", async (req, res) => {
       teamStats[teamA].maps += 1;
       teamStats[teamB].maps += 1;
 
-      /* 맵 승자 판별 (라운드 수 카운트) */
+      /* 맵 승자 판별 */
       var aWins = 0, bWins = 0;
       rounds.forEach(function(r) { if (r.winner === "a") aWins++; else if (r.winner === "b") bWins++; });
       if (aWins > bWins) teamStats[teamA].mapWins++;
@@ -1954,24 +1900,17 @@ app.get("/api/records/compute", async (req, res) => {
         var type = r.type || "";
         var winner = r.winner || "";
 
-        /* 공격/수비 판별:
-           팀A 기준: attack_* && winner=a → ATK win; def_* && winner=a → DEF win
-           팀B 기준: attack_* && winner=b → ATK win; def_* && winner=b → DEF win */
-        var isAtk  = type.indexOf("attack_") === 0;
-        var isDef  = type.indexOf("def_") === 0;
+        var isAtk = type.indexOf("attack_") === 0;
+        var isDef = type.indexOf("def_") === 0;
 
         if (isAtk) {
-          /* 팀A가 공격 (round type이 attack) */
           teamStats[teamA].atkTotal++;
           if (winner === "a") teamStats[teamA].atkWins++;
-          /* 팀B가 수비 */
           teamStats[teamB].defTotal++;
           if (winner === "b") teamStats[teamB].defWins++;
         } else if (isDef) {
-          /* 팀A가 수비 */
           teamStats[teamA].defTotal++;
           if (winner === "a") teamStats[teamA].defWins++;
-          /* 팀B가 공격 */
           teamStats[teamB].atkTotal++;
           if (winner === "b") teamStats[teamB].atkWins++;
         }
@@ -1985,29 +1924,19 @@ app.get("/api/records/compute", async (req, res) => {
       });
     });
 
-    /* debug: league별 matchKey 분포 */
-    const leagueDistrib = {};
-    Object.keys(matchMeta).forEach(function(mk) {
-      var lg = matchMeta[mk].league || "(없음)";
-      leagueDistrib[lg] = (leagueDistrib[lg] || 0) + 1;
-    });
-    var sampleMatchKeys = [];
-    matchSet.forEach(function(mk) { if (sampleMatchKeys.length < 10) sampleMatchKeys.push(mk); });
-
     res.json({
       ok: true,
       league,
       stage,
-      matchCount: matchSet.size,
+      matchCount: filteredMatchKeys.size,
       topAcs,
       topKd,
       teamStats,
       _debug: {
-        totalMatchKeys: Object.keys(matchMeta).length,
-        leagueDistrib,
-        sampleMatchKeys,
-        autoMatchTotal: autoRows.rows.length,
-        playersTotal: playersRows.rows.length,
+        totalVctpPlayers,
+        playersWithLeague,
+        filteredMaps,
+        uniqueMatchKeys: filteredMatchKeys.size,
       },
     });
   } catch(e) {
