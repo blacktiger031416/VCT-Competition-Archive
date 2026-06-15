@@ -785,11 +785,12 @@
     }
 
     /* ── 상태 ── */
-    var currentLeague = null;
-    var currentStage  = "all";
-    var currentTeam   = null;
-    var carouselIdx   = 0;
-    var lastComputeData = null;  /* 캐시 */
+    var currentLeague    = null;
+    var currentStage     = "all";
+    var currentTeam      = null;
+    var currentQualifier = "";   /* "masters-santiago"|"masters-london"|"champions"|"" */
+    var carouselIdx      = 0;
+    var lastComputeData  = null;  /* 캐시 */
 
     /* ── CSS 변수로 현재 악센트 적용 ── */
     function setAccent(league) {
@@ -799,10 +800,11 @@
 
     /* ── 리그 선택 ── */
     function selectLeague(league) {
-      currentLeague = league;
-      currentStage  = "all";
-      currentTeam   = null;
-      carouselIdx   = 0;
+      currentLeague    = league;
+      currentStage     = "all";
+      currentQualifier = "";
+      currentTeam      = null;
+      carouselIdx      = 0;
 
       setAccent(league);
 
@@ -835,20 +837,64 @@
       var group = getFilterGroup(league);
       var filters = STAGE_FILTERS[group] || STAGE_FILTERS.league;
       el.innerHTML = "";
+
+      /* 일반 stage 버튼 */
       filters.forEach(function(f) {
         var btn = document.createElement("button");
-        btn.className = "stage-btn" + (f.key === currentStage ? " active" : "");
+        var isActive = !currentQualifier && f.key === currentStage;
+        btn.className = "stage-btn" + (isActive ? " active" : "");
         btn.textContent = f.label;
         btn.onclick = function() {
-          currentStage = f.key;
-          currentTeam  = null;
-          carouselIdx  = 0;
-          el.querySelectorAll(".stage-btn").forEach(function(b){ b.classList.remove("active"); });
+          currentStage     = f.key;
+          currentQualifier = "";
+          currentTeam      = null;
+          carouselIdx      = 0;
+          el.querySelectorAll(".stage-btn,.qualifier-btn").forEach(function(b){ b.classList.remove("active"); });
           btn.classList.add("active");
           loadAndRender();
         };
         el.appendChild(btn);
       });
+
+      /* global 탭에만 qualifier 버튼 행 추가 */
+      if (league === "global") {
+        var sep = document.createElement("div");
+        sep.style.cssText = "width:100%;height:1px;background:rgba(255,255,255,0.08);margin:10px 0 8px;";
+        el.appendChild(sep);
+
+        var label = document.createElement("span");
+        label.style.cssText = "font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-right:10px;";
+        label.textContent = "세계대회 진출팀 기준";
+        el.appendChild(label);
+
+        var QUALIFIERS = [
+          {key:"masters-santiago", label:"Masters Santiago 진출팀", stageLabel:"(KickOff)"},
+          {key:"masters-london",   label:"Masters London 진출팀",   stageLabel:"(Stage 1)"},
+          {key:"champions",        label:"Champions 진출팀",        stageLabel:"(Stage 2)"},
+        ];
+        QUALIFIERS.forEach(function(q) {
+          var btn = document.createElement("button");
+          var isActive = currentQualifier === q.key;
+          btn.className = "stage-btn qualifier-btn" + (isActive ? " active" : "");
+          btn.style.cssText = "background:rgba(160,122,255,0.12);border-color:rgba(160,122,255,0.3);color:rgba(200,180,255,0.85);";
+          if (isActive) btn.style.cssText = "background:rgba(160,122,255,0.35);border-color:#a07aff;color:#fff;";
+          btn.innerHTML = esc(q.label) + ' <span style="opacity:.55;font-size:.85em;">'+esc(q.stageLabel)+'</span>';
+          btn.onclick = function() {
+            currentQualifier = q.key;
+            currentStage     = "all";
+            currentTeam      = null;
+            carouselIdx      = 0;
+            el.querySelectorAll(".stage-btn,.qualifier-btn").forEach(function(b){
+              b.classList.remove("active");
+              if (b.classList.contains("qualifier-btn")) b.style.background = "rgba(160,122,255,0.12)";
+            });
+            btn.classList.add("active");
+            btn.style.background = "rgba(160,122,255,0.35)";
+            loadAndRender();
+          };
+          el.appendChild(btn);
+        });
+      }
     }
 
     /* ── 팀 선택기 렌더 ── */
@@ -965,11 +1011,12 @@
     function loadAndRender() {
       if (!currentLeague) return;
       showLoading("데이터 계산 중...");
-      /* global 탭은 league=pacific 등 4개 합산 대신 API에 global 전달 */
       var apiLeague = currentLeague;
-      /* global의 스테이지 필터: "all"|"kickoff"|"stage1"|"stage2" → 서버에 그대로 전달 */
       var url = "/api/records/compute?league=" + encodeURIComponent(apiLeague) +
                 "&stage=" + encodeURIComponent(currentStage);
+      if (currentQualifier) {
+        url += "&qualifier=" + encodeURIComponent(currentQualifier);
+      }
       fetch(url)
         .then(function(r){ return r.json(); })
         .then(function(data) {
@@ -1001,6 +1048,19 @@
       var hasPicker = !!LEAGUE_TEAMS[currentLeague];
 
       var html = "";
+
+      /* qualifier 설명 배너 */
+      if (currentQualifier && data.qualifierTeams) {
+        var qLabelMap = {
+          "masters-santiago": "Masters Santiago 진출팀 · KickOff 성적",
+          "masters-london":   "Masters London 진출팀 · Stage 1 성적",
+          "champions":        "Champions 진출팀 · Stage 2 성적",
+        };
+        html += '<div style="background:rgba(160,122,255,0.12);border:1px solid rgba(160,122,255,0.3);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-family:\'Barlow Condensed\',sans-serif;">'
+              + '<div style="font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#a07aff;margin-bottom:4px;">'+ esc(qLabelMap[currentQualifier]||currentQualifier) +'</div>'
+              + '<div style="font-size:11px;color:rgba(255,255,255,0.45);">진출팀 ' + data.qualifierTeams.length + '팀: ' + data.qualifierTeams.join(", ") + '</div>'
+              + '</div>';
+      }
 
       /* 매치 수 표시 */
       html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:20px;">'

@@ -1680,8 +1680,17 @@ app.get("/api/records/dump", async (req, res) => {
    league=X&stage=Y 파라미터로 필터.                                         */
 app.get("/api/records/compute", async (req, res) => {
   try {
-    const league = (req.query.league || "pacific").toLowerCase();
-    const stage  = (req.query.stage  || "all").toLowerCase();
+    const league    = (req.query.league    || "pacific").toLowerCase();
+    const stage     = (req.query.stage     || "all").toLowerCase();
+    const qualifier = (req.query.qualifier || "").toLowerCase(); /* "masters-santiago"|"masters-london"|"champions" */
+
+    /* qualifier별 대응 tournament 키 + qualifying stage */
+    const QUALIFIER_MAP = {
+      "masters-santiago": { tournament: "santiago",  stage: "kickoff" },
+      "masters-london":   { tournament: "london",    stage: "stage1"  },
+      "champions":        { tournament: "champions", stage: "stage2"  },
+    };
+    const qualifierCfg = qualifier ? QUALIFIER_MAP[qualifier] : null;
 
     /* ══ 팀 → 리그 매핑 ══ */
     const TEAM_LEAGUE_MAP = {
@@ -1787,6 +1796,26 @@ app.get("/api/records/compute", async (req, res) => {
       return true;
     }
 
+    /* ── 5-pre. qualifier: 세계대회 진출팀 집합 구성 ── */
+    /* vct_p를 1차 순회하여 해당 tournament에 출전한 팀 집합을 수집 */
+    var qualifierTeams = null; /* null = no qualifier filter */
+    var qualifierStage = null;
+    if (qualifierCfg) {
+      qualifierTeams = new Set();
+      qualifierStage = qualifierCfg.stage;
+      vctpRows.rows.forEach(function(row) {
+        var pName = row.key.slice("vct_p:".length);
+        var pd; try { pd = JSON.parse(row.value); } catch(e) { return; }
+        if (!pd || !Array.isArray(pd.maps)) return;
+        var team = playerTeam[pName] || "";
+        if (!team || !TEAM_LEAGUE_MAP[team]) return; /* tier-1 팀만 */
+        var participated = pd.maps.some(function(m) {
+          return (m.tournament || "").toLowerCase() === qualifierCfg.tournament;
+        });
+        if (participated) qualifierTeams.add(team);
+      });
+    }
+
     /* ── 5. vct_p 순회: 선수 스탯 집계 + 필터된 matchKey 수집 ── */
     const playerStats = {};  /* name → { totalAcs, totalKills, totalDeaths, maps } */
     const filteredMatchKeys = new Set();
@@ -1807,13 +1836,20 @@ app.get("/api/records/compute", async (req, res) => {
       var playerLeague = TEAM_LEAGUE_MAP[team] || "";
       if (playerLeague) playersWithLeague++;
 
+      /* qualifier 필터: 해당 세계대회 진출팀이 아니면 스킵 */
+      if (qualifierTeams !== null && !qualifierTeams.has(team)) return;
+
+      /* qualifier일 때 league/stage 오버라이드 */
+      var effectiveLeague = qualifierTeams !== null ? "global" : league;
+      var effectiveStage  = qualifierTeams !== null ? qualifierStage : stage;
+
       pd.maps.forEach(function(mapEntry) {
         if (!mapEntry || !mapEntry.matchKey) return;
 
         /* league 필터 */
-        if (!mapEntryMatchesLeague(mapEntry, playerLeague, league)) return;
+        if (!mapEntryMatchesLeague(mapEntry, playerLeague, effectiveLeague)) return;
         /* stage 필터 */
-        if (!mapEntryMatchesStage(mapEntry, stage)) return;
+        if (!mapEntryMatchesStage(mapEntry, effectiveStage)) return;
 
         /* acs / kda 유효성 검사 */
         var acs = parseInt(mapEntry.acs) || 0;
@@ -1940,6 +1976,8 @@ app.get("/api/records/compute", async (req, res) => {
       ok: true,
       league,
       stage,
+      qualifier,
+      qualifierTeams: qualifierTeams ? [...qualifierTeams] : null,
       matchCount: filteredMatchKeys.size,
       topAcs,
       topKd,
@@ -1949,6 +1987,7 @@ app.get("/api/records/compute", async (req, res) => {
         playersWithLeague,
         filteredMaps,
         uniqueMatchKeys: filteredMatchKeys.size,
+        qualifierTeamCount: qualifierTeams ? qualifierTeams.size : null,
       },
     });
   } catch(e) {
