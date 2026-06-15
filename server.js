@@ -1400,11 +1400,6 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
   }
 });
 
-/* ── SPA fallback ─────────────────────────────────── */
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
 /* ── API: 자동입력 활성화 (admin) ─────────────────── */
 app.put("/api/auto-match", requireAdmin, async (req, res) => {
   const { matchKey, team1, team2, league } = req.body || {};
@@ -2934,6 +2929,11 @@ async function pollAutoMatches(allEventMatches) {
     console.error("[auto-match] 전체 오류:", e.message);
   }
 }
+
+/* ── SPA fallback (반드시 모든 API 라우트 아래에 위치) ── */
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 app.listen(PORT, async () => {
   console.log(`VCT Archive server running on port ${PORT}`);
