@@ -553,26 +553,49 @@ app.post("/api/admin/rename-player", requireAdmin, async (req, res) => {
   try {
     const prefixes = ["stock_p:", "vct_p:"];
     let renamed = [];
+
+    /* stock_p·vct_p 키 이름 변경 */
     for (const prefix of prefixes) {
       const oldKey = `${prefix}${from}`;
       const newKey = `${prefix}${to}`;
-      // 기존 키 조회 (대소문자 무관)
       const found = await pool.query(
         "SELECT key, value FROM app_data WHERE lower(key)=lower($1)",
         [oldKey]
       );
       if (found.rows.length === 0) continue;
       const { key: realOldKey, value } = found.rows[0];
-      // 새 키가 이미 있으면 덮어쓰기, 없으면 insert
       await pool.query(
         `INSERT INTO app_data (key, value) VALUES ($1, $2)
          ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
         [newKey, value]
       );
-      // 구 키 삭제
       await pool.query("DELETE FROM app_data WHERE key=$1", [realOldKey]);
       renamed.push({ from: realOldKey, to: newKey });
     }
+
+    /* vct_roster:* 에서 선수 이름 일괄 갱신 */
+    const rosterRows = await pool.query(
+      "SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"
+    );
+    for (const row of rosterRows.rows) {
+      let parsed;
+      try { parsed = JSON.parse(row.value); } catch { continue; }
+      let changed = false;
+      const fields = Array.isArray(parsed) ? [parsed] : [parsed.main || [], parsed.subs || []];
+      fields.forEach(arr => {
+        const idx = arr.findIndex(p => p && p.toLowerCase() === from.toLowerCase());
+        if (idx !== -1) { arr[idx] = to; changed = true; }
+      });
+      if (!changed) continue;
+      const newVal = JSON.stringify(parsed);
+      await pool.query(
+        `INSERT INTO app_data (key, value) VALUES ($1, $2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [row.key, newVal]
+      );
+      renamed.push({ from: `${row.key}:${from}`, to: `${row.key}:${to}` });
+    }
+
     res.json({ ok: true, renamed });
   } catch (e) {
     res.status(500).json({ error: e.message });

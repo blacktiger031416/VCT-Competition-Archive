@@ -835,7 +835,7 @@
       /* Pacific */
       "DetonatioN FocusMe": ["Meiy","SSeeS","yatsuka","Caedye","Akame"],
       "Global Esports":     ["PatMen","UdoTan","Kr1stal","xavi8k","Autumn"],
-      "Kiwoom DRX":         ["MaKo","Hermes","yong","free1ng","HYUNMIN","BeYN","Flicker"],
+      "Kiwoom DRX":         ["MaKo","Hermes","Yong","free1ng","HYUNMIN","BeYN","Flicker"],
       "Nongshim RedForce":  ["Rb","Xross","Francis","Dambi","Ivy"],
       "Paper Rex":          ["Jinggg","invy","f0rsakeN","d4v41","something"],
       "Rex Regum Qeon":     ["crazyguy","Monyet","xffero","Jemkin","Kushy"],
@@ -1732,18 +1732,58 @@
     function startRename(oldName) {
       var newName = prompt("선수 이름 수정", oldName);
       if (!newName || newName.trim() === oldName) return;
+      var trimmed = newName.trim();
       fetch("/api/admin/rename-player", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (TOKEN||"") },
-        body: JSON.stringify({ from: oldName, to: newName.trim() })
+        body: JSON.stringify({ from: oldName, to: trimmed })
       }).then(function(r) { return r.json(); })
         .then(function(d) {
           if (!d.ok) { alert("오류: " + d.error); return; }
+
+          /* localStorage: vct_p·stock_p 키 이름 변경 */
           ["vct_p:", "stock_p:"].forEach(function(prefix) {
             var val = localStorage.getItem(prefix + oldName);
-            if (val !== null) { localStorage.setItem(prefix + newName.trim(), val); localStorage.removeItem(prefix + oldName); }
+            if (val !== null) {
+              localStorage.setItem(prefix + trimmed, val);
+              localStorage.removeItem(prefix + oldName);
+            }
           });
-          PLAYERS.forEach(function(p) { if (p.name === oldName) p.name = newName.trim(); });
+
+          /* localStorage·DB의 vct_roster에서 선수 이름 갱신 */
+          for (var ri = 0; ri < localStorage.length; ri++) {
+            var rk = localStorage.key(ri);
+            if (!rk || rk.indexOf("vct_roster:") !== 0) continue;
+            try {
+              var rv = JSON.parse(localStorage.getItem(rk) || "{}");
+              var changed = false;
+              ["main","subs"].forEach(function(field) {
+                if (!Array.isArray(rv[field])) return;
+                var idx = rv[field].indexOf(oldName);
+                if (idx !== -1) { rv[field][idx] = trimmed; changed = true; }
+              });
+              if (changed) {
+                var newVal = JSON.stringify(rv);
+                localStorage.setItem(rk, newVal);
+                /* DB도 업데이트 */
+                fetch("/api/data/" + encodeURIComponent(rk), {
+                  method: "POST", credentials: "include",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ value: newVal }),
+                }).catch(function(){});
+              }
+            } catch(e2) {}
+          }
+
+          /* 메모리 내 HARDCODED_ROSTERS 갱신 (새로고침 전까지 유효) */
+          Object.keys(HARDCODED_ROSTERS).forEach(function(team) {
+            var idx = HARDCODED_ROSTERS[team].indexOf(oldName);
+            if (idx !== -1) HARDCODED_ROSTERS[team][idx] = trimmed;
+          });
+          /* TIER1_TEAMS는 Set이고 팀명 기반이므로 별도 갱신 불필요 */
+
+          /* 메모리 내 PLAYERS 이름 갱신 */
+          PLAYERS.forEach(function(p) { if (p.name === oldName) p.name = trimmed; });
           renderStockList(document.getElementById("stock-search").value);
         });
     }
