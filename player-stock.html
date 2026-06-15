@@ -212,8 +212,13 @@
       display: flex; align-items: center; justify-content: center;
       font-family: "Barlow Condensed", sans-serif;
       font-size: 14px; font-weight: 900; flex-shrink: 0;
-      color: rgba(255,255,255,.5);
+      color: rgba(255,255,255,.5); overflow: hidden;
     }
+    .s-logo img {
+      width: 22px; height: 22px; object-fit: contain;
+      display: block;
+    }
+    .s-logo img.logo-invert { filter: invert(1); }
     .s-info { min-width: 0; }
     .s-name {
       font-family: "Barlow Condensed", sans-serif;
@@ -294,7 +299,12 @@
       display: flex; align-items: center; justify-content: center;
       font-family: "Barlow Condensed", sans-serif;
       font-size: 18px; font-weight: 900; color: rgba(255,255,255,.5);
+      overflow: hidden;
     }
+    .detail-logo img {
+      width: 28px; height: 28px; object-fit: contain; display: block;
+    }
+    .detail-logo img.logo-invert { filter: invert(1); }
     .detail-name-block { flex: 1; min-width: 0; }
     .detail-name {
       font-family: "Barlow Condensed", sans-serif;
@@ -908,6 +918,71 @@
       return players;
     }
 
+    /* ── 팀 로고 맵 ── */
+    var TEAM_LOGOS = {
+      "DetonatioN FocusMe":"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png",
+      "Global Esports":"./assets/teams/ge.webp",
+      "Kiwoom DRX":"./assets/teams/krx.svg",
+      "Nongshim RedForce":"./assets/teams/ns.svg",
+      "Paper Rex":"./assets/teams/prx.svg",
+      "Rex Regum Qeon":"./assets/teams/rrq.png",
+      "Team Secret":"./assets/teams/ts.svg",
+      "ZETA DIVISION":"./assets/teams/zeta.png",
+      "FULL SENSE":"./assets/teams/fs.svg",
+      "Gen.G":"./assets/teams/gen.png",
+      "VARREL":"./assets/teams/vl.svg",
+      "T1":"./assets/teams/t1.png",
+      "G2 Esports":"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg",
+      "Leviatán":"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618",
+      "Cloud9":"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp",
+      "MIBR":"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg",
+      "LOUD":"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg",
+      "ENVY":"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg",
+      "KRÜ Esports":"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg",
+      "Sentinels":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg",
+      "NRG":"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg",
+      "FURIA":"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg",
+      "100 Thieves":"https://egamersworld.com/uploads/valorant/teams/100-thieves-logo.webp",
+      "Evil Geniuses":"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg",
+      "Gentle Mates":"./assets/teams/gm.png",
+      "Team Liquid":"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp",
+      "Team Heretics":"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg",
+      "Natus Vincere":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+      "NAVI":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png",
+      "Karmine Corp":"./assets/teams/kc.png",
+      "FUT Esports":"https://specs.gg/assets/img/teams/fut-esports.webp",
+      "BBL Esports":"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg",
+      "Fnatic":"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg",
+      "Team Vitality":"https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png",
+      "GIANTX":"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg",
+      "Eternal Fire":"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg",
+      "PCIFIC Esports":"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg",
+      "ULF Esports":"https://i.namu.wiki/i/EKmHVjvPqN3x6yN6lHSKBDOoSp5X8dQS3Y9y_hj1y13zoCwWAtaRIiuGxG3C6b7TItP0n6ZsnYqwXpxg_KKoJA.webp",
+      "All Gamers":"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp",
+      "JD Mall JDG Esports":"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg",
+      "TYLOO":"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg",
+      "Wuxi Titan Esports Club":"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg",
+      "Guangzhou Huadu Bilibili Gaming":"https://dpm.lol/esport/teams/BLG.webp",
+      "FunPlus Phoenix":"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg",
+      "Xi Lai Gaming":"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg",
+      "EDward Gaming":"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png",
+      "Dragon Ranger Gaming":"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp",
+      "Trace Esports":"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg",
+      "Nova Esports":"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp",
+      "Wolves Esports":"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp",
+    };
+    var TEAM_LOGO_INVERT = new Set([
+      "Paper Rex","Team Secret","VARREL","ZETA DIVISION",
+      "ENVY","Evil Geniuses","MIBR","Gentle Mates","GIANTX","Team Liquid","ULF Esports",
+    ]);
+    function teamLogoHTML(teamName, size) {
+      var src = TEAM_LOGOS[teamName];
+      if (!src) return teamName ? teamName.charAt(0).toUpperCase() : "?";
+      var inv = TEAM_LOGO_INVERT.has(teamName) ? " logo-invert" : "";
+      var s = size || 22;
+      return '<img src="' + src + '" alt="' + teamName + '" class="' + inv.trim() + '" style="width:' + s + 'px;height:' + s + 'px;object-fit:contain" onerror="this.parentNode.textContent=\'' + (teamName ? teamName.charAt(0) : "?") + '\'">';
+    }
+
     /* ── 상태 ── */
     var PLAYERS       = [];
     var selectedId    = null;
@@ -1099,7 +1174,7 @@
           + '<button class="admin-btn-inline" data-action="delete" data-pname="' + p.name.replace(/"/g,'&quot;') + '" title="삭제" style="color:rgba(220,38,38,.5)">🗑</button>' : "";
         html += '<div class="stock-row' + (p.id === selectedId ? " active" : "") + '" data-id="' + p.id + '">'
           + '<div class="s-player">'
-          +   '<div class="s-logo">' + p.name.charAt(0).toUpperCase() + '</div>'
+          +   '<div class="s-logo">' + teamLogoHTML(p.team, 22) + '</div>'
           +   '<div class="s-info">'
           +     '<div class="s-name">' + p.name + regionBadge + adminBtns + '</div>'
           +     '<div class="s-team">' + p.team + '</div>'
@@ -1158,7 +1233,7 @@
       selectedId = id;
 
       var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
-      document.getElementById("chart-logo").textContent        = p.name.charAt(0).toUpperCase();
+      document.getElementById("chart-logo").innerHTML           = teamLogoHTML(p.team, 28);
       document.getElementById("chart-name").textContent        = p.name;
       document.getElementById("chart-team").textContent        = p.team;
       document.getElementById("chart-price").textContent       = fmtPrice(p.price) + " 코인";
