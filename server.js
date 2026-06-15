@@ -846,6 +846,19 @@ app.post("/api/stock/buy", requireAuth, async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
       [holdingsKey, JSON.stringify(holdings)]
     );
+
+    /* 거래 내역 기록 */
+    const histKey = `trade_history:${username}`;
+    const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
+    const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
+    history.push({ type: "buy", player: playerName, qty: qtyN, price: priceN, total, ts: new Date().toISOString() });
+    if (history.length > 200) history.splice(0, history.length - 200);
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [histKey, JSON.stringify(history)]
+    );
+
     res.json({ ok: true, coins: newCoins, holdings });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -890,7 +903,83 @@ app.post("/api/stock/sell", requireAuth, async (req, res) => {
        ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
       [holdingsKey, JSON.stringify(holdings)]
     );
+
+    /* 거래 내역 기록 */
+    const histKey = `trade_history:${username}`;
+    const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
+    const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
+    history.push({ type: "sell", player: playerName, qty: qtyN, price: priceN, total, ts: new Date().toISOString() });
+    if (history.length > 200) history.splice(0, history.length - 200);
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [histKey, JSON.stringify(history)]
+    );
+
     res.json({ ok: true, coins: newCoins, holdings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 거래 내역 조회 ─────────────────────────────── */
+app.get("/api/stock/trade-history", requireAuth, async (req, res) => {
+  const key = `trade_history:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    const history = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
+    res.json({ history });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 즐겨찾기 조회 ─────────────────────────────── */
+app.get("/api/stock/watchlist", requireAuth, async (req, res) => {
+  const key = `watchlist:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    const watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
+    res.json({ watchlist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 즐겨찾기 추가 ─────────────────────────────── */
+app.post("/api/stock/watchlist", requireAuth, async (req, res) => {
+  const { playerName } = req.body || {};
+  if (!playerName) return res.status(400).json({ error: "playerName 필수" });
+  const key = `watchlist:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    const watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
+    if (!watchlist.includes(playerName)) watchlist.push(playerName);
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [key, JSON.stringify(watchlist)]
+    );
+    res.json({ ok: true, watchlist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: 즐겨찾기 제거 ─────────────────────────────── */
+app.delete("/api/stock/watchlist/:name", requireAuth, async (req, res) => {
+  const playerName = decodeURIComponent(req.params.name);
+  const key = `watchlist:${req.user.username}`;
+  try {
+    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
+    let watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
+    watchlist = watchlist.filter((n) => n !== playerName);
+    await pool.query(
+      `INSERT INTO app_data (key,value) VALUES ($1,$2)
+       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [key, JSON.stringify(watchlist)]
+    );
+    res.json({ ok: true, watchlist });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
