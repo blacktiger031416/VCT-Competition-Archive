@@ -223,9 +223,33 @@
       });
   };
 
+  /* ── 어드민일 때 _ALL_ROSTERS → vct_roster: DB 동기화 ── */
+  function syncRostersToDB() {
+    if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
+    var rosters = (typeof window._ALL_ROSTERS !== 'undefined') ? window._ALL_ROSTERS : null;
+    if (!rosters) return;
+    Object.keys(rosters).forEach(function (team) {
+      var players = rosters[team];
+      if (!Array.isArray(players) || players.length === 0) return;
+      var rosterKey = 'vct_roster:' + team;
+      /* { main: [...], subs: [] } 형태로 저장 */
+      var payload = JSON.stringify({ main: players, subs: [] });
+      /* localStorage에도 저장 */
+      try { localStorage.setItem(rosterKey, payload); } catch (e) {}
+      /* DB에도 동기화 */
+      fetch('/api/data/' + encodeURIComponent(rosterKey), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ value: payload }),
+      }).catch(function () {});
+    });
+  }
+
   /* ── 초기 실행 (DOMContentLoaded 이후 약간 대기: auth.js 로드 보장) ── */
   function tryRender() {
     renderStockButtons();
+    syncRostersToDB();
     /* maps 4-5가 나중에 추가될 때를 위해 initMapCard 패치 */
     if (typeof initMapCard === 'function' && !initMapCard._stockPatched) {
       var _orig = initMapCard;

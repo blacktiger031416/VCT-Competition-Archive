@@ -806,8 +806,70 @@
       "Dragon Ranger Gaming":"cn","Xi Lai Gaming":"cn","Wolves Esports":"cn",
     };
 
+    /* ── 하드코드 로스터 폴백 (vct_roster DB 없을 때) ── */
+    var HARDCODED_ROSTERS = {
+      /* Americas */
+      "Sentinels":      ["TenZ","ShahZaM","dapr","SicK","zekken","bang","Zellsis"],
+      "G2 Esports":     ["Mixwell","hoody","ardiis","nAts","Meddo"],
+      "NRG":            ["s0m","crashies","Victor","FNS","eeiu"],
+      "100 Thieves":    ["Asuna","Ethan","Hiko","Will","Derrek"],
+      "Cloud9":         ["Xeppaa","curry","Leaf","Mitch","vanity"],
+      "MIBR":           ["aspas","Less","RgLMent","murizzz","cauanzin","saadhak","heat","pancada"],
+      "LOUD":           ["aspas","Less","tuyz","Sacy","pANcada"],
+      "FURIA":          ["Mazin","khalil","mwzera","Nzinn","qck","Quick"],
+      "KRÜ Esports":    ["Melser","NagZ","Klaus","Jonn","keznit"],
+      "Leviatán":       ["Tacolilla","kiNgg","Shyy","nzr","Mazin"],
+      "Evil Geniuses":  ["Demon1","jawgemo","Boostio","C2Kyle","ethos","apoth"],
+      /* EMEA */
+      "Team Liquid":    ["Jamppi","ScreaM","soulcas","L1NK","nAts","Adron","Baddyg"],
+      "Team Heretics":  ["pAura","Boo","Mixwell","Natchouuu","LoWkii","wolfi"],
+      "Natus Vincere":  ["ANGE1","Shao","cNed","SUYGETSU","MrFaliN"],
+      "Karmine Corp":   ["Th1nk","Saymapulia","beyAz","deLon","spinx"],
+      "FUT Esports":    ["qRaxs","AtaKaptan","Mojj","MOJJ","LAM","MrFaliN"],
+      "BBL Esports":    ["AsLanM4SKara","Turko","QutioNN","Brave","sedef"],
+      "Fnatic":         ["Derke","Leo","Chronicle","Alfajer","Boaster","Mistic"],
+      "Team Vitality":  ["BONECOLD","ceNder","Zyppan","Sayf","vakk"],
+      "Eternal Fire":   ["Calyx","Jlerst","SouhcNK","QutioNN","glovee"],
+      "GIANTX":         ["rhyme","Fit1nho","hoody","Destrian","koldamenta"],
+      "Gentle Mates":   ["beyAz","Selva","nataNk","Lifetime","Jonn"],
+      /* Pacific */
+      "DetonatioN FocusMe": ["Meiy","SSeeS","yatsuka","Caedye","Akame"],
+      "Global Esports":     ["PatMen","UdoTan","Kr1stal","xavi8k","Autumn"],
+      "Kiwoom DRX":         ["MaKo","Hermes","yong","free1ng","HYUNMIN","BeYN","Flicker"],
+      "Nongshim RedForce":  ["Rb","Xross","Francis","Dambi","Ivy"],
+      "Paper Rex":          ["Jinggg","invy","f0rsakeN","d4v41","something"],
+      "Rex Regum Qeon":     ["crazyguy","Monyet","xffero","Jemkin","Kushy"],
+      "Team Secret":        ["JessieVash","kellyS","Sylvan","BerserX","Rimuru","Zeus"],
+      "ZETA DIVISION":      ["eKo","Absol","SyouTa","SugarZ3ro","Xdll"],
+      "FULL SENSE":         ["Crws","Killua","primmie","JitBoyS","Leviathan","seph1roth","thyy"],
+      "Gen.G":              ["Lakia","Ash","Karon","t3xture","KiTae","Xiesta","ZynX"],
+      "VARREL":             ["C1ndeR","Klaus","XuNa","oonzmlp","Zexy"],
+      "T1":                 ["stax","BuZz","Munchkin","Meteor","iZu"],
+      /* CN */
+      "FunPlus Phoenix":    ["Yuicaw","AAAAY","ZmjjKK","Lysoar","ob1","xMS"],
+      "EDward Gaming":      ["nobody","Smoggy","ZmjjKK","CHICHOO","Haodong"],
+      "Trace Esports":      ["N4RRATE","Biank","Mercury","wREKT","Amo"],
+      "Nova Esports":       ["Ribo","nobody","Smoggy","gump","Suno"],
+      "TYLOO":              ["someone","BerLIN","Emme","Aaron","Levi"],
+      "All Gamers":         ["Ritsu","Xia","CNED","hentai1","Palf"],
+      "Dragon Ranger Gaming": ["CNED","CY","H1ber","lzh","Yuko"],
+      "Xi Lai Gaming":      ["Destiny","MistakE","Munchkin","Bram","QiuQiu"],
+    };
+
+    /* 하드코드 로스터로 playerTeam 보완 */
+    function enrichPlayerTeam(playerTeam) {
+      Object.keys(HARDCODED_ROSTERS).forEach(function (team) {
+        HARDCODED_ROSTERS[team].forEach(function (p) {
+          if (!playerTeam[p]) playerTeam[p] = team;
+        });
+      });
+      return playerTeam;
+    }
+
     /* ── 선수 데이터 빌드 (서버 DB 기반) ── */
     function buildPlayersFromData(playerTeam, vcpMap, stockMap) {
+      /* DB에 없는 팀도 하드코드로 보완 */
+      playerTeam = enrichPlayerTeam(playerTeam);
       var VALID_LEAGUES = { americas:1, emea:1, pacific:1, cn:1, masters:1, champions:1 };
 
       /* 1단계: vct_p 데이터에서 ACS/KDA 집계 */
