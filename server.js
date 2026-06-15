@@ -795,12 +795,46 @@ app.get("/api/stock/holdings", requireAuth, async (req, res) => {
   const key = `holdings:${req.user.username}`;
   try {
     const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    const holdings = result.rows[0] ? JSON.parse(result.rows[0].value) : {};
-    res.json({ holdings });
+    const raw = result.rows[0] ? JSON.parse(result.rows[0].value) : {};
+    res.json({ holdings: holdingsWithAvail(raw) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+/* ── 거래 규제 상수 ─────────────────────────────────── */
+const HOLD_MS      = 2 * 60 * 60 * 1000; /* 매수 후 2시간 매도 잠금 */
+const BUY_SPREAD   = 0.002;               /* 매수 스프레드: 수량 × 0.2% */
+const SELL_SPREAD  = 0.001;               /* 매도 스프레드: 수량 × 0.1% */
+
+/* holdings 항목에 batches 필드가 없으면 마이그레이션 (기존 보유분 → 즉시 매도 가능) */
+function migrateBatches(h) {
+  if (!h) return h;
+  if (!h.batches) {
+    h.batches = h.qty > 0 ? [{ qty: h.qty, price: h.avgPrice || 0, boughtAt: 0 }] : [];
+  }
+  return h;
+}
+
+/* holdings 전체에서 선수별 availableQty / nextUnlockAt 계산 */
+function holdingsWithAvail(holdings) {
+  const now = Date.now();
+  const result = {};
+  for (const [name, h] of Object.entries(holdings)) {
+    migrateBatches(h);
+    let avail = 0, nextUnlock = null;
+    for (const b of (h.batches || [])) {
+      if (b.boughtAt + HOLD_MS <= now) avail += b.qty;
+      else if (nextUnlock === null || b.boughtAt < nextUnlock) nextUnlock = b.boughtAt;
+    }
+    result[name] = {
+      qty: h.qty, avgPrice: h.avgPrice, batches: h.batches,
+      availableQty: avail,
+      nextUnlockAt: nextUnlock ? nextUnlock + HOLD_MS : null,
+    };
+  }
+  return result;
+}
 
 /* ── API: 주식 매수 ─────────────────────────────────── */
 app.post("/api/stock/buy", requireAuth, async (req, res) => {
@@ -812,7 +846,11 @@ app.post("/api/stock/buy", requireAuth, async (req, res) => {
   const username    = req.user.username;
   const coinKey     = `coins:${username}`;
   const holdingsKey = `holdings:${username}`;
-  const total       = priceN * qtyN;
+
+  /* 호가 스프레드: 수량이 많을수록 주당 가격 상승 (최대 +20%) */
+  const spreadMult  = 1 + Math.min(BUY_SPREAD * qtyN, 0.20);
+  const effPrice    = Math.round(priceN * spreadMult); /* 실제 주당 지불 가격 */
+  const total       = effPrice * qtyN;
 
   try {
     const coinRes    = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
@@ -823,35 +861,44 @@ app.post("/api/stock/buy", requireAuth, async (req, res) => {
     const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
     const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
 
-    /* 평균 단가 갱신 */
+    /* 배치 추가 (2시간 잠금용 타임스탬프 포함) */
+    const newBatch = { qty: qtyN, price: effPrice, boughtAt: Date.now() };
     if (holdings[playerName]) {
-      const old    = holdings[playerName];
+      const old = migrateBatches(holdings[playerName]);
       const newQty = old.qty + qtyN;
       holdings[playerName] = {
         qty:      newQty,
-        avgPrice: Math.round((old.avgPrice * old.qty + priceN * qtyN) / newQty),
+        avgPrice: Math.round((old.avgPrice * old.qty + effPrice * qtyN) / newQty),
+        batches:  [...old.batches, newBatch],
       };
     } else {
-      holdings[playerName] = { qty: qtyN, avgPrice: priceN };
+      holdings[playerName] = { qty: qtyN, avgPrice: effPrice, batches: [newBatch] };
     }
 
     const newCoins = curCoins - total;
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [coinKey, String(newCoins)]
-    );
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [holdingsKey, JSON.stringify(holdings)]
-    );
+    await Promise.all([
+      pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [coinKey, String(newCoins)]
+      ),
+      pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [holdingsKey, JSON.stringify(holdings)]
+      ),
+    ]);
 
     /* 거래 내역 기록 */
     const histKey = `trade_history:${username}`;
     const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
     const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
-    history.push({ type: "buy", player: playerName, qty: qtyN, price: priceN, total, ts: new Date().toISOString() });
+    history.push({
+      type: "buy", player: playerName, qty: qtyN,
+      price: effPrice, basePrice: priceN, total,
+      spread: effPrice - priceN,
+      ts: new Date().toISOString(),
+    });
     if (history.length > 200) history.splice(0, history.length - 200);
     await pool.query(
       `INSERT INTO app_data (key,value) VALUES ($1,$2)
@@ -859,7 +906,8 @@ app.post("/api/stock/buy", requireAuth, async (req, res) => {
       [histKey, JSON.stringify(history)]
     );
 
-    res.json({ ok: true, coins: newCoins, holdings });
+    res.json({ ok: true, coins: newCoins, holdings: holdingsWithAvail(holdings),
+               effPrice, spread: effPrice - priceN });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -875,40 +923,80 @@ app.post("/api/stock/sell", requireAuth, async (req, res) => {
   const username    = req.user.username;
   const coinKey     = `coins:${username}`;
   const holdingsKey = `holdings:${username}`;
-  const total       = priceN * qtyN;
 
   try {
     const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
     const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
 
-    const cur = holdings[playerName];
+    const cur = migrateBatches(holdings[playerName]);
     if (!cur || cur.qty < qtyN)
       return res.status(400).json({ error: "보유 수량이 부족합니다." });
+
+    /* 잠금 해제된 수량 확인 (2시간 경과한 배치만) */
+    const now = Date.now();
+    let availQty = 0;
+    let nextUnlock = null;
+    for (const b of cur.batches) {
+      if (b.boughtAt + HOLD_MS <= now) availQty += b.qty;
+      else if (nextUnlock === null || b.boughtAt < nextUnlock) nextUnlock = b.boughtAt;
+    }
+    if (availQty < qtyN) {
+      const unlockTime = nextUnlock ? new Date(nextUnlock + HOLD_MS).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—";
+      return res.status(400).json({
+        error: `매도 잠금 중입니다. 매도 가능 수량: ${availQty}주 (다음 해제: ${unlockTime})`,
+      });
+    }
+
+    /* 호가 스프레드: 수량이 많을수록 주당 수령 가격 하락 (최대 -10%) */
+    const spreadMult = 1 - Math.min(SELL_SPREAD * qtyN, 0.10);
+    const effPrice   = Math.max(0, Math.round(priceN * spreadMult));
+    const total      = effPrice * qtyN;
+
+    /* FIFO로 가장 오래된 잠금 해제 배치부터 차감 */
+    let remaining = qtyN;
+    const newBatches = [];
+    for (const b of cur.batches) {
+      if (remaining <= 0) { newBatches.push(b); continue; }
+      if (b.boughtAt + HOLD_MS > now) { newBatches.push(b); continue; } /* 잠금 중 → 보존 */
+      if (b.qty <= remaining) {
+        remaining -= b.qty; /* 이 배치 전부 소진 */
+      } else {
+        newBatches.push({ ...b, qty: b.qty - remaining });
+        remaining = 0;
+      }
+    }
+
+    const newQty = cur.qty - qtyN;
+    if (newQty === 0) delete holdings[playerName];
+    else holdings[playerName] = { qty: newQty, avgPrice: cur.avgPrice, batches: newBatches };
 
     const coinRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
     const curCoins = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 1000;
     const newCoins = curCoins + total;
 
-    const newQty = cur.qty - qtyN;
-    if (newQty === 0) delete holdings[playerName];
-    else holdings[playerName] = { qty: newQty, avgPrice: cur.avgPrice };
-
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [coinKey, String(newCoins)]
-    );
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [holdingsKey, JSON.stringify(holdings)]
-    );
+    await Promise.all([
+      pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [coinKey, String(newCoins)]
+      ),
+      pool.query(
+        `INSERT INTO app_data (key,value) VALUES ($1,$2)
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [holdingsKey, JSON.stringify(holdings)]
+      ),
+    ]);
 
     /* 거래 내역 기록 */
     const histKey = `trade_history:${username}`;
     const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
     const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
-    history.push({ type: "sell", player: playerName, qty: qtyN, price: priceN, total, ts: new Date().toISOString() });
+    history.push({
+      type: "sell", player: playerName, qty: qtyN,
+      price: effPrice, basePrice: priceN, total,
+      spread: priceN - effPrice,
+      ts: new Date().toISOString(),
+    });
     if (history.length > 200) history.splice(0, history.length - 200);
     await pool.query(
       `INSERT INTO app_data (key,value) VALUES ($1,$2)
@@ -916,7 +1004,8 @@ app.post("/api/stock/sell", requireAuth, async (req, res) => {
       [histKey, JSON.stringify(history)]
     );
 
-    res.json({ ok: true, coins: newCoins, holdings });
+    res.json({ ok: true, coins: newCoins, holdings: holdingsWithAvail(holdings),
+               effPrice, spread: priceN - effPrice });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

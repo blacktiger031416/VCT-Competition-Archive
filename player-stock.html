@@ -684,6 +684,11 @@
               <span class="trade-price-val" id="trade-unit-price">— <span>코인</span></span>
             </div>
             <div class="trade-hold">보유 수량 <strong id="holding-qty">0 주</strong></div>
+            <div class="trade-hold" id="holding-avail-row" style="display:none">
+              매도 가능 <strong id="holding-avail" style="color:var(--up)">0 주</strong>
+              &nbsp;|&nbsp; 잠금 <strong id="holding-locked" style="color:var(--dim)">0 주</strong>
+              <span id="holding-unlock-time" style="font-size:11px;color:var(--dim)"></span>
+            </div>
             <div class="trade-hold" id="holding-avg-row" style="display:none">
               평균단가 <strong id="holding-avg">— 코인</strong>
               &nbsp;|&nbsp; 손익 <strong id="holding-pnl">—</strong>
@@ -699,6 +704,7 @@
               <span class="trade-total-label">총액</span>
               <div class="trade-total-val" id="trade-total">0 <span>코인</span></div>
             </div>
+            <div id="spread-info" style="display:none;font-size:11px;color:var(--dim);text-align:right;margin-top:-6px;margin-bottom:2px"></div>
             <button class="trade-btn buy-btn" id="trade-btn">매수</button>
             <button id="admin-player-reset-btn" onclick="adminResetPlayerStock()">🔄 이 선수 리셋 (Admin)</button>
             <div class="coin-bal">
@@ -1210,10 +1216,39 @@
       }
     }
 
+    /* ── 스프레드 계산 헬퍼 ── */
+    var BUY_SPREAD_RATE  = 0.002; /* 수량 × 0.2% */
+    var SELL_SPREAD_RATE = 0.001; /* 수량 × 0.1% */
+    var HOLD_MS_CLIENT   = 2 * 60 * 60 * 1000; /* 2시간 */
+    function calcBuyPrice(basePrice, qty) {
+      return Math.round(basePrice * (1 + Math.min(BUY_SPREAD_RATE * qty, 0.20)));
+    }
+    function calcSellPrice(basePrice, qty) {
+      return Math.max(0, Math.round(basePrice * (1 - Math.min(SELL_SPREAD_RATE * qty, 0.10))));
+    }
+
     /* ── 보유 수량 표시 ── */
     function updateHoldingDisplay(p) {
       var h = p ? myHoldings[p.name] : null;
       document.getElementById("holding-qty").textContent = (h ? h.qty : 0) + " 주";
+
+      /* 잠금/해제 수량 */
+      var availRow = document.getElementById("holding-avail-row");
+      if (h && h.qty > 0) {
+        var avail  = (h.availableQty !== undefined) ? h.availableQty : h.qty;
+        var locked = h.qty - avail;
+        document.getElementById("holding-avail").textContent  = avail  + " 주";
+        document.getElementById("holding-locked").textContent = locked + " 주";
+        var unlockEl = document.getElementById("holding-unlock-time");
+        if (locked > 0 && h.nextUnlockAt) {
+          var d = new Date(h.nextUnlockAt);
+          var hh = String(d.getHours()).padStart(2,"0");
+          var mm = String(d.getMinutes()).padStart(2,"0");
+          unlockEl.textContent = " (" + hh + ":" + mm + " 해제)";
+        } else { unlockEl.textContent = ""; }
+        availRow.style.display = "";
+      } else { availRow.style.display = "none"; }
+
       var avgRow = document.getElementById("holding-avg-row");
       if (h && h.qty > 0 && p) {
         var pnl = (p.price - h.avgPrice) * h.qty;
@@ -1309,9 +1344,37 @@
     }
 
     function updateTotal() {
-      var p   = selectedId ? findPlayer(selectedId) : null;
-      var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
-      document.getElementById("trade-total").innerHTML = fmtPrice((p ? p.price : 0) * qty) + ' <span>코인</span>';
+      var p      = selectedId ? findPlayer(selectedId) : null;
+      var qty    = parseInt(document.getElementById("trade-qty-input").value) || 0;
+      var base   = p ? p.price : 0;
+      var spreadEl = document.getElementById("spread-info");
+
+      if (qty > 0 && base > 0) {
+        var effPrice, total, spreadAmt, spreadPct;
+        if (tradeMode === "buy") {
+          effPrice  = calcBuyPrice(base, qty);
+          total     = effPrice * qty;
+          spreadAmt = effPrice - base;
+          spreadPct = (spreadAmt / base * 100).toFixed(1);
+          if (spreadAmt > 0) {
+            spreadEl.textContent = "주당 " + fmtPrice(effPrice) + " 코인 (스프레드 +" + spreadPct + "%)";
+            spreadEl.style.display = "";
+          } else { spreadEl.style.display = "none"; }
+        } else {
+          effPrice  = calcSellPrice(base, qty);
+          total     = effPrice * qty;
+          spreadAmt = base - effPrice;
+          spreadPct = (spreadAmt / base * 100).toFixed(1);
+          if (spreadAmt > 0) {
+            spreadEl.textContent = "주당 " + fmtPrice(effPrice) + " 코인 (스프레드 -" + spreadPct + "%)";
+            spreadEl.style.display = "";
+          } else { spreadEl.style.display = "none"; }
+        }
+        document.getElementById("trade-total").innerHTML = fmtPrice(total) + ' <span>코인</span>';
+      } else {
+        document.getElementById("trade-total").innerHTML = '0 <span>코인</span>';
+        spreadEl.style.display = "none";
+      }
     }
 
     /* ── 거래 내역 ── */
@@ -1451,7 +1514,12 @@
           myHoldings = d.holdings;
           document.getElementById("trade-qty-input").value = "";
           updateCoinDisplay(); updateHoldingDisplay(p); updateTotal(); updateMarketBar();
-          alert(p.name + " " + qty + "주 " + (tradeMode === "buy" ? "매수" : "매도") + " 완료");
+          var isBuy = tradeMode === "buy";
+          var msg = p.name + " " + qty + "주 " + (isBuy ? "매수" : "매도") + " 완료\n"
+            + "적용가: " + fmtPrice(d.effPrice) + " 코인/주";
+          if (d.spread > 0) msg += "  (스프레드 " + (isBuy ? "+" : "-") + fmtPrice(d.spread) + ")";
+          if (isBuy) msg += "\n\n⏱ 매수 후 2시간 동안 매도 잠금됩니다.";
+          alert(msg);
         })
         .catch(function () { alert("서버 오류가 발생했습니다."); })
         .finally(function () { btn.disabled = false; });
