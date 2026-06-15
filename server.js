@@ -1854,6 +1854,10 @@ app.get("/api/records/compute", async (req, res) => {
     });
 
     /* ── 5. players: 에서 선수 스탯 집계 ── */
+    /* 한국어 완성형/자모/한자 포함 여부 체크 (닉네임 오입력 필터) */
+    function hasKorean(s) {
+      return /[가-힣ᄀ-ᇿ㄰-㆏一-鿿]/.test(s);
+    }
     const playerStats = {};  /* name → { totalAcs, totalKills, totalDeaths, maps } */
     playersRows.rows.forEach(function(row) {
       var withoutPrefix = row.key.slice("players:".length);
@@ -1869,6 +1873,8 @@ app.get("/api/records/compute", async (req, res) => {
           if (!slot) continue;
           var name = (slot.name || "").trim();
           if (!name || name === "-") continue;
+          /* 전체가 한글인 이름(팀명/선수명 오입력) 제외 */
+          if (hasKorean(name) && !/[a-zA-Z0-9]/.test(name)) continue;
           var acs = parseInt(slot.acs) || 0;
           if (acs === 0) continue;
           var kdaStr = slot.kda || "0/0/0";
@@ -1969,6 +1975,15 @@ app.get("/api/records/compute", async (req, res) => {
       });
     });
 
+    /* debug: league별 matchKey 분포 */
+    const leagueDistrib = {};
+    Object.keys(matchMeta).forEach(function(mk) {
+      var lg = matchMeta[mk].league || "(없음)";
+      leagueDistrib[lg] = (leagueDistrib[lg] || 0) + 1;
+    });
+    var sampleMatchKeys = [];
+    matchSet.forEach(function(mk) { if (sampleMatchKeys.length < 10) sampleMatchKeys.push(mk); });
+
     res.json({
       ok: true,
       league,
@@ -1977,6 +1992,13 @@ app.get("/api/records/compute", async (req, res) => {
       topAcs,
       topKd,
       teamStats,
+      _debug: {
+        totalMatchKeys: Object.keys(matchMeta).length,
+        leagueDistrib,
+        sampleMatchKeys,
+        autoMatchTotal: autoRows.rows.length,
+        playersTotal: playersRows.rows.length,
+      },
     });
   } catch(e) {
     console.error("[records/compute]", e);

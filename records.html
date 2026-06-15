@@ -925,10 +925,13 @@
             lines.push("■ players 키 샘플:");
             d.players.sampleKeys.forEach(function(k){ lines.push("  " + k); });
           }
-          if (d.autoMatch && d.autoMatch.samples && d.autoMatch.samples.pacific) {
-            lines.push("");
-            lines.push("■ auto-match pacific 샘플:");
-            d.autoMatch.samples.pacific.forEach(function(s){ lines.push("  " + JSON.stringify(s)); });
+          /* auto-match 샘플 — 모든 league 키 표시 */
+          if (d.autoMatch && d.autoMatch.samples) {
+            Object.keys(d.autoMatch.samples).forEach(function(lg) {
+              lines.push("");
+              lines.push("■ auto-match [" + lg + "] 샘플:");
+              (d.autoMatch.samples[lg] || []).forEach(function(s){ lines.push("  " + JSON.stringify(s)); });
+            });
           }
           result.textContent = lines.join("\n");
         })
@@ -956,6 +959,10 @@
         .then(function(r){ return r.json(); })
         .then(function(data) {
           if (!data.ok) { showError(data.error || "오류"); return; }
+          /* 디버그 정보 콘솔 출력 */
+          if (data._debug) {
+            console.log("[records compute debug]", data._debug);
+          }
           lastComputeData = data;
           if (currentTeam) {
             loadTeamDetail(currentTeam);
