@@ -1971,16 +1971,20 @@ app.get("/api/records/compute", async (req, res) => {
       try { rounds = JSON.parse(row.value); } catch(e) { return; }
       if (!Array.isArray(rounds) || !rounds.length) return;
 
-      ensureTeam(teamA);
-      ensureTeam(teamB);
-      teamStats[teamA].maps += 1;
-      teamStats[teamB].maps += 1;
+      /* 권역 리그에서는 해당 리그 소속 팀만 집계 (타 리그 팀 오염 방지) */
+      var isRegionalLg = ["pacific","cn","americas","emea"].indexOf(league) !== -1;
+      var trackA = !isRegionalLg || teamMatchesLeague(teamA, league);
+      var trackB = !isRegionalLg || teamMatchesLeague(teamB, league);
+      if (!trackA && !trackB) return;
+
+      if (trackA) { ensureTeam(teamA); teamStats[teamA].maps += 1; }
+      if (trackB) { ensureTeam(teamB); teamStats[teamB].maps += 1; }
 
       /* 맵 승자 판별 */
       var aWins = 0, bWins = 0;
       rounds.forEach(function(r) { if (r.winner === "a") aWins++; else if (r.winner === "b") bWins++; });
-      if (aWins > bWins) teamStats[teamA].mapWins++;
-      else if (bWins > aWins) teamStats[teamB].mapWins++;
+      if (trackA && aWins > bWins) teamStats[teamA].mapWins++;
+      if (trackB && bWins > aWins) teamStats[teamB].mapWins++;
 
       rounds.forEach(function(r, idx) {
         var isPistol = (idx === 0 || idx === 12);
@@ -1991,22 +1995,16 @@ app.get("/api/records/compute", async (req, res) => {
         var isDef = type.indexOf("def_") === 0;
 
         if (isAtk) {
-          teamStats[teamA].atkTotal++;
-          if (winner === "a") teamStats[teamA].atkWins++;
-          teamStats[teamB].defTotal++;
-          if (winner === "b") teamStats[teamB].defWins++;
+          if (trackA) { teamStats[teamA].atkTotal++; if (winner === "a") teamStats[teamA].atkWins++; }
+          if (trackB) { teamStats[teamB].defTotal++; if (winner === "b") teamStats[teamB].defWins++; }
         } else if (isDef) {
-          teamStats[teamA].defTotal++;
-          if (winner === "a") teamStats[teamA].defWins++;
-          teamStats[teamB].atkTotal++;
-          if (winner === "b") teamStats[teamB].atkWins++;
+          if (trackA) { teamStats[teamA].defTotal++; if (winner === "a") teamStats[teamA].defWins++; }
+          if (trackB) { teamStats[teamB].atkTotal++; if (winner === "b") teamStats[teamB].atkWins++; }
         }
 
         if (isPistol) {
-          teamStats[teamA].pistolTotal++;
-          teamStats[teamB].pistolTotal++;
-          if (winner === "a") teamStats[teamA].pistolWins++;
-          else if (winner === "b") teamStats[teamB].pistolWins++;
+          if (trackA) { teamStats[teamA].pistolTotal++; if (winner === "a") teamStats[teamA].pistolWins++; }
+          if (trackB) { teamStats[teamB].pistolTotal++; if (winner === "b") teamStats[teamB].pistolWins++; }
         }
       });
     });
@@ -2027,6 +2025,8 @@ app.get("/api/records/compute", async (req, res) => {
         filteredMaps,
         uniqueMatchKeys: filteredMatchKeys.size,
         qualifierTeamCount: qualifierTeams ? qualifierTeams.size : null,
+        sampleMatchKeys: [...filteredMatchKeys].slice(0, 20),
+        teamStatsKeys: Object.keys(teamStats),
       },
     });
   } catch(e) {
