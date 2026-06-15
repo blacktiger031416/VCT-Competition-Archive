@@ -2040,6 +2040,16 @@ app.get("/api/records/compute", async (req, res) => {
   }
 });
 
+/* ── 임시 디버그: rounds 키 형태 확인 ── */
+app.get("/api/debug/rounds-keys", async (req, res) => {
+  try {
+    const r = await pool.query("SELECT key FROM app_data WHERE key LIKE 'rounds:%' LIMIT 50");
+    res.json({ ok: true, keys: r.rows.map(function(x){ return x.key; }) });
+  } catch(e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 /* ── 임시 디버그: DB에 저장된 실제 팀/선수 이름 확인 ── */
 app.get("/api/debug/roster", async (req, res) => {
   try {
