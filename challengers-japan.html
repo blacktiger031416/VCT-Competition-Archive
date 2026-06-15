@@ -452,7 +452,16 @@
           var def = defaultRosters[team] || [];
           return { main: def.slice(0,5), subs: def.slice(5) };
         }
-        function save(team, data) { try { localStorage.setItem(key(team), JSON.stringify(data)); } catch(e) {} }
+        function save(team, data) {
+          var k = key(team);
+          var v = JSON.stringify(data);
+          try { localStorage.setItem(k, v); } catch(e) {}
+          fetch('/api/data/' + encodeURIComponent(k), {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: v }),
+          }).catch(function(){});
+        }
 
         var modal   = document.getElementById("roster-modal");
         var logoEl  = document.getElementById("roster-modal-logo");

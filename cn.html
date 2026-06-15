@@ -614,7 +614,15 @@
         }
 
         function save(team, data) {
-          try { localStorage.setItem(key(team), JSON.stringify(data)); } catch (e) {}
+          var k = key(team);
+          var v = JSON.stringify(data);
+          try { localStorage.setItem(k, v); } catch (e) {}
+          /* 서버 DB 동기화 */
+          fetch('/api/data/' + encodeURIComponent(k), {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: v }),
+          }).catch(function(){});
         }
 
         const modal   = document.getElementById("roster-modal");
