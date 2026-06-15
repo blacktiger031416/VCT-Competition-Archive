@@ -2090,7 +2090,7 @@ app.get("/api/records/team-detail", async (req, res) => {
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'veto:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
-      pool.query("SELECT value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),  /* key도 필요 */
     ]);
 
     /* matchKey → meta */
@@ -2112,15 +2112,36 @@ app.get("/api/records/team-detail", async (req, res) => {
       if (!matchMeta[mk].teamB && t2) matchMeta[mk].teamB = t2;
       if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
     });
-    /* vct_p 에서 matchKey → league 보강 */
+    /* vct_roster: 선수→팀 매핑 (league 보강용) */
+    const playerTeamForLeague = {};
+    rosterRows.rows.forEach(function(row) {
+      var tn = row.key.slice("vct_roster:".length);
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      var all = (v.main||[]).concat(v.subs||[]);
+      all.forEach(function(p) { if (p) playerTeamForLeague[p.toLowerCase()] = tn; });
+    });
+
+    /* vct_p 에서 matchKey → league/stage 보강
+       ※ m.league 없어도 stage는 반드시 채워야 스테이지 필터가 동작함 */
     vctpRows2.rows.forEach(function(row) {
+      var pName = row.key.slice("vct_p:".length);
       var pd; try { pd = JSON.parse(row.value); } catch(e) { return; }
-      (pd.maps || []).forEach(function(m) {
-        if (!m.matchKey || !m.league) return;
+      if (!pd || !Array.isArray(pd.maps)) return;
+      /* 선수 팀 → 리그 유추 */
+      var pTeam   = playerTeamForLeague[pName.toLowerCase()] || "";
+      var pLeague = TEAM_LEAGUE_MAP2[pTeam] || "";
+      pd.maps.forEach(function(m) {
+        if (!m.matchKey) return;
         var mk = m.matchKey;
+        var tournament = m.tournament || "";
+        /* league: m.league → 팀 기반 → matchKey 기반 순 */
+        var effectiveLeague = m.league || pLeague || inferLeagueFromKey(mk);
+        if (tournament === "santiago" || tournament === "london") effectiveLeague = "masters";
+        else if (tournament.indexOf("champions") !== -1) effectiveLeague = "champions";
         if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
-        if (!matchMeta[mk].league) matchMeta[mk].league = m.league;
-        if (!matchMeta[mk].stage && m.stage) matchMeta[mk].stage = m.stage;
+        if (!matchMeta[mk].league && effectiveLeague) matchMeta[mk].league = effectiveLeague;
+        if (!matchMeta[mk].stage  && m.stage)         matchMeta[mk].stage  = m.stage;
+        if (!matchMeta[mk].tournament && tournament)   matchMeta[mk].tournament = tournament;
       });
     });
     playersRows.rows.forEach(function(row) {
@@ -2130,7 +2151,10 @@ app.get("/api/records/team-detail", async (req, res) => {
       var mk = withoutPrefix.slice(0, lc);
       if (!matchMeta[mk]) matchMeta[mk] = { league: inferLeagueFromKey(mk), stage: inferStageFromKey(mk),
                                              tournament:"", teamA:"", teamB:"" };
-      else if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromKey(mk);
+      else {
+        if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromKey(mk);
+        if (!matchMeta[mk].stage)  matchMeta[mk].stage  = inferStageFromKey(mk);
+      }
     });
 
     /* 필터 통과 matchKey */
@@ -2203,9 +2227,9 @@ app.get("/api/records/team-detail", async (req, res) => {
     });
 
     /* players: 에서 팀 사이드 판별 + 에이전트 수집 */
-    const compositions = {};  /* mapName → [{ agents:[...], count, matches:[...] }] */
+    const compositions = {};  /* mapName → { agentKey → { agents, count, matches } } */
     const mapWinRates  = {};  /* mapName → { wins, total } */
-    const banPick      = {};  /* mapName → { picks, bans } */
+    const banPick      = {};  /* mapName → { teamPick, opponentPick, teamBan, opponentBan } */
 
     const playerSet = new Set(teamPlayers.map(function(p){ return p.toLowerCase(); }));
 
@@ -2219,15 +2243,34 @@ app.get("/api/records/team-detail", async (req, res) => {
       roundsData[row.key] = row.value;
     });
 
+    /* ── 1패스: matchKey별 팀 사이드(A/B) 미리 판별 ──
+       meta.teamA/B가 없는 경우에도 players 데이터로 판별 가능 */
+    const teamSideByMatch = {};  /* mk → "A" | "B" */
+    Object.keys(mkMapIdxSet).forEach(function(mk) {
+      var aCnt = 0, bCnt = 0;
+      mkMapIdxSet[mk].forEach(function(mi) {
+        var praw = playersData["players:" + mk + ":" + mi];
+        if (!praw) return;
+        var pdata; try { pdata = JSON.parse(praw); } catch(e) { return; }
+        for (var si = 0; si < 5; si++) {
+          var aS = pdata["a"+si]; if (aS && aS.name && playerSet.has(aS.name.toLowerCase())) aCnt++;
+          var bS = pdata["b"+si]; if (bS && bS.name && playerSet.has(bS.name.toLowerCase())) bCnt++;
+        }
+      });
+      if      (aCnt > bCnt) teamSideByMatch[mk] = "A";
+      else if (bCnt > aCnt) teamSideByMatch[mk] = "B";
+    });
+
     matchSet.forEach(function(mk) {
       var mapIdxes = mkMapIdxSet[mk];
       if (!mapIdxes) return;
       var maxIdx = 0;
       mapIdxes.forEach(function(mi) { if (mi > maxIdx) maxIdx = mi; });
 
-      /* veto 밴픽 처리 */
+      /* ── 밴픽 처리 (players 기반 사이드 판별) ── */
+      var teamSideInVeto = teamSideByMatch[mk] || null;
       var veto = vetoMap[mk];
-      if (veto && Array.isArray(veto.maps)) {
+      if (veto && Array.isArray(veto.maps) && teamSideInVeto) {
         var vetoMaps = veto.maps;
         var isBo5 = !!(veto.gf || veto.bo5) || maxIdx >= 3;
         if (!isBo5 && veto.sides) isBo5 = veto.sides[4] !== undefined || veto.sides[5] !== undefined;
@@ -2237,37 +2280,21 @@ app.get("/api/records/team-detail", async (req, res) => {
         /* 밴 위치: bo3=[0,1,4,5] bo5=[0,1] */
         var banSteps = isBo5 ? [0,1] : [0,1,4,5];
 
-        /* 팀이 어느 사이드인지: firstBan="A"면 팀A가 먼저 밴
-           teamA vs teamB 에서 team이 어느쪽인지 판별 */
-        var meta = matchMeta[mk] || {};
-        var mTA = (meta.teamA||"").toLowerCase();
-        var mTB = (meta.teamB||"").toLowerCase();
-        var teamSideInVeto = null;
-        if (mTA && mTA.indexOf(teamLower) !== -1) teamSideInVeto = "A";
-        else if (mTB && mTB.indexOf(teamLower) !== -1) teamSideInVeto = "B";
-        else if (teamLower && mTA && teamLower.indexOf(mTA) !== -1) teamSideInVeto = "A";
-        else if (teamLower && mTB && teamLower.indexOf(mTB) !== -1) teamSideInVeto = "B";
-
-        if (teamSideInVeto) {
-          var firstBan = veto.firstBan || "A";
-          /* 팀 밴/픽 스텝 인덱스:
-             step 0,2,4 → firstBan 팀 (홀수: 상대팀)
-             step 1,3,5 → !firstBan 팀 */
-          var pickAndBanAll = [];
-          vetoMaps.forEach(function(mapName, stepIdx) {
-            if (!mapName) return;
-            var mn = normMap(mapName);
-            var isTeamStep = (stepIdx % 2 === 0) ? (firstBan === teamSideInVeto) : (firstBan !== teamSideInVeto);
-            var isPick = pickSteps.indexOf(stepIdx) !== -1;
-            var isBan  = banSteps.indexOf(stepIdx) !== -1;
-            if (!isPick && !isBan) return;
-            if (!banPick[mn]) banPick[mn] = { teamPick:0, opponentPick:0, teamBan:0, opponentBan:0 };
-            if (isPick && isTeamStep)   banPick[mn].teamPick++;
-            if (isPick && !isTeamStep)  banPick[mn].opponentPick++;
-            if (isBan && isTeamStep)    banPick[mn].teamBan++;
-            if (isBan && !isTeamStep)   banPick[mn].opponentBan++;
-          });
-        }
+        var firstBan = veto.firstBan || "A";
+        vetoMaps.forEach(function(mapName, stepIdx) {
+          if (!mapName) return;
+          var mn = normMap(mapName);
+          /* 짝수 스텝 → firstBan 팀, 홀수 → 상대팀 */
+          var isTeamStep = (stepIdx % 2 === 0) ? (firstBan === teamSideInVeto) : (firstBan !== teamSideInVeto);
+          var isPick = pickSteps.indexOf(stepIdx) !== -1;
+          var isBan  = banSteps.indexOf(stepIdx) !== -1;
+          if (!isPick && !isBan) return;
+          if (!banPick[mn]) banPick[mn] = { teamPick:0, opponentPick:0, teamBan:0, opponentBan:0 };
+          if (isPick && isTeamStep)   banPick[mn].teamPick++;
+          if (isPick && !isTeamStep)  banPick[mn].opponentPick++;
+          if (isBan && isTeamStep)    banPick[mn].teamBan++;
+          if (isBan && !isTeamStep)   banPick[mn].opponentBan++;
+        });
       }
 
       mapIdxes.forEach(function(mi) {
