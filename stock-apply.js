@@ -223,20 +223,21 @@
       });
   };
 
-  /* ── 어드민일 때 _ALL_ROSTERS → vct_roster: DB 동기화 ── */
+  /* ── 어드민일 때 _ALL_ROSTERS → vct_roster: DB 동기화 ──
+     단, localStorage에 이미 커스텀 로스터가 있으면 절대 덮어쓰지 않음
+     (수동 편집한 로스터가 하드코드 기본값으로 되돌아가는 문제 방지) ── */
   function syncRostersToDB() {
     if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
     var rosters = (typeof window._ALL_ROSTERS !== 'undefined') ? window._ALL_ROSTERS : null;
     if (!rosters) return;
     Object.keys(rosters).forEach(function (team) {
+      var rosterKey = 'vct_roster:' + team;
+      /* localStorage에 커스텀 로스터가 이미 있으면 건너뜀 */
+      if (localStorage.getItem(rosterKey)) return;
       var players = rosters[team];
       if (!Array.isArray(players) || players.length === 0) return;
-      var rosterKey = 'vct_roster:' + team;
-      /* { main: [...], subs: [] } 형태로 저장 */
       var payload = JSON.stringify({ main: players, subs: [] });
-      /* localStorage에도 저장 */
       try { localStorage.setItem(rosterKey, payload); } catch (e) {}
-      /* DB에도 동기화 */
       fetch('/api/data/' + encodeURIComponent(rosterKey), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
