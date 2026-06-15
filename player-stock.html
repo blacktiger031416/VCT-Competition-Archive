@@ -12,20 +12,20 @@
     a { text-decoration: none; color: inherit; }
 
     :root {
-      --bg:        #f0f2f5;
-      --bg-card:   #ffffff;
-      --bg-card2:  #f7f8fa;
-      --border:    #e2e6ed;
-      --text:      #1a202c;
-      --text-sub:  #6b7280;
-      --text-dim:  #9ca3af;
-      --up:        #e53e3e;
-      --down:      #2563eb;
-      --accent:    #e53e3e;
+      --bg:        #080c10;
+      --bg-card:   #0d1117;
+      --bg-card2:  #111820;
+      --border:    rgba(255,255,255,.07);
+      --text:      #f0f0f0;
+      --text-sub:  rgba(255,255,255,.45);
+      --text-dim:  rgba(255,255,255,.22);
+      --up:        #e84444;
+      --down:      #3b8fff;
+      --accent:    #ff2638;
       --accent2:   #ff2638;
-      --green:     #059669;
-      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-      --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+      --green:     #34d399;
+      --shadow:    0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
     }
 
     body {
@@ -40,9 +40,10 @@
       position: sticky; top: 0; z-index: 200;
       display: flex; align-items: center; gap: 8px;
       padding: 0 20px; height: 52px;
-      background: #fff;
+      background: rgba(8,12,16,.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,.3);
     }
     .nav-brand {
       font-family: "Barlow Condensed", sans-serif;
@@ -56,7 +57,7 @@
       background: var(--bg); font-size: 12px; font-weight: 700;
       color: var(--text-sub); transition: background .15s, color .15s;
     }
-    .back-link:hover { background: #e5e7eb; color: var(--text); }
+    .back-link:hover { background: rgba(255,255,255,.09); color: #fff; }
     .site-header .auth-header-btn { margin-left: auto !important; }
 
     /* ── PAGE SHELL ── */
@@ -168,7 +169,7 @@
       white-space: nowrap;
     }
     .main-tab:hover { color: var(--text); }
-    .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: #fff; }
+    .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-card); }
 
     /* 종목유형 서브 탭 */
     .type-sub-tabs {
@@ -185,7 +186,7 @@
       white-space: nowrap;
     }
     .type-sub-tab:hover { background: var(--bg); }
-    .type-sub-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+    .type-sub-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
 
     /* 권역 필터 탭 */
     .region-tabs {
@@ -201,7 +202,7 @@
       white-space: nowrap;
     }
     .region-tab:hover { background: var(--bg); }
-    .region-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+    .region-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
     .region-tab[data-region="americas"].active { background: #c05621; border-color: #c05621; }
     .region-tab[data-region="emea"].active     { background: #276749; border-color: #276749; }
     .region-tab[data-region="pacific"].active  { background: #1d4ed8; border-color: #1d4ed8; }
@@ -228,24 +229,24 @@
     /* 종목 행 */
     .stock-list { max-height: 620px; overflow-y: auto; scrollbar-gutter: stable; }
     .stock-list::-webkit-scrollbar { width: 4px; }
-    .stock-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+    .stock-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
     .stock-row {
       display: grid;
       grid-template-columns: minmax(0,1fr) 64px 66px 74px 32px;
-      padding: 8px 14px; border-bottom: 1px solid #f3f4f6;
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: background .1s; align-items: center;
     }
     .stock-row:last-child { border-bottom: none; }
-    .stock-row:hover { background: #f9fafb; }
-    .stock-row.active { background: #eff6ff; }
-    .stock-row.dimmed { opacity: .45; }
+    .stock-row:hover { background: rgba(255,255,255,.03); }
+    .stock-row.active { background: rgba(255,38,56,.07); }
+    .stock-row.dimmed { opacity: .35; }
     .stock-player { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .stock-player-logo {
       width: 30px; height: 30px; border-radius: 50%;
-      background: #e5e7eb; border: 1px solid #d1d5db;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
       display: flex; align-items: center; justify-content: center;
       font-size: 12px; font-weight: 900; flex-shrink: 0; overflow: hidden;
-      color: #6b7280;
+      color: rgba(255,255,255,.5);
     }
     .stock-player-logo img { width: 100%; height: 100%; object-fit: contain; }
     .stock-player-info { min-width: 0; }
@@ -289,20 +290,20 @@
       font-family: "Barlow Condensed", sans-serif; font-size: 9px; font-weight: 900;
       letter-spacing: .06em; text-transform: uppercase; flex-shrink: 0;
     }
-    .region-badge.americas { background: rgba(192,86,33,.12); color: #c05621; }
-    .region-badge.emea     { background: rgba(39,103,73,.12); color: #276749; }
-    .region-badge.pacific  { background: rgba(29,78,216,.12); color: #1d4ed8; }
-    .region-badge.cn       { background: rgba(155,44,44,.12); color: #9b2c2c; }
+    .region-badge.americas { background: rgba(255,119,68,.15); color: #ff7744; }
+    .region-badge.emea     { background: rgba(80,220,160,.15); color: #50dda0; }
+    .region-badge.pacific  { background: rgba(80,160,255,.15); color: #60b0ff; }
+    .region-badge.cn       { background: rgba(232,68,68,.15);  color: #e84444; }
 
     /* 종목유형 뱃지 */
     .type-badge {
       display: inline-block; padding: 1px 5px; border-radius: 3px;
       font-size: 9px; font-weight: 700; flex-shrink: 0;
     }
-    .type-badge.blue-chip { background: rgba(124,58,237,.12); color: #6d28d9; }
-    .type-badge.growth    { background: rgba(5,150,105,.12); color: #065f46; }
-    .type-badge.ipo       { background: rgba(234,179,8,.12); color: #92400e; }
-    .type-badge.pre-ipo   { background: rgba(107,114,128,.12); color: #374151; }
+    .type-badge.blue-chip { background: rgba(167,139,250,.15); color: #c4b5fd; }
+    .type-badge.growth    { background: rgba(52,211,153,.15); color: #6ee7b7; }
+    .type-badge.ipo       { background: rgba(251,191,36,.15); color: #fcd34d; }
+    .type-badge.pre-ipo   { background: rgba(148,163,184,.12); color: #94a3b8; }
 
     /* admin 이름 편집 */
     .admin-rename-btn {
@@ -326,9 +327,9 @@
     .chart-player-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
     .chart-player-logo {
       width: 40px; height: 40px; border-radius: 50%;
-      background: #e5e7eb; border: 1px solid #d1d5db;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 900; flex-shrink: 0; color: #6b7280;
+      font-size: 16px; font-weight: 900; flex-shrink: 0; color: rgba(255,255,255,.5);
     }
     .chart-player-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
     .chart-player-name {
@@ -358,7 +359,7 @@
       color: var(--text-dim); cursor: pointer; transition: all .15s;
     }
     .period-tab:hover  { background: var(--bg); color: var(--text); }
-    .period-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+    .period-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
 
     .chart-area {
       position: relative; height: 280px; padding: 12px 20px 8px;
@@ -391,8 +392,8 @@
       border-bottom: 2px solid var(--border); transition: all .15s;
     }
     .trade-tab:hover { color: var(--text); }
-    .trade-tab.active-buy  { background: #fff1f2; color: var(--up);   border-bottom-color: var(--up); }
-    .trade-tab.active-sell { background: #eff6ff; color: var(--down); border-bottom-color: var(--down); }
+    .trade-tab.active-buy  { background: rgba(232,68,68,.12);  color: var(--up);   border-bottom-color: var(--up); }
+    .trade-tab.active-sell { background: rgba(59,143,255,.12); color: var(--down); border-bottom-color: var(--down); }
 
     .trade-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -492,12 +493,12 @@
     .holdings-table th:first-child { text-align: left; }
     .holdings-table td {
       padding: 10px 14px; text-align: right;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border);
       font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700;
       color: var(--text); white-space: nowrap;
     }
     .holdings-table td:first-child { text-align: left; font-family: "Noto Sans KR", sans-serif; font-size: 13px; }
-    .holdings-table tr:hover td { background: #f9fafb; }
+    .holdings-table tr:hover td { background: rgba(255,255,255,.03); }
     .holdings-table tr:last-child td { border-bottom: none; }
     .pnl-up   { color: var(--up) !important; }
     .pnl-down { color: var(--down) !important; }
@@ -513,16 +514,16 @@
     .history-table th:first-child, .history-table th:nth-child(2) { text-align: left; }
     .history-table td {
       padding: 9px 14px; text-align: right;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border);
       font-family: "Barlow Condensed", sans-serif; font-size: 13px; color: var(--text);
       white-space: nowrap;
     }
     .history-table td:first-child { text-align: left; color: var(--text-dim); font-size: 11px; font-family: "Noto Sans KR", sans-serif; }
     .history-table td:nth-child(2) { text-align: left; font-family: "Noto Sans KR", sans-serif; font-size: 13px; }
-    .history-table tr:hover td { background: #f9fafb; }
+    .history-table tr:hover td { background: rgba(255,255,255,.03); }
     .history-table tr:last-child td { border-bottom: none; }
-    .type-buy  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(229,62,62,.1); color: var(--up); }
-    .type-sell { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(37,99,235,.1); color: var(--down); }
+    .type-buy  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(232,68,68,.15); color: var(--up); }
+    .type-sell { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(59,143,255,.15); color: var(--down); }
 
     .empty-state {
       padding: 32px; text-align: center;
@@ -545,21 +546,21 @@
     .all-stocks-table th:hover { color: var(--text); }
     .all-stocks-table td {
       padding: 10px 14px; text-align: right;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border);
       font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700;
       color: var(--text); white-space: nowrap;
     }
     .all-stocks-table td:first-child { text-align: left; }
     .all-stocks-table tr { cursor: pointer; transition: background .1s; }
-    .all-stocks-table tr:hover td { background: #f9fafb; }
-    .all-stocks-table tr.active td { background: #eff6ff; }
+    .all-stocks-table tr:hover td { background: rgba(255,255,255,.03); }
+    .all-stocks-table tr.active td { background: rgba(255,38,56,.07); }
     .all-stocks-table tr:last-child td { border-bottom: none; }
     .ft-player-cell { display: flex; align-items: center; gap: 10px; }
     .ft-player-logo {
       width: 26px; height: 26px; border-radius: 50%;
-      background: #e5e7eb; border: 1px solid #d1d5db;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 900; flex-shrink: 0; overflow: hidden; color: #6b7280;
+      font-size: 10px; font-weight: 900; flex-shrink: 0; overflow: hidden; color: rgba(255,255,255,.4);
     }
     .ft-player-logo img { width: 100%; height: 100%; object-fit: contain; }
     .ft-player-name { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
@@ -1391,7 +1392,7 @@
 
       if (!data) {
         ctx.font = "13px 'Noto Sans KR', sans-serif";
-        ctx.fillStyle = "rgba(0,0,0,.25)";
+        ctx.fillStyle = "rgba(255,255,255,.2)";
         ctx.textAlign = "center";
         ctx.fillText("거래 기록이 없습니다", W / 2, H / 2);
         return;
@@ -1403,11 +1404,11 @@
       var toX = function (i) { return (i / (data.length - 1)) * W; };
       var toY = function (v) { return H - ((v - minV) / (maxV - minV)) * H * 0.85 - H * 0.05; };
       var isUp = p.price >= p.prev;
-      var lineColor = isUp ? "#e53e3e" : "#2563eb";
-      var fillColor = isUp ? "rgba(229,62,62,.08)" : "rgba(37,99,235,.08)";
+      var lineColor = isUp ? "#e84444" : "#3b8fff";
+      var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
 
       /* 그리드 */
-      ctx.strokeStyle = "rgba(0,0,0,.06)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 1;
       for (var g = 0; g < 5; g++) {
         var gy = H * 0.05 + (H * 0.85 / 4) * g;
         ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
