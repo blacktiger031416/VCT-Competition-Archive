@@ -1690,12 +1690,11 @@ app.get("/api/records/compute", async (req, res) => {
       "Global Esports":"pacific","Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
       "Paper Rex":"pacific","Rex Regum Qeon":"pacific","T1":"pacific",
       "Team Secret":"pacific","VARREL":"pacific","ZETA DIVISION":"pacific",
-      /* CN */
+      /* CN (VCT 파트너팀만 — 챌린저스/아카데미 팀 제외) */
       "Dragon Ranger Gaming":"cn","EDward Gaming":"cn","FunPlus Phoenix":"cn",
       "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
       "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
-      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn",
-      "IGZIST":"cn","BNK FEARX":"cn",
+      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn",
       /* Americas */
       "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
       "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
@@ -1763,9 +1762,17 @@ app.get("/api/records/compute", async (req, res) => {
       return false;
     }
 
+    /* regional 리그 여부 판단 */
+    var isRegionalLeague = (league === "pacific" || league === "cn" || league === "americas" || league === "emea" || league === "global");
+
     function mapEntryMatchesStage(mapEntry, tgt) {
-      if (tgt === "all") return true;
       var s = mapEntry.stage || "";
+      if (tgt === "all") {
+        /* regional 리그 "전체" = KickOff+Stage1+Stage2 (tournament 없는 것만, 즉 Masters/Champions 제외)
+           league filter가 이미 tournament 있는 것을 제외하지만 명시적으로도 처리 */
+        if (isRegionalLeague) return !mapEntry.tournament;
+        return true; /* Masters/Champions 탭에서는 진짜 전체 */
+      }
       if (tgt === "kickoff")    return s === "kickoff";
       if (tgt === "stage1")     return s === "stage1" || s === "stage1playoffs";
       if (tgt === "stage2")     return s === "stage2" || s === "stage2playoffs";
@@ -1963,7 +1970,7 @@ app.get("/api/records/team-detail", async (req, res) => {
       "Dragon Ranger Gaming":"cn","EDward Gaming":"cn","FunPlus Phoenix":"cn",
       "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
       "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
-      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn","BNK FEARX":"cn",
+      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn",
       "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
       "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
       "Leviatán":"americas","FURIA":"americas","KRÜ Esports":"americas",
