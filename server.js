@@ -1593,10 +1593,10 @@ app.get("/api/admin/records-diag", async (req, res) => {
     autoRows.rows.forEach(r => {
       try {
         const v = JSON.parse(r.value);
-        const lg = (v.league || "").toLowerCase();
+        const lg = (v.league || "(없음)").toLowerCase();
         autoByLeague[lg] = (autoByLeague[lg] || 0) + 1;
         if (!autoSamples[lg]) autoSamples[lg] = [];
-        if (autoSamples[lg].length < 3) autoSamples[lg].push({ key: r.key, league: v.league, team1: v.team1, team2: v.team2 });
+        if (autoSamples[lg].length < 5) autoSamples[lg].push({ key: r.key, league: v.league||"", team1: v.team1, team2: v.team2 });
       } catch {}
     });
 
@@ -1672,6 +1672,36 @@ app.get("/api/records/compute", async (req, res) => {
     const league = (req.query.league || "pacific").toLowerCase();
     const stage  = (req.query.stage  || "all").toLowerCase();
 
+    /* ── 팀 → 리그 매핑 (hardcoded) ── */
+    const TEAM_LEAGUE_MAP = {
+      /* Pacific */
+      "DetonatioN FocusMe":"pacific","FULL SENSE":"pacific","Gen.G":"pacific",
+      "Global Esports":"pacific","Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
+      "Paper Rex":"pacific","Rex Regum Qeon":"pacific","T1":"pacific",
+      "Team Secret":"pacific","VARREL":"pacific","ZETA DIVISION":"pacific",
+      /* CN */
+      "Dragon Ranger Gaming":"cn","EDward Gaming":"cn","FunPlus Phoenix":"cn",
+      "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
+      "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
+      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn",
+      "IGZIST":"cn","BNK FEARX":"cn",
+      /* Americas */
+      "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
+      "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
+      "Leviatán":"americas","FURIA":"americas","KRÜ Esports":"americas",
+      "Team Liquid":"americas","MIBR":"americas","ENVY":"americas",
+      /* EMEA */
+      "Team Heretics":"emea","Fnatic":"emea","G2 Esports":"emea",
+      "Natus Vincere":"emea","Team Vitality":"emea","BBL Esports":"emea",
+      "FUT Esports":"emea","Karmine Corp":"emea","GIANTX":"emea",
+      "WEC C":"emea","Gentle Mates":"emea","ARETE":"emea","Mir Gaming":"emea",
+    };
+    function inferLeagueFromTeam(t1, t2) {
+      if (t1 && TEAM_LEAGUE_MAP[t1]) return TEAM_LEAGUE_MAP[t1];
+      if (t2 && TEAM_LEAGUE_MAP[t2]) return TEAM_LEAGUE_MAP[t2];
+      return "";
+    }
+
     /* ── 헬퍼: matchKey → league 추론 ── */
     const MK_LEAGUE_KW = { pacific:"pacific", emea:"emea", americas:"americas", cn:"cn",
                            masters:"masters", champions:"champions", london:"masters", santiago:"masters" };
@@ -1680,6 +1710,11 @@ app.get("/api/records/compute", async (req, res) => {
       for (var i = 0; i < parts.length; i++) {
         var pl = parts[i].toLowerCase();
         if (MK_LEAGUE_KW[pl]) return MK_LEAGUE_KW[pl];
+      }
+      /* 구형 matchKey: date|TeamA|TeamB 형식 → 팀 이름으로 추론 */
+      if (parts.length >= 3) {
+        var lg = inferLeagueFromTeam(parts[1], parts[2]);
+        if (lg) return lg;
       }
       return "";
     }
@@ -1727,12 +1762,13 @@ app.get("/api/records/compute", async (req, res) => {
     }
 
     /* ── 1. DB 병렬 로드 ── */
-    const [autoRows, metaRows, playersRows, roundsRows, rosterRows] = await Promise.all([
+    const [autoRows, metaRows, playersRows, roundsRows, rosterRows, vctpRows] = await Promise.all([
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT value FROM app_data WHERE key LIKE 'vct_p:%'"),
     ]);
 
     /* ── 2. matchKey → meta 맵 구성 ── */
@@ -1755,10 +1791,27 @@ app.get("/api/records/compute", async (req, res) => {
       try { v = JSON.parse(row.value); } catch(e) { return; }
       if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
       /* auto-match 우선 적용 */
+      var t1 = v.team1 || v.teamA || "";
+      var t2 = v.team2 || v.teamB || "";
+      /* league: auto-match.league 우선, 없으면 팀 이름으로 추론 */
       if (v.league) matchMeta[mk].league = v.league;
-      if (!matchMeta[mk].teamA && (v.teamA || v.team1)) matchMeta[mk].teamA = v.teamA || v.team1;
-      if (!matchMeta[mk].teamB && (v.teamB || v.team2)) matchMeta[mk].teamB = v.teamB || v.team2;
+      else if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromTeam(t1, t2);
+      if (!matchMeta[mk].teamA && t1) matchMeta[mk].teamA = t1;
+      if (!matchMeta[mk].teamB && t2) matchMeta[mk].teamB = t2;
       if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
+    });
+
+    /* vct_p 에서 matchKey → league 보강 (league 태그가 있는 entries만) */
+    vctpRows.rows.forEach(function(row) {
+      var pd;
+      try { pd = JSON.parse(row.value); } catch(e) { return; }
+      (pd.maps || []).forEach(function(m) {
+        if (!m.matchKey || !m.league) return;
+        var mk = m.matchKey;
+        if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
+        if (!matchMeta[mk].league) matchMeta[mk].league = m.league;
+        if (!matchMeta[mk].stage && m.stage) matchMeta[mk].stage = m.stage;
+      });
     });
 
     /* players 키에서 matchKey 추가 보강 */
@@ -1775,6 +1828,9 @@ app.get("/api/records/compute", async (req, res) => {
           teamA:      "",
           teamB:      "",
         };
+      } else if (!matchMeta[mk].league) {
+        /* league 아직 미확인이면 matchKey에서 다시 추론 */
+        matchMeta[mk].league = inferLeagueFromKey(mk);
       }
     });
 
@@ -1938,6 +1994,29 @@ app.get("/api/records/team-detail", async (req, res) => {
     if (!teamName) return res.status(400).json({ ok: false, error: "team 파라미터 필요" });
 
     /* ── 헬퍼 (compute와 동일한 로직 복사) ── */
+    const TEAM_LEAGUE_MAP2 = {
+      "DetonatioN FocusMe":"pacific","FULL SENSE":"pacific","Gen.G":"pacific",
+      "Global Esports":"pacific","Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
+      "Paper Rex":"pacific","Rex Regum Qeon":"pacific","T1":"pacific",
+      "Team Secret":"pacific","VARREL":"pacific","ZETA DIVISION":"pacific",
+      "Dragon Ranger Gaming":"cn","EDward Gaming":"cn","FunPlus Phoenix":"cn",
+      "All Gamers":"cn","Wolves Esports":"cn","Trace Esports":"cn",
+      "Nova Esports":"cn","Bilibili Gaming":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
+      "Wuxi Titan Esports Club":"cn","Xi Lai Gaming":"cn","TYLOO":"cn","IGZIST":"cn","BNK FEARX":"cn",
+      "Sentinels":"americas","Cloud9":"americas","100 Thieves":"americas",
+      "NRG":"americas","Evil Geniuses":"americas","LOUD":"americas",
+      "Leviatán":"americas","FURIA":"americas","KRÜ Esports":"americas",
+      "Team Liquid":"americas","MIBR":"americas","ENVY":"americas",
+      "Team Heretics":"emea","Fnatic":"emea","G2 Esports":"emea",
+      "Natus Vincere":"emea","Team Vitality":"emea","BBL Esports":"emea",
+      "FUT Esports":"emea","Karmine Corp":"emea","GIANTX":"emea",
+      "WEC C":"emea","Gentle Mates":"emea","ARETE":"emea","Mir Gaming":"emea",
+    };
+    function inferLeagueFromTeam2(t1, t2) {
+      if (t1 && TEAM_LEAGUE_MAP2[t1]) return TEAM_LEAGUE_MAP2[t1];
+      if (t2 && TEAM_LEAGUE_MAP2[t2]) return TEAM_LEAGUE_MAP2[t2];
+      return "";
+    }
     const MK_LEAGUE_KW = { pacific:"pacific", emea:"emea", americas:"americas", cn:"cn",
                            masters:"masters", champions:"champions", london:"masters", santiago:"masters" };
     function inferLeagueFromKey(mk) {
@@ -1945,6 +2024,10 @@ app.get("/api/records/team-detail", async (req, res) => {
       for (var i = 0; i < parts.length; i++) {
         var pl = parts[i].toLowerCase();
         if (MK_LEAGUE_KW[pl]) return MK_LEAGUE_KW[pl];
+      }
+      if (parts.length >= 3) {
+        var lg = inferLeagueFromTeam2(parts[1], parts[2]);
+        if (lg) return lg;
       }
       return "";
     }
@@ -1988,13 +2071,14 @@ app.get("/api/records/team-detail", async (req, res) => {
     }
 
     /* ── DB 로드 ── */
-    const [autoRows, metaRows, playersRows, roundsRows, vetoRows, rosterRows] = await Promise.all([
+    const [autoRows, metaRows, playersRows, roundsRows, vetoRows, rosterRows, vctpRows2] = await Promise.all([
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'veto:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT value FROM app_data WHERE key LIKE 'vct_p:%'"),
     ]);
 
     /* matchKey → meta */
@@ -2009,10 +2093,23 @@ app.get("/api/records/team-detail", async (req, res) => {
       var mk = row.key.slice("auto-match:".length);
       var v; try { v = JSON.parse(row.value); } catch(e) { return; }
       if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
+      var t1 = v.team1||v.teamA||"", t2 = v.team2||v.teamB||"";
       if (v.league) matchMeta[mk].league = v.league;
-      if (!matchMeta[mk].teamA && (v.teamA||v.team1)) matchMeta[mk].teamA = v.teamA||v.team1;
-      if (!matchMeta[mk].teamB && (v.teamB||v.team2)) matchMeta[mk].teamB = v.teamB||v.team2;
+      else if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromTeam2(t1, t2);
+      if (!matchMeta[mk].teamA && t1) matchMeta[mk].teamA = t1;
+      if (!matchMeta[mk].teamB && t2) matchMeta[mk].teamB = t2;
       if (!matchMeta[mk].stage) matchMeta[mk].stage = inferStageFromKey(mk);
+    });
+    /* vct_p 에서 matchKey → league 보강 */
+    vctpRows2.rows.forEach(function(row) {
+      var pd; try { pd = JSON.parse(row.value); } catch(e) { return; }
+      (pd.maps || []).forEach(function(m) {
+        if (!m.matchKey || !m.league) return;
+        var mk = m.matchKey;
+        if (!matchMeta[mk]) matchMeta[mk] = { league:"", stage:"", tournament:"", teamA:"", teamB:"" };
+        if (!matchMeta[mk].league) matchMeta[mk].league = m.league;
+        if (!matchMeta[mk].stage && m.stage) matchMeta[mk].stage = m.stage;
+      });
     });
     playersRows.rows.forEach(function(row) {
       var withoutPrefix = row.key.slice("players:".length);
@@ -2021,6 +2118,7 @@ app.get("/api/records/team-detail", async (req, res) => {
       var mk = withoutPrefix.slice(0, lc);
       if (!matchMeta[mk]) matchMeta[mk] = { league: inferLeagueFromKey(mk), stage: inferStageFromKey(mk),
                                              tournament:"", teamA:"", teamB:"" };
+      else if (!matchMeta[mk].league) matchMeta[mk].league = inferLeagueFromKey(mk);
     });
 
     /* 필터 통과 matchKey */
