@@ -1023,6 +1023,52 @@ app.get("/api/stock/trade-history", requireAuth, async (req, res) => {
   }
 });
 
+/* ── API: 선수 시장 데이터 (전체 공개) ────────────────────────────
+   player-stock.html이 localStorage 대신 서버 DB에서 선수 목록을 로드.
+   vct_roster:* + vct_p:* + stock_p:* 를 합쳐서 반환.              */
+app.get("/api/stock/market", async (req, res) => {
+  try {
+    const [rosterRows, vcpRows, stockRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'stock_p:%'"),
+    ]);
+
+    /* 팀→선수 맵 */
+    const roster = {};   /* teamName → [playerName, ...] */
+    const playerTeam = {}; /* playerName → teamName */
+    rosterRows.rows.forEach(r => {
+      const team = r.key.slice(11); /* "vct_roster:" 이후 */
+      let parsed;
+      try { parsed = JSON.parse(r.value); } catch { return; }
+      /* { main:[...], subs:[...] } 형태 또는 평탄 배열 모두 지원 */
+      const players = Array.isArray(parsed)
+        ? parsed
+        : [...(parsed.main || []), ...(parsed.subs || [])];
+      roster[team] = players;
+      players.forEach(p => { if (p) playerTeam[p.trim()] = team; });
+    });
+
+    /* 선수 스탯 맵 */
+    const vcpMap = {};  /* playerName → parsed vct_p data */
+    vcpRows.rows.forEach(r => {
+      const name = r.key.slice(6);
+      try { vcpMap[name] = JSON.parse(r.value); } catch {}
+    });
+
+    /* 주가 맵 */
+    const stockMap = {}; /* playerName → parsed stock_p data */
+    stockRows.rows.forEach(r => {
+      const name = r.key.slice(8);
+      try { stockMap[name] = JSON.parse(r.value); } catch {}
+    });
+
+    res.json({ playerTeam, vcpMap, stockMap });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ── API: 즐겨찾기 조회 ─────────────────────────────── */
 app.get("/api/stock/watchlist", requireAuth, async (req, res) => {
   const key = `watchlist:${req.user.username}`;

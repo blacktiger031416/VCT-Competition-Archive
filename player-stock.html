@@ -805,104 +805,80 @@
       "Dragon Ranger Gaming":"cn","Xi Lai Gaming":"cn","Wolves Esports":"cn",
     };
 
-    /* ── 선수 데이터 빌드 (vct_roster 기반) ── */
-    function buildPlayersFromStorage() {
-      /* 1. vct_roster → 선수→팀 매핑 */
-      var playerTeamMap = {};
-      var rosterTeams = {};
-      for (var ri = 0; ri < localStorage.length; ri++) {
-        var rk = localStorage.key(ri);
-        if (!rk || rk.indexOf("vct_roster:") !== 0) continue;
-        var rTeam = rk.slice(11);
-        try {
-          var r = JSON.parse(localStorage.getItem(rk) || "{}");
-          ((r.main || []).concat(r.subs || [])).forEach(function (p) {
-            if (p) { playerTeamMap[p.trim()] = rTeam; rosterTeams[rTeam] = true; }
-          });
-        } catch (e) {}
-      }
-
-      /* 2. vct_p → ACS/KDA 집계 (로스터에 있는 선수만) */
+    /* ── 선수 데이터 빌드 (서버 DB 기반) ── */
+    function buildPlayersFromData(playerTeam, vcpMap, stockMap) {
+      var VALID_LEAGUES = { americas:1, emea:1, pacific:1, cn:1, masters:1, champions:1 };
       var pMap = {};
-      for (var pi = 0; pi < localStorage.length; pi++) {
-        var pk = localStorage.key(pi);
-        if (!pk || pk.indexOf("vct_p:") !== 0) continue;
-        var pName = pk.slice(6);
-        /* 로스터에 없는 선수 제외 */
-        if (!playerTeamMap[pName]) continue;
 
-        var pdRaw = localStorage.getItem(pk);
-        if (!pdRaw) continue;
-        var pd;
-        try { pd = JSON.parse(pdRaw); } catch (e) { continue; }
-        if (!pd.maps || !pd.maps.length) continue;
+      Object.keys(vcpMap).forEach(function (pName) {
+        /* 로스터에 없는 선수 제외 */
+        if (!playerTeam[pName]) return;
+        var pd = vcpMap[pName];
+        if (!pd || !pd.maps || !pd.maps.length) return;
 
         pd.maps.forEach(function (m) {
           var lg = m.league || "";
-          if (lg !== "americas" && lg !== "emea" && lg !== "pacific" && lg !== "cn" && lg !== "masters" && lg !== "champions") return;
+          if (!VALID_LEAGUES[lg]) return;
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
           if (hasKda) {
-            var _p = m.kda.split("/");
-            if ((parseFloat(_p[0])||0) === 0 && (parseFloat(_p[1])||0) === 0 && (parseFloat(_p[2])||0) === 0) hasKda = false;
+            var pts = m.kda.split("/");
+            if ((parseFloat(pts[0])||0) === 0 && (parseFloat(pts[1])||0) === 0 && (parseFloat(pts[2])||0) === 0) hasKda = false;
           }
           if (acs <= 0 && !hasKda) return;
-          if (!pMap[pName]) {
-            pMap[pName] = { name: pName, acsMaps: 0, totalAcs: 0, totalK: 0, totalD: 0, kdMaps: 0, regionCounts: {} };
-          }
+          if (!pMap[pName]) pMap[pName] = { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
           var e = pMap[pName];
           e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
           if (acs > 0) { e.acsMaps++; e.totalAcs += acs; }
           if (hasKda) {
-            var pts = m.kda.split("/");
-            e.totalK += parseFloat(pts[0]) || 0;
-            e.totalD += parseFloat(pts[1]) || 0;
+            var kpts = m.kda.split("/");
+            e.totalK += parseFloat(kpts[0]) || 0;
+            e.totalD += parseFloat(kpts[1]) || 0;
             e.kdMaps++;
           }
         });
-      }
+      });
 
       /* top 30% threshold for 우량주 */
       var allMapCounts = Object.keys(pMap).map(function (k) { return pMap[k].acsMaps; });
       allMapCounts.sort(function (a, b) { return b - a; });
       var topThreshold = allMapCounts.length > 0 ? (allMapCounts[Math.floor(allMapCounts.length * 0.3)] || 1) : 1;
 
-      var players = [];
-      var idx = 0;
+      var players = [], idx = 0;
       Object.keys(pMap).forEach(function (pName) {
         var e = pMap[pName];
         if (e.acsMaps === 0) return;
 
-        var region = "americas";
-        var maxCnt = 0;
+        var region = "americas", maxCnt = 0;
         Object.keys(e.regionCounts).forEach(function (r) {
           if (e.regionCounts[r] > maxCnt) { maxCnt = e.regionCounts[r]; region = r; }
         });
 
-        var team = playerTeamMap[pName] || "";
-        /* 팀 소속 권역으로 region 보정 */
+        var team = playerTeam[pName] || "";
         if (team && REGION_MAP[team]) region = REGION_MAP[team];
 
         var avgAcs = Math.round(e.totalAcs / e.acsMaps);
-        var basePrice = 0; /* 모든 선수의 초기가는 0 */
         var kd = e.kdMaps > 0 ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2)) : null;
 
-        var stockData = null;
-        try { stockData = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null"); } catch (se) {}
+        var stockData = stockMap[pName] || null;
+        /* localStorage에서도 병합 (어드민이 로컬에서 반영한 경우) */
+        try {
+          var lsStock = JSON.parse(localStorage.getItem("stock_p:" + pName) || "null");
+          if (lsStock && (!stockData || (lsStock.runCount || 0) > (stockData.runCount || 0))) stockData = lsStock;
+        } catch (se) {}
+
         if (stockData && Array.isArray(stockData.history)) {
           stockData.history = stockData.history.map(function (h) {
             return typeof h === "object" && h !== null ? h.price : h;
           }).filter(function (h) { return typeof h === "number" && !isNaN(h); });
         }
-        /* price=0도 유효한 값이므로 !== undefined 체크 */
-        var price   = (stockData && stockData.price !== undefined) ? stockData.price : basePrice;
+
+        var price   = (stockData && stockData.price !== undefined) ? stockData.price : 0;
         var prev    = (stockData && stockData.history && stockData.history.length >= 2)
                         ? stockData.history[stockData.history.length - 2] : price;
         var history = (stockData && stockData.history && stockData.history.length > 0)
                         ? stockData.history : null;
-        if (stockData && stockData.runCount > 0) {
-          avgAcs = Math.round(stockData.runTotal / stockData.runCount);
-        }
+        if (stockData && stockData.runCount > 0) avgAcs = Math.round(stockData.runTotal / stockData.runCount);
 
         var changeRate = prev > 0 ? (price - prev) / prev * 100 : 0;
         var stockType;
@@ -922,6 +898,20 @@
 
       players.sort(function (a, b) { return b.price - a.price; });
       return players;
+    }
+
+    /* 서버에서 시장 데이터 fetch 후 빌드 */
+    function loadMarketData(callback) {
+      fetch("/api/stock/market")
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var players = buildPlayersFromData(d.playerTeam || {}, d.vcpMap || {}, d.stockMap || {});
+          callback(players);
+        })
+        .catch(function () {
+          /* 서버 실패 시 localStorage 폴백 */
+          callback([]);
+        });
     }
 
     /* ── 팀 로고 맵 ── */
@@ -1573,11 +1563,13 @@
       if (!p) return;
       if (!confirm(p.name + " 선수의 주식 데이터를 리셋하시겠습니까?")) return;
       localStorage.removeItem("stock_p:" + p.name);
-      PLAYERS = buildPlayersFromStorage();
-      var refreshed = PLAYERS.find(function (x) { return x.name === p.name; });
-      if (refreshed) selectPlayer(refreshed.id);
-      else showView("market");
-      alert(p.name + " 리셋 완료");
+      loadMarketData(function (players) {
+        PLAYERS = players;
+        var refreshed = PLAYERS.find(function (x) { return x.name === p.name; });
+        if (refreshed) selectPlayer(refreshed.id);
+        else showView("market");
+        alert(p.name + " 리셋 완료");
+      });
     };
     window.adminRefundAll = function () {
       if (!isAdminMode) return;
@@ -1652,48 +1644,51 @@
         setTimeout(applyAdminMode, ms);
       });
 
-      PLAYERS = buildPlayersFromStorage();
-      updateMarketBar();
-      renderStockList();
+      /* 서버 DB에서 선수/주가 데이터 로드 후 렌더 */
+      loadMarketData(function (players) {
+        PLAYERS = players;
+        updateMarketBar();
+        renderStockList();
 
-      if (TOKEN) {
-        Promise.all([
-          fetch("/api/coins",           { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
-          fetch("/api/stock/holdings",  { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
-          fetch("/api/stock/watchlist", { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
-        ]).then(function (results) {
-          if (typeof results[0].coins === "number") myCoins = results[0].coins;
-          if (results[1].holdings)  myHoldings  = results[1].holdings;
-          if (results[2].watchlist) myWatchlist = results[2].watchlist;
-          updateCoinDisplay(); updateMarketBar();
-          renderStockList(document.getElementById("stock-search").value);
-        }).catch(function () {});
-      } else {
-        try { myWatchlist = JSON.parse(localStorage.getItem("watchlist_local") || "[]"); } catch (ex) {}
-      }
-
-      /* SSE: 실시간 주가 업데이트 */
-      try {
-        var es = new EventSource("/api/events");
-        es.addEventListener("stock-update", function (ev) {
-          try {
-            var d = JSON.parse(ev.data);
-            if (!d || !d.playerName) return;
-            var pl = PLAYERS.find(function (x) { return x.name === d.playerName; });
-            if (pl) {
-              pl.prev    = d.prev    != null ? d.prev    : pl.prev;
-              pl.price   = d.price   != null ? d.price   : pl.price;
-              pl.history = d.history != null ? d.history : pl.history;
-              pl.avgAcs  = d.avgAcs  != null ? d.avgAcs  : pl.avgAcs;
-            }
+        if (TOKEN) {
+          Promise.all([
+            fetch("/api/coins",           { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
+            fetch("/api/stock/holdings",  { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
+            fetch("/api/stock/watchlist", { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
+          ]).then(function (results) {
+            if (typeof results[0].coins === "number") myCoins = results[0].coins;
+            if (results[1].holdings)  myHoldings  = results[1].holdings;
+            if (results[2].watchlist) myWatchlist = results[2].watchlist;
+            updateCoinDisplay(); updateMarketBar();
             renderStockList(document.getElementById("stock-search").value);
-            updateMarketBar();
-            if (selectedId && pl && pl.id === selectedId && currentView === "detail") {
-              selectPlayer(selectedId);
-            }
-          } catch (e2) {}
-        });
-      } catch (e) {}
+          }).catch(function () {});
+        } else {
+          try { myWatchlist = JSON.parse(localStorage.getItem("watchlist_local") || "[]"); } catch (ex) {}
+        }
+
+        /* SSE: 실시간 주가 업데이트 */
+        try {
+          var es = new EventSource("/api/events");
+          es.addEventListener("stock-update", function (ev) {
+            try {
+              var d = JSON.parse(ev.data);
+              if (!d || !d.playerName) return;
+              var pl = PLAYERS.find(function (x) { return x.name === d.playerName; });
+              if (pl) {
+                pl.prev    = d.prev    != null ? d.prev    : pl.prev;
+                pl.price   = d.price   != null ? d.price   : pl.price;
+                pl.history = d.history != null ? d.history : pl.history;
+                pl.avgAcs  = d.avgAcs  != null ? d.avgAcs  : pl.avgAcs;
+              }
+              renderStockList(document.getElementById("stock-search").value);
+              updateMarketBar();
+              if (selectedId && pl && pl.id === selectedId && currentView === "detail") {
+                selectPlayer(selectedId);
+              }
+            } catch (e2) {}
+          });
+        } catch (e) {}
+      });
     });
 
   })();
