@@ -2040,6 +2040,80 @@ app.get("/api/records/compute", async (req, res) => {
   }
 });
 
+/* ── 임시 디버그: DB에 저장된 실제 팀/선수 이름 확인 ── */
+app.get("/api/debug/roster", async (req, res) => {
+  try {
+    const rosterRows = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'");
+    const result = {};
+    rosterRows.rows.forEach(function(row) {
+      var teamName = row.key.slice("vct_roster:".length);
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      result[teamName] = {
+        main: (v.main || []).slice(0, 5),
+        subs: (v.subs || []).slice(0, 3),
+      };
+    });
+    res.json({ ok: true, teams: Object.keys(result).sort(), detail: result });
+  } catch(e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/* ── 임시 디버그: 특정 리그의 teamStats + matchTeams 샘플 ── */
+app.get("/api/debug/teamstats", async (req, res) => {
+  try {
+    const league = (req.query.league || "pacific").toLowerCase();
+    /* players: 로 matchTeams 구성 */
+    const [rosterRows, playersRows] = await Promise.all([
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%' LIMIT 200"),
+    ]);
+    const playerTeam = {};
+    rosterRows.rows.forEach(function(row) {
+      var tn = row.key.slice("vct_roster:".length);
+      var v; try { v = JSON.parse(row.value); } catch(e) { return; }
+      (v.main||[]).concat(v.subs||[]).forEach(function(p) {
+        if (p) { playerTeam[p] = tn; playerTeam[p.toLowerCase()] = tn; }
+      });
+    });
+    const matchTeamsSample = {};
+    playersRows.rows.forEach(function(row) {
+      var parts = row.key.split(":");
+      if (parts.length < 3) return;
+      var mk = parts.slice(1, -1).join(":");
+      if (matchTeamsSample[mk]) return;
+      var pdata; try { pdata = JSON.parse(row.value); } catch(e) { return; }
+      if (!pdata || typeof pdata !== "object") return;
+      var aCnt = {}, bCnt = {};
+      for (var si = 0; si < 5; si++) {
+        var aS = pdata["a"+si]; if (aS && aS.name) { var ta = playerTeam[aS.name]||playerTeam[aS.name.toLowerCase()]||"?"; aCnt[ta]=(aCnt[ta]||0)+1; }
+        var bS = pdata["b"+si]; if (bS && bS.name) { var tb = playerTeam[bS.name]||playerTeam[bS.name.toLowerCase()]||"?"; bCnt[tb]=(bCnt[tb]||0)+1; }
+      }
+      var tA = Object.keys(aCnt).sort(function(x,y){return aCnt[y]-aCnt[x];})[0]||"";
+      var tB = Object.keys(bCnt).sort(function(x,y){return bCnt[y]-bCnt[x];})[0]||"";
+      matchTeamsSample[mk] = { teamA: tA, teamB: tB, aCnt, bCnt };
+    });
+    /* league 포함된 matchKeys만 필터 */
+    var leagueMatches = {};
+    Object.keys(matchTeamsSample).forEach(function(mk) {
+      var mt = matchTeamsSample[mk];
+      if ((mt.teamA+mt.teamB).toLowerCase().indexOf(league.slice(0,3)) !== -1 ||
+          mk.toLowerCase().indexOf(league.slice(0,3)) !== -1) {
+        leagueMatches[mk] = mt;
+      }
+    });
+    res.json({
+      ok: true,
+      league,
+      rosterTeams: Object.keys(playerTeam).filter(function(k){ return k === k.toLowerCase() ? false : true; }).sort(),
+      matchTeamsSample: leagueMatches,
+      allMatchSample: Object.keys(matchTeamsSample).slice(0,30).reduce(function(o,k){ o[k]=matchTeamsSample[k]; return o; }, {}),
+    });
+  } catch(e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 /* ── 기록 페이지: 팀 상세 (조합, 맵 승률, 밴픽) ─────────────────────────────
    /api/records/team-detail?league=X&stage=Y&team=T                            */
 app.get("/api/records/team-detail", async (req, res) => {
