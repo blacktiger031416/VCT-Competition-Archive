@@ -782,8 +782,8 @@
     var LEAGUE_TEAMS = {
       "pacific":["DetonatioN FocusMe","FULL SENSE","Gen.G","Global Esports","Kiwoom DRX","Nongshim RedForce","Paper Rex","Rex Regum Qeon","T1","Team Secret","VARREL","ZETA DIVISION"],
       "cn":["All Gamers","Dragon Ranger Gaming","EDward Gaming","FunPlus Phoenix","Guangzhou Huadu Bilibili Gaming","JD Mall JDG Esports","Nova Esports","Trace Esports","TYLOO","Wolves Esports","Wuxi Titan Esports Club","Xi Lai Gaming"],
-      "americas":["100 Thieves","Cloud9","ENVY","Evil Geniuses","FURIA","G2 Esports","KRÜ Esports","Leviatán","LOUD","MIBR","NRG","Sentinels"],
-      "emea":["BBL Esports","Eternal Fire","Fnatic","FUT Esports","Gentle Mates","GIANTX","Karmine Corp","Natus Vincere","PCIFIC Esports","Team Heretics","Team Liquid","Team Vitality","ULF Esports"],
+      "americas":["100 Thieves","Cloud9","ENVY","Evil Geniuses","FURIA","KRÜ Esports","Leviatán","LOUD","MIBR","NRG","Sentinels","Team Liquid"],
+      "emea":["BBL Esports","Eternal Fire","Fnatic","FUT Esports","G2 Esports","Gentle Mates","GIANTX","Karmine Corp","Natus Vincere","PCIFIC Esports","Team Heretics","Team Vitality","ULF Esports"],
     };
 
     /* ── 리그 악센트 컬러 ── */
@@ -1194,12 +1194,8 @@
       var isRegional = ["pacific","cn","americas","emea"].indexOf(currentLeague) !== -1;
       var baseTeams;
       if (isRegional) {
-        /* LEAGUE_TEAMS 기준 12팀 + teamStats에 추가로 있는 팀 */
-        var fixedTeams = (LEAGUE_TEAMS[currentLeague] || []).slice();
-        Object.keys(teamStats || {}).forEach(function(t) {
-          if (fixedTeams.indexOf(t) === -1) fixedTeams.push(t);
-        });
-        baseTeams = fixedTeams;
+        /* LEAGUE_TEAMS 기준 팀만 (외부 팀 추가 금지 — 타 리그 오염 방지) */
+        baseTeams = (LEAGUE_TEAMS[currentLeague] || []).slice();
       } else {
         baseTeams = Object.keys(teamStats || {});
       }
