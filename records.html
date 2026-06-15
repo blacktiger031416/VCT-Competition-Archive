@@ -205,7 +205,12 @@
       .stat-rank.gold   { color: #f5c518; }
       .stat-rank.silver { color: #b0b8c8; }
       .stat-rank.bronze { color: #cd7f32; }
-      .stat-player { flex: 1; min-width: 0; }
+      .stat-player { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+      .stat-team-logo {
+        width: 26px; height: 26px; object-fit: contain; flex-shrink: 0;
+        opacity: 0.9;
+      }
+      .stat-player-info { flex: 1; min-width: 0; }
       .stat-player-name {
         font-size: 13px; font-weight: 700; color: #f0f0f0;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -1097,11 +1102,15 @@
         var val = field === "acs" ? p.acs : p.kd;
         var valStr = field === "kd" ? Number(val).toFixed(2) : String(val);
         var teamCode = TEAM_CODES[p.team] || p.team || "—";
+        var teamLogo = TEAM_LOGOS[p.team] || "";
         html += '<div class="stat-row">'
           + '<div class="stat-rank '+ rankCls +'">'+ (i+1) +'</div>'
           + '<div class="stat-player">'
-          +   '<div class="stat-player-name">'+ esc(p.name) +'</div>'
-          +   '<div class="stat-player-team">'+ esc(teamCode) +'</div>'
+          +   (teamLogo ? '<img class="stat-team-logo" src="'+ esc(teamLogo) +'" alt="" onerror="this.style.display=\'none\'">' : '')
+          +   '<div class="stat-player-info">'
+          +     '<div class="stat-player-name">'+ esc(p.name) +'</div>'
+          +     '<div class="stat-player-team">'+ esc(teamCode) +'</div>'
+          +   '</div>'
           + '</div>'
           + '<div class="stat-maps">'+ p.maps +'맵</div>'
           + '<div class="stat-value">'+ valStr +'</div>'
