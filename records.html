@@ -1185,44 +1185,78 @@
 
     /* ── 팀 통계 페이지 HTML ── */
     function renderTeamStatPage(title, field, teamStats) {
-      var teams = Object.keys(teamStats || {});
-      if (!teams.length) {
+      var isGlobal = (currentLeague === "global");
+
+      /* 전체 리그: teamStats에 있는 팀만 (데이터 있는 팀), Top 10 */
+      /* 권역별: LEAGUE_TEAMS 12팀 전체 포함, 데이터 없으면 맨 아래 "—" */
+      var baseTeams;
+      if (isGlobal) {
+        baseTeams = Object.keys(teamStats || {});
+      } else {
+        /* LEAGUE_TEAMS 기준 12팀 + teamStats에 추가로 있는 팀 */
+        var fixedTeams = (LEAGUE_TEAMS[currentLeague] || []).slice();
+        Object.keys(teamStats || {}).forEach(function(t) {
+          if (fixedTeams.indexOf(t) === -1) fixedTeams.push(t);
+        });
+        baseTeams = fixedTeams;
+      }
+
+      if (!baseTeams.length) {
         return '<div class="team-stat-panel"><div class="team-stat-header"><span class="team-stat-title">'
           + esc(title) + '</span></div><div class="empty-note">데이터 없음</div></div>';
       }
 
-      /* 정렬 */
-      var rows = teams.map(function(t) {
-        var s = teamStats[t];
+      /* 행 구성 */
+      var rows = baseTeams.map(function(t) {
+        var s = teamStats[t] || {};
         var wins = 0, total = 0;
-        if (field === "pistol") { wins = s.pistolWins; total = s.pistolTotal; }
-        else if (field === "atk") { wins = s.atkWins; total = s.atkTotal; }
-        else if (field === "def") { wins = s.defWins; total = s.defTotal; }
-        var rate = total > 0 ? wins / total : 0;
-        return { name: t, wins: wins, total: total, rate: rate };
-      }).filter(function(r){ return r.total > 0; })
-        .sort(function(a,b){ return b.rate - a.rate; });
+        if (field === "pistol") { wins = s.pistolWins||0; total = s.pistolTotal||0; }
+        else if (field === "atk") { wins = s.atkWins||0; total = s.atkTotal||0; }
+        else if (field === "def") { wins = s.defWins||0; total = s.defTotal||0; }
+        var hasData = total > 0;
+        var rate = hasData ? wins / total : -1;
+        return { name: t, wins: wins, total: total, rate: rate, hasData: hasData };
+      });
 
-      /* 전체 리그 기준 Top 10만 표시 */
-      if (currentLeague === "global") rows = rows.slice(0, 10);
+      /* 정렬: 데이터 있는 팀 승률 내림차순, 없는 팀 맨 아래 */
+      rows.sort(function(a, b) {
+        if (a.hasData && !b.hasData) return -1;
+        if (!a.hasData && b.hasData) return 1;
+        return b.rate - a.rate;
+      });
 
-      var maxRate = rows.length ? rows[0].rate : 1;
+      /* 전체 리그: 데이터 있는 팀만 Top 10 */
+      if (isGlobal) rows = rows.filter(function(r){ return r.hasData; }).slice(0, 10);
+
+      if (!rows.length) {
+        return '<div class="team-stat-panel"><div class="team-stat-header"><span class="team-stat-title">'
+          + esc(title) + '</span></div><div class="empty-note">데이터 없음</div></div>';
+      }
+
+      var maxRate = 0;
+      rows.forEach(function(r) { if (r.rate > maxRate) maxRate = r.rate; });
+      if (maxRate === 0) maxRate = 1;
 
       var html = '<div class="team-stat-panel"><div class="team-stat-header"><span class="team-stat-title">'
         + esc(title) + '</span></div><div class="team-stat-rows">';
 
+      var rank = 0;
       rows.forEach(function(r, i) {
-        var rankCls = i===0?"gold":i===1?"silver":i===2?"bronze":"";
-        var pct = (r.rate * 100).toFixed(1) + "%";
-        var barW = maxRate > 0 ? Math.round(r.rate / maxRate * 100) : 0;
-        var logo = TEAM_LOGOS[r.name] || "";
-        html += '<div class="team-stat-row">'
-          + '<div class="ts-rank '+ rankCls +'">'+ (i+1) +'</div>'
+        if (r.hasData) rank++;
+        var rankCls = rank===1?"gold":rank===2?"silver":rank===3?"bronze":"";
+        var rankStr = r.hasData ? String(rank) : "—";
+        var pct     = r.hasData ? (r.rate * 100).toFixed(1) + "%" : "—";
+        var recStr  = r.hasData ? r.wins + "/" + r.total : "—";
+        var barW    = r.hasData && maxRate > 0 ? Math.round(r.rate / maxRate * 100) : 0;
+        var logo    = TEAM_LOGOS[r.name] || "";
+        var dimStyle = r.hasData ? "" : "opacity:0.35;";
+        html += '<div class="team-stat-row" style="'+ dimStyle +'">'
+          + '<div class="ts-rank '+ rankCls +'">'+ rankStr +'</div>'
           + (logo ? '<img class="ts-logo" src="'+ esc(logo) +'" alt="" onerror="this.style.display=\'none\'">' : '<div style="width:24px"></div>')
           + '<div class="ts-team-name">'+ esc(TEAM_CODES[r.name] || r.name) +'</div>'
           + '<div class="ts-bar-wrap"><div class="ts-bar-bg"><div class="ts-bar-fill" style="width:'+ barW +'%"></div></div></div>'
           + '<div class="ts-rate">'+ pct +'</div>'
-          + '<div class="ts-total">'+ r.wins +'/'+ r.total +'</div>'
+          + '<div class="ts-total">'+ recStr +'</div>'
           + '</div>';
       });
 
