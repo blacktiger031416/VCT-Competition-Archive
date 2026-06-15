@@ -1203,6 +1203,9 @@
       }).filter(function(r){ return r.total > 0; })
         .sort(function(a,b){ return b.rate - a.rate; });
 
+      /* 전체 리그 기준 Top 10만 표시 */
+      if (currentLeague === "global") rows = rows.slice(0, 10);
+
       var maxRate = rows.length ? rows[0].rate : 1;
 
       var html = '<div class="team-stat-panel"><div class="team-stat-header"><span class="team-stat-title">'

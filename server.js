@@ -1717,21 +1717,57 @@ app.get("/api/records/compute", async (req, res) => {
     };
 
     /* ── 1. DB 병렬 로드 ── */
-    const [vctpRows, rosterRows, roundsRows, autoRows] = await Promise.all([
+    const [vctpRows, rosterRows, roundsRows, autoRows, playersRows] = await Promise.all([
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'rounds:%'"),
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'"),
+      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'"),
     ]);
 
     /* ── 2. vct_roster: 선수→팀 맵 ── */
-    const playerTeam = {};  /* playerName → teamName */
+    const playerTeam = {};  /* playerName → teamName (원본 + 소문자 키 모두 저장) */
     rosterRows.rows.forEach(function(row) {
       var teamName = row.key.slice("vct_roster:".length);
       var v;
       try { v = JSON.parse(row.value); } catch(e) { return; }
       var all = (v.main || []).concat(v.subs || []);
-      all.forEach(function(pn) { if (pn && pn !== "-") playerTeam[pn] = teamName; });
+      all.forEach(function(pn) {
+        if (pn && pn !== "-") {
+          playerTeam[pn] = teamName;
+          playerTeam[pn.toLowerCase()] = teamName;
+        }
+      });
+    });
+
+    /* ── 2b. players: + vct_roster → matchKey별 팀 사이드 매핑 ──
+       auto-match 데이터가 없는 경우 players: 슬롯에서 팀 이름 추론 */
+    const matchTeams = {};  /* mk → { teamA (side-a), teamB (side-b) } */
+    playersRows.rows.forEach(function(row) {
+      var parts = row.key.split(":");
+      if (parts.length < 3) return;
+      var mk = parts.slice(1, -1).join(":");
+      if (matchTeams[mk]) return;   /* 이미 판별된 경기는 스킵 */
+      var pdata; try { pdata = JSON.parse(row.value); } catch(e) { return; }
+      if (!pdata || typeof pdata !== "object" || Array.isArray(pdata)) return;
+      var aCnt = {}, bCnt = {};
+      for (var si = 0; si < 5; si++) {
+        var aSlot = pdata["a"+si];
+        var bSlot = pdata["b"+si];
+        if (aSlot && aSlot.name) {
+          var n = aSlot.name.trim();
+          var ta = playerTeam[n] || playerTeam[n.toLowerCase()] || "";
+          if (ta) aCnt[ta] = (aCnt[ta]||0) + 1;
+        }
+        if (bSlot && bSlot.name) {
+          var nb = bSlot.name.trim();
+          var tb = playerTeam[nb] || playerTeam[nb.toLowerCase()] || "";
+          if (tb) bCnt[tb] = (bCnt[tb]||0) + 1;
+        }
+      }
+      var teamA = Object.keys(aCnt).sort(function(x,y){ return aCnt[y]-aCnt[x]; })[0] || "";
+      var teamB = Object.keys(bCnt).sort(function(x,y){ return bCnt[y]-bCnt[x]; })[0] || "";
+      if (teamA || teamB) matchTeams[mk] = { teamA: teamA, teamB: teamB };
     });
 
     /* ── 3. auto-match: matchKey → { team1, team2 } ── */
@@ -1921,11 +1957,14 @@ app.get("/api/records/compute", async (req, res) => {
       /* rounds 항목의 matchKey가 필터된 집합에 없으면 건너뜀 */
       if (!filteredMatchKeys.has(mk)) return;
 
-      /* 팀 이름: auto-match 에서 가져옴 */
+      /* 팀 이름: auto-match → players+roster 추론 순 */
       var am = autoMatch[mk];
-      if (!am) return;
-      var teamA = am.team1 || "";
-      var teamB = am.team2 || "";
+      var teamA = (am && (am.team1 || am.teamA)) || "";
+      var teamB = (am && (am.team2 || am.teamB)) || "";
+      if (!teamA || !teamB) {
+        var mt = matchTeams[mk];
+        if (mt) { teamA = mt.teamA || ""; teamB = mt.teamB || ""; }
+      }
       if (!teamA || !teamB) return;
 
       var rounds;
