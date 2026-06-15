@@ -910,18 +910,20 @@
         });
       });
 
-      /* 2단계: 표시할 선수 집합 구성
-         조건: (vct_p 데이터가 있고 1부 팀 소속) OR (1부 팀 소속이고 stock_p 있음) */
+      /* 2단계: 표시할 선수 집합 구성 */
       var allNames = new Set();
+
+      /* HARDCODED_ROSTERS에 있는 모든 1부 선수는 무조건 포함 (데이터 없어도 pre-IPO) */
+      Object.keys(HARDCODED_ROSTERS).forEach(function (team) {
+        HARDCODED_ROSTERS[team].forEach(function (n) { allNames.add(n); });
+      });
+
+      /* DB playerTeam에서 1부 팀 소속 추가 선수 */
       function isTier1(n) {
         var t = playerTeam[n] || "";
         return t && TIER1_TEAMS.has(t);
       }
-      /* vct_p가 있고 1부 팀 소속인 선수 (2부에서 올라온 선수 포함) */
-      Object.keys(hasAnyVcp).forEach(function (n) {
-        if (isTier1(n)) allNames.add(n);
-      });
-      /* stock_p가 있고 1부 팀 소속인 선수 */
+      Object.keys(hasAnyVcp).forEach(function (n) { if (isTier1(n)) allNames.add(n); });
       function addIfTier1(n) { if (isTier1(n)) allNames.add(n); }
       Object.keys(stockMap).forEach(addIfTier1);
       for (var li = 0; li < localStorage.length; li++) {
@@ -947,8 +949,9 @@
           if (lsStock && (!stockData || (lsStock.runCount || 0) > (stockData.runCount || 0))) stockData = lsStock;
         } catch (se) {}
 
-        /* vct_p도 없고 stock_p도 없으면 스킵 */
-        if (!hasVcp && !stockData) return;
+        /* 1부 팀 소속이면 데이터 없어도 pre-IPO로 표시, 아니면 스킵 */
+        var inTier1Roster = team && TIER1_TEAMS.has(team);
+        if (!hasVcp && !stockData && !inTier1Roster) return;
 
         var e = pMap[pName] || { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
 
