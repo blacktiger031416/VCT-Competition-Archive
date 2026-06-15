@@ -1765,13 +1765,18 @@ app.get("/api/records/compute", async (req, res) => {
     /* regional 리그 여부 판단 */
     var isRegionalLeague = (league === "pacific" || league === "cn" || league === "americas" || league === "emea" || league === "global");
 
+    /* regional 리그 "전체"에서 인정하는 스테이지 집합 */
+    var REGIONAL_STAGES = new Set(["kickoff","stage1","stage1playoffs","stage2","stage2playoffs"]);
+
     function mapEntryMatchesStage(mapEntry, tgt) {
       var s = mapEntry.stage || "";
       if (tgt === "all") {
-        /* regional 리그 "전체" = KickOff+Stage1+Stage2 (tournament 없는 것만, 즉 Masters/Champions 제외)
-           league filter가 이미 tournament 있는 것을 제외하지만 명시적으로도 처리 */
-        if (isRegionalLeague) return !mapEntry.tournament;
-        return true; /* Masters/Champions 탭에서는 진짜 전체 */
+        if (isRegionalLeague) {
+          /* "전체" = KickOff + Stage1 + Stage2만. tournament 없고 + 인정된 stage여야 함.
+             → 챌린저스/무대회 데이터(stage="", 또는 인식불가 stage)는 자동 제외 */
+          return !mapEntry.tournament && REGIONAL_STAGES.has(s);
+        }
+        return true; /* Masters/Champions 탭 전체는 진짜 전체 */
       }
       if (tgt === "kickoff")    return s === "kickoff";
       if (tgt === "stage1")     return s === "stage1" || s === "stage1playoffs";
