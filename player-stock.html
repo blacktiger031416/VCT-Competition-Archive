@@ -876,15 +876,16 @@
       playerTeam = enrichPlayerTeam(playerTeam);
       var VALID_LEAGUES = { americas:1, emea:1, pacific:1, cn:1, masters:1, champions:1 };
 
-      /* 1단계: vct_p 데이터에서 ACS/KDA 집계 — 1부 리그 맵만 */
-      var pMap = {};
+      /* 1단계: vct_p 데이터에서 ACS/KDA 집계
+         — hasAnyVcp: 리그 무관하게 vct_p 데이터가 하나라도 있으면 true
+         — acsMaps / totalAcs 등은 1부 리그 맵만 집계 */
+      var pMap = {};      /* 1부 리그 집계 */
+      var hasAnyVcp = {}; /* 선수별 vct_p 존재 여부 (2부 포함) */
       Object.keys(vcpMap).forEach(function (pName) {
         var pd = vcpMap[pName];
         if (!pd || !pd.maps || !pd.maps.length) return;
         pd.maps.forEach(function (m) {
           var lg = m.league || "";
-          /* 2부(challengers-*) 등 VALID_LEAGUES 외 리그는 스킵 */
-          if (!VALID_LEAGUES[lg]) return;
           var acs = parseFloat(m.acs) || 0;
           var hasKda = m.kda && m.kda.indexOf("/") !== -1;
           if (hasKda) {
@@ -892,6 +893,10 @@
             if ((parseFloat(pts[0])||0) === 0 && (parseFloat(pts[1])||0) === 0 && (parseFloat(pts[2])||0) === 0) hasKda = false;
           }
           if (acs <= 0 && !hasKda) return;
+          /* 리그 무관하게 vct_p 존재 마킹 */
+          hasAnyVcp[pName] = true;
+          /* 1부 리그 맵만 통계에 반영 */
+          if (!VALID_LEAGUES[lg]) return;
           if (!pMap[pName]) pMap[pName] = { acsMaps:0, totalAcs:0, totalK:0, totalD:0, kdMaps:0, regionCounts:{} };
           var e = pMap[pName];
           e.regionCounts[lg] = (e.regionCounts[lg] || 0) + 1;
@@ -906,27 +911,23 @@
       });
 
       /* 2단계: 표시할 선수 집합 구성
-         — 1부 리그 팀 소속이거나, 1부 리그 vct_p 맵이 있는 선수만 포함 */
+         조건: (vct_p 데이터가 있고 1부 팀 소속) OR (1부 팀 소속이고 stock_p 있음) */
       var allNames = new Set();
-      /* vct_p에서 1부 리그 맵이 있는 선수 */
-      Object.keys(pMap).forEach(function (n) { allNames.add(n); });
-      /* stock_p가 있고 1부 팀 소속인 선수 (DB + localStorage) */
-      function addIfTier1(n) {
-        var team = playerTeam[n] || "";
-        if (team && TIER1_TEAMS.has(team)) allNames.add(n);
+      function isTier1(n) {
+        var t = playerTeam[n] || "";
+        return t && TIER1_TEAMS.has(t);
       }
+      /* vct_p가 있고 1부 팀 소속인 선수 (2부에서 올라온 선수 포함) */
+      Object.keys(hasAnyVcp).forEach(function (n) {
+        if (isTier1(n)) allNames.add(n);
+      });
+      /* stock_p가 있고 1부 팀 소속인 선수 */
+      function addIfTier1(n) { if (isTier1(n)) allNames.add(n); }
       Object.keys(stockMap).forEach(addIfTier1);
       for (var li = 0; li < localStorage.length; li++) {
         var lk = localStorage.key(li);
         if (lk && lk.indexOf("stock_p:") === 0) addIfTier1(lk.slice(8));
       }
-      /* HARDCODED_ROSTERS 선수 중 stock_p가 있는 경우도 포함 */
-      Object.keys(playerTeam).forEach(function (n) {
-        var team = playerTeam[n] || "";
-        if (team && TIER1_TEAMS.has(team)) {
-          if (stockMap[n] || localStorage.getItem("stock_p:" + n)) allNames.add(n);
-        }
-      });
 
       /* top 30% threshold for 우량주 */
       var allMapCounts = Object.keys(pMap).map(function (k) { return pMap[k].acsMaps; });
@@ -935,11 +936,9 @@
 
       var players = [], idx = 0;
       allNames.forEach(function (pName) {
-        var hasVcp = !!pMap[pName];
+        var hasVcp = !!hasAnyVcp[pName]; /* 2부 포함 vct_p 존재 여부 */
+        var hasTier1Vcp = !!pMap[pName]; /* 1부 리그 vct_p 여부 */
         var team = playerTeam[pName] || "";
-
-        /* 2부 팀이거나 1부 팀 소속도 아니고 vct_p 1부 맵도 없으면 스킵 */
-        if (!hasVcp && (!team || !TIER1_TEAMS.has(team))) return;
 
         var stockData = stockMap[pName] || null;
         /* localStorage에서도 병합 */
@@ -976,8 +975,8 @@
                         ? stockData.history : null;
         if (stockData && stockData.runCount > 0) avgAcs = Math.round(stockData.runTotal / stockData.runCount);
 
-        /* stock_p나 vct_p가 없어 주가가 0이고 vct_p도 없으면 표시 가치 없음 */
-        if (price === 0 && !hasVcp) return;
+        /* stock_p도 없고 vct_p도 전혀 없으면 표시하지 않음 */
+        if (price === 0 && !hasVcp && !stockData) return;
 
         var changeRate = prev > 0 ? (price - prev) / prev * 100 : 0;
         var stockType;
