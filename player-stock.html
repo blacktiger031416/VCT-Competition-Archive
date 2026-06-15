@@ -1792,7 +1792,13 @@
         });
     }
     function startDelete(name) {
-      if (!confirm('"' + name + '" 선수를 삭제하시겠습니까?')) return;
+      if (!confirm(
+        '⚠️ 선수 삭제 확인\n\n' +
+        '선수명: ' + name + '\n\n' +
+        '삭제하면 해당 선수의 주가·경기 데이터가\n' +
+        'DB에서 완전히 제거됩니다.\n\n' +
+        '정말 삭제하시겠습니까?'
+      )) return;
       fetch("/api/admin/delete-player", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (TOKEN||"") },
