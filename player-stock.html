@@ -918,11 +918,12 @@
         HARDCODED_ROSTERS[team].forEach(function (n) { allNames.add(n); });
       });
 
-      /* DB playerTeam에서 1부 팀 소속 추가 선수 */
+      /* DB playerTeam에서 1부 팀 소속인 선수도 추가 (로스터 추가 선수 반영) */
       function isTier1(n) {
         var t = playerTeam[n] || "";
         return t && TIER1_TEAMS.has(t);
       }
+      Object.keys(playerTeam).forEach(function (n) { if (isTier1(n)) allNames.add(n); });
       Object.keys(hasAnyVcp).forEach(function (n) { if (isTier1(n)) allNames.add(n); });
       function addIfTier1(n) { if (isTier1(n)) allNames.add(n); }
       Object.keys(stockMap).forEach(addIfTier1);
