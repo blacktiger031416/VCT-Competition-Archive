@@ -12,20 +12,17 @@
     a { text-decoration: none; color: inherit; }
 
     :root {
-      --bg:        #080c10;
-      --bg-card:   #0d1117;
-      --bg-card2:  #111820;
-      --border:    rgba(255,255,255,.07);
-      --text:      #f0f0f0;
-      --text-sub:  rgba(255,255,255,.45);
-      --text-dim:  rgba(255,255,255,.22);
-      --up:        #e84444;
-      --down:      #3b8fff;
-      --accent:    #ff2638;
-      --accent2:   #ff2638;
-      --green:     #34d399;
-      --shadow:    0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
-      --shadow-md: 0 4px 6px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
+      --bg:       #080c10;
+      --bg-card:  #0d1117;
+      --bg-card2: #111820;
+      --border:   rgba(255,255,255,.07);
+      --text:     #f0f0f0;
+      --sub:      rgba(255,255,255,.45);
+      --dim:      rgba(255,255,255,.22);
+      --up:       #e84444;
+      --down:     #3b8fff;
+      --accent:   #ff2638;
+      --shadow:   0 2px 8px rgba(0,0,0,.4);
     }
 
     body {
@@ -39,823 +36,696 @@
     .site-header {
       position: sticky; top: 0; z-index: 200;
       display: flex; align-items: center; gap: 8px;
-      padding: 0 20px; height: 52px;
+      padding: 0 24px; height: 52px;
       background: rgba(8,12,16,.92);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,.3);
     }
     .nav-brand {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 15px; font-weight: 900; color: var(--accent2);
-      letter-spacing: .09em; text-transform: uppercase; flex-shrink: 0;
+      font-size: 15px; font-weight: 900; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase;
     }
-    .nav-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+    .nav-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
     .back-link {
-      display: inline-flex; align-items: center; height: 30px; padding: 0 13px;
-      border: 1px solid var(--border); border-radius: 6px;
-      background: var(--bg); font-size: 12px; font-weight: 700;
-      color: var(--text-sub); transition: background .15s, color .15s;
+      display: inline-flex; align-items: center; height: 28px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 5px;
+      background: rgba(255,255,255,.04); font-size: 12px; font-weight: 700;
+      color: var(--sub); transition: .15s;
     }
     .back-link:hover { background: rgba(255,255,255,.09); color: #fff; }
-    .site-header .auth-header-btn { margin-left: auto !important; }
-
-    /* ── PAGE SHELL ── */
-    .page-shell {
-      max-width: 1500px;
-      margin: 0 auto; padding: 24px 20px 80px;
-    }
-
-    /* ── PAGE TITLE ── */
-    .page-title-row {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-    }
-    .page-title {
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .header-coins {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 28px; font-weight: 900; letter-spacing: .04em;
-      text-transform: uppercase; color: var(--text);
+      font-size: 14px; font-weight: 700; color: var(--sub);
     }
-    .page-subtitle { font-size: 13px; color: var(--text-sub); }
-    .admin-btns { margin-left: auto; display: flex; gap: 8px; }
-    #admin-reset-btn, #admin-refund-btn {
-      padding: 6px 14px; border-radius: 6px;
-      font-size: 12px; font-weight: 600; cursor: pointer; transition: .15s;
+    .header-coins strong { color: #fff; }
+    .admin-btns { display: flex; gap: 6px; }
+    .admin-btn {
+      padding: 4px 12px; border-radius: 5px;
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: .15s;
       display: none;
     }
-    #admin-reset-btn {
-      background: rgba(229,62,62,.08); border: 1px solid rgba(229,62,62,.25); color: #e53e3e;
-    }
-    #admin-reset-btn:hover { background: rgba(229,62,62,.15); }
-    #admin-refund-btn {
-      background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3); color: #b45309;
-    }
+    #admin-reset-btn  { background: rgba(232,68,68,.08);  border: 1px solid rgba(232,68,68,.25); color: var(--up); }
+    #admin-reset-btn:hover  { background: rgba(232,68,68,.15); }
+    #admin-refund-btn { background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3);  color: #fcd34d; }
     #admin-refund-btn:hover { background: rgba(234,179,8,.15); }
 
-    /* ── MARKET SUMMARY BAR ── */
-    .market-bar {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px; margin-bottom: 20px;
+    /* ── TOP TABS ── */
+    .top-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: 0 24px;
     }
-    .market-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 18px;
-      box-shadow: var(--shadow);
-    }
-    .market-card-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: var(--text-dim); margin-bottom: 4px;
-    }
-    .market-card-value {
+    .top-tab {
+      padding: 14px 24px; border: none; background: none; cursor: pointer;
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 24px; font-weight: 900; color: var(--text);
-    }
-    .market-card-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-    .market-card-sub.up   { color: var(--up); font-weight: 700; }
-    .market-card-sub.down { color: var(--down); font-weight: 700; }
-
-    /* ── MAIN LAYOUT ── */
-    .main-layout {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    /* ── CARD BASE ── */
-    .card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; box-shadow: var(--shadow); overflow: hidden;
-    }
-    .card-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .card-title {
-      font-family: "Barlow Condensed", sans-serif;
-      font-size: 13px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-sub);
-    }
-
-    /* ── LEFT PANEL: 종목 리스트 ── */
-    .stock-panel { grid-column: 1; }
-    .stock-panel-inner { display: flex; flex-direction: column; }
-
-    .panel-search-row {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      display: flex; gap: 8px; align-items: center;
-    }
-    .panel-search {
-      flex: 1; height: 32px; padding: 0 10px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); font-size: 13px; outline: none;
-    }
-    .panel-search:focus { border-color: #a0aec0; }
-    .panel-search::placeholder { color: var(--text-dim); }
-
-    /* 메인 탭 (전체/보유/즐겨찾기/종목유형) */
-    .main-tabs {
-      display: flex; gap: 0;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card2);
-    }
-    .main-tab {
-      flex: 1; padding: 9px 4px; border: none; background: none; cursor: pointer;
-      font-size: 12px; font-weight: 700;
-      color: var(--text-dim); border-bottom: 2px solid transparent;
+      font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--dim); border-bottom: 2px solid transparent;
       transition: color .15s, border-color .15s;
-      white-space: nowrap;
     }
-    .main-tab:hover { color: var(--text); }
-    .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-card); }
+    .top-tab:hover { color: var(--sub); }
+    .top-tab.active { color: #fff; border-bottom-color: var(--accent); }
 
-    /* 종목유형 서브 탭 */
-    .type-sub-tabs {
-      display: none; gap: 6px; padding: 8px 14px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card2);
-      flex-wrap: wrap;
-    }
-    .type-sub-tabs.visible { display: flex; }
-    .type-sub-tab {
-      padding: 3px 11px; border: 1px solid var(--border); border-radius: 20px;
-      background: none; color: var(--text-sub);
-      font-size: 11px; font-weight: 700; cursor: pointer; transition: all .12s;
-      white-space: nowrap;
-    }
-    .type-sub-tab:hover { background: var(--bg); }
-    .type-sub-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+    /* ── PAGE SHELL ── */
+    .page-shell { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px; }
 
-    /* 권역 필터 탭 */
-    .region-tabs {
-      display: flex; gap: 4px; padding: 8px 14px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
+    /* ── MARKET SUMMARY ── */
+    .mkt-summary {
+      display: flex; gap: 0;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      margin-bottom: 20px;
     }
-    .region-tab {
-      padding: 3px 10px; border: 1px solid var(--border); border-radius: 20px;
-      background: none; color: var(--text-sub);
-      font-family: "Barlow Condensed", sans-serif; font-size: 11px; font-weight: 900;
-      letter-spacing: .05em; text-transform: uppercase; cursor: pointer; transition: all .12s;
-      white-space: nowrap;
+    .mkt-item {
+      flex: 1; padding: 14px 20px;
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 3px;
     }
-    .region-tab:hover { background: var(--bg); }
-    .region-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
-    .region-tab[data-region="americas"].active { background: #c05621; border-color: #c05621; }
-    .region-tab[data-region="emea"].active     { background: #276749; border-color: #276749; }
-    .region-tab[data-region="pacific"].active  { background: #1d4ed8; border-color: #1d4ed8; }
-    .region-tab[data-region="cn"].active       { background: #9b2c2c; border-color: #9b2c2c; }
+    .mkt-item:last-child { border-right: none; }
+    .mkt-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--dim);
+    }
+    .mkt-value {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 20px; font-weight: 900; color: var(--text);
+    }
+    .mkt-value.up   { color: var(--up); }
+    .mkt-value.down { color: var(--down); }
 
-    /* 정렬 헤더 */
-    .st-head {
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 12px;
+    }
+    .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-search {
+      flex: 1; min-width: 200px; height: 36px; padding: 0 14px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px; outline: none;
+      transition: border-color .15s;
+    }
+    .filter-search:focus { border-color: rgba(255,255,255,.2); }
+    .filter-search::placeholder { color: var(--dim); }
+    .chip {
+      padding: 5px 13px; border-radius: 20px;
+      border: 1px solid var(--border); background: none;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      color: var(--sub); transition: all .12s; white-space: nowrap;
+    }
+    .chip:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+    .chip.active {
+      background: rgba(255,255,255,.1);
+      border-color: rgba(255,255,255,.3); color: #fff;
+    }
+    .chip[data-region="americas"].active { background: rgba(255,119,68,.2); border-color: #ff7744; color: #ff7744; }
+    .chip[data-region="emea"].active     { background: rgba(80,220,160,.2); border-color: #50dda0; color: #50dda0; }
+    .chip[data-region="pacific"].active  { background: rgba(80,160,255,.2); border-color: #60b0ff; color: #60b0ff; }
+    .chip[data-region="cn"].active       { background: rgba(232,68,68,.2);  border-color: #e84444; color: #e84444; }
+    .type-sub-row { display: none; align-items: center; gap: 6px; }
+    .type-sub-row.visible { display: flex; }
+
+    /* ── LIST HEADER / ROWS ── */
+    .list-wrap {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .list-head {
       display: grid;
-      grid-template-columns: minmax(0,1fr) 64px 66px 74px 32px;
-      padding: 6px 14px;
+      grid-template-columns: minmax(0,1fr) 90px 90px 90px 36px;
+      padding: 8px 16px;
       background: var(--bg-card2);
       border-bottom: 1px solid var(--border);
     }
-    .st-head-cell {
-      font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text-dim); cursor: pointer; user-select: none;
+    .lh-cell {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--dim); cursor: pointer; user-select: none;
       display: flex; align-items: center; gap: 3px;
     }
-    .st-head-cell:not(:first-child) { justify-content: flex-end; }
-    .st-head-cell:hover { color: var(--text); }
-    .sort-arrow { opacity: .4; font-size: 9px; }
-    .st-head-cell.sorted .sort-arrow { opacity: 1; color: var(--text); }
+    .lh-cell:not(:first-child) { justify-content: flex-end; }
+    .lh-cell:hover { color: var(--sub); }
+    .lh-cell.sorted { color: var(--text); }
+    .sort-arrow { font-size: 9px; opacity: .5; }
+    .lh-cell.sorted .sort-arrow { opacity: 1; }
 
-    /* 종목 행 */
-    .stock-list { max-height: 620px; overflow-y: auto; scrollbar-gutter: stable; }
-    .stock-list::-webkit-scrollbar { width: 4px; }
-    .stock-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+    .stock-list { }
     .stock-row {
       display: grid;
-      grid-template-columns: minmax(0,1fr) 64px 66px 74px 32px;
-      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      grid-template-columns: minmax(0,1fr) 90px 90px 90px 36px;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: background .1s; align-items: center;
     }
     .stock-row:last-child { border-bottom: none; }
     .stock-row:hover { background: rgba(255,255,255,.03); }
-    .stock-row.active { background: rgba(255,38,56,.07); }
-    .stock-row.dimmed { opacity: .35; }
-    .stock-player { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .stock-player-logo {
-      width: 30px; height: 30px; border-radius: 50%;
+    .stock-row.active { background: rgba(255,38,56,.06); }
+
+    .s-player { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .s-logo {
+      width: 34px; height: 34px; border-radius: 50%;
       background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 900; flex-shrink: 0; overflow: hidden;
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 900; flex-shrink: 0;
       color: rgba(255,255,255,.5);
     }
-    .stock-player-logo img { width: 100%; height: 100%; object-fit: contain; }
-    .stock-player-info { min-width: 0; }
-    .stock-player-name {
+    .s-info { min-width: 0; }
+    .s-name {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 14px; font-weight: 700; letter-spacing: .02em; color: var(--text);
+      font-size: 15px; font-weight: 700; color: var(--text);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      display: flex; align-items: center; gap: 4px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .stock-player-team { font-size: 10px; color: var(--text-dim); }
-    .stock-price {
+    .s-team { font-size: 11px; color: var(--dim); margin-top: 1px; }
+
+    .s-price {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 14px; font-weight: 700; color: var(--text); text-align: right;
+      font-size: 15px; font-weight: 700; text-align: right; color: var(--text);
     }
-    .stock-change { font-size: 11px; font-weight: 700; text-align: right; }
-    .stock-change.up   { color: var(--up); }
-    .stock-change.down { color: var(--down); }
-    .stock-change.flat { color: var(--text-dim); }
-    .stock-rate {
+    .s-chg { font-size: 12px; font-weight: 700; text-align: right; }
+    .s-rate {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 12px; font-weight: 700; text-align: right;
+      font-size: 13px; font-weight: 700; text-align: right;
       padding: 2px 6px; border-radius: 4px;
     }
-    .stock-rate.up   { background: rgba(229,62,62,.1); color: var(--up); }
-    .stock-rate.down { background: rgba(37,99,235,.1); color: var(--down); }
-    .stock-rate.flat { color: var(--text-dim); }
+    .s-rate.up   { background: rgba(232,68,68,.12);  color: var(--up); }
+    .s-rate.down { background: rgba(59,143,255,.12); color: var(--down); }
+    .s-rate.flat { color: var(--dim); }
+    .up   { color: var(--up)  !important; }
+    .down { color: var(--down) !important; }
+    .flat { color: var(--dim) !important; }
 
-    /* 즐겨찾기 버튼 */
     .star-btn {
       background: none; border: none; cursor: pointer;
-      font-size: 14px; line-height: 1; padding: 2px;
-      color: #d1d5db; transition: color .15s;
-      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: rgba(255,255,255,.2);
+      transition: color .15s; display: flex; align-items: center; justify-content: center;
     }
     .star-btn:hover { color: #f59e0b; }
     .star-btn.starred { color: #f59e0b; }
 
-    /* 권역 뱃지 */
-    .region-badge {
+    .rbadge {
       display: inline-block; padding: 1px 5px; border-radius: 3px;
       font-family: "Barlow Condensed", sans-serif; font-size: 9px; font-weight: 900;
       letter-spacing: .06em; text-transform: uppercase; flex-shrink: 0;
     }
-    .region-badge.americas { background: rgba(255,119,68,.15); color: #ff7744; }
-    .region-badge.emea     { background: rgba(80,220,160,.15); color: #50dda0; }
-    .region-badge.pacific  { background: rgba(80,160,255,.15); color: #60b0ff; }
-    .region-badge.cn       { background: rgba(232,68,68,.15);  color: #e84444; }
+    .rbadge.americas { background: rgba(255,119,68,.15); color: #ff7744; }
+    .rbadge.emea     { background: rgba(80,220,160,.15); color: #50dda0; }
+    .rbadge.pacific  { background: rgba(80,160,255,.15); color: #60b0ff; }
+    .rbadge.cn       { background: rgba(232,68,68,.15);  color: #e84444; }
 
-    /* 종목유형 뱃지 */
-    .type-badge {
-      display: inline-block; padding: 1px 5px; border-radius: 3px;
-      font-size: 9px; font-weight: 700; flex-shrink: 0;
-    }
-    .type-badge.blue-chip { background: rgba(167,139,250,.15); color: #c4b5fd; }
-    .type-badge.growth    { background: rgba(52,211,153,.15); color: #6ee7b7; }
-    .type-badge.ipo       { background: rgba(251,191,36,.15); color: #fcd34d; }
-    .type-badge.pre-ipo   { background: rgba(148,163,184,.12); color: #94a3b8; }
-
-    /* admin 이름 편집 */
-    .admin-rename-btn {
-      flex-shrink: 0;
+    .admin-btn-inline {
       background: none; border: none; cursor: pointer;
-      color: var(--text-dim); font-size: 11px; line-height: 1;
-      padding: 1px 3px; border-radius: 3px;
-      transition: color .12s, background .12s;
+      color: var(--dim); font-size: 11px; padding: 1px 3px;
+      border-radius: 3px; transition: .12s; flex-shrink: 0;
     }
-    .admin-rename-btn:hover { color: var(--text); background: var(--bg); }
+    .admin-btn-inline:hover { color: var(--text); background: rgba(255,255,255,.07); }
 
-    /* ── RIGHT PANEL ── */
-    .right-panel { display: flex; flex-direction: column; gap: 16px; }
-
-    /* ── 차트 패널 ── */
-    .chart-header {
-      display: flex; align-items: flex-start; gap: 16px;
-      padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
+    .empty-state {
+      padding: 48px; text-align: center;
+      color: var(--dim); font-size: 13px; line-height: 1.7;
     }
-    .chart-player-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-    .chart-player-logo {
-      width: 40px; height: 40px; border-radius: 50%;
+
+    /* ── DETAIL VIEW ── */
+    .detail-top {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .detail-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 16px; border-radius: 7px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      font-size: 13px; font-weight: 700; color: var(--sub);
+      cursor: pointer; transition: .15s; flex-shrink: 0;
+    }
+    .detail-back:hover { background: rgba(255,255,255,.09); color: #fff; }
+
+    .detail-header {
+      display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;
+    }
+    .detail-logo {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
       background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 900; flex-shrink: 0; color: rgba(255,255,255,.5);
-    }
-    .chart-player-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
-    .chart-player-name {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 24px; font-weight: 900; letter-spacing: .03em; color: var(--text);
+      font-size: 18px; font-weight: 900; color: rgba(255,255,255,.5);
     }
-    .chart-player-team { font-size: 12px; color: var(--text-sub); margin-top: 1px; }
-    .chart-price-block { text-align: right; flex-shrink: 0; }
-    .chart-current-price {
+    .detail-name-block { flex: 1; min-width: 0; }
+    .detail-name {
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 30px; font-weight: 900; color: var(--text);
+      font-size: 26px; font-weight: 900; color: #fff;
     }
-    .chart-price-change { font-size: 13px; font-weight: 700; margin-top: 2px; }
-    .chart-price-change.up   { color: var(--up); }
-    .chart-price-change.down { color: var(--down); }
-    .chart-price-change.flat { color: var(--text-dim); }
+    .detail-team { font-size: 13px; color: var(--sub); }
+    .detail-price-block { text-align: right; flex-shrink: 0; }
+    .detail-price {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 28px; font-weight: 900; color: #fff;
+    }
+    .detail-change { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .detail-change.up   { color: var(--up); }
+    .detail-change.down { color: var(--down); }
+    .detail-change.flat { color: var(--dim); }
 
-    /* 기간 탭 */
-    .chart-period-tabs {
-      display: flex; gap: 4px; padding: 10px 20px;
+    /* Detail body: chart(left) + trade(right) */
+    .detail-body {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+      align-items: start;
+    }
+    .chart-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .period-tabs {
+      display: flex; gap: 4px; padding: 12px 16px;
       border-bottom: 1px solid var(--border);
     }
     .period-tab {
-      padding: 4px 12px; border-radius: 6px; border: 1px solid transparent; background: none;
+      padding: 4px 12px; border-radius: 6px;
+      border: 1px solid transparent; background: none;
       font-family: "Barlow Condensed", sans-serif;
       font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-      color: var(--text-dim); cursor: pointer; transition: all .15s;
+      color: var(--dim); cursor: pointer; transition: all .15s;
     }
-    .period-tab:hover  { background: var(--bg); color: var(--text); }
-    .period-tab.active { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
-
-    .chart-area {
-      position: relative; height: 280px; padding: 12px 20px 8px;
-    }
+    .period-tab:hover  { color: var(--sub); }
+    .period-tab.active { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.25); }
+    .chart-area { position: relative; height: 280px; padding: 12px 16px 8px; }
     .chart-canvas { width: 100%; height: 100%; display: block; }
-
-    .chart-info-bar {
-      display: flex; gap: 0;
-      border-top: 1px solid var(--border);
+    .stats-bar {
+      display: flex; border-top: 1px solid var(--border);
     }
-    .chart-stat {
+    .stat-item {
       flex: 1; padding: 10px 14px; border-right: 1px solid var(--border);
       display: flex; flex-direction: column; gap: 2px;
     }
-    .chart-stat:last-child { border-right: none; }
-    .chart-stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: .07em; text-transform: uppercase; }
-    .chart-stat-value { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
-    .chart-stat-value.up   { color: var(--up); }
-    .chart-stat-value.down { color: var(--down); }
+    .stat-item:last-child { border-right: none; }
+    .stat-label { font-size: 10px; color: var(--dim); letter-spacing: .07em; text-transform: uppercase; }
+    .stat-val {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 15px; font-weight: 700; color: var(--text);
+    }
+    .stat-val.up   { color: var(--up); }
+    .stat-val.down { color: var(--down); }
 
-    /* ── 매수/매도 패널 ── */
+    /* Trade panel */
+    .trade-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
     .trade-tabs {
       display: grid; grid-template-columns: 1fr 1fr;
     }
     .trade-tab {
-      padding: 12px 0; border: none; cursor: pointer;
+      padding: 13px 0; border: none; cursor: pointer;
       font-family: "Barlow Condensed", sans-serif;
-      font-size: 15px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase;
-      background: var(--bg-card2); color: var(--text-dim);
+      font-size: 14px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase;
+      background: var(--bg-card2); color: var(--dim);
       border-bottom: 2px solid var(--border); transition: all .15s;
     }
-    .trade-tab:hover { color: var(--text); }
-    .trade-tab.active-buy  { background: rgba(232,68,68,.12);  color: var(--up);   border-bottom-color: var(--up); }
-    .trade-tab.active-sell { background: rgba(59,143,255,.12); color: var(--down); border-bottom-color: var(--down); }
+    .trade-tab:hover { color: var(--sub); }
+    .trade-tab.active-buy  { background: rgba(232,68,68,.1);  color: var(--up);   border-bottom-color: var(--up); }
+    .trade-tab.active-sell { background: rgba(59,143,255,.1); color: var(--down); border-bottom-color: var(--down); }
 
     .trade-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-    .trade-price-display {
+    .trade-price-row {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 14px;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px;
     }
-    .trade-price-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-sub); }
-    .trade-price-value { font-family: "Barlow Condensed", sans-serif; font-size: 18px; font-weight: 900; color: var(--text); }
-    .trade-price-value span { font-size: 12px; color: var(--text-dim); margin-left: 4px; }
-
-    .trade-holding-simple { font-size: 12px; color: var(--text-sub); text-align: right; }
-    .trade-holding-simple strong {
+    .trade-price-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--sub); }
+    .trade-price-val {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 18px; font-weight: 900; color: var(--text);
+    }
+    .trade-price-val span { font-size: 12px; color: var(--dim); margin-left: 4px; }
+    .trade-hold { font-size: 12px; color: var(--sub); text-align: right; }
+    .trade-hold strong {
       font-family: "Barlow Condensed", sans-serif;
       font-size: 14px; color: var(--text); font-weight: 900;
     }
-
-    .trade-row { display: flex; flex-direction: column; gap: 5px; }
-    .trade-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-sub); }
+    .trade-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--sub); margin-bottom: 5px; }
     .trade-input-wrap {
       display: flex; align-items: center;
-      background: var(--bg); border: 1px solid var(--border);
+      background: var(--bg-card2); border: 1px solid var(--border);
       border-radius: 8px; overflow: hidden; transition: border-color .15s;
     }
-    .trade-input-wrap:focus-within { border-color: #9ca3af; }
+    .trade-input-wrap:focus-within { border-color: rgba(255,255,255,.25); }
     .trade-input {
       flex: 1; height: 44px; padding: 0 14px;
       background: none; border: none; color: var(--text);
       font-family: "Barlow Condensed", sans-serif; font-size: 22px; font-weight: 700;
       outline: none;
     }
-    .trade-input::placeholder { color: var(--text-dim); font-size: 16px; font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
-    .trade-input-unit { padding: 0 14px; font-size: 13px; font-weight: 700; color: var(--text-sub); flex-shrink: 0; }
-
-    .trade-total {
-      background: var(--bg); border: 1px solid var(--border);
+    .trade-input::placeholder { color: var(--dim); font-size: 16px; font-weight: 500; font-family: "Noto Sans KR", sans-serif; }
+    .trade-input-unit { padding: 0 14px; font-size: 13px; font-weight: 700; color: var(--sub); flex-shrink: 0; }
+    .trade-total-row {
+      background: var(--bg-card2); border: 1px solid var(--border);
       border-radius: 8px; padding: 10px 14px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .trade-total-label { font-size: 11px; color: var(--text-sub); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-    .trade-total-value { font-family: "Barlow Condensed", sans-serif; font-size: 20px; font-weight: 900; color: var(--text); }
-    .trade-total-value span { font-size: 12px; color: var(--text-dim); margin-left: 4px; }
-
+    .trade-total-label { font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .trade-total-val {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 20px; font-weight: 900; color: var(--text);
+    }
+    .trade-total-val span { font-size: 12px; color: var(--dim); margin-left: 4px; }
     .trade-btn {
       width: 100%; height: 44px; border: none; border-radius: 8px;
       font-family: "Barlow Condensed", sans-serif;
       font-size: 17px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
       cursor: pointer; transition: filter .15s, opacity .15s;
     }
-    .trade-btn:hover:not(:disabled) { filter: brightness(1.08); }
+    .trade-btn:hover:not(:disabled) { filter: brightness(1.1); }
     .trade-btn:disabled { opacity: .35; cursor: not-allowed; }
-    .trade-btn.buy-btn  { background: var(--up);   color: #fff; }
-    .trade-btn.sell-btn { background: var(--down); color: #fff; }
-
-    .coin-balance {
+    .buy-btn  { background: var(--up);   color: #fff; }
+    .sell-btn { background: var(--down); color: #fff; }
+    .coin-bal {
       display: flex; justify-content: space-between; align-items: center;
       padding: 8px 0 0; border-top: 1px solid var(--border);
     }
-    .coin-balance-label { font-size: 11px; color: var(--text-dim); }
-    .coin-balance-value { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 900; color: var(--text-sub); }
-
-    /* ── 포트폴리오 섹션 ── */
-    .portfolio-section { margin-top: 20px; }
-    .section-tabs {
-      display: flex; gap: 0;
-      border-bottom: 1px solid var(--border);
+    .coin-bal-label { font-size: 11px; color: var(--dim); }
+    .coin-bal-val {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--sub);
     }
-    .section-tab {
-      padding: 10px 20px; border: none; background: none; cursor: pointer;
-      font-size: 13px; font-weight: 700;
-      color: var(--text-sub); border-bottom: 2px solid transparent;
-      transition: color .15s, border-color .15s;
+    #admin-player-reset-btn {
+      display: none; padding: 5px 12px; margin-top: 4px;
+      background: rgba(232,68,68,.1); border: 1px solid rgba(232,68,68,.3);
+      border-radius: 5px; color: var(--up); font-size: 12px; font-weight: 700; cursor: pointer;
+      width: 100%;
     }
-    .section-tab:hover { color: var(--text); }
-    .section-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* 총 자산 */
-    .asset-summary {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-      padding: 16px;
+    /* ── PORTFOLIO VIEW ── */
+    .port-summary {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; margin-bottom: 20px;
     }
-    .asset-item { display: flex; flex-direction: column; gap: 4px; }
-    .asset-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-dim); }
-    .asset-value { font-family: "Barlow Condensed", sans-serif; font-size: 22px; font-weight: 900; color: var(--text); }
-    .asset-value.up   { color: var(--up); }
-    .asset-value.down { color: var(--down); }
+    .port-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 22px;
+    }
+    .port-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+    .port-val {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 26px; font-weight: 900; color: var(--text);
+    }
+    .port-val span { font-size: 14px; font-weight: 700; color: var(--dim); margin-left: 4px; }
 
-    /* 보유 종목 테이블 */
-    .holdings-table { width: 100%; border-collapse: collapse; }
-    .holdings-table th {
-      padding: 8px 14px; text-align: right;
+    /* ── TABLES ── */
+    .tbl-wrap {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .tbl-head {
+      padding: 12px 18px; border-bottom: 1px solid var(--border);
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 13px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--sub);
+    }
+    .tbl {
+      width: 100%; border-collapse: collapse;
+    }
+    .tbl th {
+      padding: 8px 16px; text-align: right;
       font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text-dim); background: var(--bg-card2);
-      border-bottom: 1px solid var(--border); white-space: nowrap;
-    }
-    .holdings-table th:first-child { text-align: left; }
-    .holdings-table td {
-      padding: 10px 14px; text-align: right;
-      border-bottom: 1px solid var(--border);
-      font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700;
-      color: var(--text); white-space: nowrap;
-    }
-    .holdings-table td:first-child { text-align: left; font-family: "Noto Sans KR", sans-serif; font-size: 13px; }
-    .holdings-table tr:hover td { background: rgba(255,255,255,.03); }
-    .holdings-table tr:last-child td { border-bottom: none; }
-    .pnl-up   { color: var(--up) !important; }
-    .pnl-down { color: var(--down) !important; }
-
-    /* 거래 내역 테이블 */
-    .history-table { width: 100%; border-collapse: collapse; }
-    .history-table th {
-      padding: 8px 14px; text-align: right;
-      font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text-dim); background: var(--bg-card2);
-      border-bottom: 1px solid var(--border); white-space: nowrap;
-    }
-    .history-table th:first-child, .history-table th:nth-child(2) { text-align: left; }
-    .history-table td {
-      padding: 9px 14px; text-align: right;
-      border-bottom: 1px solid var(--border);
-      font-family: "Barlow Condensed", sans-serif; font-size: 13px; color: var(--text);
+      color: var(--dim); background: var(--bg-card2); border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    .history-table td:first-child { text-align: left; color: var(--text-dim); font-size: 11px; font-family: "Noto Sans KR", sans-serif; }
-    .history-table td:nth-child(2) { text-align: left; font-family: "Noto Sans KR", sans-serif; font-size: 13px; }
-    .history-table tr:hover td { background: rgba(255,255,255,.03); }
-    .history-table tr:last-child td { border-bottom: none; }
-    .type-buy  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(232,68,68,.15); color: var(--up); }
-    .type-sell { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(59,143,255,.15); color: var(--down); }
-
-    .empty-state {
-      padding: 32px; text-align: center;
-      color: var(--text-dim); font-size: 13px; line-height: 1.7;
-    }
-
-    .up   { color: var(--up)   !important; }
-    .down { color: var(--down) !important; }
-    .flat { color: var(--text-dim) !important; }
-
-    /* ── 전체 종목 테이블 (포트폴리오 탭 내) ── */
-    .all-stocks-table { width: 100%; border-collapse: collapse; }
-    .all-stocks-table th {
-      padding: 8px 14px; text-align: right;
-      font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text-dim); background: var(--bg-card2);
-      border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap;
-    }
-    .all-stocks-table th:first-child { text-align: left; }
-    .all-stocks-table th:hover { color: var(--text); }
-    .all-stocks-table td {
-      padding: 10px 14px; text-align: right;
+    .tbl th:first-child { text-align: left; }
+    .tbl td {
+      padding: 11px 16px; text-align: right;
       border-bottom: 1px solid var(--border);
       font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700;
       color: var(--text); white-space: nowrap;
     }
-    .all-stocks-table td:first-child { text-align: left; }
-    .all-stocks-table tr { cursor: pointer; transition: background .1s; }
-    .all-stocks-table tr:hover td { background: rgba(255,255,255,.03); }
-    .all-stocks-table tr.active td { background: rgba(255,38,56,.07); }
-    .all-stocks-table tr:last-child td { border-bottom: none; }
-    .ft-player-cell { display: flex; align-items: center; gap: 10px; }
-    .ft-player-logo {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 900; flex-shrink: 0; overflow: hidden; color: rgba(255,255,255,.4);
-    }
-    .ft-player-logo img { width: 100%; height: 100%; object-fit: contain; }
-    .ft-player-name { font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
-    .ft-player-team { font-size: 10px; color: var(--text-dim); font-family: "Noto Sans KR", sans-serif; font-weight: 500; }
-
-    /* admin 선수 리셋 버튼 */
-    #admin-player-reset-btn {
-      display: none; margin-top: 6px; padding: 4px 12px;
-      background: rgba(229,62,62,.08); border: 1px solid rgba(229,62,62,.25);
-      border-radius: 5px; color: #e53e3e; font-size: 12px; font-weight: 600; cursor: pointer;
+    .tbl td:first-child { text-align: left; font-family: "Noto Sans KR", sans-serif; font-size: 13px; font-weight: 700; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tbody tr:hover td { background: rgba(255,255,255,.025); }
+    .pnl-up   { color: var(--up) !important; }
+    .pnl-down { color: var(--down) !important; }
+    .type-buy  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(232,68,68,.15); color: var(--up); }
+    .type-sell { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(59,143,255,.15); color: var(--down); }
+    .view-title {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 22px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase;
+      color: var(--sub); margin-bottom: 16px;
     }
   </style>
 </head>
 <body>
+
   <!-- HEADER -->
   <header class="site-header">
     <a class="nav-brand" href="./index.html">VCT Archive</a>
     <span class="nav-sep"></span>
     <a class="back-link" href="./index.html">홈</a>
+    <div class="header-right">
+      <span class="header-coins">코인 <strong id="coin-balance">—</strong></span>
+      <div class="admin-btns">
+        <button class="admin-btn" id="admin-reset-btn"  onclick="adminResetStock()">전체 리셋</button>
+        <button class="admin-btn" id="admin-refund-btn" onclick="adminRefundAll()">전체 환불</button>
+      </div>
+    </div>
   </header>
 
+  <!-- TOP TABS -->
+  <div class="top-tabs">
+    <button class="top-tab active" data-view="market">전체 종목</button>
+    <button class="top-tab" data-view="portfolio">포트폴리오</button>
+    <button class="top-tab" data-view="history">거래 내역</button>
+  </div>
+
   <main class="page-shell">
-    <!-- 페이지 타이틀 -->
-    <div class="page-title-row">
-      <h1 class="page-title">선수 주식</h1>
-      <span class="page-subtitle">VCT 선수들의 퍼포먼스 기반 가상 주식 시장</span>
-      <div class="admin-btns">
-        <button id="admin-reset-btn" onclick="adminResetStock()">주식 데이터 리셋</button>
-        <button id="admin-refund-btn" onclick="adminRefundAll()">전체 환불 (매입가 기준)</button>
-      </div>
-    </div>
 
-    <!-- 시장 요약 -->
-    <div class="market-bar">
-      <div class="market-card">
-        <div class="market-card-label">상승 종목</div>
-        <div class="market-card-value up" id="tk-up">—</div>
-        <div class="market-card-sub">하락 <span id="tk-down" style="color:var(--down)">—</span>종목</div>
-      </div>
-      <div class="market-card">
-        <div class="market-card-label">전체 종목</div>
-        <div class="market-card-value" id="tk-vol">—</div>
-        <div class="market-card-sub">선수</div>
-      </div>
-      <div class="market-card">
-        <div class="market-card-label">보유 코인</div>
-        <div class="market-card-value" id="tk-coins">—</div>
-        <div class="market-card-sub">코인</div>
-      </div>
-      <div class="market-card">
-        <div class="market-card-label">주식 평가액</div>
-        <div class="market-card-value" id="tk-stock-val">—</div>
-        <div class="market-card-sub">코인</div>
-      </div>
-      <div class="market-card">
-        <div class="market-card-label">총 자산</div>
-        <div class="market-card-value" id="tk-asset">—</div>
-        <div class="market-card-sub" id="tk-asset-sub">코인</div>
-      </div>
-    </div>
+    <!-- ═══ MARKET VIEW ═══ -->
+    <div id="view-market">
 
-    <!-- 메인 레이아웃 -->
-    <div class="main-layout">
-
-      <!-- 왼쪽: 종목 리스트 -->
-      <div class="stock-panel card">
-        <div class="card-header">
-          <span class="card-title">종목</span>
+      <!-- Market summary -->
+      <div class="mkt-summary">
+        <div class="mkt-item">
+          <span class="mkt-label">상승</span>
+          <span class="mkt-value up" id="tk-up">—</span>
         </div>
-        <div class="stock-panel-inner">
-          <div class="panel-search-row">
-            <input class="panel-search" type="text" id="stock-search" placeholder="선수 / 팀 검색..." autocomplete="off" />
-          </div>
-
-          <!-- 메인 탭 -->
-          <div class="main-tabs">
-            <button class="main-tab active" data-tab="all">전체</button>
-            <button class="main-tab" data-tab="holdings">보유</button>
-            <button class="main-tab" data-tab="watchlist">즐겨찾기</button>
-            <button class="main-tab" data-tab="type">종목유형</button>
-          </div>
-
-          <!-- 종목유형 서브탭 -->
-          <div class="type-sub-tabs" id="type-sub-tabs">
-            <button class="type-sub-tab active" data-type="blue-chip">우량주</button>
-            <button class="type-sub-tab" data-type="growth">성장주</button>
-            <button class="type-sub-tab" data-type="ipo">신규상장</button>
-            <button class="type-sub-tab" data-type="pre-ipo">공모주</button>
-          </div>
-
-          <!-- 권역 필터 -->
-          <div class="region-tabs">
-            <button class="region-tab active" data-region="all">전체</button>
-            <button class="region-tab" data-region="americas">Americas</button>
-            <button class="region-tab" data-region="emea">EMEA</button>
-            <button class="region-tab" data-region="pacific">Pacific</button>
-            <button class="region-tab" data-region="cn">CN</button>
-          </div>
-
-          <!-- 정렬 헤더 -->
-          <div class="st-head">
-            <div class="st-head-cell sorted" data-sort="name">선수 <span class="sort-arrow">↕</span></div>
-            <div class="st-head-cell" data-sort="price">현재가 <span class="sort-arrow">↕</span></div>
-            <div class="st-head-cell" data-sort="change">등락 <span class="sort-arrow">↕</span></div>
-            <div class="st-head-cell" data-sort="rate">등락률 <span class="sort-arrow">↕</span></div>
-            <div class="st-head-cell"></div>
-          </div>
-
-          <div class="stock-list" id="stock-list">
-            <!-- JS 렌더링 -->
-          </div>
+        <div class="mkt-item">
+          <span class="mkt-label">하락</span>
+          <span class="mkt-value down" id="tk-down">—</span>
+        </div>
+        <div class="mkt-item">
+          <span class="mkt-label">종목 수</span>
+          <span class="mkt-value" id="tk-vol">—</span>
+        </div>
+        <div class="mkt-item">
+          <span class="mkt-label">보유 코인</span>
+          <span class="mkt-value" id="tk-coins">—</span>
+        </div>
+        <div class="mkt-item">
+          <span class="mkt-label">주식 평가액</span>
+          <span class="mkt-value" id="tk-stock-val">—</span>
+        </div>
+        <div class="mkt-item">
+          <span class="mkt-label">총 자산</span>
+          <span class="mkt-value" id="tk-asset">—</span>
         </div>
       </div>
 
-      <!-- 오른쪽 패널 -->
-      <div class="right-panel">
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="filter-row">
+          <input class="filter-search" type="text" id="stock-search" placeholder="선수 / 팀 검색..." autocomplete="off" />
+          <button class="chip active" data-tab="all">전체</button>
+          <button class="chip" data-tab="holdings">보유</button>
+          <button class="chip" data-tab="watchlist">즐겨찾기</button>
+          <button class="chip" data-tab="type">종목유형 ▾</button>
+        </div>
+        <div class="type-sub-row" id="type-sub-row">
+          <button class="chip active" data-type="blue-chip">우량주</button>
+          <button class="chip" data-type="growth">성장주</button>
+          <button class="chip" data-type="ipo">신규상장</button>
+          <button class="chip" data-type="pre-ipo">공모주</button>
+        </div>
+        <div class="filter-row">
+          <button class="chip active" data-region="all">전체</button>
+          <button class="chip" data-region="americas">Americas</button>
+          <button class="chip" data-region="emea">EMEA</button>
+          <button class="chip" data-region="pacific">Pacific</button>
+          <button class="chip" data-region="cn">CN</button>
+        </div>
+      </div>
 
-        <!-- 차트 패널 -->
-        <div class="card" id="chart-panel">
-          <div class="chart-header">
-            <div class="chart-player-info">
-              <div class="chart-player-logo" id="chart-logo">?</div>
-              <div>
-                <div class="chart-player-name" id="chart-name">선수를 선택하세요</div>
-                <div class="chart-player-team" id="chart-team">—</div>
-              </div>
-            </div>
-            <div class="chart-price-block">
-              <div class="chart-current-price" id="chart-price">—</div>
-              <div class="chart-price-change flat" id="chart-price-change">— (—%)</div>
-              <button id="admin-player-reset-btn" onclick="adminResetPlayerStock()">이 선수 리셋</button>
-            </div>
+      <!-- List -->
+      <div class="list-wrap">
+        <div class="list-head">
+          <div class="lh-cell sorted" data-sort="name">선수 <span class="sort-arrow">↓</span></div>
+          <div class="lh-cell" data-sort="price">현재가 <span class="sort-arrow">↕</span></div>
+          <div class="lh-cell" data-sort="change">등락 <span class="sort-arrow">↕</span></div>
+          <div class="lh-cell" data-sort="rate">등락률 <span class="sort-arrow">↕</span></div>
+          <div class="lh-cell"></div>
+        </div>
+        <div class="stock-list" id="stock-list">
+          <div class="empty-state">데이터 로딩 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DETAIL VIEW ═══ -->
+    <div id="view-detail" style="display:none">
+
+      <!-- Top: back + player info + price -->
+      <div class="detail-top">
+        <button class="detail-back" id="detail-back-btn">← 목록으로</button>
+        <div class="detail-header">
+          <div class="detail-logo" id="chart-logo">?</div>
+          <div class="detail-name-block">
+            <div class="detail-name" id="chart-name">—</div>
+            <div class="detail-team" id="chart-team">—</div>
           </div>
+        </div>
+        <div class="detail-price-block">
+          <div class="detail-price" id="chart-price">—</div>
+          <div class="detail-change flat" id="chart-price-change">—</div>
+        </div>
+      </div>
 
-          <div class="chart-period-tabs">
+      <!-- Chart + Trade side by side -->
+      <div class="detail-body">
+
+        <!-- Chart card -->
+        <div class="chart-card">
+          <div class="period-tabs">
             <button class="period-tab active" data-period="5">5맵</button>
             <button class="period-tab" data-period="10">10맵</button>
             <button class="period-tab" data-period="20">20맵</button>
             <button class="period-tab" data-period="30">30맵</button>
             <button class="period-tab" data-period="all">전체</button>
           </div>
-
           <div class="chart-area">
             <canvas class="chart-canvas" id="stock-chart"></canvas>
           </div>
-
-          <div class="chart-info-bar">
-            <div class="chart-stat">
-              <span class="chart-stat-label">시가</span>
-              <span class="chart-stat-value" id="stat-open">—</span>
+          <div class="stats-bar">
+            <div class="stat-item">
+              <span class="stat-label">시가</span>
+              <span class="stat-val" id="stat-open">—</span>
             </div>
-            <div class="chart-stat">
-              <span class="chart-stat-label">현재가</span>
-              <span class="chart-stat-value" id="stat-close">—</span>
+            <div class="stat-item">
+              <span class="stat-label">현재가</span>
+              <span class="stat-val" id="stat-close">—</span>
             </div>
-            <div class="chart-stat">
-              <span class="chart-stat-label">등락</span>
-              <span class="chart-stat-value" id="stat-chg">—</span>
+            <div class="stat-item">
+              <span class="stat-label">등락</span>
+              <span class="stat-val" id="stat-chg">—</span>
             </div>
-            <div class="chart-stat">
-              <span class="chart-stat-label">등락률</span>
-              <span class="chart-stat-value" id="stat-rate">—</span>
+            <div class="stat-item">
+              <span class="stat-label">등락률</span>
+              <span class="stat-val" id="stat-rate">—</span>
             </div>
-            <div class="chart-stat">
-              <span class="chart-stat-label">평균 ACS</span>
-              <span class="chart-stat-value" id="stat-avgacs">—</span>
+            <div class="stat-item">
+              <span class="stat-label">평균 ACS</span>
+              <span class="stat-val" id="stat-avgacs">—</span>
             </div>
-            <div class="chart-stat">
-              <span class="chart-stat-label">맵 수</span>
-              <span class="chart-stat-value" id="stat-mapcount">—</span>
+            <div class="stat-item">
+              <span class="stat-label">맵 수</span>
+              <span class="stat-val" id="stat-mapcount">—</span>
             </div>
           </div>
         </div>
 
-        <!-- 매수/매도 패널 -->
-        <div class="card" id="trade-panel">
+        <!-- Trade card -->
+        <div class="trade-card">
           <div class="trade-tabs">
             <button class="trade-tab active-buy" id="tab-buy">매수</button>
             <button class="trade-tab" id="tab-sell">매도</button>
           </div>
           <div class="trade-body">
-            <div class="trade-price-display">
+            <div class="trade-price-row">
               <span class="trade-price-label">주당 가격</span>
-              <span class="trade-price-value" id="trade-unit-price">— <span>코인</span></span>
+              <span class="trade-price-val" id="trade-unit-price">— <span>코인</span></span>
             </div>
-            <div class="trade-holding-simple">보유 수량 <strong id="holding-qty">0 주</strong></div>
-            <div class="trade-holding-simple" id="holding-avg-row" style="display:none">
-              평균 단가 <strong id="holding-avg">— 코인</strong>
-              &nbsp;|&nbsp; 평가 손익 <strong id="holding-pnl">—</strong>
+            <div class="trade-hold">보유 수량 <strong id="holding-qty">0 주</strong></div>
+            <div class="trade-hold" id="holding-avg-row" style="display:none">
+              평균단가 <strong id="holding-avg">— 코인</strong>
+              &nbsp;|&nbsp; 손익 <strong id="holding-pnl">—</strong>
             </div>
-
-            <div class="trade-row">
-              <span class="trade-label">수량</span>
+            <div>
+              <div class="trade-label">수량</div>
               <div class="trade-input-wrap">
                 <input class="trade-input" id="trade-qty-input" type="number" min="1" placeholder="0" />
                 <span class="trade-input-unit">주</span>
               </div>
             </div>
-
-            <div class="trade-total">
+            <div class="trade-total-row">
               <span class="trade-total-label">총액</span>
-              <div class="trade-total-value" id="trade-total">0 <span>코인</span></div>
+              <div class="trade-total-val" id="trade-total">0 <span>코인</span></div>
             </div>
-
             <button class="trade-btn buy-btn" id="trade-btn">매수</button>
-
-            <div class="coin-balance">
-              <span class="coin-balance-label">보유 코인</span>
-              <span class="coin-balance-value" id="coin-balance">— 코인</span>
+            <button id="admin-player-reset-btn" onclick="adminResetPlayerStock()">🔄 이 선수 리셋 (Admin)</button>
+            <div class="coin-bal">
+              <span class="coin-bal-label">보유 코인</span>
+              <span class="coin-bal-val" id="coin-balance-detail">— 코인</span>
             </div>
           </div>
         </div>
 
-      </div><!-- /right-panel -->
-    </div><!-- /main-layout -->
+      </div><!-- /detail-body -->
+    </div><!-- /view-detail -->
 
-    <!-- 포트폴리오 / 전체 종목 섹션 -->
-    <div class="portfolio-section">
-      <div class="card">
-        <div class="section-tabs">
-          <button class="section-tab active" data-stab="portfolio">포트폴리오</button>
-          <button class="section-tab" data-stab="all-stocks">전체 종목</button>
-          <button class="section-tab" data-stab="history">거래 내역</button>
+    <!-- ═══ PORTFOLIO VIEW ═══ -->
+    <div id="view-portfolio" style="display:none">
+      <div class="view-title">포트폴리오</div>
+      <div class="port-summary">
+        <div class="port-card">
+          <div class="port-label">보유 코인</div>
+          <div class="port-val" id="port-coins">— <span>코인</span></div>
         </div>
-
-        <!-- 포트폴리오 탭 -->
-        <div id="stab-portfolio">
-          <div class="asset-summary">
-            <div class="asset-item">
-              <span class="asset-label">보유 코인</span>
-              <span class="asset-value" id="port-coins">—</span>
-            </div>
-            <div class="asset-item">
-              <span class="asset-label">주식 평가액</span>
-              <span class="asset-value" id="port-stock">—</span>
-            </div>
-            <div class="asset-item">
-              <span class="asset-label">총 자산</span>
-              <span class="asset-value" id="port-total">—</span>
-            </div>
-          </div>
-          <table class="holdings-table" id="holdings-table">
-            <thead>
-              <tr>
-                <th>선수</th>
-                <th>수량</th>
-                <th>평균단가</th>
-                <th>현재가</th>
-                <th>평가액</th>
-                <th>평가손익</th>
-                <th>수익률</th>
-              </tr>
-            </thead>
-            <tbody id="holdings-tbody">
-              <tr><td colspan="7" class="empty-state">보유 중인 주식이 없습니다.</td></tr>
-            </tbody>
-          </table>
+        <div class="port-card">
+          <div class="port-label">주식 평가액</div>
+          <div class="port-val" id="port-stock">— <span>코인</span></div>
         </div>
-
-        <!-- 전체 종목 탭 -->
-        <div id="stab-all-stocks" style="display:none">
-          <table class="all-stocks-table" id="ft-table">
-            <thead>
-              <tr>
-                <th style="text-align:left">선수</th>
-                <th data-sort="price">현재가</th>
-                <th data-sort="change">전일비</th>
-                <th data-sort="rate">등락률</th>
-              </tr>
-            </thead>
-            <tbody id="ft-tbody">
-              <tr><td colspan="4" class="empty-state">데이터 없음</td></tr>
-            </tbody>
-          </table>
+        <div class="port-card">
+          <div class="port-label">총 자산</div>
+          <div class="port-val" id="port-total">— <span>코인</span></div>
         </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head">보유 종목</div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>선수</th>
+              <th>수량</th>
+              <th>평균단가</th>
+              <th>현재가</th>
+              <th>평가액</th>
+              <th>평가손익</th>
+              <th>수익률</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-tbody">
+            <tr><td colspan="7" class="empty-state">보유 중인 주식이 없습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        <!-- 거래 내역 탭 -->
-        <div id="stab-history" style="display:none">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>시간</th>
-                <th>선수</th>
-                <th>유형</th>
-                <th>수량</th>
-                <th>단가</th>
-                <th>총액</th>
-              </tr>
-            </thead>
-            <tbody id="history-tbody">
-              <tr><td colspan="6" class="empty-state">거래 내역을 불러오는 중...</td></tr>
-            </tbody>
-          </table>
-        </div>
-
+    <!-- ═══ HISTORY VIEW ═══ -->
+    <div id="view-history" style="display:none">
+      <div class="view-title">거래 내역</div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="text-align:left">일시</th>
+              <th style="text-align:left">선수</th>
+              <th style="text-align:left">구분</th>
+              <th>수량</th>
+              <th>단가</th>
+              <th>총액</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="6" class="empty-state">거래 내역을 불러오는 중...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -866,7 +736,6 @@
   <script>
   (function () {
 
-    /* ── 팀 → 권역 fallback ── */
     var REGION_MAP = {
       "Sentinels":"americas","G2 Esports":"americas","NRG":"americas",
       "100 Thieves":"americas","Cloud9":"americas","MIBR":"americas",
@@ -876,20 +745,23 @@
       "Natus Vincere":"emea","Karmine Corp":"emea","FUT Esports":"emea",
       "BBL Esports":"emea","Fnatic":"emea","Team Vitality":"emea",
       "Eternal Fire":"emea","PCIFIC Esports":"emea","ULF Esports":"emea",
-      "GIANTX":"emea","NAVI":"emea",
+      "GIANTX":"emea",
       "DetonatioN FocusMe":"pacific","Global Esports":"pacific",
       "Kiwoom DRX":"pacific","Nongshim RedForce":"pacific",
       "Paper Rex":"pacific","Rex Regum Qeon":"pacific",
       "Team Secret":"pacific","ZETA DIVISION":"pacific",
       "FULL SENSE":"pacific","Gen.G":"pacific","VARREL":"pacific","T1":"pacific",
       "Wuxi Titan Esports Club":"cn","Guangzhou Huadu Bilibili Gaming":"cn",
-      "FunPlus Phoenix":"cn","EDward Gaming":"cn",
-      "Trace Esports":"cn","Nova Esports":"cn",
+      "FunPlus Phoenix":"cn","EDward Gaming":"cn","JD Mall JDG Esports":"cn",
+      "Trace Esports":"cn","Nova Esports":"cn","TYLOO":"cn","All Gamers":"cn",
+      "Dragon Ranger Gaming":"cn","Xi Lai Gaming":"cn","Wolves Esports":"cn",
     };
 
-    /* ── buildPlayersFromStorage (leaderboard 동일 방식) ── */
+    /* ── 선수 데이터 빌드 (vct_roster 기반) ── */
     function buildPlayersFromStorage() {
+      /* 1. vct_roster → 선수→팀 매핑 */
       var playerTeamMap = {};
+      var rosterTeams = {};
       for (var ri = 0; ri < localStorage.length; ri++) {
         var rk = localStorage.key(ri);
         if (!rk || rk.indexOf("vct_roster:") !== 0) continue;
@@ -897,16 +769,20 @@
         try {
           var r = JSON.parse(localStorage.getItem(rk) || "{}");
           ((r.main || []).concat(r.subs || [])).forEach(function (p) {
-            if (p) playerTeamMap[p.trim()] = rTeam;
+            if (p) { playerTeamMap[p.trim()] = rTeam; rosterTeams[rTeam] = true; }
           });
         } catch (e) {}
       }
 
+      /* 2. vct_p → ACS/KDA 집계 (로스터에 있는 선수만) */
       var pMap = {};
       for (var pi = 0; pi < localStorage.length; pi++) {
         var pk = localStorage.key(pi);
         if (!pk || pk.indexOf("vct_p:") !== 0) continue;
         var pName = pk.slice(6);
+        /* 로스터에 없는 선수 제외 */
+        if (!playerTeamMap[pName]) continue;
+
         var pdRaw = localStorage.getItem(pk);
         if (!pdRaw) continue;
         var pd;
@@ -923,7 +799,6 @@
             if ((parseFloat(_p[0])||0) === 0 && (parseFloat(_p[1])||0) === 0 && (parseFloat(_p[2])||0) === 0) hasKda = false;
           }
           if (acs <= 0 && !hasKda) return;
-
           if (!pMap[pName]) {
             pMap[pName] = { name: pName, acsMaps: 0, totalAcs: 0, totalK: 0, totalD: 0, kdMaps: 0, regionCounts: {} };
           }
@@ -939,12 +814,10 @@
         });
       }
 
-      /* 전체 선수 최대 mapCount (우량주 판별용) */
+      /* top 30% threshold for 우량주 */
       var allMapCounts = Object.keys(pMap).map(function (k) { return pMap[k].acsMaps; });
       allMapCounts.sort(function (a, b) { return b - a; });
-      var topThreshold = allMapCounts.length > 0
-        ? allMapCounts[Math.floor(allMapCounts.length * 0.3)] || 1
-        : 1;
+      var topThreshold = allMapCounts.length > 0 ? (allMapCounts[Math.floor(allMapCounts.length * 0.3)] || 1) : 1;
 
       var players = [];
       var idx = 0;
@@ -958,7 +831,10 @@
           if (e.regionCounts[r] > maxCnt) { maxCnt = e.regionCounts[r]; region = r; }
         });
 
-        var team = playerTeamMap[pName] || playerTeamMap[pName.trim()] || "";
+        var team = playerTeamMap[pName] || "";
+        /* 팀 소속 권역으로 region 보정 */
+        if (team && REGION_MAP[team]) region = REGION_MAP[team];
+
         var avgAcs = Math.round(e.totalAcs / e.acsMaps);
         var basePrice = Math.max(1, Math.round(avgAcs / 10));
         var kd = e.kdMaps > 0 ? parseFloat((e.totalK / Math.max(e.totalD, 0.5)).toFixed(2)) : null;
@@ -979,41 +855,28 @@
           avgAcs = Math.round(stockData.runTotal / stockData.runCount);
         }
 
-        /* 종목 유형 분류 */
         var changeRate = prev > 0 ? (price - prev) / prev * 100 : 0;
         var stockType;
-        if (e.acsMaps >= 20 && price >= topThreshold) {
-          stockType = "blue-chip";
-        } else if (e.acsMaps >= 10 && changeRate >= 0) {
-          stockType = "growth";
-        } else if (e.acsMaps >= 1 && e.acsMaps < 10) {
-          stockType = "ipo";
-        } else {
-          stockType = "growth"; /* fallback */
-        }
+        if (!stockData) stockType = "pre-ipo";
+        else if (e.acsMaps >= 20 && price >= topThreshold) stockType = "blue-chip";
+        else if (e.acsMaps >= 10 && changeRate >= 0) stockType = "growth";
+        else if (e.acsMaps < 10) stockType = "ipo";
+        else stockType = "growth";
 
         players.push({
           id: "p" + (idx++), name: pName, team: team, region: region,
-          logo: null, price: price, prev: prev, history: history,
-          mapCount: e.acsMaps, avgAcs: avgAcs, kd: kd, shares: 10000,
+          price: price, prev: prev, history: history,
+          mapCount: e.acsMaps, avgAcs: avgAcs, kd: kd,
           stockType: stockType, hasStockData: !!stockData,
         });
-      });
-
-      /* "공모주" = stock_p: 키 아예 없는 선수들 → localStorage에서 vct_p:는 있는데 stock_p: 없음 */
-      /* (이미 buildPlayersFromStorage 에서 stock_p: 체크함 — hasStockData 활용) */
-      /* 공모주 플레이어: hasStockData === false → stockType = "pre-ipo" */
-      players.forEach(function (p) {
-        if (!p.hasStockData) p.stockType = "pre-ipo";
       });
 
       players.sort(function (a, b) { return b.price - a.price; });
       return players;
     }
 
-    /* ── 상태 변수 ── */
+    /* ── 상태 ── */
     var PLAYERS       = [];
-    var ALL_PLAYERS   = []; /* 공모주 포함 전체 (로컬 stock_p 없는 선수도) */
     var selectedId    = null;
     var tradeMode     = "buy";
     var myCoins       = 0;
@@ -1022,13 +885,12 @@
     var currentRegion = "all";
     var currentTab    = "all";
     var currentType   = "blue-chip";
+    var currentView   = "market";  /* market | detail | portfolio | history */
     var TOKEN         = localStorage.getItem("vct_auth_token");
     var isAdminMode   = false;
     var sortKey       = "name";
     var sortDir       = 1;
-    var REGION_LABEL  = { americas: "AMR", emea: "EMEA", pacific: "PAC", cn: "CN" };
 
-    /* ── 헬퍼 ── */
     function calcChange(p)  { return p.price - p.prev; }
     function calcRate(p)    { return p.prev > 0 ? ((p.price - p.prev) / p.prev * 100) : 0; }
     function fmtPrice(n)    { return (n || 0).toLocaleString(); }
@@ -1040,14 +902,106 @@
     function fmtDateTime(isoStr) {
       try {
         var d = new Date(isoStr);
-        var M = d.getMonth() + 1, D = d.getDate(),
-            h = d.getHours(), m = d.getMinutes();
-        return (M < 10 ? "0" : "") + M + "/" + (D < 10 ? "0" : "") + D
-          + " " + (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+        var M = d.getMonth() + 1, D = d.getDate(), h = d.getHours(), m = d.getMinutes();
+        return (M<10?"0":"") + M + "/" + (D<10?"0":"") + D + " " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m;
       } catch (e) { return isoStr || "—"; }
     }
 
-    /* ── 즐겨찾기 토글 ── */
+    /* ── 뷰 전환 ── */
+    function showView(view) {
+      currentView = view;
+      document.getElementById("view-market").style.display    = (view === "market" || view === "detail") ? "" : "none";
+      document.getElementById("view-detail").style.display    = view === "detail" ? "" : "none";
+      /* market view 안에서 list/detail 겹치지 않도록 */
+      var mktContent = document.querySelector("#view-market > .mkt-summary").parentElement;
+      /* list 숨기기/보이기 */
+      var filterBar  = document.querySelector(".filter-bar");
+      var listWrap   = document.querySelector(".list-wrap");
+      if (view === "detail") {
+        filterBar.style.display = "none";
+        listWrap.style.display  = "none";
+        document.querySelector(".mkt-summary").style.display = "none";
+      } else {
+        filterBar.style.display = "";
+        listWrap.style.display  = "";
+        document.querySelector(".mkt-summary").style.display = "";
+      }
+      document.getElementById("view-portfolio").style.display = view === "portfolio" ? "" : "none";
+      document.getElementById("view-history").style.display   = view === "history"   ? "" : "none";
+
+      /* top tabs highlight */
+      var topView = (view === "detail") ? "market" : view;
+      document.querySelectorAll(".top-tab").forEach(function (t) {
+        t.classList.toggle("active", t.dataset.view === topView);
+      });
+
+      if (view === "portfolio") updatePortfolioSection();
+      if (view === "history")   loadTradeHistory();
+    }
+
+    /* ── 코인 표시 업데이트 ── */
+    function updateCoinDisplay() {
+      document.getElementById("coin-balance").textContent = fmtPrice(myCoins);
+      document.getElementById("coin-balance-detail").textContent = fmtPrice(myCoins) + " 코인";
+    }
+
+    /* ── 시장 요약 ── */
+    function updateMarketBar() {
+      var upCnt = 0, downCnt = 0, stockVal = 0;
+      PLAYERS.forEach(function (p) {
+        var c = calcChange(p);
+        if (c > 0) upCnt++; else if (c < 0) downCnt++;
+      });
+      Object.keys(myHoldings).forEach(function (name) {
+        var h = myHoldings[name];
+        if (!h || h.qty <= 0) return;
+        var pl = PLAYERS.find(function (x) { return x.name === name; });
+        stockVal += (pl ? pl.price : h.avgPrice) * h.qty;
+      });
+      document.getElementById("tk-up").textContent      = upCnt;
+      document.getElementById("tk-down").textContent    = downCnt;
+      document.getElementById("tk-vol").textContent     = PLAYERS.length;
+      document.getElementById("tk-coins").textContent   = fmtPrice(myCoins);
+      document.getElementById("tk-stock-val").textContent = fmtPrice(stockVal);
+      document.getElementById("tk-asset").textContent   = fmtPrice(myCoins + stockVal);
+    }
+
+    /* ── 포트폴리오 ── */
+    function updatePortfolioSection() {
+      var stockVal = 0;
+      var tbody = document.getElementById("holdings-tbody");
+      var held = Object.keys(myHoldings).filter(function (n) { return myHoldings[n] && myHoldings[n].qty > 0; });
+      if (held.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">보유 중인 주식이 없습니다.</td></tr>';
+      } else {
+        var html = "";
+        held.forEach(function (name) {
+          var h = myHoldings[name];
+          var pl = PLAYERS.find(function (x) { return x.name === name; });
+          var curPrice = pl ? pl.price : h.avgPrice;
+          var eval_  = curPrice * h.qty;
+          var pnl    = eval_ - h.avgPrice * h.qty;
+          var pnlPct = h.avgPrice > 0 ? ((curPrice - h.avgPrice) / h.avgPrice * 100) : 0;
+          var cls    = pnl > 0 ? "pnl-up" : pnl < 0 ? "pnl-down" : "";
+          stockVal  += eval_;
+          html += '<tr>' +
+            '<td>' + name + (pl ? '<div style="font-size:11px;color:var(--dim)">' + pl.team + '</div>' : '') + '</td>' +
+            '<td>' + h.qty.toLocaleString() + '</td>' +
+            '<td>' + h.avgPrice.toLocaleString() + '</td>' +
+            '<td>' + curPrice.toLocaleString() + '</td>' +
+            '<td>' + eval_.toLocaleString() + '</td>' +
+            '<td class="' + cls + '">' + (pnl >= 0 ? "+" : "") + pnl.toLocaleString() + '</td>' +
+            '<td class="' + cls + '">' + (pnlPct >= 0 ? "+" : "") + pnlPct.toFixed(2) + '%</td>' +
+          '</tr>';
+        });
+        tbody.innerHTML = html;
+      }
+      document.getElementById("port-coins").innerHTML = fmtPrice(myCoins) + ' <span>코인</span>';
+      document.getElementById("port-stock").innerHTML = fmtPrice(stockVal) + ' <span>코인</span>';
+      document.getElementById("port-total").innerHTML = fmtPrice(myCoins + stockVal) + ' <span>코인</span>';
+    }
+
+    /* ── 즐겨찾기 ── */
     function toggleWatchlist(playerName, e) {
       if (e) e.stopPropagation();
       var idx2 = myWatchlist.indexOf(playerName);
@@ -1066,8 +1020,7 @@
         myWatchlist.splice(idx2, 1);
         if (TOKEN) {
           fetch("/api/stock/watchlist/" + encodeURIComponent(playerName), {
-            method: "DELETE",
-            headers: { "Authorization": "Bearer " + TOKEN },
+            method: "DELETE", headers: { "Authorization": "Bearer " + TOKEN },
           }).catch(function () {});
         } else {
           try { localStorage.setItem("watchlist_local", JSON.stringify(myWatchlist)); } catch(ex) {}
@@ -1076,320 +1029,148 @@
       renderStockList(document.getElementById("stock-search").value);
     }
 
-    /* ── 시장 요약 업데이트 ── */
-    function updateMarketBar() {
-      var upCnt = 0, downCnt = 0;
-      PLAYERS.forEach(function (p) {
-        var c = calcChange(p);
-        if (c > 0) upCnt++;
-        else if (c < 0) downCnt++;
-      });
-      document.getElementById("tk-up").textContent  = upCnt;
-      document.getElementById("tk-down").textContent = downCnt;
-      document.getElementById("tk-vol").textContent  = PLAYERS.length;
-
-      /* 주식 평가액 */
-      var stockVal = 0;
-      Object.keys(myHoldings).forEach(function (name) {
-        var h = myHoldings[name];
-        if (!h || h.qty <= 0) return;
-        var pl = PLAYERS.find(function (x) { return x.name === name; });
-        stockVal += (pl ? pl.price : h.avgPrice) * h.qty;
-      });
-      var totalAsset = myCoins + stockVal;
-
-      document.getElementById("tk-coins").textContent    = myCoins.toLocaleString();
-      document.getElementById("tk-stock-val").textContent = stockVal.toLocaleString();
-      document.getElementById("tk-asset").textContent    = totalAsset.toLocaleString();
-    }
-
-    /* ── 포트폴리오 섹션 업데이트 ── */
-    function updatePortfolioSection() {
-      var stockVal = 0;
-      var tbody = document.getElementById("holdings-tbody");
-      var held = Object.keys(myHoldings).filter(function (n) { return myHoldings[n] && myHoldings[n].qty > 0; });
-
-      if (held.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">보유 중인 주식이 없습니다.</td></tr>';
-      } else {
-        var html = "";
-        held.forEach(function (name) {
-          var h = myHoldings[name];
-          var pl = PLAYERS.find(function (x) { return x.name === name; });
-          var curPrice = pl ? pl.price : h.avgPrice;
-          var eval_  = curPrice * h.qty;
-          var pnl    = eval_ - h.avgPrice * h.qty;
-          var pnlPct = h.avgPrice > 0 ? ((curPrice - h.avgPrice) / h.avgPrice * 100) : 0;
-          var pnlCls = pnl > 0 ? "pnl-up" : pnl < 0 ? "pnl-down" : "";
-          stockVal += eval_;
-          html += '<tr>' +
-            '<td>' + name + (pl ? '<div style="font-size:10px;color:var(--text-dim);font-family:\'Noto Sans KR\',sans-serif">' + pl.team + '</div>' : '') + '</td>' +
-            '<td>' + h.qty.toLocaleString() + '</td>' +
-            '<td>' + h.avgPrice.toLocaleString() + '</td>' +
-            '<td>' + curPrice.toLocaleString() + '</td>' +
-            '<td>' + eval_.toLocaleString() + '</td>' +
-            '<td class="' + pnlCls + '">' + (pnl >= 0 ? "+" : "") + pnl.toLocaleString() + '</td>' +
-            '<td class="' + pnlCls + '">' + (pnlPct >= 0 ? "+" : "") + pnlPct.toFixed(2) + '%</td>' +
-          '</tr>';
-        });
-        tbody.innerHTML = html;
-      }
-
-      var totalAsset = myCoins + stockVal;
-      document.getElementById("port-coins").textContent = myCoins.toLocaleString();
-      document.getElementById("port-stock").textContent = stockVal.toLocaleString();
-      document.getElementById("port-total").textContent = totalAsset.toLocaleString();
-    }
-
-    /* ── 보유 수량 표시 ── */
-    function updateHoldingDisplay(p) {
-      var h   = p ? myHoldings[p.name] : null;
-      var qty = h ? h.qty : 0;
-      document.getElementById("holding-qty").textContent = qty + " 주";
-      var avgRow = document.getElementById("holding-avg-row");
-      if (h && h.qty > 0 && p) {
-        var pnl = (p.price - h.avgPrice) * h.qty;
-        var pnlEl = document.getElementById("holding-pnl");
-        pnlEl.textContent = (pnl >= 0 ? "+" : "") + pnl.toLocaleString() + " 코인";
-        pnlEl.style.color = pnl > 0 ? "var(--up)" : pnl < 0 ? "var(--down)" : "var(--text-dim)";
-        document.getElementById("holding-avg").textContent = h.avgPrice.toLocaleString() + " 코인";
-        avgRow.style.display = "";
-      } else {
-        avgRow.style.display = "none";
-      }
-    }
-
-    /* ── 필터된 선수 목록 ── */
+    /* ── 필터 ── */
     function getFilteredPlayers(search) {
       var s = (search || "").toLowerCase();
       var list = PLAYERS.slice();
-
-      /* 탭 필터 */
-      if (currentTab === "holdings") {
-        list = list.filter(function (p) { return myHoldings[p.name] && myHoldings[p.name].qty > 0; });
-      } else if (currentTab === "watchlist") {
-        list = list.filter(function (p) { return myWatchlist.indexOf(p.name) !== -1; });
-      } else if (currentTab === "type") {
-        if (currentType === "pre-ipo") {
-          list = list.filter(function (p) { return p.stockType === "pre-ipo"; });
-        } else {
-          list = list.filter(function (p) { return p.stockType === currentType; });
-        }
-      }
-
-      /* 권역 필터 */
-      if (currentRegion !== "all") {
-        list = list.filter(function (p) { return p.region === currentRegion; });
-      }
-
-      /* 검색 필터 */
-      if (s) {
-        list = list.filter(function (p) {
-          return p.name.toLowerCase().indexOf(s) !== -1 || p.team.toLowerCase().indexOf(s) !== -1;
-        });
-      }
-
-      /* 정렬 */
+      if (currentTab === "holdings")  list = list.filter(function (p) { return myHoldings[p.name] && myHoldings[p.name].qty > 0; });
+      else if (currentTab === "watchlist") list = list.filter(function (p) { return myWatchlist.indexOf(p.name) !== -1; });
+      else if (currentTab === "type") list = list.filter(function (p) { return p.stockType === currentType; });
+      if (currentRegion !== "all") list = list.filter(function (p) { return p.region === currentRegion; });
+      if (s) list = list.filter(function (p) { return p.name.toLowerCase().indexOf(s) !== -1 || p.team.toLowerCase().indexOf(s) !== -1; });
       list.sort(function (a, b) {
-        var va, vb;
-        if (sortKey === "name")   { va = a.name; vb = b.name; return sortDir * va.localeCompare(vb); }
-        if (sortKey === "price")  { va = a.price; vb = b.price; }
-        if (sortKey === "change") { va = calcChange(a); vb = calcChange(b); }
-        if (sortKey === "rate")   { va = calcRate(a); vb = calcRate(b); }
+        if (sortKey === "name")   return sortDir * a.name.localeCompare(b.name);
+        var va = sortKey === "price" ? a.price : sortKey === "change" ? calcChange(a) : calcRate(a);
+        var vb = sortKey === "price" ? b.price : sortKey === "change" ? calcChange(b) : calcRate(b);
         return sortDir * (vb - va);
       });
-
       return list;
     }
 
     /* ── 종목 리스트 렌더링 ── */
     function renderStockList(filter) {
-      var list = document.getElementById("stock-list");
+      var el = document.getElementById("stock-list");
       var players = getFilteredPlayers(filter);
-
       if (players.length === 0) {
-        list.innerHTML = '<div class="empty-state">검색 결과 없음</div>';
-        return;
+        el.innerHTML = '<div class="empty-state">결과 없음</div>'; return;
       }
-
+      var regionLabels = { americas: "AMR", emea: "EMEA", pacific: "PAC", cn: "CN" };
       var html = "";
       players.forEach(function (p) {
         var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
-        var initial = p.name.charAt(0).toUpperCase();
-        var regionBadge = currentRegion === "all" && currentTab === "all"
-          ? '<span class="region-badge ' + p.region + '">' + (REGION_LABEL[p.region] || "?") + '</span>'
-          : "";
         var isStarred = myWatchlist.indexOf(p.name) !== -1;
-        var dimmed = (currentTab === "type" && p.stockType === "pre-ipo") ? " dimmed" : "";
-        html += '<div class="stock-row' + (p.id === selectedId ? " active" : "") + dimmed + '" data-id="' + p.id + '">' +
-          '<div class="stock-player">' +
-            '<div class="stock-player-logo">' + initial + '</div>' +
-            '<div class="stock-player-info">' +
-              '<div class="stock-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '">' +
-                '<span class="pname-text">' + p.name + '</span>' +
-                regionBadge +
-                (isAdminMode ? '<button class="admin-rename-btn" data-action="rename" title="이름 수정">✏</button><button class="admin-rename-btn" data-action="delete" title="삭제" style="color:rgba(220,38,38,.5)">🗑</button>' : '') +
-              '</div>' +
-              '<div class="stock-player-team">' + p.team + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="stock-price">' + fmtPrice(p.price) + '</div>' +
-          '<div class="stock-change ' + cls + '">' + fmtChg(chg) + '</div>' +
-          '<div class="stock-rate ' + cls + '">' + fmtRate(rate) + '</div>' +
-          '<button class="star-btn' + (isStarred ? " starred" : "") + '" data-pname="' + p.name.replace(/"/g,'&quot;') + '" title="즐겨찾기">' +
-            (isStarred ? '★' : '☆') +
-          '</button>' +
-        '</div>';
+        var regionBadge = currentRegion === "all"
+          ? '<span class="rbadge ' + p.region + '">' + (regionLabels[p.region] || "?") + '</span>' : "";
+        var adminBtns = isAdminMode
+          ? '<button class="admin-btn-inline" data-action="rename" data-pname="' + p.name.replace(/"/g,'&quot;') + '" title="이름 수정">✏</button>'
+          + '<button class="admin-btn-inline" data-action="delete" data-pname="' + p.name.replace(/"/g,'&quot;') + '" title="삭제" style="color:rgba(220,38,38,.5)">🗑</button>' : "";
+        html += '<div class="stock-row' + (p.id === selectedId ? " active" : "") + '" data-id="' + p.id + '">'
+          + '<div class="s-player">'
+          +   '<div class="s-logo">' + p.name.charAt(0).toUpperCase() + '</div>'
+          +   '<div class="s-info">'
+          +     '<div class="s-name">' + p.name + regionBadge + adminBtns + '</div>'
+          +     '<div class="s-team">' + p.team + '</div>'
+          +   '</div>'
+          + '</div>'
+          + '<div class="s-price">' + fmtPrice(p.price) + '</div>'
+          + '<div class="s-chg ' + cls + '">' + fmtChg(chg) + '</div>'
+          + '<div class="s-rate ' + cls + '">' + fmtRate(rate) + '</div>'
+          + '<button class="star-btn' + (isStarred ? " starred" : "") + '" data-pname="' + p.name.replace(/"/g,'&quot;') + '">'
+          +   (isStarred ? '★' : '☆')
+          + '</button>'
+        + '</div>';
       });
-      list.innerHTML = html;
+      el.innerHTML = html;
 
-      list.querySelectorAll(".stock-row").forEach(function (row) {
+      el.querySelectorAll(".stock-row").forEach(function (row) {
         row.addEventListener("click", function () { selectPlayer(row.dataset.id); });
       });
-      list.querySelectorAll(".star-btn").forEach(function (btn) {
+      el.querySelectorAll(".star-btn").forEach(function (btn) {
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
           toggleWatchlist(btn.getAttribute("data-pname"), e);
         });
       });
       if (isAdminMode) {
-        list.querySelectorAll('.admin-rename-btn').forEach(function(btn) {
-          btn.addEventListener('click', function(e) {
+        el.querySelectorAll(".admin-btn-inline").forEach(function (btn) {
+          btn.addEventListener("click", function (e) {
             e.stopPropagation();
-            var nameDiv = btn.closest('[data-pname]');
-            if (!nameDiv) return;
-            var pname = nameDiv.getAttribute('data-pname');
-            if (btn.dataset.action === 'rename') startRename(pname);
-            else if (btn.dataset.action === 'delete') startDelete(pname);
+            var pname = btn.dataset.pname;
+            if (btn.dataset.action === "rename") startRename(pname);
+            else startDelete(pname);
           });
         });
       }
     }
 
-    /* ── 전체 종목 테이블 렌더링 ── */
-    function renderFullTable() {
-      var tbody = document.getElementById("ft-tbody");
-      var html  = "";
-      PLAYERS.forEach(function (p) {
-        var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
-        var initial = p.name.charAt(0).toUpperCase();
-        html += '<tr class="' + (p.id === selectedId ? "active" : "") + '" data-id="' + p.id + '">' +
-          '<td><div class="ft-player-cell">' +
-            '<div class="ft-player-logo">' + initial + '</div>' +
-            '<div><div class="ft-player-name" data-pname="' + p.name.replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:4px;">' +
-              '<span class="pname-text">' + p.name + '</span>' +
-              (isAdminMode ? '<button class="admin-rename-btn" data-action="rename" title="이름 수정">✏</button><button class="admin-rename-btn" data-action="delete" title="삭제" style="color:rgba(220,38,38,.5)">🗑</button>' : '') +
-            '</div>' +
-            '<div class="ft-player-team">' + p.team + '</div></div></div></td>' +
-          '<td>' + fmtPrice(p.price) + '</td>' +
-          '<td class="' + cls + '">' + fmtChg(chg) + '</td>' +
-          '<td class="' + cls + '">' + fmtRate(rate) + '</td>' +
-        '</tr>';
-      });
-      tbody.innerHTML = html || '<tr><td colspan="4" class="empty-state">데이터 없음</td></tr>';
-      tbody.querySelectorAll("tr").forEach(function (tr) {
-        tr.addEventListener("click", function () { selectPlayer(tr.dataset.id); });
-      });
-      if (isAdminMode) {
-        tbody.querySelectorAll('.admin-rename-btn').forEach(function(btn) {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var nameDiv = btn.closest('[data-pname]');
-            if (!nameDiv) return;
-            var pname = nameDiv.getAttribute('data-pname');
-            if (btn.dataset.action === 'rename') startRename(pname);
-            else if (btn.dataset.action === 'delete') startDelete(pname);
-          });
-        });
-      }
+    /* ── 보유 수량 표시 ── */
+    function updateHoldingDisplay(p) {
+      var h = p ? myHoldings[p.name] : null;
+      document.getElementById("holding-qty").textContent = (h ? h.qty : 0) + " 주";
+      var avgRow = document.getElementById("holding-avg-row");
+      if (h && h.qty > 0 && p) {
+        var pnl = (p.price - h.avgPrice) * h.qty;
+        var pnlEl = document.getElementById("holding-pnl");
+        pnlEl.textContent = (pnl >= 0 ? "+" : "") + fmtPrice(pnl) + " 코인";
+        pnlEl.style.color = pnl > 0 ? "var(--up)" : pnl < 0 ? "var(--down)" : "var(--dim)";
+        document.getElementById("holding-avg").textContent = fmtPrice(h.avgPrice) + " 코인";
+        avgRow.style.display = "";
+      } else { avgRow.style.display = "none"; }
     }
 
-    /* ── 거래 내역 로드 ── */
-    function loadTradeHistory() {
-      var tbody = document.getElementById("history-tbody");
-      if (!TOKEN) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">로그인이 필요합니다.</td></tr>';
-        return;
-      }
-      fetch("/api/stock/trade-history", { headers: { Authorization: "Bearer " + TOKEN } })
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          var history = d.history || [];
-          if (history.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">거래 내역이 없습니다.</td></tr>';
-            return;
-          }
-          var html = "";
-          /* 최신 순으로 표시 */
-          history.slice().reverse().forEach(function (h) {
-            html += '<tr>' +
-              '<td>' + fmtDateTime(h.ts) + '</td>' +
-              '<td>' + (h.player || "—") + '</td>' +
-              '<td><span class="type-' + (h.type || "buy") + '">' + (h.type === "sell" ? "매도" : "매수") + '</span></td>' +
-              '<td>' + (h.qty || 0).toLocaleString() + '</td>' +
-              '<td>' + (h.price || 0).toLocaleString() + '</td>' +
-              '<td>' + (h.total || 0).toLocaleString() + '</td>' +
-            '</tr>';
-          });
-          tbody.innerHTML = html;
-        })
-        .catch(function () {
-          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">불러오기 실패</td></tr>';
-        });
-    }
-
-    /* ── 선수 선택 ── */
+    /* ── 선수 선택 → 상세 뷰 ── */
     function selectPlayer(id) {
       var p = findPlayer(id);
       if (!p) return;
       selectedId = id;
+
       var chg = calcChange(p), rate = calcRate(p), cls = colorCls(chg);
-      document.getElementById("chart-name").textContent   = p.name;
-      document.getElementById("chart-team").textContent   = p.team;
-      document.getElementById("chart-price").textContent  = fmtPrice(p.price) + " 코인";
+      document.getElementById("chart-logo").textContent        = p.name.charAt(0).toUpperCase();
+      document.getElementById("chart-name").textContent        = p.name;
+      document.getElementById("chart-team").textContent        = p.team;
+      document.getElementById("chart-price").textContent       = fmtPrice(p.price) + " 코인";
       var cpEl = document.getElementById("chart-price-change");
-      cpEl.textContent = fmtChg(chg) + " (" + fmtRate(rate) + ")";
-      cpEl.className   = "chart-price-change " + cls;
-      document.getElementById("chart-logo").textContent   = p.name.charAt(0).toUpperCase();
-      document.getElementById("stat-open").textContent    = fmtPrice(p.prev);
-      document.getElementById("stat-close").textContent   = fmtPrice(p.price);
-      var statChgEl  = document.getElementById("stat-chg");
-      var statRateEl = document.getElementById("stat-rate");
-      statChgEl.textContent  = fmtChg(chg);
-      statChgEl.className    = "chart-stat-value " + cls;
-      statRateEl.textContent = fmtRate(rate);
-      statRateEl.className   = "chart-stat-value " + cls;
-      document.getElementById("stat-avgacs").textContent   = p.avgAcs != null ? p.avgAcs : "—";
-      document.getElementById("stat-mapcount").textContent = p.mapCount != null ? p.mapCount + "맵" : "—";
-      document.getElementById("trade-unit-price").innerHTML = fmtPrice(p.price) + ' <span>코인</span>';
-      document.getElementById("trade-qty-input").value = "";
+      cpEl.textContent  = fmtChg(chg) + " (" + fmtRate(rate) + ")";
+      cpEl.className    = "detail-change " + cls;
+      document.getElementById("stat-open").textContent        = fmtPrice(p.prev);
+      document.getElementById("stat-close").textContent       = fmtPrice(p.price);
+      var scEl = document.getElementById("stat-chg");
+      var srEl = document.getElementById("stat-rate");
+      scEl.textContent = fmtChg(chg); scEl.className = "stat-val " + cls;
+      srEl.textContent = fmtRate(rate); srEl.className = "stat-val " + cls;
+      document.getElementById("stat-avgacs").textContent      = p.avgAcs != null ? p.avgAcs : "—";
+      document.getElementById("stat-mapcount").textContent    = p.mapCount != null ? p.mapCount + "맵" : "—";
+      document.getElementById("trade-unit-price").innerHTML   = fmtPrice(p.price) + ' <span>코인</span>';
+      document.getElementById("trade-qty-input").value        = "";
       updateHoldingDisplay(p);
-      drawChart(p);
-      renderStockList(document.getElementById("stock-search").value);
-      renderFullTable();
       updateTotal();
+
       var resetBtn = document.getElementById("admin-player-reset-btn");
-      if (resetBtn) resetBtn.style.display = (window.vctIsAdmin && window.vctIsAdmin()) ? "" : "none";
+      if (resetBtn) resetBtn.style.display = isAdminMode ? "" : "none";
+
+      showView("detail");
+
+      /* 차트 그리기 (뷰 전환 후 다음 프레임) */
+      requestAnimationFrame(function () { drawChart(p); });
     }
 
-    /* ── 차트 그리기 ── */
+    /* ── 차트 ── */
     function drawChart(p) {
       var canvas = document.getElementById("stock-chart");
-      var ctx    = canvas.getContext("2d");
-      var W = canvas.parentElement.offsetWidth - 40;
-      var H = canvas.parentElement.offsetHeight;
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var W = canvas.parentElement.offsetWidth; var H = canvas.parentElement.offsetHeight;
       canvas.width = W; canvas.height = H;
       ctx.clearRect(0, 0, W, H);
 
       var activePeriod = document.querySelector(".period-tab.active")
         ? document.querySelector(".period-tab.active").dataset.period : "all";
-      var fullHistory = p.history && p.history.length > 1 ? p.history : null;
-      var data = fullHistory;
-      if (fullHistory && activePeriod !== "all") {
+      var full = p.history && p.history.length > 1 ? p.history : null;
+      var data = full;
+      if (full && activePeriod !== "all") {
         var n = parseInt(activePeriod, 10);
-        if (!isNaN(n) && fullHistory.length > n) data = fullHistory.slice(-n);
+        if (!isNaN(n) && full.length > n) data = full.slice(-n);
       }
-
       if (!data) {
         ctx.font = "13px 'Noto Sans KR', sans-serif";
         ctx.fillStyle = "rgba(255,255,255,.2)";
@@ -1397,7 +1178,6 @@
         ctx.fillText("거래 기록이 없습니다", W / 2, H / 2);
         return;
       }
-
       var minV = Math.min.apply(null, data) * 0.998;
       var maxV = Math.max.apply(null, data) * 1.002;
       if (maxV === minV) { maxV += 1; minV -= 1; }
@@ -1406,40 +1186,130 @@
       var isUp = p.price >= p.prev;
       var lineColor = isUp ? "#e84444" : "#3b8fff";
       var fillColor = isUp ? "rgba(232,68,68,.12)" : "rgba(59,143,255,.12)";
-
-      /* 그리드 */
-      ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
       for (var g = 0; g < 5; g++) {
         var gy = H * 0.05 + (H * 0.85 / 4) * g;
         ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
       }
-      /* 채우기 */
       ctx.beginPath();
       ctx.moveTo(toX(0), H);
       data.forEach(function (v, i) { ctx.lineTo(toX(i), toY(v)); });
       ctx.lineTo(toX(data.length - 1), H);
       ctx.closePath(); ctx.fillStyle = fillColor; ctx.fill();
-      /* 선 */
       ctx.beginPath();
-      data.forEach(function (v, i) {
-        if (i === 0) ctx.moveTo(toX(i), toY(v));
-        else         ctx.lineTo(toX(i), toY(v));
-      });
-      ctx.strokeStyle = lineColor; ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.stroke();
-      /* 끝점 */
+      data.forEach(function (v, i) { if (i === 0) ctx.moveTo(toX(i), toY(v)); else ctx.lineTo(toX(i), toY(v)); });
+      ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5; ctx.lineJoin = "round"; ctx.stroke();
       var lx = toX(data.length - 1), ly = toY(data[data.length - 1]);
       ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
       ctx.fillStyle = lineColor; ctx.fill();
     }
 
-    /* ── 총액 계산 ── */
     function updateTotal() {
       var p   = selectedId ? findPlayer(selectedId) : null;
       var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
       document.getElementById("trade-total").innerHTML = fmtPrice((p ? p.price : 0) * qty) + ' <span>코인</span>';
     }
 
-    /* ── 이벤트 리스너: 매수/매도 탭 ── */
+    /* ── 거래 내역 ── */
+    function loadTradeHistory() {
+      var tbody = document.getElementById("history-tbody");
+      if (!TOKEN) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">로그인이 필요합니다.</td></tr>'; return; }
+      fetch("/api/stock/trade-history", { headers: { Authorization: "Bearer " + TOKEN } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var history = d.history || [];
+          if (!history.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">거래 내역이 없습니다.</td></tr>'; return; }
+          var html = "";
+          history.slice().reverse().forEach(function (h) {
+            html += '<tr>'
+              + '<td>' + fmtDateTime(h.ts) + '</td>'
+              + '<td>' + (h.player || "—") + '</td>'
+              + '<td><span class="type-' + (h.type || "buy") + '">' + (h.type === "sell" ? "매도" : "매수") + '</span></td>'
+              + '<td>' + (h.qty || 0).toLocaleString() + '</td>'
+              + '<td>' + (h.price || 0).toLocaleString() + '</td>'
+              + '<td>' + (h.total || 0).toLocaleString() + '</td>'
+            + '</tr>';
+          });
+          tbody.innerHTML = html;
+        })
+        .catch(function () { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">불러오기 실패</td></tr>'; });
+    }
+
+    /* ── 이벤트 바인딩 ── */
+
+    /* 뒤로 가기 */
+    document.getElementById("detail-back-btn").addEventListener("click", function () {
+      showView("market");
+      renderStockList(document.getElementById("stock-search").value);
+    });
+
+    /* Top tabs */
+    document.querySelectorAll(".top-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showView(btn.dataset.view);
+      });
+    });
+
+    /* 검색 */
+    document.getElementById("stock-search").addEventListener("input", function () {
+      renderStockList(this.value);
+    });
+
+    /* 필터 칩: tab */
+    document.querySelectorAll(".chip[data-tab]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".chip[data-tab]").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        currentTab = btn.dataset.tab;
+        document.getElementById("type-sub-row").classList.toggle("visible", currentTab === "type");
+        renderStockList(document.getElementById("stock-search").value);
+      });
+    });
+
+    /* 필터 칩: type */
+    document.querySelectorAll(".chip[data-type]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".chip[data-type]").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        currentType = btn.dataset.type;
+        renderStockList(document.getElementById("stock-search").value);
+      });
+    });
+
+    /* 필터 칩: region */
+    document.querySelectorAll(".chip[data-region]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".chip[data-region]").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        currentRegion = btn.dataset.region;
+        renderStockList(document.getElementById("stock-search").value);
+      });
+    });
+
+    /* 정렬 헤더 */
+    document.querySelectorAll(".lh-cell[data-sort]").forEach(function (cell) {
+      cell.addEventListener("click", function () {
+        var key = cell.dataset.sort;
+        if (sortKey === key) sortDir = -sortDir;
+        else { sortKey = key; sortDir = key === "name" ? 1 : -1; }
+        document.querySelectorAll(".lh-cell").forEach(function (c) { c.classList.remove("sorted"); });
+        cell.classList.add("sorted");
+        cell.querySelector(".sort-arrow").textContent = sortDir === 1 ? "↓" : "↑";
+        renderStockList(document.getElementById("stock-search").value);
+      });
+    });
+
+    /* 기간 탭 */
+    document.querySelectorAll(".period-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".period-tab").forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        var p = selectedId ? findPlayer(selectedId) : null;
+        if (p) drawChart(p);
+      });
+    });
+
+    /* 매수/매도 탭 */
     document.getElementById("tab-buy").addEventListener("click", function () {
       tradeMode = "buy";
       document.getElementById("tab-buy").className  = "trade-tab active-buy";
@@ -1456,19 +1326,16 @@
     });
     document.getElementById("trade-qty-input").addEventListener("input", updateTotal);
 
-    /* ── 주문 실행 ── */
+    /* 주문 */
     document.getElementById("trade-btn").addEventListener("click", function () {
       var p = selectedId ? findPlayer(selectedId) : null;
       if (!p) { alert("선수를 먼저 선택해 주세요."); return; }
       if (!TOKEN) { alert("로그인이 필요합니다."); return; }
       var qty = parseInt(document.getElementById("trade-qty-input").value) || 0;
       if (qty < 1) { alert("수량을 입력해 주세요."); return; }
-      var total = p.price * qty;
       var btn = document.getElementById("trade-btn");
       btn.disabled = true;
-
-      var endpoint = tradeMode === "buy" ? "/api/stock/buy" : "/api/stock/sell";
-      fetch(endpoint, {
+      fetch(tradeMode === "buy" ? "/api/stock/buy" : "/api/stock/sell", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
         body: JSON.stringify({ playerName: p.name, qty: qty, price: p.price }),
@@ -1479,294 +1346,141 @@
           myCoins    = d.coins;
           myHoldings = d.holdings;
           document.getElementById("trade-qty-input").value = "";
-          document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-          updateHoldingDisplay(p);
-          updateTotal(); updateMarketBar(); renderFullTable();
-          renderStockList(document.getElementById("stock-search").value);
-          updatePortfolioSection();
-          var label = tradeMode === "buy" ? "매수" : "매도";
-          alert(p.name + " " + qty + "주 " + label + " 완료 (" + fmtPrice(total) + " 코인)");
+          updateCoinDisplay(); updateHoldingDisplay(p); updateTotal(); updateMarketBar();
+          alert(p.name + " " + qty + "주 " + (tradeMode === "buy" ? "매수" : "매도") + " 완료");
         })
         .catch(function () { alert("서버 오류가 발생했습니다."); })
         .finally(function () { btn.disabled = false; });
     });
 
-    /* ── 검색 ── */
-    document.getElementById("stock-search").addEventListener("input", function () {
-      renderStockList(this.value);
-    });
-
-    /* ── 메인 탭 ── */
-    document.querySelectorAll(".main-tab").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll(".main-tab").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        currentTab = btn.dataset.tab;
-        var subTabs = document.getElementById("type-sub-tabs");
-        if (currentTab === "type") subTabs.classList.add("visible");
-        else subTabs.classList.remove("visible");
-        renderStockList(document.getElementById("stock-search").value);
-      });
-    });
-
-    /* ── 종목유형 서브탭 ── */
-    document.querySelectorAll(".type-sub-tab").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll(".type-sub-tab").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        currentType = btn.dataset.type;
-        renderStockList(document.getElementById("stock-search").value);
-      });
-    });
-
-    /* ── 권역 탭 ── */
-    document.querySelectorAll(".region-tab").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll(".region-tab").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        currentRegion = btn.dataset.region;
-        renderStockList(document.getElementById("stock-search").value);
-      });
-    });
-
-    /* ── 기간 탭 ── */
-    document.querySelectorAll(".period-tab").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll(".period-tab").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        var p = selectedId ? findPlayer(selectedId) : null;
-        if (p) drawChart(p);
-      });
-    });
-
-    /* ── 정렬 헤더 (종목 리스트) ── */
-    document.querySelectorAll(".st-head-cell[data-sort]").forEach(function (cell) {
-      cell.addEventListener("click", function () {
-        var key = cell.dataset.sort;
-        if (sortKey === key) { sortDir = -sortDir; }
-        else { sortKey = key; sortDir = 1; }
-        document.querySelectorAll(".st-head-cell").forEach(function (c) { c.classList.remove("sorted"); });
-        cell.classList.add("sorted");
-        cell.querySelector(".sort-arrow").textContent = sortDir === 1 ? "↓" : "↑";
-        renderStockList(document.getElementById("stock-search").value);
-      });
-    });
-
-    /* ── 섹션 탭 (포트폴리오/전체종목/거래내역) ── */
-    document.querySelectorAll(".section-tab").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll(".section-tab").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        var tab = btn.dataset.stab;
-        document.getElementById("stab-portfolio").style.display   = tab === "portfolio"  ? "" : "none";
-        document.getElementById("stab-all-stocks").style.display  = tab === "all-stocks" ? "" : "none";
-        document.getElementById("stab-history").style.display     = tab === "history"    ? "" : "none";
-        if (tab === "history") loadTradeHistory();
-        if (tab === "all-stocks") renderFullTable();
-        if (tab === "portfolio") updatePortfolioSection();
-      });
-    });
-
-    /* ── 전체종목 테이블 정렬 헤더 ── */
-    var ftSortKey = "price", ftSortDir = 1;
-    document.querySelectorAll("#ft-table th[data-sort]").forEach(function (th) {
-      th.addEventListener("click", function () {
-        var key = th.dataset.sort;
-        if (ftSortKey === key) ftSortDir = -ftSortDir;
-        else { ftSortKey = key; ftSortDir = 1; }
-        PLAYERS.sort(function (a, b) {
-          var va, vb;
-          if (key === "price")  { va = a.price; vb = b.price; }
-          if (key === "change") { va = calcChange(a); vb = calcChange(b); }
-          if (key === "rate")   { va = calcRate(a); vb = calcRate(b); }
-          return ftSortDir * (vb - va);
-        });
-        renderFullTable();
-      });
-    });
-
     window.addEventListener("resize", function () {
       var p = selectedId ? findPlayer(selectedId) : null;
-      if (p) drawChart(p);
+      if (p && currentView === "detail") drawChart(p);
     });
 
-    /* ── Admin 기능 ── */
-    window.debugStock = function (searchName) {
-      var q = searchName ? searchName.toLowerCase() : null;
-      var found = false;
-      for (var pi = 0; pi < localStorage.length; pi++) {
-        var pk = localStorage.key(pi);
-        if (!pk || pk.indexOf("vct_p:") !== 0) continue;
-        var pName = pk.slice(6);
-        if (q && pName.toLowerCase().indexOf(q) === -1) continue;
-        found = true;
-        var pd; try { pd = JSON.parse(localStorage.getItem(pk) || "{}"); } catch (e) { continue; }
-        if (!pd.maps) { console.log("[debugStock]", pName, "→ maps 없음"); continue; }
-        var entries = pd.maps.map(function (m) {
-          return { league: m.league || "?", stage: m.stage || "?", acs: m.acs, kda: m.kda, matchKey: m.matchKey };
-        });
-        var validAcs = entries.filter(function (e) { return parseFloat(e.acs) > 0; });
-        var avgAcs = validAcs.length ? Math.round(validAcs.reduce(function (s, e) { return s + parseFloat(e.acs); }, 0) / validAcs.length) : 0;
-        console.group("[debugStock] " + pName + " (" + validAcs.length + "맵, 평균ACS " + avgAcs + ")");
-        console.table(entries);
-        console.groupEnd();
-      }
-      if (!found) console.log("[debugStock] '" + searchName + "' 선수 없음");
-    };
-
+    /* ── Admin ── */
     window.adminResetStock = function () {
-      if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
-      if (!confirm("모든 주식 데이터를 리셋하시겠습니까?\n\n되돌릴 수 없습니다.")) return;
+      if (!isAdminMode) return;
+      if (!confirm("모든 주식 데이터를 리셋하시겠습니까?")) return;
       var keys = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
         if (k && k.indexOf("stock_p:") === 0) keys.push(k);
       }
       keys.forEach(function (k) { localStorage.removeItem(k); });
-      alert("리셋 완료 (" + keys.length + "명)");
-      location.reload();
+      alert("리셋 완료 (" + keys.length + "명)"); location.reload();
     };
-
     window.adminResetPlayerStock = function () {
-      if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
+      if (!isAdminMode) return;
       var p = selectedId ? findPlayer(selectedId) : null;
       if (!p) return;
       if (!confirm(p.name + " 선수의 주식 데이터를 리셋하시겠습니까?")) return;
       localStorage.removeItem("stock_p:" + p.name);
       PLAYERS = buildPlayersFromStorage();
-      updateMarketBar();
-      renderStockList();
-      renderFullTable();
       var refreshed = PLAYERS.find(function (x) { return x.name === p.name; });
       if (refreshed) selectPlayer(refreshed.id);
+      else showView("market");
       alert(p.name + " 리셋 완료");
     };
-
     window.adminRefundAll = function () {
-      if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
-      if (!confirm("전체 환불을 진행합니다.\n모든 유저의 보유 주식을 매입가 기준으로 환불하고 holdings를 초기화합니다.\n\n되돌릴 수 없습니다. 계속하시겠습니까?")) return;
+      if (!isAdminMode) return;
+      if (!confirm("전체 환불을 진행합니다. 되돌릴 수 없습니다.")) return;
       var btn = document.getElementById("admin-refund-btn");
-      btn.disabled = true;
-      btn.textContent = "처리중...";
-      var tok = localStorage.getItem("vct_auth_token") || "";
+      btn.disabled = true; btn.textContent = "처리중...";
       fetch("/api/admin/stock-refund-all", {
         method: "POST",
-        credentials: "include",
-        headers: tok ? { "Authorization": "Bearer " + tok } : {}
+        headers: TOKEN ? { "Authorization": "Bearer " + TOKEN } : {}
       })
-        .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function(r) { return r.json(); })
         .then(function(j) {
-          var detail = (j.detail || []).map(function(d) {
-            return d.username + " → +" + d.refund.toLocaleString() + "코인";
-          }).join("\n");
-          alert("전체 환불 완료\n환불 인원: " + j.totalUsers + "명\n총 환불 코인: " + (j.totalRefund || 0).toLocaleString() + "\n\n" + (detail || "보유 주식 없음"));
+          alert("전체 환불 완료\n환불 인원: " + j.totalUsers + "명\n총 환불 코인: " + (j.totalRefund||0).toLocaleString());
         })
-        .catch(function(err) { alert("환불 오류: " + (err.message || err)); })
+        .catch(function(e) { alert("환불 오류: " + e.message); })
         .finally(function() { btn.disabled = false; btn.textContent = "전체 환불 (매입가 기준)"; });
     };
-
     function startRename(oldName) {
-      var newName = prompt('선수 이름 수정', oldName);
+      var newName = prompt("선수 이름 수정", oldName);
       if (!newName || newName.trim() === oldName) return;
-      adminRenamePlayer(oldName, newName.trim());
-    }
-
-    function startDelete(name) {
-      if (!confirm('"' + name + '" 선수 데이터를 삭제하시겠습니까?')) return;
-      var tok = localStorage.getItem('vct_auth_token') || '';
-      fetch('/api/admin/delete-player', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
-        body: JSON.stringify({ name: name })
-      })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (!data.ok) { alert('오류: ' + (data.error || '오류')); return; }
-          ['vct_p:', 'stock_p:'].forEach(function(prefix) { localStorage.removeItem(prefix + name); });
-          PLAYERS = PLAYERS.filter(function(p) { return p.name !== name; });
-          renderStockList(document.getElementById('stock-search').value);
-          renderFullTable();
-          updatePortfolioSection();
-        })
-        .catch(function(e) { alert('오류: ' + e.message); });
-    }
-
-    function adminRenamePlayer(oldName, newName) {
-      var tok = localStorage.getItem('vct_auth_token') || '';
-      fetch('/api/admin/rename-player', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
-        body: JSON.stringify({ from: oldName, to: newName })
-      })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (!data.ok) { alert('오류: ' + (data.error || '오류')); return; }
-          ['vct_p:', 'stock_p:'].forEach(function(prefix) {
+      fetch("/api/admin/rename-player", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (TOKEN||"") },
+        body: JSON.stringify({ from: oldName, to: newName.trim() })
+      }).then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (!d.ok) { alert("오류: " + d.error); return; }
+          ["vct_p:", "stock_p:"].forEach(function(prefix) {
             var val = localStorage.getItem(prefix + oldName);
-            if (val !== null) { localStorage.setItem(prefix + newName, val); localStorage.removeItem(prefix + oldName); }
+            if (val !== null) { localStorage.setItem(prefix + newName.trim(), val); localStorage.removeItem(prefix + oldName); }
           });
-          PLAYERS.forEach(function(p) { if (p.name === oldName) p.name = newName; });
-          renderStockList(document.getElementById('stock-search').value);
-          renderFullTable();
-          updatePortfolioSection();
-        })
-        .catch(function(e) { alert('오류: ' + e.message); });
+          PLAYERS.forEach(function(p) { if (p.name === oldName) p.name = newName.trim(); });
+          renderStockList(document.getElementById("stock-search").value);
+        });
+    }
+    function startDelete(name) {
+      if (!confirm('"' + name + '" 선수를 삭제하시겠습니까?')) return;
+      fetch("/api/admin/delete-player", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (TOKEN||"") },
+        body: JSON.stringify({ name: name })
+      }).then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (!d.ok) { alert("오류: " + d.error); return; }
+          ["vct_p:", "stock_p:"].forEach(function(prefix) { localStorage.removeItem(prefix + name); });
+          PLAYERS = PLAYERS.filter(function(p) { return p.name !== name; });
+          renderStockList(document.getElementById("stock-search").value);
+        });
     }
 
     /* ── 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
-      /* 비Admin도 접근 가능 (점검 모드 해제) */
       isAdminMode = !!(window.vctIsAdmin && window.vctIsAdmin());
-
-      /* Admin 버튼 표시 */
       if (isAdminMode) {
         document.getElementById("admin-reset-btn").style.display  = "";
         document.getElementById("admin-refund-btn").style.display = "";
       }
 
       PLAYERS = buildPlayersFromStorage();
+      updateMarketBar();
+      renderStockList();
 
-      if (PLAYERS.length === 0) {
-        document.getElementById("stock-list").innerHTML =
-          '<div class="empty-state">아직 입력된 경기 데이터가 없습니다.<br><span style="font-size:11px;opacity:.6;">ACS가 입력된 경기 기록이 생기면 자동으로 표시됩니다.</span></div>';
-        document.getElementById("chart-name").textContent = "선수를 선택하세요";
-        document.getElementById("tk-vol").textContent = "0";
-        document.getElementById("tk-up").textContent  = "0";
-        document.getElementById("tk-down").textContent = "0";
-      } else {
-        updateMarketBar();
-        renderStockList();
-        renderFullTable();
-        selectPlayer(PLAYERS[0].id);
-      }
-
-      /* 코인 + 보유주식 + 즐겨찾기 로드 */
       if (TOKEN) {
         Promise.all([
-          fetch("/api/coins",          { headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
-          fetch("/api/stock/holdings", { headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
-          fetch("/api/stock/watchlist",{ headers: { Authorization: "Bearer " + TOKEN } }).then(function (r) { return r.json(); }),
+          fetch("/api/coins",           { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
+          fetch("/api/stock/holdings",  { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
+          fetch("/api/stock/watchlist", { headers: { Authorization: "Bearer " + TOKEN } }).then(function(r) { return r.json(); }),
         ]).then(function (results) {
-          var coinData = results[0], holdData = results[1], wlData = results[2];
-          if (typeof coinData.coins === "number") {
-            myCoins = coinData.coins;
-            document.getElementById("coin-balance").textContent = myCoins.toLocaleString() + " 코인";
-          }
-          if (holdData.holdings) {
-            myHoldings = holdData.holdings;
-          }
-          if (wlData.watchlist) {
-            myWatchlist = wlData.watchlist;
-          }
-          updateMarketBar();
-          updatePortfolioSection();
+          if (typeof results[0].coins === "number") myCoins = results[0].coins;
+          if (results[1].holdings)  myHoldings  = results[1].holdings;
+          if (results[2].watchlist) myWatchlist = results[2].watchlist;
+          updateCoinDisplay(); updateMarketBar();
           renderStockList(document.getElementById("stock-search").value);
-          if (selectedId) updateHoldingDisplay(findPlayer(selectedId));
         }).catch(function () {});
       } else {
-        /* 비로그인 시 localStorage 즐겨찾기 폴백 */
         try { myWatchlist = JSON.parse(localStorage.getItem("watchlist_local") || "[]"); } catch (ex) {}
       }
+
+      /* SSE: 실시간 주가 업데이트 */
+      try {
+        var es = new EventSource("/api/events");
+        es.addEventListener("stock-update", function (ev) {
+          try {
+            var d = JSON.parse(ev.data);
+            if (!d || !d.playerName) return;
+            var pl = PLAYERS.find(function (x) { return x.name === d.playerName; });
+            if (pl) {
+              pl.prev    = d.prev    != null ? d.prev    : pl.prev;
+              pl.price   = d.price   != null ? d.price   : pl.price;
+              pl.history = d.history != null ? d.history : pl.history;
+              pl.avgAcs  = d.avgAcs  != null ? d.avgAcs  : pl.avgAcs;
+            }
+            renderStockList(document.getElementById("stock-search").value);
+            updateMarketBar();
+            if (selectedId && pl && pl.id === selectedId && currentView === "detail") {
+              selectPlayer(selectedId);
+            }
+          } catch (e2) {}
+        });
+      } catch (e) {}
     });
 
   })();
