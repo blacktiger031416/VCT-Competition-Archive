@@ -1642,13 +1642,16 @@
       if (!isAdminMode) return;
       if (!confirm("모든 선수의 주가를 0으로 초기화합니다.\nlocalStorage + DB가 모두 삭제됩니다.\n계속하시겠습니까?")) return;
 
-      /* 1) localStorage stock_p: 전체 삭제 */
-      var keys = [];
+      /* 1) localStorage stock_p: 및 stock_applied: 전체 삭제 */
+      var keys = [], appliedKeys = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
-        if (k && k.indexOf("stock_p:") === 0) keys.push(k);
+        if (!k) continue;
+        if (k.indexOf("stock_p:") === 0) keys.push(k);
+        if (k.indexOf("stock_applied:") === 0) appliedKeys.push(k);
       }
       keys.forEach(function (k) { localStorage.removeItem(k); });
+      appliedKeys.forEach(function (k) { localStorage.removeItem(k); });
 
       /* 2) DB stock_p: 전체 삭제 */
       /* 버튼들 비활성화 (헤더 + 툴바 둘 다) */
