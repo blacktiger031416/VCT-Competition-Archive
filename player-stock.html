@@ -863,11 +863,12 @@
       "Xi Lai Gaming":      ["Destiny","MistakE","Munchkin","Bram","QiuQiu"],
     };
 
-    /* 하드코드 로스터로 playerTeam 덮어쓰기 (DB보다 우선 — 승격/이적 반영) */
+    /* DB 로스터 보완: DB에 없는 선수만 하드코드로 채움
+       사용자가 리그 페이지에서 설정한 DB 로스터가 최우선 */
     function enrichPlayerTeam(playerTeam) {
       Object.keys(HARDCODED_ROSTERS).forEach(function (team) {
         HARDCODED_ROSTERS[team].forEach(function (p) {
-          playerTeam[p] = team; /* 항상 덮어씀: HARDCODED_ROSTERS가 최신 소속 기준 */
+          if (!playerTeam[p]) playerTeam[p] = team; /* DB에 없을 때만 폴백 */
         });
       });
       return playerTeam;
