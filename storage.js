@@ -154,7 +154,9 @@
 
       dbKeys.forEach(function (key) {
         if (isLocalOnly(key) || isServerOnly(key)) return;
-        /* 모든 사용자(admin 포함): DB가 항상 우선 */
+        /* 관리자: 이 fetch가 진행되는 동안 직접 수정한(localStorage에 이미 있는) 값은
+           지금 받아온 구버전 DB 스냅샷으로 덮어쓰지 않음 (편집 직후 되돌아가는 버그 방지) */
+        if (_isAdmin && localStorage.getItem(key) !== null) return;
         _origSet(key, data[key]);
       });
 
