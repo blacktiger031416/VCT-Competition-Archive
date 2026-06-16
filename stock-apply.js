@@ -147,8 +147,8 @@
     });
     alert(msg);
 
-    /* ── "반영됨" 상태를 localStorage에 영구 저장 ── */
-    var appliedKey = 'stock_applied:' + location.pathname + ':' + mapIdx;
+    /* ── "반영됨" 상태를 localStorage에 영구 저장 (경기별 고유 키) ── */
+    var appliedKey = 'stock_applied:' + location.pathname + ':' + getMatchKey() + ':' + mapIdx;
     try { localStorage.setItem(appliedKey, '1'); } catch (e) {}
 
     /* ── 버튼 "반영됨" 상태로 교체 ── */
@@ -167,6 +167,19 @@
     }
   }
 
+  /* ── 현재 경기 고유 식별자 (선수명 기반 지문) ── */
+  function getMatchKey() {
+    if (typeof maps === 'undefined' || !maps) return 'unknown';
+    /* 첫 번째 맵의 선수 이름을 정렬해 경기별 고유 키 생성 */
+    var first = maps[0] || maps[1] || {};
+    var names = (first.players || [])
+      .map(function (p) { return (p.name || '').trim(); })
+      .filter(Boolean)
+      .sort()
+      .join('|');
+    return names || 'unknown';
+  }
+
   /* ── Admin 버튼을 각 맵 카드에 추가 ── */
   function renderStockButtons() {
     if (!window.vctIsAdmin || !window.vctIsAdmin()) return;
@@ -181,7 +194,7 @@
 
       var btn   = document.createElement('button');
       var mapIdx = i - 1;
-      var appliedKey = 'stock_applied:' + location.pathname + ':' + mapIdx;
+      var appliedKey = 'stock_applied:' + location.pathname + ':' + getMatchKey() + ':' + mapIdx;
       var alreadyApplied = !!localStorage.getItem(appliedKey);
 
       btn.className   = 'stock-apply-btn' + (alreadyApplied ? ' applied' : '');
