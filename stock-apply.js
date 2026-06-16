@@ -167,17 +167,17 @@
     }
   }
 
-  /* ── 현재 경기 고유 식별자 (선수명 기반 지문) ── */
+  /* ── 현재 경기 고유 식별자 ──
+     각 match-dark 페이지에는 MATCH_KEY 전역 변수가 있음
+     (예: "champions|NS|TS" 형태 — 경기별로 항상 고유하고 페이지 로드 즉시 사용 가능) */
   function getMatchKey() {
-    if (typeof maps === 'undefined' || !maps) return 'unknown';
-    /* 첫 번째 맵의 선수 이름을 정렬해 경기별 고유 키 생성 */
-    var first = maps[0] || maps[1] || {};
-    var names = (first.players || [])
-      .map(function (p) { return (p.name || '').trim(); })
-      .filter(Boolean)
-      .sort()
-      .join('|');
-    return names || 'unknown';
+    if (typeof window.MATCH_KEY !== 'undefined' && window.MATCH_KEY) return window.MATCH_KEY;
+    /* 폴백: 팀명 변수 직접 참조 */
+    var a = (typeof MATCH_TEAM_A !== 'undefined') ? MATCH_TEAM_A : '';
+    var b = (typeof MATCH_TEAM_B !== 'undefined') ? MATCH_TEAM_B : '';
+    var d = (typeof MATCH_DATE   !== 'undefined') ? MATCH_DATE   : '';
+    if (a || b || d) return [d, a, b].filter(Boolean).join('|');
+    return 'unknown';
   }
 
   /* ── Admin 버튼을 각 맵 카드에 추가 ── */
