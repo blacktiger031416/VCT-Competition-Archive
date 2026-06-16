@@ -147,17 +147,25 @@
     });
     alert(msg);
 
+    /* ── "반영됨" 상태를 localStorage에 영구 저장 ── */
+    var appliedKey = 'stock_applied:' + location.pathname + ':' + mapIdx;
+    try { localStorage.setItem(appliedKey, '1'); } catch (e) {}
+
     /* ── 버튼 "반영됨" 상태로 교체 ── */
-    var card = document.getElementById('map-' + (mapIdx + 1));
-    if (card) {
-      var btn = card.querySelector('.stock-apply-btn');
-      if (btn) {
-        btn.classList.add('applied');
-        btn.textContent = '✅ 반영됨';
-        btn.disabled = true;
-      }
-    }
+    markButtonApplied(mapIdx);
   };
+
+  /* ── 버튼을 "반영됨" 상태로 변경하는 헬퍼 ── */
+  function markButtonApplied(mapIdx) {
+    var card = document.getElementById('map-' + (mapIdx + 1));
+    if (!card) return;
+    var btn = card.querySelector('.stock-apply-btn');
+    if (btn) {
+      btn.classList.add('applied');
+      btn.textContent = '✅ 반영됨';
+      btn.disabled = true;
+    }
+  }
 
   /* ── Admin 버튼을 각 맵 카드에 추가 ── */
   function renderStockButtons() {
@@ -172,14 +180,22 @@
       row.className = 'admin-stock-row';
 
       var btn   = document.createElement('button');
-      btn.className   = 'stock-apply-btn';
-      btn.textContent = '📈 주식 반영하기';
-      (function (idx) {
-        btn.addEventListener('click', function () {
-          if (!confirm('이 맵의 결과를 주식에 반영하시겠습니까?')) return;
-          window.applyMapToStock(idx);
-        });
-      }(i - 1));
+      var mapIdx = i - 1;
+      var appliedKey = 'stock_applied:' + location.pathname + ':' + mapIdx;
+      var alreadyApplied = !!localStorage.getItem(appliedKey);
+
+      btn.className   = 'stock-apply-btn' + (alreadyApplied ? ' applied' : '');
+      btn.textContent = alreadyApplied ? '✅ 반영됨' : '📈 주식 반영하기';
+      btn.disabled    = alreadyApplied;
+
+      if (!alreadyApplied) {
+        (function (idx) {
+          btn.addEventListener('click', function () {
+            if (!confirm('이 맵의 결과를 주식에 반영하시겠습니까?')) return;
+            window.applyMapToStock(idx);
+          });
+        }(mapIdx));
+      }
 
       row.appendChild(btn);
       card.appendChild(row);
@@ -193,11 +209,13 @@
     if (!window.vctIsAdmin || !window.vctIsAdmin()) {
       alert('관리자만 사용할 수 있습니다.'); return;
     }
-    /* localStorage에서 stock_p: 키 수집 */
-    var keys = [];
+    /* localStorage에서 stock_p: 및 stock_applied: 키 수집 */
+    var keys = [], appliedKeys = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
-      if (k && k.indexOf('stock_p:') === 0) keys.push(k);
+      if (!k) continue;
+      if (k.indexOf('stock_p:') === 0) keys.push(k);
+      if (k.indexOf('stock_applied:') === 0) appliedKeys.push(k);
     }
     if (!confirm(
       'stock_p: 데이터(localStorage ' + keys.length + '개 + DB 전체)를 삭제합니다.\n' +
@@ -205,8 +223,29 @@
       '계속하시겠습니까?'
     )) return;
 
-    /* localStorage 삭제 */
+    /* localStorage 삭제 (주가 데이터 + 반영됨 상태 모두) */
     keys.forEach(function (k) { localStorage.removeItem(k); });
+    appliedKeys.forEach(function (k) { localStorage.removeItem(k); });
+
+    /* 현재 페이지의 "반영됨" 버튼을 "주식 반영하기"로 되돌림 */
+    for (var mi = 0; mi < 5; mi++) {
+      var card = document.getElementById('map-' + (mi + 1));
+      if (!card) continue;
+      var btn = card.querySelector('.stock-apply-btn');
+      if (!btn) continue;
+      btn.classList.remove('applied');
+      btn.textContent = '📈 주식 반영하기';
+      btn.disabled = false;
+      /* 클릭 이벤트 재등록 */
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      (function (idx, b) {
+        b.addEventListener('click', function () {
+          if (!confirm('이 맵의 결과를 주식에 반영하시겠습니까?')) return;
+          window.applyMapToStock(idx);
+        });
+      }(mi, newBtn));
+    }
 
     /* DB 삭제 요청 */
     fetch('/api/admin/stock-reset-all', { method: 'POST', credentials: 'include' })

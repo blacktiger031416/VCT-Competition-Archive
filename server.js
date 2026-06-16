@@ -1057,19 +1057,32 @@ app.get("/api/stock/market", async (req, res) => {
       pool.query("SELECT key, value FROM app_data WHERE key LIKE 'stock_p:%'"),
     ]);
 
-    /* 팀→선수 맵 */
-    const roster = {};   /* teamName → [playerName, ...] */
-    const playerTeam = {}; /* playerName → teamName */
+    /* 팀→선수 맵 (메인/서브 분리)
+       — playerTeam : 메인 로스터 선수  (팀 로고 기준)
+       — subTeam    : 서브 로스터 선수  (메인에 없는 경우에만) */
+    const roster = {};
+    const playerTeam = {}; /* playerName → teamName (main) */
+    const subTeam    = {}; /* playerName → teamName (sub, 메인 없을 때만) */
+
+    /* 1회차: 메인 로스터만 처리 */
     rosterRows.rows.forEach(r => {
-      const team = r.key.slice(11); /* "vct_roster:" 이후 */
+      const team = r.key.slice(11);
       let parsed;
       try { parsed = JSON.parse(r.value); } catch { return; }
-      /* { main:[...], subs:[...] } 형태 또는 평탄 배열 모두 지원 */
-      const players = Array.isArray(parsed)
-        ? parsed
-        : [...(parsed.main || []), ...(parsed.subs || [])];
-      roster[team] = players;
-      players.forEach(p => { if (p) playerTeam[p.trim()] = team; });
+      const mainPlayers = Array.isArray(parsed) ? parsed : (parsed.main || []);
+      roster[team] = mainPlayers;
+      mainPlayers.forEach(p => { if (p) playerTeam[p.trim()] = team; });
+    });
+
+    /* 2회차: 서브 로스터 — 메인에 이미 있으면 무시 */
+    rosterRows.rows.forEach(r => {
+      const team = r.key.slice(11);
+      let parsed;
+      try { parsed = JSON.parse(r.value); } catch { return; }
+      if (Array.isArray(parsed)) return; /* 평탄 배열은 서브 없음 */
+      (parsed.subs || []).forEach(p => {
+        if (p && !playerTeam[p.trim()]) subTeam[p.trim()] = team;
+      });
     });
 
     /* 선수 스탯 맵 */
@@ -1086,7 +1099,7 @@ app.get("/api/stock/market", async (req, res) => {
       try { stockMap[name] = JSON.parse(r.value); } catch {}
     });
 
-    res.json({ playerTeam, vcpMap, stockMap });
+    res.json({ playerTeam, subTeam, vcpMap, stockMap });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
