@@ -1662,11 +1662,21 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
 
 /* ── API: 자동입력 활성화 (admin) ─────────────────── */
 app.put("/api/auto-match", requireAdmin, async (req, res) => {
-  const { matchKey, team1, team2, league } = req.body || {};
+  const { matchKey, team1, team2, league, thespikeMatchId } = req.body || {};
   if (!matchKey || !team1 || !team2)
     return res.status(400).json({ error: "matchKey, team1, team2 필수" });
-  const record = { matchKey, team1, team2, league: league || "", active: true, thespikeMatchId: null, filledMaps: [] };
   try {
+    /* 기존 레코드의 filledMaps·thespikeMatchId 보존 */
+    let existing = {};
+    try {
+      const r = await pool.query("SELECT value FROM app_data WHERE key=$1", [`auto-match:${matchKey}`]);
+      if (r.rows[0]) existing = JSON.parse(r.rows[0].value);
+    } catch {}
+    const record = {
+      matchKey, team1, team2, league: league || "", active: true,
+      thespikeMatchId: thespikeMatchId ? String(thespikeMatchId) : (existing.thespikeMatchId || null),
+      filledMaps: existing.filledMaps || [],
+    };
     await pool.query(
       `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
       [`auto-match:${matchKey}`, JSON.stringify(record)]
@@ -1688,6 +1698,54 @@ app.get("/api/auto-match", requireAdmin, async (req, res) => {
     const result = await pool.query("SELECT value FROM app_data WHERE key LIKE 'auto-match:%'");
     res.json(result.rows.map((r) => JSON.parse(r.value)));
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── API: 바로 적용 (이미 끝난 경기 즉시 입력) ──────── */
+app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
+  const { matchKey, thespikeMatchId, team1, team2, league } = req.body || {};
+  if (!matchKey || !thespikeMatchId)
+    return res.status(400).json({ error: "matchKey, thespikeMatchId 필수" });
+  try {
+    /* 기존 레코드 로드 (filledMaps 보존) */
+    let am = {
+      matchKey, team1: team1 || "", team2: team2 || "", league: league || "",
+      active: false, thespikeMatchId: String(thespikeMatchId), filledMaps: [],
+    };
+    try {
+      const r = await pool.query("SELECT value FROM app_data WHERE key=$1", [`auto-match:${matchKey}`]);
+      if (r.rows[0]) {
+        const ex = JSON.parse(r.rows[0].value);
+        am.filledMaps = ex.filledMaps || [];
+        if (!am.team1 && ex.team1) am.team1 = ex.team1;
+        if (!am.team2 && ex.team2) am.team2 = ex.team2;
+        if (!am.league && ex.league) am.league = ex.league;
+      }
+    } catch {}
+
+    /* thespike에서 스탯 가져오기 */
+    const statsRes = await fetch(`https://api.thespike.gg/match/${thespikeMatchId}/stats`);
+    if (!statsRes.ok) return res.status(502).json({ error: `thespike API 오류 (${statsRes.status})` });
+    const statsData = await statsRes.json();
+    const maps = statsData.maps || [];
+
+    let applied = 0;
+    for (let mapIdx = 0; mapIdx < maps.length; mapIdx++) {
+      const map = maps[mapIdx];
+      if ((am.filledMaps || []).includes(map.id)) continue; /* 이미 처리된 맵 skip */
+      const ok = await processAutoMatchMap(am, map, mapIdx, String(thespikeMatchId));
+      if (ok) {
+        applied++;
+        await pool.query(
+          `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [`auto-match:${matchKey}`, JSON.stringify(am)]
+        );
+      }
+    }
+    res.json({ ok: true, applied, totalMaps: maps.length });
+  } catch (e) {
+    console.error("[apply-now] 오류:", e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 /* ══════════════════════════════════════════════════════
@@ -3296,6 +3354,201 @@ function teamFuzzyMatch(apiTitle, queryName) {
   return strip(t) === strip(q) || strip(t).includes(strip(q)) || strip(q).includes(strip(t));
 }
 
+/* ── 맵 하나 처리 공통 헬퍼 (pollAutoMatches + apply-now 공용) ─────────
+   am        : auto-match 레코드 (matchKey, team1, team2, league, filledMaps)
+   map       : thespike stats.maps[mapIdx]
+   mapIdx    : 0-based 인덱스
+   tsMatchId : thespike 매치 ID (processedMaps 업데이트용)
+   반환값    : true=처리 완료, false=미완료 맵(skip)
+   ─────────────────────────────────────────────────────────────────────── */
+async function processAutoMatchMap(am, map, mapIdx, tsMatchId) {
+  const players = map.players || [];
+  if (!players.some((p) => p.averageCombatScore > 0)) return false; /* 미완료 맵 */
+
+  /* ACS > 0인 선수만, ACS 내림차순, 5명 제한 */
+  const teamAPlayers = players
+    .filter((p) => teamFuzzyMatch(p.teamTitle, am.team1) && p.averageCombatScore > 0)
+    .sort((a, b) => b.averageCombatScore - a.averageCombatScore).slice(0, 5);
+  const teamBPlayers = players
+    .filter((p) => teamFuzzyMatch(p.teamTitle, am.team2) && p.averageCombatScore > 0)
+    .sort((a, b) => b.averageCombatScore - a.averageCombatScore).slice(0, 5);
+
+  if (teamAPlayers.length === 0 && teamBPlayers.length === 0) return false;
+
+  /* ── players:{matchKey}:{mapIdx} 저장 ── */
+  const playersData = {};
+  teamAPlayers.forEach((p, i) => {
+    playersData[`a${i}`] = {
+      name  : p.nickname,
+      agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+      acs   : p.averageCombatScore,
+      kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+    };
+  });
+  teamBPlayers.forEach((p, i) => {
+    playersData[`b${i}`] = {
+      name  : p.nickname,
+      agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+      acs   : p.averageCombatScore,
+      kda   : `${p.kills}/${p.deaths}/${p.assists}`,
+    };
+  });
+  const playersKey = `players:${am.matchKey}:${mapIdx}`;
+  const playersVal = JSON.stringify(playersData);
+  await pool.query(
+    `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+    [playersKey, playersVal]
+  );
+  broadcast({ type: "set", key: playersKey, value: playersVal });
+
+  /* ── vct_p:{name} 업데이트 ── */
+  const _MK_TOURNAMENTS = new Set(["london", "santiago"]);
+  const _MK_STAGES = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2", "stage1playoffs", "stage2playoffs", "kickoff"]);
+  const _mkParts       = (am.matchKey || "").split("|");
+  const _mkTournament  = _mkParts.find(p => _MK_TOURNAMENTS.has(p.toLowerCase())) || "";
+  const _mkStage       = _mkParts.find(p => _MK_STAGES.has(p.toLowerCase())) || "";
+
+  for (const p of [...teamAPlayers, ...teamBPlayers]) {
+    if (!p.nickname || !(p.averageCombatScore > 0)) continue;
+    const vk   = `vct_p:${p.nickname}`;
+    const vRow = await pool.query("SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]);
+    let vData  = {}, vKey = vk;
+    if (vRow.rows[0]) {
+      vKey = vRow.rows[0].key;
+      try { vData = JSON.parse(vRow.rows[0].value); } catch {}
+    }
+    if (!vData.maps) vData.maps = [];
+    const existIdx = vData.maps.findIndex(m => m.matchKey === am.matchKey && m.mapIdx === mapIdx);
+    const entry = {
+      matchKey  : am.matchKey, mapIdx, league: am.league || "",
+      ..._mkTournament && { tournament: _mkTournament.toLowerCase() },
+      ..._mkStage      && { stage: _mkStage.toLowerCase() },
+      acs       : p.averageCombatScore,
+      kda       : `${p.kills}/${p.deaths}/${p.assists}`,
+      agent     : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+    };
+    if (existIdx >= 0) vData.maps[existIdx] = entry;
+    else vData.maps.push(entry);
+    const vVal = JSON.stringify(vData);
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [vKey, vVal]
+    );
+    broadcast({ type: "set", key: vKey, value: vVal });
+  }
+
+  /* ── 선수 주식 반영 ── */
+  for (const p of [...teamAPlayers, ...teamBPlayers]) {
+    if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
+      try { await applyAcsToStock(p.nickname, p.averageCombatScore); }
+      catch (e) { console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, e.message); }
+    }
+  }
+  if (tsMatchId) {
+    if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
+    if (!processedMaps[tsMatchId].includes(map.id)) processedMaps[tsMatchId].push(map.id);
+  }
+
+  /* ── 라운드 & 스코어 ── */
+  try {
+    const teamIdMap = {};
+    const ID_FIELDS = ["participantId", "teamId", "organizationId", "teamParticipantId"];
+    const rawRounds = map.rounds || [];
+    for (const field of ID_FIELDS) {
+      players.forEach((p) => {
+        const val = p[field];
+        if (val == null || p.averageCombatScore <= 0) return;
+        const id = String(val);
+        if (teamFuzzyMatch(p.teamTitle, am.team1)) teamIdMap[id] = "a";
+        else if (teamFuzzyMatch(p.teamTitle, am.team2)) teamIdMap[id] = "b";
+      });
+      if (rawRounds.length > 0) {
+        const r0 = rawRounds[0];
+        if (teamIdMap[String(r0.attackingTeamId)] || teamIdMap[String(r0.winningTeamId)]) break;
+      } else break;
+      Object.keys(teamIdMap).forEach(k => delete teamIdMap[k]);
+    }
+    /* 브루트포스 fallback */
+    if (rawRounds.length > 0 && !teamIdMap[String(rawRounds[0].attackingTeamId)]) {
+      const ids = [...new Set(rawRounds.flatMap(r => [r.attackingTeamId, r.winningTeamId].filter(v => v != null).map(String)))];
+      if (ids.length >= 2) {
+        const sA = players.find(p => teamFuzzyMatch(p.teamTitle, am.team1));
+        const sB = players.find(p => teamFuzzyMatch(p.teamTitle, am.team2));
+        const sp = sA || sB;
+        if (sp) {
+          for (const [, v] of Object.entries(sp)) {
+            if (ids.includes(String(v))) {
+              teamIdMap[String(v)] = sA ? "a" : "b";
+              const other = ids.find(id => id !== String(v));
+              if (other) teamIdMap[other] = sA ? "b" : "a";
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    let firstAttacker = null;
+    if (rawRounds.length > 0) firstAttacker = teamIdMap[String(rawRounds[0].attackingTeamId)] || null;
+
+    const roundsArr = rawRounds.map((r) => {
+      const atkSide = teamIdMap[String(r.attackingTeamId)];
+      const winSide = teamIdMap[String(r.winningTeamId)];
+      if (!atkSide || !winSide) return { winner: null, type: null };
+      const atkWon = winSide === atkSide;
+      let type;
+      if (atkWon) {
+        type = r.winningAction === 1 ? "attack_spike" : "attack_kill";
+      } else {
+        switch (r.winningAction) {
+          case 2: type = "def_defuse";  break;
+          case 3: type = "def_kill";    break;
+          case 4: type = "def_timeout"; break;
+          default: type = "def_kill";
+        }
+      }
+      return { winner: winSide, type };
+    });
+
+    const aScore = roundsArr.filter(r => r.winner === "a").length;
+    const bScore = roundsArr.filter(r => r.winner === "b").length;
+
+    const roundsKey = `rounds:${am.matchKey}:${mapIdx}`;
+    const roundsVal = JSON.stringify(roundsArr);
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [roundsKey, roundsVal]
+    );
+    broadcast({ type: "set", key: roundsKey, value: roundsVal });
+
+    const statsKey = `stats:${am.matchKey}:${mapIdx}`;
+    let existingStats = { teamStats: [] };
+    try {
+      const sr = await pool.query("SELECT value FROM app_data WHERE key=$1", [statsKey]);
+      if (sr.rows.length > 0) existingStats = JSON.parse(sr.rows[0].value);
+    } catch {}
+    existingStats.aScore        = aScore;
+    existingStats.bScore        = bScore;
+    existingStats.firstAttacker = firstAttacker;
+    const statsVal = JSON.stringify(existingStats);
+    await pool.query(
+      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+      [statsKey, statsVal]
+    );
+    broadcast({ type: "set", key: statsKey, value: statsVal });
+  } catch (roundErr) {
+    console.error(`[auto-match] 라운드 처리 오류:`, roundErr.message);
+  }
+
+  broadcast({ type: "auto-match-filled", matchKey: am.matchKey, mapIdx,
+              mapName: MAP_EN_TO_KO[map.title] || map.title || "" });
+
+  if (!am.filledMaps) am.filledMaps = [];
+  am.filledMaps.push(map.id);
+  console.log(`[auto-match] ${am.team1} vs ${am.team2} 맵${mapIdx + 1}(${map.title || mapIdx + 1}) 자동 입력 완료`);
+  return true;
+}
+
 async function pollAutoMatches(allEventMatches) {
   try {
     const result = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'auto-match:%'");
@@ -3304,8 +3557,9 @@ async function pollAutoMatches(allEventMatches) {
 
     for (const am of autoMatches) {
       try {
-        /* thespike 매치 ID 찾기 (이미 알고 있으면 skip) */
         let tsMatchId = am.thespikeMatchId;
+
+        /* thespikeMatchId 없으면 팀 이름 퍼지 매칭으로 탐색 (하위 호환) */
         if (!tsMatchId) {
           for (const matches of Object.values(allEventMatches)) {
             const found = matches.find((m) => {
@@ -3315,9 +3569,7 @@ async function pollAutoMatches(allEventMatches) {
             });
             if (found) { tsMatchId = found.id; break; }
           }
-          if (!tsMatchId) continue; // 아직 thespike에 없음
-
-          /* 찾은 matchId 저장 */
+          if (!tsMatchId) continue;
           am.thespikeMatchId = tsMatchId;
           await pool.query(
             `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
@@ -3325,7 +3577,6 @@ async function pollAutoMatches(allEventMatches) {
           );
         }
 
-        /* 맵별 스탯 가져와서 저장 */
         const statsRes = await fetch(`https://api.thespike.gg/match/${tsMatchId}/stats`);
         if (!statsRes.ok) continue;
         const statsData = await statsRes.json();
@@ -3333,221 +3584,15 @@ async function pollAutoMatches(allEventMatches) {
 
         for (let mapIdx = 0; mapIdx < maps.length; mapIdx++) {
           const map = maps[mapIdx];
-          if ((am.filledMaps || []).includes(map.id)) continue;
-          const players = map.players || [];
-          /* ACS는 맵 종료 후에만 채워지므로 완료 판단으로 유효 */
-          if (!players.some((p) => p.averageCombatScore > 0)) continue; // 미완료 맵
+          if ((am.filledMaps || []).includes(map.id)) continue; /* 이미 처리된 맵 skip */
 
-          /* ACS > 0인 선수만 (서브/미출전 로스터 제외), ACS 내림차순 정렬 후 5명으로 제한 */
-          const teamAPlayers = players
-            .filter((p) => teamFuzzyMatch(p.teamTitle, am.team1) && p.averageCombatScore > 0)
-            .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
-            .slice(0, 5);
-          const teamBPlayers = players
-            .filter((p) => teamFuzzyMatch(p.teamTitle, am.team2) && p.averageCombatScore > 0)
-            .sort((a, b) => b.averageCombatScore - a.averageCombatScore)
-            .slice(0, 5);
-
-          const playersData = {};
-          teamAPlayers.forEach((p, i) => {
-            playersData[`a${i}`] = {
-              name  : p.nickname,
-              agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
-              acs   : p.averageCombatScore,
-              kda   : `${p.kills}/${p.deaths}/${p.assists}`,
-            };
-          });
-          teamBPlayers.forEach((p, i) => {
-            playersData[`b${i}`] = {
-              name  : p.nickname,
-              agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
-              acs   : p.averageCombatScore,
-              kda   : `${p.kills}/${p.deaths}/${p.assists}`,
-            };
-          });
-
-          const playersKey = `players:${am.matchKey}:${mapIdx}`;
-          const playersVal = JSON.stringify(playersData);
-          await pool.query(
-            `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-            [playersKey, playersVal]
-          );
-          broadcast({ type: "set", key: playersKey, value: playersVal });
-
-          /* ── vct_p: 서버 저장 (클라이언트 미열람 시에도 주가 반영 가능하도록) ── */
-          for (const p of [...teamAPlayers, ...teamBPlayers]) {
-            if (!p.nickname || !(p.averageCombatScore > 0)) continue;
-            const vk = `vct_p:${p.nickname}`;
-            const vRow = await pool.query("SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]);
-            let vData = {};
-            let vKey = vk;
-            if (vRow.rows[0]) {
-              vKey = vRow.rows[0].key;
-              try { vData = JSON.parse(vRow.rows[0].value); } catch {}
-            }
-            if (!vData.maps) vData.maps = [];
-            /* 이미 이 맵 항목이 있으면 덮어쓰기, 없으면 추가 */
-            const existIdx = vData.maps.findIndex(m => m.matchKey === am.matchKey && m.mapIdx === mapIdx);
-            /* matchKey에서 tournament·stage 파싱 ("london|playoffs|m1", "london|swiss|groupA|0" 등) */
-            const _MK_TOURNAMENTS = new Set(["london", "santiago"]);
-            const _MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2", "stage1playoffs", "stage2playoffs", "kickoff"]);
-            const _mkParts = (am.matchKey || "").split("|");
-            const _mkTournament = _mkParts.find(p => _MK_TOURNAMENTS.has(p.toLowerCase())) || "";
-            const _mkStage      = _mkParts.find(p => _MK_STAGES.has(p.toLowerCase())) || "";
-
-            const entry = {
-              matchKey   : am.matchKey,
-              mapIdx,
-              league     : am.league || "",
-              ..._mkTournament && { tournament: _mkTournament.toLowerCase() },
-              ..._mkStage      && { stage:      _mkStage.toLowerCase() },
-              acs        : p.averageCombatScore,
-              kda        : `${p.kills}/${p.deaths}/${p.assists}`,
-              agent      : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
-            };
-            if (existIdx >= 0) vData.maps[existIdx] = entry;
-            else vData.maps.push(entry);
-            const vVal = JSON.stringify(vData);
-            await pool.query(
-              `INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-              [vKey, vVal]
-            );
-            broadcast({ type: "set", key: vKey, value: vVal });
-          }
-
-          /* ── 선수 주식 즉시 반영 (applyAcsToStock 내부에서 중복 방지) ── */
-          for (const p of [...teamAPlayers, ...teamBPlayers]) {
-            if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-              try {
-                await applyAcsToStock(p.nickname, p.averageCombatScore);
-              } catch (stockErr) {
-                console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, stockErr.message);
-              }
-            }
-          }
-          if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
-          if (!processedMaps[tsMatchId].includes(map.id)) processedMaps[tsMatchId].push(map.id);
-
-          /* ── 라운드 결과 & 스코어 자동 입력 ─────────────────────── */
-          try {
-            /* teamId → "a" | "b" 매핑: 여러 ID 필드를 순서대로 시도 (spike-match와 동일 로직) */
-            const teamIdMap = {};
-            const ID_FIELDS = ["participantId", "teamId", "organizationId", "teamParticipantId"];
-            const rawRounds0 = map.rounds || [];
-            for (const field of ID_FIELDS) {
-              players.forEach((p) => {
-                const val = p[field];
-                if (val == null || p.averageCombatScore <= 0) return;
-                const id = String(val);
-                if (teamFuzzyMatch(p.teamTitle, am.team1)) teamIdMap[id] = "a";
-                else if (teamFuzzyMatch(p.teamTitle, am.team2)) teamIdMap[id] = "b";
-              });
-              if (rawRounds0.length > 0) {
-                const r0 = rawRounds0[0];
-                if (teamIdMap[String(r0.attackingTeamId)] || teamIdMap[String(r0.winningTeamId)]) break;
-              } else break;
-              Object.keys(teamIdMap).forEach(k => delete teamIdMap[k]);
-            }
-            /* 여전히 매핑 실패 시 브루트포스 */
-            if (rawRounds0.length > 0 && !teamIdMap[String(rawRounds0[0].attackingTeamId)]) {
-              const roundTeamIds = [...new Set(
-                rawRounds0.flatMap(r => [r.attackingTeamId, r.winningTeamId].filter(v => v != null).map(String))
-              )];
-              if (roundTeamIds.length >= 2) {
-                const sampleA = players.find(p => teamFuzzyMatch(p.teamTitle, am.team1));
-                const sampleB = players.find(p => teamFuzzyMatch(p.teamTitle, am.team2));
-                const sample = sampleA || sampleB;
-                if (sample) {
-                  for (const [, v] of Object.entries(sample)) {
-                    if (roundTeamIds.includes(String(v))) {
-                      teamIdMap[String(v)] = sampleA ? "a" : "b";
-                      const other = roundTeamIds.find(id => id !== String(v));
-                      if (other) teamIdMap[other] = sampleA ? "b" : "a";
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-
-            const rawRounds = rawRounds0; // rawRounds0 = map.rounds || [] (위에서 선언)
-
-            /* firstAttacker: 라운드1 공격팀이 team A이면 "a", B이면 "b" */
-            let firstAttacker = null;
-            if (rawRounds.length > 0) {
-              const r1 = rawRounds[0];
-              firstAttacker = teamIdMap[String(r1.attackingTeamId)] || null;
-            }
-
-            /* 라운드별 winner/type 변환 */
-            const roundsArr = rawRounds.map((r) => {
-              const atkSide = teamIdMap[String(r.attackingTeamId)]; // "a" | "b"
-              const defSide = atkSide === "a" ? "b" : "a";
-              const winSide = teamIdMap[String(r.winningTeamId)];
-              if (!atkSide || !winSide) return { winner: null, type: null };
-
-              const atkWon = winSide === atkSide;
-              let type;
-              if (atkWon) {
-                // 공격팀 승리
-                type = r.winningAction === 1 ? "attack_spike" : "attack_kill";
-              } else {
-                // 수비팀 승리
-                switch (r.winningAction) {
-                  case 2: type = "def_defuse";  break; // 스파이크 해체
-                  case 3: type = "def_kill";    break; // 수비 처치 (공격팀 전멸)
-                  case 4: type = "def_timeout"; break; // 설치 실패
-                  default: type = "def_kill";
-                }
-              }
-              return { winner: winSide, type };
-            });
-
-            /* 스코어 계산 */
-            const aScore = roundsArr.filter((r) => r.winner === "a").length;
-            const bScore = roundsArr.filter((r) => r.winner === "b").length;
-
-            /* rounds 저장 & broadcast */
-            const roundsKey = `rounds:${am.matchKey}:${mapIdx}`;
-            const roundsVal = JSON.stringify(roundsArr);
+          const ok = await processAutoMatchMap(am, map, mapIdx, tsMatchId);
+          if (ok) {
             await pool.query(
               `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-              [roundsKey, roundsVal]
+              [`auto-match:${am.matchKey}`, JSON.stringify(am)]
             );
-            broadcast({ type: "set", key: roundsKey, value: roundsVal });
-
-            /* stats 저장 (기존 teamStats 보존, 스코어+firstAttacker만 갱신) */
-            const statsKey = `stats:${am.matchKey}:${mapIdx}`;
-            let existingStats = { teamStats: [] };
-            try {
-              const sr = await pool.query("SELECT value FROM app_data WHERE key=$1", [statsKey]);
-              if (sr.rows.length > 0) existingStats = JSON.parse(sr.rows[0].value);
-            } catch (_) {}
-            existingStats.aScore       = aScore;
-            existingStats.bScore       = bScore;
-            existingStats.firstAttacker = firstAttacker;
-            const statsVal = JSON.stringify(existingStats);
-            await pool.query(
-              `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-              [statsKey, statsVal]
-            );
-            broadcast({ type: "set", key: statsKey, value: statsVal });
-          } catch (roundErr) {
-            console.error(`[auto-match] 라운드 처리 오류:`, roundErr.message);
           }
-
-          broadcast({ type: "auto-match-filled", matchKey: am.matchKey, mapIdx,
-                      mapName: MAP_EN_TO_KO[map.title] || map.title || "" });
-
-          if (!am.filledMaps) am.filledMaps = [];
-          am.filledMaps.push(map.id);
-          console.log(`[auto-match] ${am.team1} vs ${am.team2} 맵${mapIdx+1}(${map.title}) 자동 입력 완료`);
-
-          /* filledMaps를 맵 처리 직후 즉시 저장 (중간 오류 시 재처리 방지) */
-          await pool.query(
-            `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-            [`auto-match:${am.matchKey}`, JSON.stringify(am)]
-          );
         }
       } catch (e) {
         console.error(`[auto-match] ${am.team1} vs ${am.team2} 오류:`, e.message);

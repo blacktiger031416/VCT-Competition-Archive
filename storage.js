@@ -23,7 +23,8 @@
 
   /* LOCAL_ONLY 접두사 — 해당 접두사로 시작하는 모든 키를 localStorage 전용으로 처리 */
   var LOCAL_ONLY_PREFIXES = [
-    "__vct_am:", /* 자동입력 ON/OFF 상태 로컬 백업 (auto-match 페이지별) */
+    "__vct_am:",    /* 자동입력 실시간 ON/OFF 상태 로컬 백업 */
+    "__vct_am_id:", /* thespike Match ID 로컬 백업 */
   ];
 
   /*
@@ -208,6 +209,12 @@
         /* 새 공지 이벤트 → auth.js 배지로 relay */
         if (update.type === "new-notice") {
           window.dispatchEvent(new CustomEvent("vct-new-notice", { detail: update }));
+          return;
+        }
+
+        /* 자동 경기 입력 완료 → auto-match.js로 relay */
+        if (update.type === "auto-match-filled") {
+          window.dispatchEvent(new CustomEvent("vct-auto-match-filled", { detail: update }));
           return;
         }
 
