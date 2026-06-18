@@ -3361,7 +3361,7 @@ function teamFuzzyMatch(apiTitle, queryName) {
    tsMatchId : thespike 매치 ID (processedMaps 업데이트용)
    반환값    : true=처리 완료, false=미완료 맵(skip)
    ─────────────────────────────────────────────────────────────────────── */
-async function processAutoMatchMap(am, map, mapIdx, tsMatchId) {
+async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = false) {
   const players = map.players || [];
   if (!players.some((p) => p.averageCombatScore > 0)) return false; /* 미완료 맵 */
 
@@ -3437,11 +3437,13 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId) {
     broadcast({ type: "set", key: vKey, value: vVal });
   }
 
-  /* ── 선수 주식 반영 ── */
-  for (const p of [...teamAPlayers, ...teamBPlayers]) {
-    if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-      try { await applyAcsToStock(p.nickname, p.averageCombatScore); }
-      catch (e) { console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, e.message); }
+  /* ── 선수 주식 반영 (실시간 적용 ON일 때만) ── */
+  if (applyStock) {
+    for (const p of [...teamAPlayers, ...teamBPlayers]) {
+      if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
+        try { await applyAcsToStock(p.nickname, p.averageCombatScore); }
+        catch (e) { console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, e.message); }
+      }
     }
   }
   if (tsMatchId) {
@@ -3586,7 +3588,8 @@ async function pollAutoMatches(allEventMatches) {
           const map = maps[mapIdx];
           if ((am.filledMaps || []).includes(map.id)) continue; /* 이미 처리된 맵 skip */
 
-          const ok = await processAutoMatchMap(am, map, mapIdx, tsMatchId);
+          const ok = await processAutoMatchMap(am, map, mapIdx, tsMatchId, true /* 실시간: 주식 반영 */);
+
           if (ok) {
             await pool.query(
               `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
