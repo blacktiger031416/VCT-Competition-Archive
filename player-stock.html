@@ -1884,6 +1884,17 @@
       if (tb) tb.style.display = admin ? "flex" : "none";
     }
 
+    /* ── 접근 제한: 어드민 전용 (준비 중) ── */
+    function checkAccess() {
+      var admin = !!(window.vctIsAdmin && window.vctIsAdmin());
+      if (!admin) {
+        document.body.style.display = "none";
+        window.location.replace("./index.html");
+      }
+    }
+    /* auth.js 로드 완료 후 최종 확인 (3초 대기) */
+    setTimeout(checkAccess, 3000);
+
     /* ── 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
       applyAdminMode();
