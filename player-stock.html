@@ -512,9 +512,69 @@
       font-size: 22px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase;
       color: var(--sub); margin-bottom: 16px;
     }
+
+    /* ── 준비 중 오버레이 ── */
+    #stock-wip-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(10, 10, 16, 0.82);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .wip-card {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 48px 52px;
+      text-align: center;
+      max-width: 360px;
+    }
+    .wip-icon { font-size: 40px; margin: 0; line-height: 1; }
+    .wip-title {
+      margin: 4px 0 0;
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 17px; font-weight: 700;
+      color: rgba(255,255,255,.9);
+      line-height: 1.45;
+    }
+    .wip-sub {
+      margin: 0;
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,.45);
+    }
+    .wip-btn {
+      margin-top: 18px;
+      display: inline-block;
+      padding: 10px 26px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.8);
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 13px; font-weight: 600;
+      text-decoration: none;
+      transition: background .15s, border-color .15s;
+    }
+    .wip-btn:hover {
+      background: rgba(255,255,255,.15);
+      border-color: rgba(255,255,255,.35);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 준비 중 오버레이 (어드민 전용 접근 제한) -->
+  <div id="stock-wip-overlay">
+    <div class="wip-card">
+      <p class="wip-icon">🔧</p>
+      <p class="wip-title">선수 주식을 업데이트 중입니다.</p>
+      <p class="wip-sub">불편을 드려서 죄송합니다.</p>
+      <a class="wip-btn" href="./index.html">홈페이지로 돌아가기</a>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <header class="site-header">
@@ -1884,16 +1944,15 @@
       if (tb) tb.style.display = admin ? "flex" : "none";
     }
 
-    /* ── 접근 제한: 어드민 전용 (준비 중) ── */
+    /* ── 접근 제한: 어드민 전용 (준비 중 오버레이) ── */
     function checkAccess() {
       var admin = !!(window.vctIsAdmin && window.vctIsAdmin());
-      if (!admin) {
-        document.body.style.display = "none";
-        window.location.replace("./index.html");
-      }
+      var overlay = document.getElementById("stock-wip-overlay");
+      if (overlay) overlay.style.display = admin ? "none" : "flex";
     }
     /* auth.js 로드 완료 후 최종 확인 (3초 대기) */
-    setTimeout(checkAccess, 3000);
+    var _accessChecks = [300, 700, 1200, 2000, 3000];
+    _accessChecks.forEach(function(ms) { setTimeout(checkAccess, ms); });
 
     /* ── 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
