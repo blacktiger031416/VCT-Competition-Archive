@@ -72,29 +72,58 @@
     #admin-refund-btn:hover { background: rgba(234,179,8,.15); }
 
     /* ── ADMIN TOOLBAR ── */
-    .admin-toolbar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 16px; margin-bottom: 10px;
-      background: rgba(232,68,68,.06);
-      border: 1px solid rgba(232,68,68,.2);
-      border-radius: 8px;
+    /* 관리자 버튼 (토글) */
+    #admin-toggle-btn {
+      display: none; align-items: center; gap: 5px;
+      padding: 5px 13px; margin-bottom: 10px;
+      border-radius: 6px; cursor: pointer;
+      font-size: 11px; font-weight: 700; letter-spacing: .05em;
+      background: rgba(232,68,68,.08);
+      border: 1px solid rgba(232,68,68,.25);
+      color: rgba(232,68,68,.8);
+      transition: background .15s, border-color .15s;
     }
-    .admin-toolbar-label {
-      font-size: 11px; font-weight: 700; color: rgba(232,68,68,.7);
-      letter-spacing: .05em; text-transform: uppercase; margin-right: 4px;
+    #admin-toggle-btn:hover {
+      background: rgba(232,68,68,.15);
+      border-color: rgba(232,68,68,.45);
+    }
+    /* 팝업 */
+    #admin-popup {
+      display: none;
+      position: absolute; z-index: 200;
+      top: calc(100% + 6px); left: 0;
+      min-width: 260px;
+      background: #1a1a24;
+      border: 1px solid rgba(232,68,68,.3);
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.55);
+      padding: 10px;
+      flex-direction: column; gap: 6px;
+    }
+    #admin-popup.open { display: flex; }
+    .admin-popup-title {
+      font-size: 10px; font-weight: 700; color: rgba(232,68,68,.6);
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 2px 4px 6px; border-bottom: 1px solid rgba(255,255,255,.06);
+      margin-bottom: 2px;
     }
     .admin-tool-btn {
-      padding: 5px 14px; border-radius: 5px;
+      padding: 8px 14px; border-radius: 6px; text-align: left;
       font-size: 12px; font-weight: 700; cursor: pointer; transition: .15s;
+      width: 100%;
     }
     .admin-tool-btn.danger {
-      background: rgba(232,68,68,.12); border: 1px solid rgba(232,68,68,.35); color: var(--up);
+      background: rgba(232,68,68,.1); border: 1px solid rgba(232,68,68,.3); color: var(--up);
     }
     .admin-tool-btn.danger:hover { background: rgba(232,68,68,.22); }
     .admin-tool-btn.warn {
-      background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3); color: #fcd34d;
+      background: rgba(234,179,8,.07); border: 1px solid rgba(234,179,8,.28); color: #fcd34d;
     }
     .admin-tool-btn.warn:hover { background: rgba(234,179,8,.15); }
+    /* 관리자 버튼 래퍼 (팝업 기준점) */
+    #admin-toolbar {
+      position: relative; display: none; margin-bottom: 10px;
+    }
 
     /* ── TOP TABS ── */
     .top-tabs {
@@ -631,12 +660,15 @@
       </div>
 
       <!-- Admin toolbar (관리자 전용 — isAdminMode 시 표시) -->
-      <div class="admin-toolbar" id="admin-toolbar" style="display:none">
-        <span class="admin-toolbar-label">⚙ 관리자</span>
-        <button class="admin-tool-btn danger" onclick="adminResetStock()">주가 전체 초기화 (→0)</button>
-        <button class="admin-tool-btn warn"   onclick="adminRefundAll()">전체 환불 (매입가 기준)</button>
-        <button class="admin-tool-btn" style="background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4);color:#818cf8" onclick="adminSyncToServer()">💾 로컬→서버 동기화</button>
-        <button class="admin-tool-btn" id="bulk-stock-btn" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.35);color:#4ade80" onclick="adminBulkStockApply()">📊 역대 경기 전체 주식 반영</button>
+      <div id="admin-toolbar">
+        <button id="admin-toggle-btn" onclick="toggleAdminPopup(event)">⚙ 관리자</button>
+        <div id="admin-popup">
+          <div class="admin-popup-title">⚙ 관리자 도구</div>
+          <button class="admin-tool-btn danger" onclick="adminResetStock()">주가 전체 초기화 (→0)</button>
+          <button class="admin-tool-btn warn"   onclick="adminRefundAll()">전체 환불 (매입가 기준)</button>
+          <button class="admin-tool-btn" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.35);color:#818cf8" onclick="adminSyncToServer()">💾 로컬→서버 동기화</button>
+          <button class="admin-tool-btn" id="bulk-stock-btn" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);color:#4ade80" onclick="adminBulkStockApply()">📊 역대 경기 전체 주식 반영</button>
+        </div>
       </div>
 
       <!-- Filter bar -->
@@ -1929,6 +1961,18 @@
         });
     }
 
+    /* ── 관리자 팝업 토글 ── */
+    window.toggleAdminPopup = function (e) {
+      if (e) e.stopPropagation();
+      var popup = document.getElementById("admin-popup");
+      if (popup) popup.classList.toggle("open");
+    };
+    /* 팝업 외부 클릭 시 닫기 */
+    document.addEventListener("click", function () {
+      var popup = document.getElementById("admin-popup");
+      if (popup) popup.classList.remove("open");
+    });
+
     /* ── 어드민 UI 표시 헬퍼 (타이밍 무관하게 여러 번 호출 가능) ── */
     function applyAdminMode() {
       var admin = !!(window.vctIsAdmin && window.vctIsAdmin());
@@ -1939,9 +1983,11 @@
       var fb = document.getElementById("admin-refund-btn");
       if (rb) rb.style.display = admin ? "" : "none";
       if (fb) fb.style.display = admin ? "" : "none";
-      /* 본문 어드민 툴바 */
+      /* 관리자 버튼 (토글 방식) */
+      var toggleBtn = document.getElementById("admin-toggle-btn");
       var tb = document.getElementById("admin-toolbar");
-      if (tb) tb.style.display = admin ? "flex" : "none";
+      if (toggleBtn) toggleBtn.style.display = admin ? "inline-flex" : "none";
+      if (tb) tb.style.display = admin ? "block" : "none";
     }
 
     /* ── 접근 제한: 어드민 전용 (준비 중 오버레이) ── */
