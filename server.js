@@ -3207,6 +3207,105 @@ app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── 역대 경기 전체 주식 일괄 적용 ─────────────────────────────────────────
+   players:{matchKey}:{mapIdx} 전체를 읽어 시간 순으로 정렬 후 ACS를 주식에 반영.
+   정렬 기준:
+   - santiago|swiss|*    → r1 → r2w → r2l → r3 (고정)
+   - santiago|playoffs|* → m1~m13 → gf (고정)
+   - london|swiss|*      → r1 → r2w → r2l → r3 (고정)
+   - london|playoffs|*   → m1~m13 → gf (고정)
+   - 나머지 (Match N, MM.DD, Grand Finals 등) → updated_at 오름차순
+     (어드민이 경기를 입력한 순서 ≈ 대회 진행 순서) */
+app.post("/api/admin/bulk-stock-apply", requireAdmin, async (req, res) => {
+  try {
+    /* 1. players:* 전체 조회 (updated_at 포함) */
+    const rows = await pool.query(
+      "SELECT key, value, updated_at FROM app_data WHERE key LIKE 'players:%' ORDER BY updated_at ASC"
+    );
+
+    /* 2. matchKey별로 그룹핑 — 각 matchKey의 최초 updated_at을 기록 */
+    const matchMaps = {}; // { matchKey: { mapIdx: playersData, __ts: earliest_ms } }
+    for (const row of rows.rows) {
+      const m = row.key.match(/^players:(.+):(\d+)$/);
+      if (!m) continue;
+      const [, matchKey, mapIdxStr] = m;
+      const mapIdx = parseInt(mapIdxStr, 10);
+      const ts = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+      if (!matchMaps[matchKey]) matchMaps[matchKey] = { __ts: ts };
+      else if (ts < matchMaps[matchKey].__ts) matchMaps[matchKey].__ts = ts;
+      try { matchMaps[matchKey][mapIdx] = JSON.parse(row.value); } catch {}
+    }
+
+    /* 3. 정렬 헬퍼 */
+    function phaseOf(mk) {
+      const p = mk.split("|");
+      if (p[0] === "santiago" && p[1] === "swiss")    return 20;
+      if (p[0] === "santiago" && p[1] === "playoffs") return 30;
+      if (p[0] === "london"   && p[1] === "swiss")    return 60;
+      if (p[0] === "london"   && p[1] === "playoffs") return 70;
+      return 0; /* timestamp 정렬 */
+    }
+    function subKeyOf(mk) {
+      const p = mk.split("|");
+      const ROUND = { r1: 0, r2w: 1, r2l: 2, r3: 3 };
+      if ((p[0] === "santiago" || p[0] === "london") && p[1] === "swiss") {
+        return (ROUND[p[2]] ?? 9) * 100 + (parseInt(p[3], 10) || 0);
+      }
+      if ((p[0] === "santiago" || p[0] === "london") && p[1] === "playoffs") {
+        return p[2] === "gf" ? 9999 : (parseInt(p[2].replace("m",""), 10) || 0);
+      }
+      return 0;
+    }
+
+    const sortedMatchKeys = Object.keys(matchMaps).filter(k => k !== "__ts");
+    sortedMatchKeys.sort((a, b) => {
+      const pa = phaseOf(a), pb = phaseOf(b);
+      if (pa !== pb) return pa - pb;
+      if (pa !== 0) return subKeyOf(a) - subKeyOf(b); /* 고정 패턴 */
+      /* timestamp 정렬 (kickoff, stage1, stage1playoffs 등) */
+      return (matchMaps[a].__ts || 0) - (matchMaps[b].__ts || 0);
+    });
+
+    /* 4. 순서대로 ACS 적용 */
+    let totalApplied = 0;
+    const errors = [];
+    for (const matchKey of sortedMatchKeys) {
+      const entry = matchMaps[matchKey];
+      const mapIdxs = Object.keys(entry)
+        .filter(k => k !== "__ts")
+        .map(Number)
+        .sort((a, b) => a - b);
+      for (const mapIdx of mapIdxs) {
+        const slots = entry[mapIdx];
+        if (!slots || typeof slots !== "object") continue;
+        for (const slotKey of ["a0","a1","a2","a3","a4","b0","b1","b2","b3","b4"]) {
+          const p = slots[slotKey];
+          if (!p || !p.name || p.name === "-" || !p.name.trim()) continue;
+          const acs = parseInt(p.acs, 10) || 0;
+          if (acs <= 0) continue;
+          try {
+            await applyAcsToStock(p.name.trim(), acs);
+            totalApplied++;
+          } catch (e) {
+            errors.push(`${p.name}: ${e.message}`);
+          }
+        }
+      }
+    }
+
+    console.log(`[bulk-stock] 완료: matchKey ${sortedMatchKeys.length}개, 적용 ${totalApplied}건, 오류 ${errors.length}건`);
+    res.json({
+      ok: true,
+      matchCount: sortedMatchKeys.length,
+      totalApplied,
+      errors: errors.slice(0, 20),
+    });
+  } catch (e) {
+    console.error("[bulk-stock] 오류:", e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* 매치 한 건 처리 — 완료된 맵만 골라서 적용 */
 async function processMatch(matchId) {
   try {
