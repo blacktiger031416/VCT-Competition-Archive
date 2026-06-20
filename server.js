@@ -1779,8 +1779,23 @@ async function getStockState(playerName) {
     "SELECT key, value FROM app_data WHERE lower(key)=lower($1) AND key LIKE 'stock_p:%'",
     [key]
   );
-  if (!res2.rows[0]) return null;
-  try { return { state: JSON.parse(res2.rows[0].value), resolvedKey: res2.rows[0].key }; } catch { return null; }
+  if (res2.rows[0]) {
+    try { return { state: JSON.parse(res2.rows[0].value), resolvedKey: res2.rows[0].key }; } catch { return null; }
+  }
+  /* 3) 특수문자 정규화 fallback — "So Sweet" ↔ "So:Sweet" 등 ':' ↔ 공백 차이 처리 */
+  const normalizedName = playerName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  const res3 = await pool.query(
+    "SELECT key, value FROM app_data WHERE key LIKE 'stock_p:%'",
+    []
+  );
+  for (const row of res3.rows) {
+    const rowName = row.key.slice(8); // "stock_p:".length === 8
+    const rowNorm = rowName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (rowNorm === normalizedName) {
+      try { return { state: JSON.parse(row.value), resolvedKey: row.key }; } catch { return null; }
+    }
+  }
+  return null;
 }
 
 /* DB에 stock_p:{name} 저장 + SSE 브로드캐스트 */
@@ -1800,10 +1815,20 @@ async function saveStockState(playerName, state, resolvedKey) {
 async function initStockFromVctP(playerName, fallbackAcs) {
   const vctKey = `vct_p:${playerName}`;
   /* 대소문자 무관 조회 */
-  const res = await pool.query(
+  let res = await pool.query(
     "SELECT key, value FROM app_data WHERE lower(key)=lower($1)",
     [vctKey]
   );
+  /* 특수문자 정규화 fallback — ':' ↔ 공백 차이 처리 */
+  if (!res.rows[0]) {
+    const normalizedName = playerName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+    const allVct = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'");
+    const matched = allVct.rows.find(r => {
+      const n = r.key.slice(6).replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+      return n === normalizedName;
+    });
+    if (matched) res = { rows: [matched] };
+  }
   let resolvedPlayerName = playerName;
   let avgAcs = fallbackAcs || 200;
 
