@@ -1484,7 +1484,9 @@
           var errEl = deadlineEditArea.querySelector(".odds-edit-error");
           errEl.style.display = "none";
           var saveBtn = deadlineEditArea.querySelector("[data-action='save-deadline']");
+          var clearBtn = deadlineEditArea.querySelector("[data-action='clear-deadline']");
           if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "저장 중..."; }
+          if (clearBtn) clearBtn.disabled = true;
           fetch("/api/prediction/matches/" + match.id, {
             method: "PATCH",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
@@ -1494,12 +1496,20 @@
               if (d.error) {
                 errEl.textContent = d.error; errEl.style.display = "block";
                 if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "저장"; }
+                if (clearBtn) clearBtn.disabled = false;
+              } else {
+                /* 로컬 matches 배열도 즉시 업데이트 (SSE 누락 대비) */
+                if (d.match) {
+                  var idx = matches.findIndex(function(m) { return m.id === d.match.id; });
+                  if (idx >= 0) matches[idx] = d.match;
+                }
+                render();
               }
-              /* 성공 시 broadcast가 render() 트리거 */
             })
             .catch(function () {
               errEl.textContent = "서버 오류"; errEl.style.display = "block";
               if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "저장"; }
+              if (clearBtn) clearBtn.disabled = false;
             });
         }
         var saveDeadlineBtn = deadlineEditArea.querySelector("[data-action='save-deadline']");
