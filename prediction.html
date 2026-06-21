@@ -296,6 +296,10 @@
     .odds-edit-input:focus { border-color:rgba(240,192,64,.5); background:rgba(240,192,64,.06); }
     .odds-edit-team { font-size:12px; color:rgba(255,255,255,.4); font-weight:700; }
     .odds-edit-error { font-size:11px; color:#ff7070; display:none; width:100%; }
+    .deadline-edit-area { padding:10px 14px 13px; border-top:1px solid rgba(255,255,255,.05); display:none; align-items:center; gap:8px; flex-wrap:wrap; }
+    .deadline-edit-area.open { display:flex; }
+    .deadline-edit-input { height:30px; padding:0 8px; border-radius:6px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:#fff; font-size:12px; outline:none; color-scheme:dark; }
+    .deadline-edit-input:focus { border-color:rgba(240,192,64,.5); background:rgba(240,192,64,.06); }
 
     /* ── Hall of Fame ── */
     .hof-season { margin-bottom:36px; }
@@ -1252,6 +1256,7 @@
         topHtml += '<div class="card-admin-btns">';
         if (match.status === "open") {
           topHtml += '<button class="btn btn-muted btn-sm" data-action="edit-odds" title="배당률 수정">✏️ 배당률</button>';
+          topHtml += '<button class="btn btn-muted btn-sm" data-action="edit-deadline" title="마감 시각 수정">⏱ 마감시각</button>';
           topHtml += '<button class="btn btn-muted btn-sm" data-action="close">배팅 마감</button>';
         }
         topHtml += '<button class="btn btn-danger btn-sm" data-action="delete">삭제</button>';
@@ -1360,7 +1365,28 @@
           '</div>';
       }
 
-      card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml + oddsEditHtml;
+      var deadlineEditHtml = '';
+      if (IS_ADMIN && match.status === 'open') {
+        /* datetime-local 입력값 형식: "YYYY-MM-DDTHH:MM" */
+        var dlInputVal = '';
+        if (match.deadline) {
+          var dlD = new Date(match.deadline);
+          var pad = function(n){ return String(n).padStart(2,'0'); };
+          dlInputVal = dlD.getFullYear() + '-' + pad(dlD.getMonth()+1) + '-' + pad(dlD.getDate()) +
+            'T' + pad(dlD.getHours()) + ':' + pad(dlD.getMinutes());
+        }
+        deadlineEditHtml =
+          '<div class="deadline-edit-area" id="deadline-edit-' + match.id + '">' +
+            '<span class="odds-edit-label">마감 시각</span>' +
+            '<input class="deadline-edit-input" type="datetime-local" value="' + dlInputVal + '" />' +
+            '<button class="btn btn-primary btn-sm" data-action="save-deadline" style="height:30px;padding:0 14px">저장</button>' +
+            '<button class="btn btn-muted btn-sm" data-action="cancel-deadline" style="height:30px">취소</button>' +
+            '<button class="btn btn-danger btn-sm" data-action="clear-deadline" style="height:30px" title="마감 시각 제거">제거</button>' +
+            '<span class="odds-edit-error"></span>' +
+          '</div>';
+      }
+
+      card.innerHTML = topHtml + teamsHtml + metaHtml + betAreaHtml + settleHtml + oddsEditHtml + deadlineEditHtml;
 
       /* ── handlers ── */
       if (canBet) {
@@ -1441,6 +1467,62 @@
           cancelOddsBtn.addEventListener("click", function () {
             oddsEditArea.classList.remove("open");
             editOddsBtn.textContent = "✏️ 배당률";
+          });
+        }
+      }
+
+      /* ── 마감 시각 수정 버튼 ── */
+      var editDeadlineBtn = card.querySelector("[data-action='edit-deadline']");
+      var deadlineEditArea = card.querySelector(".deadline-edit-area");
+      if (editDeadlineBtn && deadlineEditArea) {
+        editDeadlineBtn.addEventListener("click", function () {
+          var isOpen = deadlineEditArea.classList.contains("open");
+          deadlineEditArea.classList.toggle("open", !isOpen);
+          editDeadlineBtn.textContent = isOpen ? "⏱ 마감시각" : "✖ 닫기";
+        });
+        function saveDeadline(newDeadline) {
+          var errEl = deadlineEditArea.querySelector(".odds-edit-error");
+          errEl.style.display = "none";
+          var saveBtn = deadlineEditArea.querySelector("[data-action='save-deadline']");
+          if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "저장 중..."; }
+          fetch("/api/prediction/matches/" + match.id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN },
+            body: JSON.stringify({ deadline: newDeadline }),
+          }).then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.error) {
+                errEl.textContent = d.error; errEl.style.display = "block";
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "저장"; }
+              }
+              /* 성공 시 broadcast가 render() 트리거 */
+            })
+            .catch(function () {
+              errEl.textContent = "서버 오류"; errEl.style.display = "block";
+              if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "저장"; }
+            });
+        }
+        var saveDeadlineBtn = deadlineEditArea.querySelector("[data-action='save-deadline']");
+        if (saveDeadlineBtn) {
+          saveDeadlineBtn.addEventListener("click", function () {
+            var inp = deadlineEditArea.querySelector(".deadline-edit-input");
+            var errEl = deadlineEditArea.querySelector(".odds-edit-error");
+            if (!inp.value) { errEl.textContent = "시각을 입력해 주세요."; errEl.style.display = "block"; return; }
+            saveDeadline(new Date(inp.value).toISOString());
+          });
+        }
+        var cancelDeadlineBtn = deadlineEditArea.querySelector("[data-action='cancel-deadline']");
+        if (cancelDeadlineBtn) {
+          cancelDeadlineBtn.addEventListener("click", function () {
+            deadlineEditArea.classList.remove("open");
+            editDeadlineBtn.textContent = "⏱ 마감시각";
+          });
+        }
+        var clearDeadlineBtn = deadlineEditArea.querySelector("[data-action='clear-deadline']");
+        if (clearDeadlineBtn) {
+          clearDeadlineBtn.addEventListener("click", function () {
+            if (!confirm("마감 시각을 제거하시겠습니까?")) return;
+            saveDeadline(null);
           });
         }
       }

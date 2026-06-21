@@ -1226,7 +1226,7 @@ app.post("/api/prediction/matches", requireAdmin, async (req, res) => {
 
 /* ── API: 예측 경기 상태 변경 open↔closed (admin) ── */
 app.patch("/api/prediction/matches/:id", requireAdmin, async (req, res) => {
-  const { status, odds1, odds2 } = req.body || {};
+  const { status, odds1, odds2, deadline } = req.body || {};
   const key = `pred-match:${req.params.id}`;
   try {
     const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
@@ -1238,6 +1238,13 @@ app.patch("/api/prediction/matches/:id", requireAdmin, async (req, res) => {
       if (!["open", "closed"].includes(status))
         return res.status(400).json({ error: "status must be open or closed" });
       match.status = status;
+    }
+
+    /* 마감 시각 변경 (open 상태일 때만) */
+    if (deadline !== undefined) {
+      if (match.status !== "open")
+        return res.status(400).json({ error: "배팅 진행 중인 경기에서만 마감 시각을 변경할 수 있습니다." });
+      match.deadline = deadline ? new Date(deadline).toISOString() : null;
     }
 
     /* 배당률 변경 (open 상태일 때만) */
