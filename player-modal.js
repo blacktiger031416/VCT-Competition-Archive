@@ -197,12 +197,13 @@
   ═══════════════════════════════════════════════════════════════ */
   var LEAGUE_LABELS = {
     pacific:             'Pacific',
-    americas:            'Americas',
-    emea:                'EMEA',
-    cn:                  'China',
-    masters:             'Masters',
-    champions:           'Champions',
-    'challengers-korea': 'Korea Challengers',
+    americas:             'Americas',
+    emea:                 'EMEA',
+    cn:                   'China',
+    masters:              'Masters',
+    champions:            'Champions',
+    'challengers-korea':  'Korea Challengers',
+    'challengers-japan':  'Japan Challengers',
   };
   var TOURNAMENT_LABELS = {
     santiago: 'Santiago',
@@ -217,10 +218,13 @@
     swiss:          'Swiss',
     playoffs:       'Playoffs',
     groupstage:     'Group Stage',
-    ck_split:       'Split 1',
-    ck_split2:      'Split 2',
-    ck_split1_po:   'Split 1 Playoff',
-    ck_split2_po:   'Split 2 Playoff',
+    ck_split:              'Split 1',
+    ck_split2:             'Split 2',
+    ck_split1_po:          'Split 1 Playoff',
+    ck_split2_po:          'Split 2 Playoff',
+    cj_split1:             'Split 1',
+    cj_japan_ph2_bracket:  'Phase 2',
+    cj_japan_po_bracket:   'Playoffs',
   };
 
   /* stage 정규화: Playoffs를 부모 Stage로 묶음 */
@@ -277,7 +281,12 @@
     if (l === 'challengers-korea' && s === 'ck_split1_po')     return 210;
     if (l === 'challengers-korea' && s === 'ck_split2')        return 220;
     if (l === 'challengers-korea' && s === 'ck_split2_po')     return 230;
-    if (l === 'challengers-korea')                             return 205; // 기타 CK 스테이지
+    if (l === 'challengers-korea')                             return 205;
+    /* Challengers Japan */
+    if (l === 'challengers-japan' && s === 'cj_split1')             return 300;
+    if (l === 'challengers-japan' && s === 'cj_japan_ph2_bracket')  return 310;
+    if (l === 'challengers-japan' && s === 'cj_japan_po_bracket')   return 320;
+    if (l === 'challengers-japan')                                   return 305;
     return 999; // 알 수 없는 조합 → 숨김
   }
 
