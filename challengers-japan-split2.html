@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Challengers Japan 2026 · Split 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --acc: #159194; --acc-dim: rgba(21,145,148,.7); --acc-bg: rgba(21,145,148,.1); --bg: #071515; --bg-card: #0d1f1f; --bg-card2: #112525; }
+    body { background: var(--bg); color: #f0f0f0; font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .site-header { display:flex; align-items:center; gap:20px; padding:0 32px; height:56px; background:rgba(7,21,21,.92); border-bottom:1px solid rgba(21,145,148,.15); position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+    .home-link { font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.55); text-decoration:none; transition:color .15s; }
+    .home-link:hover { color:#fff; }
+    .home-link::after { content:" /"; margin-left:4px; color:rgba(255,255,255,.18); font-weight:400; }
+    .back-link { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.4); text-decoration:none; transition:color .15s; }
+    .back-link:hover { color:rgba(255,255,255,.8); }
+    .site-header .auth-header-btn { margin-left:auto !important; }
+
+    /* ── SHELL ── */
+    .league-shell { max-width:1280px; margin:0 auto; padding:0 40px 80px; }
+    @media (max-width:600px) { .league-shell { padding:0 16px 60px; } }
+
+    /* ── HERO ── */
+    .stage-hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(240px,360px); gap:28px; align-items:end; padding:48px 0 52px; animation:rise-in 520ms ease both; }
+    @media (max-width:680px) { .stage-hero { grid-template-columns:1fr; } }
+    .stage-hero h1 { font-size:clamp(36px,6vw,68px); font-weight:900; line-height:1; color:#fff; margin-bottom:14px; }
+    .stage-hero p.intro { font-size:14px; color:rgba(255,255,255,.45); font-weight:500; line-height:1.7; max-width:540px; }
+    .eyebrow { font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:8px; }
+    .stage-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .stage-summary div { min-height:110px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.03); animation:pop-in 520ms ease both; }
+    .stage-summary div:nth-child(2) { animation-delay:80ms; }
+    .stage-summary div:nth-child(3) { animation-delay:160ms; }
+    .stage-summary strong { color:#fff; font-size:42px; line-height:1; font-weight:900; }
+    .stage-summary span { margin-top:8px; color:rgba(255,255,255,.4); font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+
+    /* ── STAGE TABS ── */
+    .stage-tabs-wrap { position:sticky; top:56px; z-index:80; background:var(--bg); border-bottom:1px solid rgba(255,255,255,.06); margin-bottom:40px; }
+    .stage-tabs-nav { display:flex; gap:0; overflow-x:auto; scrollbar-width:none; max-width:1280px; margin:0 auto; padding:0 40px; }
+    .stage-tabs-nav::-webkit-scrollbar { display:none; }
+    .stage-tab-btn { flex-shrink:0; padding:14px 20px; border:none; background:none; color:rgba(255,255,255,.4); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; cursor:pointer; border-bottom:2px solid transparent; transition:color .15s, border-color .15s; white-space:nowrap; }
+    .stage-tab-btn:hover { color:rgba(255,255,255,.75); }
+    .stage-tab-btn.active { color:#fff; border-bottom-color:var(--acc); }
+
+    /* ── STAGE PANELS ── */
+    .stage-panel { display:none; }
+    .stage-panel.active { display:block; animation:rise-in 360ms ease both; }
+
+    /* ── SECTION HEADING ── */
+    .section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
+    .section-heading h2 { font-size:clamp(20px,3vw,28px); font-weight:900; color:#fff; line-height:1.1; }
+
+    /* ── GROUP ASSIGN (2-column card layout) ── */
+    .group-assign-section { padding:40px 0 0; }
+    .group-assign-section .section-heading { margin-bottom:20px; }
+    .group-cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:640px) { .group-cards-grid { grid-template-columns:1fr; } }
+    .group-card { background:rgba(255,255,255,.03); border:1.5px solid rgba(255,255,255,.09); border-radius:14px; padding:18px; }
+    .group-card h3 { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.5); margin:0 0 14px; }
+    .group-slots-list { display:flex; flex-direction:column; gap:8px; }
+    .group-slot { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.07); min-height:52px; transition:background .15s; }
+    .group-slot.has-team { border-color:rgba(21,145,148,.4); background:rgba(21,145,148,.07); }
+    .group-slot .slot-logo { width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .group-slot .slot-logo img { width:40px; height:40px; object-fit:contain; }
+    .group-slot .slot-name { font-size:13px; font-weight:700; flex:1; color:rgba(255,255,255,.85); }
+    .group-slot.empty .slot-name { opacity:.35; font-weight:500; }
+    .group-slot .slot-rank { font-size:11px; font-weight:700; color:rgba(255,255,255,.25); margin-left:auto; white-space:nowrap; }
+    body:not(.view-only) .group-slot { cursor:pointer; }
+    body:not(.view-only) .group-slot:hover { background:rgba(21,145,148,.14); border-color:rgba(21,145,148,.55); }
+
+    /* ── MAIN STAGE 8-TEAM SLOTS ── */
+    .main-slots-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    @media (max-width:700px) { .main-slots-grid { grid-template-columns:repeat(2,1fr); } }
+
+    /* ── DAY / WEEK TABS ── */
+    .day-tabs-wrap { margin:40px 0 0; }
+    .day-tabs-wrap > .section-heading { margin-bottom:16px; }
+    .day-tabs { }
+    .day-tabs > input { position:absolute; opacity:0; pointer-events:none; }
+    .day-tab-list { display:flex; gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; }
+    .day-tab-list::-webkit-scrollbar { display:none; }
+    .day-tab-list label { flex-shrink:0; min-height:42px; display:grid; place-items:center; padding:0 20px; border-radius:7px; background:transparent; border:1px solid transparent; font-size:14px; font-weight:700; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s, background .14s, border-color .14s; white-space:nowrap; }
+    .day-tab-list label:hover { color:rgba(255,255,255,.8); border-color:rgba(255,255,255,.1); }
+
+    #adv-d1:checked ~ .day-tab-list label[for="adv-d1"],
+    #adv-d2:checked ~ .day-tab-list label[for="adv-d2"],
+    #adv-d3:checked ~ .day-tab-list label[for="adv-d3"] { color:#fff; background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.35); }
+
+    #main-w1:checked ~ .day-tab-list label[for="main-w1"],
+    #main-w2:checked ~ .day-tab-list label[for="main-w2"],
+    #main-w3:checked ~ .day-tab-list label[for="main-w3"],
+    #main-w4:checked ~ .day-tab-list label[for="main-w4"] { color:#fff; background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.35); }
+
+    .day-panels { }
+    .day-panel { display:none; overflow:hidden; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:10px; }
+
+    #adv-d1:checked ~ .day-panels .day-panel-d1,
+    #adv-d2:checked ~ .day-panels .day-panel-d2,
+    #adv-d3:checked ~ .day-panels .day-panel-d3,
+    #main-w1:checked ~ .day-panels .day-panel-w1,
+    #main-w2:checked ~ .day-panels .day-panel-w2,
+    #main-w3:checked ~ .day-panels .day-panel-w3,
+    #main-w4:checked ~ .day-panels .day-panel-w4 { display:block; animation:panel-in 360ms ease both; }
+
+    @keyframes panel-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    .day-meta { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:20px 24px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .day-meta strong { font-size:22px; font-weight:900; color:#fff; }
+    .day-meta span { font-size:13px; font-weight:700; color:rgba(255,255,255,.4); letter-spacing:.06em; }
+
+    /* ── GROUP SECTION LABEL inside day panels ── */
+    .group-day-section { padding:20px 20px 16px; }
+    .group-day-label { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:12px; }
+
+    /* ── MATCH GRID ── */
+    .match-grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.06); border-radius:8px; overflow:hidden; }
+    .match-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:rgba(255,255,255,.06); border-radius:8px; overflow:hidden; }
+    @media (max-width:600px) { .match-grid-3, .match-grid-2 { grid-template-columns:1fr; } }
+
+    /* ── MATCH CARD ── */
+    .match-card { position:relative; min-height:130px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; padding:20px 16px 16px; background:var(--bg-card); cursor:pointer; transition:background .18s; overflow:hidden; }
+    .match-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--acc),rgba(21,145,148,.3)); transform:translateX(-100%); transition:transform 320ms ease; }
+    .match-card:hover { background:var(--bg-card2); }
+    .match-card:hover::before { transform:translateX(0); }
+    .match-card strong { position:relative; z-index:1; min-width:0; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:900; }
+    .match-team-mini-logo { width:52px; height:52px; display:flex; align-items:center; justify-content:center; }
+    .match-team-mini-logo img { width:52px; height:52px; object-fit:contain; display:block; }
+    .match-team-name { font-size:11px; font-weight:700; text-align:center; color:rgba(255,255,255,.6); margin-top:4px; }
+    .match-team-wrap { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .match-card em { position:relative; z-index:1; min-width:52px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:7px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.85); font-size:15px; font-style:normal; font-weight:900; transition:transform .18s; }
+    .match-card:hover em { transform:scale(1.06); }
+    .match-card.upcoming em { color:rgba(255,255,255,.5); background:rgba(21,145,148,.08); border-color:rgba(21,145,148,.25); animation:vs-pulse 1.8s ease-in-out infinite; }
+
+    /* ── STANDINGS ── */
+    .standings-section { margin-top:40px; }
+    .standings-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:700px) { .standings-grid-2 { grid-template-columns:1fr; } }
+    .standings-card { overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:rgba(255,255,255,.02); }
+    .standings-title { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px; background:rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.06); }
+    .standings-title h3 { font-size:20px; font-weight:900; color:#fff; }
+    .standings-title span { min-height:26px; display:inline-flex; align-items:center; padding:0 10px; border-radius:999px; background:var(--acc-bg); border:1px solid rgba(21,145,148,.3); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--acc); white-space:nowrap; }
+    .standings-table { width:100%; }
+    .standings-row { position:relative; display:grid; grid-template-columns:minmax(140px,1fr) 70px 70px 60px; align-items:stretch; min-height:76px; border-top:1px solid rgba(255,255,255,.05); color:rgba(255,255,255,.85); }
+    .standings-row::before { position:absolute; top:0; bottom:0; left:0; width:4px; content:''; background:rgba(255,255,255,.06); }
+    .standings-row.advance::before { background:rgba(21,145,148,.55); }
+    .standings-row.clinched { background:rgba(21,145,148,.05); }
+    .standings-row.clinched::before { background:var(--acc); animation:adv-pulse 2.4s ease-in-out infinite; }
+    .standings-row.eliminated { background:rgba(239,74,94,.05); }
+    .standings-row.eliminated::before { background:#ef4a5e; }
+    .standings-row:not(.standings-head) { animation:row-in 420ms ease both; }
+    .standings-head { min-height:44px; background:rgba(255,255,255,.025); color:rgba(255,255,255,.3); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .standings-head::before { display:none; }
+    .standings-row > span, .team-cell { display:flex; align-items:center; border-left:1px solid rgba(255,255,255,.05); }
+    .standings-row > span { justify-content:center; padding:0 8px; font-size:14px; font-weight:700; text-align:center; }
+    .standings-head > span { font-size:11px; }
+    .team-cell { gap:10px; min-width:0; padding:12px 14px; border-left:0; }
+    .rank-badge { width:24px; height:24px; display:flex; flex:0 0 auto; align-items:center; justify-content:center; border-radius:999px; background:rgba(255,255,255,.08); font-size:12px; font-weight:900; color:rgba(255,255,255,.7); }
+    .stage-team-logo { width:44px; height:44px; display:flex; flex:0 0 auto; align-items:center; justify-content:center; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:6px; overflow:hidden; }
+    .stage-team-logo img { width:32px; height:32px; object-fit:contain; display:block; }
+    .team-cell strong { font-size:13px; font-weight:700; color:#fff; }
+    .delta.plus { color:#3ddc84; } .delta.minus { color:#ff6b6b; }
+
+    /* ── GA MODAL ── */
+    .ga-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
+    .ga-modal[hidden] { display:none !important; }
+    .ga-backdrop { position:absolute; inset:0; background:rgba(5,5,5,.65); backdrop-filter:blur(6px); }
+    .ga-panel { position:relative; z-index:1; width:min(540px,calc(100vw - 24px)); max-height:90vh; overflow-y:auto; background:#0a1e1e; border:1.5px solid rgba(21,145,148,.3); border-radius:18px; padding:24px; animation:modal-in .2s ease; }
+    @keyframes modal-in { from { opacity:0; transform:translateY(16px) scale(.97); } to { opacity:1; transform:none; } }
+    .ga-panel h2 { font-size:18px; font-weight:900; margin:0 0 4px; color:#fff; }
+    .ga-panel p { font-size:13px; opacity:.5; margin:0 0 18px; color:#fff; }
+    .ga-team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px; }
+    @media (max-width:400px) { .ga-team-grid { grid-template-columns:repeat(2,1fr); } }
+    .ga-team-btn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 6px; border-radius:10px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.09); color:#fff; font-family:inherit; cursor:pointer; transition:all .14s; font-size:10px; font-weight:700; line-height:1.2; text-align:center; }
+    .ga-team-btn img { width:28px; height:28px; object-fit:contain; }
+    .ga-team-btn .ga-team-code { font-size:12px; font-weight:900; }
+    .ga-team-btn:hover { background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.5); }
+    .ga-team-btn.selected { background:rgba(21,145,148,.22); border-color:var(--acc); box-shadow:0 0 0 2px rgba(21,145,148,.25); }
+    .ga-team-btn.in-other-group { opacity:.22; pointer-events:none; }
+    .ga-actions { display:flex; gap:10px; justify-content:flex-end; }
+    .ga-btn { padding:9px 20px; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; border:none; }
+    .ga-btn-cancel { background:rgba(255,255,255,.08); color:rgba(255,255,255,.7); }
+    .ga-btn-cancel:hover { background:rgba(255,255,255,.14); }
+    .ga-btn-save { background:var(--acc); color:#fff; }
+    .ga-btn-save:hover { background:#127a7d; }
+    .ga-btn-clear { background:rgba(255,80,80,.12); color:#ff6b6b; border:1px solid rgba(255,80,80,.25); }
+    .ga-btn-clear:hover { background:rgba(255,80,80,.24); }
+
+    /* ── SCORE MODAL ── */
+    .score-modal { position:fixed; inset:0; z-index:9900; display:flex; align-items:center; justify-content:center; }
+    .score-modal[hidden] { display:none !important; }
+    .score-panel { position:relative; z-index:1; background:#0a1e1e; border:1.5px solid rgba(21,145,148,.3); border-radius:18px; padding:28px; width:min(380px,calc(100vw - 24px)); animation:modal-in .2s ease; }
+    .score-panel h2 { font-size:16px; font-weight:900; color:#fff; margin-bottom:20px; text-align:center; }
+    .score-inputs { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:24px; }
+    .score-team { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .score-team-name { font-size:12px; font-weight:700; color:rgba(255,255,255,.5); text-align:center; max-width:100px; word-break:break-word; }
+    .score-input { width:72px; height:72px; background:rgba(255,255,255,.06); border:1.5px solid rgba(21,145,148,.35); border-radius:10px; color:#fff; font-size:32px; font-weight:900; text-align:center; outline:none; font-family:inherit; transition:border-color .15s; }
+    .score-input:focus { border-color:var(--acc); background:rgba(21,145,148,.08); }
+    .score-vs { font-size:20px; font-weight:900; color:rgba(255,255,255,.3); padding-bottom:28px; }
+    .score-actions { display:flex; gap:8px; justify-content:flex-end; }
+
+    /* ── ADD TEAM MODAL ── */
+    .add-team-inputs { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+    .add-team-input { background:rgba(255,255,255,.06); border:1px solid rgba(21,145,148,.25); border-radius:8px; padding:10px 14px; color:#fff; font-size:14px; font-family:inherit; outline:none; transition:border-color .15s; }
+    .add-team-input:focus { border-color:var(--acc); }
+    .add-team-input::placeholder { color:rgba(255,255,255,.2); }
+    .add-team-input-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:4px; }
+
+    /* ── WEEK SECTION ── */
+    .week-section { margin:48px 0; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    @keyframes pop-in { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:none; } }
+    @keyframes row-in { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:none; } }
+    @keyframes vs-pulse { 0%,100% { opacity:1; } 50% { opacity:.55; } }
+    @keyframes adv-pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  </style>
+</head>
+<body class="league-page stage-page challengers-page">
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <a class="back-link" href="./challengers-japan.html">Japan Challengers</a>
+  </header>
+
+  <main class="league-shell">
+
+    <!-- ── HERO ── -->
+    <section class="stage-hero" aria-labelledby="stage-title">
+      <div>
+        <p class="eyebrow">Challengers Japan 2026</p>
+        <h1 id="stage-title">Split 2</h1>
+        <p class="intro">Advance Stage (A/B 그룹 각 6팀)에서 상위 2팀씩 총 4팀이 Main Stage 진출, Main Stage에서 8팀 중 상위 6팀이 Finals에 진출하는 방식입니다.</p>
+      </div>
+      <div class="stage-summary" aria-label="Split 2 진행 방식">
+        <div><strong>2</strong><span>단계</span></div>
+        <div><strong>12</strong><span>어드밴스</span></div>
+        <div><strong>6</strong><span>파이널스</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── STAGE TABS (sticky) ── -->
+  <div class="stage-tabs-wrap">
+    <div class="stage-tabs-nav">
+      <button class="stage-tab-btn active" data-stage="adv">Advance Stage</button>
+      <button class="stage-tab-btn" data-stage="main">Main Stage</button>
+    </div>
+  </div>
+
+  <div class="league-shell" style="padding-top:8px;">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- ADVANCE STAGE PANEL -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="stage-panel active" id="panel-adv">
+
+      <!-- 그룹 팀 배정 -->
+      <section class="group-assign-section" aria-labelledby="ga-title-adv">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Advance Stage</p><h2 id="ga-title-adv">그룹 팀 배정 (A/B 각 6팀)</h2></div>
+        </div>
+        <div class="group-cards-grid">
+          <div class="group-card">
+            <h3>그룹 A — 상위 2팀 Main Stage 진출</h3>
+            <div class="group-slots-list" id="slots-adva"></div>
+          </div>
+          <div class="group-card">
+            <h3>그룹 B — 상위 2팀 Main Stage 진출</h3>
+            <div class="group-slots-list" id="slots-advb"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 일차별 경기 -->
+      <div class="day-tabs-wrap">
+        <div class="section-heading"><div><p class="eyebrow">경기 목록</p><h2>일차별 경기</h2></div></div>
+        <div class="day-tabs" id="adv-day-tabs">
+          <input type="radio" name="adv-day" id="adv-d1" checked>
+          <input type="radio" name="adv-day" id="adv-d2">
+          <input type="radio" name="adv-day" id="adv-d3">
+          <div class="day-tab-list">
+            <label for="adv-d1">1일차</label>
+            <label for="adv-d2">2일차</label>
+            <label for="adv-d3">3일차</label>
+          </div>
+          <div class="day-panels">
+            <!-- 1일차: 그룹A 3경기 + 그룹B 3경기 -->
+            <div class="day-panel day-panel-d1">
+              <div class="day-meta"><strong>Day 1</strong><span>그룹 A 3경기 · 그룹 B 3경기</span></div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 A</div>
+                <div class="match-grid-3" id="mg-adva-d1"></div>
+              </div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 B</div>
+                <div class="match-grid-3" id="mg-advb-d1"></div>
+              </div>
+            </div>
+            <!-- 2일차: 그룹A 6경기 + 그룹B 6경기 -->
+            <div class="day-panel day-panel-d2">
+              <div class="day-meta"><strong>Day 2</strong><span>그룹 A 6경기 · 그룹 B 6경기</span></div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 A</div>
+                <div class="match-grid-3" id="mg-adva-d2"></div>
+              </div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 B</div>
+                <div class="match-grid-3" id="mg-advb-d2"></div>
+              </div>
+            </div>
+            <!-- 3일차: 그룹A 6경기 + 그룹B 6경기 -->
+            <div class="day-panel day-panel-d3">
+              <div class="day-meta"><strong>Day 3</strong><span>그룹 A 6경기 · 그룹 B 6경기</span></div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 A</div>
+                <div class="match-grid-3" id="mg-adva-d3"></div>
+              </div>
+              <div class="group-day-section">
+                <div class="group-day-label">그룹 B</div>
+                <div class="match-grid-3" id="mg-advb-d3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advance Stage 순위 -->
+      <section class="standings-section" aria-labelledby="adv-std-title">
+        <div class="section-heading"><div><p class="eyebrow">순위표</p><h2 id="adv-std-title">그룹 순위</h2></div></div>
+        <div class="standings-grid-2">
+          <div id="std-adva"></div>
+          <div id="std-advb"></div>
+        </div>
+      </section>
+
+    </div><!-- /panel-adv -->
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- MAIN STAGE PANEL -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="stage-panel" id="panel-main">
+
+      <!-- 팀 슬롯 -->
+      <section class="group-assign-section" aria-labelledby="ga-title-main">
+        <div class="section-heading">
+          <div><p class="eyebrow">Participants · Main Stage</p><h2 id="ga-title-main">참가 팀 (8팀)</h2></div>
+        </div>
+        <div class="main-slots-grid" id="slots-main"></div>
+      </section>
+
+      <!-- 주차별 경기 -->
+      <div class="day-tabs-wrap">
+        <div class="section-heading"><div><p class="eyebrow">경기 목록</p><h2>주차별 경기</h2></div></div>
+        <div class="day-tabs" id="main-week-tabs">
+          <input type="radio" name="main-week" id="main-w1" checked>
+          <input type="radio" name="main-week" id="main-w2">
+          <input type="radio" name="main-week" id="main-w3">
+          <input type="radio" name="main-week" id="main-w4">
+          <div class="day-tab-list">
+            <label for="main-w1">1주차</label>
+            <label for="main-w2">2주차</label>
+            <label for="main-w3">3주차</label>
+            <label for="main-w4">4주차</label>
+          </div>
+          <div class="day-panels">
+            <div class="day-panel day-panel-w1">
+              <div class="day-meta"><strong>Week 1</strong><span>6경기</span></div>
+              <div class="match-grid-3" id="mg-main-w1"></div>
+            </div>
+            <div class="day-panel day-panel-w2">
+              <div class="day-meta"><strong>Week 2</strong><span>6경기</span></div>
+              <div class="match-grid-3" id="mg-main-w2"></div>
+            </div>
+            <div class="day-panel day-panel-w3">
+              <div class="day-meta"><strong>Week 3</strong><span>4경기</span></div>
+              <div class="match-grid-2" id="mg-main-w3"></div>
+            </div>
+            <div class="day-panel day-panel-w4">
+              <div class="day-meta"><strong>Week 4</strong><span>12경기</span></div>
+              <div class="match-grid-3" id="mg-main-w4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Stage 순위 -->
+      <section class="standings-section" aria-labelledby="main-std-title">
+        <div class="section-heading"><div><p class="eyebrow">순위표</p><h2 id="main-std-title">Main Stage 순위</h2></div></div>
+        <div id="std-main"></div>
+      </section>
+
+    </div><!-- /panel-main -->
+
+  </div><!-- /.league-shell -->
+
+  <!-- ── GA MODAL ── -->
+  <div class="ga-modal" id="ga-modal" hidden>
+    <div class="ga-backdrop" id="ga-backdrop"></div>
+    <div class="ga-panel" role="dialog" aria-modal="true">
+      <h2 id="ga-modal-title">팀 배정</h2>
+      <p id="ga-modal-sub">팀을 선택하세요.</p>
+      <div class="ga-team-grid" id="ga-team-grid"></div>
+      <div class="ga-actions" id="ga-actions"></div>
+    </div>
+  </div>
+
+  <!-- ── SCORE MODAL ── -->
+  <div class="score-modal" id="score-modal" hidden>
+    <div class="ga-backdrop" id="score-backdrop"></div>
+    <div class="score-panel" role="dialog" aria-modal="true">
+      <h2 id="score-title">스코어 입력</h2>
+      <div class="score-inputs">
+        <div class="score-team"><div class="score-team-name" id="score-name-a">팀 A</div><input class="score-input" id="score-a" type="number" min="0" max="9" placeholder="0"></div>
+        <div class="score-vs">:</div>
+        <div class="score-team"><div class="score-team-name" id="score-name-b">팀 B</div><input class="score-input" id="score-b" type="number" min="0" max="9" placeholder="0"></div>
+      </div>
+      <div class="score-actions">
+        <button class="ga-btn ga-btn-clear" id="score-clear">초기화</button>
+        <button class="ga-btn ga-btn-cancel" id="score-cancel">취소</button>
+        <button class="ga-btn ga-btn-save" id="score-save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD TEAM MODAL ── -->
+  <div class="ga-modal" id="add-modal" hidden>
+    <div class="ga-backdrop" id="add-backdrop"></div>
+    <div class="ga-panel" role="dialog" aria-modal="true" style="max-width:360px;">
+      <h2>새 팀 추가</h2>
+      <p>이 Split에 참가하는 팀을 등록하세요.</p>
+      <div class="add-team-inputs">
+        <div><div class="add-team-input-label">팀 이름 *</div><input class="add-team-input" id="at-name" type="text" placeholder="예: ZETA DIVISION"></div>
+        <div><div class="add-team-input-label">팀 코드 (최대 5자)</div><input class="add-team-input" id="at-code" type="text" maxlength="5" placeholder="예: ZETA"></div>
+        <div><div class="add-team-input-label">로고 URL (선택)</div><input class="add-team-input" id="at-logo" type="text" placeholder="https://..."></div>
+      </div>
+      <div class="ga-actions">
+        <button class="ga-btn ga-btn-cancel" id="add-cancel">취소</button>
+        <button class="ga-btn ga-btn-save" id="add-save">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./storage.js"></script>
+  <script>
+  window.storageReady.then(function () {
+
+    var PFX = "cj_japan_split2_";
+    var POOL_KEY = PFX + "pool";
+    var _isAdmin = typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+
+    /* ── STAGE CONFIG ──
+       adv groups: a, b (6 slots each)
+       adv days:
+         d1: 3 matches/group
+         d2: 6 matches/group
+         d3: 6 matches/group
+       main: 8 slots, 4 weeks
+         w1: 6, w2: 6, w3: 4, w4: 12
+    ── */
+    var ADV_DAYS = {
+      d1: { n:3, label:"Day 1" },
+      d2: { n:6, label:"Day 2" },
+      d3: { n:6, label:"Day 3" },
+    };
+    var MAIN_WEEKS = {
+      w1: { n:6, label:"Week 1" },
+      w2: { n:6, label:"Week 2" },
+      w3: { n:4, label:"Week 3" },
+      w4: { n:12, label:"Week 4" },
+    };
+    var ADV_ADVANCE = 2; /* top 2 from each group → Main Stage */
+    var MAIN_ADVANCE = 6; /* top 6 → Finals */
+
+    /* ── DEFAULT POOL ── */
+    var DEFAULT_POOL = [
+      { name:"Murash Gaming",          code:"MRG",   logo:"./assets/teams/MRG.png",   white:false },
+      { name:"Insomnia",               code:"INS",   logo:"./assets/teams/INS.png",   white:false },
+      { name:"SCARZ",                  code:"SZ",    logo:"./assets/teams/SZ.png",    white:false },
+      { name:"BLUE BEES.ESP",          code:"BB",    logo:"./assets/teams/BB.png",    white:false },
+      { name:"DFM Academy",            code:"DFMA",  logo:"./assets/teams/DFMA.png",  white:false },
+      { name:"CREST GAMING Zst",       code:"CGZ",   logo:"./assets/teams/CGZ.png",   white:false },
+      { name:"AGELITE",                code:"AGL",   logo:"./assets/teams/AGL.png",   white:false },
+      { name:"IGZIST",                 code:"IGZ",   logo:"./assets/teams/IGZ.png",   white:false },
+      { name:"Delight",                code:"DLT",   logo:"./assets/teams/DLT.png",   white:false },
+      { name:"Team SEIBI",             code:"SIB",   logo:"./assets/teams/SIB.png",   white:false },
+      { name:"QT DIG∞",               code:"QTD",   logo:"./assets/teams/QTD.png",   white:false },
+      { name:"WEC C",                  code:"WECC",  logo:"./assets/teams/WECC.png",  white:false },
+      { name:"ZETA DIVISION Academy",  code:"ZETAA", logo:"./assets/teams/ZETAA.png", white:false },
+      { name:"BC SWELL",               code:"BCS",   logo:"./assets/teams/BCS.png",   white:false },
+      { name:"NORTHEPTION Youth",      code:"NTHY",  logo:"./assets/teams/NTHY.png",  white:false },
+      { name:"REIGNITE FOXX",          code:"RIGX",  logo:"./assets/teams/RIGX.png",  white:false },
+      { name:"FENNEL",                 code:"FL",    logo:"./assets/teams/FL.png",    white:false },
+      { name:"RIDDLE ORDER",           code:"RID",   logo:"./assets/teams/RID.png",   white:false },
+      { name:"REJECT",                 code:"RC",    logo:"./assets/teams/RC.png",    white:false },
+      { name:"Kirihana Academy",       code:"KRHN",  logo:"./assets/teams/KRHN.png",  white:false },
+      { name:"KING GUY",               code:"KG",    logo:"./assets/teams/KG.png",    white:false },
+      { name:"PARON",                  code:"PRN",   logo:"./assets/teams/PRN.png",   white:false },
+      { name:"ALESTAR",                code:"ALES",  logo:"./assets/teams/ALES.png",  white:false },
+    ];
+
+    /* ── HELPERS ── */
+    function loadJSON(key, def) { try { var v=localStorage.getItem(key); return v?JSON.parse(v):def; } catch(e){ return def; } }
+    function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    function loadPool()  { var p=loadJSON(POOL_KEY,null); return (Array.isArray(p)&&p.length)?p:DEFAULT_POOL.slice(); }
+    function savePool(p) { saveJSON(POOL_KEY,p); }
+    function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+    /* ── SLOT STORAGE ── */
+    function slotsKey(gid) { return PFX+gid+"_slots"; }
+    function slotCount(gid){ return gid==="main"?8:6; }
+    function loadSlots(gid){ var s=loadJSON(slotsKey(gid),null); var n=slotCount(gid); if(Array.isArray(s)&&s.length===n) return s; return Array(n).fill(""); }
+    function saveSlots(gid,s){ saveJSON(slotsKey(gid),s); }
+
+    /* ── MATCH STORAGE ──
+       Advance: key = PFX+"adv_"+group+"_"+day+"M"+m  e.g. cj_japan_split2_adv_a_d1M1
+       Main:    key = PFX+"main_"+week+"M"+m          e.g. cj_japan_split2_main_w1M1
+    ── */
+    function advMKey(grp,day,m){ return PFX+"adv_"+grp+"_"+day+"M"+m; }
+    function mainMKey(wk,m){ return PFX+"main_"+wk+"M"+m; }
+    function loadMT(key){ return loadJSON(key,{}); }
+    function saveMT(key,d){ saveJSON(key,d); }
+
+    /* scores stored as result:CJS2_{group/week}_{day/week}M{m}|tA|tB */
+    function advScKey(grp,day,m,tA,tB){ return "result:CJS2_adv_"+grp+"_"+day+"M"+m+"|"+(tA||"?")+"|"+(tB||"?"); }
+    function mainScKey(wk,m,tA,tB){ return "result:CJS2_main_"+wk+"M"+m+"|"+(tA||"?")+"|"+(tB||"?"); }
+    function loadSc(scKey){ try{ var x=localStorage.getItem(scKey); if(x){ var s=JSON.parse(x); return {a:Number(s.scoreA)||0,b:Number(s.scoreB)||0}; } }catch(e){} return null; }
+
+    /* ── LOGO HTML ── */
+    function tLogoHtml(name,sz){
+      var pool=loadPool(); sz=sz||52;
+      var t=pool.find(function(x){ return x.name===name; });
+      if(!t||!t.logo) return '<span style="font-size:10px;font-weight:900;color:rgba(255,255,255,.5);">'+(t?t.code:(name||"?").slice(0,5))+'</span>';
+      var f=t.white?'filter:brightness(0) invert(1);':'';
+      return '<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;'+f+'">';
+    }
+
+    /* ── SLOT RENDER ── */
+    function renderSlots(gid){
+      var slots=loadSlots(gid), pool=loadPool();
+      var el=document.getElementById("slots-"+gid); if(!el) return;
+      var isList=(gid==="adva"||gid==="advb"); /* group-slots-list vs flat grid */
+      el.innerHTML=slots.map(function(name,i){
+        var t=pool.find(function(x){ return x.name===name; });
+        var logoHtml=(t&&t.logo)
+          ?'<img src="'+t.logo+'" alt="'+esc(name)+'" style="width:40px;height:40px;object-fit:contain;'+(t.white?'filter:brightness(0) invert(1);':'')+'">'
+          :'<span style="font-size:11px;font-weight:900;color:rgba(255,255,255,.3);">'+(i+1)+'</span>';
+        var cls=name?"group-slot has-team":"group-slot empty";
+        return '<div class="'+cls+'" data-slot="'+(i+1)+'" data-gid="'+gid+'"><div class="slot-logo">'+logoHtml+'</div><span class="slot-name">'+esc(name||"팀 배정")+'</span><span class="slot-rank">S'+(i+1)+'</span></div>';
+      }).join("");
+      if(_isAdmin){
+        el.querySelectorAll(".group-slot").forEach(function(el2){
+          el2.addEventListener("click",function(){ openSlotPicker(gid,parseInt(el2.dataset.slot)); });
+        });
+      }
+    }
+
+    /* ── MATCH CARD ── */
+    function makeAdvMatchCard(grp,day,m){
+      var key=advMKey(grp,day,m);
+      var data=loadMT(key);
+      var tA=data.teamA||"", tB=data.teamB||"";
+      var scKey=advScKey(grp,day,m,tA,tB);
+      var sc=(tA&&tB)?loadSc(scKey):null;
+      var scoreText=sc?sc.a+" : "+sc.b:"VS";
+      var card=document.createElement("article");
+      card.className="match-card"+(sc?"":" upcoming");
+      card.innerHTML=
+        '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div><div class="match-team-name">'+esc(tA||"팀 선택")+'</div></div></strong>'
+        +'<em>'+scoreText+'</em>'
+        +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div><div class="match-team-name">'+esc(tB||"팀 선택")+'</div></div></strong>';
+      (function(g,d,mc,k){
+        var strongs=card.querySelectorAll("strong");
+        function goDetail(){
+          var dt=loadMT(k); if(!dt.teamA||!dt.teamB) return;
+          var sc2=loadSc(advScKey(g,d,mc,dt.teamA,dt.teamB));
+          var q=new URLSearchParams({date:"CJS2_adv_"+g+"_"+d+"M"+mc,teamA:dt.teamA,teamB:dt.teamB,score:sc2?(sc2.a+" : "+sc2.b):"0 : 0",from:"cj_split2"});
+          window.location.href="./challengers-japan-match-dark.html?"+q.toString();
+        }
+        if(_isAdmin){
+          strongs[0].addEventListener("click",function(e){ e.stopPropagation(); openAdvPickModal(g,d,mc,"A"); });
+          strongs[1].addEventListener("click",function(e){ e.stopPropagation(); openAdvPickModal(g,d,mc,"B"); });
+          card.querySelector("em").addEventListener("click",function(e){
+            e.stopPropagation();
+            var dt=loadMT(k); if(!dt.teamA||!dt.teamB){ alert("먼저 팀을 선택하세요"); return; }
+            openScoreModal("adv",{grp:g,day:d,m:mc,tA:dt.teamA,tB:dt.teamB});
+          });
+        }
+        card.addEventListener("click",goDetail);
+        card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goDetail(); } });
+      })(grp,day,m,key);
+      card.tabIndex=0; card.setAttribute("role","button");
+      return card;
+    }
+
+    function makeMainMatchCard(wk,m){
+      var key=mainMKey(wk,m);
+      var data=loadMT(key);
+      var tA=data.teamA||"", tB=data.teamB||"";
+      var scKey=mainScKey(wk,m,tA,tB);
+      var sc=(tA&&tB)?loadSc(scKey):null;
+      var scoreText=sc?sc.a+" : "+sc.b:"VS";
+      var card=document.createElement("article");
+      card.className="match-card"+(sc?"":" upcoming");
+      card.innerHTML=
+        '<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,52)+'</div><div class="match-team-name">'+esc(tA||"팀 선택")+'</div></div></strong>'
+        +'<em>'+scoreText+'</em>'
+        +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,52)+'</div><div class="match-team-name">'+esc(tB||"팀 선택")+'</div></div></strong>';
+      (function(w,mc,k){
+        var strongs=card.querySelectorAll("strong");
+        function goDetail(){
+          var dt=loadMT(k); if(!dt.teamA||!dt.teamB) return;
+          var sc2=loadSc(mainScKey(w,mc,dt.teamA,dt.teamB));
+          var q=new URLSearchParams({date:"CJS2_main_"+w+"M"+mc,teamA:dt.teamA,teamB:dt.teamB,score:sc2?(sc2.a+" : "+sc2.b):"0 : 0",from:"cj_split2"});
+          window.location.href="./challengers-japan-match-dark.html?"+q.toString();
+        }
+        if(_isAdmin){
+          strongs[0].addEventListener("click",function(e){ e.stopPropagation(); openMainPickModal(w,mc,"A"); });
+          strongs[1].addEventListener("click",function(e){ e.stopPropagation(); openMainPickModal(w,mc,"B"); });
+          card.querySelector("em").addEventListener("click",function(e){
+            e.stopPropagation();
+            var dt=loadMT(k); if(!dt.teamA||!dt.teamB){ alert("먼저 팀을 선택하세요"); return; }
+            openScoreModal("main",{wk:w,m:mc,tA:dt.teamA,tB:dt.teamB});
+          });
+        }
+        card.addEventListener("click",goDetail);
+        card.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goDetail(); } });
+      })(wk,m,key);
+      card.tabIndex=0; card.setAttribute("role","button");
+      return card;
+    }
+
+    /* ── MATCH GRIDS RENDER ── */
+    function renderAdvMatches(){
+      ["a","b"].forEach(function(grp){
+        Object.keys(ADV_DAYS).forEach(function(day){
+          var n=ADV_DAYS[day].n;
+          var el=document.getElementById("mg-adv"+grp+"-"+day); if(!el) return;
+          el.innerHTML="";
+          for(var m=1;m<=n;m++) el.appendChild(makeAdvMatchCard(grp,day,m));
+        });
+      });
+    }
+
+    function renderMainMatches(){
+      Object.keys(MAIN_WEEKS).forEach(function(wk){
+        var n=MAIN_WEEKS[wk].n;
+        var el=document.getElementById("mg-main-"+wk); if(!el) return;
+        el.innerHTML="";
+        for(var m=1;m<=n;m++) el.appendChild(makeMainMatchCard(wk,m));
+      });
+    }
+
+    /* ── STANDINGS ── */
+    function renderAdvStandings(grp){
+      var pool=loadPool();
+      var stats={};
+      loadSlots("adv"+grp).filter(Boolean).forEach(function(name){ stats[name]={name:name,w:0,l:0,mw:0,ml:0}; });
+      Object.keys(ADV_DAYS).forEach(function(day){
+        var n=ADV_DAYS[day].n;
+        for(var m=1;m<=n;m++){
+          var d=loadMT(advMKey(grp,day,m)); if(!d.teamA||!d.teamB) continue;
+          var sc=loadSc(advScKey(grp,day,m,d.teamA,d.teamB)); if(!sc) continue;
+          if(!stats[d.teamA]) stats[d.teamA]={name:d.teamA,w:0,l:0,mw:0,ml:0};
+          if(!stats[d.teamB]) stats[d.teamB]={name:d.teamB,w:0,l:0,mw:0,ml:0};
+          stats[d.teamA].mw+=sc.a; stats[d.teamA].ml+=sc.b;
+          stats[d.teamB].mw+=sc.b; stats[d.teamB].ml+=sc.a;
+          if(sc.a>sc.b){ stats[d.teamA].w++; stats[d.teamB].l++; }
+          else if(sc.b>sc.a){ stats[d.teamB].w++; stats[d.teamA].l++; }
+        }
+      });
+      var sorted=Object.values(stats).sort(function(a,b){
+        if(b.w!==a.w) return b.w-a.w;
+        return (b.mw-b.ml)-(a.mw-a.ml);
+      });
+      var el=document.getElementById("std-adv"+grp); if(!el) return;
+      if(!sorted.length){ el.innerHTML=""; return; }
+      var rows=sorted.map(function(s,rank){
+        var t=pool.find(function(x){ return x.name===s.name; });
+        var f=t&&t.white?'filter:brightness(0) invert(1);':'';
+        var logo=(t&&t.logo)?'<img src="'+t.logo+'" alt="'+esc(s.name)+'" style="width:32px;height:32px;object-fit:contain;'+f+'">':'';
+        var played=s.w+s.l>0, diff=s.mw-s.ml;
+        var dCls=diff>0?"delta plus":diff<0?"delta minus":"delta";
+        var dStr=played?(diff>0?"+"+diff:String(diff)):"-";
+        var adv=rank<ADV_ADVANCE;
+        return '<div class="standings-row'+(adv?" clinched":" eliminated")+'" role="row">'
+          +'<div class="team-cell"><div class="rank-badge">'+(rank+1)+'</div>'
+          +'<div class="stage-team-logo">'+logo+'</div>'
+          +'<div><strong>'+esc(s.name)+'</strong></div></div>'
+          +'<span>'+s.w+' - '+s.l+'</span>'
+          +'<span>'+s.mw+' / '+s.ml+'</span>'
+          +'<span class="'+dCls+'">'+dStr+'</span></div>';
+      }).join("");
+      el.innerHTML='<div class="standings-card"><div class="standings-title"><h3>그룹 '+grp.toUpperCase()+'</h3><span>상위 2팀 Main Stage 진출</span></div>'
+        +'<div class="standings-table" role="table">'
+        +'<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
+        +rows+'</div></div>';
+    }
+
+    function renderMainStandings(){
+      var pool=loadPool();
+      var stats={};
+      loadSlots("main").filter(Boolean).forEach(function(name){ stats[name]={name:name,w:0,l:0,mw:0,ml:0}; });
+      Object.keys(MAIN_WEEKS).forEach(function(wk){
+        var n=MAIN_WEEKS[wk].n;
+        for(var m=1;m<=n;m++){
+          var d=loadMT(mainMKey(wk,m)); if(!d.teamA||!d.teamB) continue;
+          var sc=loadSc(mainScKey(wk,m,d.teamA,d.teamB)); if(!sc) continue;
+          if(!stats[d.teamA]) stats[d.teamA]={name:d.teamA,w:0,l:0,mw:0,ml:0};
+          if(!stats[d.teamB]) stats[d.teamB]={name:d.teamB,w:0,l:0,mw:0,ml:0};
+          stats[d.teamA].mw+=sc.a; stats[d.teamA].ml+=sc.b;
+          stats[d.teamB].mw+=sc.b; stats[d.teamB].ml+=sc.a;
+          if(sc.a>sc.b){ stats[d.teamA].w++; stats[d.teamB].l++; }
+          else if(sc.b>sc.a){ stats[d.teamB].w++; stats[d.teamA].l++; }
+        }
+      });
+      var sorted=Object.values(stats).sort(function(a,b){
+        if(b.w!==a.w) return b.w-a.w;
+        return (b.mw-b.ml)-(a.mw-a.ml);
+      });
+      var el=document.getElementById("std-main"); if(!el) return;
+      if(!sorted.length){ el.innerHTML=""; return; }
+      var rows=sorted.map(function(s,rank){
+        var t=pool.find(function(x){ return x.name===s.name; });
+        var f=t&&t.white?'filter:brightness(0) invert(1);':'';
+        var logo=(t&&t.logo)?'<img src="'+t.logo+'" alt="'+esc(s.name)+'" style="width:32px;height:32px;object-fit:contain;'+f+'">':'';
+        var played=s.w+s.l>0, diff=s.mw-s.ml;
+        var dCls=diff>0?"delta plus":diff<0?"delta minus":"delta";
+        var dStr=played?(diff>0?"+"+diff:String(diff)):"-";
+        var adv=rank<MAIN_ADVANCE;
+        return '<div class="standings-row'+(adv?" clinched":" eliminated")+'" role="row">'
+          +'<div class="team-cell"><div class="rank-badge">'+(rank+1)+'</div>'
+          +'<div class="stage-team-logo">'+logo+'</div>'
+          +'<div><strong>'+esc(s.name)+'</strong></div></div>'
+          +'<span>'+s.w+' - '+s.l+'</span>'
+          +'<span>'+s.mw+' / '+s.ml+'</span>'
+          +'<span class="'+dCls+'">'+dStr+'</span></div>';
+      }).join("");
+      el.innerHTML='<div class="standings-card" style="max-width:680px;"><div class="standings-title"><h3>Main Stage</h3><span>상위 6팀 Finals 진출</span></div>'
+        +'<div class="standings-table" role="table">'
+        +'<div class="standings-row standings-head" role="row"><span>팀</span><span>승패</span><span>맵</span><span>득실</span></div>'
+        +rows+'</div></div>';
+    }
+
+    /* ── FULL RENDER ── */
+    function renderAdv(){
+      renderSlots("adva");
+      renderSlots("advb");
+      renderAdvMatches();
+      renderAdvStandings("a");
+      renderAdvStandings("b");
+    }
+    function renderMain(){
+      renderSlots("main");
+      renderMainMatches();
+      renderMainStandings();
+    }
+
+    /* ── TAB SWITCH ── */
+    var activeStage="adv";
+    document.querySelectorAll(".stage-tab-btn").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        document.querySelectorAll(".stage-tab-btn").forEach(function(b){ b.classList.remove("active"); });
+        document.querySelectorAll(".stage-panel").forEach(function(p){ p.classList.remove("active"); });
+        btn.classList.add("active");
+        activeStage=btn.dataset.stage;
+        var panel=document.getElementById("panel-"+activeStage);
+        if(panel) panel.classList.add("active");
+        if(activeStage==="adv") renderAdv();
+        else renderMain();
+      });
+    });
+
+    /* ── SLOT PICKER ── */
+    function openSlotPicker(gid,slotIdx){
+      var slots=loadSlots(gid), pool=loadPool();
+      var cur=slots[slotIdx-1];
+      /* gather all used names across adva, advb, main */
+      var usedA=new Set(loadSlots("adva").filter(Boolean));
+      var usedB=new Set(loadSlots("advb").filter(Boolean));
+      var usedM=new Set(loadSlots("main").filter(Boolean));
+      var usedInOther=new Set();
+      if(gid==="adva"){ usedB.forEach(function(n){ usedInOther.add(n); }); }
+      else if(gid==="advb"){ usedA.forEach(function(n){ usedInOther.add(n); }); }
+      var used=new Set(slots.filter(Boolean));
+      var grpLabel=gid==="adva"?"그룹 A":gid==="advb"?"그룹 B":"Main Stage";
+      document.getElementById("ga-modal-title").textContent=grpLabel+" — 슬롯 "+slotIdx+" 팀 배정";
+      document.getElementById("ga-modal-sub").textContent="팀을 선택하세요.";
+      var grid=document.getElementById("ga-team-grid");
+      grid.innerHTML=pool.map(function(t){
+        var isUsedSameGrp=used.has(t.name)&&t.name!==cur;
+        var isOther=usedInOther.has(t.name)&&t.name!==cur;
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':'';
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+(isUsedSameGrp||isOther?" in-other-group":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("")
+      +'<button class="ga-team-btn" id="btn-add-slot-team" style="border-style:dashed;color:rgba(255,255,255,.5);"><span style="font-size:20px">+</span><span>팀 추가</span></button>';
+      grid.querySelectorAll(".ga-team-btn:not(#btn-add-slot-team)").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          var s=loadSlots(gid); s[slotIdx-1]=btn.dataset.team; saveSlots(gid,s);
+          closeGaModal();
+          if(activeStage==="adv") renderAdv(); else renderMain();
+        });
+      });
+      document.getElementById("btn-add-slot-team").addEventListener("click",function(){ closeGaModal(); openAddTeam(gid); });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click",closeGaModal);
+      document.getElementById("ga-clear").addEventListener("click",function(){
+        var s=loadSlots(gid); s[slotIdx-1]=""; saveSlots(gid,s); closeGaModal();
+        if(activeStage==="adv") renderAdv(); else renderMain();
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+
+    /* ── MATCH TEAM PICKERS ── */
+    function openAdvPickModal(grp,day,m,side){
+      var key=advMKey(grp,day,m);
+      var data=loadMT(key);
+      var cur=side==="A"?data.teamA||"":data.teamB||"";
+      var pool=loadPool();
+      document.getElementById("ga-modal-title").textContent="그룹 "+grp.toUpperCase()+" "+ADV_DAYS[day].label+" Match "+m+" — "+(side==="A"?"왼쪽":"오른쪽")+" 팀 선택";
+      document.getElementById("ga-modal-sub").textContent="";
+      var grid=document.getElementById("ga-team-grid");
+      grid.innerHTML=pool.map(function(t){
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':'';
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("");
+      grid.querySelectorAll(".ga-team-btn").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          var d=loadMT(key);
+          if(side==="A") d.teamA=btn.dataset.team; else d.teamB=btn.dataset.team;
+          saveMT(key,d); closeGaModal(); renderAdvMatches(); renderAdvStandings("a"); renderAdvStandings("b");
+        });
+      });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click",closeGaModal);
+      document.getElementById("ga-clear").addEventListener("click",function(){
+        var d=loadMT(key);
+        if(side==="A") d.teamA=""; else d.teamB="";
+        saveMT(key,d); closeGaModal(); renderAdvMatches(); renderAdvStandings("a"); renderAdvStandings("b");
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+
+    function openMainPickModal(wk,m,side){
+      var key=mainMKey(wk,m);
+      var data=loadMT(key);
+      var cur=side==="A"?data.teamA||"":data.teamB||"";
+      var pool=loadPool();
+      document.getElementById("ga-modal-title").textContent=MAIN_WEEKS[wk].label+" Match "+m+" — "+(side==="A"?"왼쪽":"오른쪽")+" 팀 선택";
+      document.getElementById("ga-modal-sub").textContent="";
+      var grid=document.getElementById("ga-team-grid");
+      grid.innerHTML=pool.map(function(t){
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var logo=t.logo?'<img src="'+t.logo+'" alt="'+esc(t.name)+'" style="'+f+'">':'';
+        return '<button class="ga-team-btn'+(t.name===cur?" selected":"")+'" data-team="'+esc(t.name)+'">'
+          +logo+'<span class="ga-team-code">'+esc(t.code)+'</span><span>'+esc(t.name)+'</span></button>';
+      }).join("");
+      grid.querySelectorAll(".ga-team-btn").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          var d=loadMT(key);
+          if(side==="A") d.teamA=btn.dataset.team; else d.teamB=btn.dataset.team;
+          saveMT(key,d); closeGaModal(); renderMainMatches(); renderMainStandings();
+        });
+      });
+      document.getElementById("ga-actions").innerHTML=
+        '<button class="ga-btn ga-btn-clear" id="ga-clear">비우기</button>'
+        +'<button class="ga-btn ga-btn-cancel" id="ga-cancel">취소</button>';
+      document.getElementById("ga-cancel").addEventListener("click",closeGaModal);
+      document.getElementById("ga-clear").addEventListener("click",function(){
+        var d=loadMT(key);
+        if(side==="A") d.teamA=""; else d.teamB="";
+        saveMT(key,d); closeGaModal(); renderMainMatches(); renderMainStandings();
+      });
+      document.getElementById("ga-modal").hidden=false;
+    }
+
+    function closeGaModal(){ document.getElementById("ga-modal").hidden=true; }
+    document.getElementById("ga-backdrop").addEventListener("click",closeGaModal);
+
+    /* ── ADD TEAM MODAL ── */
+    function openAddTeam(){
+      ["at-name","at-code","at-logo"].forEach(function(id){ document.getElementById(id).value=""; });
+      document.getElementById("add-modal").hidden=false;
+      document.getElementById("at-name").focus();
+    }
+    document.getElementById("add-backdrop").addEventListener("click",function(){ document.getElementById("add-modal").hidden=true; });
+    document.getElementById("add-cancel").addEventListener("click",function(){ document.getElementById("add-modal").hidden=true; });
+    document.getElementById("add-save").addEventListener("click",function(){
+      var name=document.getElementById("at-name").value.trim();
+      var code=document.getElementById("at-code").value.trim().toUpperCase();
+      var logo=document.getElementById("at-logo").value.trim();
+      if(!name) return;
+      var pool=loadPool();
+      if(!pool.find(function(t){ return t.name===name; })){ pool.push({name:name,code:code||name.slice(0,5).toUpperCase(),logo:logo,white:false}); savePool(pool); }
+      document.getElementById("add-modal").hidden=true;
+      if(activeStage==="adv") renderAdv(); else renderMain();
+    });
+
+    /* ── SCORE MODAL ── */
+    var _scCtx=null;
+    function openScoreModal(type,ctx){
+      _scCtx={type:type,ctx:ctx};
+      var title=type==="adv"
+        ?(ctx.tA+" vs "+ctx.tB)
+        :(ctx.tA+" vs "+ctx.tB);
+      document.getElementById("score-title").textContent=title;
+      document.getElementById("score-name-a").textContent=ctx.tA;
+      document.getElementById("score-name-b").textContent=ctx.tB;
+      var scKey=type==="adv"?advScKey(ctx.grp,ctx.day,ctx.m,ctx.tA,ctx.tB):mainScKey(ctx.wk,ctx.m,ctx.tA,ctx.tB);
+      var sc=loadSc(scKey)||{a:"",b:""};
+      document.getElementById("score-a").value=sc.a!==""?sc.a:"";
+      document.getElementById("score-b").value=sc.b!==""?sc.b:"";
+      document.getElementById("score-modal").hidden=false;
+      document.getElementById("score-a").focus();
+    }
+    function closeScoreModal(){ document.getElementById("score-modal").hidden=true; _scCtx=null; }
+    document.getElementById("score-backdrop").addEventListener("click",closeScoreModal);
+    document.getElementById("score-cancel").addEventListener("click",closeScoreModal);
+    document.getElementById("score-clear").addEventListener("click",function(){
+      if(!_scCtx) return;
+      var c=_scCtx.ctx;
+      var scKey=_scCtx.type==="adv"?advScKey(c.grp,c.day,c.m,c.tA,c.tB):mainScKey(c.wk,c.m,c.tA,c.tB);
+      localStorage.removeItem(scKey);
+      closeScoreModal();
+      if(activeStage==="adv"){ renderAdvMatches(); renderAdvStandings("a"); renderAdvStandings("b"); }
+      else { renderMainMatches(); renderMainStandings(); }
+    });
+    document.getElementById("score-save").addEventListener("click",function(){
+      if(!_scCtx) return;
+      var a=parseInt(document.getElementById("score-a").value)||0;
+      var b=parseInt(document.getElementById("score-b").value)||0;
+      var c=_scCtx.ctx;
+      var scKey=_scCtx.type==="adv"?advScKey(c.grp,c.day,c.m,c.tA,c.tB):mainScKey(c.wk,c.m,c.tA,c.tB);
+      localStorage.setItem(scKey,JSON.stringify({scoreA:a,scoreB:b}));
+      closeScoreModal();
+      if(activeStage==="adv"){ renderAdvMatches(); renderAdvStandings("a"); renderAdvStandings("b"); }
+      else { renderMainMatches(); renderMainStandings(); }
+    });
+
+    document.addEventListener("keydown",function(e){
+      if(e.key!=="Escape") return;
+      if(!document.getElementById("score-modal").hidden) closeScoreModal();
+      else if(!document.getElementById("ga-modal").hidden) closeGaModal();
+      else if(!document.getElementById("add-modal").hidden) document.getElementById("add-modal").hidden=true;
+    });
+
+    /* 초기 렌더 */
+    renderAdv();
+  });
+  </script>
+  <script src="./auth.js"></script>
+  <script src="./help.js" defer></script>
+</body>
+</html>

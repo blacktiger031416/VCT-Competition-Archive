@@ -225,6 +225,7 @@
     cj_split1:             'Split 1',
     cj_japan_ph2_bracket:  'Phase 2',
     cj_japan_po_bracket:   'Playoffs',
+    cj_split2:             'Split 2',
   };
 
   /* stage 정규화: Playoffs를 부모 Stage로 묶음 */
@@ -286,6 +287,7 @@
     if (l === 'challengers-japan' && s === 'cj_split1')             return 300;
     if (l === 'challengers-japan' && s === 'cj_japan_ph2_bracket')  return 310;
     if (l === 'challengers-japan' && s === 'cj_japan_po_bracket')   return 320;
+    if (l === 'challengers-japan' && s === 'cj_split2')             return 325;
     if (l === 'challengers-japan')                                   return 305;
     return 999; // 알 수 없는 조합 → 숨김
   }
