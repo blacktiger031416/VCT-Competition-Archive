@@ -1989,15 +1989,9 @@
       if (tb) tb.style.display = admin ? "block" : "none";
     }
 
-    /* ── 접근 제한: 어드민 전용 (준비 중 오버레이) ── */
-    function checkAccess() {
-      var admin = !!(window.vctIsAdmin && window.vctIsAdmin());
-      var overlay = document.getElementById("stock-wip-overlay");
-      if (overlay) overlay.style.display = admin ? "none" : "flex";
-    }
-    /* auth.js 로드 완료 후 최종 확인 (3초 대기) */
-    var _accessChecks = [300, 700, 1200, 2000, 3000];
-    _accessChecks.forEach(function(ms) { setTimeout(checkAccess, ms); });
+    /* 오버레이 제거 — 전체 공개 */
+    var overlay = document.getElementById("stock-wip-overlay");
+    if (overlay) overlay.style.display = "none";
 
     /* ── 초기화 ── */
     (window.storageReady || Promise.resolve()).then(function () {
