@@ -3475,9 +3475,9 @@ function teamFuzzyMatch(apiTitle, queryName) {
   const q = normalizeTeamName(queryName);
   if (t === q) return true;
   if (t.includes(q) || q.includes(t)) return true;
-  // 단어 토큰 매칭 — 공통 단어(team, esports 등) 제외, 길이 4 이상만
-  const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 4 && !TEAM_GENERIC_WORDS.has(w));
-  const qWords = queryName.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 4 && !TEAM_GENERIC_WORDS.has(w));
+  // 단어 토큰 매칭 — 공통 단어(team, esports 등) 제외, 길이 2 이상 (T1·DRX 등 2~3자 코드 포함)
+  const tWords = apiTitle.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 2 && !TEAM_GENERIC_WORDS.has(w));
+  const qWords = queryName.toLowerCase().split(/[\s\-_]+/).filter(w => w.length >= 2 && !TEAM_GENERIC_WORDS.has(w));
   if (tWords.length > 0 && qWords.length > 0 &&
       qWords.some(qw => tWords.some(tw => tw.startsWith(qw) || qw.startsWith(tw)))) return true;
   // 악센트 제거 비교 (é→e, á→a, Ü→U 등)
