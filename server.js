@@ -3542,10 +3542,19 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
   for (const p of [...teamAPlayers, ...teamBPlayers]) {
     if (!p.nickname || !(p.averageCombatScore > 0)) continue;
     const vk   = `vct_p:${p.nickname}`;
-    const vRow = await pool.query("SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]);
+    let vRow = await pool.query("SELECT key, value FROM app_data WHERE lower(key)=lower($1)", [vk]);
+    /* 특수문자 정규화 fallback — "So Sweet" ↔ "So:Sweet" 등 ':' ↔ 공백 차이 처리 */
+    if (!vRow.rows[0]) {
+      const normNick = p.nickname.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+      const allVct = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'");
+      const matched = allVct.rows.find(r => {
+        return r.key.slice(6).replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase() === normNick;
+      });
+      if (matched) vRow = { rows: [matched] };
+    }
     let vData  = {}, vKey = vk;
     if (vRow.rows[0]) {
-      vKey = vRow.rows[0].key;
+      vKey = vRow.rows[0].key; /* 기존 키 재사용 — 중복 생성 방지 */
       try { vData = JSON.parse(vRow.rows[0].value); } catch {}
     }
     if (!vData.maps) vData.maps = [];
