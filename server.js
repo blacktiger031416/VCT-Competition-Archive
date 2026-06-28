@@ -3468,7 +3468,7 @@ function normalizeTeamName(name) {
 /* 팀 이름 fuzzy 매칭
    - 정확일치 → contains → 단어 토큰(공통단어 제외) → 악센트 제거
    - "Team Heretics"·"Team Vitality" 처럼 "team" 공유 → false 여야 함 */
-const TEAM_GENERIC_WORDS = new Set(["team","esports","esport","gaming","games","club","fc","sc","gg","gc","red","blue"]);
+const TEAM_GENERIC_WORDS = new Set(["team","esports","esport","gaming","games","club","fc","sc","gg","gc","red","blue","academy","global"]);
 function teamFuzzyMatch(apiTitle, queryName) {
   if (!apiTitle || !queryName) return false;
   const t = normalizeTeamName(apiTitle);
