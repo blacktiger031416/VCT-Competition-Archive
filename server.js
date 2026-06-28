@@ -1544,7 +1544,7 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
       playersA.forEach((p, i) => {
         playersData[`a${i}`] = {
           name  : p.nickname,
-          agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+          agent : agentKo(p),
           acs   : p.averageCombatScore,
           kda   : `${p.kills}/${p.deaths}/${p.assists}`,
         };
@@ -1552,7 +1552,7 @@ app.get("/api/spike-match/:id", requireAdmin, async (req, res) => {
       playersB.forEach((p, i) => {
         playersData[`b${i}`] = {
           name  : p.nickname,
-          agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+          agent : agentKo(p),
           acs   : p.averageCombatScore,
           kda   : `${p.kills}/${p.deaths}/${p.assists}`,
         };
@@ -3450,8 +3450,12 @@ const AGENT_EN_TO_KO = {
   "Chamber":"체임버","Neon":"네온","Fade":"페이드","Harbor":"하버",
   "Gekko":"게코","Deadlock":"데드록","Iso":"아이소","Clove":"클로브",
   "Vyse":"바이스","Tejo":"테호","Waylay":"웨이레이","Gecko":"게코",
-  "Mix":"믹스",
+  "Mix":"믹스","Veto":"비토",
 };
+function agentKo(p) {
+  const title = p.agents?.[0]?.title || p.agents?.[0]?.name || "";
+  return AGENT_EN_TO_KO[title] || title;
+}
 
 /* 맵 영어 → 한국어 매핑 */
 const MAP_EN_TO_KO = {
@@ -3511,7 +3515,7 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
   teamAPlayers.forEach((p, i) => {
     playersData[`a${i}`] = {
       name  : p.nickname,
-      agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+      agent : agentKo(p),
       acs   : p.averageCombatScore,
       kda   : `${p.kills}/${p.deaths}/${p.assists}`,
     };
@@ -3519,7 +3523,7 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
   teamBPlayers.forEach((p, i) => {
     playersData[`b${i}`] = {
       name  : p.nickname,
-      agent : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+      agent : agentKo(p),
       acs   : p.averageCombatScore,
       kda   : `${p.kills}/${p.deaths}/${p.assists}`,
     };
@@ -3565,7 +3569,7 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
       ..._mkStage      && { stage: _mkStage.toLowerCase() },
       acs       : p.averageCombatScore,
       kda       : `${p.kills}/${p.deaths}/${p.assists}`,
-      agent     : AGENT_EN_TO_KO[p.agents?.[0]?.title] || p.agents?.[0]?.title || "",
+      agent     : agentKo(p),
     };
     if (existIdx >= 0) vData.maps[existIdx] = entry;
     else vData.maps.push(entry);
