@@ -3461,7 +3461,7 @@ const MAP_EN_TO_KO = {
 };
 
 function normalizeTeamName(name) {
-  return (name || "").toLowerCase().replace(/\s+/g, "");
+  return (name || "").toLowerCase().replace(/[\s:]+/g, "");
 }
 
 /* 팀 이름 퍼지 매칭: 정확 일치 → 포함 관계 → 단어 토큰 겹침 → 악센트 제거 비교 */
