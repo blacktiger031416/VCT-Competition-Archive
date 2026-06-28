@@ -2754,7 +2754,7 @@ app.get("/api/records/team-detail", async (req, res) => {
 
     const MAP_NAME_KO = {
       "Ascent":"어센트","Split":"스플릿","Fracture":"프랙처","Bind":"바인드",
-      "Breeze":"브리즈","Abyss":"어비스","Lotus":"로터스","Sunset":"선셋",
+      "Breeze":"브리즈","Abyss":"어비스","Lotus":"로터스","Sunset":"선셋","Summit":"서밋",
       "Pearl":"펄","Icebox":"아이스박스","Corrode":"코로드","Haven":"헤이븐","헤이브":"헤이븐",
     };
     function normMap(n) { return MAP_NAME_KO[n] || n; }
@@ -3462,6 +3462,7 @@ const MAP_EN_TO_KO = {
   "Ascent":"어센트","Bind":"바인드","Split":"스플릿","Sunset":"선셋",
   "Abyss":"어비스","Pearl":"펄","Breeze":"브리즈","Haven":"헤이븐",
   "Fracture":"프랙처","Lotus":"로터스","Icebox":"아이스박스","Corrode":"코로드",
+  "Summit":"서밋",
 };
 
 function normalizeTeamName(name) {
