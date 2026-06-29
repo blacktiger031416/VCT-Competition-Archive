@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>발락대 경기 상세</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="./storage.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: #f4f6fb;
       min-height: 100vh;
@@ -36,221 +35,174 @@
     }
     .nav-right { margin-left: auto; }
 
-    /* ── PAGE ── */
     .page-wrap {
       max-width: 1040px;
       margin: 0 auto;
-      padding: 28px 20px 72px;
-      display: flex; flex-direction: column; gap: 20px;
+      padding: 24px 20px 72px;
+      display: flex; flex-direction: column; gap: 16px;
     }
 
-    /* ══════════════════════════════════════════
-       SCORE1 — 팀 헤더 카드
-       ══════════════════════════════════════════ */
-    .match-card {
-      border-radius: 24px;
-      overflow: hidden;
-      background: linear-gradient(160deg, #ffe8ee 0%, #fff4f0 40%, #fff8ec 100%);
-      border: 1.5px solid rgba(255,107,149,0.18);
-      box-shadow: 0 4px 32px rgba(255,107,149,0.12);
+    /* ── 이미지 위 오버레이 공통 ── */
+    .img-overlay-wrap {
       position: relative;
-    }
-
-    /* 장식 도형 */
-    .match-card::before {
-      content: '★';
-      position: absolute; top: 18px; left: 22px;
-      font-size: 28px; color: rgba(255,107,149,0.25);
-      pointer-events: none;
-    }
-    .match-card::after {
-      content: '✦';
-      position: absolute; bottom: 60px; right: 24px;
-      font-size: 22px; color: rgba(255,200,100,0.35);
-      pointer-events: none;
-    }
-
-    /* 팀 헤더 3단 */
-    .match-header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      padding: 32px 36px 24px;
-      gap: 0;
-    }
-
-    .team-side {
-      display: flex; align-items: center; gap: 16px;
-    }
-    .team-side-b { flex-direction: row-reverse; }
-
-    .team-logo {
-      width: 72px; height: 72px; object-fit: contain; flex-shrink: 0;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.13));
-    }
-    .team-logo-placeholder {
-      width: 72px; height: 72px; flex-shrink: 0; border-radius: 50%;
-      background: rgba(255,107,149,0.1); border: 2px dashed rgba(255,107,149,0.25);
-    }
-    .team-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(20px, 3vw, 30px);
-      font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase;
-      color: #2a2a3e;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
-    }
-    .team-side-b .team-name { text-align: right; }
-
-    /* VS 중앙 패널 */
-    .vs-center {
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      padding: 0 28px;
-    }
-    .vs-card {
-      background: #fff;
-      border: 2px solid rgba(255,107,149,0.35);
-      border-radius: 16px;
-      padding: 10px 28px;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      box-shadow: 0 4px 20px rgba(255,107,149,0.15);
-    }
-    .vs-text {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 26px; font-weight: 900; letter-spacing: 0.12em;
-      background: linear-gradient(135deg, #ff6b95, #ff9e6e);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .vs-date {
-      font-size: 11px; font-weight: 600; color: rgba(42,42,62,0.38);
-      letter-spacing: 0.06em;
-    }
-
-    /* 시리즈 스코어 바 */
-    .score-bar {
-      background: #fff;
-      border: 1.5px solid rgba(255,107,149,0.2);
-      border-radius: 16px;
-      margin: 0 24px 20px;
-      padding: 18px 32px;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      box-shadow: 0 2px 16px rgba(255,107,149,0.08);
-    }
-
-    /* 맵 결과 도트 */
-    .map-dots {
-      display: flex; gap: 8px; align-items: center;
-    }
-    .map-dots-b { justify-content: flex-end; }
-    .map-dot {
-      width: 36px; height: 36px; border-radius: 10px;
-      border: 2px solid rgba(0,0,0,0.08);
-      background: rgba(0,0,0,0.04);
-      cursor: pointer; transition: all 0.15s;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .map-dot:hover { transform: scale(1.08); }
-    .map-dot.win  { background: rgba(255,107,149,0.18); border-color: rgba(255,107,149,0.4); }
-    .map-dot.win::after { content: '✓'; color: #e84e78; font-weight: 700; font-size: 18px; }
-    .map-dot.lose { background: rgba(45,212,192,0.15); border-color: rgba(45,212,192,0.35); }
-    .map-dot.lose::after { content: '✗'; color: #0daa96; font-weight: 700; font-size: 18px; }
-    .map-dot-b.win  { background: rgba(45,212,192,0.18); border-color: rgba(45,212,192,0.4); }
-    .map-dot-b.win::after { content: '✓'; color: #0daa96; font-weight: 700; font-size: 18px; }
-    .map-dot-b.lose { background: rgba(255,107,149,0.15); border-color: rgba(255,107,149,0.35); }
-    .map-dot-b.lose::after { content: '✗'; color: #e84e78; font-weight: 700; font-size: 18px; }
-
-    /* 큰 스코어 */
-    .series-nums {
-      display: flex; align-items: center; gap: 0;
-      justify-content: center;
-    }
-    .series-big {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 64px; font-weight: 900; line-height: 1;
-      min-width: 52px; text-align: center;
-    }
-    .series-big.a   { color: #e84e78; }
-    .series-big.b   { color: #0daa96; }
-    .series-big.dim { color: rgba(42,42,62,0.15); }
-    .series-big-sep {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 40px; font-weight: 300; color: rgba(42,42,62,0.2); margin: 0 6px 4px;
-    }
-
-    /* 맵 밴픽 섹션 */
-    .veto-section {
-      background: #fff;
-      border: 1.5px solid rgba(255,107,149,0.18);
+      width: 100%;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 2px 16px rgba(255,107,149,0.07);
     }
-    .veto-tab {
-      display: inline-block;
-      padding: 6px 18px;
-      background: #fff;
-      border: 1.5px solid rgba(255,107,149,0.25);
-      border-bottom: none;
-      border-radius: 10px 10px 0 0;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: rgba(42,42,62,0.45);
-      margin: 0 0 -1px 20px;
+    .img-overlay-wrap img.bg-img {
+      width: 100%; display: block;
     }
-    .veto-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      padding: 16px 20px 20px;
-      background: #fffcfd;
-      border-top: 1.5px solid rgba(255,107,149,0.12);
+    /* 오버레이 요소는 절대 위치, 이미지 위에 표시 */
+    .ov {
+      position: absolute;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ══ SCORE1 오버레이 요소 ══ */
+
+    /* 팀 A 이름 (VS 카드 왼쪽) */
+    #ov-name-a {
+      left: 5%; top: 3%;
+      width: 33%; height: 18%;
+      justify-content: flex-start;
+      padding-left: 4%;
+    }
+    /* 팀 B 이름 (VS 카드 오른쪽) */
+    #ov-name-b {
+      left: 62%; top: 3%;
+      width: 33%; height: 18%;
+      justify-content: flex-end;
+      padding-right: 4%;
+    }
+    .team-name-ov {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(16px, 2.6vw, 28px);
+      font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase;
+      color: #2a2a3e;
+    }
+
+    /* 날짜 (VS 카드 아래) */
+    #ov-date {
+      left: 38%; top: 15%;
+      width: 24%; height: 6%;
+    }
+    .date-label {
+      font-size: clamp(10px, 1vw, 13px); font-weight: 600;
+      color: rgba(42,42,62,0.4); letter-spacing: 0.05em;
+    }
+
+    /* 스코어 바 — 큰 숫자 */
+    #ov-score {
+      left: 38%; top: 22%;
+      width: 24%; height: 12%;
+    }
+    .score-display {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .score-big {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(28px, 5vw, 56px); font-weight: 900; line-height: 1;
+      min-width: 36px; text-align: center;
+    }
+    .score-big.a   { color: #e84e78; }
+    .score-big.b   { color: #0daa96; }
+    .score-big.dim { color: rgba(42,42,62,0.18); }
+    .score-sep {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(20px, 3vw, 36px); font-weight: 300;
+      color: rgba(42,42,62,0.25); margin: 0 4px 3px;
+    }
+
+    /* 맵 결과 도트 — 팀 A */
+    #ov-dots-a {
+      left: 7%; top: 22%;
+      width: 28%; height: 12%;
+      justify-content: flex-start;
+      gap: 1%;
+    }
+    /* 맵 결과 도트 — 팀 B */
+    #ov-dots-b {
+      left: 65%; top: 22%;
+      width: 28%; height: 12%;
+      justify-content: flex-end;
+      gap: 1%;
+    }
+    .map-dot {
+      width: clamp(24px, 3.2vw, 38px);
+      height: clamp(24px, 3.2vw, 38px);
+      border-radius: 9px;
+      border: 2px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(14px, 2vw, 20px); font-weight: 700;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .map-dot:hover { transform: scale(1.1); }
+    .map-dot.win-a  { background: rgba(255,107,149,0.22); border-color: rgba(255,107,149,0.5); color: #e84e78; }
+    .map-dot.lose-a { background: rgba(45,212,192,0.18); border-color: rgba(45,212,192,0.4); color: #0daa96; }
+    .map-dot.win-b  { background: rgba(45,212,192,0.22); border-color: rgba(45,212,192,0.5); color: #0daa96; }
+    .map-dot.lose-b { background: rgba(255,107,149,0.18); border-color: rgba(255,107,149,0.4); color: #e84e78; }
+
+    /* 맵 밴픽 그리드 */
+    #ov-veto {
+      left: 5.5%; top: 51%;
+      width: 89%; height: 43%;
+      align-items: stretch;
+      gap: 1.2%;
     }
     .veto-cell {
-      display: flex; flex-direction: column; align-items: center;
-      border-radius: 14px; overflow: hidden;
-      border: 1.5px solid rgba(0,0,0,0.07);
-      background: #fafafa;
-      transition: border-color 0.15s;
+      flex: 1;
+      display: flex; flex-direction: column;
+      border-radius: 12px; overflow: hidden;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(2px);
+      cursor: pointer;
     }
-    .veto-cell.banned { opacity: 0.65; }
+    .veto-cell.banned { opacity: 0.6; }
     .veto-top {
-      width: 100%; padding: 6px 4px 5px;
-      text-align: center; background: rgba(0,0,0,0.025);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding: 5px 4px 4px; text-align: center;
+      background: rgba(255,255,255,0.5);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     .veto-action {
-      font-size: 9px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
+      font-size: clamp(7px, 0.9vw, 10px); font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
     }
     .veto-action.ban     { color: #e84e78; }
     .veto-action.pick    { color: #0daa96; }
     .veto-action.decider { color: #e8a020; }
     .veto-who {
-      font-size: 9px; font-weight: 600; color: rgba(42,42,62,0.4); margin-top: 2px;
+      font-size: clamp(7px, 0.8vw, 9px); font-weight: 600;
+      color: rgba(42,42,62,0.45); margin-top: 1px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      max-width: 100%; padding: 0 4px;
     }
-    .veto-img-wrap { width: 100%; aspect-ratio: 16/10; overflow: hidden; background: #e4e4ec; }
+    .veto-img-wrap {
+      flex: 1; overflow: hidden; background: #ddd;
+      min-height: 0;
+    }
     .veto-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .veto-cell.banned .veto-img-wrap img { filter: grayscale(80%) brightness(0.75); }
     .veto-name-bar {
-      width: 100%; padding: 5px 4px;
-      background: rgba(0,0,0,0.025); border-top: 1px solid rgba(0,0,0,0.05); text-align: center;
+      padding: 4px 4px; text-align: center;
+      background: rgba(255,255,255,0.5);
+      border-top: 1px solid rgba(0,0,0,0.06);
     }
     .veto-map-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #2a2a3e;
+      font-size: clamp(8px, 1vw, 12px); font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #2a2a3e;
     }
     .veto-cell.banned .veto-map-name { color: rgba(42,42,62,0.35); }
-    .veto-cell.pick-a .veto-top { background: rgba(255,107,149,0.1); }
-    .veto-cell.pick-b .veto-top { background: rgba(45,212,192,0.1); }
-    .veto-cell.decider-cell .veto-top { background: rgba(232,160,32,0.09); }
+    .veto-cell.pick-a .veto-top { background: rgba(255,107,149,0.15); }
+    .veto-cell.pick-b .veto-top { background: rgba(45,212,192,0.15); }
+    .veto-cell.decider-cell .veto-top { background: rgba(232,160,32,0.12); }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
   <header class="site-header">
     <a class="nav-home" href="./index.html">VCT Archive</a>
     <a class="nav-back" id="nav-back" href="./ballakdae-scrim.html">공식 스크림</a>
@@ -259,98 +211,93 @@
 
   <div class="page-wrap">
 
-    <!-- SCORE1 영역 -->
-    <div class="match-card">
+    <!-- ① SCORE1 UI 위에 오버레이 -->
+    <div class="img-overlay-wrap">
+      <img class="bg-img" src="./images/balakdae_score1.png" alt="" />
 
-      <!-- 팀 헤더 -->
-      <div class="match-header">
-        <div class="team-side team-side-a">
-          <div class="team-logo-placeholder" id="logo-a-wrap">
-            <img class="team-logo" id="logo-a" src="" alt="" style="display:none" />
-          </div>
-          <span class="team-name sb-name-a" id="name-a">–</span>
-        </div>
-        <div class="vs-center">
-          <div class="vs-card">
-            <span class="vs-text">VS</span>
-            <span class="vs-date" id="match-date"></span>
-          </div>
-        </div>
-        <div class="team-side team-side-b">
-          <span class="team-name sb-name-b" id="name-b">–</span>
-          <div class="team-logo-placeholder" id="logo-b-wrap">
-            <img class="team-logo" id="logo-b" src="" alt="" style="display:none" />
-          </div>
+      <!-- 팀 A 이름 -->
+      <div class="ov" id="ov-name-a">
+        <span class="team-name-ov sb-name-a">–</span>
+      </div>
+
+      <!-- 팀 B 이름 -->
+      <div class="ov" id="ov-name-b">
+        <span class="team-name-ov sb-name-b">–</span>
+      </div>
+
+      <!-- 날짜 -->
+      <div class="ov" id="ov-date">
+        <span class="date-label" id="match-date"></span>
+      </div>
+
+      <!-- 시리즈 스코어 -->
+      <div class="ov" id="ov-score">
+        <div class="score-display">
+          <span class="score-big dim" id="score-a">-</span>
+          <span class="score-sep">:</span>
+          <span class="score-big dim" id="score-b">-</span>
         </div>
       </div>
 
-      <!-- 시리즈 스코어 바 -->
-      <div class="score-bar">
-        <div class="map-dots" id="dots-a">
-          <div class="map-dot" data-side="a" data-idx="0"></div>
-          <div class="map-dot" data-side="a" data-idx="1"></div>
-          <div class="map-dot" data-side="a" data-idx="2"></div>
+      <!-- 맵 결과 도트 A -->
+      <div class="ov" id="ov-dots-a">
+        <div class="map-dot" id="dot-a-0"></div>
+        <div class="map-dot" id="dot-a-1"></div>
+        <div class="map-dot" id="dot-a-2"></div>
+      </div>
+
+      <!-- 맵 결과 도트 B -->
+      <div class="ov" id="ov-dots-b">
+        <div class="map-dot" id="dot-b-0"></div>
+        <div class="map-dot" id="dot-b-1"></div>
+        <div class="map-dot" id="dot-b-2"></div>
+      </div>
+
+      <!-- 맵 밴픽 그리드 -->
+      <div class="ov" id="ov-veto">
+        <div class="veto-cell banned" data-order="0">
+          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-0">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-0" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-0">–</span></div>
         </div>
-        <div class="series-nums">
-          <span class="series-big dim" id="score-a">-</span>
-          <span class="series-big-sep">:</span>
-          <span class="series-big dim" id="score-b">-</span>
+        <div class="veto-cell banned" data-order="1">
+          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-1">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-1" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-1">–</span></div>
         </div>
-        <div class="map-dots map-dots-b" id="dots-b">
-          <div class="map-dot map-dot-b" data-side="b" data-idx="0"></div>
-          <div class="map-dot map-dot-b" data-side="b" data-idx="1"></div>
-          <div class="map-dot map-dot-b" data-side="b" data-idx="2"></div>
+        <div class="veto-cell pick-a" data-order="2">
+          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-2">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-2" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-2">–</span></div>
+        </div>
+        <div class="veto-cell pick-b" data-order="3">
+          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-3">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-3" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-3">–</span></div>
+        </div>
+        <div class="veto-cell banned" data-order="4">
+          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-4">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-4" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-4">–</span></div>
+        </div>
+        <div class="veto-cell banned" data-order="5">
+          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-5">–</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-5" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-5">–</span></div>
+        </div>
+        <div class="veto-cell decider-cell" data-order="6">
+          <div class="veto-top"><div class="veto-action decider">DECIDER</div><div class="veto-who" id="veto-who-6">자동</div></div>
+          <div class="veto-img-wrap"><img id="veto-img-6" src="" alt="" /></div>
+          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-6">–</span></div>
         </div>
       </div>
 
-      <!-- 맵 밴픽 -->
-      <div style="padding: 0 24px 24px">
-        <div class="veto-section">
-          <div class="veto-tab">맵 밴픽</div>
-          <div class="veto-grid" id="veto-grid">
-            <div class="veto-cell banned" data-order="0">
-              <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-0">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-0" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-0">–</span></div>
-            </div>
-            <div class="veto-cell banned" data-order="1">
-              <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-1">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-1" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-1">–</span></div>
-            </div>
-            <div class="veto-cell pick-a" data-order="2">
-              <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-2">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-2" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-2">–</span></div>
-            </div>
-            <div class="veto-cell pick-b" data-order="3">
-              <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-3">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-3" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-3">–</span></div>
-            </div>
-            <div class="veto-cell banned" data-order="4">
-              <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-4">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-4" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-4">–</span></div>
-            </div>
-            <div class="veto-cell banned" data-order="5">
-              <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-5">–</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-5" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-5">–</span></div>
-            </div>
-            <div class="veto-cell decider-cell" data-order="6">
-              <div class="veto-top"><div class="veto-action decider">DECIDER</div><div class="veto-who" id="veto-who-6">자동</div></div>
-              <div class="veto-img-wrap"><img id="veto-img-6" src="" alt="" /></div>
-              <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-6">–</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div><!-- /score1 wrap -->
 
-    </div><!-- /match-card -->
-
-    <!-- SCORE2 이미지 (임시) -->
-    <img src="./images/balakdae_score2.png" alt="맵 상세" style="border-radius:20px;width:100%;display:block;" />
+    <!-- ② SCORE2 (임시 이미지) -->
+    <div class="img-overlay-wrap">
+      <img class="bg-img" src="./images/balakdae_score2.png" alt="" />
+    </div>
 
   </div>
 
@@ -363,9 +310,8 @@
     var MATCH_FROM= _p.get('from') || 'scrim';
     var MATCH_ID  = _p.get('match') || '';
 
-    var _fromInfo = { href: './ballakdae-scrim.html', label: '공식 스크림' };
-    document.getElementById('nav-back').href        = _fromInfo.href;
-    document.getElementById('nav-back').textContent = _fromInfo.label;
+    document.getElementById('nav-back').href        = './ballakdae-scrim.html';
+    document.getElementById('nav-back').textContent = '공식 스크림';
 
     document.querySelectorAll('.sb-name-a').forEach(el => el.textContent = TEAM_A);
     document.querySelectorAll('.sb-name-b').forEach(el => el.textContent = TEAM_B);
