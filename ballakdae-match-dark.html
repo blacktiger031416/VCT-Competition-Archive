@@ -1504,26 +1504,90 @@
       box-shadow: 0 2px 16px rgba(255,100,150,0.08) !important;
     }
 
-    /* 스코어보드 — 코랄/핑크 그라디언트 */
+    /* ── 스코어보드 — 발락대 전용 디자인 ── */
+
+    /* 다크 배경 이미지 숨김 */
+    .scoreboard-img { display: none !important; }
+
     .map-scoreboard {
-      background: linear-gradient(135deg, #ff8faf 0%, #ffb77a 55%, #ffe066 100%) !important;
+      background: #fff8fa !important;
+      height: 160px !important;
+      position: relative;
+      overflow: hidden;
     }
+
+    /* 왼쪽 팀 A 패널 (코랄) */
+    .map-scoreboard::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 46%;
+      background: linear-gradient(135deg, rgba(255,100,140,0.22) 0%, rgba(255,160,100,0.12) 100%);
+      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+    }
+
+    /* 오른쪽 팀 B 패널 (민트) */
+    .map-scoreboard::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 46%;
+      background: linear-gradient(225deg, rgba(45,212,192,0.22) 0%, rgba(80,180,255,0.12) 100%);
+      clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    /* 팀 이름 */
     .sb-team-name-l, .sb-team-name-r {
       color: #1a1a2e !important;
-      text-shadow: 0 1px 4px rgba(255,255,255,0.6) !important;
+      text-shadow: none !important;
+      font-size: clamp(16px, 2.8vw, 26px) !important;
     }
+
+    /* 팀 로고 — 흰색 필터 제거 */
+    .sb-team-logo { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15)) !important; }
+    .sb-team-logo.sb-team-logo-white { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15)) !important; }
+
+    /* 중앙 맵 패널 */
     .sb-center {
-      border-color: rgba(255,255,255,0.7) !important;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.1) !important;
+      border: 2px solid rgba(255,255,255,0.9) !important;
+      border-radius: 10px !important;
+      box-shadow:
+        0 0 0 3px rgba(255,120,160,0.3),
+        0 6px 24px rgba(0,0,0,0.18) !important;
+      overflow: hidden;
+      z-index: 2 !important;
     }
-    .sb-map-name { color: rgba(26,26,46,0.8) !important; background: linear-gradient(to top, rgba(255,255,255,0.65) 0%, transparent 100%) !important; }
-    .sb-score-diamond-l { color: #fff !important; text-shadow: 0 1px 8px rgba(0,0,0,0.4) !important; }
-    .sb-score-diamond-r { color: rgba(255,255,255,0.5) !important; }
-    .sb-score-diamond-l.lose { color: rgba(255,255,255,0.5) !important; }
-    .sb-score-diamond-r.win  { color: #fff !important; }
-    .sb-diamond { border-color: rgba(26,26,46,0.4) !important; }
-    .sb-diamond:hover { border-color: rgba(26,26,46,0.8) !important; }
-    .sb-diamond.filled { background: rgba(26,26,46,0.7) !important; border-color: rgba(26,26,46,0.8) !important; }
+    .sb-map-name {
+      color: rgba(255,255,255,0.95) !important;
+      background: linear-gradient(to top, rgba(26,26,46,0.7) 0%, transparent 100%) !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.14em !important;
+    }
+
+    /* 스코어 숫자 */
+    .sb-score-diamond-l {
+      color: #e8506a !important;
+      text-shadow: 0 2px 10px rgba(232,80,106,0.4) !important;
+      font-size: clamp(36px, 5.5vw, 60px) !important;
+      z-index: 2;
+    }
+    .sb-score-diamond-r {
+      color: #0daa96 !important;
+      text-shadow: 0 2px 10px rgba(13,170,150,0.4) !important;
+      font-size: clamp(36px, 5.5vw, 60px) !important;
+      z-index: 2;
+    }
+    .sb-score-diamond-l.lose { color: rgba(232,80,106,0.3) !important; text-shadow: none !important; }
+    .sb-score-diamond-r.win  { color: #0daa96 !important; }
+    .sb-score-diamond-r:not(.win) { color: rgba(13,170,150,0.3) !important; text-shadow: none !important; }
+
+    /* 다이아몬드 인디케이터 */
+    .sb-diamond {
+      width: 11px; height: 11px;
+      border-color: rgba(26,26,46,0.25) !important;
+    }
+    .sb-diamond:hover { border-color: rgba(26,26,46,0.6) !important; }
+    .sb-diamond.filled { background: rgba(26,26,46,0.55) !important; border-color: rgba(26,26,46,0.65) !important; }
 
     /* Round tracker */
     .rt-wrap { background: #fff4f7 !important; border-bottom-color: rgba(255,120,160,0.12) !important; }
