@@ -279,7 +279,16 @@
 
         // 게임 한 쌍의 팀 모두 배정됐는지 확인
         const gameComplete = pair.every(p => d[p] !== undefined && d[p] !== null);
-        const detailUrl = './ballakdae-match.html?id=' + session.id + '&game=' + gi;
+        const DATE_MAP = { d8: '07.08', d9: '07.09', d10: '07.10' };
+        const dayKey = session.id.replace(/t\d$/, '');
+        const matchDate = DATE_MAP[dayKey] || '07.08';
+        const teamA = gameComplete ? getSlotLabel(d[pair[0]]) : '';
+        const teamB = gameComplete ? getSlotLabel(d[pair[1]]) : '';
+        const detailUrl = './champions-match-dark.html?date=' + matchDate
+          + '&teamA=' + encodeURIComponent(teamA)
+          + '&teamB=' + encodeURIComponent(teamB)
+          + '&from=scrim&tournament=ballakdae'
+          + '&match=' + session.id + 'g' + gi;
 
         const gameRow = document.createElement('div');
         gameRow.className = 'match-game-row';
