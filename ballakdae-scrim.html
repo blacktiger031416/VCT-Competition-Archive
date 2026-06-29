@@ -9,210 +9,138 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
 
     :root {
-      --bg:  #f5f6fa;
-      --bg2: #eef0f5;
-      --card: #fff;
-      --text: #111;
-      --sub:  #666;
-      --acc:  #3db8b0;
-
-      --map-ascent: #e8606a;
-      --map-haven:  #e8606a;
-      --map-split:  #3db8b0;
-      --map-bind:   #3db8b0;
-      --map-summit: #c8901a;
+      --bg: #f5f6fa; --bg2: #eef0f5;
+      --text: #111; --sub: #888;
+      --acc: #3db8b0;
+      --s0: #e8606a; --s1: #c8901a; --s2: #3db8b0; --s3: #424242;
     }
 
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
     /* ── 헤더 ── */
     .site-header {
-      display: flex; align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 0 40px; height: 56px;
-      background: #fff;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
+      background: #fff; border-bottom: 1px solid rgba(0,0,0,0.08);
       position: sticky; top: 0; z-index: 100;
     }
-    .home-link {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 18px; font-weight: 900;
-      color: var(--text); text-decoration: none;
-      letter-spacing: 0.04em;
-    }
-    .back-link {
-      font-size: 13px; font-weight: 700;
-      color: var(--acc); text-decoration: none;
-      margin-left: 14px;
-      padding: 5px 14px;
-      border: 1.5px solid var(--acc);
-      border-radius: 20px;
-      transition: background 0.15s, color 0.15s;
-    }
+    .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; color: var(--text); text-decoration: none; letter-spacing: 0.04em; }
+    .back-link { font-size: 13px; font-weight: 700; color: var(--acc); text-decoration: none; margin-left: 14px; padding: 5px 14px; border: 1.5px solid var(--acc); border-radius: 20px; transition: background 0.15s, color 0.15s; }
     .back-link:hover { background: var(--acc); color: #fff; }
-
-    /* auth.js 버튼 라이트 테마 */
-    .auth-header-btn, .auth-refresh-btn, .help-trigger-btn, .suggest-trigger-btn {
-      background: rgba(0,0,0,0.05) !important;
-      border-color: rgba(0,0,0,0.15) !important;
-      color: rgba(0,0,0,0.55) !important;
-    }
+    .auth-header-btn, .auth-refresh-btn, .help-trigger-btn, .suggest-trigger-btn { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.15) !important; color: rgba(0,0,0,0.55) !important; }
     .auth-header-btn::before, .auth-refresh-btn::before { background: rgba(0,0,0,0.35) !important; }
-    .auth-header-btn:hover, .auth-refresh-btn:hover, .help-trigger-btn:hover, .suggest-trigger-btn:hover {
-      background: rgba(0,0,0,0.09) !important;
-      border-color: rgba(0,0,0,0.28) !important;
-      color: rgba(0,0,0,0.85) !important;
-    }
-    .auth-header-btn--on {
-      background: rgba(30,210,100,0.12) !important;
-      border-color: rgba(30,210,100,0.4) !important;
-      color: #18a864 !important;
-    }
+    .auth-header-btn:hover, .auth-refresh-btn:hover, .help-trigger-btn:hover, .suggest-trigger-btn:hover { background: rgba(0,0,0,0.09) !important; border-color: rgba(0,0,0,0.28) !important; color: rgba(0,0,0,0.85) !important; }
+    .auth-header-btn--on { background: rgba(30,210,100,0.12) !important; border-color: rgba(30,210,100,0.4) !important; color: #18a864 !important; }
     .auth-header-btn--on::before { background: #18a864 !important; }
-    .auth-header-btn--user {
-      background: rgba(80,140,255,0.1) !important;
-      border-color: rgba(80,140,255,0.3) !important;
-      color: #3670d0 !important;
-    }
+    .auth-header-btn--user { background: rgba(80,140,255,0.1) !important; border-color: rgba(80,140,255,0.3) !important; color: #3670d0 !important; }
 
     /* ── 컨테이너 ── */
-    .scrim-shell {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 48px 32px 80px;
-    }
-    .scrim-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 40px; font-weight: 900;
-      letter-spacing: 0.02em;
-      margin-bottom: 6px;
-    }
-    .scrim-sub {
-      font-size: 14px; color: var(--sub);
-      margin-bottom: 36px;
-    }
+    .scrim-shell { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; }
+    .scrim-title { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 900; letter-spacing: 0.02em; margin-bottom: 6px; }
+    .scrim-sub { font-size: 14px; color: var(--sub); margin-bottom: 36px; }
 
     /* ── 스케줄 그리드 ── */
-    .schedule-wrap {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.07);
-      overflow: hidden;
-    }
+    .schedule-wrap { background: #fff; border-radius: 20px; box-shadow: 0 2px 20px rgba(0,0,0,0.07); overflow: hidden; }
+    .schedule-grid { display: grid; grid-template-columns: 130px repeat(3, 1fr); }
 
-    .schedule-grid {
-      display: grid;
-      grid-template-columns: 140px repeat(3, 1fr);
-    }
-
-    /* 헤더 셀 */
-    .sh-empty {
-      background: #2b2b2b;
-      display: flex; align-items: center; justify-content: center;
-      padding: 16px;
-    }
-    .sh-date {
-      background: #e8606a;
-      color: #fff;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 16px 8px;
-      gap: 2px;
-    }
-    .sh-date-main {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px; font-weight: 900;
-      letter-spacing: 0.04em;
-    }
-    .sh-date-day {
-      font-size: 12px; font-weight: 700; opacity: 0.85;
-    }
+    /* 헤더 */
+    .sh-empty { background: #2b2b2b; }
+    .sh-date { background: #e8606a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; gap: 2px; }
+    .sh-date-main { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 0.04em; }
+    .sh-date-day { font-size: 12px; font-weight: 700; opacity: 0.85; }
 
     /* 시간 셀 */
-    .time-cell {
-      background: #fff;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 20px 12px;
-      border-top: 1px solid rgba(0,0,0,0.07);
-      gap: 4px;
-    }
-    .time-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px; font-weight: 900;
-      letter-spacing: 0.04em;
-    }
-    .time-range {
-      font-size: 12px; color: var(--sub); font-weight: 700;
-    }
+    .time-cell { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 12px; border-top: 1px solid rgba(0,0,0,0.07); gap: 4px; }
+    .time-label { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; }
+    .time-range { font-size: 12px; color: var(--sub); font-weight: 700; }
 
     /* 경기 셀 */
     .match-cell {
-      border: 1px solid rgba(232,96,106,0.25);
-      border-radius: 0;
       background: #fff;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 20px 16px;
-      gap: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px 12px; gap: 12px;
       border-top: 1px solid rgba(0,0,0,0.07);
       border-left: 1px solid rgba(0,0,0,0.07);
+      position: relative;
+      transition: background 0.15s;
     }
+    .match-cell.clickable { cursor: pointer; }
+    .match-cell.clickable:hover { background: #f8fffe; }
 
-    .match-pairs {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 2px;
+    /* 게임 행 */
+    .match-games { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+    .match-game { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .vs-text { font-size: 11px; font-weight: 700; color: #bbb; }
+    .games-sep { font-size: 11px; color: #ddd; }
+
+    /* 팀 슬롯 */
+    .team-slot {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 72px; height: 32px;
+      border: 2px dashed #ddd; border-radius: 8px;
+      font-size: 12px; font-weight: 900;
+      color: #ccc; padding: 0 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
     }
-    .match-pair {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px; font-weight: 900;
+    .team-slot.filled { border-style: solid; }
+    .team-slot.admin-edit { cursor: pointer; }
+    .team-slot.admin-edit:hover:not(.filled) { border-color: var(--acc); color: var(--acc); }
+    .team-slot.admin-edit.filled:hover { opacity: 0.75; }
+
+    /* 맵 */
+    .match-maps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .map-tag { font-size: 12px; font-weight: 900; }
+    .map-dot { color: #ddd; font-size: 10px; }
+    .map-ascent, .map-haven { color: #e8606a; }
+    .map-split,  .map-bind   { color: #3db8b0; }
+    .map-summit { color: #c8901a; }
+
+    /* 상세 버튼 */
+    .detail-btn {
+      display: inline-block; padding: 5px 14px;
+      background: var(--acc); color: #fff;
+      font-size: 12px; font-weight: 900;
+      border-radius: 20px; text-decoration: none;
+      transition: opacity 0.15s;
       letter-spacing: 0.04em;
-      color: var(--text);
-      white-space: nowrap;
     }
-    .match-pair .vs { color: #aaa; margin: 0 3px; }
-    .match-sep {
-      font-size: 12px; color: #ccc; margin: 1px 0;
-    }
-
-    .match-maps {
-      display: flex; align-items: center; gap: 8px;
-      flex-wrap: wrap; justify-content: center;
-    }
-    .map-tag {
-      font-size: 13px; font-weight: 900;
-      padding: 3px 0;
-    }
-    .map-dot {
-      color: #ccc; font-size: 10px;
-    }
-    .map-ascent { color: var(--map-ascent); }
-    .map-haven  { color: var(--map-haven);  }
-    .map-split  { color: var(--map-split);  }
-    .map-bind   { color: var(--map-bind);   }
-    .map-summit { color: var(--map-summit); }
+    .detail-btn:hover { opacity: 0.8; }
 
     /* 범례 */
-    .legend {
-      display: flex; gap: 20px; flex-wrap: wrap;
-      margin-top: 24px; padding: 16px 20px;
-      background: #fff; border-radius: 14px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 24px; padding: 16px 20px; background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* ── 팀 픽 모달 ── */
+    .tp-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; }
+    .tp-panel {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: min(480px, 100%); background: #fff; border-radius: 20px 20px 0 0;
+      padding: 24px 24px 32px; z-index: 201;
     }
-    .legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 700;
+    .tp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .tp-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; }
+    .tp-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+    .tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tp-team-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 12px; border: 2px solid transparent;
+      background: var(--bg); cursor: pointer; transition: border-color 0.15s;
+      text-align: left;
     }
-    .legend-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-    }
+    .tp-team-btn:hover:not(:disabled) { border-color: var(--acc); }
+    .tp-team-btn:disabled { opacity: 0.3; cursor: default; }
+    .tp-team-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .tp-team-info { display: flex; flex-direction: column; gap: 2px; }
+    .tp-slot-num { font-size: 10px; font-weight: 700; color: var(--sub); }
+    .tp-slot-name { font-size: 14px; font-weight: 900; }
+    .tp-clear { margin-top: 12px; width: 100%; padding: 10px; border: none; background: #f1f1f1; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .tp-clear:hover { background: #e8e8e8; }
   </style>
 </head>
 <body>
@@ -225,163 +153,253 @@
 
   <div class="scrim-shell">
     <h1 class="scrim-title">공식 스크림 일정</h1>
-    <p class="scrim-sub">총 6경기 · 각 경기 3맵 고정 · 팀 배정 후 업데이트 예정</p>
+    <p class="scrim-sub">총 6경기 · 각 경기 3맵 고정</p>
 
     <div class="schedule-wrap">
-      <div class="schedule-grid">
-
+      <div class="schedule-grid" id="schedule-grid">
         <!-- 헤더 행 -->
         <div class="sh-empty"></div>
-        <div class="sh-date">
-          <div class="sh-date-main">7월 8일</div>
-          <div class="sh-date-day">수요일</div>
-        </div>
-        <div class="sh-date">
-          <div class="sh-date-main">7월 9일</div>
-          <div class="sh-date-day">목요일</div>
-        </div>
-        <div class="sh-date">
-          <div class="sh-date-main">7월 10일</div>
-          <div class="sh-date-day">금요일</div>
-        </div>
-
-        <!-- 1타임 행 -->
-        <div class="time-cell">
-          <div class="time-label">1타임</div>
-          <div class="time-range">17:00 – 20:00</div>
-        </div>
-
-        <!-- 7/8 1타임: A vs B · C vs D / 어센트·바인드·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> B</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">C <span class="vs">vs</span> D</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-ascent">어센트</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-bind">바인드</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-        <!-- 7/9 1타임: A vs C · B vs D / 어센트·바인드·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> C</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">B <span class="vs">vs</span> D</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-ascent">어센트</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-bind">바인드</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-        <!-- 7/10 1타임: A vs D · B vs C / 헤이븐·스플릿·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> D</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">B <span class="vs">vs</span> C</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-haven">헤이븐</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-split">스플릿</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-        <!-- 2타임 행 -->
-        <div class="time-cell">
-          <div class="time-label">2타임</div>
-          <div class="time-range">21:00 – 24:00</div>
-        </div>
-
-        <!-- 7/8 2타임: A vs D · B vs C / 어센트·바인드·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> D</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">B <span class="vs">vs</span> C</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-ascent">어센트</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-bind">바인드</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-        <!-- 7/9 2타임: A vs B · C vs D / 헤이븐·스플릿·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> B</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">C <span class="vs">vs</span> D</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-haven">헤이븐</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-split">스플릿</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-        <!-- 7/10 2타임: A vs C · B vs D / 헤이븐·스플릿·서밋 -->
-        <div class="match-cell">
-          <div class="match-pairs">
-            <div class="match-pair">A <span class="vs">vs</span> C</div>
-            <div class="match-sep">·</div>
-            <div class="match-pair">B <span class="vs">vs</span> D</div>
-          </div>
-          <div class="match-maps">
-            <span class="map-tag map-haven">헤이븐</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-split">스플릿</span>
-            <span class="map-dot">·</span>
-            <span class="map-tag map-summit">서밋</span>
-          </div>
-        </div>
-
-      </div><!-- /schedule-grid -->
-    </div><!-- /schedule-wrap -->
-
-    <!-- 맵 범례 -->
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--map-ascent)"></div>
-        <span style="color:var(--map-ascent)">어센트</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--map-haven)"></div>
-        <span style="color:var(--map-haven)">헤이븐</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--map-bind)"></div>
-        <span style="color:var(--map-bind)">바인드</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--map-split)"></div>
-        <span style="color:var(--map-split)">스플릿</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--map-summit)"></div>
-        <span style="color:var(--map-summit)">서밋</span>
+        <div class="sh-date"><div class="sh-date-main">7월 8일</div><div class="sh-date-day">수요일</div></div>
+        <div class="sh-date"><div class="sh-date-main">7월 9일</div><div class="sh-date-day">목요일</div></div>
+        <div class="sh-date"><div class="sh-date-main">7월 10일</div><div class="sh-date-day">금요일</div></div>
+        <!-- 1타임 -->
+        <div class="time-cell"><div class="time-label">1타임</div><div class="time-range">17:00 – 20:00</div></div>
+        <div class="match-cell" id="cell-d8t1"></div>
+        <div class="match-cell" id="cell-d9t1"></div>
+        <div class="match-cell" id="cell-d10t1"></div>
+        <!-- 2타임 -->
+        <div class="time-cell"><div class="time-label">2타임</div><div class="time-range">21:00 – 24:00</div></div>
+        <div class="match-cell" id="cell-d8t2"></div>
+        <div class="match-cell" id="cell-d9t2"></div>
+        <div class="match-cell" id="cell-d10t2"></div>
       </div>
     </div>
 
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#e8606a"></div><span style="color:#e8606a">어센트 / 헤이븐</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3db8b0"></div><span style="color:#3db8b0">바인드 / 스플릿</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c8901a"></div><span style="color:#c8901a">서밋</span></div>
+    </div>
+  </div>
+
+  <!-- 팀 선택 모달 -->
+  <div id="tp-modal" hidden>
+    <div class="tp-backdrop" id="tp-backdrop"></div>
+    <div class="tp-panel">
+      <div class="tp-head">
+        <span class="tp-title" id="tp-title">팀 선택</span>
+        <button class="tp-close" id="tp-close">✕</button>
+      </div>
+      <div class="tp-grid" id="tp-grid"></div>
+      <button class="tp-clear" id="tp-clear">선택 취소</button>
+    </div>
   </div>
 
   <script src="./auth.js" defer></script>
+  <script>
+  (function () {
+    const SCRIM_KEY = 'ballakdae_scrim';
+    const COACH_KEY = 'ballakdae_draft_coaches';
+
+    const SLOT_COLORS = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
+    const SLOT_NAMES  = ['슬롯1', '슬롯2', '슬롯3', '슬롯4'];
+    const COACHES = [
+      { name: '김돌돌', photo: 'Coach_김돌돌.jpg' },
+      { name: '남봉',   photo: 'Coach_남봉.webp'  },
+      { name: '자몽뀨', photo: 'Coach_자몽뀨.jpg' },
+      { name: '협준',   photo: 'Coach_협준.jpg'   },
+    ];
+
+    // 세션 정의: games[0]=게임1, games[1]=게임2 / 각 game = [position A slot, position B slot]
+    // positions는 편의상 0~3(A,B,C,D) 인덱스로 관리
+    const SESSIONS = [
+      { id: 'd8t1',  pos: [[0,1],[2,3]], maps: ['어센트','바인드','서밋'] },
+      { id: 'd9t1',  pos: [[0,2],[1,3]], maps: ['어센트','바인드','서밋'] },
+      { id: 'd10t1', pos: [[0,3],[1,2]], maps: ['헤이븐','스플릿','서밋'] },
+      { id: 'd8t2',  pos: [[0,3],[1,2]], maps: ['어센트','바인드','서밋'] },
+      { id: 'd9t2',  pos: [[0,1],[2,3]], maps: ['헤이븐','스플릿','서밋'] },
+      { id: 'd10t2', pos: [[0,2],[1,3]], maps: ['헤이븐','스플릿','서밋'] },
+    ];
+
+    // scrimData[sessionId] = { 0: slotIdx, 1: slotIdx, 2: slotIdx, 3: slotIdx }
+    // posIndex 0~3 → which slot (0~3) is assigned
+    let scrimData = {};
+    let coachAssign = {};
+    let _ctx = null; // { sessionId, posIndex }
+
+    function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+    function loadScrim() { try { return JSON.parse(localStorage.getItem(SCRIM_KEY) || '{}'); } catch { return {}; } }
+    function saveScrim() { localStorage.setItem(SCRIM_KEY, JSON.stringify(scrimData)); }
+    function loadCoaches() { try { return JSON.parse(localStorage.getItem(COACH_KEY) || '{}'); } catch { return {}; } }
+
+    function getCoachForSlot(slotIdx) {
+      const coachName = coachAssign[slotIdx];
+      return COACHES.find(c => c.name === coachName) || null;
+    }
+
+    function getSlotLabel(slotIdx) {
+      const c = getCoachForSlot(slotIdx);
+      return c ? c.name : SLOT_NAMES[slotIdx];
+    }
+
+    function mapClass(mapName) {
+      const m = { '어센트': 'map-ascent', '헤이븐': 'map-haven', '바인드': 'map-bind', '스플릿': 'map-split', '서밋': 'map-summit' };
+      return m[mapName] || '';
+    }
+
+    function isSessionComplete(sessionId) {
+      const d = scrimData[sessionId] || {};
+      return [0,1,2,3].every(p => d[p] !== undefined && d[p] !== null);
+    }
+
+    /* ── 셀 렌더 ── */
+    function renderCell(session) {
+      const cell = document.getElementById('cell-' + session.id);
+      if (!cell) return;
+      const admin = isAdmin();
+      const d = scrimData[session.id] || {};
+      const complete = isSessionComplete(session.id);
+
+      cell.innerHTML = '';
+      cell.classList.toggle('clickable', complete && !admin);
+      if (complete && !admin) {
+        cell.onclick = () => { window.location.href = './ballakdae-match.html?id=' + session.id; };
+      } else {
+        cell.onclick = null;
+      }
+
+      // 게임 두 개
+      const gamesWrap = document.createElement('div');
+      gamesWrap.className = 'match-games';
+
+      session.pos.forEach((pair, gi) => {
+        if (gi > 0) {
+          const sep = document.createElement('div');
+          sep.className = 'games-sep';
+          sep.textContent = '·';
+          gamesWrap.appendChild(sep);
+        }
+        const gameRow = document.createElement('div');
+        gameRow.className = 'match-game';
+
+        pair.forEach((posIdx, ti) => {
+          if (ti > 0) {
+            const vs = document.createElement('span');
+            vs.className = 'vs-text';
+            vs.textContent = 'vs';
+            gameRow.appendChild(vs);
+          }
+          const slot = document.createElement('div');
+          slot.className = 'team-slot';
+          const assigned = d[posIdx];
+          if (assigned !== undefined && assigned !== null) {
+            slot.classList.add('filled');
+            slot.textContent = getSlotLabel(assigned);
+            slot.style.borderColor = SLOT_COLORS[assigned];
+            slot.style.color = SLOT_COLORS[assigned];
+          } else {
+            slot.textContent = '팀 선택';
+          }
+          if (admin) {
+            slot.classList.add('admin-edit');
+            slot.addEventListener('click', e => {
+              e.stopPropagation();
+              openTeamPicker(session.id, posIdx);
+            });
+          }
+          gameRow.appendChild(slot);
+        });
+
+        gamesWrap.appendChild(gameRow);
+      });
+      cell.appendChild(gamesWrap);
+
+      // 맵
+      const mapsWrap = document.createElement('div');
+      mapsWrap.className = 'match-maps';
+      session.maps.forEach((m, i) => {
+        if (i > 0) { const dot = document.createElement('span'); dot.className = 'map-dot'; dot.textContent = '·'; mapsWrap.appendChild(dot); }
+        const tag = document.createElement('span');
+        tag.className = 'map-tag ' + mapClass(m);
+        tag.textContent = m;
+        mapsWrap.appendChild(tag);
+      });
+      cell.appendChild(mapsWrap);
+
+      // 상세 버튼 (admin + complete)
+      if (admin && complete) {
+        const btn = document.createElement('a');
+        btn.className = 'detail-btn';
+        btn.href = './ballakdae-match.html?id=' + session.id;
+        btn.textContent = '상세';
+        btn.addEventListener('click', e => e.stopPropagation());
+        cell.appendChild(btn);
+      }
+    }
+
+    function renderAll() {
+      SESSIONS.forEach(s => renderCell(s));
+    }
+
+    /* ── 팀 픽 모달 ── */
+    function openTeamPicker(sessionId, posIdx) {
+      _ctx = { sessionId, posIdx };
+      document.getElementById('tp-title').textContent =
+        '팀 선택 — ' + ['A', 'B', 'C', 'D'][posIdx] + ' 포지션';
+      const d = scrimData[sessionId] || {};
+      // 같은 세션 내 이미 사용된 슬롯
+      const usedSlots = new Set(Object.values(d).filter(v => v !== null && v !== undefined));
+      if (d[posIdx] !== undefined) usedSlots.delete(d[posIdx]); // 자기 자신은 제외
+
+      const grid = document.getElementById('tp-grid');
+      grid.innerHTML = '';
+      [0,1,2,3].forEach(si => {
+        const btn = document.createElement('button');
+        btn.className = 'tp-team-btn';
+        btn.disabled = usedSlots.has(si);
+        btn.style.borderColor = d[posIdx] === si ? SLOT_COLORS[si] : '';
+        const coach = getCoachForSlot(si);
+        btn.innerHTML = `
+          ${coach ? `<img src="./images/${coach.photo}" alt="${coach.name}" />` : `<div style="width:40px;height:40px;border-radius:50%;background:${SLOT_COLORS[si]}22;border:2px solid ${SLOT_COLORS[si]};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${SLOT_COLORS[si]}">${si+1}</div>`}
+          <div class="tp-team-info">
+            <div class="tp-slot-num">${SLOT_NAMES[si]}</div>
+            <div class="tp-slot-name">${coach ? coach.name : '미배정'}</div>
+          </div>`;
+        btn.addEventListener('click', () => {
+          if (!scrimData[sessionId]) scrimData[sessionId] = {};
+          scrimData[sessionId][posIdx] = si;
+          saveScrim();
+          closeTeamPicker();
+          renderAll();
+        });
+        grid.appendChild(btn);
+      });
+      document.getElementById('tp-modal').hidden = false;
+    }
+
+    function closeTeamPicker() {
+      document.getElementById('tp-modal').hidden = true;
+      _ctx = null;
+    }
+
+    document.getElementById('tp-close').addEventListener('click', closeTeamPicker);
+    document.getElementById('tp-backdrop').addEventListener('click', closeTeamPicker);
+    document.getElementById('tp-clear').addEventListener('click', () => {
+      if (!_ctx) return;
+      if (!scrimData[_ctx.sessionId]) scrimData[_ctx.sessionId] = {};
+      delete scrimData[_ctx.sessionId][_ctx.posIdx];
+      saveScrim();
+      closeTeamPicker();
+      renderAll();
+    });
+
+    /* ── 초기화 ── */
+    scrimData   = loadScrim();
+    coachAssign = loadCoaches();
+    renderAll();
+    document.addEventListener('DOMContentLoaded', function () { renderAll(); });
+    window.addEventListener('auth-state-change', function () { renderAll(); });
+  })();
+  </script>
 </body>
 </html>
