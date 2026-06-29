@@ -318,8 +318,27 @@
       .agent-slot:nth-child(1) { border-color: var(--acc); }
       .agent-slot:nth-child(2) { border-color: #f0c842; }
       .agent-slot:nth-child(3) { border-color: var(--acc2); }
-      .agent-slot img { width: 100%; height: 100%; object-fit: cover; }
+      .agent-slot img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
       .agent-slot-empty { width: 16px; height: 16px; opacity: 0.2; }
+      body:not(.view-only) .agent-slot.admin-slot { cursor: pointer; transition: opacity 0.15s; }
+      body:not(.view-only) .agent-slot.admin-slot:hover { opacity: 0.75; }
+
+      /* ── 에이전트 피커 모달 ──────────────────── */
+      .ap-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+      [hidden] { display: none !important; }
+      .ap-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+      .ap-panel { position: relative; background: #fff; border-radius: 20px; width: min(560px, 94vw); max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 48px rgba(0,0,0,0.18); }
+      .ap-head { padding: 16px 20px 12px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; }
+      .ap-head h2 { font-size: 16px; font-weight: 900; color: #111; font-family: 'Noto Sans KR', sans-serif; }
+      .ap-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; line-height: 1; padding: 4px; }
+      .ap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 14px; overflow-y: auto; flex: 1; }
+      .ap-agent-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 4px; background: #f8f8f8; border: 2px solid transparent; border-radius: 12px; cursor: pointer; transition: all 0.13s; font-family: inherit; }
+      .ap-agent-btn img { width: 48px; height: 48px; object-fit: contain; border-radius: 50%; background: #eee; }
+      .ap-agent-btn span { font-size: 10px; font-weight: 700; color: #444; text-align: center; line-height: 1.2; }
+      .ap-agent-btn:hover { background: rgba(232,67,45,0.08); border-color: var(--acc); }
+      .ap-foot { padding: 10px 16px; border-top: 1px solid rgba(0,0,0,0.07); display: flex; justify-content: flex-end; gap: 8px; }
+      .ap-btn { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1.5px solid rgba(0,0,0,0.15); background: transparent; color: #555; font-family: inherit; }
+      .ap-btn-clear { color: var(--acc); border-color: rgba(232,67,45,0.3); }
 
       /* 구분 소제목 */
       .player-subhead {
@@ -457,5 +476,117 @@
         </div>
       </section>
     </main>
+
+    <!-- 에이전트 피커 모달 -->
+    <div class="ap-modal" id="ap-modal" hidden>
+      <div class="ap-backdrop" id="ap-backdrop"></div>
+      <div class="ap-panel">
+        <div class="ap-head">
+          <h2>요원 선택</h2>
+          <button class="ap-close" id="ap-close">✕</button>
+        </div>
+        <div class="ap-grid" id="ap-grid"></div>
+        <div class="ap-foot">
+          <button class="ap-btn ap-btn-clear" id="ap-clear">슬롯 초기화</button>
+          <button class="ap-btn" id="ap-cancel">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      const STORAGE_KEY = 'ballakdae_agents';
+      let _agentList = null;
+      let _ctx = null;
+
+      function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+      function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
+      function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+      function renderSavedAgents() {
+        const saved = loadData();
+        document.querySelectorAll('.player-card').forEach(card => {
+          const name = card.querySelector('.card-name')?.textContent.trim() || '';
+          card.querySelectorAll('.agent-slot').forEach((slot, idx) => {
+            const key = name + ':' + idx;
+            if (saved[key]) {
+              slot.innerHTML = '<img src="' + saved[key].icon + '" alt="' + saved[key].name + '" />';
+            }
+          });
+        });
+      }
+
+      function bindAdminSlots() {
+        document.querySelectorAll('.player-card').forEach(card => {
+          const name = card.querySelector('.card-name')?.textContent.trim() || '';
+          card.querySelectorAll('.agent-slot').forEach((slot, idx) => {
+            slot.classList.add('admin-slot');
+            slot.addEventListener('click', function () {
+              _ctx = { playerName: name, slotIdx: idx, slotEl: slot };
+              openPicker();
+            });
+          });
+        });
+      }
+
+      async function openPicker() {
+        document.getElementById('ap-modal').hidden = false;
+        if (_agentList) { renderAgentGrid(); return; }
+        document.getElementById('ap-grid').innerHTML =
+          '<p style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px;">불러오는 중...</p>';
+        try {
+          const res = await fetch('https://valorant-api.com/v1/agents?isPlayableCharacter=true');
+          const json = await res.json();
+          _agentList = json.data.sort((a, b) => a.displayName.localeCompare(b.displayName));
+          renderAgentGrid();
+        } catch {
+          document.getElementById('ap-grid').innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;color:#e8432d;padding:24px;">불러오기 실패</p>';
+        }
+      }
+
+      function renderAgentGrid() {
+        const grid = document.getElementById('ap-grid');
+        grid.innerHTML = '';
+        _agentList.forEach(agent => {
+          const btn = document.createElement('button');
+          btn.className = 'ap-agent-btn';
+          btn.innerHTML = '<img src="' + agent.displayIconSmall + '" alt="' + agent.displayName + '" />'
+                        + '<span>' + agent.displayName + '</span>';
+          btn.addEventListener('click', function () {
+            const saved = loadData();
+            const key = _ctx.playerName + ':' + _ctx.slotIdx;
+            saved[key] = { icon: agent.displayIconSmall, name: agent.displayName };
+            saveData(saved);
+            _ctx.slotEl.innerHTML = '<img src="' + agent.displayIconSmall + '" alt="' + agent.displayName + '" />';
+            closePicker();
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      function closePicker() {
+        document.getElementById('ap-modal').hidden = true;
+        _ctx = null;
+      }
+
+      document.getElementById('ap-close').addEventListener('click', closePicker);
+      document.getElementById('ap-cancel').addEventListener('click', closePicker);
+      document.getElementById('ap-backdrop').addEventListener('click', closePicker);
+      document.getElementById('ap-clear').addEventListener('click', function () {
+        if (!_ctx) return;
+        const saved = loadData();
+        delete saved[_ctx.playerName + ':' + _ctx.slotIdx];
+        saveData(saved);
+        _ctx.slotEl.innerHTML = '';
+        closePicker();
+      });
+
+      renderSavedAgents();
+      window.addEventListener('load', function () {
+        if (isAdmin()) bindAdminSlots();
+      });
+    })();
+    </script>
   </body>
 </html>
