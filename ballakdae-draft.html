@@ -411,15 +411,9 @@
     }
     .coach-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .coach-card.dragging { opacity: 0.35; transform: scale(0.95); }
-    .coach-card.assigned { opacity: 0.45; }
+    .coach-card.assigned { opacity: 1; }
     .coach-card img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: top; }
     .coach-card-name { font-size: 12px; font-weight: 900; }
-    .coach-assigned-badge {
-      position: absolute; top: -4px; right: -4px;
-      width: 18px; height: 18px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 900; color: #fff;
-    }
 
     /* 슬롯 드롭존 */
     .slot-chip.drop-over {
@@ -591,15 +585,18 @@
       row.innerHTML = '';
       COACHES.forEach(c => {
         const card = document.createElement('div');
-        card.className = 'coach-card' + (assigned.has(c.name) ? ' assigned' : '');
+        const si = Object.entries(coachAssign).find(([,v]) => v === c.name)?.[0];
+        card.className = 'coach-card' + (si !== undefined ? ' assigned' : '');
         card.draggable = true;
         card.dataset.coach = c.name;
-        // 배정된 슬롯 번호 찾기
-        const si = Object.entries(coachAssign).find(([,v]) => v === c.name)?.[0];
+        if (si !== undefined) {
+          const slotBg = SLOTS[+si].bg;
+          card.style.borderColor = slotBg;
+          card.style.background = slotBg + '22'; // 13% opacity tint
+        }
         card.innerHTML = `
           <img src="./images/${c.photo}" alt="${c.name}" />
-          <div class="coach-card-name">${c.name}</div>
-          ${si !== undefined ? `<div class="coach-assigned-badge" style="background:${SLOTS[+si].bg}">${SLOTS[+si].name}</div>` : ''}`;
+          <div class="coach-card-name">${c.name}</div>`;
         card.addEventListener('dragstart', e => {
           e.dataTransfer.setData('text/plain', c.name);
           card.classList.add('dragging');
