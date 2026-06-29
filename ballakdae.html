@@ -193,6 +193,147 @@
       }
       .auth-header-btn--user::before { background: #3670d0 !important; }
 
+      /* ── 선수 카드 그리드 ───────────────────── */
+      .player-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .player-card {
+        background: #fff;
+        border-radius: 18px;
+        width: 170px;
+        flex-shrink: 0;
+        position: relative;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+        overflow: hidden;
+        transition: transform 0.18s, box-shadow 0.18s;
+      }
+      .player-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.15); }
+
+      /* 좌상단 / 우하단 빨간 삼각형 */
+      .player-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        border-top: 36px solid var(--acc);
+        border-right: 36px solid transparent;
+        z-index: 3;
+      }
+      .player-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0; right: 0;
+        border-bottom: 36px solid var(--acc);
+        border-left: 36px solid transparent;
+        z-index: 3;
+      }
+
+      /* Valorant V 아이콘 (좌상단 삼각 위) */
+      .card-valo-icon {
+        position: absolute;
+        top: 5px; left: 6px;
+        width: 18px; height: 18px;
+        z-index: 4;
+        filter: brightness(0) invert(1);
+      }
+
+      /* 티어 배지 */
+      .card-tier {
+        position: absolute;
+        top: 12px;
+        left: 50%; transform: translateX(-50%);
+        background: linear-gradient(135deg, #c9920a, #f0c842, #c9920a);
+        color: #3a2000;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 12px;
+        font-weight: 900;
+        padding: 4px 18px;
+        border-radius: 20px;
+        white-space: nowrap;
+        z-index: 4;
+        box-shadow: 0 2px 8px rgba(200,140,0,0.35);
+      }
+      .card-tier.tier-player {
+        background: linear-gradient(135deg, #2f87d4, #7ec8f5, #2f87d4);
+        color: #001a2e;
+      }
+      .card-tier.tier-coach {
+        background: linear-gradient(135deg, #5b3ac4, #a78bfa, #5b3ac4);
+        color: #fff;
+      }
+
+      /* 사진 영역 */
+      .card-photo {
+        width: 100%;
+        aspect-ratio: 3/4;
+        object-fit: cover;
+        object-position: top center;
+        display: block;
+        background: linear-gradient(160deg, #f0f0f0 0%, #e0e0e0 100%);
+      }
+      .card-photo-empty {
+        width: 100%;
+        aspect-ratio: 3/4;
+        background: linear-gradient(160deg, #f4f4f6 0%, #e8e8ec 100%);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .card-photo-empty svg { opacity: 0.18; }
+
+      /* 이름 */
+      .card-name {
+        text-align: center;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 20px;
+        font-weight: 900;
+        color: #111;
+        padding: 10px 8px 4px;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+      }
+
+      /* Valorant 브이 마크 */
+      .card-vmark {
+        display: flex; justify-content: center;
+        margin: 2px 0 6px;
+      }
+      .card-vmark svg { width: 20px; height: 20px; }
+
+      /* 요원 슬롯 */
+      .card-agents {
+        display: flex;
+        justify-content: center;
+        gap: 7px;
+        padding: 0 14px 16px;
+      }
+      .agent-slot {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2.5px solid transparent;
+        flex-shrink: 0;
+        background: #f0f0f0;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .agent-slot:nth-child(1) { border-color: var(--acc); }
+      .agent-slot:nth-child(2) { border-color: #f0c842; }
+      .agent-slot:nth-child(3) { border-color: var(--acc2); }
+      .agent-slot img { width: 100%; height: 100%; object-fit: cover; }
+      .agent-slot-empty { width: 16px; height: 16px; opacity: 0.2; }
+
+      /* 구분 소제목 */
+      .player-subhead {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(0,0,0,0.3);
+        margin: 0 0 14px;
+      }
+      .player-group { margin-bottom: 36px; }
+
       /* ── TBD 플레이스홀더 ───────────────────── */
       .tbd-block {
         display: flex;
@@ -263,9 +404,92 @@
           <p class="eyebrow">Players</p>
           <h2 id="players-title">2026 발락대 참가 선수</h2>
         </div>
-        <div class="tbd-block">
-          <span class="tbd-icon">🎮</span>
-          <p>참가 선수 공개 예정</p>
+
+        <!-- 리더 -->
+        <div class="player-group">
+          <p class="player-subhead">Team Leaders</p>
+          <div class="player-grid" id="leaders-grid">
+            <!-- 리더 카드 × 4 -->
+            <div class="player-card">
+              <img class="card-valo-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Valorant_logo_-_white.svg/512px-Valorant_logo_-_white.svg.png" alt="V" />
+              <div class="card-tier">리더</div>
+              <div class="card-photo-empty">
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="card-name">푸린</div>
+              <div class="card-vmark">
+                <svg viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 20L0 0h5.5L12 11.4 18.5 0H24L12 20Z" fill="#e8432d"/></svg>
+              </div>
+              <div class="card-agents">
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+              </div>
+            </div>
+
+            <div class="player-card">
+              <img class="card-valo-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Valorant_logo_-_white.svg/512px-Valorant_logo_-_white.svg.png" alt="V" />
+              <div class="card-tier">리더</div>
+              <div class="card-photo-empty">
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="card-name">슬프</div>
+              <div class="card-vmark">
+                <svg viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 20L0 0h5.5L12 11.4 18.5 0H24L12 20Z" fill="#e8432d"/></svg>
+              </div>
+              <div class="card-agents">
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+              </div>
+            </div>
+
+            <div class="player-card">
+              <img class="card-valo-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Valorant_logo_-_white.svg/512px-Valorant_logo_-_white.svg.png" alt="V" />
+              <div class="card-tier">리더</div>
+              <div class="card-photo-empty">
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="card-name">루아나</div>
+              <div class="card-vmark">
+                <svg viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 20L0 0h5.5L12 11.4 18.5 0H24L12 20Z" fill="#e8432d"/></svg>
+              </div>
+              <div class="card-agents">
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+              </div>
+            </div>
+
+            <div class="player-card">
+              <img class="card-valo-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Valorant_logo_-_white.svg/512px-Valorant_logo_-_white.svg.png" alt="V" />
+              <div class="card-tier">리더</div>
+              <div class="card-photo-empty">
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div class="card-name">콕끼리</div>
+              <div class="card-vmark">
+                <svg viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 20L0 0h5.5L12 11.4 18.5 0H24L12 20Z" fill="#e8432d"/></svg>
+              </div>
+              <div class="card-agents">
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+                <div class="agent-slot"><svg class="agent-slot-empty" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 일반 선수 -->
+        <div class="player-group">
+          <p class="player-subhead">Players</p>
+          <div class="player-grid" id="players-grid">
+            <!-- 선수 카드 — 추후 추가 -->
+            <div class="tbd-block" style="flex:1;min-width:200px;margin-bottom:0;">
+              <span class="tbd-icon">🎮</span>
+              <p>선수 목록 공개 예정</p>
+            </div>
+          </div>
         </div>
       </section>
 
