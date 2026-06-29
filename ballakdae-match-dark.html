@@ -4,380 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>발락대 경기 상세</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="./storage.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: #f4f6fb;
       min-height: 100vh;
-      font-family: 'Barlow', sans-serif;
-      color: #2a2a3e;
+      font-family: sans-serif;
     }
-
-    /* ── NAV ───────────────────────────────────────── */
     .site-header {
       position: sticky; top: 0; z-index: 100;
-      height: 60px;
+      height: 56px;
       background: #fff;
-      display: flex; align-items: center; gap: 0; padding: 0 28px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      display: flex; align-items: center; padding: 0 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
     }
     .nav-home {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700; font-size: 14px; letter-spacing: 0.12em;
+      font-weight: 700; font-size: 14px; letter-spacing: 0.1em;
       text-transform: uppercase; color: rgba(42,42,62,0.4);
-      text-decoration: none; transition: color 0.15s;
+      text-decoration: none;
     }
-    .nav-home:hover { color: rgba(42,42,62,0.7); }
-    .nav-home::after { content: " /"; margin: 0 10px; color: rgba(42,42,62,0.2); font-weight: 400; }
+    .nav-home::after { content: " /"; margin: 0 10px; color: rgba(42,42,62,0.2); }
     .nav-back {
-      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700; font-size: 14px; letter-spacing: 0.1em;
       text-transform: uppercase; color: #ff6b95;
-      text-decoration: none; transition: color 0.15s;
+      text-decoration: none;
     }
-    .nav-back:hover { color: #e84e78; }
     .nav-right { margin-left: auto; }
 
-    /* ── PAGE WRAP ─────────────────────────────────── */
     .page-wrap {
-      max-width: 980px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 28px 20px 72px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-
-    /* ── CARD BASE ─────────────────────────────────── */
-    .card, .map-detail-card {
-      background: #fff;
-      border-radius: 24px;
-      border: 1.5px solid rgba(0,0,0,0.06);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-      overflow: hidden;
+    .page-wrap img {
+      width: 100%;
+      border-radius: 20px;
+      display: block;
     }
-
-    /* ── 섹션 구분 레이블 ──────────────────────────── */
-    .divider-label {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 12px; letter-spacing: 0.12em;
-      text-transform: uppercase; color: rgba(42,42,62,0.35);
-    }
-    .divider-label::before, .divider-label::after {
-      content: ''; flex: 1; height: 1.5px;
-      background: rgba(0,0,0,0.07); border-radius: 99px;
-    }
-
-    /* ════════════════════════════════════════════
-       1. 팀 헤더 & 시리즈 스코어
-       ════════════════════════════════════════════ */
-    .match-header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      min-height: 140px;
-      padding: 0;
-      background: linear-gradient(135deg, #fff8fa 0%, #f8fdfc 100%);
-    }
-
-    .team-side {
-      display: flex; align-items: center; gap: 16px;
-      padding: 28px 32px;
-    }
-    .team-side-b { flex-direction: row-reverse; }
-
-    .team-logo {
-      width: 68px; height: 68px;
-      object-fit: contain; flex-shrink: 0;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
-    }
-
-    /* 팀 이름 — 알약 배지 스타일 */
-    .team-name-pill {
-      display: inline-flex; align-items: center;
-      padding: 8px 18px;
-      border-radius: 999px;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(15px, 2.5vw, 22px);
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .team-name-pill.a {
-      background: rgba(255,107,149,0.12);
-      color: #e84e78;
-      border: 2px solid rgba(255,107,149,0.3);
-    }
-    .team-name-pill.b {
-      background: rgba(45,212,192,0.12);
-      color: #0daa96;
-      border: 2px solid rgba(45,212,192,0.3);
-    }
-
-    /* 가운데 시리즈 스코어 */
-    .series-score {
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      padding: 0 20px;
-    }
-    .series-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
-      text-transform: uppercase; color: rgba(42,42,62,0.28);
-    }
-    .series-nums {
-      display: flex; align-items: center; gap: 2px;
-    }
-    .series-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 60px; font-weight: 900; line-height: 1;
-      min-width: 48px; text-align: center;
-    }
-    .series-num.a   { color: #e84e78; }
-    .series-num.b   { color: #0daa96; }
-    .series-num.dim { color: rgba(42,42,62,0.15); }
-    .series-sep {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 36px; font-weight: 300;
-      color: rgba(42,42,62,0.18); margin: 0 4px 4px;
-    }
-    .series-date {
-      font-size: 12px; font-weight: 600;
-      color: rgba(42,42,62,0.32); letter-spacing: 0.04em;
-    }
-
-    /* 팀 색상 하단 스트라이프 */
-    .team-stripe {
-      height: 5px;
-      border-radius: 0 0 24px 24px;
-    }
-    .team-stripe.a { background: linear-gradient(90deg, #ff6b95, #ffb06e, transparent); }
-    .team-stripe.b { background: linear-gradient(270deg, #2dd4c0, #5eb8f5, transparent); }
-
-    /* ════════════════════════════════════════════
-       2. 맵 스코어
-       ════════════════════════════════════════════ */
-    .map-score-row {
-      display: flex;
-      gap: 12px;
-      padding: 20px;
-    }
-    .map-score-item {
-      flex: 1;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      padding: 14px 10px 16px;
-      border-radius: 18px;
-      background: #f9f9fb;
-      border: 1.5px solid rgba(0,0,0,0.07);
-      transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
-      cursor: pointer;
-    }
-    .map-score-item:hover {
-      border-color: rgba(255,107,149,0.35);
-      box-shadow: 0 4px 16px rgba(255,107,149,0.12);
-      transform: translateY(-2px);
-    }
-    .map-score-item.win-a {
-      background: linear-gradient(160deg, #fff0f4 0%, #fff9f0 100%);
-      border-color: rgba(255,107,149,0.3);
-    }
-    .map-score-item.win-b {
-      background: linear-gradient(160deg, #f0fdfb 0%, #f0f8ff 100%);
-      border-color: rgba(45,212,192,0.3);
-    }
-    .map-number {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: rgba(42,42,62,0.28);
-    }
-    .map-img-thumb {
-      width: 100%; aspect-ratio: 16/9;
-      border-radius: 12px; overflow: hidden;
-      background: #eee;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .map-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .map-name-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 800; letter-spacing: 0.06em;
-      text-transform: uppercase; color: #2a2a3e;
-    }
-    .map-result-nums {
-      display: flex; align-items: center; gap: 6px;
-    }
-    .map-result-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 24px; font-weight: 900; line-height: 1;
-    }
-    .map-result-num.side-a { color: #e84e78; }
-    .map-result-num.side-b { color: #0daa96; }
-    .map-result-num.dim    { color: rgba(42,42,62,0.2); }
-    .map-result-sep { font-size: 16px; color: rgba(42,42,62,0.22); }
-
-    /* ════════════════════════════════════════════
-       3. 맵 밴픽
-       ════════════════════════════════════════════ */
-    .veto-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      padding: 16px 20px 20px;
-    }
-    .veto-cell {
-      display: flex; flex-direction: column; align-items: center;
-      border-radius: 16px; overflow: hidden;
-      border: 1.5px solid rgba(0,0,0,0.07);
-      background: #fafafa;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .veto-cell.banned {
-      background: #f5f5f5;
-      opacity: 0.72;
-    }
-    .veto-top {
-      width: 100%; padding: 7px 4px 5px;
-      text-align: center; background: rgba(0,0,0,0.03);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .veto-action {
-      font-size: 9px; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-    .veto-action.ban     { color: #e84e78; }
-    .veto-action.pick    { color: #0daa96; }
-    .veto-action.decider { color: #e8a020; }
-    .veto-who {
-      font-size: 9px; font-weight: 600;
-      color: rgba(42,42,62,0.38); margin-top: 2px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      max-width: 100%; padding: 0 4px;
-    }
-    .veto-map-img-wrap {
-      width: 100%; aspect-ratio: 16/10; overflow: hidden;
-      background: #e8e8ee;
-    }
-    .veto-map-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .veto-cell.banned .veto-map-img-wrap img { filter: grayscale(85%) brightness(0.75); }
-    .veto-map-name-bar {
-      width: 100%; padding: 6px 4px;
-      background: rgba(0,0,0,0.03);
-      border-top: 1px solid rgba(0,0,0,0.05); text-align: center;
-    }
-    .veto-map-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #2a2a3e;
-    }
-    .veto-cell.banned .veto-map-name { color: rgba(42,42,62,0.32); }
-    .veto-cell.pick-a .veto-top { background: rgba(255,107,149,0.1); }
-    .veto-cell.pick-b .veto-top { background: rgba(45,212,192,0.1); }
-    .veto-cell.decider-cell .veto-top { background: rgba(232,160,32,0.09); }
-
-    /* ════════════════════════════════════════════
-       4. 맵별 상세 카드
-       ════════════════════════════════════════════ */
-
-    /* 맵 헤더 스코어보드 */
-    .map-sb {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      min-height: 96px;
-      background: linear-gradient(135deg, #fff8fa 0%, #f8fdfc 100%);
-      border-bottom: 1.5px solid rgba(0,0,0,0.06);
-    }
-    .map-sb-team {
-      display: flex; align-items: center; gap: 10px;
-      padding: 18px 22px;
-    }
-    .map-sb-team-b { flex-direction: row-reverse; }
-    .map-sb-logo {
-      width: 38px; height: 38px; object-fit: contain; flex-shrink: 0;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
-    }
-    .map-sb-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(13px, 1.8vw, 17px); font-weight: 800;
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .map-sb-name.a { color: #e84e78; }
-    .map-sb-name.b { color: #0daa96; }
-    .map-sb-team-b .map-sb-name { text-align: right; }
-
-    /* 가운데 맵 썸네일 + 스코어 */
-    .map-sb-center {
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      padding: 14px 16px; flex-shrink: 0;
-    }
-    .map-sb-map-thumb {
-      width: 110px; height: 68px; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.14);
-      background: #e0e0e8;
-    }
-    .map-sb-map-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .map-sb-map-name {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-      text-transform: uppercase; color: rgba(42,42,62,0.38);
-    }
-    .map-sb-score-row {
-      display: flex; align-items: center; gap: 6px;
-    }
-    .map-sb-score-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(26px, 4vw, 42px); font-weight: 900; line-height: 1;
-    }
-    .map-sb-score-num.a   { color: #e84e78; }
-    .map-sb-score-num.b   { color: #0daa96; }
-    .map-sb-score-num.dim { color: rgba(42,42,62,0.18); }
-    .map-sb-score-sep {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px; font-weight: 300; color: rgba(42,42,62,0.2);
-    }
-
-    /* 라운드 트래커 자리 */
-    .round-tracker-placeholder {
-      margin: 16px 20px;
-      padding: 20px;
-      background: #f9f9fb;
-      border-radius: 16px;
-      border: 1.5px dashed rgba(0,0,0,0.1);
-      text-align: center;
-      color: rgba(42,42,62,0.25);
-      font-size: 12px; font-style: italic; letter-spacing: 0.04em;
-    }
-
-    /* 선수 테이블 자리 */
-    .player-table-placeholder { padding: 0 20px 20px; }
-    .player-section-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
-      text-transform: uppercase; margin: 10px 0 6px;
-      padding: 4px 10px; border-radius: 999px; display: inline-block;
-    }
-    .player-section-label.a { background: rgba(255,107,149,0.1); color: #e84e78; }
-    .player-section-label.b { background: rgba(45,212,192,0.1); color: #0daa96; }
-    .player-row-placeholder {
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      gap: 6px; margin-bottom: 6px;
-    }
-    .player-slot {
-      height: 52px; border-radius: 14px;
-      background: #f5f5f8;
-      border: 1.5px dashed rgba(0,0,0,0.1);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .player-slot-label { font-size: 11px; color: rgba(42,42,62,0.22); font-style: italic; }
-    .player-row-placeholder.team-a .player-slot { border-color: rgba(255,107,149,0.22); }
-    .player-row-placeholder.team-b .player-slot { border-color: rgba(45,212,192,0.22); }
-
-    /* ── auth 버튼 ─────────────────────────────────── */
-    .auth-header-btn { margin-left: auto !important; }
-
   </style>
 </head>
 <body>
-
-  <!-- NAV -->
   <header class="site-header">
     <a class="nav-home" href="./index.html">VCT Archive</a>
     <a class="nav-back" id="nav-back" href="./ballakdae-scrim.html">공식 스크림</a>
@@ -385,242 +55,18 @@
   </header>
 
   <div class="page-wrap">
-
-    <!-- ① 팀 헤더 & 시리즈 스코어 -->
-    <div class="card">
-      <div class="match-header">
-        <div class="team-side team-side-a">
-          <img class="team-logo" id="logo-a" src="" alt="" />
-          <span class="team-name-pill a" id="name-a">–</span>
-        </div>
-        <div class="series-score">
-          <span class="series-label">시리즈 스코어</span>
-          <div class="series-nums">
-            <span class="series-num dim" id="score-a">-</span>
-            <span class="series-sep">:</span>
-            <span class="series-num dim" id="score-b">-</span>
-          </div>
-          <span class="series-date" id="match-date"></span>
-        </div>
-        <div class="team-side team-side-b">
-          <span class="team-name-pill b" id="name-b">–</span>
-          <img class="team-logo" id="logo-b" src="" alt="" />
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr">
-        <div class="team-stripe a"></div>
-        <div class="team-stripe b"></div>
-      </div>
-    </div>
-
-    <!-- ③ 맵 밴픽 -->
-    <div class="divider-label">맵 밴픽</div>
-    <div class="card">
-      <div class="veto-grid" id="veto-grid">
-        <div class="veto-cell banned" data-order="0">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-0">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-0" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-0">–</span></div>
-        </div>
-        <div class="veto-cell banned" data-order="1">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-1">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-1" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-1">–</span></div>
-        </div>
-        <div class="veto-cell pick-a" data-order="2">
-          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-2">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-2" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-2">–</span></div>
-        </div>
-        <div class="veto-cell pick-b" data-order="3">
-          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-3">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-3" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-3">–</span></div>
-        </div>
-        <div class="veto-cell banned" data-order="4">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-4">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-4" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-4">–</span></div>
-        </div>
-        <div class="veto-cell banned" data-order="5">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-5">–</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-5" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-5">–</span></div>
-        </div>
-        <div class="veto-cell decider-cell" data-order="6">
-          <div class="veto-top"><div class="veto-action decider">DECIDER</div><div class="veto-who" id="veto-who-6">자동</div></div>
-          <div class="veto-map-img-wrap"><img id="veto-img-6" src="" alt="" /></div>
-          <div class="veto-map-name-bar"><span class="veto-map-name" id="veto-map-6">–</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ④ 맵별 상세 -->
-    <div class="divider-label">맵별 상세</div>
-
-    <!-- MAP 1 -->
-    <div class="map-detail-card" id="map-detail-0">
-      <div class="map-sb">
-        <div class="map-sb-team map-sb-team-a">
-          <img class="map-sb-logo sb-logo-a" src="" alt="" />
-          <span class="map-sb-name a sb-name-a">–</span>
-          <span class="map-sb-score-num a dim" id="md-score-a-0">-</span>
-        </div>
-        <div class="map-sb-center">
-          <div class="map-sb-map-thumb"><img id="md-map-img-0" src="" alt="" /></div>
-          <span class="map-sb-map-name" id="md-map-name-0">MAP 1</span>
-        </div>
-        <div class="map-sb-team map-sb-team-b">
-          <span class="map-sb-score-num b dim" id="md-score-b-0">-</span>
-          <span class="map-sb-name b sb-name-b">–</span>
-          <img class="map-sb-logo sb-logo-b" src="" alt="" />
-        </div>
-      </div>
-      <div class="round-tracker-placeholder">라운드 트래커 — 추후 추가 예정</div>
-      <div class="player-table-placeholder">
-        <span class="player-section-label a sb-label-a">팀 A</span>
-        <div class="player-row-placeholder team-a">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-        <span class="player-section-label b sb-label-b" style="margin-top:14px">팀 B</span>
-        <div class="player-row-placeholder team-b">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAP 2 -->
-    <div class="map-detail-card" id="map-detail-1">
-      <div class="map-sb">
-        <div class="map-sb-team map-sb-team-a">
-          <img class="map-sb-logo sb-logo-a" src="" alt="" />
-          <span class="map-sb-name a sb-name-a">–</span>
-          <span class="map-sb-score-num a dim" id="md-score-a-1">-</span>
-        </div>
-        <div class="map-sb-center">
-          <div class="map-sb-map-thumb"><img id="md-map-img-1" src="" alt="" /></div>
-          <span class="map-sb-map-name" id="md-map-name-1">MAP 2</span>
-        </div>
-        <div class="map-sb-team map-sb-team-b">
-          <span class="map-sb-score-num b dim" id="md-score-b-1">-</span>
-          <span class="map-sb-name b sb-name-b">–</span>
-          <img class="map-sb-logo sb-logo-b" src="" alt="" />
-        </div>
-      </div>
-      <div class="round-tracker-placeholder">라운드 트래커 — 추후 추가 예정</div>
-      <div class="player-table-placeholder">
-        <span class="player-section-label a sb-label-a">팀 A</span>
-        <div class="player-row-placeholder team-a">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-        <span class="player-section-label b sb-label-b" style="margin-top:14px">팀 B</span>
-        <div class="player-row-placeholder team-b">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAP 3 -->
-    <div class="map-detail-card" id="map-detail-2">
-      <div class="map-sb">
-        <div class="map-sb-team map-sb-team-a">
-          <img class="map-sb-logo sb-logo-a" src="" alt="" />
-          <span class="map-sb-name a sb-name-a">–</span>
-          <span class="map-sb-score-num a dim" id="md-score-a-2">-</span>
-        </div>
-        <div class="map-sb-center">
-          <div class="map-sb-map-thumb"><img id="md-map-img-2" src="" alt="" /></div>
-          <span class="map-sb-map-name" id="md-map-name-2">MAP 3</span>
-        </div>
-        <div class="map-sb-team map-sb-team-b">
-          <span class="map-sb-score-num b dim" id="md-score-b-2">-</span>
-          <span class="map-sb-name b sb-name-b">–</span>
-          <img class="map-sb-logo sb-logo-b" src="" alt="" />
-        </div>
-      </div>
-      <div class="round-tracker-placeholder">라운드 트래커 — 추후 추가 예정</div>
-      <div class="player-table-placeholder">
-        <span class="player-section-label a sb-label-a">팀 A</span>
-        <div class="player-row-placeholder team-a">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-        <span class="player-section-label b sb-label-b" style="margin-top:14px">팀 B</span>
-        <div class="player-row-placeholder team-b">
-          <div class="player-slot"><span class="player-slot-label">선수 1</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 2</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 3</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 4</span></div>
-          <div class="player-slot"><span class="player-slot-label">선수 5</span></div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /page-wrap -->
+    <img src="./images/balakdae_score1.png" alt="경기 스코어" />
+    <img src="./images/balakdae_score2.png" alt="맵 상세" />
+  </div>
 
   <script src="./auth.js" defer></script>
   <script>
     var _p = new URLSearchParams(location.search);
-    var TEAM_A     = decodeURIComponent(_p.get('teamA') || '슬롯1');
-    var TEAM_B     = decodeURIComponent(_p.get('teamB') || '슬롯2');
-    var MATCH_DATE = _p.get('date') || '';
     var MATCH_FROM = _p.get('from') || 'scrim';
-    var MATCH_ID   = _p.get('match') || '';
-
     var _fromMap = { scrim: { href: './ballakdae-scrim.html', label: '공식 스크림' } };
     var _fromInfo = _fromMap[MATCH_FROM] || _fromMap.scrim;
     document.getElementById('nav-back').href        = _fromInfo.href;
     document.getElementById('nav-back').textContent = _fromInfo.label;
-
-    /* ── 팀 이름 채우기 ── */
-    document.querySelectorAll('.sb-name-a').forEach(el => el.textContent = TEAM_A);
-    document.querySelectorAll('.sb-name-b').forEach(el => el.textContent = TEAM_B);
-    document.querySelectorAll('.sb-label-a').forEach(el => el.textContent = TEAM_A);
-    document.querySelectorAll('.sb-label-b').forEach(el => el.textContent = TEAM_B);
-    document.getElementById('name-a').textContent = TEAM_A;
-    document.getElementById('name-b').textContent = TEAM_B;
-    if (MATCH_DATE) document.getElementById('match-date').textContent = MATCH_DATE;
-
-    /* ── 밴픽 who 라벨 (BAN=A/B교대, PICK=A/B교대) ── */
-    var vetoOrder = [
-      { action:'ban',  who:'a' },
-      { action:'ban',  who:'b' },
-      { action:'pick', who:'a' },
-      { action:'pick', who:'b' },
-      { action:'ban',  who:'a' },
-      { action:'ban',  who:'b' },
-      { action:'decider', who:null },
-    ];
-    vetoOrder.forEach(function(v, i) {
-      var el = document.getElementById('veto-who-' + i);
-      if (!el) return;
-      if (v.who === 'a') el.textContent = TEAM_A;
-      else if (v.who === 'b') el.textContent = TEAM_B;
-    });
-
-    /* ── 스토리지 키 ── */
-    var STORAGE_KEY = 'ballakdae_match_' + MATCH_ID;
-
-    function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
   </script>
 </body>
 </html>
