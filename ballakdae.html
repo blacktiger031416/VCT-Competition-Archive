@@ -13,11 +13,19 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      :root { --acc: #ff4ea0; }
+      :root {
+        --acc: #e8432d;      /* 발락대 레드 */
+        --acc2: #15b8a6;     /* 발락대 민트 */
+        --bg: #ffffff;
+        --bg2: #f4f4f4;
+        --text: #111111;
+        --text-sub: #555555;
+        --border: rgba(0,0,0,0.08);
+      }
 
       body {
-        background: #0d1520;
-        color: #e8e4e0;
+        background: var(--bg);
+        color: var(--text);
         font-family: 'Barlow', 'Noto Sans KR', sans-serif;
         min-height: 100vh;
       }
@@ -29,8 +37,8 @@
         gap: 20px;
         padding: 0 32px;
         height: 56px;
-        background: rgba(13,21,32,0.9);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.92);
+        border-bottom: 1px solid var(--border);
         position: sticky;
         top: 0;
         z-index: 100;
@@ -43,23 +51,23 @@
         font-weight: 700;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.55);
+        color: rgba(0,0,0,0.45);
         text-decoration: none;
         transition: color 0.15s;
       }
-      .home-link:hover { color: #fff; }
-      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .home-link:hover { color: #111; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(0,0,0,0.18); font-weight: 400; }
       .back-link {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: 13px;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.4);
+        color: rgba(0,0,0,0.35);
         text-decoration: none;
         transition: color 0.15s;
       }
-      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .back-link:hover { color: #111; }
 
       /* ── HERO ───────────────────────────────── */
       .league-hero {
@@ -68,16 +76,18 @@
         align-items: center;
         justify-content: space-between;
         gap: 32px;
-        padding: 72px 48px 80px;
+        padding: 72px 0 80px;
         max-width: 1080px;
         margin: 0 auto;
+        padding-left: 48px;
+        padding-right: 48px;
         overflow: hidden;
       }
       .league-hero::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(255,78,160,0.10) 0%, transparent 70%);
+        background: radial-gradient(ellipse 55% 70% at 85% 50%, rgba(21,184,166,0.10) 0%, transparent 65%);
         pointer-events: none;
       }
       .hero-text { position: relative; z-index: 1; }
@@ -97,13 +107,13 @@
         letter-spacing: 0.03em;
         text-transform: uppercase;
         line-height: 0.95;
-        color: #fff;
+        color: var(--text);
         margin-bottom: 20px;
       }
       .league-hero .intro {
         font-size: 14px;
         line-height: 1.8;
-        color: rgba(255,255,255,0.45);
+        color: var(--text-sub);
         max-width: 420px;
         font-family: 'Noto Sans KR', sans-serif;
         font-weight: 500;
@@ -116,36 +126,39 @@
         padding: 16px;
       }
       .league-mark img {
-        width: clamp(160px, 22vw, 260px);
-        height: clamp(160px, 22vw, 260px);
+        width: clamp(160px, 22vw, 280px);
+        height: clamp(160px, 22vw, 280px);
         object-fit: contain;
-        filter: drop-shadow(0 4px 32px rgba(255,78,160,0.18));
+        filter: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
       }
 
       /* ── SHELL ──────────────────────────────── */
       .league-shell {
         max-width: 1080px;
         margin: 0 auto;
-        padding: 0 32px 80px;
+        padding: 0 48px 80px;
       }
       .section-divider {
         height: 1px;
-        background: rgba(255,255,255,0.06);
+        background: var(--border);
         margin: 0 0 56px;
       }
       .section-heading {
         margin-bottom: 24px;
-        border-left: 3px solid var(--acc);
+        border-left: 3px solid var(--acc2);
         padding-left: 16px;
       }
-      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading .eyebrow {
+        color: var(--acc2);
+        margin-bottom: 4px;
+      }
       .section-heading h2 {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: 28px;
         font-weight: 900;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: #fff;
+        color: var(--text);
       }
 
       /* ── TBD 플레이스홀더 ───────────────────── */
@@ -156,14 +169,14 @@
         justify-content: center;
         gap: 10px;
         padding: 48px 24px;
-        background: rgba(255,255,255,0.03);
-        border: 1px dashed rgba(255,255,255,0.1);
+        background: var(--bg2);
+        border: 1px dashed rgba(0,0,0,0.12);
         border-radius: 8px;
         margin-bottom: 56px;
       }
       .tbd-block .tbd-icon {
         font-size: 32px;
-        opacity: 0.3;
+        opacity: 0.25;
       }
       .tbd-block p {
         font-family: 'Barlow Condensed', sans-serif;
@@ -171,7 +184,7 @@
         font-weight: 600;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(255,255,255,0.2);
+        color: rgba(0,0,0,0.25);
       }
     </style>
 
@@ -183,8 +196,8 @@
       <a class="back-link" href="./index.html">홈으로</a>
     </header>
 
-    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
-      <section class="league-hero" aria-labelledby="league-title" style="padding:72px 0 80px;">
+    <div style="max-width:1080px;margin:0 auto;padding:0 48px;">
+      <section class="league-hero" style="padding-left:0;padding-right:0;" aria-labelledby="league-title">
         <div class="hero-text">
           <p class="eyebrow">이벤트 경기</p>
           <h1 id="league-title">2026<br>발락대</h1>
