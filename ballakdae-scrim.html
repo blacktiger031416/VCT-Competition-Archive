@@ -71,10 +71,11 @@
     .match-cell.clickable:hover { background: #f8fffe; }
 
     /* 게임 행 */
-    .match-games { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
-    .match-game { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .match-games { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; }
+    .match-game-row { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .match-game { display: flex; align-items: center; gap: 6px; justify-content: center; flex: 1; }
     .vs-text { font-size: 11px; font-weight: 700; color: #bbb; }
-    .games-sep { font-size: 11px; color: #ddd; }
+    .games-sep { font-size: 11px; color: #ddd; text-align: center; }
 
     /* 팀 슬롯 */
     .team-slot {
@@ -261,12 +262,8 @@
       const complete = isSessionComplete(session.id);
 
       cell.innerHTML = '';
-      cell.classList.toggle('clickable', complete && !admin);
-      if (complete && !admin) {
-        cell.onclick = () => { window.location.href = './ballakdae-match.html?id=' + session.id; };
-      } else {
-        cell.onclick = null;
-      }
+      cell.classList.remove('clickable');
+      cell.onclick = null;
 
       // 게임 두 개
       const gamesWrap = document.createElement('div');
@@ -279,15 +276,23 @@
           sep.textContent = '·';
           gamesWrap.appendChild(sep);
         }
-        const gameRow = document.createElement('div');
-        gameRow.className = 'match-game';
 
+        // 게임 한 쌍의 팀 모두 배정됐는지 확인
+        const gameComplete = pair.every(p => d[p] !== undefined && d[p] !== null);
+        const detailUrl = './ballakdae-match.html?id=' + session.id + '&game=' + gi;
+
+        const gameRow = document.createElement('div');
+        gameRow.className = 'match-game-row';
+
+        // 슬롯 두 개 + vs
+        const gameInner = document.createElement('div');
+        gameInner.className = 'match-game';
         pair.forEach((posIdx, ti) => {
           if (ti > 0) {
             const vs = document.createElement('span');
             vs.className = 'vs-text';
             vs.textContent = 'vs';
-            gameRow.appendChild(vs);
+            gameInner.appendChild(vs);
           }
           const slot = document.createElement('div');
           slot.className = 'team-slot';
@@ -302,13 +307,26 @@
           }
           if (admin) {
             slot.classList.add('admin-edit');
-            slot.addEventListener('click', e => {
-              e.stopPropagation();
-              openTeamPicker(session.id, posIdx);
-            });
+            slot.addEventListener('click', e => { e.stopPropagation(); openTeamPicker(session.id, posIdx); });
           }
-          gameRow.appendChild(slot);
+          gameInner.appendChild(slot);
         });
+        gameRow.appendChild(gameInner);
+
+        // 상세 버튼: admin이면 버튼, 비admin이면 행 클릭
+        if (gameComplete) {
+          if (admin) {
+            const btn = document.createElement('a');
+            btn.className = 'detail-btn';
+            btn.href = detailUrl;
+            btn.textContent = '상세';
+            btn.addEventListener('click', e => e.stopPropagation());
+            gameRow.appendChild(btn);
+          } else {
+            gameRow.style.cursor = 'pointer';
+            gameRow.addEventListener('click', e => { e.stopPropagation(); window.location.href = detailUrl; });
+          }
+        }
 
         gamesWrap.appendChild(gameRow);
       });
@@ -325,16 +343,6 @@
         mapsWrap.appendChild(tag);
       });
       cell.appendChild(mapsWrap);
-
-      // 상세 버튼 (admin + complete)
-      if (admin && complete) {
-        const btn = document.createElement('a');
-        btn.className = 'detail-btn';
-        btn.href = './ballakdae-match.html?id=' + session.id;
-        btn.textContent = '상세';
-        btn.addEventListener('click', e => e.stopPropagation());
-        cell.appendChild(btn);
-      }
     }
 
     function renderAll() {
