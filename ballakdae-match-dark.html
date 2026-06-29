@@ -170,60 +170,47 @@
     .map-dot.win-b  { background: rgba(45,212,192,0.22); border-color: rgba(45,212,192,0.5); color: #0daa96; }
     .map-dot.lose-b { background: rgba(255,107,149,0.18); border-color: rgba(255,107,149,0.4); color: #e84e78; }
 
-    /* 맵 밴픽 그리드 */
-    #ov-veto {
-      left: 5.5%; top: 51%;
-      width: 89%; height: 43%;
+    /* 3맵 그리드 */
+    #ov-maps {
+      left: 16%; top: 52%;
+      width: 68%; height: 36%;
       align-items: stretch;
-      gap: 1.2%;
+      gap: 2%;
     }
-    .veto-cell {
+    .map-cell {
       flex: 1;
       display: flex; flex-direction: column;
-      border-radius: 12px; overflow: hidden;
+      border-radius: 14px; overflow: hidden;
       border: 1.5px solid rgba(0,0,0,0.08);
       background: rgba(255,255,255,0.65);
       backdrop-filter: blur(2px);
       cursor: pointer;
     }
-    .veto-cell.banned { opacity: 0.6; }
-    .veto-top {
+    .map-top {
       padding: 5px 4px 4px; text-align: center;
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,107,149,0.12);
       border-bottom: 1px solid rgba(0,0,0,0.06);
     }
-    .veto-action {
-      font-size: clamp(7px, 0.9vw, 10px); font-weight: 800;
+    .map-num {
+      font-size: clamp(8px, 1vw, 11px); font-weight: 800;
       letter-spacing: 0.14em; text-transform: uppercase;
+      color: #e84e78;
     }
-    .veto-action.ban     { color: #e84e78; }
-    .veto-action.pick    { color: #0daa96; }
-    .veto-action.decider { color: #e8a020; }
-    .veto-who {
-      font-size: clamp(7px, 0.8vw, 9px); font-weight: 600;
-      color: rgba(42,42,62,0.45); margin-top: 1px;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .veto-img-wrap {
-      flex: 1; overflow: hidden; background: #ddd;
+    .map-img-wrap {
+      flex: 1; overflow: hidden; background: #e8e8ec;
       min-height: 0;
     }
-    .veto-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .veto-cell.banned .veto-img-wrap img { filter: grayscale(80%) brightness(0.75); }
-    .veto-name-bar {
-      padding: 4px 4px; text-align: center;
+    .map-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .map-name-bar {
+      padding: 5px 4px; text-align: center;
       background: rgba(255,255,255,0.5);
       border-top: 1px solid rgba(0,0,0,0.06);
     }
-    .veto-map-name {
+    .map-name-txt {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(8px, 1vw, 12px); font-weight: 800;
+      font-size: clamp(9px, 1.1vw, 14px); font-weight: 800;
       letter-spacing: 0.1em; text-transform: uppercase; color: #2a2a3e;
     }
-    .veto-cell.banned .veto-map-name { color: rgba(42,42,62,0.35); }
-    .veto-cell.pick-a .veto-top { background: rgba(255,107,149,0.15); }
-    .veto-cell.pick-b .veto-top { background: rgba(45,212,192,0.15); }
-    .veto-cell.decider-cell .veto-top { background: rgba(232,160,32,0.12); }
   </style>
 </head>
 <body>
@@ -289,42 +276,22 @@
         <div class="map-dot" id="dot-b-2"></div>
       </div>
 
-      <!-- 맵 밴픽 그리드 -->
-      <div class="ov" id="ov-veto">
-        <div class="veto-cell banned" data-order="0">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-0">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-0" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-0">–</span></div>
+      <!-- 3맵 그리드 -->
+      <div class="ov" id="ov-maps">
+        <div class="map-cell" data-map="0">
+          <div class="map-top"><div class="map-num">MAP 1</div></div>
+          <div class="map-img-wrap"><img id="map-img-0" src="" alt="" /></div>
+          <div class="map-name-bar"><span class="map-name-txt" id="map-name-0">–</span></div>
         </div>
-        <div class="veto-cell banned" data-order="1">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-1">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-1" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-1">–</span></div>
+        <div class="map-cell" data-map="1">
+          <div class="map-top"><div class="map-num">MAP 2</div></div>
+          <div class="map-img-wrap"><img id="map-img-1" src="" alt="" /></div>
+          <div class="map-name-bar"><span class="map-name-txt" id="map-name-1">–</span></div>
         </div>
-        <div class="veto-cell pick-a" data-order="2">
-          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-2">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-2" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-2">–</span></div>
-        </div>
-        <div class="veto-cell pick-b" data-order="3">
-          <div class="veto-top"><div class="veto-action pick">PICK</div><div class="veto-who" id="veto-who-3">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-3" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-3">–</span></div>
-        </div>
-        <div class="veto-cell banned" data-order="4">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-4">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-4" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-4">–</span></div>
-        </div>
-        <div class="veto-cell banned" data-order="5">
-          <div class="veto-top"><div class="veto-action ban">BAN</div><div class="veto-who" id="veto-who-5">–</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-5" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-5">–</span></div>
-        </div>
-        <div class="veto-cell decider-cell" data-order="6">
-          <div class="veto-top"><div class="veto-action decider">DECIDER</div><div class="veto-who" id="veto-who-6">자동</div></div>
-          <div class="veto-img-wrap"><img id="veto-img-6" src="" alt="" /></div>
-          <div class="veto-name-bar"><span class="veto-map-name" id="veto-map-6">–</span></div>
+        <div class="map-cell" data-map="2">
+          <div class="map-top"><div class="map-num">MAP 3</div></div>
+          <div class="map-img-wrap"><img id="map-img-2" src="" alt="" /></div>
+          <div class="map-name-bar"><span class="map-name-txt" id="map-name-2">–</span></div>
         </div>
       </div>
 
@@ -353,12 +320,11 @@
     document.querySelectorAll('.sb-name-b').forEach(el => el.textContent = TEAM_B);
     if (MATCH_DATE) document.getElementById('match-date').textContent = MATCH_DATE;
 
-    var vetoWho = ['a','b','a','b','a','b',null];
-    vetoWho.forEach(function(who, i) {
-      var el = document.getElementById('veto-who-' + i);
-      if (!el) return;
-      if (who === 'a') el.textContent = TEAM_A;
-      else if (who === 'b') el.textContent = TEAM_B;
+    // 맵 이름 데이터 (localStorage 저장 예정)
+    var mapNames = ['–', '–', '–'];
+    mapNames.forEach(function(name, i) {
+      var el = document.getElementById('map-name-' + i);
+      if (el) el.textContent = name;
     });
 
     function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
