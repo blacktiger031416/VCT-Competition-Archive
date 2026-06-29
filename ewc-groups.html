@@ -633,7 +633,7 @@
           { teamName: teamB, slot: slotB, seed: seedB, score: sc.sb, isWin: hasScore && !aWins, isPlayoff: false },
         ].forEach(({ teamName, slot, seed, score, isWin }) => {
           const row = buildTeamRow({
-            teamName, seedLabel: `#${seed}`, srcLabel: null,
+            teamName, seedLabel: null, srcLabel: null,
             score, isWin, isPlayoff: false, isElim: false,
           });
           row.dataset.clickable = "true";
@@ -804,14 +804,13 @@
       let _pickerCtx = null, _pickerSel = "";
 
       function openSlotPicker(gk, slot) {
-        const seedIdx = parseInt(slot.replace("s", "")) - 1;
         const slots = loadSlots()[gk] || {};
-        _pickerCtx = { gk, slot, seedIdx };
+        _pickerCtx = { gk, slot };
         _pickerSel = slots[slot] || "";
 
         document.getElementById("ts-title").textContent = "팀 선택";
         document.getElementById("ts-subtitle").textContent =
-          `${gk}조 ${seedIdx + 1}시드 팀을 선택하세요`;
+          `${gk}조에 배정할 팀을 선택하세요`;
 
         renderPickerGrid();
         renderPickerActions();
@@ -823,20 +822,26 @@
         grid.innerHTML = "";
 
         const participants = loadParticipants();
-        const seedIdx = _pickerCtx.seedIdx;
 
-        // Collect candidate teams for this seed slot
+        // EWC: 시드 무관, 전체 참가팀 목록 표시
         let candidates = [];
         if (participants) {
           REGIONS.forEach(r => {
-            const name = (participants[r] || [])[seedIdx];
-            if (name) {
-              const t = findTeam(name);
-              if (t) candidates.push({ ...t, region: r });
-            }
+            (participants[r] || []).forEach(name => {
+              if (name) {
+                const t = findTeam(name);
+                if (t) candidates.push({ ...t, region: r });
+              }
+            });
           });
+          // 챔피언 슬롯도 포함
+          const champName = (participants.champion || [])[0];
+          if (champName) {
+            const t = findTeam(champName);
+            if (t) candidates.push({ ...t, region: "champion" });
+          }
         }
-        // Fallback: all teams from all regions
+        // Fallback: ewc_participants 미설정 시 전체 팀 표시
         if (candidates.length === 0) {
           REGIONS.forEach(r => {
             ALL_TEAMS[r].forEach(t => candidates.push({ ...t, region: r }));
