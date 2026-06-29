@@ -787,15 +787,6 @@
         scoreEl.textContent = score == null ? "–" : String(score);
         row.appendChild(scoreEl);
 
-        // 팀 클릭 → 로스터 모달
-        if (team && window.openRosterModal) {
-          row.style.cursor = "pointer";
-          row.addEventListener("click", function(e) {
-            if (e.target.closest(".gmc-score")) return;
-            var logoHTML = '<img src="' + team.logo + '"' + (team.white ? ' class="logo-white"' : '') + ' />';
-            window.openRosterModal(team.name, logoHTML);
-          });
-        }
 
         return row;
       }
