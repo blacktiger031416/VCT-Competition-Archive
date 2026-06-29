@@ -382,6 +382,61 @@
     .pm-player img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: top; }
     .pm-player span { font-size: 10px; font-weight: 700; text-align: center; line-height: 1.3; }
 
+    /* ── 코치 풀 ── */
+    .coach-pool-wrap {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .coach-pool-label {
+      font-size: 12px; font-weight: 700; color: var(--sub);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .coach-pool-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .coach-card {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      cursor: grab;
+      transition: border-color 0.15s, opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+      user-select: none;
+      position: relative;
+    }
+    .coach-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .coach-card.dragging { opacity: 0.35; transform: scale(0.95); }
+    .coach-card.assigned { opacity: 0.45; }
+    .coach-card img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .coach-card-name { font-size: 12px; font-weight: 900; }
+    .coach-assigned-badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 900; color: #fff;
+    }
+
+    /* 슬롯 드롭존 */
+    .slot-chip.drop-over {
+      filter: brightness(1.25);
+      transform: scale(1.08);
+    }
+    .slot-chip-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .slot-coach-photo {
+      width: 30px; height: 30px; border-radius: 50%;
+      object-fit: cover; object-position: top;
+      border: 2px solid rgba(255,255,255,0.7);
+    }
+    .slot-chip-name { font-size: 11px; font-weight: 900; line-height: 1; }
+    .slot-chip-num  { font-size: 10px; opacity: 0.75; line-height: 1; }
+
     /* ── 드래프트 완료 배너 ── */
     .done-banner {
       text-align: center;
@@ -404,6 +459,12 @@
   <div class="draft-shell">
     <h1 class="draft-title">스네이크 드래프트</h1>
     <p class="draft-sub">4슬롯 × 5라운드 · 총 20픽 · 홀수 라운드 정순 / 짝수 라운드 역순</p>
+
+    <!-- 코치 배정 영역 -->
+    <div class="coach-pool-wrap">
+      <div class="coach-pool-label">감독 — 슬롯에 드래그하여 배정</div>
+      <div class="coach-pool-row" id="coach-pool-row"></div>
+    </div>
 
     <!-- 현재 픽 배너 -->
     <div class="pick-banner" id="pick-banner">
@@ -458,7 +519,8 @@
   <script src="./auth.js" defer></script>
   <script>
   (function () {
-    const STORAGE_KEY = 'ballakdae_draft';
+    const STORAGE_KEY        = 'ballakdae_draft';
+    const COACH_STORAGE_KEY  = 'ballakdae_draft_coaches';
 
     /* ── 상수 ──────────────────────────────── */
     const SLOTS = [
@@ -466,6 +528,13 @@
       { name: '슬롯2', cls: 's2', bg: '#c8901a' },
       { name: '슬롯3', cls: 's3', bg: '#3db8b0' },
       { name: '슬롯4', cls: 's4', bg: '#424242' },
+    ];
+
+    const COACHES = [
+      { name: '김돌돌', photo: 'Coach_김돌돌.jpg'  },
+      { name: '남봉',   photo: 'Coach_남봉.webp'   },
+      { name: '자몽뀨', photo: 'Coach_자몽뀨.jpg'  },
+      { name: '협준',   photo: 'Coach_협준.jpg'    },
     ];
 
     // GRID[slot_idx][round_idx] = pick number (1-based)
@@ -506,11 +575,79 @@
 
     /* ── 상태 ──────────────────────────────── */
     let picks = {}; // pickNum → playerName
+    let coachAssign = {}; // slotIdx(0-3) → coachName
     let _pendingPick = null;
 
     function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
-    function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
+    function loadData()  { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
     function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+    function loadCoaches()  { try { return JSON.parse(localStorage.getItem(COACH_STORAGE_KEY) || '{}'); } catch { return {}; } }
+    function saveCoaches(d) { localStorage.setItem(COACH_STORAGE_KEY, JSON.stringify(d)); }
+
+    /* ── 코치 풀 렌더 ── */
+    function renderCoachPool() {
+      const assigned = new Set(Object.values(coachAssign));
+      const row = document.getElementById('coach-pool-row');
+      row.innerHTML = '';
+      COACHES.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'coach-card' + (assigned.has(c.name) ? ' assigned' : '');
+        card.draggable = true;
+        card.dataset.coach = c.name;
+        // 배정된 슬롯 번호 찾기
+        const si = Object.entries(coachAssign).find(([,v]) => v === c.name)?.[0];
+        card.innerHTML = `
+          <img src="./images/${c.photo}" alt="${c.name}" />
+          <div class="coach-card-name">${c.name}</div>
+          ${si !== undefined ? `<div class="coach-assigned-badge" style="background:${SLOTS[+si].bg}">${SLOTS[+si].name}</div>` : ''}`;
+        card.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', c.name);
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        row.appendChild(card);
+      });
+    }
+
+    /* ── 슬롯 칩 내용 생성 ── */
+    function slotChipHTML(si) {
+      const coach = coachAssign[si] ? COACHES.find(c => c.name === coachAssign[si]) : null;
+      if (coach) {
+        return `<div class="slot-chip-inner">
+          <img class="slot-coach-photo" src="./images/${coach.photo}" alt="${coach.name}" />
+          <div class="slot-chip-name">${coach.name}</div>
+          <div class="slot-chip-num">${SLOTS[si].name}</div>
+        </div>`;
+      }
+      return SLOTS[si].name;
+    }
+
+    /* ── 슬롯 드롭존 바인딩 ── */
+    function bindSlotDrops() {
+      document.querySelectorAll('.slot-chip[data-slot]').forEach(chip => {
+        const si = +chip.dataset.slot;
+        chip.addEventListener('dragover', e => { e.preventDefault(); chip.classList.add('drop-over'); });
+        chip.addEventListener('dragleave', () => chip.classList.remove('drop-over'));
+        chip.addEventListener('drop', e => {
+          e.preventDefault();
+          chip.classList.remove('drop-over');
+          const coachName = e.dataTransfer.getData('text/plain');
+          // 기존 슬롯에서 제거
+          Object.keys(coachAssign).forEach(k => { if (coachAssign[k] === coachName) delete coachAssign[k]; });
+          coachAssign[si] = coachName;
+          saveCoaches(coachAssign);
+          renderCoachPool();
+          renderSlotChips();
+        });
+      });
+    }
+
+    function renderSlotChips() {
+      document.querySelectorAll('.slot-chip[data-slot]').forEach(chip => {
+        const si = +chip.dataset.slot;
+        chip.innerHTML = slotChipHTML(si);
+      });
+    }
 
     function currentPickNum() {
       for (let i = 1; i <= 20; i++) { if (!picks[i]) return i; }
@@ -547,7 +684,7 @@
         // 슬롯 라벨
         const th = document.createElement('th');
         th.className = 'slot-label';
-        th.innerHTML = `<span class="slot-chip" style="background:${SLOTS[si].bg}">${SLOTS[si].name}</span>`;
+        th.innerHTML = `<span class="slot-chip" data-slot="${si}" style="background:${SLOTS[si].bg};cursor:pointer;transition:filter 0.15s,transform 0.15s;">${slotChipHTML(si)}</span>`;
         tr.appendChild(th);
         // 각 라운드 픽
         row.forEach(pNum => {
@@ -577,6 +714,9 @@
         });
         tbody.appendChild(tr);
       });
+
+      /* 슬롯 드롭존 재바인딩 */
+      bindSlotDrops();
 
       /* 선수 풀 */
       const drafted = new Set(Object.values(picks));
@@ -642,8 +782,11 @@
     });
 
     /* ── 초기화 ── */
-    picks = loadData();
+    picks       = loadData();
+    coachAssign = loadCoaches();
+    renderCoachPool();
     render();
+    bindSlotDrops();
     window.addEventListener('auth-state-change', render);
   })();
   </script>
