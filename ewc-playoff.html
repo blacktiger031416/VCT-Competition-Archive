@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWC 2026 — 플레이오프</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { background: #0d1117; color: #e2e8f0; font-family: "Noto Sans KR", "Barlow", sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ─────────────────────────────── */
+    .site-header { display: flex; align-items: center; gap: 16px; padding: 0 32px; height: 56px; background: rgba(13,17,23,0.95); border-bottom: 1px solid rgba(148,163,184,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+    .site-header .auth-header-btn { margin-left: auto !important; }
+    .home-link { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; }
+    .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+    .back-link { padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border: 1.5px solid rgba(148,163,184,0.3); border-radius: 999px; color: #94a3b8; font-size: 13px; font-weight: 700; text-decoration: none; font-family: "Barlow Condensed", sans-serif; letter-spacing: 0.08em; }
+
+    /* ── HERO ───────────────────────────────── */
+    .stage-shell { max-width: 1280px; margin: 0 auto; padding: 0 28px 80px; }
+    .stage-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(240px,360px); gap: 32px; align-items: center; padding: 52px 0 44px; }
+    .eyebrow { font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; }
+    .stage-hero h1 { font-family: "Barlow Condensed", sans-serif; font-size: clamp(36px,5vw,60px); font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1; color: #e2e8f0; margin-bottom: 14px; }
+    .intro { font-size: 14px; line-height: 1.8; color: rgba(226,232,240,0.55); word-break: keep-all; }
+    .stage-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .stage-summary div { background: rgba(148,163,184,0.08); border: 1.5px solid rgba(148,163,184,0.2); border-radius: 14px; padding: 20px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .stage-summary strong { font-size: 26px; font-weight: 900; color: #94a3b8; font-family: "Barlow Condensed", sans-serif; }
+    .stage-summary span { font-size: 11px; color: rgba(226,232,240,0.4); }
+
+    /* ── SECTION HEADING ────────────────────── */
+    .section-outer { padding: 0 0 60px; }
+    .section-heading { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 20px; }
+    .section-heading h2 { font-family: "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 900; color: #94a3b8; }
+
+    /* ── BRACKET SCROLL ─────────────────────── */
+    .bracket-scroll { overflow-x: auto; padding-bottom: 16px; }
+    .bracket-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      grid-template-rows: auto auto;
+      gap: 0;
+      min-width: 700px;
+    }
+
+    /* Round headers */
+    .round-header {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(148,163,184,0.5); text-align: center;
+      padding: 0 8px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Bracket columns */
+    .bcol { display: flex; flex-direction: column; padding: 0 8px; }
+    .bcol-qf { justify-content: space-around; gap: 12px; padding-top: 16px; }
+    .bcol-sf { justify-content: space-around; padding-top: 16px; }
+    .bcol-finals { justify-content: space-around; gap: 24px; padding-top: 16px; }
+
+    .sf-half { display: flex; align-items: center; flex: 1; }
+    .finals-half { display: flex; align-items: center; flex: 1; }
+
+    /* ── MATCH CARD ─────────────────────────── */
+    .bracket-match {
+      background: rgba(13,17,23,0.8);
+      border: 1.5px solid rgba(148,163,184,0.14);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 100%;
+      transition: border-color 0.16s;
+    }
+    .bracket-match:hover { border-color: rgba(148,163,184,0.35); }
+
+    .bracket-match h3 {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(148,163,184,0.5);
+      padding: 6px 10px 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .match-bo-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; padding: 1px 5px; border-radius: 3px; background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .match-bo-tag.bo5 { background: rgba(250,200,60,0.15); color: #f5c842; }
+    .match-detail-link {
+      margin-left: auto; font-size: 9px; font-weight: 700;
+      color: rgba(148,163,184,0.5); text-decoration: none;
+      border: 1px solid rgba(148,163,184,0.2); border-radius: 3px; padding: 1px 5px;
+      transition: all 0.13s;
+    }
+    .match-detail-link:hover { color: #94a3b8; border-color: rgba(148,163,184,0.5); }
+
+    .bracket-team {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 10px; border-top: 1px solid rgba(255,255,255,0.04);
+      min-height: 44px; cursor: default; transition: background 0.13s;
+    }
+    .bracket-match .bracket-team:first-of-type { border-top: none; }
+    .bracket-team.winner { background: rgba(50,170,80,0.10); }
+    .bracket-team.winner strong { color: #e2e8f0 !important; }
+    .bracket-team.winner em { color: rgba(255,255,255,0.9) !important; }
+    .bracket-team.tbd strong { color: rgba(226,232,240,0.22); }
+    .bracket-team.champion strong { color: #f5c842 !important; }
+    .bracket-team.champion em { color: #f5c842 !important; }
+
+    .bracket-logo { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .bracket-logo img { width: 22px; height: 22px; object-fit: contain; }
+    .bracket-team strong { flex: 1; font-family: "Barlow Condensed", sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(226,232,240,0.45); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bracket-team em { font-style: normal; font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.28); min-width: 16px; text-align: right; flex-shrink: 0; }
+
+    body:not(.view-only) .bracket-team[data-slot] { cursor: pointer; }
+    body:not(.view-only) .bracket-team[data-slot]:hover { background: rgba(148,163,184,0.1); }
+
+    /* Grand Final highlight */
+    .grand-final-card { border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.04); }
+    .grand-final-card:hover { border-color: rgba(245,200,66,0.55); }
+    .grand-final-card h3 { color: rgba(245,200,66,0.7); }
+
+    /* 3rd place highlight */
+    .third-place-card { border-color: rgba(148,163,184,0.25); }
+
+    /* ── TEAM PICKER MODAL ──────────────────── */
+    .ts-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .ts-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
+    .ts-panel { position: relative; background: #161b22; border: 1.5px solid rgba(148,163,184,0.25); border-radius: 16px; width: min(520px,94vw); max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+    .ts-head { padding: 18px 20px 12px; border-bottom: 1px solid rgba(148,163,184,0.12); }
+    .ts-head h2 { font-size: 16px; font-weight: 900; color: #e2e8f0; margin-bottom: 2px; }
+    .ts-head p { font-size: 12px; color: rgba(226,232,240,0.45); }
+    .ts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 8px; padding: 14px; overflow-y: auto; flex: 1; }
+    .ts-team-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; background: rgba(148,163,184,0.06); border: 1.5px solid rgba(148,163,184,0.15); border-radius: 10px; cursor: pointer; transition: all 0.13s; color: inherit; font-family: inherit; }
+    .ts-team-btn img { width: 32px; height: 32px; object-fit: contain; }
+    .ts-team-btn strong { font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .ts-team-btn:hover { background: rgba(148,163,184,0.14); border-color: rgba(148,163,184,0.4); }
+    .ts-team-btn.sel { background: rgba(148,163,184,0.22); border-color: #94a3b8; }
+    .ts-team-btn:disabled { opacity: 0.3; pointer-events: none; }
+    .ts-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid rgba(148,163,184,0.1); }
+    .ts-btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1.5px solid rgba(148,163,184,0.2); background: transparent; color: rgba(226,232,240,0.6); font-family: inherit; transition: all 0.13s; }
+    .ts-btn:hover { background: rgba(148,163,184,0.1); }
+    .ts-btn-save { background: #94a3b8; border-color: #94a3b8; color: #0d1117; }
+    .ts-btn-save:hover { background: #b0bece; }
+
+    /* ── SCORE MODAL ────────────────────────── */
+    .sm-modal { position: fixed; inset: 0; z-index: 210; display: flex; align-items: center; justify-content: center; }
+    .sm-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.7); }
+    .sm-panel { position: relative; background: #161b22; border: 1.5px solid rgba(148,163,184,0.25); border-radius: 14px; width: min(380px,92vw); padding: 22px 22px 18px; }
+    .sm-panel h2 { font-size: 15px; font-weight: 900; color: #e2e8f0; margin-bottom: 14px; }
+    .sm-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .sm-row label { flex: 1; font-size: 13px; font-weight: 700; color: rgba(226,232,240,0.7); font-family: "Barlow Condensed", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+    .sm-row input { width: 60px; padding: 6px 10px; background: rgba(148,163,184,0.1); border: 1.5px solid rgba(148,163,184,0.25); border-radius: 8px; color: #e2e8f0; font-size: 16px; font-weight: 700; text-align: center; font-family: inherit; }
+    .sm-foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  </style>
+  <script src="./storage.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <a class="back-link" href="./ewc.html">EWC</a>
+  </header>
+
+  <main class="stage-shell">
+    <!-- Hero -->
+    <div class="stage-hero">
+      <div>
+        <p class="eyebrow">EWC 2026</p>
+        <h1>플레이오프</h1>
+        <p class="intro">
+          그룹 스테이지 각 조 상위 2팀, 총 8팀이 참가하는<br>
+          싱글 엘리미네이션 방식의 플레이오프입니다.<br>
+          결승전만 Bo5로 진행됩니다.
+        </p>
+      </div>
+      <div class="stage-summary">
+        <div><strong>8</strong><span>참가팀</span></div>
+        <div><strong>Bo3</strong><span>기본 방식</span></div>
+        <div><strong>Bo5</strong><span>결승전</span></div>
+      </div>
+    </div>
+
+    <!-- Bracket -->
+    <section class="section-outer">
+      <div class="section-heading">
+        <p class="eyebrow">Playoff</p>
+        <h2>플레이오프 대진표</h2>
+      </div>
+
+      <div class="bracket-scroll">
+        <div class="bracket-wrap" id="bracket-wrap">
+
+          <!-- Row 1: Round headers -->
+          <div class="round-header">8강 — Quarter Final</div>
+          <div class="round-header">4강 — Semi Final</div>
+          <div class="round-header">결승 / 3등 결정전</div>
+
+          <!-- Row 2: Bracket columns -->
+          <!-- QF column -->
+          <div class="bcol bcol-qf" id="col-qf">
+            <article class="bracket-match" data-mid="qf1">
+              <h3>QF 1 <span class="match-bo-tag">Bo3</span></h3>
+              <div class="bracket-team tbd" data-slot="a"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+              <div class="bracket-team tbd" data-slot="b"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+            </article>
+            <article class="bracket-match" data-mid="qf2">
+              <h3>QF 2 <span class="match-bo-tag">Bo3</span></h3>
+              <div class="bracket-team tbd" data-slot="a"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+              <div class="bracket-team tbd" data-slot="b"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+            </article>
+            <article class="bracket-match" data-mid="qf3">
+              <h3>QF 3 <span class="match-bo-tag">Bo3</span></h3>
+              <div class="bracket-team tbd" data-slot="a"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+              <div class="bracket-team tbd" data-slot="b"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+            </article>
+            <article class="bracket-match" data-mid="qf4">
+              <h3>QF 4 <span class="match-bo-tag">Bo3</span></h3>
+              <div class="bracket-team tbd" data-slot="a"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+              <div class="bracket-team tbd" data-slot="b"><span class="bracket-logo"></span><strong>TBD</strong><em>–</em></div>
+            </article>
+          </div>
+
+          <!-- SF column -->
+          <div class="bcol bcol-sf" id="col-sf">
+            <div class="sf-half">
+              <article class="bracket-match" data-mid="sf1" style="width:100%;">
+                <h3>SF 1 <span class="match-bo-tag">Bo3</span></h3>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>QF1 승자</strong><em>–</em></div>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>QF2 승자</strong><em>–</em></div>
+              </article>
+            </div>
+            <div class="sf-half">
+              <article class="bracket-match" data-mid="sf2" style="width:100%;">
+                <h3>SF 2 <span class="match-bo-tag">Bo3</span></h3>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>QF3 승자</strong><em>–</em></div>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>QF4 승자</strong><em>–</em></div>
+              </article>
+            </div>
+          </div>
+
+          <!-- Finals column -->
+          <div class="bcol bcol-finals" id="col-finals">
+            <div class="finals-half">
+              <article class="bracket-match grand-final-card" data-mid="final" style="width:100%;">
+                <h3>결승전 <span class="match-bo-tag bo5">Bo5</span></h3>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>SF1 승자</strong><em>–</em></div>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>SF2 승자</strong><em>–</em></div>
+              </article>
+            </div>
+            <div class="finals-half">
+              <article class="bracket-match third-place-card" data-mid="third" style="width:100%;">
+                <h3>3등 결정전 <span class="match-bo-tag">Bo3</span></h3>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>SF1 패자</strong><em>–</em></div>
+                <div class="bracket-team tbd"><span class="bracket-logo"></span><strong>SF2 패자</strong><em>–</em></div>
+              </article>
+            </div>
+          </div>
+
+        </div><!-- /.bracket-wrap -->
+      </div><!-- /.bracket-scroll -->
+    </section>
+  </main>
+
+  <!-- Team Picker Modal -->
+  <div class="ts-modal" id="ts-modal" hidden>
+    <div class="ts-backdrop" id="ts-backdrop"></div>
+    <div class="ts-panel">
+      <div class="ts-head">
+        <h2 id="ts-title">팀 선택</h2>
+        <p id="ts-subtitle"></p>
+      </div>
+      <div class="ts-grid" id="ts-grid"></div>
+      <div class="ts-foot">
+        <button class="ts-btn" id="ts-clear">초기화</button>
+        <button class="ts-btn" id="ts-cancel">취소</button>
+        <button class="ts-btn ts-btn-save" id="ts-save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Modal -->
+  <div class="sm-modal" id="sm-modal" hidden>
+    <div class="sm-backdrop" id="sm-backdrop"></div>
+    <div class="sm-panel">
+      <h2 id="sm-title">스코어 입력</h2>
+      <div class="sm-row">
+        <label id="sm-label-a">팀 A</label>
+        <input type="number" id="sm-sa" min="0" max="3" />
+      </div>
+      <div class="sm-row">
+        <label id="sm-label-b">팀 B</label>
+        <input type="number" id="sm-sb" min="0" max="3" />
+      </div>
+      <div class="sm-foot">
+        <button class="ts-btn" id="sm-cancel">취소</button>
+        <button class="ts-btn ts-btn-save" id="sm-save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  window.storageReady = window.storageReady || Promise.resolve();
+  window.storageReady.then(function () {
+
+    const STORAGE_KEY      = "ewc_playoff";
+    const PARTICIPANTS_KEY = "ewc_participants";
+
+    /* ── 전체 팀 목록 ─────────────────────────────────────── */
+    const ALL_TEAMS = [
+      { name:"Paper Rex",                       code:"PRX",  logo:"./assets/teams/prx.svg", white:true },
+      { name:"Gen.G",                           code:"GEN",  logo:"./assets/teams/gen.png" },
+      { name:"Kiwoom DRX",                      code:"KRX",  logo:"./assets/teams/krx.svg" },
+      { name:"Rex Regum Qeon",                  code:"RRQ",  logo:"./assets/teams/rrq.png" },
+      { name:"T1",                              code:"T1",   logo:"./assets/teams/t1.png" },
+      { name:"FULL SENSE",                      code:"FS",   logo:"./assets/teams/fs.svg" },
+      { name:"Global Esports",                  code:"GE",   logo:"./assets/teams/ge.webp" },
+      { name:"DetonatioN FocusMe",              code:"DFM",  logo:"https://static.lolesports.com/teams/1737376982013_DFM_LOGO_white_0-.png" },
+      { name:"Nongshim RedForce",               code:"NS",   logo:"./assets/teams/ns.svg" },
+      { name:"VARREL",                          code:"VL",   logo:"./assets/teams/vl.svg", white:true },
+      { name:"Team Secret",                     code:"TS",   logo:"./assets/teams/ts.svg", white:true },
+      { name:"ZETA DIVISION",                   code:"ZETA", logo:"./assets/teams/zeta.png", white:true },
+      { name:"Sentinels",                       code:"SEN",  logo:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Sentinels_logo.svg" },
+      { name:"G2 Esports",                      code:"G2",   logo:"https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg" },
+      { name:"NRG",                             code:"NRG",  logo:"https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg" },
+      { name:"100 Thieves",                     code:"100T", logo:"https://www.thespike.gg/_next/image?url=https%3A%2F%2Fcdn.thespike.gg%2Fweasel%252F285px-100_Thieves_darkmode_1741958947603.png&w=640&q=75" },
+      { name:"Cloud9",                          code:"C9",   logo:"https://i.namu.wiki/i/pNejTSgMv0MvBpL_QKyRVK31Kop9zA0W1oLfUN_jzMUzhHFNcji-UOduWMYHYPW7cqamflZwS86BCgx15VavaQ.webp" },
+      { name:"MIBR",                            code:"MIBR", logo:"https://i.namu.wiki/i/xtVv9C2-C6kg9R5UYtMfh9YvnQtRUAeSIZO9uw_nb2MPy_OlDfZe318_NXMW7Ev5U6rhFPnyAJ5fWmsVpTQuNA.svg", white:true },
+      { name:"LOUD",                            code:"LOUD", logo:"https://i.namu.wiki/i/KLSPm8NpWYB4fnKtttI3JE3NwAv8MDqvG0SnN8NK2KmcZXMKETfbkzrZno0d4HqTTq2Mr8DhCNOoDIJN1MO60A.svg" },
+      { name:"FURIA",                           code:"FUR",  logo:"https://i.namu.wiki/i/Hr2xAFhDXF1myp7cr6Loehv1Di9S9Ps0QX4UI8itigPaMxM7-6bcXj2IcaNuE3oooSKw8obr9tG57Ka0FuQL1g.svg" },
+      { name:"KRÜ Esports",                     code:"KRÜ",  logo:"https://i.namu.wiki/i/GHrz6y7qiDsMos3qYnboyiUXwHa80QujzR3--A63eR4ode-2kXnyH4suCmrkipZ-Nr9Cf-8AeAvfHiEEfq_1RQ.svg" },
+      { name:"Leviatán",                        code:"LEV",  logo:"https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/4/43/Leviatanlogo_profile.png/revision/latest/scale-to-width-down/1200?cb=20230406020618" },
+      { name:"Evil Geniuses",                   code:"EG",   logo:"https://i.namu.wiki/i/dZikzI1dDYGxSbFNFDWalvzOt16Lyt1zSoJV0Wi2aOr2dEEbWM54nTLJ2WPM7oqA-l2IftT8zBe_ykLdkjbW9Q.svg", white:true },
+      { name:"ENVY",                            code:"ENVY", logo:"https://i.namu.wiki/i/yShke1Sd9Zj71613blHlgjZS5vkjnjGxXnmbUj-QNxBIL5JH6f7avrRmRa3NcpfDTNcATm3hUXIF36NbiuCqIw.svg", white:true },
+      { name:"All Gamers",                      code:"AG",   logo:"https://i.namu.wiki/i/5BvCRCBmH7L2vf7IUVxTUodUxcGjFG9Wj8gTfQfCX39lZBmZe65aXGnliVal-TvqE0EWzvnNk9uZpYka-Bkd9w.webp" },
+      { name:"JD Mall JDG Esports",             code:"JDG",  logo:"https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg" },
+      { name:"TYLOO",                           code:"TYL",  logo:"https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg" },
+      { name:"Guangzhou Huadu Bilibili Gaming", code:"BLG",  logo:"https://dpm.lol/esport/teams/BLG.webp" },
+      { name:"FunPlus Phoenix",                 code:"FPX",  logo:"https://i.namu.wiki/i/bo6KwtrXNzYIi3crhMLbn0G6As6Nw3e0mgwRiNgkv5jbmvZtzNxxM3PSfrJ92ybcZf-yqy2ma6Iwk0Hg5rFkCQ.svg" },
+      { name:"Wuxi Titan Esports Club",         code:"TEC",  logo:"https://i.namu.wiki/i/doa0qMFjVzCAMO6yZ8963XeNJ2DjQnSjeEnZd7pKsk5op7S5E6QMrKcn_GI4qcWgiJHMto_F-NVn8ilAKjWiSA.svg" },
+      { name:"Xi Lai Gaming",                   code:"XLG",  logo:"https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg" },
+      { name:"EDward Gaming",                   code:"EDG",  logo:"https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png" },
+      { name:"Dragon Ranger Gaming",            code:"DRG",  logo:"https://i.namu.wiki/i/HNgARAhXqj-GU-MTPU1tZaTG0jf2ISAgOpYMeSIhQwRwgI-Du73w4kLJAUchM3u6aCGWjingU6ggytTqSFhOug.webp" },
+      { name:"Trace Esports",                   code:"TE",   logo:"https://i.namu.wiki/i/V8Ky2dcxylZ84RGcXeFbPG0x8txS6o3tpxLskoeAJWZkUiGIEFqCnRZHZ7kKwUi5i_sGg_oiHHXhJ-DfsPgWaA.svg" },
+      { name:"Nova Esports",                    code:"NOVA", logo:"https://i.namu.wiki/i/-6DEz5g9-cso0kotRlGjxhZfBRLtMzq1OExUW-jyDO_FAR3bVmFwXD9z1UxT7_3U7YkiqwBgGY1E11qs9R6eyA.webp" },
+      { name:"Wolves Esports",                  code:"WOL",  logo:"https://i.namu.wiki/i/X-eGL_hqaHsoGwmlAnlpWND0IL9ubVJBNJOBIm0tm365e5mMyXSh15rMbGd_zaedawHbF9Rr4rNPjVgb2X650g.webp" },
+      { name:"Gentle Mates",                    code:"M8",   logo:"./assets/teams/gm.png", white:true },
+      { name:"Team Liquid",                     code:"TL",   logo:"https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp", white:true },
+      { name:"Team Heretics",                   code:"TH",   logo:"https://i.namu.wiki/i/xhSOK4GxhF_Jvb_5DBSWbMPPw5WIF0VHjhZmewaTs9MISk8wd33bVJAf1QodqKgX-bAp0musx6K3GQSohdQnIw.svg" },
+      { name:"NAVI",                            code:"NAVI", logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/NAVI-Logo.svg/1280px-NAVI-Logo.svg.png" },
+      { name:"Karmine Corp",                    code:"KC",   logo:"./assets/teams/kc.png" },
+      { name:"PCIFIC Esports",                  code:"PCF",  logo:"https://i.namu.wiki/i/1Mc2sGqVID3LVIKcGjKpitWA-4ZflKXzVsyD7wfyziCL7TsCYSVOStcvsJ6GT1oi8WLF7tCzN5V0lJznozZ7HQ.svg" },
+      { name:"FUT Esports",                     code:"FUT",  logo:"https://img.redbull.com/images/c_limit,w_4000/e_trim:1:transparent/c_limit,w_600/bo_5px_solid_rgb:00000000/q_auto:best,f_auto/redbullcom/2023/11/15/m76gqzk7ebefvxn4idmu/fut-esports" },
+      { name:"BBL Esports",                     code:"BBL",  logo:"https://i.namu.wiki/i/N0DXbTuVDoEBvb075pjNqv1Mzvhx-x40_G03TusP-lmj6xWjsFvIfAdL5NHEfEBYA9CS-whWH4cFb33uVnkILg.svg" },
+      { name:"Fnatic",                          code:"FNC",  logo:"https://i.namu.wiki/i/mDFrJuf51SSI6aOExJ5_KDbICs154lUpHgiuQNFP8L2Fcu2FxnU49spDKvpFhZzZvhwtntf58BWVwGbN20kNBQ.svg" },
+      { name:"Team Vitality",                   code:"VIT",  logo:"https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png" },
+      { name:"GIANTX",                          code:"GX",   logo:"https://i.namu.wiki/i/smbcvKZYz5eUQqXRfGl_7bXNclG0mpQkHJ-vk2WLqNefG_xO_lErENqYn2GQWvDpO9sSZPBYOHo-Td0lXg1vvQ.svg", white:true },
+      { name:"Eternal Fire",                    code:"EF",   logo:"https://i.namu.wiki/i/mkmrm6lQKQlLsm4GMnZzHvOhujJ1yPSpJE9w5U5p4rQHkef-0XAH4Ga3FUQLt7HSAZO6WwwXBgiaOaJz621qEg.svg" },
+    ];
+
+    /* ── Match propagation map ────────────────────────────── */
+    const LINKS = {
+      sf1:   [{ m:"qf1", r:"w" }, { m:"qf2", r:"w" }],
+      sf2:   [{ m:"qf3", r:"w" }, { m:"qf4", r:"w" }],
+      final: [{ m:"sf1", r:"w" }, { m:"sf2", r:"w" }],
+      third: [{ m:"sf1", r:"l" }, { m:"sf2", r:"l" }],
+    };
+    const PROCESS_ORDER = ["qf1","qf2","qf3","qf4","sf1","sf2","final","third"];
+    const IS_BO5 = { final: true };
+    const QF_IDS = ["qf1","qf2","qf3","qf4"];
+
+    function isAdmin() { return typeof window.vctIsAdmin === "function" && window.vctIsAdmin(); }
+    function findTeam(n) { return ALL_TEAMS.find(t => t.name === n || t.code === n); }
+
+    /* ── Storage ──────────────────────────────────────────── */
+    function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; } }
+    function save(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+    function loadParticipants() {
+      try {
+        const p = JSON.parse(localStorage.getItem(PARTICIPANTS_KEY) || "{}");
+        const names = [];
+        ["pacific","americas","cn","emea"].forEach(r => {
+          (p[r] || []).filter(Boolean).forEach(n => names.push(n));
+        });
+        const champ = (p.champion || [])[0];
+        if (champ) names.push(champ);
+        return names.length > 0 ? names : null;
+      } catch { return null; }
+    }
+
+    /* ── State computation ────────────────────────────────── */
+    function computeStates() {
+      const raw = load();
+      const states = {};
+      PROCESS_ORDER.forEach(mid => {
+        const stored = raw[mid] || {};
+        const links = LINKS[mid];
+        let a = stored.a || "";
+        let b = stored.b || "";
+        if (links) {
+          const [la, lb] = links;
+          if (!a && la) { const prev = states[la.m]; if (prev) a = la.r === "w" ? prev.winner : prev.loser; }
+          if (!b && lb) { const prev = states[lb.m]; if (prev) b = lb.r === "w" ? prev.winner : prev.loser; }
+        }
+        const sa = stored.sa ?? null;
+        const sb = stored.sb ?? null;
+        const hasResult = sa !== null && sb !== null && sa !== sb && a && b;
+        states[mid] = {
+          a, b, sa, sb,
+          winner: hasResult ? (sa > sb ? a : b) : "",
+          loser:  hasResult ? (sa > sb ? b : a) : "",
+          isFinal: mid === "final",
+        };
+      });
+      return states;
+    }
+
+    /* ── Rendering ────────────────────────────────────────── */
+    function logoHTML(t) {
+      if (!t) return "";
+      return `<img src="${t.logo}" alt="${t.name}" ${t.white ? 'style="filter:brightness(0) invert(1)"' : ''} />`;
+    }
+
+    function renderRow(row, teamName, score, isWinner, isFinal) {
+      const logoEl = row.querySelector(".bracket-logo");
+      const nameEl = row.querySelector("strong");
+      const scoreEl = row.querySelector("em");
+      const t = teamName ? findTeam(teamName) : null;
+
+      row.classList.toggle("tbd", !teamName);
+      row.classList.toggle("winner", Boolean(isWinner));
+      row.classList.toggle("champion", Boolean(isFinal && isWinner));
+
+      if (logoEl) logoEl.innerHTML = t ? logoHTML(t) : "";
+      if (nameEl) nameEl.textContent = t ? t.code : (teamName || "TBD");
+      if (scoreEl) scoreEl.textContent = score !== null ? String(score) : "–";
+
+      row.onclick = null;
+      if (teamName && t && window.openRosterModal) {
+        row.style.cursor = "pointer";
+        row.onclick = function(e) {
+          if (e.target.tagName === "EM") return;
+          window.openRosterModal(t.name, `<img src="${t.logo}" ${t.white ? 'class="logo-white"' : ''} />`);
+        };
+      } else {
+        row.style.cursor = "";
+      }
+    }
+
+    function buildMatchUrl(mid, st) {
+      const bo = IS_BO5[mid] ? 5 : 3;
+      return `./ewc-match-dark.html?from=playoffs&match=${mid}&teamA=${encodeURIComponent(st.a)}&teamB=${encodeURIComponent(st.b)}&score=${st.sa ?? "-"}:${st.sb ?? "-"}&bo=${bo}`;
+    }
+
+    function render() {
+      const states = computeStates();
+      document.querySelectorAll(".bracket-match").forEach(card => {
+        const mid = card.dataset.mid;
+        const st = states[mid];
+        if (!st) return;
+        const rows = card.querySelectorAll(".bracket-team");
+
+        renderRow(rows[0], st.a, st.sa, st.winner && st.winner === st.a, st.isFinal);
+        renderRow(rows[1], st.b, st.sb, st.winner && st.winner === st.b, st.isFinal);
+
+        /* Admin: QF팀 슬롯 클릭 피커 */
+        if (isAdmin() && QF_IDS.includes(mid)) {
+          rows.forEach((row, idx) => {
+            row.dataset.slot = idx === 0 ? "a" : "b";
+            row.onclick = function(e) {
+              if (e.target.tagName === "EM") return;
+              openPicker(mid, idx === 0 ? "a" : "b");
+            };
+          });
+        }
+
+        /* 헤더에 스코어 / 상세 버튼 */
+        const h3 = card.querySelector("h3");
+        let scoreBtn = card.querySelector(".score-btn");
+        let detailLink = card.querySelector(".match-detail-link");
+
+        if (isAdmin()) {
+          if (!scoreBtn) {
+            scoreBtn = document.createElement("button");
+            scoreBtn.className = "ts-btn score-btn";
+            scoreBtn.style.cssText = "font-size:9px;padding:2px 6px;margin-left:auto;";
+            scoreBtn.textContent = "스코어";
+            h3.appendChild(scoreBtn);
+          }
+          scoreBtn.onclick = (e) => { e.stopPropagation(); openScoreModal(mid, st); };
+        }
+
+        if (st.a && st.b) {
+          if (!detailLink) {
+            detailLink = document.createElement("a");
+            detailLink.className = "match-detail-link";
+            detailLink.textContent = "상세";
+            h3.appendChild(detailLink);
+          }
+          detailLink.href = buildMatchUrl(mid, st);
+        }
+      });
+    }
+
+    /* ── Team Picker Modal ────────────────────────────────── */
+    let _pickerCtx = null, _pickerSel = "";
+
+    function openPicker(mid, slot) {
+      const raw = load();
+      _pickerCtx = { mid, slot };
+      _pickerSel = (raw[mid] || {})[slot] || "";
+      document.getElementById("ts-subtitle").textContent = `${mid.toUpperCase()} ${slot === "a" ? "팀 A" : "팀 B"}`;
+      renderPickerGrid();
+      document.getElementById("ts-modal").hidden = false;
+    }
+
+    function renderPickerGrid() {
+      const grid = document.getElementById("ts-grid");
+      grid.innerHTML = "";
+
+      const participants = loadParticipants();
+      let candidates = participants
+        ? participants.map(n => findTeam(n)).filter(Boolean)
+        : ALL_TEAMS.slice();
+
+      /* 다른 QF 슬롯에서 이미 사용 중인 팀 */
+      const raw = load();
+      const usedElsewhere = new Set();
+      QF_IDS.forEach(m => {
+        const md = raw[m] || {};
+        if (md.a && !(m === _pickerCtx.mid && "a" === _pickerCtx.slot)) usedElsewhere.add(md.a);
+        if (md.b && !(m === _pickerCtx.mid && "b" === _pickerCtx.slot)) usedElsewhere.add(md.b);
+      });
+
+      candidates.forEach(t => {
+        const btn = document.createElement("button");
+        btn.className = "ts-team-btn" + (t.name === _pickerSel ? " sel" : "");
+        if (usedElsewhere.has(t.name)) btn.disabled = true;
+        btn.innerHTML = `<img src="${t.logo}" alt="${t.name}" ${t.white ? 'style="filter:brightness(0) invert(1)"' : ''} /><strong>${t.code}</strong>`;
+        btn.addEventListener("click", () => {
+          grid.querySelectorAll(".ts-team-btn").forEach(b => b.classList.remove("sel"));
+          btn.classList.add("sel");
+          _pickerSel = t.name;
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function closePicker() { document.getElementById("ts-modal").hidden = true; _pickerCtx = null; _pickerSel = ""; }
+
+    document.getElementById("ts-cancel").addEventListener("click", closePicker);
+    document.getElementById("ts-backdrop").addEventListener("click", closePicker);
+    document.getElementById("ts-clear").addEventListener("click", () => {
+      const raw = load();
+      if (!raw[_pickerCtx.mid]) raw[_pickerCtx.mid] = {};
+      raw[_pickerCtx.mid][_pickerCtx.slot] = "";
+      save(raw); closePicker(); render();
+    });
+    document.getElementById("ts-save").addEventListener("click", () => {
+      if (!_pickerSel) { closePicker(); return; }
+      const raw = load();
+      if (!raw[_pickerCtx.mid]) raw[_pickerCtx.mid] = {};
+      raw[_pickerCtx.mid][_pickerCtx.slot] = _pickerSel;
+      save(raw); closePicker(); render();
+    });
+
+    /* ── Score Modal ──────────────────────────────────────── */
+    let _scoreMid = null;
+
+    function openScoreModal(mid, st) {
+      _scoreMid = mid;
+      const ta = findTeam(st.a); const tb = findTeam(st.b);
+      document.getElementById("sm-title").textContent = `${ta ? ta.code : st.a || "팀 A"} vs ${tb ? tb.code : st.b || "팀 B"}`;
+      document.getElementById("sm-label-a").textContent = ta ? ta.code : (st.a || "팀 A");
+      document.getElementById("sm-label-b").textContent = tb ? tb.code : (st.b || "팀 B");
+      document.getElementById("sm-sa").value = st.sa ?? "";
+      document.getElementById("sm-sb").value = st.sb ?? "";
+      const bo = IS_BO5[mid] ? 5 : 3;
+      document.getElementById("sm-sa").max = bo;
+      document.getElementById("sm-sb").max = bo;
+      document.getElementById("sm-modal").hidden = false;
+    }
+
+    function closeScoreModal() { document.getElementById("sm-modal").hidden = true; _scoreMid = null; }
+
+    document.getElementById("sm-cancel").addEventListener("click", closeScoreModal);
+    document.getElementById("sm-backdrop").addEventListener("click", closeScoreModal);
+    document.getElementById("sm-save").addEventListener("click", () => {
+      const sa = parseInt(document.getElementById("sm-sa").value);
+      const sb = parseInt(document.getElementById("sm-sb").value);
+      if (isNaN(sa) || isNaN(sb)) { closeScoreModal(); return; }
+      const raw = load();
+      if (!raw[_scoreMid]) raw[_scoreMid] = {};
+      raw[_scoreMid].sa = sa;
+      raw[_scoreMid].sb = sb;
+      save(raw); closeScoreModal(); render();
+    });
+
+    render();
+  });
+  </script>
+
+  <script src="./auth.js"></script>
+  <script src="./player-modal.js" defer></script>
+  <script src="./roster-modal.js" defer></script>
+  <script src="./help.js" defer></script>
+</body>
+</html>
