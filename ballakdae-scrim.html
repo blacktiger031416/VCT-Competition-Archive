@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발락대 공식 스크림</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:  #f5f6fa;
+      --bg2: #eef0f5;
+      --card: #fff;
+      --text: #111;
+      --sub:  #666;
+      --acc:  #3db8b0;
+
+      --map-ascent: #e8606a;
+      --map-haven:  #e8606a;
+      --map-split:  #3db8b0;
+      --map-bind:   #3db8b0;
+      --map-summit: #c8901a;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── 헤더 ── */
+    .site-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 40px; height: 56px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .home-link {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900;
+      color: var(--text); text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .back-link {
+      font-size: 13px; font-weight: 700;
+      color: var(--acc); text-decoration: none;
+      margin-left: 14px;
+      padding: 5px 14px;
+      border: 1.5px solid var(--acc);
+      border-radius: 20px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .back-link:hover { background: var(--acc); color: #fff; }
+
+    /* auth.js 버튼 라이트 테마 */
+    .auth-header-btn, .auth-refresh-btn, .help-trigger-btn, .suggest-trigger-btn {
+      background: rgba(0,0,0,0.05) !important;
+      border-color: rgba(0,0,0,0.15) !important;
+      color: rgba(0,0,0,0.55) !important;
+    }
+    .auth-header-btn::before, .auth-refresh-btn::before { background: rgba(0,0,0,0.35) !important; }
+    .auth-header-btn:hover, .auth-refresh-btn:hover, .help-trigger-btn:hover, .suggest-trigger-btn:hover {
+      background: rgba(0,0,0,0.09) !important;
+      border-color: rgba(0,0,0,0.28) !important;
+      color: rgba(0,0,0,0.85) !important;
+    }
+    .auth-header-btn--on {
+      background: rgba(30,210,100,0.12) !important;
+      border-color: rgba(30,210,100,0.4) !important;
+      color: #18a864 !important;
+    }
+    .auth-header-btn--on::before { background: #18a864 !important; }
+    .auth-header-btn--user {
+      background: rgba(80,140,255,0.1) !important;
+      border-color: rgba(80,140,255,0.3) !important;
+      color: #3670d0 !important;
+    }
+
+    /* ── 컨테이너 ── */
+    .scrim-shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+    .scrim-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 40px; font-weight: 900;
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+    .scrim-sub {
+      font-size: 14px; color: var(--sub);
+      margin-bottom: 36px;
+    }
+
+    /* ── 스케줄 그리드 ── */
+    .schedule-wrap {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 140px repeat(3, 1fr);
+    }
+
+    /* 헤더 셀 */
+    .sh-empty {
+      background: #2b2b2b;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .sh-date {
+      background: #e8606a;
+      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 16px 8px;
+      gap: 2px;
+    }
+    .sh-date-main {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px; font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+    .sh-date-day {
+      font-size: 12px; font-weight: 700; opacity: 0.85;
+    }
+
+    /* 시간 셀 */
+    .time-cell {
+      background: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px 12px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      gap: 4px;
+    }
+    .time-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+    .time-range {
+      font-size: 12px; color: var(--sub); font-weight: 700;
+    }
+
+    /* 경기 셀 */
+    .match-cell {
+      border: 1px solid rgba(232,96,106,0.25);
+      border-radius: 0;
+      background: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px 16px;
+      gap: 12px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      border-left: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .match-pairs {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2px;
+    }
+    .match-pair {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px; font-weight: 900;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .match-pair .vs { color: #aaa; margin: 0 3px; }
+    .match-sep {
+      font-size: 12px; color: #ccc; margin: 1px 0;
+    }
+
+    .match-maps {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .map-tag {
+      font-size: 13px; font-weight: 900;
+      padding: 3px 0;
+    }
+    .map-dot {
+      color: #ccc; font-size: 10px;
+    }
+    .map-ascent { color: var(--map-ascent); }
+    .map-haven  { color: var(--map-haven);  }
+    .map-split  { color: var(--map-split);  }
+    .map-bind   { color: var(--map-bind);   }
+    .map-summit { color: var(--map-summit); }
+
+    /* 범례 */
+    .legend {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      margin-top: 24px; padding: 16px 20px;
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div style="display:flex;align-items:center;">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./ballakdae.html">발락대</a>
+    </div>
+  </header>
+
+  <div class="scrim-shell">
+    <h1 class="scrim-title">공식 스크림 일정</h1>
+    <p class="scrim-sub">총 6경기 · 각 경기 3맵 고정 · 팀 배정 후 업데이트 예정</p>
+
+    <div class="schedule-wrap">
+      <div class="schedule-grid">
+
+        <!-- 헤더 행 -->
+        <div class="sh-empty"></div>
+        <div class="sh-date">
+          <div class="sh-date-main">7월 8일</div>
+          <div class="sh-date-day">수요일</div>
+        </div>
+        <div class="sh-date">
+          <div class="sh-date-main">7월 9일</div>
+          <div class="sh-date-day">목요일</div>
+        </div>
+        <div class="sh-date">
+          <div class="sh-date-main">7월 10일</div>
+          <div class="sh-date-day">금요일</div>
+        </div>
+
+        <!-- 1타임 행 -->
+        <div class="time-cell">
+          <div class="time-label">1타임</div>
+          <div class="time-range">17:00 – 20:00</div>
+        </div>
+
+        <!-- 7/8 1타임: A vs B · C vs D / 어센트·바인드·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> B</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">C <span class="vs">vs</span> D</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-ascent">어센트</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-bind">바인드</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+        <!-- 7/9 1타임: A vs C · B vs D / 어센트·바인드·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> C</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">B <span class="vs">vs</span> D</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-ascent">어센트</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-bind">바인드</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+        <!-- 7/10 1타임: A vs D · B vs C / 헤이븐·스플릿·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> D</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">B <span class="vs">vs</span> C</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-haven">헤이븐</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-split">스플릿</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+        <!-- 2타임 행 -->
+        <div class="time-cell">
+          <div class="time-label">2타임</div>
+          <div class="time-range">21:00 – 24:00</div>
+        </div>
+
+        <!-- 7/8 2타임: A vs D · B vs C / 어센트·바인드·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> D</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">B <span class="vs">vs</span> C</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-ascent">어센트</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-bind">바인드</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+        <!-- 7/9 2타임: A vs B · C vs D / 헤이븐·스플릿·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> B</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">C <span class="vs">vs</span> D</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-haven">헤이븐</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-split">스플릿</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+        <!-- 7/10 2타임: A vs C · B vs D / 헤이븐·스플릿·서밋 -->
+        <div class="match-cell">
+          <div class="match-pairs">
+            <div class="match-pair">A <span class="vs">vs</span> C</div>
+            <div class="match-sep">·</div>
+            <div class="match-pair">B <span class="vs">vs</span> D</div>
+          </div>
+          <div class="match-maps">
+            <span class="map-tag map-haven">헤이븐</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-split">스플릿</span>
+            <span class="map-dot">·</span>
+            <span class="map-tag map-summit">서밋</span>
+          </div>
+        </div>
+
+      </div><!-- /schedule-grid -->
+    </div><!-- /schedule-wrap -->
+
+    <!-- 맵 범례 -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--map-ascent)"></div>
+        <span style="color:var(--map-ascent)">어센트</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--map-haven)"></div>
+        <span style="color:var(--map-haven)">헤이븐</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--map-bind)"></div>
+        <span style="color:var(--map-bind)">바인드</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--map-split)"></div>
+        <span style="color:var(--map-split)">스플릿</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--map-summit)"></div>
+        <span style="color:var(--map-summit)">서밋</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="./auth.js" defer></script>
+</body>
+</html>
