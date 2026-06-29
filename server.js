@@ -3452,9 +3452,14 @@ const AGENT_EN_TO_KO = {
   "Vyse":"바이스","Tejo":"테호","Waylay":"웨이레이","Gecko":"게코",
   "Mix":"믹스","Veto":"비토",
 };
+/* 대소문자 무관 역방향 조회용 맵 */
+const _AGENT_LOWER = Object.fromEntries(
+  Object.entries(AGENT_EN_TO_KO).map(([k, v]) => [k.toLowerCase(), v])
+);
 function agentKo(p) {
   const title = p.agents?.[0]?.title || p.agents?.[0]?.name || "";
-  return AGENT_EN_TO_KO[title] || title;
+  if (!title) return "";
+  return AGENT_EN_TO_KO[title] || _AGENT_LOWER[title.toLowerCase()] || title;
 }
 
 /* 맵 영어 → 한국어 매핑 */
