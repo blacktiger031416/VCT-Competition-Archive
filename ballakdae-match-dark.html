@@ -60,19 +60,38 @@
 
     /* ══ SCORE1 오버레이 요소 ══ */
 
-    /* 팀 A 이름 (VS 카드 왼쪽) */
-    #ov-name-a {
-      left: 5%; top: 3%;
-      width: 33%; height: 18%;
-      justify-content: flex-start;
-      padding-left: 4%;
+    /* 팀 A 로고 (왼쪽 외곽) */
+    #ov-logo-a {
+      left: 4%; top: 3%;
+      width: 12%; height: 16%;
     }
-    /* 팀 B 이름 (VS 카드 오른쪽) */
+    /* 팀 B 로고 (오른쪽 외곽) */
+    #ov-logo-b {
+      left: 84%; top: 3%;
+      width: 12%; height: 16%;
+    }
+    .team-logo-ov {
+      width: 100%; height: 100%;
+      object-fit: contain; display: block;
+    }
+    .team-logo-placeholder {
+      width: 100%; height: 100%;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.45);
+      border: 2px dashed rgba(42,42,62,0.15);
+    }
+
+    /* 팀 A 이름 (로고 오른쪽 → VS 카드 방향으로 모음) */
+    #ov-name-a {
+      left: 17%; top: 3%;
+      width: 21%; height: 18%;
+      justify-content: flex-start;
+    }
+    /* 팀 B 이름 (로고 왼쪽 → VS 카드 방향으로 모음) */
     #ov-name-b {
       left: 62%; top: 3%;
-      width: 33%; height: 18%;
+      width: 21%; height: 18%;
       justify-content: flex-end;
-      padding-right: 4%;
     }
     .team-name-ov {
       font-family: 'Barlow Condensed', sans-serif;
@@ -221,6 +240,18 @@
     <div class="img-overlay-wrap">
       <img class="bg-img" src="./images/balakdae_score1.png" alt="" />
 
+      <!-- 팀 A 로고 -->
+      <div class="ov" id="ov-logo-a">
+        <img class="team-logo-ov" id="logo-img-a" src="" alt="" onerror="this.style.display='none'" />
+        <div class="team-logo-placeholder" id="logo-ph-a"></div>
+      </div>
+
+      <!-- 팀 B 로고 -->
+      <div class="ov" id="ov-logo-b">
+        <img class="team-logo-ov" id="logo-img-b" src="" alt="" onerror="this.style.display='none'" />
+        <div class="team-logo-placeholder" id="logo-ph-b"></div>
+      </div>
+
       <!-- 팀 A 이름 -->
       <div class="ov" id="ov-name-a">
         <span class="team-name-ov sb-name-a">–</span>
@@ -331,6 +362,24 @@
     });
 
     function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+
+    // 로고: 이미지 로드 성공 시 placeholder 숨김
+    function setTeamLogo(side, src) {
+      var img = document.getElementById('logo-img-' + side);
+      var ph  = document.getElementById('logo-ph-' + side);
+      if (!src) return;
+      img.onload  = function() { ph.style.display = 'none'; img.style.display = 'block'; };
+      img.onerror = function() { img.style.display = 'none'; ph.style.display = 'block'; };
+      img.style.display = 'none';
+      img.src = src;
+    }
+    // 팀 이름 → 로고 경로 규칙 (teams/ 폴더, SVG 우선)
+    function teamLogoSrc(name) {
+      if (!name) return '';
+      return './assets/teams/' + encodeURIComponent(name) + '.svg';
+    }
+    setTeamLogo('a', teamLogoSrc(TEAM_A));
+    setTeamLogo('b', teamLogoSrc(TEAM_B));
   </script>
 </body>
 </html>
