@@ -785,9 +785,18 @@
     picks       = loadData();
     coachAssign = loadCoaches();
     renderCoachPool();
-    render();
+    render();           // 즉시 렌더 (admin 상태 미확정)
     bindSlotDrops();
-    window.addEventListener('auth-state-change', render);
+
+    // defer 스크립트(auth.js) 완료 후 admin 상태 확정 → 재렌더
+    document.addEventListener('DOMContentLoaded', function () {
+      render();
+      bindSlotDrops();
+    });
+    window.addEventListener('auth-state-change', function () {
+      render();
+      bindSlotDrops();
+    });
   })();
   </script>
 </body>
