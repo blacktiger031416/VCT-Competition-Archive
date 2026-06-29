@@ -587,21 +587,24 @@
         const card = document.createElement('div');
         const si = Object.entries(coachAssign).find(([,v]) => v === c.name)?.[0];
         card.className = 'coach-card' + (si !== undefined ? ' assigned' : '');
-        card.draggable = true;
         card.dataset.coach = c.name;
         if (si !== undefined) {
           const slotBg = SLOTS[+si].bg;
           card.style.borderColor = slotBg;
-          card.style.background = slotBg + '22'; // 13% opacity tint
+          card.style.background = slotBg + '22';
         }
         card.innerHTML = `
           <img src="./images/${c.photo}" alt="${c.name}" />
           <div class="coach-card-name">${c.name}</div>`;
-        card.addEventListener('dragstart', e => {
-          e.dataTransfer.setData('text/plain', c.name);
-          card.classList.add('dragging');
-        });
-        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        if (isAdmin()) {
+          card.draggable = true;
+          card.style.cursor = 'grab';
+          card.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', c.name);
+            card.classList.add('dragging');
+          });
+          card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        }
         row.appendChild(card);
       });
     }
@@ -628,6 +631,7 @@
         chip.addEventListener('drop', e => {
           e.preventDefault();
           chip.classList.remove('drop-over');
+          if (!isAdmin()) return;
           const coachName = e.dataTransfer.getData('text/plain');
           // 기존 슬롯에서 제거
           Object.keys(coachAssign).forEach(k => { if (coachAssign[k] === coachName) delete coachAssign[k]; });
