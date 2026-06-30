@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>발락대 공식 대회 대진표</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #f5f7fa; color: #111; min-height: 100vh; }
+
+    /* ── Header ── */
+    .site-header { display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:56px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.08);position:sticky;top:0;z-index:100; }
+    .home-link { font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#111;text-decoration:none;letter-spacing:0.04em; }
+    .back-link { font-size:13px;font-weight:700;color:#3db8b0;text-decoration:none;margin-left:14px;padding:5px 14px;border:1.5px solid #3db8b0;border-radius:20px;transition:background 0.15s,color 0.15s; }
+    .back-link:hover { background:#3db8b0;color:#fff; }
+
+    /* ── Shell ── */
+    .bracket-shell { max-width:1280px;margin:0 auto;padding:40px 32px 80px; }
+    .bracket-title { font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;letter-spacing:0.02em;margin-bottom:4px; }
+    .bracket-sub { font-size:13px;color:#999;margin-bottom:36px; }
+
+    /* ── Bracket outer wrap ── */
+    .bracket-outer { overflow-x:auto;padding-bottom:16px; }
+
+    /* ── bracket-flow: horizontal layout of all rounds ── */
+    .bracket-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 900px;
+      position: relative;
+    }
+
+    /* ── Column wrappers ── */
+    .bc-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex-shrink: 0;
+    }
+
+    /* ── Match Node ── */
+    .match-node {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+      overflow: hidden;
+      width: 168px;
+      flex-shrink: 0;
+    }
+
+    .match-round-tag {
+      padding: 5px 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .rw { background: rgba(232,96,106,0.12); color: #e8606a; }
+    .rl { background: rgba(61,184,176,0.12);  color: #3db8b0; }
+    .rf { background: rgba(200,144,26,0.12);  color: #c8901a; }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      transition: background 0.13s;
+      user-select: none;
+    }
+    .team-row.admin-click { cursor: pointer; }
+    .team-row.admin-click:hover { background: rgba(0,0,0,0.03); }
+    .team-row.win-row { background: rgba(21,184,166,0.07); }
+    .team-row.lose-row { opacity: 0.38; }
+    .team-pip { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+    .team-lbl { font-size:12px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .team-row.win-row .team-lbl { font-weight:900; }
+    .win-badge { font-size:9px;font-weight:900;background:#3db8b0;color:#fff;padding:1px 5px;border-radius:3px;flex-shrink:0; }
+    .tbd-row { color:#bbb; }
+
+    /* ── Connector pieces (CSS border-based) ── */
+    .conn-pair {
+      width: 28px;
+      flex-shrink: 0;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+    }
+    .conn-pair .cp-top { flex:1; border-right:2px solid; border-bottom:2px solid; border-radius:0 0 6px 0; }
+    .conn-pair .cp-bot { flex:1; border-right:2px solid; border-top:2px solid; border-radius:0 6px 0 0; }
+
+    .conn-h {
+      height: 2px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ── Result box (승자조승자 / 준결승승자) ── */
+    .result-node {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 10px 14px;
+      width: 138px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .rn-label { font-size:10px;font-weight:700;color:#aaa;margin-bottom:4px; }
+    .rn-name  { font-size:13px;font-weight:900; }
+    .rn-note  { font-size:10px;color:#bbb;margin-top:3px; }
+
+    /* ── Grand Final section ── */
+    .gf-section {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.09);
+      overflow: hidden;
+      margin-top: 28px;
+    }
+    .gf-bar {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      background: linear-gradient(180deg, #c8901a, #f0c842);
+      color: #3a2000;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      padding: 20px 14px;
+    }
+    .gf-body { display:flex;align-items:center;padding:24px 20px;gap:0;flex:1; }
+
+    /* ── Trophy ── */
+    .trophy-node {
+      background: linear-gradient(135deg, #c8901a, #f0c842, #c8901a);
+      border-radius: 18px;
+      padding: 24px 28px;
+      text-align: center;
+      flex-shrink: 0;
+      box-shadow: 0 6px 24px rgba(200,144,26,0.35);
+    }
+    .trophy-icon  { font-size:44px;line-height:1;margin-bottom:6px; }
+    .trophy-label { font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:#3a2000; }
+    .trophy-team  { font-size:15px;font-weight:900;color:#3a2000;margin-top:4px; }
+
+    /* ── Section cards (winners / losers) ── */
+    .section-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .section-bar {
+      padding: 11px 20px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .sw { background: #e8606a; }
+    .sl { background: #3db8b0; }
+
+    .section-body { padding: 24px 20px; }
+
+    /* ── Arrow label ── */
+    .arrow-label {
+      flex-shrink: 0;
+      padding: 0 10px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #bbb;
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* ── Placement note below match ── */
+    .node-wrap { display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0; }
+    .p-note { font-size:10px;color:#bbb;text-align:center; }
+
+    /* ── Admin Reset ── */
+    .admin-bar { margin-top:16px;display:flex;justify-content:flex-end; }
+    .reset-btn { padding:6px 14px;border-radius:8px;border:1.5px solid rgba(0,0,0,0.14);background:transparent;color:#bbb;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit; }
+    .reset-btn:hover { border-color:#e8606a;color:#e8606a; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div style="display:flex;align-items:center;">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./ballakdae.html">발락대</a>
+    </div>
+  </header>
+
+  <div class="bracket-shell">
+    <h1 class="bracket-title">공식 대회 대진표</h1>
+    <p class="bracket-sub">더블 엘리미네이션 방식 · 4강 → 결승전</p>
+    <div id="bracket-root"></div>
+  </div>
+
+  <script src="./auth.js" defer></script>
+  <script>
+  (function() {
+    const COACHES_KEY = 'ballakdae_draft_coaches';
+    const TOURNEY_KEY = 'ballakdae_tournament_v1';
+    const SLOT_COLORS = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
+    const SLOT_NAMES  = ['슬롯1', '슬롯2', '슬롯3', '슬롯4'];
+
+    let coachAssign = {};
+    let T = { sf1: null, sf2: null, wb: null, lb1: null, sflb: null, gf: null };
+
+    function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+
+    function getName(slot) {
+      if (slot === null || slot === undefined) return null;
+      return coachAssign[slot] || SLOT_NAMES[slot];
+    }
+    function getColor(slot) {
+      if (slot === null || slot === undefined) return '#ccc';
+      return SLOT_COLORS[slot] || '#ccc';
+    }
+
+    function load() {
+      try { coachAssign = JSON.parse(localStorage.getItem(COACHES_KEY) || '{}'); } catch(e) {}
+      try {
+        var s = JSON.parse(localStorage.getItem(TOURNEY_KEY) || '{}');
+        if (s && typeof s === 'object') Object.assign(T, s);
+      } catch(e) {}
+    }
+    function save() { localStorage.setItem(TOURNEY_KEY, JSON.stringify(T)); }
+
+    function derived() {
+      var sf1_w = T.sf1, sf1_l = (sf1_w !== null && sf1_w !== undefined) ? (sf1_w === 0 ? 1 : 0) : null;
+      var sf2_w = T.sf2, sf2_l = (sf2_w !== null && sf2_w !== undefined) ? (sf2_w === 2 ? 3 : 2) : null;
+      var wb_w  = T.wb,  wb_l  = (wb_w !== null && wb_w !== undefined && sf1_w !== null && sf2_w !== null) ? (wb_w === sf1_w ? sf2_w : sf1_w) : null;
+      var lb1_w = T.lb1, lb1_l = (lb1_w !== null && lb1_w !== undefined && sf1_l !== null && sf2_l !== null) ? (lb1_w === sf1_l ? sf2_l : sf1_l) : null;
+      var sflb_w = T.sflb, sflb_l = (sflb_w !== null && sflb_w !== undefined && wb_l !== null && lb1_w !== null) ? (sflb_w === wb_l ? lb1_w : wb_l) : null;
+      var gf_w  = T.gf,  gf_l  = (gf_w !== null && gf_w !== undefined && wb_w !== null && sflb_w !== null) ? (gf_w === wb_w ? sflb_w : wb_w) : null;
+      return { sf1_w, sf1_l, sf2_w, sf2_l, wb_w, wb_l, lb1_w, lb1_l, sflb_w, sflb_l, gf_w, gf_l };
+    }
+
+    /* ── Build a match node ── */
+    function matchNode(tagLabel, tagClass, slotA, slotB, winner, onClickA, onClickB) {
+      var el = document.createElement('div');
+      el.className = 'match-node';
+
+      var tag = document.createElement('div');
+      tag.className = 'match-round-tag ' + tagClass;
+      tag.textContent = tagLabel;
+      el.appendChild(tag);
+
+      [[slotA, onClickA], [slotB, onClickB]].forEach(function(pair) {
+        var slot = pair[0], onClick = pair[1];
+        var row = document.createElement('div');
+        row.className = 'team-row';
+        var hasSlot = slot !== null && slot !== undefined;
+        var hasResult = winner !== null && winner !== undefined;
+        var isWin = hasResult && hasSlot && winner === slot;
+
+        if (hasResult) row.classList.add(isWin ? 'win-row' : 'lose-row');
+        if (hasSlot && isAdmin() && onClick) {
+          row.classList.add('admin-click');
+          row.addEventListener('click', function() { onClick(); save(); renderBracket(); });
+        }
+
+        var pip = document.createElement('div');
+        pip.className = 'team-pip';
+        pip.style.background = hasSlot ? getColor(slot) : '#ddd';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'team-lbl' + (hasSlot ? '' : ' tbd-row');
+        lbl.style.color = hasSlot ? getColor(slot) : '#ccc';
+        lbl.textContent = hasSlot ? getName(slot) : '–';
+
+        row.appendChild(pip);
+        row.appendChild(lbl);
+        if (isWin) {
+          var badge = document.createElement('span');
+          badge.className = 'win-badge';
+          badge.textContent = '승';
+          row.appendChild(badge);
+        }
+        el.appendChild(row);
+      });
+      return el;
+    }
+
+    /* ── Result box ── */
+    function resultNode(label, slot, note) {
+      var el = document.createElement('div');
+      el.className = 'result-node';
+      el.innerHTML = '<div class="rn-label">' + label + '</div>' +
+        '<div class="rn-name" style="color:' + getColor(slot) + '">' + (slot !== null && slot !== undefined ? getName(slot) : '–') + '</div>' +
+        (note ? '<div class="rn-note">' + note + '</div>' : '');
+      return el;
+    }
+
+    /* ── Vertical pair connector ── */
+    function connPair(color) {
+      var el = document.createElement('div');
+      el.className = 'conn-pair';
+      el.innerHTML = '<div class="cp-top" style="border-color:' + color + '"></div><div class="cp-bot" style="border-color:' + color + '"></div>';
+      return el;
+    }
+
+    /* ── Horizontal line ── */
+    function connH(color, width) {
+      var el = document.createElement('div');
+      el.className = 'conn-h';
+      el.style.background = color;
+      el.style.width = (width || 24) + 'px';
+      return el;
+    }
+
+    /* ── Arrow label ── */
+    function arrowLabel(text) {
+      var el = document.createElement('div');
+      el.className = 'arrow-label';
+      el.innerHTML = text;
+      return el;
+    }
+
+    /* ── Node wrap (match + placement note) ── */
+    function nodeWrap(matchEl, note) {
+      var el = document.createElement('div');
+      el.className = 'node-wrap';
+      el.appendChild(matchEl);
+      if (note) {
+        var n = document.createElement('div');
+        n.className = 'p-note';
+        n.textContent = note;
+        el.appendChild(n);
+      }
+      return el;
+    }
+
+    function renderBracket() {
+      var d = derived();
+      var admin = isAdmin();
+      var root = document.getElementById('bracket-root');
+      root.innerHTML = '';
+
+      /* ══ 승자조 섹션 ══ */
+      var wCard = document.createElement('div');
+      wCard.className = 'section-card';
+      wCard.innerHTML = '<div class="section-bar sw">승자조 Winners Bracket</div>';
+
+      var wBody = document.createElement('div');
+      wBody.className = 'section-body';
+
+      var wFlow = document.createElement('div');
+      wFlow.className = 'bracket-flow';
+
+      /* SF1 + SF2 stacked */
+      var sfPair = document.createElement('div');
+      sfPair.className = 'bc-pair';
+      var sf1W = nodeWrap(matchNode('4강 1경기 · Bo3', 'rw', 0, 1, T.sf1,
+        function(){ T.sf1 = 0; }, function(){ T.sf1 = 1; }));
+      sf1W.style.cssText = 'flex:1;justify-content:center;padding:12px 0 6px;';
+      var sf2W = nodeWrap(matchNode('4강 2경기 · Bo3', 'rw', 2, 3, T.sf2,
+        function(){ T.sf2 = 2; }, function(){ T.sf2 = 3; }));
+      sf2W.style.cssText = 'flex:1;justify-content:center;padding:6px 0 12px;';
+      sfPair.appendChild(sf1W);
+      sfPair.appendChild(sf2W);
+      wFlow.appendChild(sfPair);
+
+      /* Connector SF→WB */
+      wFlow.appendChild(connPair('#e8606a'));
+      wFlow.appendChild(connH('#e8606a', 20));
+
+      /* WB match */
+      var wbNd = matchNode('승자조 · Bo1', 'rw', d.sf1_w, d.sf2_w, T.wb,
+        function(){ T.wb = d.sf1_w; }, function(){ T.wb = d.sf2_w; });
+      wFlow.appendChild(wbNd);
+
+      /* Arrow */
+      wFlow.appendChild(arrowLabel('결승전<br>직행 →'));
+
+      /* WB Winner result */
+      wFlow.appendChild(resultNode('승자조 승자', d.wb_w));
+
+      wBody.appendChild(wFlow);
+      wCard.appendChild(wBody);
+      root.appendChild(wCard);
+
+      /* ══ 패자조 섹션 ══ */
+      var lCard = document.createElement('div');
+      lCard.className = 'section-card';
+      lCard.innerHTML = '<div class="section-bar sl">패자조 Losers Bracket</div>';
+
+      var lBody = document.createElement('div');
+      lBody.className = 'section-body';
+
+      var lFlow = document.createElement('div');
+      lFlow.className = 'bracket-flow';
+
+      /* LB1 */
+      var lb1subLabel = (d.sf1_l !== null && d.sf2_l !== null) ? null : '(4강 패자)';
+      lFlow.appendChild(nodeWrap(
+        matchNode('패자조 · Bo1', 'rl', d.sf1_l, d.sf2_l, T.lb1,
+          function(){ T.lb1 = d.sf1_l; }, function(){ T.lb1 = d.sf2_l; }),
+        '패배 시 4위'));
+
+      /* Connector LB1→SF_LB (simple horizontal since we need WB loser too) */
+      lFlow.appendChild(connH('#3db8b0', 20));
+
+      /* SF_LB */
+      var sfLbNote = null;
+      if (d.wb_l !== null || d.lb1_w !== null) sfLbNote = null;
+      lFlow.appendChild(nodeWrap(
+        matchNode('준결승전 · Bo3', 'rl', d.wb_l, d.lb1_w, T.sflb,
+          function(){ T.sflb = d.wb_l; }, function(){ T.sflb = d.lb1_w; }),
+        '패배 시 3위'));
+
+      lFlow.appendChild(connH('#3db8b0', 20));
+
+      /* SF_LB Winner result */
+      lFlow.appendChild(resultNode('준결승전 승자', d.sflb_w, '패배 시 2위'));
+
+      lBody.appendChild(lFlow);
+      lCard.appendChild(lBody);
+      root.appendChild(lCard);
+
+      /* ══ 결승전 섹션 ══ */
+      var gfSection = document.createElement('div');
+      gfSection.className = 'gf-section';
+
+      var gfBar = document.createElement('div');
+      gfBar.className = 'gf-bar';
+      gfBar.textContent = '결승전';
+      gfSection.appendChild(gfBar);
+
+      var gfBody = document.createElement('div');
+      gfBody.className = 'gf-body';
+
+      var gfNd = matchNode('결승전 · Bo5', 'rf', d.wb_w, d.sflb_w, T.gf,
+        function(){ T.gf = d.wb_w; }, function(){ T.gf = d.sflb_w; });
+      gfBody.appendChild(gfNd);
+      gfBody.appendChild(connH('#c8901a', 28));
+
+      /* Trophy */
+      var trophy = document.createElement('div');
+      trophy.className = 'trophy-node';
+      var champName = (d.gf_w !== null && d.gf_w !== undefined) ? getName(d.gf_w) : '';
+      var champColor = (d.gf_w !== null && d.gf_w !== undefined) ? getColor(d.gf_w) : '#3a2000';
+      trophy.innerHTML = '<div class="trophy-icon">🏆</div>'
+        + '<div class="trophy-label">우승</div>'
+        + (champName ? '<div class="trophy-team" style="color:' + champColor + '">' + champName + '</div>' : '');
+      gfBody.appendChild(trophy);
+
+      /* 2위 / 준우승 */
+      if (d.gf_l !== null && d.gf_l !== undefined) {
+        var runnerUp = document.createElement('div');
+        runnerUp.style.cssText = 'margin-left:16px;font-size:11px;color:#aaa;align-self:center;';
+        runnerUp.innerHTML = '<div style="font-weight:700;color:' + getColor(d.gf_l) + '">' + getName(d.gf_l) + '</div><div>준우승 (2위)</div>';
+        gfBody.appendChild(runnerUp);
+      }
+
+      gfSection.appendChild(gfBody);
+      root.appendChild(gfSection);
+
+      /* ══ Admin Reset ══ */
+      if (admin) {
+        var adminBar = document.createElement('div');
+        adminBar.className = 'admin-bar';
+        var resetBtn = document.createElement('button');
+        resetBtn.className = 'reset-btn';
+        resetBtn.textContent = '대진표 결과 초기화';
+        resetBtn.addEventListener('click', function() {
+          if (!confirm('대진표 결과를 전부 초기화할까요?')) return;
+          T = { sf1: null, sf2: null, wb: null, lb1: null, sflb: null, gf: null };
+          save();
+          renderBracket();
+        });
+        adminBar.appendChild(resetBtn);
+        root.appendChild(adminBar);
+      }
+    }
+
+    load();
+    renderBracket();
+    window.addEventListener('auth-state-change', function() { renderBracket(); });
+  })();
+  </script>
+</body>
+</html>
