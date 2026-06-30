@@ -2277,10 +2277,12 @@ function changeMapCount(delta) {
 }
 
 function updateDiamonds() {
-  var count = 3; /* 발락대 스크림: 항상 3개 */
+  var count = Math.ceil(currentBo / 2); /* Bo1→1, Bo3→2, Bo5→3 */
   var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
   var html = diamond.repeat(count);
-  ["m1-diamonds-l","m1-diamonds-r","m2-diamonds-l","m2-diamonds-r","m3-diamonds-l","m3-diamonds-r"].forEach(function(id) {
+  var ids = [];
+  for (var _di = 1; _di <= 5; _di++) ids.push('m'+_di+'-diamonds-l', 'm'+_di+'-diamonds-r');
+  ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
