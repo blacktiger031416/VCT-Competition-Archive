@@ -1867,8 +1867,10 @@
         <div class="sb-diamonds sb-diamonds-l" id="m1-diamonds-l">
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
         <div class="sb-diamonds sb-diamonds-r" id="m1-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
@@ -1919,8 +1921,10 @@
         <div class="sb-diamonds sb-diamonds-l" id="m2-diamonds-l">
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
         <div class="sb-diamonds sb-diamonds-r" id="m2-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
@@ -1971,8 +1975,10 @@
         <div class="sb-diamonds sb-diamonds-l" id="m3-diamonds-l">
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
         <div class="sb-diamonds sb-diamonds-r" id="m3-diamonds-r">
+          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
@@ -2158,7 +2164,7 @@ function buildMapCardHtml(n) {
   var mid = "m" + n;
   var rtId = "rt-" + (n - 1);
   var tsId = "ts-" + (n - 1);
-  var diagCount = currentBo === 5 ? 3 : 2;
+  var diagCount = 3; /* 발락대 스크림: 항상 3맵 전부 진행 */
   var diag = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>'.repeat(diagCount);
   return `
     <div class="map-scoreboard">
@@ -2246,7 +2252,7 @@ function changeMapCount(delta) {
 }
 
 function updateDiamonds() {
-  var count = currentBo === 5 ? 3 : 2;
+  var count = 3; /* 발락대 스크림: 항상 3개 */
   var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
   var html = diamond.repeat(count);
   ["m1-diamonds-l","m1-diamonds-r","m2-diamonds-l","m2-diamonds-r","m3-diamonds-l","m3-diamonds-r"].forEach(function(id) {
