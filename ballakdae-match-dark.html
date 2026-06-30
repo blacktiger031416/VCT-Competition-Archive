@@ -3835,6 +3835,15 @@ const VETO_STEPS_BO3 = [
   { type: "ban",     label: "BAN" },
   { type: "decider", label: "DECIDER", mapIndex: 2 },
 ];
+/* 발락대 공식 대회 Bo3: 밴밴픽픽디사이더 (5스텝) */
+const VETO_STEPS_BALLAKDAE_BO3 = [
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "pick",    label: "PICK",    mapIndex: 0 },
+  { type: "pick",    label: "PICK",    mapIndex: 1 },
+  { type: "decider", label: "DECIDER", mapIndex: 2 },
+];
+var _isBallakdaeVeto = (_MATCH_TOURNAMENT === 'ballakdae') && (['sf1','sf2','sflb'].indexOf(_MATCH_MID) !== -1);
 const VETO_STEPS_BO5 = [
   { type: "ban",  label: "BAN" },
   { type: "ban",  label: "BAN" },
@@ -3854,7 +3863,7 @@ const VETO_STEPS_GF = [
   { type: "pick",    label: "PICK",    team: "B", mapIndex: 3 },
   { type: "decider", label: "DECIDER", mapIndex: 4 },
 ];
-var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO3;
+var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : (_isBallakdaeVeto ? VETO_STEPS_BALLAKDAE_BO3 : VETO_STEPS_BO3);
 
 /* 각 스텝에서 행동하는 팀 (A=상위조/선팀, B=상대팀) */
 function vetoStepTeam(idx, firstBan) {
@@ -3882,7 +3891,7 @@ function vetoTeamShort(code) { return code === "A" ? TEAM_A_CODE : TEAM_B_CODE; 
 var vetoState = {
   firstBan: "A",
   maps: ["코로드", "펄", "어센트", "바인드", "어비스", "선셋", "브리즈"],
-  sides: { 2: "defense", 3: "defense", 6: "defense" },
+  sides: _isBallakdaeVeto ? { 2: "defense", 3: "defense", 4: "defense" } : { 2: "defense", 3: "defense", 6: "defense" },
   choosers: {},
 };
 
@@ -4168,7 +4177,7 @@ function openVetoPicker(idx) {
 
 /* 밴픽 → 스코어보드 맵 이미지 자동 연동 */
 /* Bo3: 픽은 index 2, 3 / 디사이더 index 6 */
-var VETO_MAP_SLOT = [2, 3, 6]; /* Bo3: map-1, map-2, map-3 / Bo5: [2,3,4,5,6] */
+var VETO_MAP_SLOT = _isBallakdaeVeto ? [2, 3, 4] : [2, 3, 6]; /* 발락대Bo3: [2,3,4] / 일반Bo3: [2,3,6] / Bo5: [2,3,4,5,6] */
 
 function syncVetoMaps() {
   VETO_MAP_SLOT.forEach(function(stepIdx, i) {
