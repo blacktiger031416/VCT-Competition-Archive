@@ -222,7 +222,7 @@
         var hasResult = winner != null;
         var isWin = hasResult && hasSlot && winner === slot;
         if (hasResult) row.classList.add(isWin ? 'win' : 'lose');
-        if (hasSlot && cb) {
+        if (hasSlot && isAdmin() && cb) {
           row.classList.add('clickable');
           row.addEventListener('click', function(){ cb(); save(); renderBracket(); });
         }
@@ -410,7 +410,8 @@
 
     load();
     renderBracket();
-    window.addEventListener('auth-state-change', function(){ renderBracket(); });
+    /* auth.js(defer)가 로드 완료된 뒤 admin 상태 반영 */
+    window.addEventListener('load', function(){ renderBracket(); });
     window.addEventListener('resize', drawLines);
   })();
   </script>
