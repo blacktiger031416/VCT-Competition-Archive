@@ -1478,6 +1478,7 @@
     body.is-ballakdae-veto .mo-veto-grid { grid-template-columns: repeat(5, 1fr); }
     body.is-ballakdae-wb  .mo-veto-grid { grid-template-columns: repeat(1, 1fr); max-width: 260px; }
     body.is-ballakdae-lb1 .mo-veto-grid { grid-template-columns: repeat(5, 1fr); }
+    body.is-ballakdae-gf  .mo-veto      { display: none !important; }
     #bl-maps { border-top: 1px solid rgba(26,26,46,0.08); padding: 10px 8px; }
     .bl-maps-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -2037,10 +2038,11 @@ if (MATCH_FROM === 'tournament') {
   if (['sf1','sf2','sflb'].indexOf(_bm) !== -1) document.body.classList.add('is-ballakdae-veto');
   if (_bm === 'wb')  document.body.classList.add('is-ballakdae-wb');
   if (_bm === 'lb1') document.body.classList.add('is-ballakdae-lb1');
+  if (_bm === 'gf')  document.body.classList.add('is-ballakdae-gf');
 }
 var LEAGUE      = 'ballakdae';
-var MATCH_BO5   = _params.get('bo5') === '1';
-var MATCH_GF    = _params.get('gf')  === '1';
+var MATCH_GF    = _params.get('gf')  === '1' || (MATCH_FROM === 'tournament' && _bm === 'gf');
+var MATCH_BO5   = _params.get('bo5') === '1' || MATCH_GF;
 var MATCH_SCORE = _params.get('score')  || '- : -';
 var _MATCH_TOURNAMENT = _params.get('tournament') || 'ballakdae';
 (function(){
@@ -2145,7 +2147,9 @@ var _fromInfo = _fromMap[MATCH_FROM] || _fromDefault;
 // ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
 var currentBo = MATCH_BO5 ? 5 : 3;
 if (MATCH_FROM === 'tournament' && (_bm === 'wb' || _bm === 'lb1')) currentBo = 1;
-var MIN_MAPS = (MATCH_FROM === 'tournament' && ['sf1','sf2','sflb'].indexOf(_bm) !== -1) ? 2 : 1;
+var MIN_MAPS = MATCH_GF ? 3
+  : (MATCH_FROM === 'tournament' && ['sf1','sf2','sflb'].indexOf(_bm) !== -1) ? 2
+  : 1;
 var activeMapCount = Math.max(MIN_MAPS, Math.min(Math.max(_sA + _sB, MIN_MAPS), currentBo));
 var initializedMaps = (function() {
   var m = {};
