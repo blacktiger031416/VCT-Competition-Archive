@@ -2025,6 +2025,13 @@ var MATCH_DATE  = _params.get('date')   || '04.26';
 var MATCH_TEAM_A = _params.get('teamA') || 'Paper Rex';
 var MATCH_TEAM_B = _params.get('teamB') || 'Sentinels';
 var MATCH_FROM  = _params.get('from')   || 'groups';
+/* tournament 매치는 BL 맵 피커(스크림 전용) 숨김 */
+(function(){
+  if (MATCH_FROM === 'tournament') {
+    var _el = document.getElementById('bl-maps');
+    if (_el) _el.style.display = 'none';
+  }
+})();
 var LEAGUE      = 'ballakdae';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
@@ -3152,7 +3159,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   renderPredBar();
   renderVeto();
   syncVetoMaps();
-  applyBLMaps(); /* BL 맵 선택이 syncVetoMaps()에 덮어쓰이지 않도록 재적용 */
+  if (MATCH_FROM !== 'tournament') applyBLMaps(); /* BL 맵 선택이 syncVetoMaps()에 덮어쓰이지 않도록 재적용 (tournament는 veto 사용) */
   applyScoreClasses('m1');
   applyScoreClasses('m2');
   applyScoreClasses('m3');
