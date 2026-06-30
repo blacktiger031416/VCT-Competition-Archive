@@ -222,7 +222,7 @@
         var hasResult = winner != null;
         var isWin = hasResult && hasSlot && winner === slot;
         if (hasResult) row.classList.add(isWin ? 'win' : 'lose');
-        if (hasSlot && isAdmin() && cb) {
+        if (hasSlot && cb) {
           row.classList.add('clickable');
           row.addEventListener('click', function(){ cb(); save(); renderBracket(); });
         }
@@ -337,16 +337,6 @@
       svg.setAttribute('width', grid.offsetWidth);
       svg.setAttribute('height', grid.offsetHeight);
 
-      /* "결승전 직행" 텍스트 라벨 */
-      document.querySelectorAll('.gf-label').forEach(function(e){ e.remove(); });
-      if (wbrc && gf_lt) {
-        var lbl = document.createElement('div');
-        lbl.className = 'gf-label';
-        lbl.textContent = '결승전 직행 →';
-        lbl.style.left = (wbrc.x + 8) + 'px';
-        lbl.style.top  = (wbrc.y - 18) + 'px';
-        grid.appendChild(lbl);
-      }
     }
 
     function renderBracket() {
