@@ -125,12 +125,16 @@
       overflow: visible;
     }
 
-    /* ── 결승전 직행 label ── */
-    .gf-label {
-      position: absolute;
-      font-size:10px;font-weight:700;color:#e8606a;
-      white-space:nowrap;
-      pointer-events:none;
+    /* ── Score row ── */
+    .score-row {
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #555;
+      padding: 4px 12px 6px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      letter-spacing: 0.1em;
     }
 
     /* ── Admin reset ── */
@@ -164,253 +168,245 @@
   <script>
   (function() {
     var COACHES_KEY = 'ballakdae_draft_coaches';
-    var TOURNEY_KEY = 'ballakdae_tournament_v1';
+    var TOURNEY_KEY = 'ballakdae_tournament_v2';
     var SLOT_COLORS = ['#e8606a','#c8901a','#3db8b0','#424242'];
     var SLOT_NAMES  = ['슬롯1','슬롯2','슬롯3','슬롯4'];
 
     var coaches = {};
-    var T = { sf1:null, sf2:null, wb:null, lb1:null, sflb:null, gf:null };
+    /* s0=SF1 위, s1=SF1 아래, s2=SF2 위, s3=SF2 아래 (슬롯 인덱스 0~3 또는 null) */
+    var T = { s0:null, s1:null, s2:null, s3:null };
 
-    function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
-    function getName(s) {
-      if (s === null || s === undefined) return null;
-      return coaches[s] || SLOT_NAMES[s];
-    }
-    function getColor(s) {
-      if (s === null || s === undefined) return '#ccc';
-      return SLOT_COLORS[s] || '#ccc';
-    }
+    function isAdmin() { return typeof window.vctIsAdmin==='function' && window.vctIsAdmin(); }
+    function getName(s) { return (s!==null&&s!==undefined) ? (coaches[s]||SLOT_NAMES[s]) : null; }
+    function getColor(s) { return (s!==null&&s!==undefined) ? (SLOT_COLORS[s]||'#ccc') : '#ccc'; }
+
     function load() {
-      try { coaches = JSON.parse(localStorage.getItem(COACHES_KEY) || '{}'); } catch(e){}
-      try { var sv = JSON.parse(localStorage.getItem(TOURNEY_KEY)||'{}'); if(sv) Object.assign(T,sv); } catch(e){}
+      try { coaches = JSON.parse(localStorage.getItem(COACHES_KEY)||'{}'); } catch(e){}
+      try { var sv=JSON.parse(localStorage.getItem(TOURNEY_KEY)||'{}'); if(sv) Object.assign(T,sv); } catch(e){}
     }
     function save() { localStorage.setItem(TOURNEY_KEY, JSON.stringify(T)); }
 
+    /* 상세 경기 결과 읽기 (result:ballakdae|tournament|matchId) */
+    function getResult(matchId) {
+      try {
+        var raw=localStorage.getItem('result:ballakdae|tournament|'+matchId);
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) { return null; }
+    }
+    function getScore(matchId) {
+      var r=getResult(matchId);
+      if(!r||!r.scoreA||!r.scoreB||r.scoreA==='-'||r.scoreB==='-') return null;
+      var a=parseInt(r.scoreA), b=parseInt(r.scoreB);
+      if(isNaN(a)||isNaN(b)) return null;
+      return {a:a, b:b};
+    }
+    function winnerOf(matchId, slotA, slotB) {
+      if(slotA===null||slotA===undefined||slotB===null||slotB===undefined) return null;
+      var sc=getScore(matchId);
+      if(!sc||sc.a===sc.b) return null;
+      return sc.a>sc.b ? slotA : slotB;
+    }
+    function loserOf(matchId, slotA, slotB) {
+      var w=winnerOf(matchId,slotA,slotB);
+      return w===null ? null : (w===slotA ? slotB : slotA);
+    }
+
     function derived() {
-      var sf1w = T.sf1, sf1l = sf1w!=null ? (sf1w===0?1:0) : null;
-      var sf2w = T.sf2, sf2l = sf2w!=null ? (sf2w===2?3:2) : null;
-      var wbw  = T.wb,  wbl  = (wbw!=null&&sf1w!=null&&sf2w!=null) ? (wbw===sf1w?sf2w:sf1w) : null;
-      var lb1w = T.lb1, lb1l = (lb1w!=null&&sf1l!=null&&sf2l!=null) ? (lb1w===sf1l?sf2l:sf1l) : null;
-      var sflbw= T.sflb,sflbl= (sflbw!=null&&wbl!=null&&lb1w!=null) ? (sflbw===wbl?lb1w:wbl) : null;
-      var gfw  = T.gf,  gfl  = (gfw!=null&&wbw!=null&&sflbw!=null) ? (gfw===wbw?sflbw:wbw) : null;
-      return { sf1w,sf1l,sf2w,sf2l,wbw,wbl,lb1w,lb1l,sflbw,sflbl,gfw,gfl };
+      var sf1w=winnerOf('sf1',T.s0,T.s1), sf1l=loserOf('sf1',T.s0,T.s1);
+      var sf2w=winnerOf('sf2',T.s2,T.s3), sf2l=loserOf('sf2',T.s2,T.s3);
+      var wbw =winnerOf('wb', sf1w,sf2w),  wbl =loserOf('wb', sf1w,sf2w);
+      var lb1w=winnerOf('lb1',sf1l,sf2l),  lb1l=loserOf('lb1',sf1l,sf2l);
+      var sflbw=winnerOf('sflb',wbl,lb1w), sflbl=loserOf('sflb',wbl,lb1w);
+      var gfw =winnerOf('gf', wbw,sflbw),  gfl =loserOf('gf', wbw,sflbw);
+      return {sf1w,sf1l,sf2w,sf2l,wbw,wbl,lb1w,lb1l,sflbw,sflbl,gfw,gfl};
     }
 
-    /* 상세 경기 URL */
     function detailUrl(matchId, slotA, slotB) {
-      var a = (slotA!=null) ? encodeURIComponent(getName(slotA)) : '';
-      var b = (slotB!=null) ? encodeURIComponent(getName(slotB)) : '';
-      return './ballakdae-match-dark.html?from=tournament&tournament=ballakdae&match=' + matchId
-        + '&teamA=' + a + '&teamB=' + b;
+      var a=slotA!==null&&slotA!==undefined ? encodeURIComponent(getName(slotA)) : '';
+      var b=slotB!==null&&slotB!==undefined ? encodeURIComponent(getName(slotB)) : '';
+      return './ballakdae-match-dark.html?from=tournament&tournament=ballakdae&match='+matchId+'&teamA='+a+'&teamB='+b;
     }
 
-    /* ── 매치 노드 생성 ── */
-    function makeNode(tagLabel, tagClass, slotA, slotB, winner, onA, onB) {
-      var el = document.createElement('div');
-      el.className = 'match-node';
+    /* 어드민: 시드 위치 클릭 시 사용 가능한 슬롯으로 순환 */
+    function cycleSeed(skey) {
+      var used=[];
+      ['s0','s1','s2','s3'].forEach(function(k){ if(k!==skey&&T[k]!==null&&T[k]!==undefined) used.push(T[k]); });
+      var avail=[0,1,2,3].filter(function(v){ return used.indexOf(v)===-1; });
+      avail.push(null);
+      var cur=T[skey], idx=avail.indexOf(cur);
+      T[skey]=avail[(idx+1)%avail.length];
+    }
 
-      var tag = document.createElement('div');
-      tag.className = 'round-tag ' + tagClass;
-      tag.textContent = tagLabel;
+    /* seedKeyA/B 있으면 어드민이 클릭해 팀 배정, 없으면 스코어 자동 반영만 */
+    function makeNode(tagLabel, tagClass, slotA, slotB, matchId, seedKeyA, seedKeyB) {
+      var el=document.createElement('div');
+      el.className='match-node';
+
+      var tag=document.createElement('div');
+      tag.className='round-tag '+tagClass;
+      tag.textContent=tagLabel;
       el.appendChild(tag);
 
-      [[slotA, onA], [slotB, onB]].forEach(function(pair) {
-        var slot = pair[0], cb = pair[1];
-        var row = document.createElement('div');
-        row.className = 'team-row';
-        var hasSlot = slot != null;
-        var hasResult = winner != null;
-        var isWin = hasResult && hasSlot && winner === slot;
-        if (hasResult) row.classList.add(isWin ? 'win' : 'lose');
-        if (hasSlot && isAdmin() && cb) {
+      var sc=getScore(matchId);
+      var wSlot=winnerOf(matchId,slotA,slotB);
+
+      [[slotA,seedKeyA],[slotB,seedKeyB]].forEach(function(pair){
+        var slot=pair[0], skey=pair[1];
+        var row=document.createElement('div');
+        row.className='team-row';
+        var has=slot!==null&&slot!==undefined;
+        var isW=wSlot!==null&&has&&wSlot===slot;
+        var isL=wSlot!==null&&has&&wSlot!==slot;
+        if(isW) row.classList.add('win');
+        if(isL) row.classList.add('lose');
+        if(skey&&isAdmin()){
           row.classList.add('clickable');
-          row.addEventListener('click', function(){ cb(); save(); renderBracket(); });
+          row.addEventListener('click',function(){ cycleSeed(skey); save(); renderBracket(); });
         }
-        var pip = document.createElement('div');
-        pip.className = 'pip';
-        pip.style.background = hasSlot ? getColor(slot) : '#ddd';
-        var lbl = document.createElement('div');
-        lbl.className = 'tlbl';
-        lbl.style.color = hasSlot ? getColor(slot) : '#ccc';
-        lbl.textContent = hasSlot ? getName(slot) : '–';
+        var pip=document.createElement('div');
+        pip.className='pip';
+        pip.style.background=has?getColor(slot):'#ddd';
+        var lbl=document.createElement('div');
+        lbl.className='tlbl';
+        lbl.style.color=has?getColor(slot):'#aaa';
+        lbl.textContent=has?getName(slot):(skey&&isAdmin()?'팀 배정 ▸':'–');
         row.appendChild(pip);
         row.appendChild(lbl);
-        if (isWin) {
-          var wt = document.createElement('span');
-          wt.className = 'win-tag';
-          wt.textContent = '승';
-          row.appendChild(wt);
-        }
+        if(isW){var wt=document.createElement('span');wt.className='win-tag';wt.textContent='승';row.appendChild(wt);}
         el.appendChild(row);
       });
+
+      if(sc){
+        var sr=document.createElement('div');
+        sr.className='score-row';
+        sr.textContent=sc.a+' : '+sc.b;
+        el.appendChild(sr);
+      }
+
       return el;
     }
 
-    /* ── 노드 래퍼 (매치 + 상세 버튼 + 순위 노트) ── */
     function makeWrap(cls, node, btnClass, matchId, slotA, slotB, note) {
-      var wrap = document.createElement('div');
-      wrap.className = 'nd-wrap ' + cls;
+      var wrap=document.createElement('div');
+      wrap.className='nd-wrap '+cls;
       wrap.appendChild(node);
-      var btn = document.createElement('a');
-      btn.className = 'detail-btn ' + btnClass;
-      btn.href = detailUrl(matchId, slotA, slotB);
-      btn.textContent = '상세';
+      var btn=document.createElement('a');
+      btn.className='detail-btn '+btnClass;
+      btn.href=detailUrl(matchId,slotA,slotB);
+      btn.textContent='상세';
       wrap.appendChild(btn);
-      if (note) {
-        var n = document.createElement('div');
-        n.className = 'p-note';
-        n.textContent = note;
-        wrap.appendChild(n);
-      }
+      if(note){var n=document.createElement('div');n.className='p-note';n.textContent=note;wrap.appendChild(n);}
       return wrap;
     }
 
     /* ── SVG 연결선 ── */
     function drawLines() {
-      var grid = document.getElementById('bracket-grid');
-      var svg  = document.getElementById('bracket-svg');
-      svg.innerHTML = '';
-      var cr = grid.getBoundingClientRect();
+      var grid=document.getElementById('bracket-grid');
+      var svg =document.getElementById('bracket-svg');
+      svg.innerHTML='';
+      var cr=grid.getBoundingClientRect();
 
-      function pos(cls, anchor) {
-        var el = grid.querySelector('.' + cls);
-        if (!el) return null;
-        var r = el.querySelector('.match-node').getBoundingClientRect();
-        var h = r.height;
-        switch(anchor) {
-          case 'rc': return { x: r.right-cr.left, y: (r.top+r.bottom)/2-cr.top };
-          case 'lc': return { x: r.left-cr.left,  y: (r.top+r.bottom)/2-cr.top };
-          case 'lt': return { x: r.left-cr.left,  y: r.top+h*0.33-cr.top };
-          case 'lb': return { x: r.left-cr.left,  y: r.top+h*0.67-cr.top };
-          case 'rt': return { x: r.right-cr.left, y: r.top+h*0.33-cr.top };
-          case 'rb': return { x: r.right-cr.left, y: r.top+h*0.67-cr.top };
+      function pos(cls,anchor) {
+        var el=grid.querySelector('.'+cls);
+        if(!el) return null;
+        var r=el.querySelector('.match-node').getBoundingClientRect();
+        var h=r.height;
+        switch(anchor){
+          case 'rc': return {x:r.right-cr.left, y:(r.top+r.bottom)/2-cr.top};
+          case 'lc': return {x:r.left-cr.left,  y:(r.top+r.bottom)/2-cr.top};
+          case 'lt': return {x:r.left-cr.left,  y:r.top+h*0.33-cr.top};
+          case 'lb': return {x:r.left-cr.left,  y:r.top+h*0.67-cr.top};
         }
       }
-
-      function line(d, color, dashed) {
-        var p = document.createElementNS('http://www.w3.org/2000/svg','path');
-        p.setAttribute('d', d);
-        p.setAttribute('stroke', color);
-        p.setAttribute('stroke-width', '2');
-        p.setAttribute('fill', 'none');
-        p.setAttribute('stroke-linecap', 'round');
-        if (dashed) p.setAttribute('stroke-dasharray', '5,4');
+      function line(d,color){
+        var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d',d); p.setAttribute('stroke',color);
+        p.setAttribute('stroke-width','2'); p.setAttribute('fill','none');
+        p.setAttribute('stroke-linecap','round');
         svg.appendChild(p);
       }
 
-      var W = '#e8606a', L = '#3db8b0', F = '#c8901a';
+      var W='#e8606a', L='#3db8b0';
+      var sf1=pos('nd-sf1','rc'), sf2=pos('nd-sf2','rc');
+      var wblc=pos('nd-wb','lc'), wbrc=pos('nd-wb','rc');
+      var lb1=pos('nd-lb1','rc');
+      var sflb_lt=pos('nd-sflb','lt'), sflb_lb=pos('nd-sflb','lb'), sflb_rc=pos('nd-sflb','rc');
+      var gf_lt=pos('nd-gf','lt'), gf_lb=pos('nd-gf','lb');
 
-      var sf1 = pos('nd-sf1','rc'), sf2 = pos('nd-sf2','rc');
-      var wblc = pos('nd-wb','lc'), wbrc = pos('nd-wb','rc');
-      var lb1 = pos('nd-lb1','rc');
-      var sflb_lt = pos('nd-sflb','lt'), sflb_lb = pos('nd-sflb','lb'), sflb_rc = pos('nd-sflb','rc');
-      var gf_lt = pos('nd-gf','lt'), gf_lb = pos('nd-gf','lb');
-
-      /* SF1+SF2 → WB fork */
-      if (sf1 && sf2 && wblc) {
-        var bx = sf1.x + (wblc.x - sf1.x) * 0.42;
-        line('M'+sf1.x+','+sf1.y+' L'+bx+','+sf1.y, W);
-        line('M'+sf2.x+','+sf2.y+' L'+bx+','+sf2.y, W);
-        line('M'+bx+','+sf1.y+' L'+bx+','+sf2.y, W);
-        line('M'+bx+','+wblc.y+' L'+wblc.x+','+wblc.y, W);
+      if(sf1&&sf2&&wblc){
+        var bx=sf1.x+(wblc.x-sf1.x)*0.42;
+        line('M'+sf1.x+','+sf1.y+' L'+bx+','+sf1.y,W);
+        line('M'+sf2.x+','+sf2.y+' L'+bx+','+sf2.y,W);
+        line('M'+bx+','+sf1.y+' L'+bx+','+sf2.y,W);
+        line('M'+bx+','+wblc.y+' L'+wblc.x+','+wblc.y,W);
       }
-
-      /* WB winner → GF top */
-      if (wbrc && gf_lt) {
-        var mx = (wbrc.x + gf_lt.x) / 2;
-        line('M'+wbrc.x+','+wbrc.y+' L'+mx+','+wbrc.y+' L'+mx+','+gf_lt.y+' L'+gf_lt.x+','+gf_lt.y, W);
+      if(wbrc&&gf_lt){
+        var mx=(wbrc.x+gf_lt.x)/2;
+        line('M'+wbrc.x+','+wbrc.y+' L'+mx+','+wbrc.y+' L'+mx+','+gf_lt.y+' L'+gf_lt.x+','+gf_lt.y,W);
       }
-
-      /* LB1 → SF_LB bottom */
-      if (lb1 && sflb_lb) {
-        var mx2 = (lb1.x + sflb_lb.x) / 2;
-        line('M'+lb1.x+','+lb1.y+' L'+mx2+','+lb1.y+' L'+mx2+','+sflb_lb.y+' L'+sflb_lb.x+','+sflb_lb.y, L);
+      if(lb1&&sflb_lb){
+        var mx2=(lb1.x+sflb_lb.x)/2;
+        line('M'+lb1.x+','+lb1.y+' L'+mx2+','+lb1.y+' L'+mx2+','+sflb_lb.y+' L'+sflb_lb.x+','+sflb_lb.y,L);
       }
-
-      /* SF_LB winner → GF bottom */
-      if (sflb_rc && gf_lb) {
-        var mx3 = (sflb_rc.x + gf_lb.x) / 2;
-        line('M'+sflb_rc.x+','+sflb_rc.y+' L'+mx3+','+sflb_rc.y+' L'+mx3+','+gf_lb.y+' L'+gf_lb.x+','+gf_lb.y, L);
+      if(sflb_rc&&gf_lb){
+        var mx3=(sflb_rc.x+gf_lb.x)/2;
+        line('M'+sflb_rc.x+','+sflb_rc.y+' L'+mx3+','+sflb_rc.y+' L'+mx3+','+gf_lb.y+' L'+gf_lb.x+','+gf_lb.y,L);
       }
-
-      /* SVG 크기 */
-      svg.setAttribute('width', grid.offsetWidth);
-      svg.setAttribute('height', grid.offsetHeight);
-
+      svg.setAttribute('width',grid.offsetWidth);
+      svg.setAttribute('height',grid.offsetHeight);
     }
 
     function renderBracket() {
-      var d = derived();
-      var grid = document.getElementById('bracket-grid');
+      var d=derived();
+      var grid=document.getElementById('bracket-grid');
+      Array.from(grid.children).forEach(function(c){ if(!c.classList.contains('bracket-svg')) c.remove(); });
 
-      /* 기존 match 노드 제거 (SVG는 유지) */
-      Array.from(grid.children).forEach(function(c){
-        if (!c.classList.contains('bracket-svg')) c.remove();
-      });
-
-      /* SF1 */
       grid.appendChild(makeWrap('nd-sf1',
-        makeNode('4강 1경기 · Bo3','rt-w', 0, 1, T.sf1,
-          function(){T.sf1=0;}, function(){T.sf1=1;}),
-        'dw', 'sf1', 0, 1));
+        makeNode('4강 1경기 · Bo3','rt-w',T.s0,T.s1,'sf1','s0','s1'),
+        'dw','sf1',T.s0,T.s1));
 
-      /* SF2 */
       grid.appendChild(makeWrap('nd-sf2',
-        makeNode('4강 2경기 · Bo3','rt-w', 2, 3, T.sf2,
-          function(){T.sf2=2;}, function(){T.sf2=3;}),
-        'dw', 'sf2', 2, 3));
+        makeNode('4강 2경기 · Bo3','rt-w',T.s2,T.s3,'sf2','s2','s3'),
+        'dw','sf2',T.s2,T.s3));
 
-      /* WB */
       grid.appendChild(makeWrap('nd-wb',
-        makeNode('승자조 · Bo1','rt-w', d.sf1w, d.sf2w, T.wb,
-          function(){T.wb=d.sf1w;}, function(){T.wb=d.sf2w;}),
-        'dw', 'wb', d.sf1w, d.sf2w));
+        makeNode('승자조 · Bo1','rt-w',d.sf1w,d.sf2w,'wb',null,null),
+        'dw','wb',d.sf1w,d.sf2w));
 
-      /* LB1 */
       grid.appendChild(makeWrap('nd-lb1',
-        makeNode('패자조 · Bo1','rt-l', d.sf1l, d.sf2l, T.lb1,
-          function(){T.lb1=d.sf1l;}, function(){T.lb1=d.sf2l;}),
-        'dl', 'lb1', d.sf1l, d.sf2l, '패배 시 4위'));
+        makeNode('패자조 · Bo1','rt-l',d.sf1l,d.sf2l,'lb1',null,null),
+        'dl','lb1',d.sf1l,d.sf2l,'패배 시 4위'));
 
-      /* SF_LB */
       grid.appendChild(makeWrap('nd-sflb',
-        makeNode('준결승전 · Bo3','rt-l', d.wbl, d.lb1w, T.sflb,
-          function(){T.sflb=d.wbl;}, function(){T.sflb=d.lb1w;}),
-        'dl', 'sflb', d.wbl, d.lb1w, '패배 시 3위'));
+        makeNode('준결승전 · Bo3','rt-l',d.wbl,d.lb1w,'sflb',null,null),
+        'dl','sflb',d.wbl,d.lb1w,'패배 시 3위'));
 
-      /* GF */
       grid.appendChild(makeWrap('nd-gf',
-        makeNode('결승전 · Bo5','rt-f', d.wbw, d.sflbw, T.gf,
-          function(){T.gf=d.wbw;}, function(){T.gf=d.sflbw;}),
-        'df', 'gf', d.wbw, d.sflbw, d.gfl!=null ? getName(d.gfl)+' (2위)' : null));
+        makeNode('결승전 · Bo5','rt-f',d.wbw,d.sflbw,'gf',null,null),
+        'df','gf',d.wbw,d.sflbw,d.gfl!==null?getName(d.gfl)+' (2위)':null));
 
-      /* Admin reset */
-      var abRoot = document.getElementById('admin-bar-root');
-      abRoot.innerHTML = '';
-      if (isAdmin()) {
-        var bar = document.createElement('div');
-        bar.className = 'admin-bar';
-        var btn = document.createElement('button');
-        btn.className = 'reset-btn';
-        btn.textContent = '대진표 결과 초기화';
-        btn.addEventListener('click', function(){
-          if (!confirm('대진표 결과를 전부 초기화할까요?')) return;
-          T = {sf1:null,sf2:null,wb:null,lb1:null,sflb:null,gf:null};
+      var abRoot=document.getElementById('admin-bar-root');
+      abRoot.innerHTML='';
+      if(isAdmin()){
+        var bar=document.createElement('div');
+        bar.className='admin-bar';
+        var btn=document.createElement('button');
+        btn.className='reset-btn';
+        btn.textContent='대진표 초기화';
+        btn.addEventListener('click',function(){
+          if(!confirm('대진표 팀 배정을 초기화할까요?')) return;
+          T={s0:null,s1:null,s2:null,s3:null};
           save(); renderBracket();
         });
         bar.appendChild(btn);
         abRoot.appendChild(bar);
       }
 
-      /* SVG 연결선 (DOM 업데이트 후 그리기) */
-      requestAnimationFrame(function(){
-        requestAnimationFrame(drawLines);
-      });
+      requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
     }
 
     load();
     renderBracket();
-    /* auth.js(defer)가 로드 완료된 뒤 admin 상태 반영 */
     window.addEventListener('load', function(){ renderBracket(); });
     window.addEventListener('resize', drawLines);
   })();
