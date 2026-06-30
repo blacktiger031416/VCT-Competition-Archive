@@ -1590,6 +1590,32 @@
     .mo-veto-cell.decider-cell .mo-veto-top    { background: rgba(201,168,76,0.1) !important; }
     .mo-veto-cell.decider-cell .mo-veto-bottom { background: rgba(201,168,76,0.1) !important; }
 
+    /* ── 스코어보드 패널 색 오버레이 (이미지 유지, hue만 교체) ── */
+    .map-scoreboard { position: relative !important; }
+    .map-scoreboard::before,
+    .map-scoreboard::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 46%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* 왼쪽 패널 → 민트 */
+    .map-scoreboard::before {
+      left: 0;
+      background: #0daa96;
+      mix-blend-mode: hue;
+    }
+    /* 오른쪽 패널 → 다홍 */
+    .map-scoreboard::after {
+      right: 0;
+      background: #e84e78;
+      mix-blend-mode: hue;
+    }
+    /* 팀 이름·점수·오버레이는 hue 레이어 위에 표시 */
+    .scoreboard-overlay { z-index: 2 !important; }
+
     /* 팀 로고 흰색 필터 제거 (라이트 배경이므로 불필요) */
     .sb-team-logo { filter: none !important; }
     .sb-team-logo.sb-team-logo-white { filter: none !important; }
