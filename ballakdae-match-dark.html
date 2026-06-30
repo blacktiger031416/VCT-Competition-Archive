@@ -1590,8 +1590,18 @@
     .mo-veto-cell.decider-cell .mo-veto-top    { background: rgba(201,168,76,0.1) !important; }
     .mo-veto-cell.decider-cell .mo-veto-bottom { background: rgba(201,168,76,0.1) !important; }
 
-    /* ── 스코어보드: 배경 이미지/프레임 제거, 콘텐츠만 유지 ── */
-    .map-scoreboard { background: #fff !important; }
+    /* ── 스코어보드: 흰 배경 + 민트 hue 오버레이 ── */
+    .map-scoreboard { background: #fff !important; position: relative !important; }
+    .map-scoreboard::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #0daa96;
+      mix-blend-mode: hue;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .scoreboard-overlay { z-index: 2 !important; }
 
     /* 팀 이름·점수 색 → 다크 */
     .sb-team-name-l, .sb-team-name-r { color: #1a1a2e !important; text-shadow: none !important; }
