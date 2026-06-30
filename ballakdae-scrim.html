@@ -70,33 +70,29 @@
     .match-cell.clickable { cursor: pointer; }
     .match-cell.clickable:hover { background: #f8fffe; }
 
-    /* 게임 행 */
-    .match-games { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; }
-    .match-game-row { display: flex; align-items: center; gap: 6px; justify-content: center; }
-    .match-score {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 900; letter-spacing: 0.05em;
-      color: #444; min-width: 36px; text-align: center;
-    }
-    .match-game { display: flex; align-items: center; gap: 6px; justify-content: center; flex: 1; }
-    .vs-text { font-size: 11px; font-weight: 700; color: #bbb; }
+    /* 다크 매치 카드 */
+    .match-games { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
     .games-sep { font-size: 11px; color: #ddd; text-align: center; }
-
-    /* 팀 슬롯 */
-    .team-slot {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-width: 72px; height: 32px;
-      border: 2px dashed #ddd; border-radius: 8px;
-      font-size: 12px; font-weight: 900;
-      color: #ccc; padding: 0 8px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-      user-select: none;
+    .match-card { background: #1e1e2e; border-radius: 12px; padding: 10px 10px 8px; width: 100%; }
+    .match-card-body { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .match-team-side { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 0; }
+    .match-team-left { justify-content: flex-start; }
+    .match-team-right { justify-content: flex-end; }
+    .match-team-side.admin-edit { cursor: pointer; transition: opacity 0.15s; }
+    .match-team-side.admin-edit:hover { opacity: 0.75; }
+    .team-logo-wrap {
+      width: 30px; height: 30px; border-radius: 50%; overflow: hidden;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900;
+      background: rgba(255,255,255,0.08); color: #888;
     }
-    .team-slot.filled { border-style: solid; }
-    .team-slot.admin-edit { cursor: pointer; }
-    .team-slot.admin-edit:hover:not(.filled) { border-color: var(--acc); color: var(--acc); }
-    .team-slot.admin-edit.filled:hover { opacity: 0.75; }
+    .team-logo-img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .team-name-text { font-size: 11px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 54px; color: #ccc; }
+    .match-card-center { display: flex; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; padding: 0 6px; }
+    .mc-score-num { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 0.02em; line-height: 1; }
+    .mc-vs { font-size: 10px; font-weight: 700; color: #555; letter-spacing: 0.05em; }
+    .match-card-detail { text-align: center; margin-top: 8px; }
+    .match-card .detail-btn { font-size: 11px; padding: 4px 12px; }
 
     /* 맵 */
     .match-maps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
@@ -282,7 +278,6 @@
           gamesWrap.appendChild(sep);
         }
 
-        // 게임 한 쌍의 팀 모두 배정됐는지 확인
         const gameComplete = pair.every(p => d[p] !== undefined && d[p] !== null);
         const DATE_MAP = { d8: '07.08', d9: '07.09', d10: '07.10' };
         const dayKey = session.id.replace(/t\d$/, '');
@@ -295,69 +290,116 @@
           + '&from=scrim&tournament=ballakdae'
           + '&match=' + session.id + 'g' + gi;
 
-        const gameRow = document.createElement('div');
-        gameRow.className = 'match-game-row';
-
-        // 슬롯 두 개 + vs
-        const gameInner = document.createElement('div');
-        gameInner.className = 'match-game';
-        pair.forEach((posIdx, ti) => {
-          if (ti > 0) {
-            const vs = document.createElement('span');
-            vs.className = 'vs-text';
-            vs.textContent = 'vs';
-            gameInner.appendChild(vs);
-          }
-          const slot = document.createElement('div');
-          slot.className = 'team-slot';
-          const assigned = d[posIdx];
-          if (assigned !== undefined && assigned !== null) {
-            slot.classList.add('filled');
-            slot.textContent = getSlotLabel(assigned);
-            slot.style.borderColor = SLOT_COLORS[assigned];
-            slot.style.color = SLOT_COLORS[assigned];
-          } else {
-            slot.textContent = '팀 선택';
-          }
-          if (admin) {
-            slot.classList.add('admin-edit');
-            slot.addEventListener('click', e => { e.stopPropagation(); openTeamPicker(session.id, posIdx); });
-          }
-          gameInner.appendChild(slot);
-        });
-        gameRow.appendChild(gameInner);
-
-        // 시리즈 스코어 표시
+        // 스코어 읽기
+        let scoreA = null, scoreB = null;
         if (gameComplete) {
-          const matchKey = 'ballakdae|scrim|' + session.id + 'g' + gi;
           try {
+            const matchKey = 'ballakdae|scrim|' + session.id + 'g' + gi;
             const res = JSON.parse(localStorage.getItem('result:' + matchKey) || '{}');
-            const sA = res.scoreA, sB = res.scoreB;
-            if (sA != null && sA !== '-' && sB != null && sB !== '-') {
-              const scoreEl = document.createElement('span');
-              scoreEl.className = 'match-score';
-              scoreEl.textContent = sA + ' : ' + sB;
-              gameRow.appendChild(scoreEl);
+            if (res.scoreA != null && res.scoreA !== '-' && res.scoreB != null && res.scoreB !== '-') {
+              scoreA = res.scoreA;
+              scoreB = res.scoreB;
             }
           } catch(e) {}
         }
 
-        // 상세 버튼: admin이면 버튼, 비admin이면 행 클릭
-        if (gameComplete) {
-          if (admin) {
-            const btn = document.createElement('a');
-            btn.className = 'detail-btn';
-            btn.href = detailUrl;
-            btn.textContent = '상세';
-            btn.addEventListener('click', e => e.stopPropagation());
-            gameRow.appendChild(btn);
+        // 다크 매치 카드
+        const card = document.createElement('div');
+        card.className = 'match-card';
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'match-card-body';
+
+        function makeTeamEl(posIdx, side) {
+          const el = document.createElement('div');
+          el.className = 'match-team-side match-team-' + side;
+          const assigned = d[posIdx];
+          const isAssigned = assigned !== undefined && assigned !== null;
+
+          const logoEl = document.createElement('div');
+          logoEl.className = 'team-logo-wrap';
+          if (isAssigned) {
+            const coach = getCoachForSlot(assigned);
+            if (coach) {
+              const img = document.createElement('img');
+              img.className = 'team-logo-img';
+              img.src = './images/' + coach.photo;
+              img.alt = coach.name;
+              logoEl.appendChild(img);
+            } else {
+              logoEl.classList.add('team-logo-num');
+              logoEl.style.background = SLOT_COLORS[assigned] + '33';
+              logoEl.style.border = '2px solid ' + SLOT_COLORS[assigned];
+              logoEl.style.color = SLOT_COLORS[assigned];
+              logoEl.textContent = assigned + 1;
+            }
           } else {
-            gameRow.style.cursor = 'pointer';
-            gameRow.addEventListener('click', e => { e.stopPropagation(); window.location.href = detailUrl; });
+            logoEl.classList.add('team-logo-empty');
+            logoEl.textContent = '–';
           }
+
+          const nameEl = document.createElement('div');
+          nameEl.className = 'team-name-text';
+          if (isAssigned) {
+            nameEl.textContent = getSlotLabel(assigned);
+            nameEl.style.color = SLOT_COLORS[assigned];
+          } else {
+            nameEl.textContent = '미정';
+          }
+
+          if (side === 'left') { el.appendChild(logoEl); el.appendChild(nameEl); }
+          else                 { el.appendChild(nameEl); el.appendChild(logoEl); }
+
+          if (admin) {
+            el.classList.add('admin-edit');
+            el.addEventListener('click', e => { e.stopPropagation(); openTeamPicker(session.id, posIdx); });
+          }
+          return el;
         }
 
-        gamesWrap.appendChild(gameRow);
+        cardBody.appendChild(makeTeamEl(pair[0], 'left'));
+
+        // 중앙: 스코어(양옆) or vs
+        const centerEl = document.createElement('div');
+        centerEl.className = 'match-card-center';
+        if (scoreA !== null) {
+          const sA = document.createElement('span');
+          sA.className = 'mc-score-num';
+          sA.textContent = scoreA;
+          const vsEl = document.createElement('span');
+          vsEl.className = 'mc-vs';
+          vsEl.textContent = 'vs';
+          const sB = document.createElement('span');
+          sB.className = 'mc-score-num';
+          sB.textContent = scoreB;
+          centerEl.appendChild(sA);
+          centerEl.appendChild(vsEl);
+          centerEl.appendChild(sB);
+        } else {
+          const vsEl = document.createElement('span');
+          vsEl.className = 'mc-vs';
+          vsEl.textContent = 'vs';
+          centerEl.appendChild(vsEl);
+        }
+
+        cardBody.appendChild(centerEl);
+        cardBody.appendChild(makeTeamEl(pair[1], 'right'));
+        card.appendChild(cardBody);
+
+        // 상세 버튼 (카드 아래 중앙)
+        if (gameComplete) {
+          const detailRow = document.createElement('div');
+          detailRow.className = 'match-card-detail';
+          const btn = document.createElement('a');
+          btn.className = 'detail-btn';
+          btn.href = detailUrl;
+          btn.textContent = '상세';
+          if (admin) btn.addEventListener('click', e => e.stopPropagation());
+          detailRow.appendChild(btn);
+          card.appendChild(detailRow);
+        }
+
+        gamesWrap.appendChild(card);
       });
       cell.appendChild(gamesWrap);
 
