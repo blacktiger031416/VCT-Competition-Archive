@@ -73,6 +73,11 @@
     /* 게임 행 */
     .match-games { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; }
     .match-game-row { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .match-score {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 900; letter-spacing: 0.05em;
+      color: #444; min-width: 36px; text-align: center;
+    }
     .match-game { display: flex; align-items: center; gap: 6px; justify-content: center; flex: 1; }
     .vs-text { font-size: 11px; font-weight: 700; color: #bbb; }
     .games-sep { font-size: 11px; color: #ddd; text-align: center; }
@@ -321,6 +326,21 @@
           gameInner.appendChild(slot);
         });
         gameRow.appendChild(gameInner);
+
+        // 시리즈 스코어 표시
+        if (gameComplete) {
+          const matchKey = 'ballakdae|scrim|' + session.id + 'g' + gi;
+          try {
+            const res = JSON.parse(localStorage.getItem('result:' + matchKey) || '{}');
+            const sA = res.scoreA, sB = res.scoreB;
+            if (sA != null && sA !== '-' && sB != null && sB !== '-') {
+              const scoreEl = document.createElement('span');
+              scoreEl.className = 'match-score';
+              scoreEl.textContent = sA + ' : ' + sB;
+              gameRow.appendChild(scoreEl);
+            }
+          } catch(e) {}
+        }
 
         // 상세 버튼: admin이면 버튼, 비admin이면 행 클릭
         if (gameComplete) {
