@@ -177,279 +177,355 @@
       letter-spacing: 0.1em; text-transform: uppercase; color: #2a2a3e;
     }
 
-    /* ══ MAP CARD (champions style) ══ */
-    .map-card {
-      background: #0a0800;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 4px;
-      margin-bottom: 0;
-      overflow: hidden;
-      max-width: 100%;
-    }
+    /* ══ SCORE2 오버레이 요소 ══ */
 
-    .map-scoreboard {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      height: 160px;
-      background: linear-gradient(135deg, #0c1522 0%, #111a28 50%, #0c1522 100%);
+    /* 팀 A 헤더 박스 (왼쪽, 분홍) */
+    .s2-hdr-a {
+      left: 1.3%; top: 2.9%;
+      width: 30.6%; height: 16.6%;
+      flex-direction: column; gap: 4%;
     }
-    .scoreboard-img {
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center 42%; display: block;
+    /* 맵 썸네일 */
+    .s2-hdr-map {
+      left: 37%; top: 2%;
+      width: 10%; height: 17%;
+      flex-direction: column;
     }
-    .scoreboard-overlay { position: absolute; inset: 0; }
-
-    .sb-team-block {
-      position: absolute; top: 42%;
-      display: flex; align-items: center; gap: 6px;
+    .s2-map-thumb {
+      width: 100%; height: 85%;
+      object-fit: cover; border-radius: 6px;
+      display: block;
     }
-    .sb-team-block-l { left: 24%; transform: translate(-100%, -50%); gap: 18px; }
-    .sb-team-block-r { left: 76%; transform: translateY(-50%); gap: 28px; }
-    .sb-team-logo { width: clamp(48px,7vw,80px); height: clamp(48px,7vw,80px); object-fit: contain; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.8)); margin-right: 4px; }
-    .sb-team-logo.sb-team-logo-white { filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.8)); }
-    .sb-team-name-l, .sb-team-name-r {
+    .s2-map-thumb-ph {
+      width: 100%; height: 85%;
+      background: rgba(255,255,255,0.5);
+      border-radius: 6px;
+    }
+    /* 스코어 표시 (썸네일 아래 필 영역) */
+    .s2-hdr-pill {
+      left: 34.5%; top: 19.5%;
+      width: 17%; height: 5%;
+      gap: 8%;
+    }
+    .s2-map-score {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(14px,3vw,22px); font-weight: 900;
+      font-size: clamp(12px, 2vw, 22px); font-weight: 900; line-height: 1;
+      cursor: pointer;
+    }
+    .s2-map-score.a { color: #e84e78; }
+    .s2-map-score.b { color: #0daa96; }
+    .s2-map-score-sep {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(10px, 1.5vw, 18px); font-weight: 300;
+      color: rgba(42,42,62,0.3);
+    }
+    /* 팀 B 헤더 박스 (오른쪽, 민트) */
+    .s2-hdr-b {
+      left: 67.7%; top: 2.9%;
+      width: 30.6%; height: 16.6%;
+      flex-direction: column; gap: 4%;
+    }
+    .s2-team-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(10px, 1.6vw, 18px); font-weight: 900;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: #2a2a3e; text-align: center;
+    }
+    .s2-map-name-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(7px, 0.9vw, 10px); font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
-      color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+      color: rgba(42,42,62,0.45); margin-top: 2%;
     }
-    .sb-center {
-      position: absolute; top: 42%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 150px; height: 94px;
-      border: 1px solid rgba(255,255,255,0.28);
+
+    /* 라운드 트래커 영역 */
+    .s2-rt-area {
+      left: 1%; top: 22.9%;
+      width: 98%; height: 11.7%;
+      align-items: stretch; flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.4);
     }
-    .sb-map-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
-    .sb-map-name {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 4px 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+
+    /* 선수 패널 A (왼쪽) */
+    .s2-panel-a {
+      left: 1.3%; top: 36%;
+      width: 46.5%; height: 59%;
+      flex-direction: column; align-items: stretch;
+      overflow: hidden;
+    }
+    /* 선수 패널 B (오른쪽) */
+    .s2-panel-b {
+      left: 50.5%; top: 36%;
+      width: 47.5%; height: 59%;
+      flex-direction: column; align-items: stretch;
+      overflow: hidden;
+    }
+
+    /* 선수 패널 공통 */
+    .s2-panel-head {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
-      text-transform: uppercase; color: rgba(255,255,255,0.85); text-align: center;
+      font-size: clamp(7px, 0.8vw, 9px); font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 8px; height: 13%;
+      display: flex; align-items: center;
+      flex-shrink: 0;
     }
-    .sb-score-diamond-l, .sb-score-diamond-r {
-      position: absolute; top: 42%;
-      font-family: Impact, 'Russo One', sans-serif;
-      font-size: clamp(34px,6vw,64px); font-weight: 400;
-      letter-spacing: 0.02em; text-shadow: 0 1px 10px rgba(0,0,0,0.95); line-height: 1;
-    }
-    .sb-score-diamond-l { left: 29%; transform: translate(-50%,-50%); color: #fff; }
-    .sb-score-diamond-r { left: 71%; transform: translate(-50%,-50%); color: rgba(255,255,255,0.4); }
-    .sb-score-diamond-l.lose { color: rgba(255,255,255,0.4); }
-    .sb-score-diamond-r.win  { color: #fff; }
-    .sb-diamonds {
-      position: absolute; top: calc(78% - 14px);
-      display: flex; gap: 10px; align-items: center; transform: translateY(-50%);
-    }
-    .sb-diamonds-l { left: 28.5%; transform: translate(calc(-50% + 10px),-50%); }
-    .sb-diamonds-r { left: 70%;   transform: translate(calc(-50% + 3px), -50%); }
-    .sb-diamond {
-      width: 13px; height: 13px;
-      border: 1.5px solid rgba(255,255,255,0.55);
-      transform: rotate(45deg); cursor: pointer; background: transparent;
-      transition: background 0.12s, border-color 0.12s; flex-shrink: 0;
-    }
-    .sb-diamond:hover { border-color: rgba(255,255,255,0.9); }
-    .sb-diamond.filled { background: rgba(255,255,255,0.88); border-color: #fff; }
+    .s2-panel-head.a { color: #e84e78; justify-content: flex-start; }
+    .s2-panel-head.b { color: #0daa96; justify-content: flex-end; }
 
-    /* ROUND TRACKER */
-    .rt-wrap {
+    /* 선수 행 */
+    .s2-player-row {
+      flex: 1; display: flex; align-items: center;
+      min-height: 0; overflow: hidden;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      cursor: pointer;
+    }
+    .s2-player-row:hover { background: rgba(255,255,255,0.3); }
+
+    /* 요원 초상화 */
+    .s2-agent-wrap {
+      width: 13%; height: 100%;
+      flex-shrink: 0; overflow: hidden;
+      background: rgba(255,255,255,0.3);
+    }
+    .s2-agent-img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center; display: block;
+    }
+    .s2-agent-ph {
+      width: 100%; height: 100%;
+      background: rgba(200,200,220,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: rgba(42,42,62,0.3);
+    }
+
+    /* 선수 이름 */
+    .s2-p-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(9px, 1.4vw, 15px); font-weight: 700;
+      letter-spacing: 0.03em; color: #2a2a3e;
+      flex: 1; padding: 0 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .s2-p-name.r { text-align: right; }
+
+    /* KDA */
+    .s2-kda-btn {
+      background: none; border: none; cursor: pointer; padding: 2px 5px;
+      flex-shrink: 0;
+    }
+    .s2-kda {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(8px, 1.3vw, 14px); font-weight: 700;
+      color: rgba(42,42,62,0.55); white-space: nowrap;
+    }
+    .s2-kda .kv { color: #e84e78; font-weight: 900; }
+    .s2-kda .sep { color: rgba(42,42,62,0.25); }
+
+    /* ACS */
+    .s2-acs {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(7px, 1vw, 11px); font-weight: 600;
+      color: rgba(42,42,62,0.35); padding: 0 3px; flex-shrink: 0;
+    }
+
+    /* ── 라운드 트래커 CSS ── */
+    .s2-rt-inner {
+      width: 100%; height: 100%;
       display: flex; align-items: stretch;
-      background: #0c1116;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
       overflow: hidden;
     }
-    .rt-left { flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; }
-    .rt-left-spacer { height: 22px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .rt-team-row { display: flex; align-items: center; gap: 7px; padding: 0 12px 0 14px; height: 34px; position: relative; }
-    .rt-team-row + .rt-team-row { border-top: 1px solid rgba(255,255,255,0.07); }
-    .rt-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-    .rt-logo { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
-    .rt-logo-white { filter: brightness(0) invert(1); }
-    .rt-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; min-width: 26px; }
-    .rt-grid-wrap { flex: 1; overflow-x: auto; }
-    .rt-grid { display: flex; flex-direction: column; min-width: max-content; }
-    .rt-block { display: flex; flex-direction: column; }
-    .rt-block + .rt-block { border-top: 1px solid rgba(255,255,255,0.07); margin-top: 2px; }
-    .rt-row { display: flex; align-items: center; gap: 3px; padding: 0 6px; }
-    .rt-row.num-row  { height: 20px; padding-top: 4px; }
-    .rt-row.cell-row { height: 34px; padding-bottom: 3px; }
-    .rt-row.cell-row + .rt-row.cell-row { padding-top: 0; padding-bottom: 6px; }
-    .rt-num { width: 28px; flex-shrink: 0; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; }
-    .rt-cell { width: 28px; height: 26px; flex-shrink: 0; background: #1a2030; border: 1px solid rgba(255,255,255,0.35); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
-    .rt-cell:hover { background: rgba(255,255,255,0.12); }
-    .rt-cell.win-atk { background: rgba(208,53,53,0.35); }
-    .rt-cell.win-def { background: rgba(0,196,176,0.35); }
-    .rt-cell img { width: 14px; height: 14px; object-fit: contain; display: block; }
-    .rt-sep     { width: 6px; flex-shrink: 0; }
-    .rt-sep-num { width: 6px; flex-shrink: 0; }
+    .s2-rt-left {
+      display: flex; flex-direction: column;
+      width: 7%; flex-shrink: 0;
+      border-right: 1px solid rgba(0,0,0,0.06);
+    }
+    .s2-rt-left-spacer { height: 33%; flex-shrink: 0; }
+    .s2-rt-team-row {
+      flex: 1; display: flex; align-items: center;
+      padding: 0 4px; gap: 3px; min-height: 0;
+    }
+    .s2-rt-accent {
+      width: 3px; height: 70%; border-radius: 2px; flex-shrink: 0;
+    }
+    .s2-rt-logo {
+      width: clamp(10px, 1.5vw, 18px); height: clamp(10px, 1.5vw, 18px);
+      object-fit: contain; flex-shrink: 0;
+    }
+    .s2-rt-tname {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(6px, 0.8vw, 9px); font-weight: 700;
+      letter-spacing: 0.05em; color: rgba(42,42,62,0.6);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .s2-rt-grid-wrap {
+      flex: 1; overflow-x: auto; overflow-y: hidden;
+    }
+    .s2-rt-grid { display: flex; height: 100%; }
+    .s2-rt-block { display: flex; flex-direction: column; flex-shrink: 0; }
+    .s2-rt-row {
+      display: flex; align-items: center; gap: 2px; padding: 0 3px;
+    }
+    .s2-rt-row.num-row  { height: 30%; padding-top: 3px; }
+    .s2-rt-row.cell-row { height: 35%; }
+    .s2-rt-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(5px, 0.65vw, 7px); font-weight: 600;
+      color: rgba(42,42,62,0.35); letter-spacing: 0.05em;
+      width: clamp(10px, 1.8vw, 18px); text-align: center; flex-shrink: 0;
+    }
+    .s2-rt-sep { width: 1px; height: 80%; background: rgba(0,0,0,0.12); flex-shrink: 0; }
+    .s2-rt-sep-num { width: 1px; flex-shrink: 0; }
+    .s2-rt-cell {
+      width: clamp(10px, 1.8vw, 18px); height: clamp(10px, 1.8vw, 18px);
+      border-radius: 3px; flex-shrink: 0;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .s2-rt-cell:hover { background: rgba(255,255,255,0.8); }
+    .s2-rt-cell.win-atk { background: rgba(232,78,120,0.3); border-color: rgba(232,78,120,0.5); }
+    .s2-rt-cell.win-def { background: rgba(13,170,150,0.3); border-color: rgba(13,170,150,0.5); }
+    .s2-rt-cell img { width: 70%; height: 70%; object-fit: contain; display: block; }
 
-    /* ROUND PICKER MODAL */
+    /* ── 라운드 픽커 모달 ── */
     .round-picker {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.65);
-      z-index: 2000; display: grid; place-items: center;
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
     }
     .round-picker-panel {
-      background: #fff; border-radius: 10px;
-      min-width: 280px; max-width: 460px; width: 90vw;
-      overflow: hidden; box-shadow: 0 14px 48px rgba(0,0,0,0.5);
+      background: #fff; border-radius: 14px;
+      padding: 18px 22px 16px;
+      min-width: 320px; max-width: 90vw;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
     }
-    .round-picker-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(7,17,17,0.12); }
-    .round-picker-head strong { font-size: 16px; font-weight: 900; color: #111; }
-    .round-picker-head-actions { display: flex; gap: 8px; }
-    .rp-clear-btn, .rp-close-btn { padding: 4px 10px; border: 1px solid rgba(7,17,17,0.22); border-radius: 5px; background: transparent; font-size: 13px; cursor: pointer; transition: background 120ms; }
-    .rp-clear-btn:hover, .rp-close-btn:hover { background: rgba(7,17,17,0.07); }
-    .round-picker-body { display: grid; grid-template-columns: 1fr 1fr; }
-    .rp-team-section { padding: 12px; border-right: 1px solid rgba(7,17,17,0.1); }
-    .rp-team-section:last-child { border-right: 0; }
-    .rp-team-label { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: rgba(7,17,17,0.6); }
-    .rp-icons { display: flex; flex-direction: column; gap: 3px; }
-    .rp-icon-btn { display: flex; align-items: center; gap: 8px; padding: 5px 7px; border: 1.5px solid transparent; border-radius: 6px; background: transparent; cursor: pointer; transition: background 110ms, border-color 110ms; width: 100%; text-align: left; font-size: 11px; color: rgba(7,17,17,0.7); }
-    .rp-icon-btn:hover { background: rgba(7,17,17,0.06); }
-    .rp-icon-btn.selected { background: rgba(7,17,17,0.09); border-color: rgba(7,17,17,0.28); }
-    .rp-icon-btn img { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+    .round-picker-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .round-picker-head strong { font-size: 15px; font-weight: 900; color: #2a2a3e; }
+    .round-picker-head-actions { display: flex; gap: 6px; }
+    .rp-clear-btn, .rp-close-btn {
+      border: 1px solid rgba(42,42,62,0.15); border-radius: 5px;
+      padding: 4px 10px; background: transparent;
+      font-size: 12px; cursor: pointer; color: #2a2a3e;
+    }
+    .rp-clear-btn:hover, .rp-close-btn:hover { background: rgba(42,42,62,0.06); }
+    .round-picker-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .rp-team-section {}
+    .rp-team-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      color: rgba(42,42,62,0.5); margin-bottom: 8px; text-transform: uppercase;
+    }
+    .rp-icons { display: flex; flex-direction: column; gap: 5px; }
+    .rp-icon-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 6px;
+      border: 1px solid rgba(42,42,62,0.12);
+      background: transparent; cursor: pointer;
+      font-size: 12px; color: #2a2a3e; text-align: left;
+    }
+    .rp-icon-btn:hover { background: rgba(42,42,62,0.05); }
+    .rp-icon-btn.selected { background: rgba(42,42,62,0.09); border-color: rgba(42,42,62,0.28); }
+    .rp-icon-btn img { width: 20px; height: 20px; object-fit: contain; }
 
-    /* PLAYER TABLE */
-    .player-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; padding: 4px 6px 6px; }
-    .player-table colgroup col:nth-child(1) { width: 96px; }
-    .player-table colgroup col:nth-child(2) { width: 50px; }
-    .player-table colgroup col:nth-child(3) { width: auto; }
-    .player-table colgroup col:nth-child(4) { width: 1px; }
-    .player-table colgroup col:nth-child(5) { width: auto; }
-    .player-table colgroup col:nth-child(6) { width: 52px; }
-    .player-table colgroup col:nth-child(7) { width: 96px; }
-    .player-cell { border: 1px solid rgba(255,255,255,0.35); padding: 0 !important; vertical-align: top; }
-    .pc-inner { display: flex; align-items: center; width: 100%; height: 54px; box-sizing: border-box; overflow: hidden; }
-    .pc-agent { width: 54px; height: 54px; flex-shrink: 0; overflow: hidden; }
-    .pc-agent .agent-portrait { width: 54px; height: 54px; object-fit: cover; object-position: top center; display: block; border: none; }
-    .pc-text { display: flex; align-items: center; gap: 10px; padding: 0 14px; flex: 1; }
-    .player-cell-l .pc-stats { margin-left: auto; }
-    .player-cell-r .pc-name { margin-left: auto; }
-    .pc-stats { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .pc-acs { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.01em; white-space: nowrap; }
-    .player-cell-r .agent-portrait { transform: scaleX(-1); }
-    .player-cell-r .agent-portrait.agent-no-flip { transform: scaleX(1); }
-    .player-table thead th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .player-table thead th.col-kda-l { text-align: right; }
-    .player-table thead th.col-kda-r { text-align: left; }
-    .player-table thead th.col-name-l { text-align: left; padding-left: 10px; }
-    .player-table thead th.col-name-r { text-align: right; padding-right: 10px; }
-    .player-table thead th.col-div { background: transparent; }
-    .player-table tbody tr { height: 56px; transition: background 0.1s; }
-    .player-table tbody tr:hover .player-cell { background: rgba(255,255,255,0.04) !important; }
-    .player-table tbody td { padding: 7px 8px; vertical-align: middle; }
-    .cell-skills { text-align: center; padding: 0 !important; vertical-align: top; }
-    .skill-stack { display: flex; flex-direction: row; width: 84px; height: 56px; border: 1px solid rgba(255,255,255,0.35); overflow: hidden; margin: 0 auto; }
-    .skill-box { flex: 1; background: #1a2030; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; overflow: hidden; padding: 3px 2px 11px; gap: 3px; }
-    .skill-box img { width: 100%; max-height: 36px; object-fit: contain; display: block; flex-shrink: 0; }
-    .skill-charges { display: flex; gap: 2px; flex-shrink: 0; }
-    .skill-charge { width: 7px; height: 2.5px; background: rgba(255,255,255,0.75); }
-    .chamber-q-charges { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; width: calc(4 * 3px + 3 * 2px); margin: 0 auto; flex-shrink: 0; }
-    .chamber-q-charges .skill-charge { width: 3px; }
-    .chamber-skill-box { justify-content: flex-end !important; padding-bottom: 11px !important; }
-    .astra-skills-row { flex: 1; display: flex; flex-direction: row; min-height: 0; }
-    .astra-gage-row { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 3px; padding: 2px 3px 3px; margin-bottom: 8px; flex-shrink: 0; background: #1a2030; }
-    .astra-gage-row img { width: 9px; height: 9px; object-fit: contain; display: block; }
-    .astra-skills-row .skill-box { justify-content: flex-start; padding-top: 5px; padding-bottom: 3px; }
-    .reyna-eq { flex: 2; display: flex; flex-direction: column; background: #1a2030; overflow: hidden; }
-    .reyna-eq-imgs { flex: 1; min-height: 0; display: flex; flex-direction: row; align-items: stretch; }
-    .reyna-eq-imgs .skill-box { border-right: none; justify-content: flex-end; padding-bottom: 5px; }
-    .reyna-shared-charges { display: flex; gap: 2px; padding: 2px 3px 3px; margin-bottom: 8px; flex-shrink: 0; }
-    .reyna-shared-charge { flex: 1; height: 2.5px; background: rgba(255,255,255,0.75); }
-    .cell-ult { padding: 0 !important; vertical-align: top; }
-    .cell-ult-l { padding-right: 4px !important; }
-    .cell-ult-r { padding-left: 4px !important; }
-    .ult-box { width: 48px; height: 56px; background: #1a2030; border: 1px solid rgba(255,255,255,0.35); margin: 0; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .ult-ring-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .ult-icon-img { position: relative; z-index: 1; width: 38%; height: 38%; object-fit: contain; display: block; flex-shrink: 0; }
-    .agent-portrait { width: 54px; height: 54px; object-fit: cover; object-position: top center; display: block; border: none; max-width: 100%; max-height: 100%; }
-    .agent-placeholder { width: 48px; min-height: 42px; background: #1a2030; border-right: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
-    .cell-name-l { text-align: left; padding-left: 10px !important; }
-    .cell-name-r { text-align: right; padding-right: 10px !important; }
-    .player-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.03em; color: #fff; }
-    .cell-kda-l { text-align: right; }
-    .cell-kda-r { text-align: left; }
-    .kda-display { display: inline-flex; align-items: baseline; gap: 2px; font-family: 'Barlow Condensed', sans-serif; }
-    .kda-k { font-size: 20px; font-weight: 900; color: #fff; }
-    .kda-sep { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.3); }
-    .kda-d { font-size: 20px; font-weight: 900; color: #fff; }
-    .kda-a { font-size: 20px; font-weight: 900; color: #fff; }
-    .cell-div { background: transparent; width: 1px; padding: 0 !important; }
-    .kda-btn { background: none; border: none; cursor: pointer; color: inherit; padding: 2px 4px; border-radius: 3px; transition: background 0.1s; display: inline-flex; }
-    .kda-btn:hover { background: rgba(255,255,255,0.08); }
+    /* ── KDA 편집 팝업 ── */
+    .kda-popup {
+      position: fixed; inset: 0; z-index: 9100;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .kda-popup-panel {
+      background: #fff; border-radius: 14px;
+      padding: 20px 24px 16px;
+      min-width: 280px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    }
+    .kda-popup-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 900; color: #2a2a3e;
+      margin-bottom: 14px; letter-spacing: 0.06em;
+    }
+    .kda-popup-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .kda-popup-field { display: flex; align-items: center; gap: 10px; }
+    .kda-popup-label {
+      font-size: 11px; font-weight: 700; color: rgba(42,42,62,0.5);
+      width: 32px; text-align: right; flex-shrink: 0;
+    }
+    .kda-popup-input {
+      flex: 1; border: 1.5px solid rgba(42,42,62,0.15);
+      border-radius: 6px; padding: 6px 10px;
+      font-size: 14px; color: #2a2a3e; outline: none;
+    }
+    .kda-popup-input:focus { border-color: #ff6b95; }
+    .kda-popup-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-save, .btn-cancel, .btn-clear {
+      padding: 7px 16px; border-radius: 7px; font-size: 13px;
+      font-weight: 700; cursor: pointer; border: none;
+    }
+    .btn-save { background: #ff6b95; color: #fff; }
+    .btn-save:hover { background: #e84e78; }
+    .btn-cancel { background: transparent; color: rgba(42,42,62,0.5);
+      border: 1px solid rgba(42,42,62,0.15); }
+    .btn-clear { background: transparent; color: rgba(42,42,62,0.4);
+      border: 1px solid rgba(42,42,62,0.12); }
 
-    /* KDA POPUP */
-    .kda-popup { position: fixed; inset: 0; z-index: 999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
-    .kda-popup-panel { background: #1a2535; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 20px 24px; min-width: 240px; }
-    .kda-popup-panel h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
-    .kda-popup-panel .kda-inputs { display: flex; align-items: center; gap: 8px; }
-    .kda-popup-panel input { width: 60px; background: #0a1018; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; text-align: center; padding: 6px 4px; }
-    .kda-popup-panel input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
-    .kda-popup-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; color: rgba(255,255,255,0.3); }
-    .kda-popup-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-    .kda-popup-actions button { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 16px; border-radius: 3px; border: none; cursor: pointer; }
-    .btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
-    .btn-save   { background: #c9a84c; color: #fff; }
-    .btn-clear  { background: rgba(220,50,50,0.12); border: 1px solid rgba(220,50,50,0.3) !important; color: rgba(255,120,120,0.8); }
-    .btn-cancel:hover { background: rgba(255,255,255,0.14); }
-    .btn-save:hover   { background: #e03344; }
-    .btn-clear:hover  { background: rgba(220,50,50,0.25); color: #ff7070; }
+    /* ── 스코어 편집 팝업 ── */
+    .score-editor-popup {
+      position: fixed; inset: 0; z-index: 9100;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .score-editor-panel {
+      background: #fff; border-radius: 14px;
+      padding: 20px 24px 16px;
+      min-width: 240px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    }
+    .score-editor-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 900; color: #2a2a3e;
+      margin-bottom: 14px;
+    }
+    .score-editor-input {
+      width: 100%; border: 1.5px solid rgba(42,42,62,0.15);
+      border-radius: 6px; padding: 8px 12px;
+      font-size: 22px; font-weight: 900; color: #2a2a3e;
+      text-align: center; outline: none; margin-bottom: 12px;
+    }
+    .score-editor-input:focus { border-color: #ff6b95; }
 
-    /* TEAM STATS */
-    .team-stats-wrap { border-top: 1px solid rgba(255,255,255,0.07); background: #0c1116; padding: 6px 10px 10px; position: relative; overflow: hidden; }
-    .ts-bg-logo { position: absolute; top: 50%; transform: translateY(-50%); width: 180px; height: 180px; object-fit: contain; opacity: 0.13; pointer-events: none; }
-    .ts-bg-logo-a { left: 20px; }
-    .ts-bg-logo-b { right: 20px; }
-    .ts-header { display: flex; align-items: center; padding: 4px 6px 6px; }
-    .ts-team-label { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-    .ts-team-label-r { text-align: right; }
-    .ts-center-head { width: 140px; text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-    .ts-row { display: flex; align-items: center; height: 38px; border-radius: 2px; transition: background 0.1s; }
-    .ts-row:hover { background: rgba(255,255,255,0.03); }
-    .ts-val { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; letter-spacing: 0.02em; }
-    .ts-val-a { text-align: right; padding-right: 20px; color: rgba(255,255,255,0.9); }
-    .ts-val-b { text-align: left; padding-left: 20px; color: rgba(255,255,255,0.9); }
-    .ts-val-a.ts-win, .ts-val-b.ts-win { color: #fff; }
-    .ts-val-a.ts-lose, .ts-val-b.ts-lose { color: rgba(255,255,255,0.55); }
-    .ts-label-wrap { width: 140px; flex-shrink: 0; text-align: center; }
-    .ts-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-    .ts-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 2px 6px; }
-
-    /* SCORE POPUP */
-    .odds-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: grid; place-items: center; }
-    .odds-popup-panel { background: #1a2030; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; width: 280px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
-    .odds-popup-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .odds-popup-head strong { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
-    .odds-popup-head button { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); border-radius: 4px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
-    .odds-popup-form { display: flex; gap: 8px; padding: 14px 16px; }
-    .odds-popup-form input { flex: 1; background: #0a0800; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; color: #fff; font-size: 15px; padding: 7px 10px; outline: none; }
-    .odds-popup-form input:focus { border-color: rgba(255,255,255,0.45); }
-    .odds-popup-form button { background: #0e9381; border: none; border-radius: 4px; color: #fff; font-size: 13px; font-weight: 700; padding: 7px 14px; cursor: pointer; }
-
-    /* EDIT MODAL */
-    .edit-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: center; justify-content: center; }
-    .edit-modal-panel { background: #141d2b; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 20px 24px; min-width: 280px; max-width: 480px; width: 90vw; box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
-    .edit-modal-panel h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
-    .edit-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-    .edit-modal-actions button { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 18px; border-radius: 3px; border: none; cursor: pointer; }
-    .em-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
-    .em-save   { background: #c9a84c; color: #fff; }
-    .edit-modal-input { width: 100%; background: #0a1018; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; padding: 8px 12px; }
-    .edit-modal-input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
-
-    /* ROSTER / AGENT PICKER */
-    .roster-picker-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
-    .roster-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.18); background: #1a2030; color: rgba(255,255,255,0.75); cursor: pointer; transition: background 0.12s; }
-    .roster-btn:hover { background: rgba(255,255,255,0.1); }
-    .roster-btn.selected { background: rgba(201,168,76,0.22); border-color: #c9a84c; color: #fff; }
-    .roster-manual-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; display: block; }
-    .pc-agent { cursor: pointer; }
-    .pc-agent:hover { opacity: 0.8; }
+    /* ── 지도 픽커 팝업 ── */
+    .map-picker-popup {
+      position: fixed; inset: 0; z-index: 9100;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .map-picker-panel {
+      background: #fff; border-radius: 14px;
+      padding: 20px 24px 16px; min-width: 320px; max-width: 90vw;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+    }
+    .map-picker-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 900; color: #2a2a3e; margin-bottom: 14px;
+    }
+    .map-picker-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin-bottom: 14px;
+    }
+    .map-picker-btn {
+      padding: 6px 4px; border-radius: 7px;
+      border: 1.5px solid rgba(42,42,62,0.12);
+      background: transparent; cursor: pointer;
+      font-size: 11px; font-weight: 700; color: #2a2a3e;
+      text-align: center;
+    }
+    .map-picker-btn:hover { background: rgba(255,107,149,0.08); border-color: rgba(255,107,149,0.3); }
   </style>
 </head>
 <body>
@@ -527,142 +603,95 @@
       </div>
     </div><!-- /score1 wrap -->
 
-    <!-- MAP 1 -->
-    <div class="map-card" id="map-1">
-      <div class="map-scoreboard">
-        <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
-        <div class="scoreboard-overlay">
-          <div class="sb-team-block sb-team-block-l">
-            <img class="sb-team-logo sb-logo-a" src="" alt="" />
-            <span class="sb-team-name-l sb-name-a">–</span>
-          </div>
-          <div class="sb-center">
-            <img class="sb-map-img" id="m1-sb-map-img" src="images/Map.png" alt="" />
-            <div class="sb-map-name" id="m1-sb-map-name">–</div>
-          </div>
-          <div class="sb-team-block sb-team-block-r">
-            <span class="sb-team-name-r sb-name-b">–</span>
-            <img class="sb-team-logo sb-logo-b" src="" alt="" />
-          </div>
-          <div class="sb-score-diamond-l" id="m1-score-l" onclick="openScoreEditor('m1','l')" style="cursor:pointer">-</div>
-          <div class="sb-score-diamond-r" id="m1-score-r" onclick="openScoreEditor('m1','r')" style="cursor:pointer">-</div>
-          <div class="sb-diamonds sb-diamonds-l" id="m1-diamonds-l">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-          <div class="sb-diamonds sb-diamonds-r" id="m1-diamonds-r">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-        </div>
+    <!-- ② SCORE2 — MAP 1 상세 -->
+    <div class="img-overlay-wrap" id="s2-block-0">
+      <img class="bg-img" src="./images/balakdae_score2.png" alt="" />
+      <!-- 팀 A 헤더 박스 -->
+      <div class="ov s2-hdr-a">
+        <span class="s2-team-name sb-name-a">–</span>
       </div>
-      <div class="rt-wrap" id="rt-0"></div>
-      <table class="player-table">
-        <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
-        <thead>
-          <tr>
-            <th></th><th></th>
-            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-            <th class="col-div"></th>
-            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-            <th></th><th></th>
-          </tr>
-        </thead>
-        <tbody id="m1-rows"></tbody>
-      </table>
-      <div class="team-stats-wrap" id="ts-0"></div>
+      <!-- 맵 썸네일 -->
+      <div class="ov s2-hdr-map">
+        <img class="s2-map-thumb" id="s2-mimg-0" src="" alt="" style="display:none" onerror="this.style.display='none'" />
+        <div class="s2-map-thumb-ph" id="s2-mph-0"></div>
+        <span class="s2-map-name-label" id="s2-mname-0">MAP 1</span>
+      </div>
+      <!-- 스코어 필 -->
+      <div class="ov s2-hdr-pill">
+        <span class="s2-map-score a" id="s2-score-a-0" onclick="openMapScoreEditor(0,'a')">-</span>
+        <span class="s2-map-score-sep">:</span>
+        <span class="s2-map-score b" id="s2-score-b-0" onclick="openMapScoreEditor(0,'b')">-</span>
+      </div>
+      <!-- 팀 B 헤더 박스 -->
+      <div class="ov s2-hdr-b">
+        <span class="s2-team-name sb-name-b">–</span>
+      </div>
+      <!-- 라운드 트래커 -->
+      <div class="ov s2-rt-area" id="s2-rt-0"></div>
+      <!-- 선수 패널 A -->
+      <div class="ov s2-panel-a" id="s2-pa-0">
+        <div class="s2-panel-head a sb-name-a">– · K / D / A</div>
+      </div>
+      <!-- 선수 패널 B -->
+      <div class="ov s2-panel-b" id="s2-pb-0">
+        <div class="s2-panel-head b sb-name-b">K / D / A · –</div>
+      </div>
     </div>
 
-    <!-- MAP 2 -->
-    <div class="map-card" id="map-2">
-      <div class="map-scoreboard">
-        <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
-        <div class="scoreboard-overlay">
-          <div class="sb-team-block sb-team-block-l">
-            <img class="sb-team-logo sb-logo-a" src="" alt="" />
-            <span class="sb-team-name-l sb-name-a">–</span>
-          </div>
-          <div class="sb-center">
-            <img class="sb-map-img" id="m2-sb-map-img" src="images/Map.png" alt="" />
-            <div class="sb-map-name" id="m2-sb-map-name">–</div>
-          </div>
-          <div class="sb-team-block sb-team-block-r">
-            <span class="sb-team-name-r sb-name-b">–</span>
-            <img class="sb-team-logo sb-logo-b" src="" alt="" />
-          </div>
-          <div class="sb-score-diamond-l" id="m2-score-l" onclick="openScoreEditor('m2','l')" style="cursor:pointer">-</div>
-          <div class="sb-score-diamond-r" id="m2-score-r" onclick="openScoreEditor('m2','r')" style="cursor:pointer">-</div>
-          <div class="sb-diamonds sb-diamonds-l" id="m2-diamonds-l">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-          <div class="sb-diamonds sb-diamonds-r" id="m2-diamonds-r">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-        </div>
+    <!-- ② SCORE2 — MAP 2 상세 -->
+    <div class="img-overlay-wrap" id="s2-block-1">
+      <img class="bg-img" src="./images/balakdae_score2.png" alt="" />
+      <div class="ov s2-hdr-a">
+        <span class="s2-team-name sb-name-a">–</span>
       </div>
-      <div class="rt-wrap" id="rt-1"></div>
-      <table class="player-table">
-        <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
-        <thead>
-          <tr>
-            <th></th><th></th>
-            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-            <th class="col-div"></th>
-            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-            <th></th><th></th>
-          </tr>
-        </thead>
-        <tbody id="m2-rows"></tbody>
-      </table>
-      <div class="team-stats-wrap" id="ts-1"></div>
+      <div class="ov s2-hdr-map">
+        <img class="s2-map-thumb" id="s2-mimg-1" src="" alt="" style="display:none" onerror="this.style.display='none'" />
+        <div class="s2-map-thumb-ph" id="s2-mph-1"></div>
+        <span class="s2-map-name-label" id="s2-mname-1">MAP 2</span>
+      </div>
+      <div class="ov s2-hdr-pill">
+        <span class="s2-map-score a" id="s2-score-a-1" onclick="openMapScoreEditor(1,'a')">-</span>
+        <span class="s2-map-score-sep">:</span>
+        <span class="s2-map-score b" id="s2-score-b-1" onclick="openMapScoreEditor(1,'b')">-</span>
+      </div>
+      <div class="ov s2-hdr-b">
+        <span class="s2-team-name sb-name-b">–</span>
+      </div>
+      <div class="ov s2-rt-area" id="s2-rt-1"></div>
+      <div class="ov s2-panel-a" id="s2-pa-1">
+        <div class="s2-panel-head a sb-name-a">– · K / D / A</div>
+      </div>
+      <div class="ov s2-panel-b" id="s2-pb-1">
+        <div class="s2-panel-head b sb-name-b">K / D / A · –</div>
+      </div>
     </div>
 
-    <!-- MAP 3 -->
-    <div class="map-card" id="map-3">
-      <div class="map-scoreboard">
-        <img class="scoreboard-img" src="images/scoreborad.png" alt="scoreboard" />
-        <div class="scoreboard-overlay">
-          <div class="sb-team-block sb-team-block-l">
-            <img class="sb-team-logo sb-logo-a" src="" alt="" />
-            <span class="sb-team-name-l sb-name-a">–</span>
-          </div>
-          <div class="sb-center">
-            <img class="sb-map-img" id="m3-sb-map-img" src="images/Map.png" alt="" />
-            <div class="sb-map-name" id="m3-sb-map-name">–</div>
-          </div>
-          <div class="sb-team-block sb-team-block-r">
-            <span class="sb-team-name-r sb-name-b">–</span>
-            <img class="sb-team-logo sb-logo-b" src="" alt="" />
-          </div>
-          <div class="sb-score-diamond-l" id="m3-score-l" onclick="openScoreEditor('m3','l')" style="cursor:pointer">-</div>
-          <div class="sb-score-diamond-r" id="m3-score-r" onclick="openScoreEditor('m3','r')" style="cursor:pointer">-</div>
-          <div class="sb-diamonds sb-diamonds-l" id="m3-diamonds-l">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-          <div class="sb-diamonds sb-diamonds-r" id="m3-diamonds-r">
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-            <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          </div>
-        </div>
+    <!-- ② SCORE2 — MAP 3 상세 -->
+    <div class="img-overlay-wrap" id="s2-block-2">
+      <img class="bg-img" src="./images/balakdae_score2.png" alt="" />
+      <div class="ov s2-hdr-a">
+        <span class="s2-team-name sb-name-a">–</span>
       </div>
-      <div class="rt-wrap" id="rt-2"></div>
-      <table class="player-table">
-        <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
-        <thead>
-          <tr>
-            <th></th><th></th>
-            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-            <th class="col-div"></th>
-            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-            <th></th><th></th>
-          </tr>
-        </thead>
-        <tbody id="m3-rows"></tbody>
-      </table>
-      <div class="team-stats-wrap" id="ts-2"></div>
+      <div class="ov s2-hdr-map">
+        <img class="s2-map-thumb" id="s2-mimg-2" src="" alt="" style="display:none" onerror="this.style.display='none'" />
+        <div class="s2-map-thumb-ph" id="s2-mph-2"></div>
+        <span class="s2-map-name-label" id="s2-mname-2">MAP 3</span>
+      </div>
+      <div class="ov s2-hdr-pill">
+        <span class="s2-map-score a" id="s2-score-a-2" onclick="openMapScoreEditor(2,'a')">-</span>
+        <span class="s2-map-score-sep">:</span>
+        <span class="s2-map-score b" id="s2-score-b-2" onclick="openMapScoreEditor(2,'b')">-</span>
+      </div>
+      <div class="ov s2-hdr-b">
+        <span class="s2-team-name sb-name-b">–</span>
+      </div>
+      <div class="ov s2-rt-area" id="s2-rt-2"></div>
+      <div class="ov s2-panel-a" id="s2-pa-2">
+        <div class="s2-panel-head a sb-name-a">– · K / D / A</div>
+      </div>
+      <div class="ov s2-panel-b" id="s2-pb-2">
+        <div class="s2-panel-head b sb-name-b">K / D / A · –</div>
+      </div>
     </div>
 
   </div>
@@ -678,28 +707,8 @@
   var MATCH_ID  = _p.get('match') || '';
 
   var MATCH_KEY = ['ballakdae', MATCH_FROM, MATCH_ID || (MATCH_DATE + '|' + TEAM_A + '|' + TEAM_B)].filter(Boolean).join('|');
-  var LEAGUE    = 'ballakdae';
 
-  var TEAM_A_CODE  = TEAM_A;
-  var TEAM_B_CODE  = TEAM_B;
-  var TEAM_A_COLOR = '#ff6b95';
-  var TEAM_B_COLOR = '#2dd4c0';
-
-  function teamLogoSrc(name) {
-    if (!name) return '';
-    return './assets/teams/' + encodeURIComponent(name) + '.svg';
-  }
-  var TEAM_A_LOGO = teamLogoSrc(TEAM_A);
-  var TEAM_B_LOGO = teamLogoSrc(TEAM_B);
-  var TEAM_A_LOGO_WHITE = false;
-  var TEAM_B_LOGO_WHITE = false;
-
-  var _MATCH_TOURNAMENT = '';
-  var _MATCH_GROUP      = '';
-  var _MATCH_IDX        = '';
-  var _MATCH_MID        = MATCH_ID;
-
-  // ── score1 팀 이름/로고/날짜 채우기 ─────────────────────────
+  // 팀 이름 채우기
   document.getElementById('nav-back').href        = './ballakdae-scrim.html';
   document.getElementById('nav-back').textContent = '공식 스크림';
   document.querySelectorAll('.sb-name-a').forEach(function(el) { el.textContent = TEAM_A; });
@@ -708,7 +717,7 @@
 
   function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
 
-  // ── 팀 로고 (score1) ─────────────────────────────────────────
+  // ── 팀 로고 ──────────────────────────────────────────────────
   function setTeamLogo(side, src) {
     var img = document.getElementById('logo-img-' + side);
     var ph  = document.getElementById('logo-ph-' + side);
@@ -718,24 +727,12 @@
     img.style.display = 'none';
     img.src = src;
   }
-  setTeamLogo('a', TEAM_A_LOGO);
-  setTeamLogo('b', TEAM_B_LOGO);
-
-  // ── 맵 이미지 (score1 그리드용) ──────────────────────────────
-  var MAP_IMAGES = {
-    "어센트":   "images/maps/ascent.jpg",
-    "바인드":   "images/maps/bind.jpg",
-    "브리즈":   "images/maps/breeze.jpg",
-    "아이스박스":"images/maps/icebox.jpg",
-    "해븐":     "images/maps/haven.jpg",
-    "스플릿":   "images/maps/split.jpg",
-    "프랙처":   "images/maps/fracture.jpg",
-    "펄":       "images/maps/pearl.jpg",
-    "로터스":   "images/maps/lotus.jpg",
-    "선셋":     "images/maps/sunset.jpg",
-    "어비스":   "images/maps/abyss.jpg",
-  };
-  var MAP_LIST = Object.keys(MAP_IMAGES);
+  function teamLogoSrc(name) {
+    if (!name) return '';
+    return './assets/teams/' + encodeURIComponent(name) + '.svg';
+  }
+  setTeamLogo('a', teamLogoSrc(TEAM_A));
+  setTeamLogo('b', teamLogoSrc(TEAM_B));
 
   // ── 라운드 트래커 상수 ────────────────────────────────────────
   var ROUND_ICONS = {
@@ -797,648 +794,421 @@
     피닉스:"https://valorantinfo.com/images/kr/phoenix_valorant_icon_3596.webp",
     하버:"https://i.namu.wiki/i/qxmGsWVdbBLpysuGibvT8l4dwJLFI4RTIanYEaVg-laKEt3sDGw5Crc5S-mm7qtI83iQg9SNntbThMcaJ1VTdA.webp",
   };
-  var agents = Object.keys(agentImages);
+  var agentList = Object.keys(agentImages);
 
-  // ── 요원 스킬/궁 데이터 ──────────────────────────────────────
-  var AGENT_DATA = {
-    "제트":{ ult:"images/jett_ult.webp", ultCharges:8, skills:[{src:"images/jett_e.png",charges:1},{src:"images/jett_c.webp",charges:2},{src:"images/jett_q.png",charges:1}] },
-    "레이즈":{ ult:"images/raze_ult.webp", ultCharges:8, skills:[{src:"images/raze_e.webp",charges:1},{src:"images/raze_c.webp",charges:1},{src:"images/raze_q.png",charges:2}] },
-    "게코":{ ult:"images/geko_ult.webp", ultCharges:8, skills:[{src:"images/geko_e.webp",charges:1},{src:"images/geko_c.webp",charges:1},{src:"images/geko_q.webp",charges:1}] },
-    "네온":{ ult:"images/neon_ult.webp", ultCharges:8, skills:[{src:"images/neon_e.webp",charges:1},{src:"images/neon_c.webp",charges:1},{src:"images/neon_q.webp",charges:1}] },
-    "데드록":{ ult:"images/deadlock_ult.webp", ultCharges:7, skills:[{src:"images/deadlock_e.webp",charges:1},{src:"images/deadlock_c.webp",charges:1},{src:"images/deadlock_q.webp",charges:2}] },
-    "하버":{ ult:"images/harbor_ult.webp", ultCharges:7, skills:[{src:"images/harbor_e.webp",charges:1},{src:"images/harbor_c.webp",charges:1},{src:"images/harbor_q.webp",charges:1}] },
-    "피닉스":{ ult:"images/phoenix_ult.webp", ultCharges:6, skills:[{src:"images/phoenix_e.webp",charges:2},{src:"images/phoenix_c.webp",charges:1},{src:"images/phoenix_q.webp",charges:1}] },
-    "페이드":{ ult:"images/fade_ult.webp", ultCharges:8, skills:[{src:"images/fade_e.webp",charges:1},{src:"images/fade_c.webp",charges:2},{src:"images/fade_q.webp",charges:1}] },
-    "테호":{ ult:"images/tejo_ult.webp", ultCharges:9, skills:[{src:"images/tejo_e.webp",charges:2},{src:"images/tejo_c.webp",charges:1},{src:"images/tejo_q.webp",charges:1}] },
-    "킬조이":{ ult:"images/killjoy_ult.webp", ultCharges:9, skills:[{src:"images/killjoy_e.webp",charges:1},{src:"images/killjoy_c.webp",charges:2},{src:"images/killjoy_q.webp",charges:1}] },
-    "클로브":{ ult:"images/clove_ult.webp", ultCharges:8, skills:[{src:"images/clove_e.webp",charges:2},{src:"images/clove_c.webp",charges:1},{src:"images/clove_q.webp",charges:1}] },
-    "케이오":{ ult:"images/kay:o_ult.webp", ultCharges:8, skills:[{src:"images/kay:o_e.webp",charges:1},{src:"images/kay:o_c.webp",charges:1},{src:"images/kay:o_q.webp",charges:2}] },
-    "체임버":{ ult:"images/chamber_ult.webp", ultCharges:8, layout:"chamber", skills:[{src:"images/chamber_e.webp",charges:1},{src:"images/chamber_c.webp",charges:1},{src:"images/chamber_q.webp",charges:8}] },
-    "웨이레이":{ ult:"images/waylay_ult.webp", ultCharges:8, skills:[{src:"images/waylay_e.webp",charges:1},{src:"images/waylay_c.webp",charges:1},{src:"images/waylay_q.webp",charges:1}] },
-    "요루":{ ult:"images/yoru_ult.webp", ultCharges:8, skills:[{src:"images/yoru_e.webp",charges:2},{src:"images/yoru_c.webp",charges:1},{src:"images/yoru_q.webp",charges:1}] },
-    "오멘":{ ult:"images/omen_ult.webp", ultCharges:7, skills:[{src:"images/omen_e.webp",charges:2},{src:"images/omen_c.webp",charges:2},{src:"images/omen_q.webp",charges:1}] },
-    "아이소":{ ult:"images/iso_ult.webp", ultCharges:7, skills:[{src:"images/iso_e.webp",charges:1},{src:"images/iso_c.webp",charges:1},{src:"images/iso_q.webp",charges:1}] },
-    "아스트라":{ ult:"images/astra_ult.webp", ultCharges:7, layout:"astra", gageImg:"images/astra_gage.webp", skills:[{src:"images/astra_e.webp",charges:0},{src:"images/astra_c.webp",charges:0},{src:"images/astra_q.webp",charges:0}] },
-    "스카이":{ ult:"images/skye_ult.png", ultCharges:8, skills:[{src:"images/skye_e.webp",charges:2},{src:"images/skye_c.webp",charges:1},{src:"images/skye_q.webp",charges:1}] },
-    "소바":{ ult:"images/sova_ult.webp", ultCharges:8, skills:[{src:"images/sova_e.png",charges:1},{src:"images/sova_c.png",charges:1},{src:"images/sova_q.webp",charges:2}] },
-    "세이지":{ ult:"images/sage_ult.png", ultCharges:7, skills:[{src:"images/sage_e.png",charges:1},{src:"images/sage_c.webp",charges:1},{src:"images/sage_q.png",charges:2}] },
-    "사이퍼":{ ult:"images/cyper_ult.png", ultCharges:7, skills:[{src:"images/cyper_e.png",charges:1},{src:"images/cyper_c.png",charges:2},{src:"images/cyper_q.webp",charges:2}] },
-    "비토":{ ult:"images/veto_ult.webp", ultCharges:7, skills:[{src:"images/veto_e.webp",charges:1},{src:"images/veto_c.webp",charges:2},{src:"images/veto_q.webp",charges:1}] },
-    "브림스톤":{ ult:"images/brimstone_ult.png", ultCharges:8, skills:[{src:"images/brimstone_e.webp",charges:3},{src:"images/brimstone_c.png",charges:1},{src:"images/brimstone_q.webp",charges:1}] },
-    "브리치":{ ult:"images/breach_ult.webp", ultCharges:8, skills:[{src:"images/breach_e.webp",charges:1},{src:"images/breach_c.webp",charges:1},{src:"images/breach_q.webp",charges:2}] },
-    "바이퍼":{ ult:"images/viper_ult.webp", ultCharges:9, skills:[{src:"images/viper_e.webp",charges:1},{src:"images/viper_c.webp",charges:1},{src:"images/viper_q.png",charges:1}] },
-    "바이스":{ ult:"images/vise_ult.webp", ultCharges:8, skills:[{src:"images/vise_e.webp",charges:1},{src:"images/vise_c.webp",charges:2},{src:"images/vise_q.webp",charges:1}] },
-    "믹스":{ ult:"images/mix_ult.webp", ultCharges:8, skills:[{src:"images/mix_e.webp",charges:2},{src:"images/mix_c.webp",charges:2},{src:"images/mix_q.webp",charges:1}] },
-    "레이나":{ ult:"images/rayna_ult.webp", ultCharges:7, layout:"reyna", sharedCharges:2, skills:[{src:"images/rayna_e.webp",charges:0},{src:"images/rayna_q.webp",charges:0},{src:"images/rayna_c.webp",charges:2}] },
+  // ── 맵 이미지 ────────────────────────────────────────────────
+  var MAP_IMAGES = {
+    "어센트":   "images/maps/ascent.jpg",
+    "바인드":   "images/maps/bind.jpg",
+    "브리즈":   "images/maps/breeze.jpg",
+    "아이스박스":"images/maps/icebox.jpg",
+    "해븐":     "images/maps/haven.jpg",
+    "스플릿":   "images/maps/split.jpg",
+    "프랙처":   "images/maps/fracture.jpg",
+    "펄":       "images/maps/pearl.jpg",
+    "로터스":   "images/maps/lotus.jpg",
+    "선셋":     "images/maps/sunset.jpg",
+    "어비스":   "images/maps/abyss.jpg",
   };
+  var MAP_LIST = Object.keys(MAP_IMAGES);
 
-  function applyAgentData(p) {
-    var data = AGENT_DATA[p.agent];
-    if (!data) return;
-    p.ult        = data.ult;
-    p.ultCharges = data.ultCharges;
-    p.ultFilled  = 0;
-    p.skills     = data.skills.map(function(s) { return { src: s.src, charges: s.charges }; });
+  // ── 맵 데이터 (3맵 고정) ─────────────────────────────────────
+  function blankPlayer(side) {
+    return { side: side, name: '-', agent: '', k: '-', d: '-', a: '-', acs: '-' };
   }
-
-  // ── createBlankMapData ────────────────────────────────────────
-  function createBlankMapData(mapIdx) {
-    var n = mapIdx + 1;
-    var blank5 = function(side) {
-      return [0,1,2,3,4].map(function() {
-        return { side: side, name: "-", agent: "", k: "-", d: "-", a: "-", acs: "-" };
-      });
-    };
+  function blankMapData(idx) {
     return {
-      tbodyId: "m" + n + "-rows",
-      rtId: "rt-" + mapIdx,
-      teamA: TEAM_A_CODE, teamB: TEAM_B_CODE,
-      colorA: TEAM_A_COLOR, colorB: TEAM_B_COLOR,
-      logoA: TEAM_A_LOGO, logoAWhite: TEAM_A_LOGO_WHITE,
-      logoB: TEAM_B_LOGO, logoBWhite: TEAM_B_LOGO_WHITE,
-      mapImg: "",
-      rtState: { rounds: [], firstAttacker: null, stats: { aScore: "-", bScore: "-" } },
-      tsId: "ts-" + mapIdx,
-      teamStats: [
-        { label: "첫킬",        a: "-", b: "-" },
-        { label: "절약왕",      a: "-", b: "-" },
-        { label: "포스트 플랜트", a: "-", b: "-" },
-        { label: "클러치",      a: "-", b: "-" },
-      ],
-      players: blank5("a").concat(blank5("b")),
+      idx: idx,
+      mapName: '',
+      rtState: { rounds: [], firstAttacker: null, stats: { aScore: '-', bScore: '-' } },
+      players: [0,1,2,3,4].map(function() { return blankPlayer('a'); })
+             .concat([0,1,2,3,4].map(function() { return blankPlayer('b'); })),
     };
   }
+  var maps = [blankMapData(0), blankMapData(1), blankMapData(2)];
 
-  var maps = [createBlankMapData(0), createBlankMapData(1), createBlankMapData(2)];
+  // ── localStorage 키 ──────────────────────────────────────────
+  function rKey(i)  { return 'bld_rounds:'  + MATCH_KEY + ':' + i; }
+  function pKey(i)  { return 'bld_players:' + MATCH_KEY + ':' + i; }
+  function scKey(i) { return 'bld_score:'   + MATCH_KEY + ':' + i; }
+  function mnKey()  { return 'bld_mapnames:' + MATCH_KEY; }
 
-  // ── scoreState ────────────────────────────────────────────────
-  var scoreState = {
-    m1: { l: "-", r: "-" },
-    m2: { l: "-", r: "-" },
-    m3: { l: "-", r: "-" },
-  };
+  function saveRound(i) {
+    try { localStorage.setItem(rKey(i), JSON.stringify(maps[i].rtState.rounds || [])); } catch(e) {}
+  }
+  function loadRound(i) {
+    try {
+      var r = localStorage.getItem(rKey(i));
+      if (r) maps[i].rtState.rounds = JSON.parse(r);
+    } catch(e) {}
+  }
+  function saveScore(i) {
+    try {
+      localStorage.setItem(scKey(i), JSON.stringify({
+        a: maps[i].rtState.stats.aScore,
+        b: maps[i].rtState.stats.bScore,
+      }));
+    } catch(e) {}
+  }
+  function loadScore(i) {
+    try {
+      var r = localStorage.getItem(scKey(i));
+      if (!r) return;
+      var d = JSON.parse(r);
+      maps[i].rtState.stats.aScore = d.a != null ? d.a : '-';
+      maps[i].rtState.stats.bScore = d.b != null ? d.b : '-';
+    } catch(e) {}
+  }
+  function savePlayers(i) {
+    try {
+      var d = {};
+      maps[i].players.forEach(function(p, pi) { d[pi] = p; });
+      localStorage.setItem(pKey(i), JSON.stringify(d));
+    } catch(e) {}
+  }
+  function loadPlayers(i) {
+    try {
+      var r = localStorage.getItem(pKey(i));
+      if (!r) return;
+      var d = JSON.parse(r);
+      Object.keys(d).forEach(function(pi) {
+        var idx = parseInt(pi);
+        if (maps[i].players[idx]) Object.assign(maps[i].players[idx], d[pi]);
+      });
+    } catch(e) {}
+  }
+  function saveMapNames() {
+    try {
+      var ns = maps.map(function(m) { return m.mapName || ''; });
+      localStorage.setItem(mnKey(), JSON.stringify(ns));
+    } catch(e) {}
+  }
+  function loadMapNames() {
+    try {
+      var r = localStorage.getItem(mnKey());
+      if (!r) return;
+      var ns = JSON.parse(r);
+      if (Array.isArray(ns)) ns.forEach(function(n, i) { if (maps[i]) maps[i].mapName = n || ''; });
+    } catch(e) {}
+  }
+
+  // ── 초기 로드 ────────────────────────────────────────────────
+  loadMapNames();
+  for (var _i = 0; _i < 3; _i++) {
+    loadRound(_i); loadScore(_i); loadPlayers(_i);
+  }
 
   // ── 맵 그리드(score1) 이름/이미지 표시 ──────────────────────
   function applyMapGridCells() {
     for (var i = 0; i < 3; i++) {
-      var nm = maps[i].rtState && maps[i].rtState.stats ? '' : '';
-      // score1 맵 그리드는 맵명 없이 유지 (밴픽 연동 없음)
-      var mapNameEl = document.getElementById('map-name-' + i);
-      var mapImgEl  = document.getElementById('map-img-' + i);
-      // 맵 이름은 scoreState의 맵 이름 데이터에서 가져오지 않음 (score1 전용)
+      var nm = maps[i].mapName;
+      var el = document.getElementById('map-name-' + i);
+      if (el) el.textContent = nm || '–';
+      var img = document.getElementById('map-img-' + i);
+      if (img) { if (nm && MAP_IMAGES[nm]) { img.src = MAP_IMAGES[nm]; img.style.display = 'block'; } else img.style.display = 'none'; }
     }
   }
 
-  // ── 맵 선택 팝업 (score1 그리드) ─────────────────────────────
+  // ── 맵 선택 팝업 ─────────────────────────────────────────────
   function openMapPicker(mapIdx) {
     if (!isAdmin()) return;
     var popup = document.createElement('div');
-    popup.style.cssText = 'position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
-    popup.innerHTML = '<div style="background:#fff;border-radius:14px;padding:20px 24px 16px;min-width:320px;max-width:90vw;box-shadow:0 12px 48px rgba(0,0,0,0.22);">'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;color:#2a2a3e;margin-bottom:14px;">MAP ' + (mapIdx + 1) + ' 선택</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">'
+    popup.className = 'map-picker-popup';
+    popup.innerHTML = '<div class="map-picker-panel">'
+      + '<div class="map-picker-title">MAP ' + (mapIdx + 1) + ' 선택</div>'
+      + '<div class="map-picker-grid">'
       + MAP_LIST.map(function(m) {
-          return '<button style="padding:6px 4px;border-radius:7px;border:1.5px solid rgba(42,42,62,0.12);background:transparent;cursor:pointer;font-size:11px;font-weight:700;color:#2a2a3e;" data-map="' + m + '">' + m + '</button>';
+          return '<button class="map-picker-btn" data-map="' + m + '">' + m + '</button>';
         }).join('')
       + '</div>'
-      + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
-      + '<button id="mpk-cancel" style="padding:7px 16px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid rgba(42,42,62,0.15);background:transparent;color:rgba(42,42,62,0.5);">취소</button>'
-      + '</div></div>';
+      + '<div class="kda-popup-actions"><button class="btn-clear" id="mpk-clear">초기화</button><button class="btn-cancel" id="mpk-cancel">취소</button></div>'
+      + '</div>';
     document.body.appendChild(popup);
     popup.addEventListener('click', function(e) {
       if (e.target === popup || e.target.id === 'mpk-cancel') { popup.remove(); return; }
+      if (e.target.id === 'mpk-clear') {
+        maps[mapIdx].mapName = '';
+        saveMapNames();
+        applyMapGridCells();
+        renderAll();
+        popup.remove(); return;
+      }
       var btn = e.target.closest('[data-map]');
       if (btn) {
-        var nm = btn.dataset.map;
-        var mnEl = document.getElementById('map-name-' + mapIdx);
-        var miEl = document.getElementById('map-img-'  + mapIdx);
-        if (mnEl) mnEl.textContent = nm;
-        if (miEl && MAP_IMAGES[nm]) { miEl.src = MAP_IMAGES[nm]; miEl.style.display = 'block'; }
-        // 맵 카드 스코어보드 이미지도 업데이트
-        var sbImg  = document.getElementById('m' + (mapIdx+1) + '-sb-map-img');
-        var sbName = document.getElementById('m' + (mapIdx+1) + '-sb-map-name');
-        if (sbImg  && MAP_IMAGES[nm]) sbImg.src = MAP_IMAGES[nm];
-        if (sbName) sbName.textContent = nm;
+        maps[mapIdx].mapName = btn.dataset.map;
+        saveMapNames();
+        applyMapGridCells();
+        renderAll();
         popup.remove();
       }
     });
   }
 
-  // ── 헬퍼 ─────────────────────────────────────────────────────
-  function hexRgb(hex) {
-    var h = hex.replace("#","");
-    return parseInt(h.slice(0,2),16)+","+parseInt(h.slice(2,4),16)+","+parseInt(h.slice(4,6),16);
-  }
-
-  function agentCell(agent, side) {
-    var placeholder = (side === "b") ? "images/Agent_right.webp" : "images/Agent.webp";
-    if (!agent) return '<img class="agent-portrait agent-no-flip" src="'+placeholder+'" alt="요원" />';
-    var src = agentImages[agent];
-    if (src) return '<img class="agent-portrait" src="'+src+'" alt="'+agent+'" />';
-    return '<img class="agent-portrait agent-no-flip" src="'+placeholder+'" alt="'+agent+'" />';
-  }
-
-  function kdaHtml(p, mapIdx, playerIdx) {
-    var k = p.k, d = p.d, a = p.a;
-    if (p.kda != null && p.kda !== "") {
-      var parts = String(p.kda).split("/");
-      k = parts[0] !== undefined ? parts[0] : 0;
-      d = parts[1] !== undefined ? parts[1] : 0;
-      a = parts[2] !== undefined ? parts[2] : 0;
-    }
-    return '<button class="kda-btn" onclick="openKda('+mapIdx+','+playerIdx+')" title="KDA 수정">'
-      + '<span class="kda-display"><span class="kda-k">'+k+'</span><span class="kda-sep">/</span>'
-      + '<span class="kda-d">'+d+'</span><span class="kda-sep">/</span><span class="kda-a">'+a+'</span></span>'
-      + '</button>';
-  }
-
-  // ── renderMap ─────────────────────────────────────────────────
-  function makeSkillStack(p) {
-    var s = p.skills || [];
-    var agentData = AGENT_DATA[p.agent];
-
-    if (agentData && agentData.layout === 'astra') {
-      function astraImg(i) { var sk=s[i]; if(!sk) return ''; var src=typeof sk==='string'?sk:sk.src; return src?'<img src="'+src+'" alt="" />':''; }
-      var gageImg = agentData.gageImg || '';
-      var gages = gageImg ? Array(5).fill('<img src="'+gageImg+'" alt="" />').join('') : '';
-      return '<div class="skill-stack" style="flex-direction:column;background:#1a2030"><div class="astra-skills-row"><div class="skill-box">'+astraImg(0)+'</div><div class="skill-box">'+astraImg(1)+'</div><div class="skill-box">'+astraImg(2)+'</div></div><div class="astra-gage-row">'+gages+'</div></div>';
-    }
-
-    if (agentData && agentData.layout === 'chamber') {
-      function chamberBox(i) {
-        var sk=s[i]; if(!sk) return '<div class="skill-box chamber-skill-box"></div>';
-        var src=typeof sk==='string'?sk:sk.src; var charges=typeof sk==='object'?(sk.charges||0):0;
-        var img=src?'<img src="'+src+'" alt="" />':''; var bars='';
-        if(charges===1) bars='<div style="display:flex;justify-content:center;align-items:center;flex-shrink:0;width:100%;height:7px"><div class="skill-charge" style="width:8px"></div></div>';
-        else if(charges>1) bars='<div class="chamber-q-charges">'+'<div class="skill-charge"></div>'.repeat(charges)+'</div>';
-        return '<div class="skill-box chamber-skill-box">'+img+bars+'</div>';
-      }
-      return '<div class="skill-stack">'+chamberBox(0)+chamberBox(1)+chamberBox(2)+'</div>';
-    }
-
-    if (agentData && agentData.layout === 'reyna') {
-      function skillImg(i) { var sk=s[i]; if(!sk) return ''; var src=typeof sk==='string'?sk:sk.src; return src?'<img src="'+src+'" alt="" />':''; }
-      var eqCount = agentData.sharedCharges || 2;
-      var sharedBars = '<div class="reyna-shared-charge"></div>'.repeat(eqCount);
-      var cSkill=s[2]; var cSrc=cSkill?(typeof cSkill==='string'?cSkill:cSkill.src):''; var cCharges=cSkill&&typeof cSkill==='object'?(cSkill.charges||0):0;
-      var cBars=cCharges>0?'<div class="skill-charges">'+'<div class="skill-charge"></div>'.repeat(cCharges)+'</div>':'';
-      return '<div class="skill-stack"><div class="reyna-eq"><div class="reyna-eq-imgs"><div class="skill-box">'+skillImg(0)+'</div><div class="skill-box">'+skillImg(1)+'</div></div><div class="reyna-shared-charges">'+sharedBars+'</div></div><div class="skill-box">'+(cSrc?'<img src="'+cSrc+'" alt="" />':'')+cBars+'</div></div>';
-    }
-
-    var boxes = [0,1,2].map(function(i) {
-      var sk=s[i]; if(!sk) return '<div class="skill-box"></div>';
-      var src=typeof sk==='string'?sk:sk.src; var charges=typeof sk==='object'?(sk.charges||0):0;
-      var img=src?'<img src="'+src+'" alt="" />':'';
-      var bars=charges>0?'<div class="skill-charges">'+'<div class="skill-charge"></div>'.repeat(charges)+'</div>':'';
-      return '<div class="skill-box">'+img+bars+'</div>';
-    }).join('');
-    return '<div class="skill-stack">'+boxes+'</div>';
-  }
-
-  function seededRand(seed) {
-    var h = 0;
-    for (var i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
-    return (h >>> 0) / 0xFFFFFFFF;
-  }
-
-  function makeUltRingSvg(charges, filled) {
-    var cx=24,cy=28,r=18,sw=4.2,gapDeg=9;
-    var segDeg=(360/charges)-gapDeg;
-    var filledCol='rgba(255,255,255,0.88)', emptyCol='rgba(255,255,255,0.16)';
-    function pt(angleDeg){ var rad=(angleDeg-90)*Math.PI/180; return [(cx+r*Math.cos(rad)).toFixed(2),(cy+r*Math.sin(rad)).toFixed(2)]; }
-    var paths='';
-    for(var i=0;i<charges;i++){
-      var startDeg=(360/charges)*i+gapDeg/2, endDeg=startDeg+segDeg;
-      var p1=pt(startDeg), p2=pt(endDeg), largeArc=segDeg>180?1:0;
-      var col=i<filled?filledCol:emptyCol;
-      paths+='<path d="M'+p1[0]+','+p1[1]+' A'+r+','+r+' 0 '+largeArc+',1 '+p2[0]+','+p2[1]+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="butt"/>';
-    }
-    return '<svg class="ult-ring-svg" viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">'+paths+'</svg>';
-  }
-
-  function makeUltBox(p, mapIdx, pIdx) {
-    var charges=(p.ultCharges!=null)?p.ultCharges:6;
-    if(p.ultFilled==null) p.ultFilled=Math.floor(seededRand(p.name+p.agent)*(charges+1));
-    var ring=makeUltRingSvg(charges,p.ultFilled);
-    var icon=p.ult?'<img class="ult-icon-img" src="'+p.ult+'" alt="" />':'';
-    var click=(mapIdx!=null&&pIdx!=null)?'onclick="clickUlt('+mapIdx+','+pIdx+')"':'';
-    return '<div class="ult-box" '+click+' style="cursor:pointer">'+ring+icon+'</div>';
-  }
-
-  function renderMap(mapData, mapIdx) {
-    var tbody = document.getElementById(mapData.tbodyId);
-    if (!tbody) return;
-    var sideA = mapData.players.filter(function(p){return p.side==="a";});
-    var sideB = mapData.players.filter(function(p){return p.side==="b";});
-    var rows = Math.max(sideA.length, sideB.length);
-    var rA=hexRgb(mapData.colorA), rB=hexRgb(mapData.colorB);
-    var gradA='linear-gradient(to right, rgba('+rA+',0.32) 0%, rgba('+rA+',0.10) 45%, transparent 100%)';
-    var gradB='linear-gradient(to left,  rgba('+rB+',0.32) 0%, rgba('+rB+',0.10) 45%, transparent 100%)';
-    var html='';
-    for(var i=0;i<rows;i++){
-      var a=sideA[i], b=sideB[i];
-      var ai=a?mapData.players.indexOf(a):-1, bi=b?mapData.players.indexOf(b):-1;
-      var agentA=a?'<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker('+mapIdx+','+ai+')">'+agentCell(a.agent,"a")+'</div>':"";
-      var agentB=b?'<div class="pc-agent" style="cursor:pointer" onclick="openAgentPicker('+mapIdx+','+bi+')">'+agentCell(b.agent,"b")+'</div>':"";
-      html+='<tr>'
-        +'<td class="cell-skills">'+(a?makeSkillStack(a):"")+'</td>'
-        +'<td class="cell-ult cell-ult-l">'+(a?makeUltBox(a,mapIdx,ai):"")+'</td>'
-        +'<td class="player-cell player-cell-l" style="background:'+gradA+'"><div class="pc-inner">'+agentA
-          +'<div class="pc-text"><span class="player-name" style="'+(a?'cursor:pointer':'')+'" onclick="'+(a?'openRosterPicker('+mapIdx+','+ai+')':'')+'">'+(a?(a.name||"-"):"")+'</span>'
-          +'<div class="pc-stats">'+(a&&a.acs!=null?'<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor('+mapIdx+','+ai+')">('+a.acs+')</span>':"")
-          +'<div class="pc-kda">'+(a?kdaHtml(a,mapIdx,ai):"")+'</div></div></div></div></td>'
-        +'<td class="cell-div"></td>'
-        +'<td class="player-cell player-cell-r" style="background:'+gradB+'"><div class="pc-inner"><div class="pc-text">'
-          +'<div class="pc-stats"><div class="pc-kda">'+(b?kdaHtml(b,mapIdx,bi):"")+'</div>'+(b&&b.acs!=null?'<span class="pc-acs" style="cursor:pointer" onclick="openAcsEditor('+mapIdx+','+bi+')">('+b.acs+')</span>':"")+'</div>'
-          +'<span class="player-name pc-name" style="'+(b?'cursor:pointer':'')+'" onclick="'+(b?'openRosterPicker('+mapIdx+','+bi+')':'')+'">'+(b?(b.name||"-"):"")+'</span></div>'+agentB+'</div></td>'
-        +'<td class="cell-ult cell-ult-r">'+(b?makeUltBox(b,mapIdx,bi):"")+'</td>'
-        +'<td class="cell-skills">'+(b?makeSkillStack(b):"")+'</td>'
-        +'</tr>';
-    }
-    tbody.innerHTML = html;
-  }
-
-  function clickUlt(mapIdx, pIdx) {
-    var p = maps[mapIdx].players[pIdx];
-    var charges = (p.ultCharges!=null)?p.ultCharges:6;
-    p.ultFilled = (p.ultFilled+1)%(charges+1);
-    renderMap(maps[mapIdx], mapIdx);
-  }
-
-  // ── applyMatchUI ─────────────────────────────────────────────
-  function applyMatchUI() {
-    document.documentElement.style.setProperty('--color-a', TEAM_A_COLOR);
-    document.documentElement.style.setProperty('--color-b', TEAM_B_COLOR);
-    document.documentElement.style.setProperty('--color-a-rgb', hexRgb(TEAM_A_COLOR));
-    document.documentElement.style.setProperty('--color-b-rgb', hexRgb(TEAM_B_COLOR));
-    document.querySelectorAll('.sb-logo-a').forEach(function(el){ el.src=TEAM_A_LOGO; el.alt=TEAM_A_CODE; if(TEAM_A_LOGO_WHITE) el.classList.add('sb-team-logo-white'); });
-    document.querySelectorAll('.sb-name-a').forEach(function(el){ el.textContent=TEAM_A_CODE; });
-    document.querySelectorAll('.sb-logo-b').forEach(function(el){ el.src=TEAM_B_LOGO; el.alt=TEAM_B_CODE; if(TEAM_B_LOGO_WHITE) el.classList.add('sb-team-logo-white'); });
-    document.querySelectorAll('.sb-name-b').forEach(function(el){ el.textContent=TEAM_B_CODE; });
-    document.querySelectorAll('.sb-th-a').forEach(function(el){ el.textContent=TEAM_A_CODE+' · K / D / A'; });
-    document.querySelectorAll('.sb-th-b').forEach(function(el){ el.textContent='K / D / A · '+TEAM_B_CODE; });
-  }
-  applyMatchUI();
-
-  // ── renderRoundTracker ────────────────────────────────────────
-  function renderRoundTracker(m, mapIdx) {
-    var wrap = document.getElementById(m.rtId);
-    if (!wrap) return;
-    var state=m.rtState, rounds=state.rounds||[];
-    var aScore=parseInt(state.stats&&state.stats.aScore)||0, bScore=parseInt(state.stats&&state.stats.bScore)||0;
-    var total=Math.max(24,aScore+bScore);
-    var leftHtml='<div class="rt-left"><div class="rt-left-spacer"></div>'
-      +'<div class="rt-team-row"><div class="rt-accent" style="background:'+m.colorA+'"></div><img class="rt-logo'+(m.logoAWhite?' rt-logo-white':'')+'" src="'+m.logoA+'" /><span class="rt-team-name">'+m.teamA+'</span></div>'
-      +'<div class="rt-team-row"><div class="rt-accent" style="background:'+m.colorB+'"></div><img class="rt-logo'+(m.logoBWhite?' rt-logo-white':'')+'" src="'+m.logoB+'" /><span class="rt-team-name">'+m.teamB+'</span></div>'
-      +'</div>';
-    var numBlocks=Math.ceil(total/24), blocksHtml='';
-    for(var b=0;b<numBlocks;b++){
-      var start=b*24, end=Math.min(start+24,total), numCells='',cellsA='',cellsB='';
-      for(var i=start;i<end;i++){
-        if((i-start)===12){ numCells+='<div class="rt-sep-num"></div>'; cellsA+='<div class="rt-sep"></div>'; cellsB+='<div class="rt-sep"></div>'; }
-        numCells+='<div class="rt-num">'+String(i+1).padStart(2,'0')+'</div>';
-        var rnd=rounds[i]||{}, isAtk=ATK_TYPES.indexOf(rnd.type)!==-1;
-        var winCls=rnd.winner?(isAtk?' win-atk':' win-def'):'';
-        var clsA=rnd.winner==='a'?winCls:'', clsB=rnd.winner==='b'?winCls:'';
-        var iconA=(rnd.winner==='a'&&rnd.type)?'<img src="'+ROUND_ICONS[rnd.type]+'" alt="" />':'';
-        var iconB=(rnd.winner==='b'&&rnd.type)?'<img src="'+ROUND_ICONS[rnd.type]+'" alt="" />':'';
-        cellsA+='<div class="rt-cell'+clsA+'" data-map="'+mapIdx+'" data-round="'+i+'" data-side="a">'+iconA+'</div>';
-        cellsB+='<div class="rt-cell'+clsB+'" data-map="'+mapIdx+'" data-round="'+i+'" data-side="b">'+iconB+'</div>';
-      }
-      blocksHtml+='<div class="rt-wrap">'+leftHtml+'<div class="rt-grid-wrap"><div class="rt-grid"><div class="rt-block">'
-        +'<div class="rt-row num-row">'+numCells+'</div>'
-        +'<div class="rt-row cell-row">'+cellsA+'</div>'
-        +'<div class="rt-row cell-row">'+cellsB+'</div>'
-        +'</div></div></div></div>';
-    }
-    wrap.innerHTML = blocksHtml;
-    wrap.style.flexDirection = 'column';
-    wrap.querySelectorAll('.rt-cell').forEach(function(cell){
-      cell.addEventListener('click', function(){
-        openRoundPicker(wrap, maps[+cell.dataset.map], +cell.dataset.map, +cell.dataset.round);
-      });
-    });
-  }
-
-  // ── openRoundPicker ───────────────────────────────────────────
-  function openRoundPicker(container, m, mapIdx, roundIdx) {
-    var existing = document.querySelector('.round-picker'); if(existing) existing.remove();
-    var state=m.rtState, fa=state.firstAttacker||null, aAtks=roundIsAttacking('a',roundIdx,fa);
-    var r=(state.rounds||[])[roundIdx]||{};
-    var aTypes=fa?(aAtks?ATK_TYPES:DEF_TYPES):ATK_TYPES.concat(DEF_TYPES);
-    var bTypes=fa?(aAtks?DEF_TYPES:ATK_TYPES):ATK_TYPES.concat(DEF_TYPES);
-    function iconGroup(winner,types,label){
-      return '<div class="rp-team-section"><div class="rp-team-label">'+label+'</div><div class="rp-icons">'
-        +types.map(function(t){ var sel=(r.winner===winner&&r.type===t)?' selected':'';
-          return '<button class="rp-icon-btn'+sel+'" data-rp-winner="'+winner+'" data-rp-type="'+t+'"><img src="'+ROUND_ICONS[t]+'" alt="" />'+ROUND_ICON_LABELS[t]+'</button>'; }).join('')
-        +'</div></div>';
-    }
-    var aLabel=m.teamA+(fa?(aAtks?' (공격)':' (수비)'):''), bLabel=m.teamB+(fa?(aAtks?' (수비)':' (공격)'):'');
-    var picker=document.createElement('div');
-    picker.className='round-picker';
-    picker.innerHTML='<div class="round-picker-panel"><div class="round-picker-head"><strong>라운드 '+(roundIdx+1)+'</strong>'
-      +'<div class="round-picker-head-actions">'+(r.winner?'<button class="rp-clear-btn" data-rp-clear>초기화</button>':'')
-      +'<button class="rp-close-btn" data-rp-close>닫기</button></div></div>'
-      +'<div class="round-picker-body">'+iconGroup('a',aTypes,aLabel)+iconGroup('b',bTypes,bLabel)+'</div></div>';
-    document.body.appendChild(picker);
-    picker.addEventListener('click',function(e){
-      if(e.target===picker||e.target.closest('[data-rp-close]')){ picker.remove(); return; }
-      if(e.target.closest('[data-rp-clear]')){ if(!state.rounds)state.rounds=[]; state.rounds[roundIdx]={winner:null,type:null}; saveRoundState(mapIdx); renderRoundTracker(m,mapIdx); picker.remove(); return; }
-      var btn=e.target.closest('[data-rp-winner]');
-      if(btn){ if(!state.rounds)state.rounds=[]; while(state.rounds.length<=roundIdx)state.rounds.push({winner:null,type:null}); state.rounds[roundIdx]={winner:btn.dataset.rpWinner,type:btn.dataset.rpType}; saveRoundState(mapIdx); renderRoundTracker(m,mapIdx); picker.remove(); }
-    });
-  }
-
-  // ── saveRoundState / loadRoundState ──────────────────────────
-  function saveRoundState(mapIdx) {
-    try { localStorage.setItem('rounds:'+MATCH_KEY+':'+mapIdx, JSON.stringify(maps[mapIdx].rtState.rounds||[])); } catch(e){}
-  }
-  function loadRoundState(mapIdx) {
-    try { var raw=localStorage.getItem('rounds:'+MATCH_KEY+':'+mapIdx); if(!raw)return; var rr=JSON.parse(raw); if(Array.isArray(rr))maps[mapIdx].rtState.rounds=rr; } catch(e){}
-  }
-
-  // ── saveStatsState / loadStatsState ──────────────────────────
-  function saveStatsState(mapIdx) {
-    try {
-      var m=maps[mapIdx];
-      localStorage.setItem('stats:'+MATCH_KEY+':'+mapIdx, JSON.stringify({
-        aScore:m.rtState.stats.aScore, bScore:m.rtState.stats.bScore,
-        teamStats:m.teamStats.map(function(ts){return{label:ts.label,a:ts.a,b:ts.b};})
-      }));
-    } catch(e){}
-  }
-  function loadStatsState(mapIdx) {
-    try {
-      var raw=localStorage.getItem('stats:'+MATCH_KEY+':'+mapIdx); if(!raw)return;
-      var saved=JSON.parse(raw), m=maps[mapIdx];
-      var scoreId=['m1','m2','m3'][mapIdx];
-      if(saved.aScore!=null){ m.rtState.stats.aScore=saved.aScore; if(scoreState[scoreId]){scoreState[scoreId].l=saved.aScore;applyScoreClasses(scoreId);} }
-      if(saved.bScore!=null){ m.rtState.stats.bScore=saved.bScore; if(scoreState[scoreId]){scoreState[scoreId].r=saved.bScore;applyScoreClasses(scoreId);} }
-      if(Array.isArray(saved.teamStats)) saved.teamStats.forEach(function(ts,i){ if(m.teamStats[i]){m.teamStats[i].a=ts.a;m.teamStats[i].b=ts.b;} });
-    } catch(e){}
-  }
-
-  // ── renderTeamStats ───────────────────────────────────────────
-  function renderTeamStats(m, mapIdx) {
-    var wrap=document.getElementById(m.tsId); if(!wrap||!m.teamStats)return;
-    var aScore=m.rtState.stats.aScore, bScore=m.rtState.stats.bScore;
-    function toNum(v){ return parseFloat(String(v).split("/")[0])||0; }
-    function winClass(va,vb){ var na=toNum(va),nb=toNum(vb); if(na>nb)return["ts-win","ts-lose"]; if(nb>na)return["ts-lose","ts-win"]; return["",""]; }
-    var sc=winClass(aScore,bScore);
-    var rows='<div class="ts-row"><span class="ts-val ts-val-a '+sc[0]+'" style="cursor:pointer" onclick="openStatEditor('+mapIdx+',\'score\',\'a\')">'+aScore+'</span><div class="ts-label-wrap"><span class="ts-label">스코어</span></div><span class="ts-val ts-val-b '+sc[1]+'" style="cursor:pointer" onclick="openStatEditor('+mapIdx+',\'score\',\'b\')">'+bScore+'</span></div><div class="ts-divider"></div>';
-    m.teamStats.forEach(function(stat,i){
-      var cl=winClass(stat.a,stat.b);
-      rows+='<div class="ts-row"><span class="ts-val ts-val-a '+cl[0]+'" style="cursor:pointer" onclick="openStatEditor('+mapIdx+','+i+',\'a\')">'+(stat.a===''||stat.a==null?'-':stat.a)+'</span><div class="ts-label-wrap"><span class="ts-label">'+stat.label+'</span></div><span class="ts-val ts-val-b '+cl[1]+'" style="cursor:pointer" onclick="openStatEditor('+mapIdx+','+i+',\'b\')">'+(stat.b===''||stat.b==null?'-':stat.b)+'</span></div>'+(i<m.teamStats.length-1?'<div class="ts-divider"></div>':'');
-    });
-    var laF=m.logoAWhite?'filter:brightness(0) invert(1)':'', lbF=m.logoBWhite?'filter:brightness(0) invert(1)':'';
-    wrap.innerHTML='<img class="ts-bg-logo ts-bg-logo-a" src="'+m.logoA+'" style="'+laF+'" /><img class="ts-bg-logo ts-bg-logo-b" src="'+m.logoB+'" style="'+lbF+'" />'
-      +'<div class="ts-header"><span class="ts-team-label">'+m.teamA+'</span><span class="ts-center-head">팀 스탯</span><span class="ts-team-label ts-team-label-r">'+m.teamB+'</span></div>'+rows;
-  }
-
-  // ── saveFieldSync / loadPlayersSync ──────────────────────────
-  var PLAYERS_MATCH_KEY = 'players:' + MATCH_KEY;
-
-  function getPlayerSideKey(mapIdx, pIdx) {
-    var m=maps[mapIdx], p=m.players[pIdx];
-    var sideA=m.players.filter(function(q){return q.side==='a';}), sideB=m.players.filter(function(q){return q.side==='b';});
-    var idx=(p.side==='a'?sideA:sideB).indexOf(p);
-    return p.side+idx;
-  }
-
-  function saveFieldSync(mapIdx, pIdx, field, value) {
-    var PKEY=PLAYERS_MATCH_KEY+':'+mapIdx, data={};
-    try{ var raw=localStorage.getItem(PKEY); if(raw){var pp=JSON.parse(raw);if(!Array.isArray(pp))data=pp;} }catch(e){}
-    var pKey=getPlayerSideKey(mapIdx,pIdx);
-    if(!data[pKey])data[pKey]={};
-    data[pKey][field]=value;
-    try{ localStorage.setItem(PKEY,JSON.stringify(data)); }catch(e){}
-    try{
-      var _slot=data[pKey], _pName=(_slot&&_slot.name||'').trim();
-      if(_pName&&_pName!=='-'){
-        var _vk='vct_p:'+_pName, _pd={};
-        try{ _pd=JSON.parse(localStorage.getItem(_vk)||'{}'); }catch(e2){}
-        if(!_pd.maps)_pd.maps=[];
-        var _entry=null;
-        for(var _i=0;_i<_pd.maps.length;_i++){ if(_pd.maps[_i].matchKey===MATCH_KEY&&_pd.maps[_i].mapIdx===mapIdx){_entry=_pd.maps[_i];break;} }
-        if(!_entry){_entry={matchKey:MATCH_KEY,mapIdx:mapIdx};_pd.maps.push(_entry);}
-        _entry.league=LEAGUE; _entry.stage=MATCH_FROM;
-        if(_slot.agent&&_slot.agent.trim())_entry.agent=_slot.agent.trim(); else if(_slot.agent===''||_slot.agent===null)delete _entry.agent;
-        if(_slot.acs!=null&&_slot.acs!=='')_entry.acs=_slot.acs; else if(_slot.acs===null)delete _entry.acs;
-        if(_slot.kda&&_slot.kda.indexOf('/')!==-1)_entry.kda=_slot.kda; else if(_slot.kda===null||_slot.kda==='')delete _entry.kda;
-        var hasStats=('acs' in _entry)||('kda' in _entry);
-        if(!hasStats){ _pd.maps=_pd.maps.filter(function(e){return!(e.matchKey===MATCH_KEY&&e.mapIdx===mapIdx);}); }
-        localStorage.setItem(_vk,JSON.stringify(_pd));
-        (function(k,v){fetch('/api/data/'+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({value:v})}).catch(function(){});}(_vk,JSON.stringify(_pd)));
-      }
-    }catch(e3){}
-  }
-
-  function loadPlayersSync(mapIdx) {
-    try{
-      var raw=localStorage.getItem(PLAYERS_MATCH_KEY+':'+mapIdx); if(!raw)return;
-      var data=JSON.parse(raw); if(Array.isArray(data))return;
-      var m=maps[mapIdx];
-      var sideA=m.players.filter(function(p){return p.side==='a';}), sideB=m.players.filter(function(p){return p.side==='b';});
-      [sideA,sideB].forEach(function(side,si){
-        var sl=si===0?'a':'b';
-        side.forEach(function(p,i){
-          var src=data[sl+i]; if(!src)return;
-          if(src.name!=null)p.name=src.name;
-          if(src.agent)p.agent=src.agent;
-          if(src.kda&&src.kda.indexOf('/')!==-1){ p.kda=src.kda; var pts=src.kda.split('/'); p.k=isNaN(parseInt(pts[0]))?(pts[0]||'-'):parseInt(pts[0]); p.d=isNaN(parseInt(pts[1]))?(pts[1]||'-'):parseInt(pts[1]); p.a=isNaN(parseInt(pts[2]))?(pts[2]||'-'):parseInt(pts[2]); }
-          if(src.acs!=null)p.acs=src.acs;
-        });
-      });
-    }catch(e){}
-  }
-
-  // ── applyScoreClasses / openScoreEditor ──────────────────────
-  function applyScoreClasses(mapId) {
-    var s=scoreState[mapId], elL=document.getElementById(mapId+'-score-l'), elR=document.getElementById(mapId+'-score-r');
-    if(!elL||!elR)return;
-    elL.textContent=s.l; elR.textContent=s.r;
-    var nL=Number(s.l), nR=Number(s.r);
-    elL.className='sb-score-diamond-l'+(nL<nR?' lose':'');
-    elR.className='sb-score-diamond-r'+(nR>nL?' win':'');
-  }
-
-  function openScoreEditor(mapId, side) {
-    var existing=document.querySelector('.score-popup'); if(existing)existing.remove();
-    var label=side==='l'?TEAM_A_CODE+' 라운드 수':TEAM_B_CODE+' 라운드 수', cur=scoreState[mapId][side];
-    var popup=document.createElement('div');
-    popup.className='odds-popup score-popup';
-    popup.innerHTML='<div class="odds-popup-panel"><div class="odds-popup-head"><strong>'+label+'</strong><button onclick="this.closest(\'.score-popup\').remove()">닫기</button></div>'
-      +'<form class="odds-popup-form"><input type="number" min="0" max="30" value="'+cur+'" autofocus /><button type="submit">적용</button></form></div>';
+  // ── 맵 스코어 편집 ───────────────────────────────────────────
+  function openMapScoreEditor(mapIdx, side) {
+    if (!isAdmin()) return;
+    var cur = side === 'a' ? maps[mapIdx].rtState.stats.aScore : maps[mapIdx].rtState.stats.bScore;
+    var popup = document.createElement('div');
+    popup.className = 'score-editor-popup';
+    popup.innerHTML = '<div class="score-editor-panel">'
+      + '<div class="score-editor-title">MAP ' + (mapIdx + 1) + ' — ' + (side === 'a' ? TEAM_A : TEAM_B) + ' 스코어</div>'
+      + '<input class="score-editor-input" id="se-input" type="text" value="' + (cur === '-' ? '' : cur) + '" />'
+      + '<div class="kda-popup-actions"><button class="btn-cancel" id="se-cancel">취소</button><button class="btn-save" id="se-save">저장</button></div>'
+      + '</div>';
     document.body.appendChild(popup);
-    popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
-    popup.querySelector('form').addEventListener('submit',function(e){
-      e.preventDefault();
-      var val=parseInt(e.currentTarget.querySelector('input').value)||0;
-      scoreState[mapId][side]=val;
-      applyScoreClasses(mapId);
-      var mapIdx=parseInt(mapId.slice(1))-1;
-      maps[mapIdx].rtState.stats.aScore=scoreState[mapId].l;
-      maps[mapIdx].rtState.stats.bScore=scoreState[mapId].r;
-      renderRoundTracker(maps[mapIdx],mapIdx);
-      renderTeamStats(maps[mapIdx],mapIdx);
-      saveStatsState(mapIdx);
+    document.getElementById('se-input').focus();
+    document.getElementById('se-cancel').onclick = function() { popup.remove(); };
+    document.getElementById('se-save').onclick = function() {
+      var v = document.getElementById('se-input').value.trim() || '-';
+      if (side === 'a') maps[mapIdx].rtState.stats.aScore = v;
+      else              maps[mapIdx].rtState.stats.bScore = v;
+      saveScore(mapIdx);
+      renderAll();
       popup.remove();
-    });
-    popup.querySelector('input').focus();
-  }
-
-  function toggleDiamond(el) {
-    el.classList.toggle('filled');
-    saveDiamondState();
-  }
-  function saveDiamondState() {
-    try{
-      var state={};
-      document.querySelectorAll('.sb-diamonds').forEach(function(wrap){ if(!wrap.id)return; state[wrap.id]=Array.from(wrap.querySelectorAll('.sb-diamond')).map(function(d){return d.classList.contains('filled');}); });
-      localStorage.setItem('diamonds:'+MATCH_KEY,JSON.stringify(state));
-    }catch(e){}
-  }
-  function loadDiamondState() {
-    try{
-      var raw=localStorage.getItem('diamonds:'+MATCH_KEY); if(!raw)return;
-      var state=JSON.parse(raw);
-      Object.keys(state).forEach(function(id){ var wrap=document.getElementById(id); if(!wrap)return; var ds=wrap.querySelectorAll('.sb-diamond'); state[id].forEach(function(filled,i){if(ds[i])ds[i].classList.toggle('filled',filled);}); });
-    }catch(e){}
-  }
-
-  // ── openKda / openAcsEditor / openStatEditor ─────────────────
-  function openKda(mapIdx, playerIdx) {
-    var p=maps[mapIdx].players[playerIdx];
-    var popup=document.createElement('div'); popup.className='kda-popup';
-    popup.innerHTML='<div class="kda-popup-panel"><h3>'+p.name+' — K / D / A</h3><div class="kda-inputs">'
-      +'<input id="inp-k" type="number" min="0" max="99" value="'+p.k+'" /><span class="kda-popup-sep">/</span>'
-      +'<input id="inp-d" type="number" min="0" max="99" value="'+p.d+'" /><span class="kda-popup-sep">/</span>'
-      +'<input id="inp-a" type="number" min="0" max="99" value="'+p.a+'" /></div>'
-      +'<div class="kda-popup-actions"><button class="btn-clear" id="btn-kda-clear">칸 비우기</button><button class="btn-cancel" id="btn-cancel">취소</button><button class="btn-save" id="btn-save">저장</button></div></div>';
-    document.body.appendChild(popup);
-    document.getElementById('inp-k').focus();
-    document.getElementById('btn-kda-clear').onclick=function(){ p.k='-';p.d='-';p.a='-';p.kda=null; saveFieldSync(mapIdx,playerIdx,'kda',null); renderMap(maps[mapIdx],mapIdx); popup.remove(); };
-    document.getElementById('btn-cancel').onclick=function(){ popup.remove(); };
-    popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
-    var _save=function(){ document.getElementById('btn-save').click(); };
-    ['inp-k','inp-d','inp-a'].forEach(function(id){ var el=document.getElementById(id); if(el)el.addEventListener('keydown',function(e){if(e.key==='Enter')_save();}); });
-    document.getElementById('btn-save').onclick=function(){
-      p.k=parseInt(document.getElementById('inp-k').value)||0;
-      p.d=parseInt(document.getElementById('inp-d').value)||0;
-      p.a=parseInt(document.getElementById('inp-a').value)||0;
-      p.kda=p.k+'/'+p.d+'/'+p.a;
-      saveFieldSync(mapIdx,playerIdx,'kda',p.kda);
-      if(p.name&&p.name!=='-')saveFieldSync(mapIdx,playerIdx,'name',p.name);
-      renderMap(maps[mapIdx],mapIdx); popup.remove();
     };
+    popup.addEventListener('click', function(e) { if (e.target === popup) popup.remove(); });
   }
 
-  function openAcsEditor(mapIdx, playerIdx) {
-    var existing=document.querySelector('.kda-popup.acs-popup'); if(existing)existing.remove();
-    var p=maps[mapIdx].players[playerIdx];
-    var popup=document.createElement('div'); popup.className='kda-popup acs-popup';
-    popup.innerHTML='<div class="kda-popup-panel"><h3>'+p.name+' — ACS</h3><div class="kda-inputs"><input id="inp-acs" type="number" min="0" max="999" value="'+(p.acs!=null?p.acs:'')+'" /></div>'
-      +'<div class="kda-popup-actions"><button class="btn-clear" id="btn-acs-clear">칸 비우기</button><button class="btn-cancel" id="btn-acs-cancel">취소</button><button class="btn-save" id="btn-acs-save">저장</button></div></div>';
-    document.body.appendChild(popup);
-    document.getElementById('inp-acs').focus();
-    document.getElementById('btn-acs-clear').onclick=function(){ p.acs=null; saveFieldSync(mapIdx,playerIdx,'acs',null); renderMap(maps[mapIdx],mapIdx); popup.remove(); };
-    document.getElementById('btn-acs-cancel').onclick=function(){ popup.remove(); };
-    popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
-    var _acsSave=function(){ document.getElementById('btn-acs-save').click(); };
-    var _acsInp=document.getElementById('inp-acs'); if(_acsInp)_acsInp.addEventListener('keydown',function(e){if(e.key==='Enter')_acsSave();});
-    document.getElementById('btn-acs-save').onclick=function(){ p.acs=parseInt(document.getElementById('inp-acs').value)||0; saveFieldSync(mapIdx,playerIdx,'acs',p.acs); if(p.name&&p.name!=='-')saveFieldSync(mapIdx,playerIdx,'name',p.name); renderMap(maps[mapIdx],mapIdx); popup.remove(); };
-  }
+  // ── 라운드 트래커 렌더링 ─────────────────────────────────────
+  function renderRoundTracker(mapIdx) {
+    var wrap = document.getElementById('s2-rt-' + mapIdx);
+    if (!wrap) return;
+    var m = maps[mapIdx];
+    var state = m.rtState;
+    var rounds = state.rounds || [];
+    var aScore = parseInt(state.stats.aScore) || 0;
+    var bScore = parseInt(state.stats.bScore) || 0;
+    var total  = Math.max(24, aScore + bScore);
 
-  function openStatEditor(mapIdx, statKey, side) {
-    var existing=document.querySelector('.stat-editor-popup'); if(existing)existing.remove();
-    var m=maps[mapIdx]; var label,curVal;
-    if(statKey==='score'){ label='스코어'; var scoreId=['m1','m2','m3'][mapIdx]; curVal=side==='a'?m.rtState.stats.aScore:m.rtState.stats.bScore; }
-    else{ label=m.teamStats[statKey].label; curVal=m.teamStats[statKey][side]; }
-    var teamName=side==='a'?m.teamA:m.teamB;
-    var popup=document.createElement('div'); popup.className='kda-popup stat-editor-popup';
-    popup.innerHTML='<div class="kda-popup-panel"><h3>'+teamName+' — '+label+'</h3><div class="kda-inputs"><input id="inp-stat" type="text" value="'+curVal+'" autofocus style="width:120px;text-align:center;font-size:20px;" /></div>'
-      +'<div class="kda-popup-actions"><button class="btn-cancel" id="btn-stat-cancel">취소</button><button class="btn-save" id="btn-stat-save">저장</button></div></div>';
-    document.body.appendChild(popup);
-    var inp=document.getElementById('inp-stat'); inp.focus(); inp.select();
-    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();document.getElementById('btn-stat-save').click();}});
-    document.getElementById('btn-stat-cancel').onclick=function(){ popup.remove(); };
-    popup.addEventListener('click',function(e){if(e.target===popup)popup.remove();});
-    document.getElementById('btn-stat-save').onclick=function(){
-      var raw=inp.value.trim(), val=(raw===''||raw==='-')?'-':(raw.indexOf('/')!==-1?raw:(parseFloat(raw)||0));
-      if(statKey==='score'){
-        if(side==='a'){m.rtState.stats.aScore=val;var scoreId=['m1','m2','m3'][mapIdx];if(scoreState[scoreId]){scoreState[scoreId].l=val;applyScoreClasses(scoreId);}}
-        else{m.rtState.stats.bScore=val;var scoreId=['m1','m2','m3'][mapIdx];if(scoreState[scoreId]){scoreState[scoreId].r=val;applyScoreClasses(scoreId);}}
-        renderRoundTracker(m,mapIdx);
-      } else { m.teamStats[statKey][side]=val; }
-      renderTeamStats(m,mapIdx); saveStatsState(mapIdx); popup.remove();
-    };
-  }
+    var logoA = './assets/teams/' + encodeURIComponent(TEAM_A) + '.svg';
+    var logoB = './assets/teams/' + encodeURIComponent(TEAM_B) + '.svg';
 
-  // ── openRosterPicker ──────────────────────────────────────────
-  function openRosterPicker(mapIdx, playerIdx) {
-    var existing=document.querySelector('.roster-popup'); if(existing)existing.remove();
-    var m=maps[mapIdx], p=m.players[playerIdx];
-    var popup=document.createElement('div'); popup.className='kda-popup roster-popup';
-    popup.innerHTML='<div class="kda-popup-panel"><h3>'+(p.side==='a'?m.teamA:m.teamB)+' 선수 선택</h3>'
-      +'<div style="margin-top:10px;margin-bottom:4px;"><span class="roster-manual-label">직접 입력</span>'
-      +'<div style="display:flex;gap:6px;align-items:center;"><input id="roster-manual-input" type="text" placeholder="선수 닉네임" value="'+(p.name!=='-'?p.name:'')+'" style="flex:1;background:#1a2030;border:1px solid rgba(255,255,255,0.18);border-radius:4px;padding:6px 10px;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:700;outline:none;" />'
-      +'<button id="roster-manual-confirm" style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:4px;cursor:pointer;background:rgba(255,70,85,0.2);border:1px solid #ff4655;color:#fff;">확인</button></div></div>'
-      +'<div class="kda-popup-actions"><button class="btn-clear" id="btn-roster-clear">칸 비우기</button><button class="btn-cancel" id="btn-roster-cancel">취소</button></div></div>';
-    document.body.appendChild(popup);
-    var input=document.getElementById('roster-manual-input');
-    function applyName(name){ name=name.trim(); if(!name)return; p.name=name; saveFieldSync(mapIdx,playerIdx,'name',p.name); renderMap(m,mapIdx); popup.remove(); }
-    document.getElementById('btn-roster-clear').onclick=function(){ p.name='-'; saveFieldSync(mapIdx,playerIdx,'name','-'); renderMap(m,mapIdx); popup.remove(); };
-    document.getElementById('btn-roster-cancel').onclick=function(){ popup.remove(); };
-    document.getElementById('roster-manual-confirm').onclick=function(){ applyName(input.value); };
-    input.addEventListener('keydown',function(e){if(e.key==='Enter')applyName(input.value);});
-    popup.addEventListener('click',function(e){if(e.target===popup){popup.remove();}});
-  }
+    var leftHtml = '<div class="s2-rt-left">'
+      + '<div class="s2-rt-left-spacer"></div>'
+      + '<div class="s2-rt-team-row"><div class="s2-rt-accent" style="background:#e84e78"></div>'
+      + '<img class="s2-rt-logo" src="' + logoA + '" onerror="this.style.display=\'none\'" />'
+      + '<span class="s2-rt-tname">' + TEAM_A + '</span></div>'
+      + '<div class="s2-rt-team-row"><div class="s2-rt-accent" style="background:#0daa96"></div>'
+      + '<img class="s2-rt-logo" src="' + logoB + '" onerror="this.style.display=\'none\'" />'
+      + '<span class="s2-rt-tname">' + TEAM_B + '</span></div>'
+      + '</div>';
 
-  // ── openAgentPicker ───────────────────────────────────────────
-  function openAgentPicker(mapIdx, playerIdx) {
-    var existing=document.querySelector('.agent-picker-popup'); if(existing)existing.remove();
-    var m=maps[mapIdx], p=m.players[playerIdx];
-    var popup=document.createElement('div'); popup.className='kda-popup agent-picker-popup';
-    var btns=Object.keys(agentImages).map(function(name){
-      return '<button data-agent="'+name+'" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:'+(p.agent===name?'rgba(255,70,85,0.25)':'#1a2030')+';border:1px solid '+(p.agent===name?'#c9a84c':'rgba(255,255,255,0.15)')+';border-radius:6px;padding:6px 8px;cursor:pointer;width:72px;">'
-        +'<img src="'+agentImages[name]+'" alt="'+name+'" style="width:44px;height:44px;object-fit:cover;border-radius:4px;" />'
-        +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);white-space:nowrap;">'+name+'</span></button>';
-    }).join('');
-    popup.innerHTML='<div class="kda-popup-panel" style="max-width:520px"><h3>'+p.name+' — 요원 선택</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;">'+btns+'</div>'
-      +'<div class="kda-popup-actions"><button class="btn-clear" id="btn-agent-clear">칸 비우기</button><button class="btn-cancel" id="btn-agent-cancel">취소</button></div></div>';
-    document.body.appendChild(popup);
-    document.getElementById('btn-agent-clear').onclick=function(){ p.agent=''; saveFieldSync(mapIdx,playerIdx,'agent',''); renderMap(maps[mapIdx],mapIdx); popup.remove(); };
-    document.getElementById('btn-agent-cancel').onclick=function(){ popup.remove(); };
-    popup.addEventListener('click',function(e){
-      if(e.target===popup){popup.remove();return;}
-      var btn=e.target.closest('[data-agent]');
-      if(btn){ p.agent=btn.dataset.agent; applyAgentData(p); saveFieldSync(mapIdx,playerIdx,'agent',p.agent); if(p.name&&p.name!=='-')saveFieldSync(mapIdx,playerIdx,'name',p.name); renderMap(m,mapIdx); popup.remove(); }
-    });
-  }
-
-  // ── 초기 렌더링 ───────────────────────────────────────────────
-  maps.forEach(function(m){ m.players.forEach(function(p){ applyAgentData(p); }); });
-  maps.forEach(function(m,i){ renderMap(m,i); });
-  maps.forEach(function(m,i){ renderRoundTracker(m,i); });
-  maps.forEach(function(m,i){ renderTeamStats(m,i); });
-
-  (window.storageReady||Promise.resolve()).then(function(){
-    maps.forEach(function(m,i){ loadPlayersSync(i); });
-    maps.forEach(function(m,i){ loadRoundState(i); });
-    maps.forEach(function(m,i){ loadStatsState(i); });
-    loadDiamondState();
-    maps.forEach(function(m){ m.players.forEach(function(p){ applyAgentData(p); }); });
-    maps.forEach(function(m,i){ renderMap(m,i); });
-    maps.forEach(function(m,i){ renderRoundTracker(m,i); });
-    maps.forEach(function(m,i){ renderTeamStats(m,i); });
-    applyScoreClasses('m1'); applyScoreClasses('m2'); applyScoreClasses('m3');
-  });
-
-  window.addEventListener('storage',function(e){
-    if(e.key==='_playerRenameEvent'){
-      maps.forEach(function(m,i){ loadPlayersSync(i); renderMap(m,i); renderTeamStats(m,i); });
+    var numBlocks = Math.ceil(total / 24);
+    var blocksHtml = '';
+    for (var b = 0; b < numBlocks; b++) {
+      var start = b * 24;
+      var end   = Math.min(start + 24, total);
+      var numCells = '', cellsA = '', cellsB = '';
+      for (var ri = start; ri < end; ri++) {
+        if ((ri - start) === 12) {
+          numCells += '<div class="s2-rt-sep-num"></div>';
+          cellsA   += '<div class="s2-rt-sep"></div>';
+          cellsB   += '<div class="s2-rt-sep"></div>';
+        }
+        numCells += '<div class="s2-rt-num">' + String(ri + 1).padStart(2,'0') + '</div>';
+        var r = rounds[ri] || {};
+        var isAtk = ATK_TYPES.indexOf(r.type) !== -1;
+        var winCls = r.winner ? (isAtk ? ' win-atk' : ' win-def') : '';
+        var clsA = r.winner === 'a' ? winCls : '';
+        var clsB = r.winner === 'b' ? winCls : '';
+        var iconA = (r.winner === 'a' && r.type) ? '<img src="' + ROUND_ICONS[r.type] + '" alt="" />' : '';
+        var iconB = (r.winner === 'b' && r.type) ? '<img src="' + ROUND_ICONS[r.type] + '" alt="" />' : '';
+        cellsA += '<div class="s2-rt-cell' + clsA + '" data-mi="' + mapIdx + '" data-ri="' + ri + '" data-si="a">' + iconA + '</div>';
+        cellsB += '<div class="s2-rt-cell' + clsB + '" data-mi="' + mapIdx + '" data-ri="' + ri + '" data-si="b">' + iconB + '</div>';
+      }
+      blocksHtml += '<div class="s2-rt-grid-wrap"><div class="s2-rt-grid"><div class="s2-rt-block">'
+        + '<div class="s2-rt-row num-row">' + numCells + '</div>'
+        + '<div class="s2-rt-row cell-row">' + cellsA + '</div>'
+        + '<div class="s2-rt-row cell-row">' + cellsB + '</div>'
+        + '</div></div></div>';
     }
-  });
+    wrap.innerHTML = '<div class="s2-rt-inner">' + leftHtml + blocksHtml + '</div>';
+
+    wrap.querySelectorAll('.s2-rt-cell').forEach(function(cell) {
+      cell.addEventListener('click', function() {
+        if (!isAdmin()) return;
+        openRoundPicker(mapIdx, parseInt(cell.dataset.ri));
+      });
+    });
+  }
+
+  // ── 라운드 픽커 모달 ─────────────────────────────────────────
+  function openRoundPicker(mapIdx, roundIdx) {
+    document.querySelector('.round-picker') && document.querySelector('.round-picker').remove();
+    var m = maps[mapIdx];
+    var state = m.rtState;
+    var fa = state.firstAttacker || null;
+    var aAtks = roundIsAttacking('a', roundIdx, fa);
+    var r = (state.rounds || [])[roundIdx] || {};
+
+    var aTypes = fa ? (aAtks ? ATK_TYPES : DEF_TYPES) : ATK_TYPES.concat(DEF_TYPES);
+    var bTypes = fa ? (aAtks ? DEF_TYPES : ATK_TYPES) : ATK_TYPES.concat(DEF_TYPES);
+
+    function iconGroup(winner, types, label) {
+      return '<div class="rp-team-section"><div class="rp-team-label">' + label + '</div><div class="rp-icons">'
+        + types.map(function(t) {
+            var sel = (r.winner === winner && r.type === t) ? ' selected' : '';
+            return '<button class="rp-icon-btn' + sel + '" data-w="' + winner + '" data-t="' + t + '">'
+              + '<img src="' + ROUND_ICONS[t] + '" alt="" />' + ROUND_ICON_LABELS[t] + '</button>';
+          }).join('')
+        + '</div></div>';
+    }
+    var aLabel = TEAM_A + (fa ? (aAtks ? ' (공격)' : ' (수비)') : '');
+    var bLabel = TEAM_B + (fa ? (aAtks ? ' (수비)' : ' (공격)') : '');
+
+    var picker = document.createElement('div');
+    picker.className = 'round-picker';
+    picker.innerHTML = '<div class="round-picker-panel">'
+      + '<div class="round-picker-head"><strong>라운드 ' + (roundIdx + 1) + '</strong>'
+      + '<div class="round-picker-head-actions">'
+      + (r.winner ? '<button class="rp-clear-btn" data-rp-clear>초기화</button>' : '')
+      + '<button class="rp-close-btn" data-rp-close>닫기</button></div></div>'
+      + '<div class="round-picker-body">' + iconGroup('a', aTypes, aLabel) + iconGroup('b', bTypes, bLabel) + '</div>'
+      + '</div>';
+    document.body.appendChild(picker);
+
+    picker.addEventListener('click', function(e) {
+      if (e.target === picker || e.target.closest('[data-rp-close]')) { picker.remove(); return; }
+      if (e.target.closest('[data-rp-clear]')) {
+        if (!state.rounds) state.rounds = [];
+        state.rounds[roundIdx] = { winner: null, type: null };
+        saveRound(mapIdx); renderRoundTracker(mapIdx); picker.remove(); return;
+      }
+      var btn = e.target.closest('[data-w]');
+      if (btn) {
+        if (!state.rounds) state.rounds = [];
+        state.rounds[roundIdx] = { winner: btn.dataset.w, type: btn.dataset.t };
+        saveRound(mapIdx); renderRoundTracker(mapIdx); picker.remove();
+      }
+    });
+  }
+
+  // ── 선수 패널 렌더링 ─────────────────────────────────────────
+  function renderPlayers(mapIdx) {
+    var m = maps[mapIdx];
+    var sideA = m.players.filter(function(p) { return p.side === 'a'; });
+    var sideB = m.players.filter(function(p) { return p.side === 'b'; });
+
+    function makeRow(p, globalIdx, side) {
+      var agSrc = agentImages[p.agent] || '';
+      var agHtml = agSrc
+        ? '<div class="s2-agent-wrap"><img class="s2-agent-img" src="' + agSrc + '" alt="" /></div>'
+        : '<div class="s2-agent-wrap"><div class="s2-agent-ph" onclick="openAgentPick(' + mapIdx + ',' + globalIdx + ')">?</div></div>';
+      var kStr = p.k !== '-' ? p.k : '-';
+      var dStr = p.d !== '-' ? p.d : '-';
+      var aStr = p.a !== '-' ? p.a : '-';
+      var kdaHtml = '<button class="s2-kda-btn" onclick="openKdaEditor(' + mapIdx + ',' + globalIdx + ')">'
+        + '<span class="s2-kda"><span class="kv">' + kStr + '</span><span class="sep">/</span>' + dStr + '<span class="sep">/</span>' + aStr + '</span>'
+        + '</button>';
+      var nameHtml = '<span class="s2-p-name' + (side === 'b' ? ' r' : '') + '" onclick="openNameEditor(' + mapIdx + ',' + globalIdx + ')">' + (p.name || '-') + '</span>';
+      if (side === 'a') {
+        return '<div class="s2-player-row">' + agHtml + nameHtml + kdaHtml + '</div>';
+      } else {
+        return '<div class="s2-player-row">' + kdaHtml + nameHtml + agHtml + '</div>';
+      }
+    }
+
+    var paEl = document.getElementById('s2-pa-' + mapIdx);
+    var pbEl = document.getElementById('s2-pb-' + mapIdx);
+    if (!paEl || !pbEl) return;
+
+    var headA = '<div class="s2-panel-head a">' + TEAM_A + ' · K / D / A</div>';
+    var headB = '<div class="s2-panel-head b">K / D / A · ' + TEAM_B + '</div>';
+
+    var rowsA = sideA.map(function(p, si) {
+      var gi = m.players.indexOf(p);
+      return makeRow(p, gi, 'a');
+    }).join('');
+    var rowsB = sideB.map(function(p, si) {
+      var gi = m.players.indexOf(p);
+      return makeRow(p, gi, 'b');
+    }).join('');
+
+    paEl.innerHTML = headA + rowsA;
+    pbEl.innerHTML = headB + rowsB;
+  }
+
+  // ── 스코어 헤더 갱신 ─────────────────────────────────────────
+  function renderMapHeader(mapIdx) {
+    var m = maps[mapIdx];
+    var sa = document.getElementById('s2-score-a-' + mapIdx);
+    var sb = document.getElementById('s2-score-b-' + mapIdx);
+    if (sa) sa.textContent = m.rtState.stats.aScore || '-';
+    if (sb) sb.textContent = m.rtState.stats.bScore || '-';
+
+    var mname = document.getElementById('s2-mname-' + mapIdx);
+    if (mname) mname.textContent = m.mapName || ('MAP ' + (mapIdx + 1));
+    var mimg = document.getElementById('s2-mimg-' + mapIdx);
+    var mph  = document.getElementById('s2-mph-' + mapIdx);
+    if (mimg && mph) {
+      if (m.mapName && MAP_IMAGES[m.mapName]) {
+        mimg.src = MAP_IMAGES[m.mapName];
+        mimg.style.display = 'block';
+        mph.style.display = 'none';
+      } else {
+        mimg.style.display = 'none';
+        mph.style.display = 'block';
+      }
+    }
+  }
+
+  function renderAll() {
+    applyMapGridCells();
+    for (var i = 0; i < 3; i++) {
+      renderMapHeader(i);
+      renderRoundTracker(i);
+      renderPlayers(i);
+    }
+  }
+  renderAll();
+
+  // ── KDA 편집 팝업 ────────────────────────────────────────────
+  function openKdaEditor(mapIdx, playerIdx) {
+    if (!isAdmin()) return;
+    var p = maps[mapIdx].players[playerIdx];
+    var popup = document.createElement('div');
+    popup.className = 'kda-popup';
+    popup.innerHTML = '<div class="kda-popup-panel">'
+      + '<div class="kda-popup-title">' + (p.name || '선수') + ' KDA 수정</div>'
+      + '<div class="kda-popup-fields">'
+      + '<div class="kda-popup-field"><span class="kda-popup-label">이름</span><input class="kda-popup-input" id="kf-name" value="' + (p.name === '-' ? '' : (p.name || '')) + '" /></div>'
+      + '<div class="kda-popup-field"><span class="kda-popup-label">K</span><input class="kda-popup-input" id="kf-k" type="number" value="' + (p.k === '-' ? '' : (p.k || '')) + '" /></div>'
+      + '<div class="kda-popup-field"><span class="kda-popup-label">D</span><input class="kda-popup-input" id="kf-d" type="number" value="' + (p.d === '-' ? '' : (p.d || '')) + '" /></div>'
+      + '<div class="kda-popup-field"><span class="kda-popup-label">A</span><input class="kda-popup-input" id="kf-a" type="number" value="' + (p.a === '-' ? '' : (p.a || '')) + '" /></div>'
+      + '<div class="kda-popup-field"><span class="kda-popup-label">요원</span><input class="kda-popup-input" id="kf-agent" list="kf-agent-list" value="' + (p.agent || '') + '" />'
+      + '<datalist id="kf-agent-list">' + agentList.map(function(ag) { return '<option value="' + ag + '">'; }).join('') + '</datalist>'
+      + '</div></div>'
+      + '<div class="kda-popup-actions">'
+      + '<button class="btn-clear" id="kf-clear">초기화</button>'
+      + '<button class="btn-cancel" id="kf-cancel">취소</button>'
+      + '<button class="btn-save" id="kf-save">저장</button>'
+      + '</div></div>';
+    document.body.appendChild(popup);
+    document.getElementById('kf-name').focus();
+    document.getElementById('kf-cancel').onclick = function() { popup.remove(); };
+    document.getElementById('kf-clear').onclick = function() {
+      p.name = '-'; p.k = '-'; p.d = '-'; p.a = '-'; p.agent = '';
+      savePlayers(mapIdx); renderPlayers(mapIdx); popup.remove();
+    };
+    document.getElementById('kf-save').onclick = function() {
+      var nm = document.getElementById('kf-name').value.trim();
+      var k  = document.getElementById('kf-k').value.trim();
+      var d  = document.getElementById('kf-d').value.trim();
+      var a  = document.getElementById('kf-a').value.trim();
+      var ag = document.getElementById('kf-agent').value.trim();
+      p.name  = nm  || '-';
+      p.k     = k   || '-';
+      p.d     = d   || '-';
+      p.a     = a   || '-';
+      p.agent = ag  || '';
+      savePlayers(mapIdx); renderPlayers(mapIdx); popup.remove();
+    };
+    popup.addEventListener('click', function(e) { if (e.target === popup) popup.remove(); });
+  }
+
+  // openNameEditor → KDA 팝업과 동일
+  function openNameEditor(mapIdx, playerIdx) { openKdaEditor(mapIdx, playerIdx); }
+  function openAgentPick(mapIdx, playerIdx) { openKdaEditor(mapIdx, playerIdx); }
 
   </script>
 </body>
