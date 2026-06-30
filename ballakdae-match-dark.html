@@ -3909,7 +3909,8 @@ function vetoSideChooser(idx, firstBan) {
     return picker === "A" ? "B" : "A";
   }
   if (step.type === "decider") {
-    return vetoSideChooser(3, firstBan);
+    if (VETO_STEPS.length > 3 && VETO_STEPS[3] && VETO_STEPS[3].type === "pick") return vetoSideChooser(3, firstBan);
+    return firstBan;
   }
   return "";
 }
