@@ -1472,7 +1472,9 @@
     .mo-prediction { display: none !important; }
 
     /* ── 발락대 3맵 슬롯 ── */
-    .mo-veto { display: none !important; }
+    /* 스크림: veto 숨기고 BL 맵 표시 / tournament: BL 맵 숨기고 veto 표시 */
+    body.is-scrim  .mo-veto  { display: none !important; }
+    body.is-tournament #bl-maps { display: none !important; }
     #bl-maps { border-top: 1px solid rgba(26,26,46,0.08); padding: 10px 8px; }
     .bl-maps-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -2025,13 +2027,8 @@ var MATCH_DATE  = _params.get('date')   || '04.26';
 var MATCH_TEAM_A = _params.get('teamA') || 'Paper Rex';
 var MATCH_TEAM_B = _params.get('teamB') || 'Sentinels';
 var MATCH_FROM  = _params.get('from')   || 'groups';
-/* tournament 매치는 BL 맵 피커(스크림 전용) 숨김 */
-(function(){
-  if (MATCH_FROM === 'tournament') {
-    var _el = document.getElementById('bl-maps');
-    if (_el) _el.style.display = 'none';
-  }
-})();
+/* 스크림 ↔ tournament 표시 분기 */
+document.body.classList.add(MATCH_FROM === 'tournament' ? 'is-tournament' : 'is-scrim');
 var LEAGUE      = 'ballakdae';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
