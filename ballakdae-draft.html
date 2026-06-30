@@ -62,6 +62,39 @@
       background: var(--acc);
       color: #fff;
     }
+    .btn-try-guest {
+      font-size: 13px; font-weight: 700;
+      color: #8b5cf6; text-decoration: none;
+      padding: 5px 14px;
+      border: 1.5px solid #8b5cf6;
+      border-radius: 20px;
+      background: none; cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-try-guest:hover { background: #8b5cf6; color: #fff; }
+    .guest-mode-banner {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      color: #fff; border-radius: 10px;
+      padding: 12px 20px; margin-bottom: 20px;
+      font-size: 14px; font-weight: 700;
+    }
+    .guest-mode-banner .gm-label { font-size: 12px; opacity: 0.85; font-weight: 400; flex: 1; }
+    .guest-mode-banner .gm-real-link {
+      font-size: 12px; color: rgba(255,255,255,0.75);
+      text-decoration: none; border: 1px solid rgba(255,255,255,0.4);
+      padding: 3px 10px; border-radius: 14px;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .guest-mode-banner .gm-real-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .guest-mode-banner .gm-reset-btn {
+      font-size: 12px; color: #fff; background: rgba(255,255,255,0.18);
+      border: none; padding: 4px 12px; border-radius: 14px;
+      cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .guest-mode-banner .gm-reset-btn:hover { background: rgba(255,255,255,0.32); }
 
     /* ── auth.js 버튼 라이트 테마 오버라이드 ── */
     .auth-header-btn,
@@ -446,13 +479,22 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="home-link" href="./index.html">VCT Archive</a>
-    <a class="back-link" href="./ballakdae.html">발락대</a>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./ballakdae.html">발락대</a>
+    </div>
+    <div id="header-guest-area" style="display:flex;align-items:center;gap:10px;"></div>
   </header>
 
   <div class="draft-shell">
     <h1 class="draft-title">스네이크 드래프트</h1>
     <p class="draft-sub">4슬롯 × 5라운드 · 총 20픽 · 홀수 라운드 정순 / 짝수 라운드 역순</p>
+    <div id="guest-banner" hidden class="guest-mode-banner">
+      <span>🎮 게스트 모드</span>
+      <span class="gm-label">내 브라우저에만 저장되며 실제 드래프트에는 영향을 주지 않아요</span>
+      <button class="gm-reset-btn" id="btn-guest-reset">내 기록 초기화</button>
+      <a class="gm-real-link" href="./ballakdae-draft.html">실제 드래프트 보기</a>
+    </div>
 
     <!-- 코치 배정 영역 -->
     <div class="coach-pool-wrap">
@@ -513,8 +555,9 @@
   <script src="./auth.js" defer></script>
   <script>
   (function () {
-    const STORAGE_KEY        = 'ballakdae_draft';
-    const COACH_STORAGE_KEY  = 'ballakdae_draft_coaches';
+    const IS_GUEST           = new URLSearchParams(location.search).get('guest') === '1';
+    const STORAGE_KEY        = IS_GUEST ? 'ballakdae_draft_guest'         : 'ballakdae_draft';
+    const COACH_STORAGE_KEY  = IS_GUEST ? 'ballakdae_draft_coaches_guest' : 'ballakdae_draft_coaches';
 
     /* ── 상수 ──────────────────────────────── */
     const SLOTS = [
@@ -573,6 +616,7 @@
     let _pendingPick = null;
 
     function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+    function isEditMode() { return IS_GUEST || isAdmin(); }
     function loadData()  { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
     function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
     function loadCoaches()  { try { return JSON.parse(localStorage.getItem(COACH_STORAGE_KEY) || '{}'); } catch { return {}; } }
@@ -596,7 +640,7 @@
         card.innerHTML = `
           <img src="./images/${c.photo}" alt="${c.name}" />
           <div class="coach-card-name">${c.name}</div>`;
-        if (isAdmin()) {
+        if (isEditMode()) {
           card.draggable = true;
           card.style.cursor = 'grab';
           card.addEventListener('dragstart', e => {
@@ -631,7 +675,7 @@
         chip.addEventListener('drop', e => {
           e.preventDefault();
           chip.classList.remove('drop-over');
-          if (!isAdmin()) return;
+          if (!isEditMode()) return;
           const coachName = e.dataTransfer.getData('text/plain');
           // 기존 슬롯에서 제거
           Object.keys(coachAssign).forEach(k => { if (coachAssign[k] === coachName) delete coachAssign[k]; });
@@ -658,6 +702,7 @@
     /* ── 렌더 ──────────────────────────────── */
     function render() {
       const admin = isAdmin();
+      const canEdit = isEditMode();
       const cur = currentPickNum();
 
       /* 배너 */
@@ -695,7 +740,7 @@
           const player = picks[pNum] ? PLAYERS.find(p => p.name === picks[pNum]) : null;
           const isActive = pNum === cur;
           const box = document.createElement('div');
-          box.className = `pick-box ${SLOTS[si].cls}${isActive ? ' active-pick' : ''}${admin && !picks[pNum] ? ' admin-pick' : ''}`;
+          box.className = `pick-box ${SLOTS[si].cls}${isActive ? ' active-pick' : ''}${canEdit && !picks[pNum] ? ' admin-pick' : ''}`;
           if (player) {
             box.innerHTML = `
               <img class="pick-player-thumb" src="./images/${player.photo}" alt="${player.name}" />
@@ -703,10 +748,10 @@
           } else {
             box.innerHTML = `<div class="pick-num">#${pNum}</div>`;
           }
-          if (admin && !picks[pNum]) {
+          if (canEdit && !picks[pNum]) {
             box.addEventListener('click', () => openModal(pNum));
           }
-          if (admin && picks[pNum]) {
+          if (canEdit && picks[pNum]) {
             box.title = '클릭하여 취소';
             box.style.cursor = 'pointer';
             box.addEventListener('click', () => { delete picks[pNum]; saveData(picks); render(); });
@@ -733,7 +778,7 @@
           <img src="./images/${p.photo}" alt="${p.name}" />
           <div class="pool-player-name">${p.name}</div>
           <div class="tier-dot"></div>`;
-        if (admin && !drafted.has(p.name)) {
+        if (canEdit && !drafted.has(p.name)) {
           card.addEventListener('click', () => {
             if (cur !== null) { assignPick(cur, p.name); }
           });
@@ -786,6 +831,33 @@
       render();
     });
 
+    document.getElementById('btn-guest-reset').addEventListener('click', () => {
+      if (!confirm('내 게스트 드래프트 기록을 초기화할까요?')) return;
+      picks = {};
+      coachAssign = {};
+      saveData(picks);
+      saveCoaches(coachAssign);
+      renderCoachPool();
+      render();
+    });
+
+    /* ── 게스트 UI 초기화 (auth 확정 후 재호출 가능) ── */
+    function initGuestUI() {
+      const area = document.getElementById('header-guest-area');
+      area.innerHTML = '';
+      if (IS_GUEST) {
+        document.getElementById('guest-banner').hidden = false;
+        document.getElementById('btn-reset').hidden = true;
+      } else if (!isAdmin()) {
+        const btn = document.createElement('a');
+        btn.className = 'btn-try-guest';
+        btn.href = '?guest=1';
+        btn.textContent = '게스트로 체험하기';
+        area.appendChild(btn);
+      }
+    }
+    initGuestUI();
+
     /* ── 초기화 ── */
     picks       = loadData();
     coachAssign = loadCoaches();
@@ -797,10 +869,12 @@
     document.addEventListener('DOMContentLoaded', function () {
       render();
       bindSlotDrops();
+      initGuestUI();
     });
     window.addEventListener('auth-state-change', function () {
       render();
       bindSlotDrops();
+      initGuestUI();
     });
   })();
   </script>
