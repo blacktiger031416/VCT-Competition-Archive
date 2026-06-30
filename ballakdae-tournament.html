@@ -125,17 +125,17 @@
       overflow: visible;
     }
 
-    /* ── Score row ── */
-    .score-row {
-      text-align: center;
+    /* ── Score badge (팀 행 오른쪽) ── */
+    .score-badge {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
-      color: #555;
-      padding: 4px 12px 6px;
-      border-top: 1px solid rgba(0,0,0,0.06);
-      letter-spacing: 0.1em;
+      color: #888;
+      flex-shrink: 0;
+      min-width: 18px;
+      text-align: right;
     }
+    .team-row.win .score-badge { color: #333; }
 
     /* ── Admin reset ── */
     .admin-bar { margin-top:16px;display:flex;justify-content:flex-end; }
@@ -250,8 +250,8 @@
       var sc=getScore(matchId);
       var wSlot=winnerOf(matchId,slotA,slotB);
 
-      [[slotA,seedKeyA],[slotB,seedKeyB]].forEach(function(pair){
-        var slot=pair[0], skey=pair[1];
+      [[slotA,seedKeyA,sc?sc.a:null],[slotB,seedKeyB,sc?sc.b:null]].forEach(function(triple){
+        var slot=triple[0], skey=triple[1], pts=triple[2];
         var row=document.createElement('div');
         row.className='team-row';
         var has=slot!==null&&slot!==undefined;
@@ -272,16 +272,15 @@
         lbl.textContent=has?getName(slot):(skey&&isAdmin()?'팀 배정 ▸':'–');
         row.appendChild(pip);
         row.appendChild(lbl);
+        if(sc!==null&&pts!==null){
+          var badge=document.createElement('span');
+          badge.className='score-badge';
+          badge.textContent=pts;
+          row.appendChild(badge);
+        }
         if(isW){var wt=document.createElement('span');wt.className='win-tag';wt.textContent='승';row.appendChild(wt);}
         el.appendChild(row);
       });
-
-      if(sc){
-        var sr=document.createElement('div');
-        sr.className='score-row';
-        sr.textContent=sc.a+' : '+sc.b;
-        el.appendChild(sr);
-      }
 
       return el;
     }
