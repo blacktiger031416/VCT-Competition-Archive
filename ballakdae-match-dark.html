@@ -4255,35 +4255,37 @@ var BL_MAPS = ['', '', ''];
 
 function blMapsKey() { return MATCH_KEY + '|bl-maps'; }
 
-function saveBLMaps() { storeSet(blMapsKey(), BL_MAPS); }
+function saveBLMaps() {
+  try { localStorage.setItem(blMapsKey(), JSON.stringify(BL_MAPS)); } catch(e) {}
+}
 
 function applyBLMaps() {
-  var KR_MAPS = Object.keys(MAP_IMGS).filter(function(k) {
-    return ['어센트','바인드','코로드','스플릿','선셋','어비스','펄','브리즈','헤이븐','프랙처','로터스','아이스박스','서밋','미공개'].indexOf(k) !== -1;
-  });
   BL_MAPS.forEach(function(mapName, i) {
     var idx = i + 1;
-    var imgEl   = document.getElementById('bl-slot-img-'  + idx);
-    var phEl    = document.getElementById('bl-slot-ph-'   + idx);
-    var nameEl  = document.getElementById('bl-slot-name-' + idx);
-    var sbImg   = document.getElementById('m' + idx + '-sb-map-img');
-    var sbName  = document.getElementById('m' + idx + '-sb-map-name');
-    var imgSrc  = MAP_IMGS[mapName] || '';
-    if (imgEl) { imgEl.src = imgSrc; imgEl.style.display = imgSrc ? 'block' : 'none'; }
-    if (phEl)  { phEl.style.display = imgSrc ? 'none' : ''; }
-    if (nameEl){ nameEl.textContent = mapName || '–'; }
-    if (sbImg) { sbImg.src = imgSrc || 'images/Map.png'; }
+    var imgEl  = document.getElementById('bl-slot-img-'  + idx);
+    var phEl   = document.getElementById('bl-slot-ph-'   + idx);
+    var nameEl = document.getElementById('bl-slot-name-' + idx);
+    var sbImg  = document.getElementById('m' + idx + '-sb-map-img');
+    var sbName = document.getElementById('m' + idx + '-sb-map-name');
+    var imgSrc = MAP_IMGS[mapName] || '';
+    if (imgEl)  { imgEl.src = imgSrc; imgEl.style.display = imgSrc ? 'block' : 'none'; }
+    if (phEl)   { phEl.style.display = imgSrc ? 'none' : ''; }
+    if (nameEl) { nameEl.textContent = mapName || '–'; }
+    if (sbImg)  { sbImg.src = imgSrc || 'images/Map.png'; }
     if (sbName && mapName) { sbName.textContent = mapName; }
   });
 }
 
 function loadBLMaps() {
-  var saved = storeGet(blMapsKey());
-  if (Array.isArray(saved) && saved.length === 3) BL_MAPS = saved;
+  try {
+    var raw = localStorage.getItem(blMapsKey());
+    if (raw) { var saved = JSON.parse(raw); if (Array.isArray(saved) && saved.length === 3) BL_MAPS = saved; }
+  } catch(e) {}
   applyBLMaps();
 }
 
 function openBlMapPicker(slotIdx) {
+  if (!isAdmin()) return;
   var mapNames = ['어센트','바인드','코로드','스플릿','선셋','어비스','펄','브리즈','헤이븐','프랙처','로터스','아이스박스','서밋','미공개'];
   var html = '<div class="veto-popup" onclick="if(event.target===this)this.remove()">'
     + '<div class="veto-popup-panel" style="max-width:480px">'
