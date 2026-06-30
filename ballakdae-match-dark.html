@@ -1471,6 +1471,49 @@
     .mo-pred-title, .mo-veto-title { color: rgba(26,26,46,0.35) !important; }
     .mo-prediction { display: none !important; }
 
+    /* ── 발락대 3맵 슬롯 ── */
+    .mo-veto { display: none !important; }
+    #bl-maps { border-top: 1px solid rgba(26,26,46,0.08); padding: 10px 8px; }
+    .bl-maps-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(26,26,46,0.35);
+      padding: 2px 4px 8px;
+    }
+    .bl-maps-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    }
+    .bl-map-slot {
+      display: flex; flex-direction: column;
+      border-radius: 4px; overflow: hidden;
+      border: 1px solid rgba(26,26,46,0.1);
+      cursor: pointer; transition: opacity 0.1s;
+    }
+    .bl-map-slot:hover { opacity: 0.82; }
+    .bl-map-slot-label {
+      background: #f0f4f8;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: rgba(26,26,46,0.55); text-align: center; padding: 6px 5px;
+    }
+    .bl-map-slot-img-wrap {
+      height: 120px; overflow: hidden; background: #e8ecf5;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .bl-map-slot-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bl-map-slot-ph {
+      font-size: 12px; color: rgba(26,26,46,0.3);
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .bl-map-slot-name {
+      background: #f0f4f8;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 900;
+      color: #1a1a2e; text-align: center; padding: 6px 5px;
+    }
+
     /* Round tracker */
     .rt-wrap {
       background: #f0f4f8 !important;
@@ -1716,10 +1759,41 @@
       <div class="mo-pred-bar" id="pred-bar"></div>
     </div>
 
-    <!-- 맵 밴픽 -->
+    <!-- 맵 밴픽 (숨김) -->
     <div class="mo-veto">
       <div class="mo-veto-title">맵 밴픽</div>
       <div class="mo-veto-grid" id="veto-grid"></div>
+    </div>
+
+    <!-- 발락대 3맵 슬롯 -->
+    <div id="bl-maps">
+      <div class="bl-maps-title">맵</div>
+      <div class="bl-maps-grid">
+        <div class="bl-map-slot" id="bl-slot-1" onclick="openBlMapPicker(1)">
+          <div class="bl-map-slot-label">1맵</div>
+          <div class="bl-map-slot-img-wrap">
+            <img class="bl-map-slot-img" id="bl-slot-img-1" src="" alt="" style="display:none" />
+            <span class="bl-map-slot-ph" id="bl-slot-ph-1">클릭하여 선택</span>
+          </div>
+          <div class="bl-map-slot-name" id="bl-slot-name-1">–</div>
+        </div>
+        <div class="bl-map-slot" id="bl-slot-2" onclick="openBlMapPicker(2)">
+          <div class="bl-map-slot-label">2맵</div>
+          <div class="bl-map-slot-img-wrap">
+            <img class="bl-map-slot-img" id="bl-slot-img-2" src="" alt="" style="display:none" />
+            <span class="bl-map-slot-ph" id="bl-slot-ph-2">클릭하여 선택</span>
+          </div>
+          <div class="bl-map-slot-name" id="bl-slot-name-2">–</div>
+        </div>
+        <div class="bl-map-slot" id="bl-slot-3" onclick="openBlMapPicker(3)">
+          <div class="bl-map-slot-label">3맵</div>
+          <div class="bl-map-slot-img-wrap">
+            <img class="bl-map-slot-img" id="bl-slot-img-3" src="" alt="" style="display:none" />
+            <span class="bl-map-slot-ph" id="bl-slot-ph-3">클릭하여 선택</span>
+          </div>
+          <div class="bl-map-slot-name" id="bl-slot-name-3">–</div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -4175,6 +4249,67 @@ window._matchDetailRenamePlayer = function() {
 window.addEventListener('storage', function(e) {
   if (e.key === '_playerRenameEvent') window._matchDetailRenamePlayer();
 });
+
+/* ── 발락대 3맵 슬롯 ──────────────────────────────────────── */
+var BL_MAPS = ['', '', ''];
+
+function blMapsKey() { return MATCH_KEY + '|bl-maps'; }
+
+function saveBLMaps() { storeSet(blMapsKey(), BL_MAPS); }
+
+function applyBLMaps() {
+  var KR_MAPS = Object.keys(MAP_IMGS).filter(function(k) {
+    return ['어센트','바인드','코로드','스플릿','선셋','어비스','펄','브리즈','헤이븐','프랙처','로터스','아이스박스','서밋','미공개'].indexOf(k) !== -1;
+  });
+  BL_MAPS.forEach(function(mapName, i) {
+    var idx = i + 1;
+    var imgEl   = document.getElementById('bl-slot-img-'  + idx);
+    var phEl    = document.getElementById('bl-slot-ph-'   + idx);
+    var nameEl  = document.getElementById('bl-slot-name-' + idx);
+    var sbImg   = document.getElementById('m' + idx + '-sb-map-img');
+    var sbName  = document.getElementById('m' + idx + '-sb-map-name');
+    var imgSrc  = MAP_IMGS[mapName] || '';
+    if (imgEl) { imgEl.src = imgSrc; imgEl.style.display = imgSrc ? 'block' : 'none'; }
+    if (phEl)  { phEl.style.display = imgSrc ? 'none' : ''; }
+    if (nameEl){ nameEl.textContent = mapName || '–'; }
+    if (sbImg) { sbImg.src = imgSrc || 'images/Map.png'; }
+    if (sbName && mapName) { sbName.textContent = mapName; }
+  });
+}
+
+function loadBLMaps() {
+  var saved = storeGet(blMapsKey());
+  if (Array.isArray(saved) && saved.length === 3) BL_MAPS = saved;
+  applyBLMaps();
+}
+
+function openBlMapPicker(slotIdx) {
+  if (!isAdmin()) return;
+  var mapNames = ['어센트','바인드','코로드','스플릿','선셋','어비스','펄','브리즈','헤이븐','프랙처','로터스','아이스박스','서밋','미공개'];
+  var html = '<div class="veto-popup" onclick="if(event.target===this)this.remove()">'
+    + '<div class="veto-popup-panel" style="max-width:480px">'
+    + '<div class="veto-popup-head"><strong>' + slotIdx + '맵 선택</strong>'
+    + '<button onclick="this.closest(\'.veto-popup\').remove()">닫기</button></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px">';
+  mapNames.forEach(function(m) {
+    var src = MAP_IMGS[m] || '';
+    html += '<button class="veto-map-btn" onclick="selectBLMap(' + slotIdx + ',\'' + m + '\')">'
+      + (src ? '<img src="' + src + '" alt="' + m + '" />' : '')
+      + '<span>' + m + '</span></button>';
+  });
+  html += '</div></div></div>';
+  document.querySelector('.veto-popup')?.remove();
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function selectBLMap(slotIdx, mapName) {
+  BL_MAPS[slotIdx - 1] = mapName;
+  saveBLMaps();
+  applyBLMaps();
+  document.querySelector('.veto-popup')?.remove();
+}
+
+loadBLMaps();
 </script>
 <script src="./auth.js"></script>
 <script src="./stock-apply.js"></script>
