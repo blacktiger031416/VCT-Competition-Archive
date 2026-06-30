@@ -2144,7 +2144,9 @@ var _fromInfo = _fromMap[MATCH_FROM] || _fromDefault;
 
 // ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
 var currentBo = MATCH_BO5 ? 5 : 3;
-var activeMapCount = Math.max(3, Math.min(_sA + _sB, currentBo));
+if (MATCH_FROM === 'tournament' && (_bm === 'wb' || _bm === 'lb1')) currentBo = 1;
+var MIN_MAPS = (MATCH_FROM === 'tournament' && ['sf1','sf2','sflb'].indexOf(_bm) !== -1) ? 2 : 1;
+var activeMapCount = Math.max(MIN_MAPS, Math.min(Math.max(_sA + _sB, MIN_MAPS), currentBo));
 var initializedMaps = (function() {
   var m = {};
   // 맵 1~3은 static HTML 존재, 맵 4~5는 initMapCard()로 동적 생성 필요
@@ -2259,13 +2261,13 @@ function updateMapCards() {
   if (label) label.textContent = activeMapCount + " / " + maxMaps;
   var btnMinus = document.getElementById("btn-map-minus");
   var btnPlus  = document.getElementById("btn-map-plus");
-  if (btnMinus) btnMinus.disabled = activeMapCount <= 1;
+  if (btnMinus) btnMinus.disabled = activeMapCount <= MIN_MAPS;
   if (btnPlus)  btnPlus.disabled  = activeMapCount >= maxMaps;
 }
 
 function changeMapCount(delta) {
   var maxMaps = currentBo;
-  activeMapCount = Math.min(maxMaps, Math.max(1, activeMapCount + delta));
+  activeMapCount = Math.min(maxMaps, Math.max(MIN_MAPS, activeMapCount + delta));
   if (delta > 0) initMapCard(activeMapCount);
   updateMapCards();
 }
