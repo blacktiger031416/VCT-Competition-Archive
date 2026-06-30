@@ -1476,6 +1476,8 @@
     body.is-scrim  .mo-veto  { display: none !important; }
     body.is-tournament #bl-maps { display: none !important; }
     body.is-ballakdae-veto .mo-veto-grid { grid-template-columns: repeat(5, 1fr); }
+    body.is-ballakdae-wb  .mo-veto-grid { grid-template-columns: repeat(1, 1fr); max-width: 260px; }
+    body.is-ballakdae-lb1 .mo-veto-grid { grid-template-columns: repeat(5, 1fr); }
     #bl-maps { border-top: 1px solid rgba(26,26,46,0.08); padding: 10px 8px; }
     .bl-maps-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -2030,7 +2032,12 @@ var MATCH_TEAM_B = _params.get('teamB') || 'Sentinels';
 var MATCH_FROM  = _params.get('from')   || 'groups';
 /* 스크림 ↔ tournament 표시 분기 */
 document.body.classList.add(MATCH_FROM === 'tournament' ? 'is-tournament' : 'is-scrim');
-if (MATCH_FROM === 'tournament' && ['sf1','sf2','sflb'].indexOf(_params.get('match') || '') !== -1) document.body.classList.add('is-ballakdae-veto');
+var _bm = _params.get('match') || '';
+if (MATCH_FROM === 'tournament') {
+  if (['sf1','sf2','sflb'].indexOf(_bm) !== -1) document.body.classList.add('is-ballakdae-veto');
+  if (_bm === 'wb')  document.body.classList.add('is-ballakdae-wb');
+  if (_bm === 'lb1') document.body.classList.add('is-ballakdae-lb1');
+}
 var LEAGUE      = 'ballakdae';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
@@ -3841,7 +3848,7 @@ const VETO_STEPS_BO3 = [
   { type: "ban",     label: "BAN" },
   { type: "decider", label: "DECIDER", mapIndex: 2 },
 ];
-/* 발락대 공식 대회 Bo3: 밴밴픽픽디사이더 (5스텝) */
+/* 발락대 공식 대회 Bo3 SF/준결승: 밴밴픽픽디사이더 (5스텝) */
 const VETO_STEPS_BALLAKDAE_BO3 = [
   { type: "ban",     label: "BAN" },
   { type: "ban",     label: "BAN" },
@@ -3849,7 +3856,20 @@ const VETO_STEPS_BALLAKDAE_BO3 = [
   { type: "pick",    label: "PICK",    mapIndex: 1 },
   { type: "decider", label: "DECIDER", mapIndex: 2 },
 ];
+/* 발락대 승자조 Bo1: 맵 1개 (디사이더) */
+const VETO_STEPS_BALLAKDAE_WB = [
+  { type: "decider", label: "MAP", mapIndex: 0 },
+];
+/* 발락대 패자조 Bo1: 밴밴밴밴디사이더 (5스텝) */
+const VETO_STEPS_BALLAKDAE_LB1 = [
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "ban",     label: "BAN" },
+  { type: "decider", label: "DECIDER", mapIndex: 0 },
+];
 var _isBallakdaeVeto = (_MATCH_TOURNAMENT === 'ballakdae') && (['sf1','sf2','sflb'].indexOf(_MATCH_MID) !== -1);
+var _bMid = (_MATCH_TOURNAMENT === 'ballakdae') ? (_MATCH_MID || '') : '';
 const VETO_STEPS_BO5 = [
   { type: "ban",  label: "BAN" },
   { type: "ban",  label: "BAN" },
@@ -3869,7 +3889,11 @@ const VETO_STEPS_GF = [
   { type: "pick",    label: "PICK",    team: "B", mapIndex: 3 },
   { type: "decider", label: "DECIDER", mapIndex: 4 },
 ];
-var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : (_isBallakdaeVeto ? VETO_STEPS_BALLAKDAE_BO3 : VETO_STEPS_BO3);
+var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF
+  : _isBallakdaeVeto       ? VETO_STEPS_BALLAKDAE_BO3
+  : _bMid === 'wb'         ? VETO_STEPS_BALLAKDAE_WB
+  : _bMid === 'lb1'        ? VETO_STEPS_BALLAKDAE_LB1
+  : VETO_STEPS_BO3;
 
 /* 각 스텝에서 행동하는 팀 (A=상위조/선팀, B=상대팀) */
 function vetoStepTeam(idx, firstBan) {
@@ -4183,7 +4207,10 @@ function openVetoPicker(idx) {
 
 /* 밴픽 → 스코어보드 맵 이미지 자동 연동 */
 /* Bo3: 픽은 index 2, 3 / 디사이더 index 6 */
-var VETO_MAP_SLOT = _isBallakdaeVeto ? [2, 3, 4] : [2, 3, 6]; /* 발락대Bo3: [2,3,4] / 일반Bo3: [2,3,6] / Bo5: [2,3,4,5,6] */
+var VETO_MAP_SLOT = _isBallakdaeVeto ? [2, 3, 4]
+  : _bMid === 'wb'  ? [0]
+  : _bMid === 'lb1' ? [4]
+  : [2, 3, 6]; /* 발락대Bo3:[2,3,4] / wb:[0] / lb1:[4] / 일반Bo3:[2,3,6] / Bo5:[2,3,4,5,6] */
 
 function syncVetoMaps() {
   VETO_MAP_SLOT.forEach(function(stepIdx, i) {
