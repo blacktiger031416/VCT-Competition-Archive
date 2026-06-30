@@ -1475,6 +1475,7 @@
     /* 스크림: veto 숨기고 BL 맵 표시 / tournament: BL 맵 숨기고 veto 표시 */
     body.is-scrim  .mo-veto  { display: none !important; }
     body.is-tournament #bl-maps { display: none !important; }
+    body.is-ballakdae-veto .mo-veto-grid { grid-template-columns: repeat(5, 1fr); }
     #bl-maps { border-top: 1px solid rgba(26,26,46,0.08); padding: 10px 8px; }
     .bl-maps-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -2029,6 +2030,7 @@ var MATCH_TEAM_B = _params.get('teamB') || 'Sentinels';
 var MATCH_FROM  = _params.get('from')   || 'groups';
 /* 스크림 ↔ tournament 표시 분기 */
 document.body.classList.add(MATCH_FROM === 'tournament' ? 'is-tournament' : 'is-scrim');
+if (_isBallakdaeVeto) document.body.classList.add('is-ballakdae-veto');
 var LEAGUE      = 'ballakdae';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
