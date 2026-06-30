@@ -2277,7 +2277,7 @@ function changeMapCount(delta) {
 }
 
 function updateDiamonds() {
-  var count = Math.ceil(currentBo / 2); /* Bo1→1, Bo3→2, Bo5→3 */
+  var count = MATCH_FROM !== 'tournament' ? 3 : Math.ceil(currentBo / 2);
   var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
   var html = diamond.repeat(count);
   var ids = [];
