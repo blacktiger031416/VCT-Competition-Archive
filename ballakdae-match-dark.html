@@ -1756,7 +1756,7 @@
         <span class="mo-team-name-lg" id="mo-name-a">–</span>
       </div>
       <div class="mo-header-center">
-        <span class="mo-league-tag">VCT Champions 2026</span>
+        <span class="mo-league-tag" id="mo-league-tag">VCT Champions 2026</span>
         <span class="mo-vs-text">VS</span>
         <span class="mo-match-sub" id="mo-match-sub">–</span>
       </div>
@@ -2030,6 +2030,11 @@ var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
 var _MATCH_TOURNAMENT = _params.get('tournament') || 'ballakdae';
+(function(){
+  var _tagMap = { ballakdae: '발락대 공식 대회' };
+  var _el = document.getElementById('mo-league-tag');
+  if (_el && _tagMap[_MATCH_TOURNAMENT]) _el.textContent = _tagMap[_MATCH_TOURNAMENT];
+})();
 var _MATCH_GROUP      = _params.get('group')      || '';
 var _MATCH_IDX        = _params.get('idx')        || '';
 var _MATCH_MID        = _params.get('match')      || '';
