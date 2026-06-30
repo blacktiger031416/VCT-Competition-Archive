@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스네이크 드래프트 체험</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=Noto Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --bg: #f5f6fa;
+      --bg2: #eef0f5;
+      --card: #fff;
+      --text: #111;
+      --sub: #666;
+      --acc: #00b4a6;
+      --s1: #e8606a;
+      --s2: #c8901a;
+      --s3: #3db8b0;
+      --s4: #424242;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── 헤더 ── */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 56px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .site-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900;
+      color: var(--text); text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .guest-badge {
+      font-size: 11px; font-weight: 700;
+      background: #f3e8ff; color: #7c3aed;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── 컨테이너 ── */
+    .draft-shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    .draft-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 40px; font-weight: 900;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+    .draft-sub {
+      font-size: 14px; color: var(--sub);
+      margin-bottom: 36px;
+    }
+
+    /* ── 현재 픽 배너 ── */
+    .pick-banner {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 24px; border-radius: 14px;
+      background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+    .pick-label { font-size: 13px; font-weight: 700; color: var(--sub); }
+    .pick-info {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 900; letter-spacing: 0.04em;
+    }
+    .pick-slot-chip {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 900; color: #fff;
+    }
+    .btn {
+      padding: 8px 20px; border: none; border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.82; }
+    .btn-danger  { background: #e8606a; color: #fff; }
+
+    /* ── 스네이크 드래프트 테이블 ── */
+    .draft-table-wrap {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 24px; margin-bottom: 36px; overflow-x: auto;
+    }
+    .draft-table { width: 100%; border-collapse: separate; border-spacing: 8px; }
+
+    .draft-table thead th { text-align: center; padding: 6px 4px; }
+    .round-badge {
+      display: inline-block; background: var(--text); color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 900; letter-spacing: 0.05em;
+      padding: 6px 20px; border-radius: 10px; margin-bottom: 4px;
+    }
+    .round-dir { font-size: 11px; color: var(--sub); font-weight: 700; }
+
+    .slot-label { min-width: 60px; text-align: center; vertical-align: middle; }
+    .slot-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 10px 12px; border-radius: 10px; color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 13px; font-weight: 900; white-space: nowrap; min-width: 56px;
+    }
+
+    .pick-cell { vertical-align: top; padding: 0; }
+    .pick-box {
+      border-radius: 12px; border: 2.5px solid;
+      min-width: 120px; height: 88px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 8px; cursor: default;
+      transition: background 0.15s, transform 0.12s;
+      position: relative; overflow: hidden;
+    }
+    .pick-box.active-pick { box-shadow: 0 0 0 3px rgba(0,0,0,0.18); transform: scale(1.04); }
+    .pick-box.admin-pick { cursor: pointer; }
+    .pick-box.admin-pick:hover { opacity: 0.88; }
+
+    .pick-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; font-weight: 900; letter-spacing: 0.02em; line-height: 1;
+    }
+    .pick-player-name { font-size: 12px; font-weight: 700; margin-top: 4px; text-align: center; line-height: 1.2; }
+    .pick-player-thumb {
+      width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover; object-position: top; margin-bottom: 4px;
+    }
+
+    .s4 { color: #333; }
+    .pick-box.s1 { border-color: var(--s1); }
+    .pick-box.s2 { border-color: var(--s2); }
+    .pick-box.s3 { border-color: var(--s3); }
+    .pick-box.s4 { border-color: var(--s4); }
+    .pick-box.s1 .pick-num { color: var(--s1); }
+    .pick-box.s2 .pick-num { color: var(--s2); }
+    .pick-box.s3 .pick-num { color: var(--s3); }
+    .pick-box.s4 .pick-num { color: var(--s4); }
+    .pick-box.s1 .pick-player-name { color: var(--s1); }
+    .pick-box.s2 .pick-player-name { color: var(--s2); }
+    .pick-box.s3 .pick-player-name { color: var(--s3); }
+    .pick-box.s4 .pick-player-name { color: #333; }
+
+    /* ── 선수 풀 ── */
+    .player-pool-wrap {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 24px;
+    }
+    .pool-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .pool-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 0.04em; }
+    .pool-count { font-size: 13px; color: var(--sub); font-weight: 700; }
+    .pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+    .pool-player {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 10px 6px; border-radius: 10px; border: 2px solid transparent;
+      background: var(--bg); cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+    }
+    .pool-player:hover { border-color: var(--acc); background: #e8faf8; }
+    .pool-player.drafted { opacity: 0.25; cursor: default; pointer-events: none; }
+    .pool-player img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .pool-player-name { font-size: 11px; font-weight: 700; text-align: center; line-height: 1.2; }
+    .tier-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .tier-leader .tier-dot { background: #c9920a; }
+    .tier-main .tier-dot   { background: #0e9e96; }
+    .tier-rookie .tier-dot { background: #6d28d9; }
+
+    /* ── 선수 픽 모달 ── */
+    .pm-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; }
+    .pm-panel {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: min(540px, 100%); background: #fff;
+      border-radius: 20px 20px 0 0; padding: 24px 24px 32px; z-index: 201;
+    }
+    .pm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .pm-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; }
+    .pm-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--sub); }
+    .pm-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 8px; max-height: 300px; overflow-y: auto;
+    }
+    .pm-player {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 4px; border-radius: 10px; border: 2px solid transparent;
+      background: var(--bg); cursor: pointer; transition: border-color 0.15s;
+    }
+    .pm-player:hover { border-color: var(--acc); }
+    .pm-player img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .pm-player span { font-size: 10px; font-weight: 700; text-align: center; line-height: 1.3; }
+
+    /* ── 코치 풀 ── */
+    .coach-pool-wrap {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      padding: 20px 24px; margin-bottom: 20px;
+    }
+    .coach-pool-label {
+      font-size: 12px; font-weight: 700; color: var(--sub);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .coach-pool-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .coach-card {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 16px; border-radius: 14px; background: var(--bg);
+      border: 2px solid transparent; cursor: grab;
+      transition: border-color 0.15s, opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+      user-select: none;
+    }
+    .coach-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .coach-card.dragging { opacity: 0.35; transform: scale(0.95); }
+    .coach-card.assigned { opacity: 1; }
+    .coach-card img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .coach-card-name { font-size: 12px; font-weight: 900; }
+
+    .slot-chip.drop-over { filter: brightness(1.25); transform: scale(1.08); }
+    .slot-chip-inner { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .slot-coach-photo {
+      width: 30px; height: 30px; border-radius: 50%;
+      object-fit: cover; object-position: top; border: 2px solid rgba(255,255,255,0.7);
+    }
+    .slot-chip-name { font-size: 11px; font-weight: 900; line-height: 1; }
+    .slot-chip-num  { font-size: 10px; opacity: 0.75; line-height: 1; }
+
+    .done-banner {
+      text-align: center; padding: 20px;
+      background: linear-gradient(135deg, #00b4a6, #2dd4ca);
+      border-radius: 14px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 900; margin-bottom: 20px;
+    }
+
+    .info-note {
+      font-size: 12px; color: var(--sub);
+      text-align: center; padding: 32px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <span class="site-title">스네이크 드래프트</span>
+    <span class="guest-badge">체험 모드 · 내 브라우저에만 저장</span>
+  </header>
+
+  <div class="draft-shell">
+    <h1 class="draft-title">스네이크 드래프트</h1>
+    <p class="draft-sub">4슬롯 × 5라운드 · 총 20픽 · 홀수 라운드 정순 / 짝수 라운드 역순</p>
+
+    <!-- 코치 배정 영역 -->
+    <div class="coach-pool-wrap">
+      <div class="coach-pool-label">감독 — 슬롯에 드래그하여 배정</div>
+      <div class="coach-pool-row" id="coach-pool-row"></div>
+    </div>
+
+    <!-- 현재 픽 배너 + 초기화 버튼 행 -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div class="pick-banner" id="pick-banner" style="flex:1;margin-bottom:0;">
+        <span class="pick-label">현재 픽</span>
+        <span class="pick-info" id="banner-pick-info">—</span>
+        <span class="pick-slot-chip" id="banner-slot-chip"></span>
+      </div>
+      <div class="done-banner" id="done-banner" hidden style="flex:1;margin-bottom:0;">🎉 드래프트 완료!</div>
+      <button class="btn btn-danger" id="btn-reset">초기화</button>
+    </div>
+
+    <!-- 스네이크 드래프트 테이블 -->
+    <div class="draft-table-wrap">
+      <table class="draft-table" id="draft-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th><div class="round-badge">1R</div><div class="round-dir">정순↓</div></th>
+            <th><div class="round-badge">2R</div><div class="round-dir">역순↑</div></th>
+            <th><div class="round-badge">3R</div><div class="round-dir">정순↓</div></th>
+            <th><div class="round-badge">4R</div><div class="round-dir">역순↑</div></th>
+            <th><div class="round-badge">5R</div><div class="round-dir">정순↓</div></th>
+          </tr>
+        </thead>
+        <tbody id="draft-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 선수 풀 -->
+    <div class="player-pool-wrap" id="pool-wrap">
+      <div class="pool-head">
+        <span class="pool-title">선수 풀</span>
+        <span class="pool-count" id="pool-count"></span>
+      </div>
+      <div class="pool-grid" id="pool-grid"></div>
+    </div>
+
+    <p class="info-note">이 페이지의 드래프트 결과는 내 브라우저에만 저장되며 실제 대회에 영향을 주지 않습니다.</p>
+  </div>
+
+  <!-- 선수 픽 모달 -->
+  <div id="pm-modal" hidden>
+    <div class="pm-backdrop" id="pm-backdrop"></div>
+    <div class="pm-panel">
+      <div class="pm-head">
+        <span class="pm-title" id="pm-title">선수 선택</span>
+        <button class="pm-close" id="pm-close">✕</button>
+      </div>
+      <div class="pm-grid" id="pm-grid"></div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const STORAGE_KEY       = 'snake_draft_free';
+    const COACH_STORAGE_KEY = 'snake_draft_free_coaches';
+
+    const SLOTS = [
+      { name: '슬롯1', cls: 's1', bg: '#e8606a' },
+      { name: '슬롯2', cls: 's2', bg: '#c8901a' },
+      { name: '슬롯3', cls: 's3', bg: '#3db8b0' },
+      { name: '슬롯4', cls: 's4', bg: '#424242' },
+    ];
+
+    const COACHES = [
+      { name: '김돌돌', photo: 'Coach_김돌돌.jpg'  },
+      { name: '남봉',   photo: 'Coach_남봉.webp'   },
+      { name: '자몽뀨', photo: 'Coach_자몽뀨.jpg'  },
+      { name: '협준',   photo: 'Coach_협준.jpg'    },
+    ];
+
+    const GRID = [
+      [1,  8,  9, 16, 17],
+      [2,  7, 10, 15, 18],
+      [3,  6, 11, 14, 19],
+      [4,  5, 12, 13, 20],
+    ];
+
+    const PICK_SLOT = {};
+    GRID.forEach((row, si) => row.forEach(p => { PICK_SLOT[p] = si; }));
+
+    const PLAYERS = [
+      { name: '루아나',        tier: 'leader',  photo: 'leader_루아나.webp'  },
+      { name: '실프',          tier: 'leader',  photo: 'leader_실프.webp'    },
+      { name: '콕끼리',        tier: 'leader',  photo: 'leader_콕끼리.webp'  },
+      { name: '푸린',          tier: 'leader',  photo: 'leader_푸린.jpg'     },
+      { name: '감제이',        tier: 'main',    photo: 'main_감제이.png'     },
+      { name: '눈꽃',          tier: 'main',    photo: 'main_눈꽃.webp'      },
+      { name: '마뫄',          tier: 'main',    photo: 'main_마뫄.webp'      },
+      { name: '빅헤드',        tier: 'main',    photo: 'main_빅헤드.webp'    },
+      { name: '유네네',        tier: 'main',    photo: 'main_유네네.webp'    },
+      { name: '임나은',        tier: 'main',    photo: 'main_임나은.webp'    },
+      { name: '치킨쿤',        tier: 'main',    photo: 'main_치킨쿤.webp'    },
+      { name: '핑맨',          tier: 'main',    photo: 'main_핑맨.webp'      },
+      { name: '고수달',        tier: 'rookie',  photo: 'rookie_고수달.webp'  },
+      { name: '댕균',          tier: 'rookie',  photo: 'rookie_댕균.webp'    },
+      { name: '씨렉',          tier: 'rookie',  photo: 'rookie_씨렉.jpg'     },
+      { name: '아야',          tier: 'rookie',  photo: 'rookie_아야.webp'    },
+      { name: '유봄냥',        tier: 'rookie',  photo: 'rookie_유봄냥.webp'  },
+      { name: '이로나묭 치카', tier: 'rookie',  photo: 'rookie_이로나묭치카.webp' },
+      { name: '이무지',        tier: 'rookie',  photo: 'rookie_이무지.webp'  },
+      { name: '후추',          tier: 'rookie',  photo: 'rookie_후추.webp'    },
+    ];
+
+    let picks = {};
+    let coachAssign = {};
+    let _pendingPick = null;
+
+    function loadData()    { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
+    function saveData(d)   { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+    function loadCoaches() { try { return JSON.parse(localStorage.getItem(COACH_STORAGE_KEY) || '{}'); } catch { return {}; } }
+    function saveCoaches(d){ localStorage.setItem(COACH_STORAGE_KEY, JSON.stringify(d)); }
+
+    function imgPath(photo) { return '../images/' + photo; }
+
+    /* ── 코치 풀 ── */
+    function renderCoachPool() {
+      const row = document.getElementById('coach-pool-row');
+      row.innerHTML = '';
+      COACHES.forEach(c => {
+        const card = document.createElement('div');
+        const si = Object.entries(coachAssign).find(([,v]) => v === c.name)?.[0];
+        card.className = 'coach-card' + (si !== undefined ? ' assigned' : '');
+        card.dataset.coach = c.name;
+        if (si !== undefined) {
+          card.style.borderColor = SLOTS[+si].bg;
+          card.style.background  = SLOTS[+si].bg + '22';
+        }
+        card.innerHTML = `<img src="${imgPath(c.photo)}" alt="${c.name}" /><div class="coach-card-name">${c.name}</div>`;
+        card.draggable = true;
+        card.style.cursor = 'grab';
+        card.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', c.name); card.classList.add('dragging'); });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        row.appendChild(card);
+      });
+    }
+
+    function slotChipHTML(si) {
+      const coach = coachAssign[si] ? COACHES.find(c => c.name === coachAssign[si]) : null;
+      if (coach) {
+        return `<div class="slot-chip-inner">
+          <img class="slot-coach-photo" src="${imgPath(coach.photo)}" alt="${coach.name}" />
+          <div class="slot-chip-name">${coach.name}</div>
+          <div class="slot-chip-num">${SLOTS[si].name}</div>
+        </div>`;
+      }
+      return SLOTS[si].name;
+    }
+
+    function bindSlotDrops() {
+      document.querySelectorAll('.slot-chip[data-slot]').forEach(chip => {
+        const si = +chip.dataset.slot;
+        chip.addEventListener('dragover',  e => { e.preventDefault(); chip.classList.add('drop-over'); });
+        chip.addEventListener('dragleave', () => chip.classList.remove('drop-over'));
+        chip.addEventListener('drop', e => {
+          e.preventDefault();
+          chip.classList.remove('drop-over');
+          const coachName = e.dataTransfer.getData('text/plain');
+          Object.keys(coachAssign).forEach(k => { if (coachAssign[k] === coachName) delete coachAssign[k]; });
+          coachAssign[si] = coachName;
+          saveCoaches(coachAssign);
+          renderCoachPool();
+          renderSlotChips();
+        });
+      });
+    }
+
+    function renderSlotChips() {
+      document.querySelectorAll('.slot-chip[data-slot]').forEach(chip => {
+        chip.innerHTML = slotChipHTML(+chip.dataset.slot);
+      });
+    }
+
+    function currentPickNum() {
+      for (let i = 1; i <= 20; i++) { if (!picks[i]) return i; }
+      return null;
+    }
+
+    /* ── 렌더 ── */
+    function render() {
+      const cur = currentPickNum();
+
+      const banner     = document.getElementById('pick-banner');
+      const doneBanner = document.getElementById('done-banner');
+      if (cur === null) {
+        banner.hidden = true; doneBanner.hidden = false;
+        document.getElementById('pool-wrap').hidden = true;
+      } else {
+        banner.hidden = false; doneBanner.hidden = true;
+        document.getElementById('pool-wrap').hidden = false;
+        const si = PICK_SLOT[cur];
+        document.getElementById('banner-pick-info').textContent = `#${cur} 번째 픽`;
+        const chip = document.getElementById('banner-slot-chip');
+        chip.textContent = SLOTS[si].name;
+        chip.style.background = SLOTS[si].bg;
+      }
+
+      const tbody = document.getElementById('draft-tbody');
+      tbody.innerHTML = '';
+      GRID.forEach((row, si) => {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.className = 'slot-label';
+        th.innerHTML = `<span class="slot-chip" data-slot="${si}" style="background:${SLOTS[si].bg};cursor:pointer;transition:filter 0.15s,transform 0.15s;">${slotChipHTML(si)}</span>`;
+        tr.appendChild(th);
+        row.forEach(pNum => {
+          const td  = document.createElement('td');
+          td.className = 'pick-cell';
+          const player   = picks[pNum] ? PLAYERS.find(p => p.name === picks[pNum]) : null;
+          const isActive = pNum === cur;
+          const box = document.createElement('div');
+          box.className = `pick-box ${SLOTS[si].cls}${isActive ? ' active-pick' : ''}${!picks[pNum] ? ' admin-pick' : ''}`;
+          if (player) {
+            box.innerHTML = `<img class="pick-player-thumb" src="${imgPath(player.photo)}" alt="${player.name}" /><div class="pick-player-name">${player.name}</div>`;
+          } else {
+            box.innerHTML = `<div class="pick-num">#${pNum}</div>`;
+          }
+          if (!picks[pNum]) {
+            box.addEventListener('click', () => openModal(pNum));
+          }
+          if (picks[pNum]) {
+            box.title = '클릭하여 취소';
+            box.style.cursor = 'pointer';
+            box.addEventListener('click', () => { delete picks[pNum]; saveData(picks); render(); });
+          }
+          td.appendChild(box); tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      bindSlotDrops();
+
+      const drafted  = new Set(Object.values(picks));
+      const remaining = PLAYERS.filter(p => !drafted.has(p.name));
+      document.getElementById('pool-count').textContent = `${remaining.length}명 남음`;
+      const poolGrid = document.getElementById('pool-grid');
+      poolGrid.innerHTML = '';
+      PLAYERS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = `pool-player tier-${p.tier}${drafted.has(p.name) ? ' drafted' : ''}`;
+        card.innerHTML = `<img src="${imgPath(p.photo)}" alt="${p.name}" /><div class="pool-player-name">${p.name}</div><div class="tier-dot"></div>`;
+        if (!drafted.has(p.name)) {
+          card.addEventListener('click', () => { if (cur !== null) assignPick(cur, p.name); });
+        }
+        poolGrid.appendChild(card);
+      });
+    }
+
+    function assignPick(pickNum, playerName) {
+      picks[pickNum] = playerName;
+      saveData(picks);
+      closeModal();
+      render();
+    }
+
+    /* ── 픽 모달 ── */
+    function openModal(pickNum) {
+      _pendingPick = pickNum;
+      const si = PICK_SLOT[pickNum];
+      document.getElementById('pm-title').textContent = `#${pickNum} 픽 — ${SLOTS[si].name}`;
+      const drafted = new Set(Object.values(picks));
+      const grid = document.getElementById('pm-grid');
+      grid.innerHTML = '';
+      PLAYERS.filter(p => !drafted.has(p.name)).forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'pm-player';
+        btn.innerHTML = `<img src="${imgPath(p.photo)}" alt="${p.name}" /><span>${p.name}</span>`;
+        btn.addEventListener('click', () => assignPick(pickNum, p.name));
+        grid.appendChild(btn);
+      });
+      document.getElementById('pm-modal').hidden = false;
+    }
+
+    function closeModal() {
+      document.getElementById('pm-modal').hidden = true;
+      _pendingPick = null;
+    }
+
+    document.getElementById('pm-close').addEventListener('click', closeModal);
+    document.getElementById('pm-backdrop').addEventListener('click', closeModal);
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (!confirm('드래프트를 초기화할까요?')) return;
+      picks = {}; coachAssign = {};
+      saveData(picks); saveCoaches(coachAssign);
+      renderCoachPool(); render();
+    });
+
+    /* ── 초기화 ── */
+    picks       = loadData();
+    coachAssign = loadCoaches();
+    renderCoachPool();
+    render();
+  })();
+  </script>
+</body>
+</html>
