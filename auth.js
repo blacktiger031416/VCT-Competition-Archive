@@ -720,8 +720,8 @@
             location.reload();
           }
         })
-        .catch(function () {
-          errEl.textContent = "서버에 연결할 수 없습니다.";
+        .catch(function (err) {
+          errEl.textContent = "오류: " + (err && (err.message || err.name || String(err))) || "서버에 연결할 수 없습니다.";
           errEl.hidden = false;
           btn.disabled = false;
           btn.textContent = "로그인";
