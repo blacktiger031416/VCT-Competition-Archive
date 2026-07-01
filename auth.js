@@ -721,7 +721,12 @@
           }
         })
         .catch(function (err) {
-          errEl.textContent = "오류: " + (err && (err.message || err.name || String(err))) || "서버에 연결할 수 없습니다.";
+          var msg = err && (err.message || String(err)) || "";
+          if (msg.indexOf("quota") !== -1 || msg.indexOf("Quota") !== -1 || msg.indexOf("QUOTA") !== -1) {
+            errEl.textContent = "저장 공간 부족 — 콘솔에서 localStorage.clear() 실행 후 새로고침";
+          } else {
+            errEl.textContent = "서버에 연결할 수 없습니다.";
+          }
           errEl.hidden = false;
           btn.disabled = false;
           btn.textContent = "로그인";
