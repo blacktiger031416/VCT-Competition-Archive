@@ -109,6 +109,16 @@
     }
     document.getElementById('am-now-btn').addEventListener('click', applyNow);
     document.getElementById('am-live-btn').addEventListener('click', toggleLive);
+
+    /* 입력 지우면 localStorage에서도 제거 */
+    var idInput = document.getElementById('am-id-input');
+    if (idInput) {
+      idInput.addEventListener('change', function () {
+        if (!idInput.value.trim()) {
+          try { localStorage.removeItem(lsIdKey()); } catch (_) {}
+        }
+      });
+    }
   }
 
   /* ── 유틸 ── */
