@@ -204,6 +204,7 @@
     champions:            'Champions',
     'challengers-korea':  'Korea Challengers',
     'challengers-japan':  'Japan Challengers',
+    'ewc':                'EWC',
   };
   var TOURNAMENT_LABELS = {
     santiago: 'Santiago',
@@ -275,6 +276,7 @@
     if (l === 'masters' && t === 'london' && s === 'playoffs')  return  70;
     if (s === 'stage2')                                         return  80;
     if (s === 'stage2playoffs')                                 return  90;
+    if (l === 'ewc')                                                return  95;
     if (l === 'champions' && (s === 'swiss' || s === 'groupstage')) return 100;
     if (l === 'champions' && s === 'playoffs')                  return 110;
     /* Challengers Korea */
