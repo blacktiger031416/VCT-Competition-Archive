@@ -200,8 +200,9 @@
   <script src="./auth.js" defer></script>
   <script>
   (function () {
-    const SCRIM_KEY = 'ballakdae_scrim';
-    const COACH_KEY = 'ballakdae_draft_coaches';
+    const SCRIM_KEY  = 'ballakdae_scrim';
+    const COACH_KEY  = 'ballakdae_draft_coaches';
+    const TEAMS_KEY  = 'ballakdae_team_names';
 
     const SLOT_COLORS = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
     const SLOT_NAMES  = ['슬롯1', '슬롯2', '슬롯3', '슬롯4'];
@@ -233,6 +234,7 @@
     function loadScrim() { try { return JSON.parse(localStorage.getItem(SCRIM_KEY) || '{}'); } catch { return {}; } }
     function saveScrim() { localStorage.setItem(SCRIM_KEY, JSON.stringify(scrimData)); }
     function loadCoaches() { try { return JSON.parse(localStorage.getItem(COACH_KEY) || '{}'); } catch { return {}; } }
+    function loadTeamNames() { try { return JSON.parse(localStorage.getItem(TEAMS_KEY) || '{}'); } catch { return {}; } }
 
     function getCoachForSlot(slotIdx) {
       const coachName = coachAssign[slotIdx];
@@ -240,6 +242,8 @@
     }
 
     function getSlotLabel(slotIdx) {
+      const teamNames = loadTeamNames();
+      if (teamNames[slotIdx]) return teamNames[slotIdx];
       const c = getCoachForSlot(slotIdx);
       return c ? c.name : SLOT_NAMES[slotIdx];
     }

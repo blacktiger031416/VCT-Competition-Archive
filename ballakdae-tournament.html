@@ -168,20 +168,26 @@
   <script>
   (function() {
     var COACHES_KEY = 'ballakdae_draft_coaches';
+    var TEAMS_KEY   = 'ballakdae_team_names';
     var TOURNEY_KEY = 'ballakdae_tournament_v2';
     var SLOT_COLORS = ['#e8606a','#c8901a','#3db8b0','#424242'];
     var SLOT_NAMES  = ['슬롯1','슬롯2','슬롯3','슬롯4'];
 
     var coaches = {};
+    var teamNames = {};
     /* s0=SF1 위, s1=SF1 아래, s2=SF2 위, s3=SF2 아래 (슬롯 인덱스 0~3 또는 null) */
     var T = { s0:null, s1:null, s2:null, s3:null };
 
     function isAdmin() { return typeof window.vctIsAdmin==='function' && window.vctIsAdmin(); }
-    function getName(s) { return (s!==null&&s!==undefined) ? (coaches[s]||SLOT_NAMES[s]) : null; }
+    function getName(s) {
+      if (s===null||s===undefined) return null;
+      return teamNames[s] || coaches[s] || SLOT_NAMES[s];
+    }
     function getColor(s) { return (s!==null&&s!==undefined) ? (SLOT_COLORS[s]||'#ccc') : '#ccc'; }
 
     function load() {
-      try { coaches = JSON.parse(localStorage.getItem(COACHES_KEY)||'{}'); } catch(e){}
+      try { coaches   = JSON.parse(localStorage.getItem(COACHES_KEY)||'{}'); } catch(e){}
+      try { teamNames = JSON.parse(localStorage.getItem(TEAMS_KEY)||'{}');   } catch(e){}
       try { var sv=JSON.parse(localStorage.getItem(TOURNEY_KEY)||'{}'); if(sv) Object.assign(T,sv); } catch(e){}
     }
     function save() { localStorage.setItem(TOURNEY_KEY, JSON.stringify(T)); }
