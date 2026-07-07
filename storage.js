@@ -87,8 +87,11 @@
     });
   })();
 
-  /* 관리자 여부 (vct_admin_auth는 LOCAL_ONLY라 localStorage에서 직접 읽음) */
-  var _isAdmin = !!localStorage.getItem("vct_admin_auth");
+  /* 관리자 여부: 구형 vct_admin_auth 또는 신형 JWT vct_auth_user(role=admin) */
+  var _isAdmin = !!localStorage.getItem("vct_admin_auth") || (function () {
+    try { var u = JSON.parse(localStorage.getItem("vct_auth_user")); return !!(u && u.role === "admin"); }
+    catch (e) { return false; }
+  })();
 
   /* 편집 페이지(match-dark) 여부: 실시간 새로고침 제외 */
   var _isEditPage = window.location.pathname.indexOf("match-dark") !== -1;
