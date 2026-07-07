@@ -931,21 +931,22 @@
 
       // 팀 코치 사진 (이름 → 파일 경로)
       const STAFF_PHOTOS = {
-        '거갈없':  './images/거갈없.jpeg',
-        '크포':    './images/크포.jpeg',
-        'TS':      './images/TS_유태석.jpeg',
-        '아카메':  './images/아카메.jpeg',
-        '도로시':  './images/도로시.jpg',
-        '소가테':  './images/소가테.jpg',
-        '김뚜띠':  './images/김뚜띠.jpeg',
+        '거긴 갈 수 없다': './images/거갈없.jpeg',
+        '크포':            './images/크포.jpeg',
+        'TS':              './images/TS_유태석.jpeg',
+        '아카메':          './images/아카메.jpeg',
+        '도로시':          './images/도로시.jpg',
+        '소가테':          './images/소가테.jpg',
+        '김뚜띠':          './images/김뚜띠.jpeg',
+        '너불':            './images/너불.webp',
       };
 
       // 감독 이름 → 해당 팀 기본 코치 배정 (코치 배정이 비어있을 때만 적용)
       const DEFAULT_STAFF_BY_COACH = {
-        '협준':   ['소가테', '김뚜띠'],
-        '김돌돌': ['도로시', '아카메'],
-        '자몽뀨': ['거갈없', '크포'],
-        '남봉':   ['TS',     ''],
+        '협준':   ['소가테',         '김뚜띠'],
+        '김돌돌': ['도로시',         '아카메'],
+        '자몽뀨': ['거긴 갈 수 없다','크포'  ],
+        '남봉':   ['TS',             '너불'  ],
       };
 
       function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
@@ -955,6 +956,21 @@
       function getPlayerPhoto(name) { const p = ALL_PLAYERS.find(x => x.name === name); return p ? p.photo : null; }
       function getCoachPhoto(name)  { const c = COACHES.find(x => x.name === name); return c ? c.photo : null; }
       function getStaffPhoto(name)  { return STAFF_PHOTOS[name] || null; }
+
+      // 이름 변경 마이그레이션 (저장된 구이름 → 새이름)
+      function migrateStaffNames() {
+        const RENAME = { '거갈없': '거긴 갈 수 없다' };
+        const d = loadJSON(STAFF_KEY, '{}');
+        let changed = false;
+        Object.keys(d).forEach(function(si) {
+          if (!Array.isArray(d[si])) return;
+          d[si] = d[si].map(function(name) {
+            if (RENAME[name]) { changed = true; return RENAME[name]; }
+            return name;
+          });
+        });
+        if (changed) save(STAFF_KEY, d);
+      }
 
       // 코치 배정이 비어있는 슬롯에만 기본값 적용
       function initDefaultStaff() {
@@ -1213,6 +1229,7 @@
         document.getElementById('tr-modal').hidden = true;
       });
 
+      migrateStaffNames();
       initDefaultStaff();
       renderTeams();
       window.addEventListener('auth-state-change', function () {
