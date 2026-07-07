@@ -2720,6 +2720,37 @@ function _loadRoster(teamFullName, code) {
 TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
 TEAM_ROSTERS[TEAM_B_CODE] = _loadRoster(MATCH_TEAM_B, TEAM_B_CODE);
 
+// 발락대 드래프트 로스터 자동 반영
+(function() {
+  try {
+    var _draftPicks   = JSON.parse(localStorage.getItem('ballakdae_draft')        || '{}');
+    var _coachAssign  = JSON.parse(localStorage.getItem('ballakdae_draft_coaches') || '{}');
+    var _teamNames    = JSON.parse(localStorage.getItem('ballakdae_team_names')    || '{}');
+    var _DRAFT_GRID   = [[1,8,9,16,17],[2,7,10,15,18],[3,6,11,14,19],[4,5,12,13,20]];
+
+    function _findSlot(label) {
+      for (var si = 0; si < 4; si++) {
+        if (_teamNames[si] && _teamNames[si] === label) return si;
+      }
+      for (var si = 0; si < 4; si++) {
+        if (_coachAssign[si] === label) return si;
+      }
+      return null;
+    }
+    function _draftRoster(label) {
+      var si = _findSlot(label);
+      if (si === null) return null;
+      var r = _DRAFT_GRID[si].map(function(p) { return _draftPicks[p]; }).filter(Boolean);
+      return r.length ? r : null;
+    }
+
+    var rA = _draftRoster(MATCH_TEAM_A);
+    if (rA) TEAM_ROSTERS[TEAM_A_CODE] = rA;
+    var rB = _draftRoster(MATCH_TEAM_B);
+    if (rB) TEAM_ROSTERS[TEAM_B_CODE] = rB;
+  } catch(e) {}
+})();
+
 var maps = [
   createBlankMapData(0),
   createBlankMapData(1),
