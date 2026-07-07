@@ -929,12 +929,49 @@
         { name: '협준',   photo: './images/Coach_협준.jpg'    },
       ];
 
+      // 팀 코치 사진 (이름 → 파일 경로)
+      const STAFF_PHOTOS = {
+        '거갈없':  './images/거갈없.jpeg',
+        '크포':    './images/크포.jpeg',
+        'TS':      './images/TS_유태석.jpeg',
+        '아카메':  './images/아카메.jpeg',
+        '도로시':  './images/도로시.jpg',
+        '소가테':  './images/소가테.jpg',
+        '김뚜띠':  './images/김뚜띠.jpeg',
+      };
+
+      // 감독 이름 → 해당 팀 기본 코치 배정 (코치 배정이 비어있을 때만 적용)
+      const DEFAULT_STAFF_BY_COACH = {
+        '협준':   ['소가테', '김뚜띠'],
+        '김돌돌': ['도로시', '아카메'],
+        '자몽뀨': ['거갈없', '크포'],
+        '남봉':   ['TS',     ''],
+      };
+
       function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
       function loadJSON(k, def) { try { return JSON.parse(localStorage.getItem(k) || def); } catch { return JSON.parse(def); } }
       function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
 
       function getPlayerPhoto(name) { const p = ALL_PLAYERS.find(x => x.name === name); return p ? p.photo : null; }
       function getCoachPhoto(name)  { const c = COACHES.find(x => x.name === name); return c ? c.photo : null; }
+      function getStaffPhoto(name)  { return STAFF_PHOTOS[name] || null; }
+
+      // 코치 배정이 비어있는 슬롯에만 기본값 적용
+      function initDefaultStaff() {
+        const stored      = loadJSON(STAFF_KEY, '{}');
+        const coachAssign = loadJSON(COACH_KEY, '{}');
+        let changed = false;
+        for (let si = 0; si < 4; si++) {
+          const already = stored[si];
+          if (Array.isArray(already) && (already[0] || already[1])) continue;
+          const coachName = coachAssign[si];
+          if (coachName && DEFAULT_STAFF_BY_COACH[coachName]) {
+            stored[si] = DEFAULT_STAFF_BY_COACH[coachName].slice();
+            changed = true;
+          }
+        }
+        if (changed) save(STAFF_KEY, stored);
+      }
 
       function memberEl(photoSrc, name, role) {
         const wrap = document.createElement('div');
@@ -1115,29 +1152,54 @@
         body.appendChild(t3);
 
         const staffRow = document.createElement('div');
-        staffRow.className = 'tr-staff-row';
+        staffRow.className = 'tr-member-row';
         for (let ci = 0; ci < 2; ci++) {
-          const slot = document.createElement('div');
-          slot.className = 'tr-staff-slot';
-          slot.innerHTML = '<span class="tr-staff-icon">🎯</span>';
-          const input = document.createElement('input');
-          input.className = 'tr-staff-input';
-          input.type = 'text';
-          input.placeholder = '코치 이름';
-          input.value = teamStaff[ci] || '';
-          input.readOnly = !admin;
-          if (admin) input.dataset.editable = 'true';
           (function (capturedCi) {
-            input.addEventListener('change', function () {
-              if (!admin) return;
-              const d = loadJSON(STAFF_KEY, '{}');
-              if (!Array.isArray(d[si])) d[si] = ['', ''];
-              d[si][capturedCi] = input.value.trim();
-              save(STAFF_KEY, d);
-            });
+            const staffName = teamStaff[capturedCi] || '';
+            const staffPhoto = getStaffPhoto(staffName);
+
+            if (staffName) {
+              const m = memberEl(staffPhoto, staffName, 'COACH');
+              if (admin) {
+                const editBtn = document.createElement('button');
+                editBtn.style.cssText = 'display:block;margin-top:4px;background:none;border:none;font-size:11px;color:rgba(0,0,0,0.3);cursor:pointer;font-family:inherit;padding:0;';
+                editBtn.textContent = '✏️ 수정';
+                editBtn.addEventListener('click', function () {
+                  const val = prompt('코치 이름 입력 (비워두면 제거):', staffName);
+                  if (val === null) return;
+                  const d = loadJSON(STAFF_KEY, '{}');
+                  if (!Array.isArray(d[si])) d[si] = ['', ''];
+                  d[si][capturedCi] = val.trim();
+                  save(STAFF_KEY, d);
+                  openModal(si);
+                });
+                m.appendChild(editBtn);
+              }
+              staffRow.appendChild(m);
+            } else {
+              const ph = document.createElement('div');
+              ph.className = 'tr-member';
+              if (admin) {
+                ph.style.cursor = 'pointer';
+                ph.innerHTML = '<div class="tr-member-photo-ph" style="border:2px dashed rgba(0,0,0,0.15);font-size:20px;color:rgba(0,0,0,0.2);">+</div>'
+                             + '<div class="tr-member-name" style="color:rgba(0,0,0,0.25);">추가</div>';
+                ph.addEventListener('click', function () {
+                  const val = prompt('코치 이름 입력:');
+                  if (!val || !val.trim()) return;
+                  const d = loadJSON(STAFF_KEY, '{}');
+                  if (!Array.isArray(d[si])) d[si] = ['', ''];
+                  d[si][capturedCi] = val.trim();
+                  save(STAFF_KEY, d);
+                  openModal(si);
+                });
+              } else {
+                ph.innerHTML = '<div class="tr-member-photo-ph">👤</div>'
+                             + '<div class="tr-member-name" style="color:rgba(0,0,0,0.25);">미정</div>'
+                             + '<div class="tr-member-role">COACH</div>';
+              }
+              staffRow.appendChild(ph);
+            }
           })(ci);
-          slot.appendChild(input);
-          staffRow.appendChild(slot);
         }
         body.appendChild(staffRow);
 
@@ -1151,8 +1213,12 @@
         document.getElementById('tr-modal').hidden = true;
       });
 
+      initDefaultStaff();
       renderTeams();
-      window.addEventListener('auth-state-change', renderTeams);
+      window.addEventListener('auth-state-change', function () {
+        initDefaultStaff();
+        renderTeams();
+      });
     })();
     </script>
   </body>
