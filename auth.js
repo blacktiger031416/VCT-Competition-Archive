@@ -1417,4 +1417,7 @@
   /* ── 전역 노출 ── */
   window.vctIsAdmin = isAdmin;
   window.vctGetUser = getCachedUser;
+
+  /* ── 초기 auth 상태 알림 (defer 완료 후 인라인 스크립트에 admin 상태 전파) ── */
+  window.dispatchEvent(new CustomEvent("auth-state-change"));
 })();
