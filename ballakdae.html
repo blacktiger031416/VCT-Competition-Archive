@@ -395,6 +395,176 @@
         text-align: center;
       }
 
+      /* ── 팀 카드 ─────────────────────────────── */
+      .teams-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .team-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.18s, box-shadow 0.18s;
+        border-top: 4px solid #ccc;
+        display: flex;
+        flex-direction: column;
+      }
+      .team-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.14); }
+      .team-logo-wrap {
+        padding: 24px 20px 14px;
+        display: flex;
+        justify-content: center;
+      }
+      .team-logo-img {
+        width: 88px; height: 88px;
+        border-radius: 50%;
+        object-fit: contain;
+        background: #f4f4f4;
+      }
+      .team-logo-placeholder {
+        width: 88px; height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f0f0f4, #e4e4ec);
+        border: 2px dashed rgba(0,0,0,0.10);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 26px; font-weight: 900;
+        color: rgba(0,0,0,0.18);
+      }
+      .team-name-row {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 0 16px 6px;
+      }
+      .team-name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 20px; font-weight: 900;
+        color: #111; letter-spacing: 0.04em; text-align: center;
+      }
+      .team-edit-btn {
+        background: none; border: none; cursor: pointer;
+        font-size: 12px; color: rgba(0,0,0,0.22); padding: 2px 4px;
+        border-radius: 4px; transition: color 0.15s; display: none;
+      }
+      .team-edit-btn:hover { color: rgba(0,0,0,0.55); }
+      .admin-mode .team-edit-btn { display: inline-flex; }
+      .team-meta {
+        text-align: center; padding: 0 16px 6px;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 12px; color: rgba(0,0,0,0.38); line-height: 1.6;
+      }
+      .team-action-btn {
+        display: block;
+        margin: auto 12px 12px;
+        padding: 8px 12px;
+        background: rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.09);
+        border-radius: 10px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px; font-weight: 700;
+        color: rgba(0,0,0,0.38); cursor: pointer; text-align: center;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        transition: background 0.14s, color 0.14s;
+      }
+      .team-action-btn:hover { background: rgba(0,0,0,0.07); color: rgba(0,0,0,0.6); }
+      .team-logo-set-btn {
+        display: none;
+        margin: 0 12px 14px;
+        padding: 6px 12px;
+        background: transparent;
+        border: 1px dashed rgba(0,0,0,0.14);
+        border-radius: 8px;
+        font-size: 11px; color: rgba(0,0,0,0.3);
+        cursor: pointer; text-align: center; width: calc(100% - 24px);
+        font-family: 'Barlow Condensed', sans-serif; font-weight: 600; letter-spacing: 0.06em;
+      }
+      .admin-mode .team-logo-set-btn { display: block; }
+
+      /* ── 팀 로스터 모달 ──────────────────── */
+      .tr-modal { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; }
+      .tr-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.52); }
+      .tr-panel {
+        position: relative; background: #fff; border-radius: 20px;
+        width: min(660px, 94vw); max-height: 88vh;
+        display: flex; flex-direction: column; overflow: hidden;
+        box-shadow: 0 20px 64px rgba(0,0,0,0.22);
+      }
+      .tr-head {
+        display: flex; align-items: center; gap: 14px;
+        padding: 18px 20px; border-bottom: 1px solid rgba(0,0,0,0.07);
+        flex-shrink: 0;
+      }
+      .tr-head-logo-wrap { flex-shrink: 0; }
+      .tr-head-logo-img { width: 44px; height: 44px; border-radius: 50%; object-fit: contain; background: #f4f4f4; }
+      .tr-head-logo-ph {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: rgba(0,0,0,0.06);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 16px; font-weight: 900; color: rgba(0,0,0,0.3);
+      }
+      .tr-head h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 24px; font-weight: 900; color: #111;
+        letter-spacing: 0.04em; flex: 1;
+      }
+      .tr-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #aaa; padding: 4px 8px; line-height: 1; }
+      .tr-body { overflow-y: auto; flex: 1; padding: 22px 20px 24px; }
+      .tr-section-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+        text-transform: uppercase; color: rgba(0,0,0,0.28);
+        margin: 0 0 14px;
+      }
+      .tr-section-title + .tr-section-title { margin-top: 22px; }
+      .tr-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 20px 0 20px; }
+      .tr-member-row { display: flex; flex-wrap: wrap; gap: 14px; }
+      .tr-member {
+        display: flex; flex-direction: column; align-items: center; gap: 5px;
+        width: 78px; cursor: default;
+      }
+      .tr-member-photo {
+        width: 70px; height: 70px; border-radius: 50%;
+        object-fit: cover; object-position: top;
+        border: 2.5px solid rgba(0,0,0,0.08); background: #f0f0f0;
+        display: block;
+      }
+      .tr-member-photo-ph {
+        width: 70px; height: 70px; border-radius: 50%;
+        background: linear-gradient(135deg, #f0f0f4, #e4e4ec);
+        border: 2.5px solid rgba(0,0,0,0.07);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px;
+      }
+      .tr-member-name {
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 11px; font-weight: 700; color: #333;
+        text-align: center; word-break: keep-all; line-height: 1.25;
+      }
+      .tr-member-role {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+        text-transform: uppercase; color: rgba(0,0,0,0.28);
+      }
+      .tr-staff-row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .tr-staff-slot {
+        display: flex; align-items: center; gap: 8px;
+        padding: 9px 14px; background: #f8f8f8;
+        border-radius: 10px; border: 1px solid rgba(0,0,0,0.07);
+        min-width: 160px; flex: 1;
+      }
+      .tr-staff-icon { font-size: 16px; flex-shrink: 0; }
+      .tr-staff-input {
+        border: none; background: transparent;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 13px; font-weight: 700; color: #333;
+        width: 100%; outline: none; cursor: default;
+      }
+      .tr-staff-input[data-editable="true"] { cursor: text; }
+      .tr-staff-input::placeholder { color: rgba(0,0,0,0.22); font-weight: 500; }
+
       /* ── TBD 플레이스홀더 ───────────────────── */
       .tbd-block {
         display: flex;
@@ -515,6 +685,14 @@
         </div>
       </section>
 
+      <section aria-labelledby="teams-title" style="margin-bottom:56px;">
+        <div class="section-heading">
+          <p class="eyebrow">Teams</p>
+          <h2 id="teams-title">2026 발락대 팀 구성</h2>
+        </div>
+        <div class="teams-grid" id="teams-grid"></div>
+      </section>
+
       <section aria-labelledby="coaches-title" style="margin-bottom:56px;">
         <div class="section-heading">
           <p class="eyebrow">Coaches</p>
@@ -577,6 +755,19 @@
       </section>
 
     </main>
+
+    <!-- 팀 로스터 모달 -->
+    <div class="tr-modal" id="tr-modal" hidden>
+      <div class="tr-backdrop" id="tr-backdrop"></div>
+      <div class="tr-panel">
+        <div class="tr-head" id="tr-head">
+          <div class="tr-head-logo-wrap" id="tr-head-logo-wrap"></div>
+          <h3 id="tr-title"></h3>
+          <button class="tr-close" id="tr-close">✕</button>
+        </div>
+        <div class="tr-body" id="tr-body"></div>
+      </div>
+    </div>
 
     <!-- 에이전트 피커 모달 -->
     <div class="ap-modal" id="ap-modal" hidden>
@@ -687,6 +878,281 @@
       window.addEventListener('load', function () {
         if (isAdmin()) bindAdminSlots();
       });
+    })();
+    </script>
+    <script>
+    (function () {
+      const TEAMS_KEY = 'ballakdae_team_names';
+      const LOGOS_KEY = 'ballakdae_team_logos';
+      const STAFF_KEY = 'ballakdae_team_staff';
+      const DRAFT_KEY = 'ballakdae_draft';
+      const COACH_KEY = 'ballakdae_draft_coaches';
+
+      const SLOT_COLORS  = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
+      const SLOT_LABELS  = ['팀 1', '팀 2', '팀 3', '팀 4'];
+
+      // 드래프트 GRID: 슬롯별 픽 번호(1-20)
+      const GRID = [
+        [1,  8,  9, 16, 17],
+        [2,  7, 10, 15, 18],
+        [3,  6, 11, 14, 19],
+        [4,  5, 12, 13, 20],
+      ];
+
+      const ALL_PLAYERS = [
+        { name: '루아나',        photo: './images/leader_루아나.webp'        },
+        { name: '실프',          photo: './images/leader_실프.webp'          },
+        { name: '콕끼리',        photo: './images/leader_콕끼리.webp'        },
+        { name: '푸린',          photo: './images/leader_푸린.jpg'           },
+        { name: '감제이',        photo: './images/main_감제이.png'           },
+        { name: '눈꽃',          photo: './images/main_눈꽃.webp'            },
+        { name: '마뫄',          photo: './images/main_마뫄.webp'            },
+        { name: '빅헤드',        photo: './images/main_빅헤드.webp'          },
+        { name: '유네네',        photo: './images/main_유네네.webp'          },
+        { name: '임나은',        photo: './images/main_임나은.webp'          },
+        { name: '치킨쿤',        photo: './images/main_치킨쿤.webp'          },
+        { name: '핑맨',          photo: './images/main_핑맨.webp'            },
+        { name: '고수달',        photo: './images/rookie_고수달.webp'        },
+        { name: '댕균',          photo: './images/rookie_댕균.webp'          },
+        { name: '씨렉',          photo: './images/rookie_씨렉.jpg'           },
+        { name: '아야',          photo: './images/rookie_아야.webp'          },
+        { name: '유봄냥',        photo: './images/rookie_유봄냥.webp'        },
+        { name: '이로나묭 치카', photo: './images/rookie_이로나묭치카.webp'  },
+        { name: '이무지',        photo: './images/rookie_이무지.webp'        },
+        { name: '후추',          photo: './images/rookie_후추.webp'          },
+      ];
+
+      const COACHES = [
+        { name: '김돌돌', photo: './images/Coach_김돌돌.jpg'  },
+        { name: '남봉',   photo: './images/Coach_남봉.webp'   },
+        { name: '자몽뀨', photo: './images/Coach_자몽뀨.jpg'  },
+        { name: '협준',   photo: './images/Coach_협준.jpg'    },
+      ];
+
+      function isAdmin() { return typeof window.vctIsAdmin === 'function' && window.vctIsAdmin(); }
+      function loadJSON(k, def) { try { return JSON.parse(localStorage.getItem(k) || def); } catch { return JSON.parse(def); } }
+      function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+      function getPlayerPhoto(name) { const p = ALL_PLAYERS.find(x => x.name === name); return p ? p.photo : null; }
+      function getCoachPhoto(name)  { const c = COACHES.find(x => x.name === name); return c ? c.photo : null; }
+
+      function memberEl(photoSrc, name, role) {
+        const wrap = document.createElement('div');
+        wrap.className = 'tr-member';
+        if (photoSrc) {
+          wrap.innerHTML = '<img class="tr-member-photo" src="' + photoSrc + '" alt="' + name + '" />';
+        } else {
+          wrap.innerHTML = '<div class="tr-member-photo-ph">👤</div>';
+        }
+        wrap.innerHTML += '<div class="tr-member-name">' + name + '</div>';
+        if (role) wrap.innerHTML += '<div class="tr-member-role">' + role + '</div>';
+        return wrap;
+      }
+
+      /* ── 팀 카드 렌더 ──────────────────────────── */
+      function renderTeams() {
+        const names       = loadJSON(TEAMS_KEY, '{}');
+        const logos       = loadJSON(LOGOS_KEY, '{}');
+        const picks       = loadJSON(DRAFT_KEY, '{}');
+        const coachAssign = loadJSON(COACH_KEY, '{}');
+        const admin       = isAdmin();
+
+        if (admin) document.body.classList.add('admin-mode');
+        else        document.body.classList.remove('admin-mode');
+
+        const grid = document.getElementById('teams-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        SLOT_COLORS.forEach(function (color, si) {
+          const name       = names[si] || SLOT_LABELS[si];
+          const logo       = logos[si];
+          const coachName  = coachAssign[si];
+          const playerList = GRID[si].map(function (p) { return picks[p]; }).filter(Boolean);
+
+          const card = document.createElement('div');
+          card.className = 'team-card';
+          card.style.borderTopColor = color;
+
+          /* 로고 */
+          const logoWrap = document.createElement('div');
+          logoWrap.className = 'team-logo-wrap';
+          logoWrap.innerHTML = logo
+            ? '<img class="team-logo-img" src="' + logo + '" alt="' + name + '" />'
+            : '<div class="team-logo-placeholder">T' + (si + 1) + '</div>';
+          card.appendChild(logoWrap);
+
+          /* 팀 이름 */
+          const nameRow = document.createElement('div');
+          nameRow.className = 'team-name-row';
+          const nameEl = document.createElement('span');
+          nameEl.className = 'team-name';
+          nameEl.textContent = name;
+          nameRow.appendChild(nameEl);
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'team-edit-btn';
+          editBtn.title = '팀 이름 수정';
+          editBtn.textContent = '✏️';
+          editBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const val = prompt('팀 이름 입력:', name);
+            if (val !== null && val.trim()) {
+              const d = loadJSON(TEAMS_KEY, '{}');
+              d[si] = val.trim();
+              save(TEAMS_KEY, d);
+              renderTeams();
+            }
+          });
+          nameRow.appendChild(editBtn);
+          card.appendChild(nameRow);
+
+          /* 감독·선수 수 */
+          const meta = document.createElement('div');
+          meta.className = 'team-meta';
+          meta.innerHTML =
+            (coachName ? '감독 · <strong>' + coachName + '</strong>' : '감독 미배정') +
+            '<br>' + (playerList.length ? '선수 ' + playerList.length + ' / 5명' : '드래프트 미완료');
+          card.appendChild(meta);
+
+          /* 로스터 보기 버튼 */
+          const seeBtn = document.createElement('button');
+          seeBtn.className = 'team-action-btn';
+          seeBtn.textContent = 'View Roster';
+          seeBtn.addEventListener('click', function (e) { e.stopPropagation(); openModal(si); });
+          card.appendChild(seeBtn);
+
+          /* Admin: 로고 URL 설정 */
+          const logoSetBtn = document.createElement('button');
+          logoSetBtn.className = 'team-logo-set-btn';
+          logoSetBtn.textContent = '로고 URL 설정';
+          logoSetBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const logos2 = loadJSON(LOGOS_KEY, '{}');
+            const url = prompt('로고 이미지 URL 입력 (비워두면 제거):', logos2[si] || '');
+            if (url !== null) {
+              const d = loadJSON(LOGOS_KEY, '{}');
+              if (url.trim()) d[si] = url.trim(); else delete d[si];
+              save(LOGOS_KEY, d);
+              renderTeams();
+            }
+          });
+          card.appendChild(logoSetBtn);
+
+          card.addEventListener('click', function () { openModal(si); });
+          grid.appendChild(card);
+        });
+      }
+
+      /* ── 로스터 모달 ───────────────────────────── */
+      function openModal(si) {
+        const names       = loadJSON(TEAMS_KEY, '{}');
+        const logos       = loadJSON(LOGOS_KEY, '{}');
+        const staff       = loadJSON(STAFF_KEY, '{}');
+        const picks       = loadJSON(DRAFT_KEY, '{}');
+        const coachAssign = loadJSON(COACH_KEY, '{}');
+        const admin       = isAdmin();
+
+        const name       = names[si] || SLOT_LABELS[si];
+        const logo       = logos[si];
+        const color      = SLOT_COLORS[si];
+        const coachName  = coachAssign[si];
+        const playerList = GRID[si].map(function (p) { return picks[p]; }).filter(Boolean);
+        const teamStaff  = staff[si] || ['', ''];
+
+        /* 헤더 */
+        document.getElementById('tr-head').style.background =
+          'linear-gradient(135deg,' + color + '18 0%,transparent 70%)';
+        document.getElementById('tr-head-logo-wrap').innerHTML = logo
+          ? '<img class="tr-head-logo-img" src="' + logo + '" alt="' + name + '" />'
+          : '<div class="tr-head-logo-ph" style="background:' + color + '22;color:' + color + ';">T' + (si + 1) + '</div>';
+        document.getElementById('tr-title').textContent = name;
+
+        /* 바디 */
+        const body = document.getElementById('tr-body');
+        body.innerHTML = '';
+
+        /* ── 감독 ── */
+        const t1 = document.createElement('p');
+        t1.className = 'tr-section-title';
+        t1.textContent = '감독';
+        body.appendChild(t1);
+
+        const coachRow = document.createElement('div');
+        coachRow.className = 'tr-member-row';
+        if (coachName) {
+          coachRow.appendChild(memberEl(getCoachPhoto(coachName), coachName, 'HEAD COACH'));
+        } else {
+          coachRow.innerHTML = '<p style="color:rgba(0,0,0,0.22);font-size:13px;font-family:Noto Sans KR,sans-serif;">감독 미배정</p>';
+        }
+        body.appendChild(coachRow);
+
+        /* ── 선수 ── */
+        const div1 = document.createElement('div'); div1.className = 'tr-divider';
+        body.appendChild(div1);
+        const t2 = document.createElement('p');
+        t2.className = 'tr-section-title';
+        t2.textContent = '선수 ' + playerList.length + ' / 5';
+        body.appendChild(t2);
+
+        const playerRow = document.createElement('div');
+        playerRow.className = 'tr-member-row';
+        if (playerList.length) {
+          playerList.forEach(function (pName) {
+            playerRow.appendChild(memberEl(getPlayerPhoto(pName), pName, null));
+          });
+        } else {
+          playerRow.innerHTML = '<p style="color:rgba(0,0,0,0.22);font-size:13px;font-family:Noto Sans KR,sans-serif;">드래프트 미완료</p>';
+        }
+        body.appendChild(playerRow);
+
+        /* ── 코치 ── */
+        const div2 = document.createElement('div'); div2.className = 'tr-divider';
+        body.appendChild(div2);
+        const t3 = document.createElement('p');
+        t3.className = 'tr-section-title';
+        t3.textContent = '코치';
+        body.appendChild(t3);
+
+        const staffRow = document.createElement('div');
+        staffRow.className = 'tr-staff-row';
+        for (let ci = 0; ci < 2; ci++) {
+          const slot = document.createElement('div');
+          slot.className = 'tr-staff-slot';
+          slot.innerHTML = '<span class="tr-staff-icon">🎯</span>';
+          const input = document.createElement('input');
+          input.className = 'tr-staff-input';
+          input.type = 'text';
+          input.placeholder = '코치 이름';
+          input.value = teamStaff[ci] || '';
+          input.readOnly = !admin;
+          if (admin) input.dataset.editable = 'true';
+          (function (capturedCi) {
+            input.addEventListener('change', function () {
+              if (!admin) return;
+              const d = loadJSON(STAFF_KEY, '{}');
+              if (!Array.isArray(d[si])) d[si] = ['', ''];
+              d[si][capturedCi] = input.value.trim();
+              save(STAFF_KEY, d);
+            });
+          })(ci);
+          slot.appendChild(input);
+          staffRow.appendChild(slot);
+        }
+        body.appendChild(staffRow);
+
+        document.getElementById('tr-modal').hidden = false;
+      }
+
+      document.getElementById('tr-close').addEventListener('click', function () {
+        document.getElementById('tr-modal').hidden = true;
+      });
+      document.getElementById('tr-backdrop').addEventListener('click', function () {
+        document.getElementById('tr-modal').hidden = true;
+      });
+
+      renderTeams();
+      window.addEventListener('auth-state-change', renderTeams);
     })();
     </script>
   </body>
