@@ -178,6 +178,61 @@
     .sb-diamond.filled { background: rgba(255,255,255,0.88); border-color: #fff; }
 
     /* ── ROUND TRACKER ───────────────────────── */
+    /* ── 맵 사이드 선택 바 ── */
+    .map-side-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 20px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 10px;
+    }
+    .map-side-team {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .map-side-team-b { flex-direction: row-reverse; }
+    .map-side-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.65);
+      white-space: nowrap;
+    }
+    .map-side-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+    .badge-atk { background: rgba(232,78,120,0.2); color: #e84e78; border: 1px solid rgba(232,78,120,0.35); }
+    .badge-def { background: rgba(61,184,176,0.15); color: #3db8b0; border: 1px solid rgba(61,184,176,0.3); }
+    .badge-none { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.1); }
+    .map-side-toggle {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      color: rgba(255,255,255,0.45);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      padding: 4px 12px;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .map-side-toggle:hover { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.8); }
+
     .rt-wrap {
       display: flex;
       align-items: stretch;
@@ -1884,6 +1939,11 @@
         </div>
       </div>
     </div>
+    <div class="map-side-bar" id="side-bar-0">
+      <div class="map-side-team map-side-team-a"></div>
+      <button class="map-side-toggle" onclick="toggleMapSide(0)">↔ 사이드</button>
+      <div class="map-side-team map-side-team-b"></div>
+    </div>
 
     <div class="rt-wrap" id="rt-0"></div>
 
@@ -1938,6 +1998,11 @@
         </div>
       </div>
     </div>
+    <div class="map-side-bar" id="side-bar-1">
+      <div class="map-side-team map-side-team-a"></div>
+      <button class="map-side-toggle" onclick="toggleMapSide(1)">↔ 사이드</button>
+      <div class="map-side-team map-side-team-b"></div>
+    </div>
 
     <div class="rt-wrap" id="rt-1"></div>
 
@@ -1991,6 +2056,11 @@
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
       </div>
+    </div>
+    <div class="map-side-bar" id="side-bar-2">
+      <div class="map-side-team map-side-team-a"></div>
+      <button class="map-side-toggle" onclick="toggleMapSide(2)">↔ 사이드</button>
+      <div class="map-side-team map-side-team-b"></div>
     </div>
 
     <div class="rt-wrap" id="rt-2"></div>
@@ -2215,6 +2285,11 @@ function buildMapCardHtml(n) {
         <div class="sb-diamonds sb-diamonds-r" id="${mid}-diamonds-r">${diag}</div>
       </div>
     </div>
+    <div class="map-side-bar" id="side-bar-${n - 1}">
+      <div class="map-side-team map-side-team-a"></div>
+      <button class="map-side-toggle" onclick="toggleMapSide(${n - 1})">↔ 사이드</button>
+      <div class="map-side-team map-side-team-b"></div>
+    </div>
     <div class="rt-wrap" id="${rtId}"></div>
     <table class="player-table">
       <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
@@ -2254,6 +2329,7 @@ function initMapCard(n) {
   syncVetoMaps();
   applyMatchUI();
   loadDiamondState();
+  renderSideBar(mapIdx);
 }
 
 function updateMapCards() {
@@ -3135,6 +3211,49 @@ function applyMatchUI() {
 }
 
 applyMatchUI();
+
+// ── 맵 공격/수비 사이드 관리 ──────────────────────────────────────
+var SIDE_KEY_PREFIX = 'side:' + MATCH_KEY + ':';
+
+function loadMapSide(mapIdx) {
+  return localStorage.getItem(SIDE_KEY_PREFIX + mapIdx) || null; // 'a' | 'b' | null
+}
+
+function saveMapSide(mapIdx, who) {
+  if (who === null) localStorage.removeItem(SIDE_KEY_PREFIX + mapIdx);
+  else localStorage.setItem(SIDE_KEY_PREFIX + mapIdx, who);
+  renderSideBar(mapIdx);
+}
+
+function toggleMapSide(mapIdx) {
+  var cur = loadMapSide(mapIdx);
+  // null → 'a' (A팀 공격) → 'b' (B팀 공격) → null
+  saveMapSide(mapIdx, cur === null ? 'a' : cur === 'a' ? 'b' : null);
+}
+
+function renderSideBar(mapIdx) {
+  var bar = document.getElementById('side-bar-' + mapIdx);
+  if (!bar) return;
+  var who = loadMapSide(mapIdx);
+  var nameA = MATCH_TEAM_A || TEAM_A_CODE;
+  var nameB = MATCH_TEAM_B || TEAM_B_CODE;
+
+  function badge(cls, label) {
+    return '<span class="map-side-badge ' + cls + '">' + label + '</span>';
+  }
+
+  var aBadge = who === 'a' ? badge('badge-atk', '공') : who === 'b' ? badge('badge-def', '수') : badge('badge-none', '?');
+  var bBadge = who === 'b' ? badge('badge-atk', '공') : who === 'a' ? badge('badge-def', '수') : badge('badge-none', '?');
+
+  bar.querySelector('.map-side-team-a').innerHTML = '<span class="map-side-name">' + nameA + '</span>' + aBadge;
+  bar.querySelector('.map-side-team-b').innerHTML = bBadge + '<span class="map-side-name">' + nameB + '</span>';
+}
+
+function renderAllSideBars() {
+  for (var i = 0; i < 5; i++) renderSideBar(i);
+}
+
+renderAllSideBars();
 
 // ── 초기화 (storage.js DB 로드 완료 후 실행) ─────────────────────
 maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
