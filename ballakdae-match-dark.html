@@ -3227,6 +3227,11 @@ function loadMapSide(mapIdx) {
 function saveMapSide(mapIdx, who) {
   if (who === null) localStorage.removeItem(SIDE_KEY_PREFIX + mapIdx);
   else localStorage.setItem(SIDE_KEY_PREFIX + mapIdx, who);
+  // firstAttacker 반영 → 라운드 공수 레이블 업데이트
+  if (maps[mapIdx]) {
+    maps[mapIdx].rtState.firstAttacker = who;
+    renderRoundTracker(maps[mapIdx], mapIdx);
+  }
   renderSideBar(mapIdx);
 }
 
@@ -3234,6 +3239,15 @@ function toggleMapSide(mapIdx) {
   var cur = loadMapSide(mapIdx);
   // null → 'a' (A팀 공격) → 'b' (B팀 공격) → null
   saveMapSide(mapIdx, cur === null ? 'a' : cur === 'a' ? 'b' : null);
+}
+
+function applyAllSavedSides() {
+  for (var i = 0; i < maps.length; i++) {
+    var who = loadMapSide(i);
+    if (who !== null && maps[i]) {
+      maps[i].rtState.firstAttacker = who;
+    }
+  }
 }
 
 function renderSideBar(mapIdx) {
@@ -3259,6 +3273,7 @@ function renderAllSideBars() {
 }
 
 renderAllSideBars();
+applyAllSavedSides();
 
 // ── 초기화 (storage.js DB 로드 완료 후 실행) ─────────────────────
 maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
@@ -3291,10 +3306,12 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   maps.forEach(function(m, i) { loadRoundState(i); });
   maps.forEach(function(m, i) { loadStatsState(i); });
   loadDiamondState();
+  applyAllSavedSides();
   maps.forEach(function(m) { m.players.forEach(function(p) { applyAgentData(p); }); });
   maps.forEach(function(m, i) { renderMap(m, i); });
   maps.forEach(function(m, i) { renderRoundTracker(m, i); });
   maps.forEach(function(m, i) { renderTeamStats(m, i); });
+  renderAllSideBars();
 
   // ④ 맵 4~5 HTML 빌드 (데이터 로드 완료 후)
   for (var _mi2 = 4; _mi2 <= Math.min(activeMapCount, currentBo); _mi2++) {
