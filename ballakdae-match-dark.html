@@ -1581,6 +1581,22 @@
       font-size: 13px; font-weight: 900;
       color: #1a1a2e; text-align: center; padding: 6px 5px;
     }
+    .bl-map-side {
+      background: rgba(26,26,46,0.06);
+      border-top: 1px solid rgba(26,26,46,0.08);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(26,26,46,0.4);
+      text-align: center; padding: 5px 6px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bl-map-side:hover { background: rgba(26,26,46,0.12); color: rgba(26,26,46,0.7); }
+    .bl-map-side.side-a { background: rgba(232,78,120,0.12); color: #c0304e; border-top-color: rgba(232,78,120,0.2); }
+    .bl-map-side.side-b { background: rgba(61,184,176,0.12); color: #2a9a92; border-top-color: rgba(61,184,176,0.2); }
+    /* 스코어보드 아래 사이드 바 숨김 (bl-map-slot으로 이동) */
+    .map-side-bar { display: none !important; }
 
     /* Round tracker */
     .rt-wrap {
@@ -1881,6 +1897,7 @@
             <span class="bl-map-slot-ph" id="bl-slot-ph-1">클릭하여 선택</span>
           </div>
           <div class="bl-map-slot-name" id="bl-slot-name-1">–</div>
+          <div class="bl-map-side" id="bl-side-0" onclick="event.stopPropagation();toggleMapSide(0)">공/수 선택</div>
         </div>
         <div class="bl-map-slot" id="bl-slot-2" onclick="openBlMapPicker(2)">
           <div class="bl-map-slot-label">2맵</div>
@@ -1889,6 +1906,7 @@
             <span class="bl-map-slot-ph" id="bl-slot-ph-2">클릭하여 선택</span>
           </div>
           <div class="bl-map-slot-name" id="bl-slot-name-2">–</div>
+          <div class="bl-map-side" id="bl-side-1" onclick="event.stopPropagation();toggleMapSide(1)">공/수 선택</div>
         </div>
         <div class="bl-map-slot" id="bl-slot-3" onclick="openBlMapPicker(3)">
           <div class="bl-map-slot-label">3맵</div>
@@ -1897,6 +1915,7 @@
             <span class="bl-map-slot-ph" id="bl-slot-ph-3">클릭하여 선택</span>
           </div>
           <div class="bl-map-slot-name" id="bl-slot-name-3">–</div>
+          <div class="bl-map-side" id="bl-side-2" onclick="event.stopPropagation();toggleMapSide(2)">공/수 선택</div>
         </div>
       </div>
     </div>
@@ -3251,21 +3270,24 @@ function applyAllSavedSides() {
 }
 
 function renderSideBar(mapIdx) {
-  var bar = document.getElementById('side-bar-' + mapIdx);
-  if (!bar) return;
   var who = loadMapSide(mapIdx);
   var nameA = MATCH_TEAM_A || TEAM_A_CODE;
   var nameB = MATCH_TEAM_B || TEAM_B_CODE;
 
-  function badge(cls, label) {
-    return '<span class="map-side-badge ' + cls + '">' + label + '</span>';
+  // bl-map-slot 안 공/수 토글 업데이트
+  var blSide = document.getElementById('bl-side-' + mapIdx);
+  if (blSide) {
+    blSide.classList.remove('side-a', 'side-b');
+    if (who === 'a') {
+      blSide.textContent = nameA + ' 공격';
+      blSide.classList.add('side-a');
+    } else if (who === 'b') {
+      blSide.textContent = nameB + ' 공격';
+      blSide.classList.add('side-b');
+    } else {
+      blSide.textContent = '공/수 선택';
+    }
   }
-
-  var aBadge = who === 'a' ? badge('badge-atk', '공') : who === 'b' ? badge('badge-def', '수') : badge('badge-none', '?');
-  var bBadge = who === 'b' ? badge('badge-atk', '공') : who === 'a' ? badge('badge-def', '수') : badge('badge-none', '?');
-
-  bar.querySelector('.map-side-team-a').innerHTML = '<span class="map-side-name">' + nameA + '</span>' + aBadge;
-  bar.querySelector('.map-side-team-b').innerHTML = bBadge + '<span class="map-side-name">' + nameB + '</span>';
 }
 
 function renderAllSideBars() {
