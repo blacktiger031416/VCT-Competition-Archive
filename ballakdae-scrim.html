@@ -203,9 +203,16 @@
     const SCRIM_KEY  = 'ballakdae_scrim';
     const COACH_KEY  = 'ballakdae_draft_coaches';
     const TEAMS_KEY  = 'ballakdae_team_names';
+    const LOGOS_KEY  = 'ballakdae_team_logos';
 
     const SLOT_COLORS = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
     const SLOT_NAMES  = ['슬롯1', '슬롯2', '슬롯3', '슬롯4'];
+    const DEFAULT_TEAM_LOGOS = [
+      './images/나중에정할게.webp',
+      './images/라이어게임.webp',
+      './images/두고보자.webp',
+      './images/발로록.webp',
+    ];
     const COACHES = [
       { name: '김돌돌', photo: 'Coach_김돌돌.jpg' },
       { name: '남봉',   photo: 'Coach_남봉.webp'  },
@@ -235,6 +242,12 @@
     function saveScrim() { localStorage.setItem(SCRIM_KEY, JSON.stringify(scrimData)); }
     function loadCoaches() { try { return JSON.parse(localStorage.getItem(COACH_KEY) || '{}'); } catch { return {}; } }
     function loadTeamNames() { try { return JSON.parse(localStorage.getItem(TEAMS_KEY) || '{}'); } catch { return {}; } }
+    function loadTeamLogos() { try { return JSON.parse(localStorage.getItem(LOGOS_KEY) || '{}'); } catch { return {}; } }
+
+    function getTeamLogo(slotIdx) {
+      const logos = loadTeamLogos();
+      return logos[slotIdx] || DEFAULT_TEAM_LOGOS[slotIdx] || null;
+    }
 
     function getCoachForSlot(slotIdx) {
       const coachName = coachAssign[slotIdx];
@@ -323,12 +336,12 @@
           const logoEl = document.createElement('div');
           logoEl.className = 'team-logo-wrap';
           if (isAssigned) {
-            const coach = getCoachForSlot(assigned);
-            if (coach) {
+            const teamLogo = getTeamLogo(assigned);
+            if (teamLogo) {
               const img = document.createElement('img');
               img.className = 'team-logo-img';
-              img.src = './images/' + coach.photo;
-              img.alt = coach.name;
+              img.src = teamLogo;
+              img.alt = getSlotLabel(assigned);
               logoEl.appendChild(img);
             } else {
               logoEl.classList.add('team-logo-num');
@@ -441,12 +454,13 @@
         btn.className = 'tp-team-btn';
         btn.disabled = usedSlots.has(si);
         btn.style.borderColor = d[posIdx] === si ? SLOT_COLORS[si] : '';
-        const coach = getCoachForSlot(si);
+        const teamLogo2 = getTeamLogo(si);
+        const slotLabel2 = getSlotLabel(si);
         btn.innerHTML = `
-          ${coach ? `<img src="./images/${coach.photo}" alt="${coach.name}" />` : `<div style="width:40px;height:40px;border-radius:50%;background:${SLOT_COLORS[si]}22;border:2px solid ${SLOT_COLORS[si]};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${SLOT_COLORS[si]}">${si+1}</div>`}
+          ${teamLogo2 ? `<img src="${teamLogo2}" alt="${slotLabel2}" />` : `<div style="width:40px;height:40px;border-radius:50%;background:${SLOT_COLORS[si]}22;border:2px solid ${SLOT_COLORS[si]};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${SLOT_COLORS[si]}">${si+1}</div>`}
           <div class="tp-team-info">
             <div class="tp-slot-num">${SLOT_NAMES[si]}</div>
-            <div class="tp-slot-name">${coach ? coach.name : '미배정'}</div>
+            <div class="tp-slot-name">${slotLabel2}</div>
           </div>`;
         btn.addEventListener('click', () => {
           if (!scrimData[sessionId]) scrimData[sessionId] = {};
