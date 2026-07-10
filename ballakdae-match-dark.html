@@ -3971,6 +3971,8 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
           return !(e.matchKey === MATCH_KEY && e.mapIdx === mapIdx);
         });
       }
+      // 최근 30개 초과 시 오래된 항목 제거 (localStorage 용량 보호)
+      if (_pd.maps.length > 30) _pd.maps = _pd.maps.slice(-30);
       localStorage.setItem(_vk, JSON.stringify(_pd));
       /* ── 서버 DB 동기화 (비동기, 실패해도 무시) ── */
       (function(k,v){fetch('/api/data/'+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({value:v})}).catch(function(){});})(_vk, JSON.stringify(_pd));
