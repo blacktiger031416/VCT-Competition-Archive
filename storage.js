@@ -113,9 +113,20 @@
 
   /* ── setItem 오버라이드 ───────────────────────────────── */
   localStorage.setItem = function (key, value) {
-    _origSet(key, value);
+    /* vct_p:* — localStorage에는 최근 15개만, DB에는 전체 보존 */
+    var localValue = value;
+    if (key.indexOf("vct_p:") === 0) {
+      try {
+        var _pd = JSON.parse(value);
+        if (_pd && Array.isArray(_pd.maps) && _pd.maps.length > 15) {
+          var _trimmed = { maps: _pd.maps.slice(-15) };
+          localValue = JSON.stringify(_trimmed);
+        }
+      } catch (_e) {}
+    }
+    _origSet(key, localValue);
     if (!isLocalOnly(key) && !isServerOnly(key)) {
-      pushKey(key, value);
+      pushKey(key, value); /* DB에는 원본 전체 값 전송 */
     }
   };
 
@@ -161,7 +172,17 @@
         /* 관리자: 이 fetch가 진행되는 동안 직접 수정한(localStorage에 이미 있는) 값은
            지금 받아온 구버전 DB 스냅샷으로 덮어쓰지 않음 (편집 직후 되돌아가는 버그 방지) */
         if (_isAdmin && localStorage.getItem(key) !== null) return;
-        _origSet(key, data[key]);
+        /* vct_p:* — DB에서 불러올 때도 localStorage에는 최근 15개만 저장 */
+        var storeVal = data[key];
+        if (key.indexOf("vct_p:") === 0) {
+          try {
+            var _pd2 = JSON.parse(storeVal);
+            if (_pd2 && Array.isArray(_pd2.maps) && _pd2.maps.length > 15) {
+              storeVal = JSON.stringify({ maps: _pd2.maps.slice(-15) });
+            }
+          } catch (_e2) {}
+        }
+        _origSet(key, storeVal);
       });
 
       /* 관리자: 슬립 중 실패한 저장을 DB에 재동기화 */
