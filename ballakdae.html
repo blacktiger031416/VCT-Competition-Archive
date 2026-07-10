@@ -890,6 +890,13 @@
 
       const SLOT_COLORS  = ['#e8606a', '#c8901a', '#3db8b0', '#424242'];
       const SLOT_LABELS  = ['팀 1', '팀 2', '팀 3', '팀 4'];
+      const DEFAULT_TEAM_NAMES = ['나중에정할게', '라이어게임', '두고보자', '발로록'];
+      const DEFAULT_TEAM_LOGOS = [
+        './images/나중에정할게.webp',
+        './images/라이어게임.webp',
+        './images/두고보자.webp',
+        './images/발로록.webp',
+      ];
 
       // 드래프트 GRID: 슬롯별 픽 번호(1-20)
       const GRID = [
@@ -1018,8 +1025,8 @@
         grid.innerHTML = '';
 
         SLOT_COLORS.forEach(function (color, si) {
-          const name       = names[si] || SLOT_LABELS[si];
-          const logo       = logos[si];
+          const name       = names[si] || DEFAULT_TEAM_NAMES[si] || SLOT_LABELS[si];
+          const logo       = logos[si] || DEFAULT_TEAM_LOGOS[si];
           const coachName  = coachAssign[si];
           const playerList = GRID[si].map(function (p) { return picks[p]; }).filter(Boolean);
 
