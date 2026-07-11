@@ -105,6 +105,11 @@
       color: #fff;
       text-shadow: 0 1px 6px rgba(0,0,0,0.8);
       white-space: nowrap;
+      line-height: 1.15;
+    }
+    .sb-team-name-l.multiline, .sb-team-name-r.multiline {
+      white-space: normal;
+      text-align: center;
     }
 
     /* 센터 맵 패널 */
@@ -3239,12 +3244,19 @@ function applyMatchUI() {
     el.src = TEAM_A_LOGO; el.alt = TEAM_A_CODE;
     if (TEAM_A_LOGO_WHITE) el.classList.add('sb-team-logo-white'); else el.classList.remove('sb-team-logo-white');
   });
-  document.querySelectorAll('.sb-name-a').forEach(function(el) { el.textContent = TEAM_A_CODE; });
+  var _SB_NAME_BREAKS = { '나중에정할게': '나중에<br>정할게' };
+  document.querySelectorAll('.sb-name-a').forEach(function(el) {
+    if (_SB_NAME_BREAKS[TEAM_A_CODE]) { el.innerHTML = _SB_NAME_BREAKS[TEAM_A_CODE]; el.classList.add('multiline'); }
+    else { el.textContent = TEAM_A_CODE; el.classList.remove('multiline'); }
+  });
   document.querySelectorAll('.sb-logo-b').forEach(function(el) {
     el.src = TEAM_B_LOGO; el.alt = TEAM_B_CODE;
     if (TEAM_B_LOGO_WHITE) el.classList.add('sb-team-logo-white'); else el.classList.remove('sb-team-logo-white');
   });
-  document.querySelectorAll('.sb-name-b').forEach(function(el) { el.textContent = TEAM_B_CODE; });
+  document.querySelectorAll('.sb-name-b').forEach(function(el) {
+    if (_SB_NAME_BREAKS[TEAM_B_CODE]) { el.innerHTML = _SB_NAME_BREAKS[TEAM_B_CODE]; el.classList.add('multiline'); }
+    else { el.textContent = TEAM_B_CODE; el.classList.remove('multiline'); }
+  });
   document.querySelectorAll('.sb-th-a').forEach(function(el) { el.textContent = TEAM_A_CODE + ' · K / D / A'; });
   document.querySelectorAll('.sb-th-b').forEach(function(el) { el.textContent = 'K / D / A · ' + TEAM_B_CODE; });
 }
