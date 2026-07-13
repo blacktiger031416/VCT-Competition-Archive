@@ -2305,7 +2305,7 @@ function buildMapCardHtml(n) {
   var mid = "m" + n;
   var rtId = "rt-" + (n - 1);
   var tsId = "ts-" + (n - 1);
-  var diagCount = 3; /* 발락대 스크림: 항상 3맵 전부 진행 */
+  var diagCount = (MATCH_FROM === 'tournament') ? Math.ceil(currentBo / 2) : 3;
   var diag = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>'.repeat(diagCount);
   return `
     <div class="map-scoreboard">
@@ -2396,6 +2396,7 @@ function changeMapCount(delta) {
   activeMapCount = Math.min(maxMaps, Math.max(MIN_MAPS, activeMapCount + delta));
   if (delta > 0) initMapCard(activeMapCount);
   updateMapCards();
+  updateDiamonds();
 }
 
 function updateDiamonds() {
