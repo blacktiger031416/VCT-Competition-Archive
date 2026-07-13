@@ -3393,6 +3393,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
 
   renderSlots();
   applySharedResult();
+  syncMapCountFromScore();
   renderPredBar();
   renderVeto();
   syncVetoMaps();
@@ -3403,7 +3404,7 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
 
   ['score-a', 'score-b'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) el.addEventListener('change', saveSharedResult);
+    if (el) el.addEventListener('change', function() { saveSharedResult(); syncMapCountFromScore(); });
   });
 
   /* view-only: 스코어 input readonly 처리 */
@@ -4271,6 +4272,17 @@ function saveSharedResult() {
   current.scoreA = document.getElementById('score-a').value || '-';
   current.scoreB = document.getElementById('score-b').value || '-';
   localStorage.setItem(RESULT_KEY, JSON.stringify(current));
+}
+
+function syncMapCountFromScore() {
+  var sA = parseInt(document.getElementById('score-a').value) || 0;
+  var sB = parseInt(document.getElementById('score-b').value) || 0;
+  var needed = Math.max(MIN_MAPS, Math.min(sA + sB, currentBo));
+  if (needed !== activeMapCount) {
+    for (var _i = activeMapCount + 1; _i <= needed; _i++) initMapCard(_i);
+    activeMapCount = needed;
+    updateMapCards();
+  }
 }
 
 function applySharedResult() {
