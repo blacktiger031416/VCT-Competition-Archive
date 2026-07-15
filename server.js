@@ -657,6 +657,48 @@ app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
   }
 });
 
+/* ── API: vct_p:* DB 트리밍 (admin 전용) ──────────── */
+app.post("/api/admin/trim-vct-p", requireAdmin, async (req, res) => {
+  const limit = Math.max(1, Math.min(200, parseInt(req.body.limit) || 30));
+  try {
+    const { rows } = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'");
+    let trimmed = 0, skipped = 0;
+    for (const row of rows) {
+      try {
+        const pd = JSON.parse(row.value);
+        if (pd && Array.isArray(pd.maps) && pd.maps.length > limit) {
+          const newVal = JSON.stringify({ maps: pd.maps.slice(-limit) });
+          await pool.query("UPDATE app_data SET value=$1, updated_at=NOW() WHERE key=$2", [newVal, row.key]);
+          trimmed++;
+        } else {
+          skipped++;
+        }
+      } catch (_e) { skipped++; }
+    }
+    res.json({ ok: true, trimmed, skipped, limit });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── API: DB 저장 현황 (admin 전용) ─────────────── */
+app.get("/api/admin/storage-info", requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT key, octet_length(value) AS bytes FROM app_data ORDER BY bytes DESC LIMIT 50"
+    );
+    const totalRow = await pool.query("SELECT SUM(octet_length(value)) AS total FROM app_data");
+    const total = parseInt(totalRow.rows[0].total) || 0;
+    res.json({
+      totalKB: Math.round(total / 1024),
+      limitKB: 5120,
+      top: rows.map(r => ({ key: r.key, kb: Math.round(r.bytes / 1024 * 10) / 10 }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── API: 전체 뷰어 새로고침 트리거 ─────────────── */
 app.post("/api/refresh", (req, res) => {
   broadcast({ type: "force-reload" });

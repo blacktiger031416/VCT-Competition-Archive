@@ -113,20 +113,25 @@
 
   /* ── setItem 오버라이드 ───────────────────────────────── */
   localStorage.setItem = function (key, value) {
-    /* vct_p:* — localStorage에는 최근 15개만, DB에는 전체 보존 */
+    /* vct_p:* — localStorage에는 최근 15개만, DB에는 최근 30개만 */
     var localValue = value;
+    var dbValue = value;
     if (key.indexOf("vct_p:") === 0) {
       try {
         var _pd = JSON.parse(value);
-        if (_pd && Array.isArray(_pd.maps) && _pd.maps.length > 15) {
-          var _trimmed = { maps: _pd.maps.slice(-15) };
-          localValue = JSON.stringify(_trimmed);
+        if (_pd && Array.isArray(_pd.maps)) {
+          if (_pd.maps.length > 15) {
+            localValue = JSON.stringify({ maps: _pd.maps.slice(-15) });
+          }
+          if (_pd.maps.length > 30) {
+            dbValue = JSON.stringify({ maps: _pd.maps.slice(-30) });
+          }
         }
       } catch (_e) {}
     }
     _origSet(key, localValue);
     if (!isLocalOnly(key) && !isServerOnly(key)) {
-      pushKey(key, value); /* DB에는 원본 전체 값 전송 */
+      pushKey(key, dbValue);
     }
   };
 
