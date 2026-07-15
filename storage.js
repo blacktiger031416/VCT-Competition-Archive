@@ -154,8 +154,19 @@
       if (!key || isLocalOnly(key) || isServerOnly(key)) continue;
       var localVal = localStorage.getItem(key);
       if (localVal === null) continue;
-      if (dbData[key] !== localVal) {
-        syncs.push(pushKey(key, localVal));
+      /* vct_p:* — DB에 올릴 때도 15맵 초과분 제거 */
+      var dbVal = localVal;
+      if (key.indexOf("vct_p:") === 0) {
+        try {
+          var _sd = JSON.parse(localVal);
+          if (_sd && Array.isArray(_sd.maps) && _sd.maps.length > 15) {
+            dbVal = JSON.stringify({ maps: _sd.maps.slice(-15) });
+            _origSet(key, dbVal); /* localStorage도 동시에 정리 */
+          }
+        } catch (_se) {}
+      }
+      if (dbData[key] !== dbVal) {
+        syncs.push(pushKey(key, dbVal));
       }
     }
     return Promise.all(syncs);
@@ -187,6 +198,19 @@
         }
         _origSet(key, storeVal);
       });
+
+      /* vct_p:* — localStorage에 남아있는 오래된 데이터도 15맵으로 정리 */
+      for (var _ti = 0; _ti < localStorage.length; _ti++) {
+        var _tk = localStorage.key(_ti);
+        if (!_tk || _tk.indexOf("vct_p:") !== 0) continue;
+        try {
+          var _tv = localStorage.getItem(_tk);
+          var _td = JSON.parse(_tv);
+          if (_td && Array.isArray(_td.maps) && _td.maps.length > 15) {
+            _origSet(_tk, JSON.stringify({ maps: _td.maps.slice(-15) }));
+          }
+        } catch (_te) {}
+      }
 
       /* 관리자: 슬립 중 실패한 저장을 DB에 재동기화 */
       return syncLocalToDB(data).then(function () {
