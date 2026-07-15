@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VCT Challengers Southeast Asia 2026</title>
+    <title>VCT Challengers SEA 2026 · Split 1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
@@ -13,7 +13,6 @@
       :root {
         --accent: #159194;
         --accent-dim: rgba(21,145,148,0.7);
-        --accent-bg:  rgba(21,145,148,0.12);
         --bg-base:    #071515;
         --bg-card:    #0d1f1f;
         --bg-card2:   #112222;
@@ -21,6 +20,7 @@
 
       body { background: var(--bg-base); color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
+      /* ── HEADER ── */
       .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(7,21,21,0.92); border-bottom: 1px solid rgba(21,145,148,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
       .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
       .home-link:hover { color: #fff; }
@@ -29,7 +29,8 @@
       .back-link:hover { color: rgba(255,255,255,0.8); }
       .site-header .auth-header-btn { margin-left: auto !important; }
 
-      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 72px 48px 80px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
+      /* ── HERO ── */
+      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 72px 0 80px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
       .league-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(21,145,148,0.18) 0%, transparent 70%); pointer-events: none; }
       .hero-text { position: relative; z-index: 1; }
       .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
@@ -38,47 +39,81 @@
       .league-mark { flex-shrink: 0; position: relative; z-index: 1; padding: 16px; }
       .league-mark img { width: clamp(120px, 18vw, 200px); height: clamp(120px, 18vw, 200px); object-fit: contain; opacity: 0.9; filter: drop-shadow(0 4px 24px rgba(21,145,148,0.35)); }
 
+      /* ── SHELL ── */
       .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+      .section-divider { height: 1px; background: rgba(21,145,148,0.12); margin: 0 0 56px; }
       .section-heading { margin-bottom: 24px; border-left: 3px solid var(--accent); padding-left: 16px; }
       .section-heading .eyebrow { margin-bottom: 4px; }
       .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
 
+      /* ── TOURNAMENT GRID ── */
       .tournament-section { margin-bottom: 64px; }
-      .tournament-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-      @media (max-width: 640px) { .tournament-grid { grid-template-columns: 1fr; } }
-      .tournament-card { display: flex; flex-direction: column; gap: 6px; padding: 24px 22px; background: var(--bg-card); border: 1px solid rgba(21,145,148,0.12); border-radius: 4px; text-decoration: none; color: #e8e4e0; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.18s, background 0.2s; cursor: pointer; }
+      .tournament-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 720px) { .tournament-grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 480px) { .tournament-grid { grid-template-columns: 1fr; } }
+
+      .tournament-card {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 24px 22px;
+        background: var(--bg-card);
+        border: 1px solid rgba(21,145,148,0.12);
+        border-radius: 4px; text-decoration: none;
+        color: #e8e4e0; position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        cursor: pointer;
+      }
       .tournament-card::before { content: ''; position: absolute; inset: 0 0 0 0; border-bottom: 2px solid var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
       .tournament-card:hover { border-color: rgba(21,145,148,0.4); background: var(--bg-card2); transform: translateY(-2px); }
       .tournament-card:hover::before { transform: scaleX(1); }
-      .tournament-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-dim); }
-      .tournament-card strong { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1; }
-      .tournament-card > span:last-child { font-size: 12px; color: rgba(255,255,255,0.35); font-family: 'Barlow', sans-serif; margin-top: 4px; }
 
-      .section-divider { height: 1px; background: rgba(21,145,148,0.12); margin: 0 0 56px; }
+      .tournament-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-dim); }
+      .tournament-card strong { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1.1; }
+      .tournament-card .card-sub { font-size: 12px; color: rgba(255,255,255,0.3); font-family: 'Barlow', sans-serif; margin-top: 4px; }
+
+      /* Main Event 카드 강조 */
+      .tournament-card.main-event { border-color: rgba(21,145,148,0.3); background: rgba(21,145,148,0.05); }
+      .tournament-card.main-event strong { color: #7de8ea; }
+      .tournament-card.main-event:hover { border-color: rgba(21,145,148,0.6); background: rgba(21,145,148,0.1); }
+
+      /* Premier Qualifier 카드 */
+      .tournament-card.qualifier { border-color: rgba(255,200,50,0.15); }
+      .tournament-card.qualifier strong { color: #ffd966; }
+      .tournament-card.qualifier:hover { border-color: rgba(255,200,50,0.35); }
+      .tournament-card.qualifier::before { border-bottom-color: #ffd966; }
+
+      /* ── Divider between groups ── */
+      .grid-divider {
+        grid-column: 1 / -1;
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+        margin: 4px 0;
+      }
 
       .card-transition-overlay { position: fixed; inset: 0; background: var(--bg-base); pointer-events: none; opacity: 0; z-index: 9999; transition: opacity 0.4s ease; }
       body.card-transitioning .card-transition-overlay { opacity: 1; }
     </style>
   </head>
-  <body class="league-page challengers-sea-page">
+  <body>
     <header class="site-header">
       <a class="home-link" href="./index.html">VCT Archive</a>
-      <a class="back-link" href="./challengers-pacific.html">Pacific Challengers</a>
+      <a class="back-link" href="./challengers-sea.html">SEA Challengers</a>
     </header>
 
     <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
-      <section class="league-hero" aria-labelledby="league-title" style="padding:72px 0 80px;">
+      <section class="league-hero" aria-labelledby="league-title">
         <div class="hero-text">
-          <p class="eyebrow">VCT Challengers 2026</p>
-          <h1 id="league-title">Southeast Asia<br>Challengers</h1>
+          <p class="eyebrow">VCT Challengers SEA 2026</p>
+          <h1 id="league-title">Split 1</h1>
           <p class="intro">
-            2026 VCT Challengers Southeast Asia의 Split 1, Split 2 결과를
-            정리하는 리그 페이지입니다.<br>
-            각 Split의 경기 결과와 참가 팀 정보를 이곳에서 확인할 수 있습니다.
+            Southeast Asia 권역의 Regional 대회 5개와 Premier Qualifier, Main Event로 구성됩니다.
           </p>
         </div>
         <div class="league-mark">
-          <img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="VCT Challengers Southeast Asia" />
+          <img src="https://static.wikia.nocookie.net/logopedia/images/f/f1/VALORANT_Challengers_logo.png/revision/latest?cb=20210816022910" alt="VCT Challengers SEA" />
         </div>
       </section>
     </div>
@@ -93,13 +128,39 @@
         </div>
 
         <div class="tournament-grid">
-          <a class="tournament-card" href="./challengers-sea-split1.html" data-split="split1">
-            <span class="tournament-kicker">2026 SEA Challengers</span>
-            <strong>Split 1</strong>
+          <!-- Regional 5개 -->
+          <a class="tournament-card" href="javascript:void(0)" data-slug="indonesia">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Indonesia<br>Regional</strong>
           </a>
-          <a class="tournament-card" href="javascript:void(0)" data-split="split2">
-            <span class="tournament-kicker">2026 SEA Challengers</span>
-            <strong>Split 2</strong>
+          <a class="tournament-card" href="javascript:void(0)" data-slug="vietnam">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Vietnam<br>Regional</strong>
+          </a>
+          <a class="tournament-card" href="javascript:void(0)" data-slug="philippines">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Philippines<br>Regional</strong>
+          </a>
+          <a class="tournament-card" href="javascript:void(0)" data-slug="thailand">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Thailand<br>Regional</strong>
+          </a>
+          <a class="tournament-card" href="javascript:void(0)" data-slug="rest-of-sea">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Rest of SEA<br>Regional</strong>
+          </a>
+
+          <!-- 구분선 -->
+          <div class="grid-divider"></div>
+
+          <!-- Premier Qualifier + Main Event -->
+          <a class="tournament-card qualifier" href="javascript:void(0)" data-slug="premier-qualifier">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Premier Qualifier</strong>
+          </a>
+          <a class="tournament-card main-event" href="javascript:void(0)" data-slug="main-event">
+            <span class="tournament-kicker">2026 SEA Challengers · Split 1</span>
+            <strong>Main Event</strong>
           </a>
         </div>
       </section>
