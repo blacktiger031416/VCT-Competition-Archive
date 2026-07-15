@@ -691,7 +691,7 @@ app.get("/api/admin/storage-info", requireAdmin, async (req, res) => {
     const total = parseInt(totalRow.rows[0].total) || 0;
     res.json({
       totalKB: Math.round(total / 1024),
-      limitKB: 5120,
+      limitKB: 51200,
       top: rows.map(r => ({ key: r.key, kb: Math.round(r.bytes / 1024 * 10) / 10 }))
     });
   } catch (err) {
