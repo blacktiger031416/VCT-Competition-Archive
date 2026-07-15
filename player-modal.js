@@ -229,10 +229,11 @@
     cj_split2:             'Split 2',
   };
 
-  /* stage 정규화: Playoffs를 부모 Stage로 묶음 */
+  /* stage 정규화: Playoffs/PlayIn을 부모 Stage로 묶음 */
   function normalizeStage(s) {
     if (s === 'stage1playoffs') return 'stage1';
     if (s === 'stage2playoffs') return 'stage2';
+    if (s === 's2playin')       return 'stage2';
     return s || '';
   }
 
