@@ -630,6 +630,10 @@
             <div id="ch-korea-slot"></div>
           </div>
           <div class="ch-invite-card">
+            <h3>Southeast Asia Challengers</h3>
+            <div id="ch-sea-slot"></div>
+          </div>
+          <div class="ch-invite-card">
             <h3>Last Chance Qualifier</h3>
             <div id="ch-sa-slot"></div>
           </div>
@@ -1184,6 +1188,7 @@
       const CH_SLOTS = [
         { id: "ch-japan-slot", key: "japan", label: "Japan" },
         { id: "ch-korea-slot", key: "korea", label: "Korea" },
+        { id: "ch-sea-slot",   key: "sea",   label: "Southeast Asia" },
         { id: "ch-sa-slot",    key: "sa",    label: "Last Chance Qualifier" },
       ];
       const CH_TEAMS = {
@@ -1214,7 +1219,7 @@
         ],
         korea: [
           { name:"BNK FEARX",           logo:"./assets/teams/BFX.svg" },
-          { name:"ONSIDE GAMING",        logo:"./assets/teams/ONG.webp" },
+          { name:"ONSIDE GAMING",        logo:"./assets/teams/ONG.webp", white:true },
           { name:"T1 Esports Academy",   logo:"./assets/teams/T1A.svg" },
           { name:"KIWOOM DRX Academy",   logo:"./assets/teams/KRXA.svg" },
           { name:"Gen.G Global Academy", logo:"./assets/teams/GGA.webp" },
@@ -1235,7 +1240,7 @@
           const team = data[key] || {};
           const slot = document.createElement("div");
           slot.className = "group-slot" + (team.name ? " has-team" : " empty");
-          const logo = team.logo ? `<img src="${team.logo}" alt="${team.name}" style="width:40px;height:40px;object-fit:contain;">` : "";
+          const logo = team.logo ? `<img src="${team.logo}" alt="${team.name}"${team.white ? ' class="logo-white"' : ''} style="width:40px;height:40px;object-fit:contain;">` : "";
           slot.innerHTML = `<div class="slot-logo">${logo}</div><span class="slot-name">${team.name || "팀 선택"}</span><span class="slot-rank">${label}</span>`;
           if (isAdmin()) slot.addEventListener("click", () => openChPicker(key, label));
           el.innerHTML = ""; el.appendChild(slot);
@@ -1254,8 +1259,9 @@
           manualArea.style.display = "none";
           gridArea.innerHTML = teams.map(t => {
             const sel = (team.name === t.name) ? " selected" : "";
-            return `<button class="ga-team-btn${sel}" data-name="${t.name}" data-logo="${t.logo}">` +
-              `<img src="${t.logo}" alt="${t.name}" style="width:32px;height:32px;object-fit:contain;">` +
+            const wc = t.white ? ' class="logo-white"' : '';
+            return `<button class="ga-team-btn${sel}" data-name="${t.name}" data-logo="${t.logo}" data-white="${t.white ? 'true' : ''}">` +
+              `<img src="${t.logo}" alt="${t.name}"${wc} style="width:32px;height:32px;object-fit:contain;">` +
               `<span style="font-size:9px;font-weight:700;line-height:1.2;text-align:center;word-break:keep-all">${t.name}</span>` +
               `</button>`;
           }).join("");
@@ -1263,7 +1269,8 @@
             btn.addEventListener("click", () => {
               const name = btn.dataset.name;
               const logo = btn.dataset.logo;
-              const d = loadChInvite(); d[_chCtx] = { name, logo }; saveChInvite(d); closeChModal(); renderChInvite();
+              const white = btn.dataset.white === "true";
+              const d = loadChInvite(); d[_chCtx] = { name, logo, white }; saveChInvite(d); closeChModal(); renderChInvite();
             });
           });
           document.getElementById("ch-actions").innerHTML = `<button class="ga-btn ga-btn-clear" id="ch-clear">비우기</button><button class="ga-btn ga-btn-cancel" id="ch-cancel">취소</button>`;
