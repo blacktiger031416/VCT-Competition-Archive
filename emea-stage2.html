@@ -92,21 +92,17 @@
       /* ── WEEK TABS ──────────────────────────── */
       .week-section { margin: 48px 0; }
       .week-tabs > input { position: absolute; opacity: 0; pointer-events: none; }
-      .week-tab-list { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
+      .week-tab-list { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; padding: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
       .week-tab-list label { min-height: 46px; display: grid; place-items: center; border-radius: 7px; background: transparent; border: 1px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.14s, background 0.14s, border-color 0.14s; }
       .week-tab-list label:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.1); }
       #week-1:checked ~ .week-tab-list label[for="week-1"],
       #week-2:checked ~ .week-tab-list label[for="week-2"],
-      #week-3:checked ~ .week-tab-list label[for="week-3"],
-      #week-4:checked ~ .week-tab-list label[for="week-4"],
-      #week-5:checked ~ .week-tab-list label[for="week-5"] { color: #fff; background: rgba(20,100,246,0.12); border-color: rgba(20,100,246,0.35); }
+      #week-3:checked ~ .week-tab-list label[for="week-3"] { color: #fff; background: rgba(20,100,246,0.12); border-color: rgba(20,100,246,0.35); }
       .week-panels { margin-top: 12px; }
       .week-panel { display: none; overflow: hidden; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
       #week-1:checked ~ .week-panels .week-panel-1,
       #week-2:checked ~ .week-panels .week-panel-2,
-      #week-3:checked ~ .week-panels .week-panel-3,
-      #week-4:checked ~ .week-panels .week-panel-4,
-      #week-5:checked ~ .week-panels .week-panel-5 { display: block; }
+      #week-3:checked ~ .week-panels .week-panel-3 { display: block; }
       .week-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); }
       .week-meta strong { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; color: #fff; }
       .week-meta span { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
@@ -292,15 +288,11 @@
           <input type="radio" name="week" id="week-1" checked />
           <input type="radio" name="week" id="week-2" />
           <input type="radio" name="week" id="week-3" />
-          <input type="radio" name="week" id="week-4" />
-          <input type="radio" name="week" id="week-5" />
 
           <div class="week-tab-list" aria-label="주차 선택">
             <label for="week-1">1주차</label>
             <label for="week-2">2주차</label>
             <label for="week-3">3주차</label>
-            <label for="week-4">4주차</label>
-            <label for="week-5">5주차</label>
           </div>
 
           <div class="week-panels" id="week-panels"></div>
@@ -491,11 +483,9 @@
          주차별 경기 렌더링
       ══════════════════════════════════════════════════ */
       const WEEK_DATES = [
-        "07.16 - 07.18",
-        "07.23 - 07.25",
-        "07.30 - 08.01",
-        "08.06 - 08.08",
-        "08.13 - 08.15",
+        "07.16 - 07.20",
+        "07.23 - 07.27",
+        "07.30 - 08.03",
       ];
 
       function renderWeekPanels() {
@@ -503,7 +493,7 @@
         if (!panelsContainer) return;
         panelsContainer.innerHTML = "";
 
-        for (let w = 1; w <= 5; w++) {
+        for (let w = 1; w <= 3; w++) {
           const panel = document.createElement("div");
           panel.className = `week-panel week-panel-${w}`;
 
@@ -515,7 +505,7 @@
           const grid = document.createElement("div");
           grid.className = "match-grid";
 
-          for (let m = 0; m < 6; m++) {
+          for (let m = 0; m < 10; m++) {
             const md = loadMatch(w, m);
             const { teamA, teamB, date } = md;
             const displayDate = date || `W${w}`;
@@ -598,8 +588,8 @@
       ══════════════════════════════════════════════════ */
       function collectAllFixtures() {
         const fixtures = [];
-        for (let w = 1; w <= 5; w++) {
-          for (let m = 0; m < 6; m++) {
+        for (let w = 1; w <= 3; w++) {
+          for (let m = 0; m < 10; m++) {
             const md = loadMatch(w, m);
             if (!md.teamA || !md.teamB) continue;
             const key = md.date || `stage2_emea_w${w}_m${m}`;
