@@ -795,6 +795,11 @@
       function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
       function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 
+      function agentIcon(entry) {
+        if (entry.uuid) return 'https://media.valorant-api.com/agents/' + entry.uuid + '/displayiconsmall.png';
+        return entry.icon || '';
+      }
+
       function renderSavedAgents() {
         const saved = loadData();
         document.querySelectorAll('.player-card').forEach(card => {
@@ -802,7 +807,7 @@
           card.querySelectorAll('.agent-slot').forEach((slot, idx) => {
             const key = name + ':' + idx;
             if (saved[key]) {
-              slot.innerHTML = '<img src="' + saved[key].icon + '" alt="' + saved[key].name + '" />';
+              slot.innerHTML = '<img src="' + agentIcon(saved[key]) + '" alt="' + saved[key].name + '" />';
             }
           });
         });
@@ -848,7 +853,7 @@
           btn.addEventListener('click', function () {
             const saved = loadData();
             const key = _ctx.playerName + ':' + _ctx.slotIdx;
-            saved[key] = { icon: agent.displayIconSmall, name: agent.displayName };
+            saved[key] = { uuid: agent.uuid, name: agent.displayName };
             saveData(saved);
             _ctx.slotEl.innerHTML = '<img src="' + agent.displayIconSmall + '" alt="' + agent.displayName + '" />';
             closePicker();
@@ -873,6 +878,20 @@
         _ctx.slotEl.innerHTML = '';
         closePicker();
       });
+
+      /* 기존 icon URL → uuid 마이그레이션 (한 번만 실행) */
+      (function migrateAgentData() {
+        var d = loadData();
+        var changed = false;
+        Object.keys(d).forEach(function(k) {
+          var e = d[k];
+          if (e && e.icon && !e.uuid) {
+            var m = e.icon.match(/\/agents\/([0-9a-f-]{36})\//i);
+            if (m) { e.uuid = m[1]; delete e.icon; changed = true; }
+          }
+        });
+        if (changed) saveData(d);
+      })();
 
       renderSavedAgents();
       window.addEventListener('load', function () {

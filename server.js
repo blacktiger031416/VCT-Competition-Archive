@@ -3467,6 +3467,11 @@ async function initProcessedMaps() {
 /* 처리 완료 맵을 DB에 주기적으로 저장 */
 async function saveProcessedMaps() {
   try {
+    /* 최근 200개 matchId만 유지 (오래된 항목 정리) */
+    const keys = Object.keys(processedMaps);
+    if (keys.length > 200) {
+      keys.slice(0, keys.length - 200).forEach(k => delete processedMaps[k]);
+    }
     await pool.query(
       `INSERT INTO app_data (key, value)
        VALUES ('stock:processed_maps', $1)
