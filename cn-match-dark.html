@@ -1737,6 +1737,31 @@ var MATCH_KEY = (function() {
   } catch(e) {}
 })();
 
+/* ── vct_p: stage 태그 교정: 현재 MATCH_KEY 진입 stage로 동기화 ── */
+(function repairVctpStage() {
+  try {
+    for (var _ri = 0; _ri < localStorage.length; _ri++) {
+      var _rk = localStorage.key(_ri);
+      if (!_rk || _rk.indexOf('vct_p:') !== 0) continue;
+      try {
+        var _rpd = JSON.parse(localStorage.getItem(_rk) || '{}');
+        if (!_rpd.maps) continue;
+        var _changed = false;
+        _rpd.maps.forEach(function(_rm) {
+          if (_rm.matchKey === MATCH_KEY && _rm.stage !== MATCH_FROM) {
+            _rm.stage = MATCH_FROM;
+            _rm.league = LEAGUE;
+            _changed = true;
+          }
+        });
+        if (_changed) {
+          localStorage.setItem(_rk, JSON.stringify(_rpd));
+        }
+      } catch(_re) {}
+    }
+  } catch(_re2) {}
+})();
+
 /* ── MATCH_KEY 마이그레이션: 구버전(date|teamA|teamB) → 신버전 키 ── */
 (function migrateMatchKey() {
   function migrateFrom(oldKey) {
