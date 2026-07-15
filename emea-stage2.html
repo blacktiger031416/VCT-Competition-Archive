@@ -444,6 +444,9 @@
       }
 
       /* ── 팀 로고 HTML ───────────────────────────────── */
+      const DISPLAY_NAME = { "NAVI": "Natus Vincere" };
+      function canonicalName(n) { return DISPLAY_NAME[n] || n; }
+
       function logoHtml(teamName, size) {
         const src = teamLogos[teamName];
         if (!src) return "";
@@ -685,7 +688,7 @@
                 <div class="team-cell">
                   <div class="rank-badge">${i + 1}</div>
                   <div class="stage-team-logo">${logoHtml(s.team)}</div>
-                  <div><strong>${s.team}</strong><span>${teamNationality[s.team] || ""}</span></div>
+                  <div><strong>${canonicalName(s.team)}</strong><span>${teamNationality[s.team] || ""}</span></div>
                 </div>
                 <span>${s.wins} - ${s.losses}</span>
                 <span>${s.mapsWon} / ${s.mapsLost}</span>
@@ -888,7 +891,7 @@
           const slot = document.createElement("div");
           slot.className = "group-slot" + (team.name ? " has-team" : " empty");
           const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;">' : "";
-          slot.innerHTML = '<div class="slot-logo">' + logo + '</div><span class="slot-name">' + (team.name || "팀 선택") + '</span><span class="slot-rank">' + s.label + '</span>';
+          slot.innerHTML = '<div class="slot-logo">' + logo + '</div><span class="slot-name">' + (canonicalName(team.name) || "팀 선택") + '</span><span class="slot-rank">' + s.label + '</span>';
           if (isAdmin()) slot.addEventListener("click", function() { openChPicker(s.key, s.label); });
           el.innerHTML = ""; el.appendChild(slot);
         });
