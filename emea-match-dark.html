@@ -2789,8 +2789,12 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
 
   ['score-a', 'score-b'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) el.addEventListener('change', saveSharedResult);
+    if (el) {
+      el.addEventListener('change', saveSharedResult);
+      el.addEventListener('input',  saveSharedResult);
+    }
   });
+  window.addEventListener('pagehide', saveSharedResult);
 
   /* view-only: 스코어 input readonly 처리 */
   if (!window.vctIsAdmin || !window.vctIsAdmin()) {
