@@ -323,7 +323,14 @@
     function loadJSON(key, def) { try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
     function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-    var DEFAULT_POOL = [];
+    var DEFAULT_POOL = [
+      { name:"Trinity",           code:"TRN",  logo:"", white:false },
+      { name:"MoonWish Esports",  code:"MOON", logo:"", white:false },
+      { name:"Kadiliman Esports", code:"KDM",  logo:"", white:false },
+      { name:"Zirca",             code:"ZIRC", logo:"", white:false },
+      { name:"brimstone",         code:"BRIM", logo:"", white:false },
+      { name:"ANTASENA",          code:"ANTA", logo:"", white:false },
+    ];
     function loadPool() { var p = loadJSON(POOL_KEY, null); return (Array.isArray(p) && p.length) ? p : DEFAULT_POOL.slice(); }
     function savePool(p) { saveJSON(POOL_KEY, p); }
 
@@ -351,7 +358,8 @@
     }
 
     var SLOTS_KEY = PFX + "slots";
-    function loadSlots() { var s = loadJSON(SLOTS_KEY, null); if (Array.isArray(s) && s.length === SLOT_COUNT) return s; return Array(SLOT_COUNT).fill(""); }
+    var DEFAULT_SLOTS = DEFAULT_POOL.map(function(t) { return t.name; });
+    function loadSlots() { var s = loadJSON(SLOTS_KEY, null); if (Array.isArray(s) && s.length === SLOT_COUNT) return s; return DEFAULT_SLOTS.slice(); }
     function saveSlots(s) { saveJSON(SLOTS_KEY, s); }
 
     /* ── 참가 팀 슬롯 ── */
