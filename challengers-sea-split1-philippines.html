@@ -116,14 +116,11 @@
     .sd-panel h2 { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; margin:0 0 4px; }
     .sd-panel p { font-size:13px; color:rgba(255,255,255,.4); margin:0 0 14px; font-family:'Noto Sans KR',sans-serif; }
     .sd-team-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; min-height:32px; }
-    .sd-team-btn { padding:10px 8px; border-radius:8px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.09); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .14s; text-align:center; letter-spacing:.04em; text-transform:uppercase; word-break:break-all; }
+    .sd-team-btn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 6px; border-radius:8px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.09); color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all .14s; text-align:center; letter-spacing:.04em; text-transform:uppercase; }
+    .sd-team-btn img { width:32px; height:32px; object-fit:contain; filter:drop-shadow(0 1px 4px rgba(0,0,0,.5)); }
+    .sd-team-btn img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,.5)); }
     .sd-team-btn:hover { background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.5); }
     .sd-team-btn.selected { background:rgba(21,145,148,.22); border-color:var(--acc); }
-    .sd-add-row { display:flex; gap:8px; margin-bottom:14px; }
-    .sd-add-input { flex:1; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:9px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:600; outline:none; }
-    .sd-add-input:focus { border-color:rgba(21,145,148,.5); }
-    .sd-add-btn { padding:9px 16px; border-radius:8px; background:rgba(21,145,148,.15); border:1px solid rgba(21,145,148,.3); color:var(--acc); font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
-    .sd-add-btn:hover { background:rgba(21,145,148,.25); }
     .sd-actions { display:flex; gap:8px; justify-content:flex-end; }
   </style>
 </head>
@@ -272,12 +269,8 @@
     <div class="sd-backdrop" id="sd-backdrop"></div>
     <div class="sd-panel" role="dialog" aria-modal="true">
       <h2 id="sd-title">팀 배치</h2>
-      <p>배치할 팀을 선택하거나 아래에서 추가하세요.</p>
+      <p>배치할 팀을 선택하세요.</p>
       <div class="sd-team-grid" id="sd-team-grid"></div>
-      <div class="sd-add-row">
-        <input class="sd-add-input" id="sd-add-input" type="text" placeholder="새 팀 이름 입력" autocomplete="off">
-        <button class="sd-add-btn" id="sd-add-btn">추가</button>
-      </div>
       <div class="sd-actions">
         <button class="sc-btn sc-btn-clear" id="sd-clear">초기화</button>
         <button class="sc-btn sc-btn-cancel" id="sd-cancel">취소</button>
@@ -290,8 +283,17 @@
   window.storageReady.then(function () {
     var SEEDS_KEY  = 'sea_s1_ph_seeds';
     var SCORES_KEY = 'sea_s1_ph_scores';
-    var POOL_KEY   = 'sea_s1_ph_pool';
 
+    var TEAMS = [
+      {name:'Oasis Gaming',code:'OAS',logo:'./assets/teams/OAS.png',white:false},
+      {name:'NAOS',code:'NAOS',logo:'./assets/teams/NAOS.png',white:false},
+      {name:'PH Rejects',code:'PHR',logo:'./assets/teams/PHR.png',white:false},
+      {name:'HARU Esports',code:'HARU',logo:'./assets/teams/HARU.png',white:false},
+      {name:'Xipto Esports',code:'XIP',logo:'./assets/teams/XIP.png',white:false},
+      {name:'AMITY 2.0',code:'AMT',logo:'./assets/teams/AMT.png',white:true},
+      {name:'AIM PH',code:'AIM',logo:'./assets/teams/AIM.png',white:false},
+      {name:'QT Academy',code:'QTA',logo:'./assets/teams/QTA.png',white:false}
+    ];
     var LINKS = {
       1:[null,null], 2:[null,null], 3:[null,null], 4:[null,null],
       5:[{m:1,r:'winner'},{m:2,r:'winner'}],
@@ -313,8 +315,6 @@
 
     var seeds  = lj(SEEDS_KEY,{});
     var scores = lj(SCORES_KEY,{});
-    var pool   = lj(POOL_KEY,[]);
-
     function resolveState(){
       var st={};
       for(var mid=1;mid<=14;mid++){
@@ -392,9 +392,10 @@
     var _sdSlot=null;
     function renderSdGrid(){
       var cur=seeds[_sdSlot]||'', grid=document.getElementById('sd-team-grid');
-      if(!pool.length){ grid.innerHTML='<p style="font-size:12px;color:rgba(255,255,255,.3);grid-column:1/-1;padding:8px 0;text-align:center">아래에서 팀을 추가하세요</p>'; return; }
-      grid.innerHTML=pool.map(function(t){
-        return '<button class="sd-team-btn'+(t===cur?' selected':'')+'" data-team="'+t.replace(/"/g,'&quot;')+'">'+t+'</button>';
+      grid.innerHTML=TEAMS.map(function(t){
+        var sel=t.name===cur?' selected':'';
+        var wc=t.white?' class="logo-white"':'';
+        return '<button class="sd-team-btn'+sel+'" data-team="'+t.name+'"><img'+wc+' src="'+t.logo+'" alt="'+t.code+'"><span>'+t.code+'</span></button>';
       }).join('');
       grid.querySelectorAll('.sd-team-btn').forEach(function(btn){
         btn.addEventListener('click',function(){ seeds[_sdSlot]=btn.dataset.team; sj(SEEDS_KEY,seeds); closeSd(); renderBracket(); });
@@ -407,21 +408,12 @@
       document.getElementById('sd-add-input').value='';
       renderSdGrid();
       document.getElementById('sd-modal').hidden=false;
-      setTimeout(function(){ document.getElementById('sd-add-input').focus(); },60);
     }
     function closeSd(){ document.getElementById('sd-modal').hidden=true; _sdSlot=null; }
     document.getElementById('sd-backdrop').addEventListener('click',closeSd);
     document.getElementById('sd-cancel').addEventListener('click',closeSd);
     document.getElementById('sd-clear').addEventListener('click',function(){
       if(!_sdSlot) return; delete seeds[_sdSlot]; sj(SEEDS_KEY,seeds); closeSd(); renderBracket();
-    });
-    document.getElementById('sd-add-btn').addEventListener('click',function(){
-      var name=document.getElementById('sd-add-input').value.trim(); if(!name) return;
-      if(pool.indexOf(name)<0){ pool.push(name); sj(POOL_KEY,pool); }
-      seeds[_sdSlot]=name; sj(SEEDS_KEY,seeds); closeSd(); renderBracket();
-    });
-    document.getElementById('sd-add-input').addEventListener('keydown',function(e){
-      if(e.key==='Enter') document.getElementById('sd-add-btn').click();
     });
 
     document.addEventListener('keydown',function(e){
