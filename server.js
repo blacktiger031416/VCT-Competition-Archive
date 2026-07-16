@@ -1790,8 +1790,6 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
         );
       }
     }
-    /* 모든 맵 처리 후 최종 경기 결과 저장 (processAutoMatchMap 내 호출과 중복이지만 안전망) */
-    if (applied > 0) await recomputeMatchResult(matchKey);
     res.json({ ok: true, applied, totalMaps: maps.length });
   } catch (e) {
     console.error("[apply-now] 오류:", e.message);
@@ -3747,44 +3745,7 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
   if (!am.filledMaps) am.filledMaps = [];
   am.filledMaps.push(map.id);
   console.log(`[auto-match] ${am.team1} vs ${am.team2} 맵${mapIdx + 1}(${map.title || mapIdx + 1}) 자동 입력 완료`);
-
-  /* 맵 처리 직후 전체 경기 결과 갱신 */
-  await recomputeMatchResult(am.matchKey);
-
   return true;
-}
-
-/* ── 맵 스코어 집계 → result:{matchKey} 저장 ── */
-async function recomputeMatchResult(matchKey) {
-  try {
-    const rows = await pool.query(
-      "SELECT key, value FROM app_data WHERE key LIKE $1 ORDER BY key",
-      [`stats:${matchKey}:%`]
-    );
-    if (!rows.rows.length) return;
-
-    const marksA = [], marksB = [];
-    let scoreA = 0, scoreB = 0;
-
-    for (const row of rows.rows) {
-      const stats = JSON.parse(row.value);
-      const a = stats.aScore ?? 0, b = stats.bScore ?? 0;
-      if (a > b)      { marksA.push("O"); marksB.push("X"); scoreA++; }
-      else if (b > a) { marksA.push("X"); marksB.push("O"); scoreB++; }
-      else            { marksA.push("");  marksB.push(""); }
-    }
-
-    const resultVal = JSON.stringify({ scoreA: String(scoreA), scoreB: String(scoreB), marksA, marksB });
-    const resultKey = `result:${matchKey}`;
-    await pool.query(
-      `INSERT INTO app_data (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [resultKey, resultVal]
-    );
-    broadcast({ type: "set", key: resultKey, value: resultVal });
-    console.log(`[result] ${matchKey} → ${scoreA}:${scoreB}`);
-  } catch (e) {
-    console.error("[recomputeMatchResult] 오류:", e.message);
-  }
 }
 
 async function pollAutoMatches(allEventMatches) {
