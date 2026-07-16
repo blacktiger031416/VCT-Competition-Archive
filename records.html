@@ -438,39 +438,6 @@
         color: var(--current-accent,#fff);
       }
 
-      /* ── 밴픽 (새 디자인) ── */
-      .banpick-section { margin-bottom: 32px; }
-      .banpick-table { display: flex; flex-direction: column; }
-      .bp-row-new {
-        display: flex; align-items: center; gap: 14px;
-        padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-      }
-      .bp-row-new:last-child { border-bottom: none; }
-      .bp-map-thumb {
-        width: 72px; height: 40px; object-fit: cover; border-radius: 5px;
-        flex-shrink: 0; background: rgba(255,255,255,0.05);
-      }
-      .bp-info { flex: 1; min-width: 0; }
-      .bp-mapname {
-        font-family: "Barlow Condensed", sans-serif; font-size: 11px; font-weight: 800;
-        text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 5px;
-      }
-      .bp-bar-group { display: flex; flex-direction: column; gap: 4px; }
-      .bp-bar-line { display: flex; align-items: center; gap: 8px; }
-      .bp-bar-tag {
-        font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-        width: 18px; text-align: right; flex-shrink: 0;
-      }
-      .bp-bar-tag.pick { color: var(--current-accent, #01d2d7); }
-      .bp-bar-tag.ban  { color: #e84040; }
-      .bp-bar-outer { flex: 1; height: 7px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
-      .bp-bar-inner { height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-      .bp-bar-inner.pick { background: var(--current-accent, #01d2d7); }
-      .bp-bar-inner.ban  { background: #e84040; }
-      .bp-bar-count {
-        font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 700;
-        color: rgba(255,255,255,0.4); width: 22px; text-align: right; flex-shrink: 0;
-      }
 
       /* 조합 팝업 */
       .comp-modal-bg {
@@ -1449,57 +1416,6 @@
         html += '</div>';
       }
 
-      /* 밴픽 */
-      if (Object.keys(banpick).length) {
-        /* 최대값 계산 (바 비율용) */
-        var maxPick = 1, maxBan = 1;
-        Object.keys(banpick).forEach(function(mn) {
-          var bp = banpick[mn];
-          var p = (bp.teamPick||0) + (bp.opponentPick||0);
-          var b = (bp.teamBan||0) + (bp.opponentBan||0);
-          if (p > maxPick) maxPick = p;
-          if (b > maxBan)  maxBan  = b;
-        });
-        /* 총 픽(=플레이) 기준 내림차순 정렬 */
-        var bpKeys = Object.keys(banpick).sort(function(a, b2) {
-          var pa = (banpick[a].teamPick||0) + (banpick[a].opponentPick||0);
-          var pb = (banpick[b2].teamPick||0) + (banpick[b2].opponentPick||0);
-          return pb - pa;
-        });
-
-        html += '<div class="banpick-section">';
-        html += '<div class="detail-section-title">맵 밴픽</div>';
-        html += '<div class="banpick-table">';
-        bpKeys.forEach(function(mn) {
-          var bp = banpick[mn];
-          var teamPick = bp.teamPick || 0;
-          var oppPick  = bp.opponentPick || 0;
-          var teamBan  = bp.teamBan  || 0;
-          var totalPick = teamPick + oppPick;
-          var img = MAP_IMG[mn] || "";
-          var pickPct = Math.round(totalPick / maxPick * 100);
-          var banPct  = Math.round(teamBan   / maxBan  * 100);
-          html += '<div class="bp-row-new">'
-            + (img ? '<img class="bp-map-thumb" src="'+ esc(img) +'" alt="">' : '<div class="bp-map-thumb"></div>')
-            + '<div class="bp-info">'
-            +   '<div class="bp-mapname">'+ esc(mn) +'</div>'
-            +   '<div class="bp-bar-group">'
-            +     '<div class="bp-bar-line">'
-            +       '<span class="bp-bar-tag pick">픽</span>'
-            +       '<div class="bp-bar-outer"><div class="bp-bar-inner pick" style="width:'+ pickPct +'%"></div></div>'
-            +       '<span class="bp-bar-count">'+ totalPick +'</span>'
-            +     '</div>'
-            +     '<div class="bp-bar-line">'
-            +       '<span class="bp-bar-tag ban">밴</span>'
-            +       '<div class="bp-bar-outer"><div class="bp-bar-inner ban" style="width:'+ banPct +'%"></div></div>'
-            +       '<span class="bp-bar-count">'+ teamBan +'</span>'
-            +     '</div>'
-            +   '</div>'
-            + '</div>'
-            + '</div>';
-        });
-        html += '</div></div>';
-      }
 
       /* 조합 데이터 저장 (팝업용) */
       window._currentComps = comps;
