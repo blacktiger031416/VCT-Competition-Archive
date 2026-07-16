@@ -71,6 +71,23 @@
     .bracket-legend span { display:flex; align-items:center; gap:7px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.35); }
     .legend-pip { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
 
+    /* Teams section */
+    .teams-section { max-width:1400px; margin:40px auto 0; padding:0 32px 64px; }
+    .teams-section .section-heading { margin-bottom:24px; border-left:3px solid var(--acc); padding-left:16px; }
+    .teams-section .section-heading .eyebrow { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+    .teams-section .section-heading h2 { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; color:#fff; }
+    .team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+    @media (max-width:480px) { .team-grid { grid-template-columns:repeat(2,1fr); } }
+    .team-card { display:flex; flex-direction:column; align-items:center; gap:10px; padding:22px 12px 18px; background:var(--bg-card); border:1px solid rgba(21,145,148,.1); border-radius:4px; transition:border-color .2s,transform .18s,background .2s; }
+    .team-card:hover { border-color:rgba(21,145,148,.4); background:var(--bg-card2); transform:translateY(-2px); }
+    .team-logo-placeholder { width:60px; height:60px; display:flex; align-items:center; justify-content:center; }
+    .team-logo-placeholder img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,.6)); transition:filter .18s; }
+    .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
+    .team-card:hover .team-logo-placeholder img { filter:drop-shadow(0 2px 12px rgba(255,255,255,.15)); }
+    .team-card:hover .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 12px rgba(255,255,255,.15)); }
+    .team-card h3 { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; text-align:center; line-height:1.2; }
+    .team-card p { font-size:11px; color:rgba(255,255,255,.35); font-family:'Noto Sans KR',sans-serif; font-weight:500; text-align:center; }
+
     /* Score modal */
     .sc-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
     .sc-modal[hidden] { display:none !important; }
@@ -176,6 +193,55 @@
           <span><span class="legend-pip" style="background:rgba(255,255,255,.35)"></span>다음 라운드 진출</span>
           <span><span class="legend-pip" style="background:rgba(255,210,60,.8)"></span>우승</span>
         </div>
+      </div>
+    </section>
+
+    <section class="teams-section" aria-labelledby="teams-title">
+      <div class="section-heading">
+        <p class="eyebrow">Participating Teams</p>
+        <h2 id="teams-title">참가 팀</h2>
+      </div>
+      <div class="team-grid">
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/FCY.png" alt="Fancy United Esports" /></div>
+          <h3>FCY</h3>
+          <p>Fancy United Esports</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/4S.png" alt="4 shurima" /></div>
+          <h3>4S</h3>
+          <p>4 shurima</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/GC.png" alt="God Chosen" /></div>
+          <h3>GC</h3>
+          <p>God Chosen</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/BEWD.png" alt="Blue Eyes White Dragon" /></div>
+          <h3>BEWD</h3>
+          <p>Blue Eyes White Dragon</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/MIVN.png" alt="Made in Vietnam" /></div>
+          <h3>MIVN</h3>
+          <p>Made in Vietnam</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/GG.png" alt="Goblin Gang" /></div>
+          <h3>GG</h3>
+          <p>Goblin Gang</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/VNS.png" alt="VNSport" /></div>
+          <h3>VNS</h3>
+          <p>VNSport</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/DAG.png" alt="Da Nang GrandStand" /></div>
+          <h3>DAG</h3>
+          <p>Da Nang GrandStand</p>
+        </article>
       </div>
     </section>
   </main>
