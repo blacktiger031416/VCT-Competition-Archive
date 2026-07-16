@@ -210,6 +210,20 @@
     .add-input::placeholder { color:rgba(255,255,255,.2); }
     .add-input-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:3px; }
 
+    /* PARTICIPATING TEAMS */
+    .participants-section { margin-bottom:32px; }
+    .participants-heading { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:14px; }
+    .participants-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+    @media (max-width:860px) { .participants-grid { grid-template-columns:repeat(4,1fr); } }
+    @media (max-width:480px) { .participants-grid { grid-template-columns:repeat(3,1fr); } }
+    .participant-card { display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 10px 14px; background:var(--bg-card); border:1px solid rgba(21,145,148,.1); border-radius:6px; transition:border-color .2s,transform .18s,background .2s; }
+    .participant-card:hover { border-color:rgba(21,145,148,.35); background:var(--bg-card2); transform:translateY(-2px); }
+    .participant-logo { width:52px; height:52px; display:flex; align-items:center; justify-content:center; }
+    .participant-logo img { width:52px; height:52px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .participant-logo img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .participant-code { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; text-align:center; line-height:1.1; }
+    .participant-name { font-size:10px; color:rgba(255,255,255,.35); text-align:center; line-height:1.3; word-break:keep-all; font-family:'Noto Sans KR',sans-serif; }
+
     @keyframes rise-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
   </style>
 </head>
@@ -231,6 +245,12 @@
         <div><strong>4</strong><span>그룹</span></div>
         <div><strong>8</strong><span>플레이오프</span></div>
       </div>
+    </section>
+
+    <!-- PARTICIPATING TEAMS -->
+    <section class="participants-section" aria-labelledby="participants-title">
+      <p class="participants-heading" id="participants-title">Participating Teams</p>
+      <div class="participants-grid" id="participants-grid"></div>
     </section>
 
     <!-- Section radio controls (siblings of gs-section / po-section) -->
@@ -459,7 +479,7 @@
       { name:'555',               code:'555',  logo:'./assets/teams/555.png',  white:false },
       { name:'Sharper Esports',   code:'SP',   logo:'./assets/teams/SP.png',   white:false },
       { name:'Motiv Esports',     code:'MTV',  logo:'./assets/teams/MTV.png',  white:false },
-      { name:'Rival Esports',     code:'RC',   logo:'./assets/teams/RC.png',   white:false },
+      { name:'Rival Esports',     code:'RVL',  logo:'./assets/teams/RVL.png',  white:false },
       { name:'Trinity',           code:'TRN',  logo:'./assets/teams/TRN.png',  white:false },
       { name:'Kadiliman Esports', code:'KDM',  logo:'./assets/teams/KDM.png',  white:true  },
       { name:'Alter Ego',         code:'AE',   logo:'./assets/teams/AE.png',   white:false },
@@ -864,7 +884,24 @@
       else if(!document.getElementById('add-modal').hidden) document.getElementById('add-modal').hidden=true;
     });
 
+    /* ── PARTICIPANTS ── */
+    function renderTeams(){
+      var pool=loadPool(), grid=document.getElementById('participants-grid');
+      if(!grid) return;
+      grid.innerHTML=pool.map(function(t){
+        var logo=t.logo
+          ?'<img src="'+t.logo+'" alt="'+esc(t.code)+'"'+(t.white?' class="logo-white"':'')+' loading="lazy">'
+          :'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:900;color:rgba(255,255,255,.4);">'+esc(t.code)+'</span>';
+        return '<div class="participant-card">'
+          +'<div class="participant-logo">'+logo+'</div>'
+          +'<div class="participant-code">'+esc(t.code)+'</div>'
+          +'<div class="participant-name">'+esc(t.name)+'</div>'
+          +'</div>';
+      }).join('');
+    }
+
     /* Init */
+    renderTeams();
     renderAllGroups();
     renderBracket();
   });
