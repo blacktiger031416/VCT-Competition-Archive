@@ -440,6 +440,11 @@
           const sa = String(stored.scoreA ?? "").trim();
           const sb = String(stored.scoreB ?? "").trim();
           if (sa && sb && sa !== "-" && sb !== "-") return `${sa} : ${sb}`;
+          if (Array.isArray(stored.marksA) && Array.isArray(stored.marksB)) {
+            const winsA = stored.marksA.filter(m => m === "O").length;
+            const winsB = stored.marksB.filter(m => m === "O").length;
+            if (winsA > 0 || winsB > 0) return `${winsA} : ${winsB}`;
+          }
         } catch {}
         return "VS";
       }
