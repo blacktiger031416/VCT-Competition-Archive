@@ -71,6 +71,23 @@
     .bracket-legend span { display:flex; align-items:center; gap:7px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.35); }
     .legend-pip { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
 
+    /* Teams section */
+    .teams-section { max-width:1400px; margin:40px auto 0; padding:0 32px 64px; }
+    .teams-section .section-heading { margin-bottom:24px; border-left:3px solid var(--acc); padding-left:16px; }
+    .teams-section .section-heading .eyebrow { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+    .teams-section .section-heading h2 { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; color:#fff; }
+    .team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+    @media (max-width:480px) { .team-grid { grid-template-columns:repeat(2,1fr); } }
+    .team-card { display:flex; flex-direction:column; align-items:center; gap:10px; padding:22px 12px 18px; background:var(--bg-card); border:1px solid rgba(21,145,148,.1); border-radius:4px; transition:border-color .2s,transform .18s,background .2s; }
+    .team-card:hover { border-color:rgba(21,145,148,.4); background:var(--bg-card2); transform:translateY(-2px); }
+    .team-logo-placeholder { width:60px; height:60px; display:flex; align-items:center; justify-content:center; }
+    .team-logo-placeholder img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,.6)); transition:filter .18s; }
+    .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
+    .team-card:hover .team-logo-placeholder img { filter:drop-shadow(0 2px 12px rgba(255,255,255,.15)); }
+    .team-card:hover .team-logo-placeholder img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 12px rgba(255,255,255,.15)); }
+    .team-card h3 { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; text-align:center; line-height:1.2; }
+    .team-card p { font-size:11px; color:rgba(255,255,255,.35); font-family:'Noto Sans KR',sans-serif; font-weight:500; text-align:center; }
+
     /* Score modal */
     .sc-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
     .sc-modal[hidden] { display:none !important; }
@@ -176,6 +193,55 @@
           <span><span class="legend-pip" style="background:rgba(255,255,255,.35)"></span>다음 라운드 진출</span>
           <span><span class="legend-pip" style="background:rgba(255,210,60,.8)"></span>우승</span>
         </div>
+      </div>
+    </section>
+
+    <section class="teams-section" aria-labelledby="teams-title">
+      <div class="section-heading">
+        <p class="eyebrow">Participating Teams</p>
+        <h2 id="teams-title">참가 팀</h2>
+      </div>
+      <div class="team-grid">
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/OAS.png" alt="Oasis Gaming" /></div>
+          <h3>OAS</h3>
+          <p>Oasis Gaming</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/NAOS.png" alt="NAOS" /></div>
+          <h3>NAOS</h3>
+          <p>NAOS</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/PHR.png" alt="PH Rejects" /></div>
+          <h3>PHR</h3>
+          <p>PH Rejects</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/HARU.png" alt="HARU Esports" /></div>
+          <h3>HARU</h3>
+          <p>HARU Esports</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/XIP.png" alt="Xipto Esports" /></div>
+          <h3>XIP</h3>
+          <p>Xipto Esports</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/AMT.png" alt="AMITY 2.0" /></div>
+          <h3>AMT</h3>
+          <p>AMITY 2.0</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/AIM.png" alt="AIM PH" /></div>
+          <h3>AIM</h3>
+          <p>AIM PH</p>
+        </article>
+        <article class="team-card">
+          <div class="team-logo-placeholder"><img src="./assets/teams/QTA.png" alt="QT Academy" /></div>
+          <h3>QTA</h3>
+          <p>QT Academy</p>
+        </article>
       </div>
     </section>
   </main>
