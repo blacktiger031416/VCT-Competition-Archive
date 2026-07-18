@@ -890,14 +890,16 @@
         /* 팀이 모두 배정된 경우 상세 페이지로 이동 */
         var st2=resolvePoState(),s2=st2[mid];
         if(!s2||!s2.teams[0]||!s2.teams[1]) return;
-        var q=new URLSearchParams({
+        var qObj={
           date:'sea_s1_me_po_m'+mid,
           teamA:s2.teams[0],teamB:s2.teams[1],
           score:s2.score.a+' : '+s2.score.b,
           from:'sea_s1_me',tournament:'sea_s1_me',
           match:'M'+mid
-        });
-        window.location.href='./challengers-sea-match-dark.html?'+q.toString();
+        };
+        if(mid===13||mid===14) qObj.bo5='1';
+        if(mid===14) qObj.gf='1';
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(qObj).toString();
       });
     });
 
