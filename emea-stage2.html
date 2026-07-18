@@ -185,6 +185,28 @@
       .ts-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
       .ts-btn-clear:hover { background: rgba(255,80,80,0.24); }
 
+      /* ── SCORE INPUT MODAL ──────────────────── */
+      .sc-modal { position: fixed; inset: 0; z-index: 9900; display: flex; align-items: center; justify-content: center; }
+      .sc-modal[hidden] { display: none !important; }
+      .sc-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.7); backdrop-filter: blur(6px); }
+      .sc-panel { position: relative; z-index: 1; width: min(360px, calc(100vw - 24px)); background: #121b2a; border: 1.5px solid rgba(20,100,246,0.3); border-radius: 18px; padding: 28px 24px 24px; animation: panelIn 0.2s ease; }
+      .sc-panel h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; margin: 0 0 6px; }
+      .sc-panel p { font-size: 12px; color: rgba(255,255,255,0.45); margin: 0 0 20px; font-family: 'Noto Sans KR', sans-serif; }
+      .sc-score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+      .sc-score-input { flex: 1; text-align: center; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.15); color: #fff; border-radius: 10px; padding: 12px 8px; font-size: 28px; font-weight: 900; font-family: 'Barlow Condensed', sans-serif; outline: none; width: 0; }
+      .sc-score-input:focus { border-color: #1464f6; background: rgba(20,100,246,0.08); }
+      .sc-score-sep { font-size: 22px; font-weight: 900; color: rgba(255,255,255,0.35); font-family: 'Barlow Condensed', sans-serif; flex-shrink: 0; }
+      .sc-actions { display: flex; gap: 8px; justify-content: flex-end; }
+      .sc-btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; }
+      .sc-btn-cancel { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+      .sc-btn-cancel:hover { background: rgba(255,255,255,0.14); }
+      .sc-btn-save { background: #1464f6; color: #fff; }
+      .sc-btn-save:hover { background: #2070ff; }
+      .sc-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
+      .sc-btn-clear:hover { background: rgba(255,80,80,0.24); }
+      .match-card em { cursor: pointer; }
+      .match-card em:hover { background: rgba(20,100,246,0.15); border-color: rgba(20,100,246,0.5); }
+
       /* 흰색으로 표시할 팀 로고 */
       .stage-team-logo img[alt="Gentle Mates"],
       .stage-team-logo img[alt="GIANTX"],
@@ -335,6 +357,25 @@
         <div class="ga-actions" id="ch-actions"></div>
       </div>
     </div>
+    <!-- 스코어 입력 모달 -->
+    <div class="sc-modal" id="sc-modal" hidden>
+      <div class="sc-backdrop" id="sc-backdrop"></div>
+      <div class="sc-panel" role="dialog" aria-modal="true" aria-labelledby="sc-title">
+        <h2 id="sc-title">스코어 입력</h2>
+        <p id="sc-subtitle"></p>
+        <div class="sc-score-row">
+          <input class="sc-score-input" id="sc-score-a" type="number" min="0" max="99" placeholder="0" />
+          <span class="sc-score-sep">:</span>
+          <input class="sc-score-input" id="sc-score-b" type="number" min="0" max="99" placeholder="0" />
+        </div>
+        <div class="sc-actions">
+          <button class="sc-btn sc-btn-clear" id="sc-btn-clear">초기화</button>
+          <button class="sc-btn sc-btn-cancel" id="sc-btn-cancel">취소</button>
+          <button class="sc-btn sc-btn-save" id="sc-btn-save">저장</button>
+        </div>
+      </div>
+    </div>
+
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {
@@ -549,6 +590,12 @@
 
             const scoreEl = document.createElement("em");
             scoreEl.textContent = score;
+            if (hasTeams) {
+              scoreEl.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openScoreModal(date || `stage2_emea_w${w}_m${m}`, teamA, teamB);
+              });
+            }
 
             const teamBEl = document.createElement("strong");
             if (teamB) {
@@ -927,6 +974,57 @@
       document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
       document.addEventListener("keydown", function(e) { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
       renderChInvite();
+
+      /* ══════════════════════════════════════════════════
+         스코어 입력 모달
+      ══════════════════════════════════════════════════ */
+      let _scCtx = null;
+
+      function openScoreModal(dateKey, teamA, teamB) {
+        _scCtx = { dateKey, teamA, teamB };
+        const stored = JSON.parse(localStorage.getItem(`result:${dateKey}|${teamA}|${teamB}`) || "{}");
+        const sa = String(stored.scoreA ?? "").trim();
+        const sb = String(stored.scoreB ?? "").trim();
+        document.getElementById("sc-subtitle").textContent = `${teamA} vs ${teamB}`;
+        document.getElementById("sc-score-a").value = sa !== "-" ? sa : "";
+        document.getElementById("sc-score-b").value = sb !== "-" ? sb : "";
+        document.getElementById("sc-modal").hidden = false;
+        setTimeout(() => document.getElementById("sc-score-a").focus(), 60);
+      }
+
+      function closeScoreModal() {
+        document.getElementById("sc-modal").hidden = true;
+        _scCtx = null;
+      }
+
+      document.getElementById("sc-btn-cancel").addEventListener("click", closeScoreModal);
+      document.getElementById("sc-backdrop").addEventListener("click", closeScoreModal);
+
+      document.getElementById("sc-btn-clear").addEventListener("click", () => {
+        if (!_scCtx) return;
+        localStorage.removeItem(`result:${_scCtx.dateKey}|${_scCtx.teamA}|${_scCtx.teamB}`);
+        closeScoreModal();
+        renderWeekPanels();
+        renderStandings();
+      });
+
+      document.getElementById("sc-btn-save").addEventListener("click", () => {
+        if (!_scCtx) return;
+        const a = document.getElementById("sc-score-a").value.trim();
+        const b = document.getElementById("sc-score-b").value.trim();
+        if (a === "" || b === "") return;
+        localStorage.setItem(
+          `result:${_scCtx.dateKey}|${_scCtx.teamA}|${_scCtx.teamB}`,
+          JSON.stringify({ scoreA: a, scoreB: b })
+        );
+        closeScoreModal();
+        renderWeekPanels();
+        renderStandings();
+      });
+
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && !document.getElementById("sc-modal").hidden) closeScoreModal();
+      });
 
     });
     </script>
