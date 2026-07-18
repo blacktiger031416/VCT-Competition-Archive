@@ -544,7 +544,7 @@
           +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tA||null,44)+'</div><div class="match-team-name">'+esc(tA||'팀 선택')+'</div></div></strong>'
           +'<em>'+scoreText+'</em>'
           +'<strong><div class="match-team-wrap"><div class="match-team-mini-logo">'+tLogoHtml(tB||null,44)+'</div><div class="match-team-name">'+esc(tB||'팀 선택')+'</div></div></strong>';
-        (function(grp,mdef){
+        (function(grp,mdef,tA2,tB2){
           var strongs=card.querySelectorAll('strong');
           if(_isAdmin){
             strongs[0].style.cursor='pointer';
@@ -557,7 +557,20 @@
               openScoreModal(grp,mdef.m);
             });
           }
-        })(g, md);
+          if(tA2&&tB2){
+            card.style.cursor='pointer';
+            card.addEventListener('click',function(){
+              var sc2=loadSc(grp,mdef.m,tA2,tB2);
+              var scoreStr=sc2?sc2.a+' : '+sc2.b:'- : -';
+              var q=new URLSearchParams({
+                date:'SEAME_G'+grp+'_M'+mdef.m,
+                teamA:tA2,teamB:tB2,score:scoreStr,
+                from:'sea_s1_me'
+              });
+              window.location.href='./challengers-sea-match-dark.html?'+q.toString();
+            });
+          }
+        })(g, md, tA, tB);
         grid.appendChild(card);
       });
     }
@@ -803,7 +816,8 @@
         var isGF=mid===14, w=s.winner;
         renderPoRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
         renderPoRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
-        card.classList.toggle('clickable',_isAdmin);
+        var hasTeams=!!(s.teams[0]&&s.teams[1]);
+        card.classList.toggle('clickable',_isAdmin||hasTeams);
         if(_isAdmin) rows.forEach(function(row,i){
           if(PO_LINKS[mid][i]===null) row.dataset.seedSlot=mid+'_'+i;
           else delete row.dataset.seedSlot;
@@ -868,10 +882,22 @@
 
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
-        if(!_isAdmin) return;
-        var row=e.target.closest('.bt-row[data-seed-slot]');
-        if(row){ openPoSd(row.dataset.seedSlot); return; }
-        openPoScore(Number(card.dataset.mid));
+        var mid=Number(card.dataset.mid);
+        var seedRow=e.target.closest('.bt-row[data-seed-slot]');
+        if(_isAdmin&&seedRow){ openPoSd(seedRow.dataset.seedSlot); return; }
+        var btRow=e.target.closest('.bt-row');
+        if(_isAdmin&&btRow){ openPoScore(mid); return; }
+        /* 팀이 모두 배정된 경우 상세 페이지로 이동 */
+        var st2=resolvePoState(),s2=st2[mid];
+        if(!s2||!s2.teams[0]||!s2.teams[1]) return;
+        var q=new URLSearchParams({
+          date:'sea_s1_me_po_m'+mid,
+          teamA:s2.teams[0],teamB:s2.teams[1],
+          score:s2.score.a+' : '+s2.score.b,
+          from:'sea_s1_me',tournament:'sea_s1_me',
+          match:'M'+mid
+        });
+        window.location.href='./challengers-sea-match-dark.html?'+q.toString();
       });
     });
 
