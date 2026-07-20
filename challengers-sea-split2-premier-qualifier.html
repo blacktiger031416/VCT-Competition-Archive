@@ -29,7 +29,7 @@
     .playoff-board { max-width:1400px; margin:0 auto; padding:0 32px; }
     .bracket-scroll { overflow-x:auto; padding-bottom:24px; }
 
-    .de-section-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; padding:18px 0 8px 10px; border-left:3px solid var(--acc); color:var(--acc); margin-bottom:4px; min-width:760px; }
+    .de-section-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; padding:18px 0 8px 10px; border-left:3px solid var(--acc); color:var(--acc); margin-bottom:4px; min-width:800px; }
     .de-section-label.lower { color:rgba(255,200,50,.8); border-left-color:rgba(255,200,50,.5); }
 
     .de-rounds { display:grid; grid-template-columns:repeat(4,minmax(190px,1fr)); gap:8px; min-width:800px; margin-bottom:4px; }
@@ -49,8 +49,6 @@
     .bracket-match h3 span { color:rgba(255,255,255,.16); font-weight:500; }
     .bracket-match.lb-final { border-color:rgba(255,200,50,.2); }
     .bracket-match.lb-final h3 { color:rgba(255,200,50,.7); }
-    .bracket-match.grand-final { border-color:rgba(21,145,148,.35); }
-    .bracket-match.grand-final h3 { color:rgba(21,145,148,.85); }
 
     .bt-row { display:flex; align-items:center; gap:6px; padding:7px 9px; border-top:1px solid rgba(255,255,255,.04); }
     .bracket-match .bt-row:first-of-type { border-top:none; }
@@ -60,15 +58,22 @@
     .bt-row.winner .bt-name { color:#fff; }
     .bt-row.winner .bt-score { color:rgba(255,255,255,.9); }
     .bt-row.winner { background:rgba(255,255,255,.03); }
-    .bt-row.champion { background:rgba(255,200,50,.08); }
-    .bt-row.champion .bt-name { color:#ffd966; }
-    .bt-row.champion .bt-score { color:#ffd966; }
     .bt-row.placeholder .bt-name { color:rgba(255,255,255,.2); }
     .bt-logo { width:20px; height:20px; object-fit:contain; flex-shrink:0; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
     .bt-logo.logo-white { filter:brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
     .bt-row.placeholder .bt-logo { visibility:hidden; }
     body:not(.view-only) .bt-row[data-seed-slot] { cursor:pointer; }
     body:not(.view-only) .bt-row[data-seed-slot]:hover { background:rgba(21,145,148,.1); }
+
+    /* Qualified slot */
+    .qualified-slot { border:1.5px solid rgba(21,145,148,.35); border-radius:4px; overflow:hidden; background:rgba(21,145,148,.06); }
+    .qualified-slot .qs-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(21,145,148,.8); padding:5px 9px 4px; border-bottom:1px solid rgba(21,145,148,.15); }
+    .qualified-slot .qs-team { display:flex; align-items:center; gap:6px; padding:8px 9px; }
+    .qualified-slot .qs-logo { width:20px; height:20px; object-fit:contain; flex-shrink:0; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+    .qualified-slot .qs-logo.logo-white { filter:brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+    .qualified-slot .qs-name { flex:1; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:rgba(21,145,148,.9); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .qualified-slot .qs-name.empty { color:rgba(255,255,255,.18); font-weight:600; font-size:11px; }
+    .qualified-slot .qs-check { font-size:14px; color:rgba(21,145,148,.7); flex-shrink:0; }
 
     .bracket-legend { display:flex; gap:24px; justify-content:center; align-items:center; padding:20px 0 8px; border-top:1px solid rgba(255,255,255,.06); margin-top:16px; min-width:800px; }
     .bracket-legend span { display:flex; align-items:center; gap:7px; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.35); }
@@ -138,7 +143,7 @@
       <div>
         <p class="eyebrow">Challengers SEA 2026 · Split 2</p>
         <h1>Premier Qualifier PlayOff</h1>
-        <p>더블 엘리미네이션 · 8팀 · LB Final &amp; Grand Final Bo5</p>
+        <p>더블 엘리미네이션 · 8팀 · UB Final &amp; LB Final 승자 각각 본선 직행</p>
       </div>
     </section>
 
@@ -147,7 +152,7 @@
 
         <div class="de-section-label">UPPER BRACKET</div>
         <div class="de-rounds" aria-hidden="true">
-          <span>UB Quarterfinals</span><span>UB Semifinals</span><span>UB Final</span><span>Grand Final</span>
+          <span>UB Quarterfinals</span><span>UB Semifinals</span><span>UB Final</span><span>Qualified</span>
         </div>
         <div class="de-grid ub-grid">
           <div class="de-col">
@@ -164,13 +169,20 @@
             <article class="bracket-match" data-mid="7"><h3>Match 7 · UB Final <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M5</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↗M6</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
           </div>
           <div class="de-col de-col-center">
-            <article class="bracket-match grand-final" data-mid="14"><h3>Match 14 · Grand Final <span>(Bo5)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M7</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↗M13</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+            <div class="qualified-slot" id="qs-ub">
+              <div class="qs-label">✦ Qualified — UB</div>
+              <div class="qs-team">
+                <img class="qs-logo" id="qs-ub-logo" src="" alt="">
+                <span class="qs-name empty" id="qs-ub-name">TBD</span>
+                <span class="qs-check" id="qs-ub-check" style="display:none">✓</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="de-section-label lower">LOWER BRACKET</div>
         <div class="de-rounds" aria-hidden="true">
-          <span>LB Round 1</span><span>LB Quarterfinals</span><span>LB Semifinal</span><span>LB Final</span>
+          <span>LB Round 1</span><span>LB Round 2</span><span>LB Round 3</span><span>LB Final</span>
         </div>
         <div class="de-grid lb-grid">
           <div class="de-col">
@@ -178,20 +190,28 @@
             <article class="bracket-match" data-mid="9"><h3>Match 9 · LB R1 <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↘M3</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M4</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
           </div>
           <div class="de-col">
-            <article class="bracket-match" data-mid="10"><h3>Match 10 · LB QF <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M8</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M6</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
-            <article class="bracket-match" data-mid="11"><h3>Match 11 · LB QF <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M9</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M5</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+            <article class="bracket-match" data-mid="10"><h3>Match 10 · LB R2 <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M8</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M6</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+            <article class="bracket-match" data-mid="11"><h3>Match 11 · LB R2 <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M9</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M5</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
           </div>
           <div class="de-col de-col-center">
-            <article class="bracket-match" data-mid="12"><h3>Match 12 · LB SF <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M10</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↗M11</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+            <article class="bracket-match" data-mid="12"><h3>Match 12 · LB R3 <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M10</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↗M11</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
           </div>
-          <div class="de-col de-col-center">
-            <article class="bracket-match lb-final" data-mid="13"><h3>Match 13 · LB Final <span>(Bo5)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M12</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M7</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+          <div class="de-col de-col-center" style="gap:12px;">
+            <article class="bracket-match lb-final" data-mid="13"><h3>Match 13 · LB Final <span>(Bo3)</span></h3><div class="bt-row placeholder"><span class="bt-seed">↗M12</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div><div class="bt-row placeholder"><span class="bt-seed">↘M7</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div></article>
+            <div class="qualified-slot" id="qs-lb">
+              <div class="qs-label">✦ Qualified — LB</div>
+              <div class="qs-team">
+                <img class="qs-logo" id="qs-lb-logo" src="" alt="">
+                <span class="qs-name empty" id="qs-lb-name">TBD</span>
+                <span class="qs-check" id="qs-lb-check" style="display:none">✓</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="bracket-legend">
           <span><span class="legend-pip" style="background:rgba(255,255,255,.35)"></span>다음 라운드 진출</span>
-          <span><span class="legend-pip" style="background:rgba(255,210,60,.8)"></span>우승</span>
+          <span><span class="legend-pip" style="background:rgba(21,145,148,.7)"></span>본선 직행</span>
         </div>
       </div>
     </section>
@@ -298,37 +318,38 @@
       {name:'Homeless Gang',    code:'HLG',  logo:'./assets/teams/HLG.png',   white:false}
     ];
     var TEAM_MAP={};TEAMS.forEach(function(t){TEAM_MAP[t.name]=t;});
+
     var LINKS = {
       1:[null,null], 2:[null,null], 3:[null,null], 4:[null,null],
       5:[{m:1,r:'winner'},{m:2,r:'winner'}],
       6:[{m:3,r:'winner'},{m:4,r:'winner'}],
       7:[{m:5,r:'winner'},{m:6,r:'winner'}],
-      8:[{m:1,r:'loser'}, {m:2,r:'loser'}],
-      9:[{m:3,r:'loser'}, {m:4,r:'loser'}],
+      8:[{m:1,r:'loser'},{m:2,r:'loser'}],
+      9:[{m:3,r:'loser'},{m:4,r:'loser'}],
       10:[{m:8,r:'winner'},{m:6,r:'loser'}],
       11:[{m:9,r:'winner'},{m:5,r:'loser'}],
       12:[{m:10,r:'winner'},{m:11,r:'winner'}],
       13:[{m:12,r:'winner'},{m:7,r:'loser'}],
-      14:[{m:7,r:'winner'},{m:13,r:'winner'}],
     };
 
-    function thr(mid){ return (mid===13||mid===14)?3:2; }
+    function thr(){ return 2; }
     function lj(k,d){ try{var v=JSON.parse(localStorage.getItem(k));return v!=null?v:d;}catch(e){return d;} }
     function sj(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
     function isAdmin(){ return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
 
     var seeds  = lj(SEEDS_KEY,{});
     var scores = lj(SCORES_KEY,{});
+
     function resolveState(){
       var st={};
-      for(var mid=1;mid<=14;mid++){
+      for(var mid=1;mid<=13;mid++){
         var lk=LINKS[mid];
         var teams=[0,1].map(function(i){
           if(lk[i]===null) return seeds[mid+'_'+i]||'';
           var src=st[lk[i].m]; return src?(src[lk[i].r]||''):'';
         });
         var sc=scores[mid]||{a:0,b:0};
-        var t=thr(mid);
+        var t=thr();
         var hw=teams[0]&&teams[1]&&(sc.a>=t||sc.b>=t)&&sc.a!==sc.b;
         st[mid]={teams:teams,score:sc,
           winner:hw?teams[sc.a>sc.b?0:1]:'',
@@ -337,16 +358,23 @@
       return st;
     }
 
-    function renderRow(row,name,score,isWin,isChamp){
+    function renderRow(row,name,score,isWin){
       var ne=row.querySelector('.bt-name'), se=row.querySelector('.bt-score');
       var li=row.querySelector('.bt-logo');
       row.dataset.teamName=name||'';
-      row.classList.toggle('winner',Boolean(isWin&&name&&!isChamp));
-      row.classList.toggle('champion',Boolean(isChamp&&name));
+      row.classList.toggle('winner',Boolean(isWin&&name));
       row.classList.toggle('placeholder',!name);
       if(ne) ne.textContent=name||(row.querySelector('.bt-seed')?row.querySelector('.bt-seed').textContent:'TBD');
       if(se) se.textContent=name?String(score):'-';
       if(li){var tm=name&&TEAM_MAP[name];li.src=tm?tm.logo:'';li.alt=tm?tm.code:'';li.className='bt-logo'+(tm&&tm.white?' logo-white':'');}
+    }
+
+    function renderQualified(elName, elLogo, elCheck, name){
+      var tm = name && TEAM_MAP[name];
+      elName.textContent = name || 'TBD';
+      elName.classList.toggle('empty', !name);
+      if(elLogo){ elLogo.src=tm?tm.logo:''; elLogo.alt=tm?tm.code:''; elLogo.className='qs-logo'+(tm&&tm.white?' logo-white':''); elLogo.style.display=name?'':'none'; }
+      if(elCheck){ elCheck.style.display=name?'':'none'; }
     }
 
     function renderBracket(){
@@ -355,15 +383,27 @@
         var mid=Number(card.dataset.mid);
         var s=st[mid]; if(!s) return;
         var rows=card.querySelectorAll('.bt-row');
-        var isGF=mid===14, w=s.winner;
-        renderRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
-        renderRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
+        var w=s.winner;
+        renderRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]);
+        renderRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]);
         card.classList.toggle('clickable',isAdmin());
         if(isAdmin()) rows.forEach(function(row,i){
           if(LINKS[mid][i]===null) row.dataset.seedSlot=mid+'_'+i;
           else delete row.dataset.seedSlot;
         });
       });
+      renderQualified(
+        document.getElementById('qs-ub-name'),
+        document.getElementById('qs-ub-logo'),
+        document.getElementById('qs-ub-check'),
+        st[7]?st[7].winner:''
+      );
+      renderQualified(
+        document.getElementById('qs-lb-name'),
+        document.getElementById('qs-lb-logo'),
+        document.getElementById('qs-lb-check'),
+        st[13]?st[13].winner:''
+      );
     }
 
     /* Score modal */
@@ -376,9 +416,8 @@
       document.getElementById('sc-sub').textContent=s.teams[0]+' vs '+s.teams[1];
       document.getElementById('sc-team-a').textContent=s.teams[0];
       document.getElementById('sc-team-b').textContent=s.teams[1];
-      var mx=String(thr(mid));
       var ia=document.getElementById('sc-score-a'), ib=document.getElementById('sc-score-b');
-      ia.max=ib.max=mx; ia.value=String(s.score.a); ib.value=String(s.score.b);
+      ia.max=ib.max='3'; ia.value=String(s.score.a); ib.value=String(s.score.b);
       document.getElementById('sc-modal').hidden=false; ia.focus();
     }
     function closeScore(){ document.getElementById('sc-modal').hidden=true; _scMid=null; }
