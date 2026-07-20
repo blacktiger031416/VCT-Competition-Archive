@@ -905,10 +905,15 @@
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
         var mid=Number(card.dataset.mid);
-        var seedRow=e.target.closest('.bt-row[data-seed-slot]');
-        if(_isAdmin&&seedRow){ openPoSd(seedRow.dataset.seedSlot); return; }
         var btRow=e.target.closest('.bt-row');
-        if(_isAdmin&&btRow){ openPoScore(mid); return; }
+        if(_isAdmin&&btRow){
+          var st_c=resolvePoState(),s_c=st_c[mid];
+          var bothSet=!!(s_c&&s_c.teams[0]&&s_c.teams[1]);
+          if(bothSet){ openPoScore(mid); return; }
+          var seedRow=e.target.closest('.bt-row[data-seed-slot]');
+          if(seedRow){ openPoSd(seedRow.dataset.seedSlot); return; }
+          openPoScore(mid); return;
+        }
         /* 팀이 모두 배정된 경우 상세 페이지로 이동 */
         var st2=resolvePoState(),s2=st2[mid];
         if(!s2||!s2.teams[0]||!s2.teams[1]) return;
