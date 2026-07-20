@@ -317,13 +317,22 @@
     var PFX      = "sea_pq_s2_";
     var POOL_KEY = PFX + "pool";
     var DAYS     = [{d:1, count:6}, {d:2, count:6}, {d:3, count:3}];
-    var SLOT_COUNT = 6;
+    var SLOT_COUNT = 8;
     var _isAdmin = typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
 
     function loadJSON(key, def) { try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
     function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-    var DEFAULT_POOL = [];
+    var DEFAULT_POOL = [
+      { name:"AURA",             code:"AURA", logo:"./assets/teams/AURA.png",  white:false },
+      { name:"NINJA TEAM",       code:"NJT",  logo:"./assets/teams/NJT.png",   white:false },
+      { name:"Xipto Esports",    code:"XPT",  logo:"./assets/teams/XPT.png",   white:false },
+      { name:"Kadiliman Esports",code:"KDM",  logo:"./assets/teams/KDM.png",   white:true  },
+      { name:"Armory Gaming",    code:"AG",   logo:"./assets/teams/AG.png",    white:false },
+      { name:"V6 Esports",       code:"V6 E", logo:"./assets/teams/V6 E.png",  white:false },
+      { name:"Heaven Sent",      code:"HS",   logo:"./assets/teams/HS.png",    white:false },
+      { name:"Homeless Gang",    code:"HLG",  logo:"./assets/teams/HLG.png",   white:false },
+    ];
     function loadPool() { var p = loadJSON(POOL_KEY, null); return (Array.isArray(p) && p.length) ? p : DEFAULT_POOL.slice(); }
     function savePool(p) { saveJSON(POOL_KEY, p); }
 
