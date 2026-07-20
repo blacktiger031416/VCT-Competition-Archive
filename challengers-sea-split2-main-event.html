@@ -38,16 +38,26 @@
 
     /* SECTION TABS (Group Stage / PlayOffs) */
     input[name="section"], input[name="group"] { position:absolute; opacity:0; pointer-events:none; }
-    .sec-tabs { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; margin-bottom:0; }
+    .sec-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; margin-bottom:0; }
     .sec-tabs label { min-height:48px; display:grid; place-items:center; border-radius:7px; border:1px solid transparent; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s, background .14s, border-color .14s; }
     .sec-tabs label:hover { color:rgba(255,255,255,.8); border-color:rgba(255,255,255,.1); }
     #sec-gs:checked ~ .sec-tabs label[for="sec-gs"],
-    #sec-po:checked ~ .sec-tabs label[for="sec-po"] { color:#fff; background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.35); }
+    #sec-po:checked ~ .sec-tabs label[for="sec-po"],
+    #sec-rq:checked ~ .sec-tabs label[for="sec-rq"] { color:#fff; background:rgba(21,145,148,.12); border-color:rgba(21,145,148,.35); }
 
     /* SECTION CONTENT */
-    .gs-section, .po-section { display:none; margin-top:24px; }
+    .gs-section, .po-section, .rq-section { display:none; margin-top:24px; }
     #sec-gs:checked ~ .gs-section { display:block; }
     #sec-po:checked ~ .po-section { display:block; }
+    #sec-rq:checked ~ .rq-section { display:block; }
+
+    /* RQ SECTION */
+    .rq-link-card { display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:32px 36px; border:1px solid rgba(255,200,50,.2); border-radius:12px; background:rgba(255,200,50,.03); max-width:600px; }
+    .rq-link-card .rq-kicker { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,200,50,.7); }
+    .rq-link-card h2 { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:900; color:#fff; }
+    .rq-link-card p { font-size:13px; color:rgba(255,255,255,.45); font-family:'Noto Sans KR',sans-serif; line-height:1.7; }
+    .rq-go-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border-radius:8px; background:rgba(255,200,50,.12); border:1px solid rgba(255,200,50,.3); color:#ffd966; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; text-decoration:none; transition:background .15s,border-color .15s; }
+    .rq-go-btn:hover { background:rgba(255,200,50,.22); border-color:rgba(255,200,50,.5); }
 
     /* GROUP INNER TABS */
     .grp-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:8px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; margin-bottom:20px; }
@@ -253,13 +263,15 @@
       <div class="participants-grid" id="participants-grid"></div>
     </section>
 
-    <!-- Section radio controls (siblings of gs-section / po-section) -->
+    <!-- Section radio controls -->
     <input type="radio" name="section" id="sec-gs" checked>
     <input type="radio" name="section" id="sec-po">
+    <input type="radio" name="section" id="sec-rq">
 
     <div class="sec-tabs">
       <label for="sec-gs">그룹 스테이지</label>
       <label for="sec-po">플레이오프</label>
+      <label for="sec-rq">Replacement Qualifier</label>
     </div>
 
     <!-- ── GROUP STAGE ── -->
@@ -379,6 +391,16 @@
             <span><span class="legend-pip" style="background:rgba(255,210,60,.8)"></span>우승</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ── REPLACEMENT QUALIFIER ── -->
+    <div class="rq-section">
+      <div class="rq-link-card">
+        <span class="rq-kicker">추가 스테이지</span>
+        <h2>Replacement Qualifier</h2>
+        <p>Xiao Long Bao의 부정행위 실격으로 추가된 스테이지입니다.<br>4개 팀이 단일 그룹 라운드로빈(6경기)을 치르며, 1위 팀이 플레이오프에 직행합니다.</p>
+        <a class="rq-go-btn" href="./challengers-sea-split2-replacement-qualifier.html">바로가기 →</a>
       </div>
     </div>
   </main>
