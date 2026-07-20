@@ -561,7 +561,13 @@
             const md = loadMatch(w, m);
             const { teamA, teamB, date } = md;
             const displayDate = date || `W${w}`;
-            const score = getStoredMatchScore(date || `stage2_emea_w${w}_m${m}`, teamA, teamB);
+            const _posKey = `stage2_emea_w${w}_m${m}`;
+            const _primaryKey = date || _posKey;
+            let score = getStoredMatchScore(_primaryKey, teamA, teamB);
+            if (score === "VS" && date && date !== _posKey) {
+              const _alt = getStoredMatchScore(_posKey, teamA, teamB);
+              if (_alt !== "VS") score = _alt;
+            }
             const hasTeams = teamA && teamB;
 
             const card = document.createElement("article");
@@ -593,7 +599,7 @@
             if (hasTeams) {
               scoreEl.addEventListener("click", (e) => {
                 e.stopPropagation();
-                openScoreModal(date || `stage2_emea_w${w}_m${m}`, teamA, teamB);
+                openScoreModal(date || `stage2_emea_w${w}_m${m}`, teamA, teamB, `stage2_emea_w${w}_m${m}`);
               });
             }
 
@@ -646,9 +652,14 @@
           for (let m = 0; m < 10; m++) {
             const md = loadMatch(w, m);
             if (!md.teamA || !md.teamB) continue;
-            const key = md.date || `stage2_emea_w${w}_m${m}`;
-            const score = getStoredMatchScore(key, md.teamA, md.teamB);
-            fixtures.push({ date: key, teamA: md.teamA, teamB: md.teamB, score });
+            const positionalKey = `stage2_emea_w${w}_m${m}`;
+            const primaryKey = md.date || positionalKey;
+            let score = getStoredMatchScore(primaryKey, md.teamA, md.teamB);
+            if (score === "VS" && md.date && md.date !== positionalKey) {
+              const alt = getStoredMatchScore(positionalKey, md.teamA, md.teamB);
+              if (alt !== "VS") score = alt;
+            }
+            fixtures.push({ date: primaryKey, teamA: md.teamA, teamB: md.teamB, score });
           }
         }
         return fixtures;
@@ -980,9 +991,13 @@
       ══════════════════════════════════════════════════ */
       let _scCtx = null;
 
-      function openScoreModal(dateKey, teamA, teamB) {
+      function openScoreModal(dateKey, teamA, teamB, fallbackKey) {
         _scCtx = { dateKey, teamA, teamB };
-        const stored = JSON.parse(localStorage.getItem(`result:${dateKey}|${teamA}|${teamB}`) || "{}");
+        let stored = JSON.parse(localStorage.getItem(`result:${dateKey}|${teamA}|${teamB}`) || "{}");
+        if (fallbackKey && fallbackKey !== dateKey && !stored.scoreA && !stored.marksA) {
+          const alt = JSON.parse(localStorage.getItem(`result:${fallbackKey}|${teamA}|${teamB}`) || "{}");
+          if (alt.scoreA || alt.marksA) stored = alt;
+        }
         const sa = String(stored.scoreA ?? "").trim();
         const sb = String(stored.scoreB ?? "").trim();
         document.getElementById("sc-subtitle").textContent = `${teamA} vs ${teamB}`;
