@@ -315,9 +315,12 @@
       [6,7]
     ];
 
-    var slots    = lj(SLOTS_KEY, DEFAULT_POOL.map(function(t){ return t.name; }));
+    var FS_SEEDS_KEY = PFX+'fs_seeds';
+
+    var slots    = lj(SLOTS_KEY, ['','','','','','','','']);
     var scores   = lj(SCORES_KEY, {});
     var fsScores = lj(FS_SCORES_KEY, {});
+    var fsSeeds  = lj(FS_SEEDS_KEY, {});
 
     function pool(){ return DEFAULT_POOL; }
     function tmap(){ var m={}; pool().forEach(function(t){ m[t.name]=t; }); return m; }
@@ -483,13 +486,17 @@
     }
 
     // ── FINAL STAGE ──────────────────────────────────────────
-    function top4(){ return calcStandings().slice(0,4).map(function(r){ return r.name; }); }
+    // SF1/SF2: admin assigns teams manually via fsSeeds
+    // Final: auto from SF1/SF2 winners
+    var FS_LINKS = {
+      1:[null,null], 2:[null,null],
+      3:[{m:1,r:'winner'},{m:2,r:'winner'}]
+    };
 
     function resolveFs(){
-      var t4=top4(), tm=tmap();
       var st={};
-      st[1]={teams:[t4[0]||'',t4[3]||''],score:fsScores[1]||{a:0,b:0}};
-      st[2]={teams:[t4[1]||'',t4[2]||''],score:fsScores[2]||{a:0,b:0}};
+      st[1]={teams:[fsSeeds['1_0']||'',fsSeeds['1_1']||''],score:fsScores[1]||{a:0,b:0}};
+      st[2]={teams:[fsSeeds['2_0']||'',fsSeeds['2_1']||''],score:fsScores[2]||{a:0,b:0}};
       [1,2].forEach(function(mid){
         var s=st[mid],hw=s.teams[0]&&s.teams[1]&&(s.score.a>=2||s.score.b>=2)&&s.score.a!==s.score.b;
         s.winner=hw?s.teams[s.score.a>s.score.b?0:1]:'';
@@ -510,6 +517,40 @@
       if(li){ li.src=t?t.logo:''; li.alt=t?t.code:''; li.className='bt-logo'+(t&&t.white?' logo-w':''); }
     }
 
+    // ── FS SEED PICKER ───────────────────────────────────────
+    var _fsSeedSlot=null;
+    function openFsPicker(slot){
+      _fsSeedSlot=slot;
+      var p=pool(), cur=fsSeeds[slot]||'';
+      var usedSlots=Object.keys(fsSeeds).filter(function(k){ return k!==slot; });
+      var used=usedSlots.map(function(k){ return fsSeeds[k]; });
+      var parts=slot.split('_');
+      document.getElementById('ga-title').textContent='SF'+parts[0]+' '+(parts[1]==='0'?'A팀':'B팀')+' 배정';
+      document.getElementById('ga-sub').textContent='파이널 스테이지에 배정할 팀을 선택하세요.';
+      var grid=document.getElementById('ga-grid');
+      grid.innerHTML=p.map(function(t){
+        var f=t.white?'filter:brightness(0) invert(1);':'';
+        var lg=t.logo?'<img src="'+esc(t.logo)+'" alt="" style="'+f+'">':"";
+        var inOther=used.indexOf(t.name)>=0;
+        return '<button class="ga-team-btn'+(t.name===cur?' selected':'')+(inOther?' in-other':'')+'" data-team="'+esc(t.name)+'">'+lg+'<span>'+esc(t.code||t.name)+'</span></button>';
+      }).join('');
+      grid.querySelectorAll('.ga-team-btn').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          fsSeeds[_fsSeedSlot]=btn.dataset.team; sj(FS_SEEDS_KEY,fsSeeds); closeGa(); renderFs();
+        });
+      });
+      var ac=document.getElementById('ga-actions');
+      ac.innerHTML='';
+      var clrBtn=document.createElement('button');
+      clrBtn.className='ga-btn ga-btn-clear'; clrBtn.textContent='초기화';
+      clrBtn.addEventListener('click',function(){ delete fsSeeds[_fsSeedSlot]; sj(FS_SEEDS_KEY,fsSeeds); closeGa(); renderFs(); });
+      var canBtn=document.createElement('button');
+      canBtn.className='ga-btn ga-btn-cancel'; canBtn.textContent='취소';
+      canBtn.addEventListener('click',closeGa);
+      ac.appendChild(clrBtn); ac.appendChild(canBtn);
+      document.getElementById('ga-modal').hidden=false;
+    }
+
     function renderFs(){
       var st=resolveFs();
       document.querySelectorAll('.bracket-match').forEach(function(card){
@@ -517,11 +558,24 @@
         var rows=card.querySelectorAll('.bt-row'), w=s.winner, isGF=mid===3;
         renderFsRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
         renderFsRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
+        // SF1/SF2: mark empty seed slots for admin picking
+        if(adm()&&mid!==3){
+          rows.forEach(function(row,i){
+            if(!s.teams[i]) row.dataset.seedSlot=mid+'_'+i;
+            else delete row.dataset.seedSlot;
+          });
+        }
         var hasTeams=!!(s.teams[0]&&s.teams[1]);
         card.classList.toggle('clickable',adm()||hasTeams);
-        card.onclick=function(){
-          var s2=resolveFs()[mid]; if(!s2||!s2.teams[0]||!s2.teams[1]) return;
-          if(adm()){ openFsModal(mid,s2); return; }
+        card.onclick=function(e){
+          var s2=resolveFs()[mid];
+          if(adm()){
+            var seedRow=e.target.closest('.bt-row[data-seed-slot]');
+            if(seedRow){ openFsPicker(seedRow.dataset.seedSlot); return; }
+            if(s2&&s2.teams[0]&&s2.teams[1]){ openFsModal(mid,s2); return; }
+            return;
+          }
+          if(!s2||!s2.teams[0]||!s2.teams[1]) return;
           window.location.href='./challengers-sea-match-dark.html?'
             +new URLSearchParams({date:'pacific_lcq_sa_s1_fs_m'+mid,
               teamA:s2.teams[0],teamB:s2.teams[1],
