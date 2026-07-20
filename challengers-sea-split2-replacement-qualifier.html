@@ -250,8 +250,7 @@
 
     function poolMap(){ var m={}; pool.forEach(function(t){m[t.name]=t;}); return m; }
 
-    function scoreKey(mid){ return PFX+'m'+mid; }
-    function loadSc(mid){ return lj(scoreKey(mid), null); }
+    function loadSc(mid){ return scores[mid] || null; }
     function saveSc(mid, a, b){ scores[mid]={a:a,b:b}; sj(SCORES_KEY, scores); }
     function deleteSc(mid){ delete scores[mid]; sj(SCORES_KEY, scores); }
 
