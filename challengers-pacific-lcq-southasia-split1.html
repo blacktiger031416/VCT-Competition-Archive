@@ -283,9 +283,9 @@
     function lj(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
     function sj(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
     function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function adm(){ return !!(window.isAdmin&&window.isAdmin()); }
+    var _isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
 
-    document.body.classList.toggle('view-only', !adm());
+    document.body.classList.toggle('view-only', !_isAdmin);
 
     var DEFAULT_POOL = [
       {name:'Asterisk',          code:'AST',  logo:'./assets/teams/AST.png',  white:true},
@@ -374,7 +374,7 @@
         +'<div class="match-team r" data-ts="b">'+lgHtml(b,b&&b.white)+'<span class="match-tname'+(tB?' set':'')+(winB?' win':'')+'">'+esc(nB)+'</span></div>';
 
       card.addEventListener('click',function(e){
-        if(adm()){
+        if(_isAdmin){
           var ts=e.target.closest('[data-ts]');
           if(ts){
             var side=ts.dataset.ts;
@@ -533,17 +533,17 @@
         renderFsRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
         renderFsRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
         // SF1/SF2: mark empty seed slots for admin picking
-        if(adm()&&mid!==3){
+        if(_isAdmin&&mid!==3){
           rows.forEach(function(row,i){
             if(!s.teams[i]) row.dataset.seedSlot=mid+'_'+i;
             else delete row.dataset.seedSlot;
           });
         }
         var hasTeams=!!(s.teams[0]&&s.teams[1]);
-        card.classList.toggle('clickable',adm()||hasTeams);
+        card.classList.toggle('clickable',_isAdmin||hasTeams);
         card.onclick=function(e){
           var s2=resolveFs()[mid];
-          if(adm()){
+          if(_isAdmin){
             var seedRow=e.target.closest('.bt-row[data-seed-slot]');
             if(seedRow){ openFsPicker(seedRow.dataset.seedSlot); return; }
             if(s2&&s2.teams[0]&&s2.teams[1]){ openFsModal(mid,s2); return; }
