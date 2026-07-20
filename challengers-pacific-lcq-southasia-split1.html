@@ -276,24 +276,6 @@
     </div>
   </div>
 
-  <!-- Add team modal -->
-  <div class="add-modal" id="add-modal" hidden>
-    <div class="ga-bd" id="add-bd"></div>
-    <div class="add-panel" role="dialog">
-      <h2>팀 추가</h2>
-      <p>South Asia Split 1 참가 팀을 등록합니다.</p>
-      <div class="add-inputs">
-        <div><div class="add-lbl">팀 이름 *</div><input class="add-input" id="at-name" type="text" placeholder="예: Global Esports"></div>
-        <div><div class="add-lbl">팀 코드 (최대 5자)</div><input class="add-input" id="at-code" type="text" maxlength="5" placeholder="예: GE"></div>
-        <div><div class="add-lbl">로고 경로</div><input class="add-input" id="at-logo" type="text" placeholder="./assets/teams/GE.png"></div>
-      </div>
-      <div class="ga-actions">
-        <button class="ga-btn ga-btn-cancel" id="add-cancel">취소</button>
-        <button class="ga-btn ga-btn-save" id="add-save">추가</button>
-      </div>
-    </div>
-  </div>
-
   <script src="./storage.js"></script>
   <script src="./auth.js"></script>
   <script>
@@ -305,8 +287,18 @@
 
     document.body.classList.toggle('view-only', !adm());
 
+    var DEFAULT_POOL = [
+      {name:'Asterisk',          code:'AST',  logo:'./assets/teams/AST.png',  white:false},
+      {name:'Revenant XSpark',   code:'RNTX', logo:'./assets/teams/RNTX.png', white:false},
+      {name:'Gods Reign',        code:'GDR',  logo:'./assets/teams/GDR.png',  white:false},
+      {name:'S8UL Esports',      code:'S8UL', logo:'./assets/teams/S8UL.png', white:false},
+      {name:'The Rad Syndicate', code:'RAD',  logo:'./assets/teams/RAD.png',  white:false},
+      {name:'Leosun Esports',    code:'LSE',  logo:'./assets/teams/LSE.png',  white:false},
+      {name:'xCrew',             code:'XRE',  logo:'./assets/teams/XRE.png',  white:false},
+      {name:'DOT EXE',           code:'DXE',  logo:'./assets/teams/DXE.png',  white:false},
+    ];
+
     var PFX          = 'pacific_lcq_sa_s1_';
-    var POOL_KEY     = PFX+'pool';
     var SLOTS_KEY    = PFX+'gs_slots';
     var SCORES_KEY   = PFX+'gs_scores';
     var FS_SCORES_KEY= PFX+'fs_scores';
@@ -327,9 +319,8 @@
     var scores   = lj(SCORES_KEY, {});
     var fsScores = lj(FS_SCORES_KEY, {});
 
-    function pool(){ return lj(POOL_KEY, []); }
+    function pool(){ return DEFAULT_POOL; }
     function tmap(){ var m={}; pool().forEach(function(t){ m[t.name]=t; }); return m; }
-    function teamOf(name){ return tmap()[name]||null; }
 
     // ── TEAM SLOTS ────────────────────────────────────────────
     function renderSlots(){
@@ -371,39 +362,17 @@
       });
       var ac=document.getElementById('ga-actions');
       ac.innerHTML='';
-      var addBtn=document.createElement('button');
-      addBtn.className='ga-btn ga-btn-clear'; addBtn.textContent='+ 팀 추가'; addBtn.style.marginRight='auto';
-      addBtn.addEventListener('click',function(){ closeGa(); openAdd(); });
       var clrBtn=document.createElement('button');
       clrBtn.className='ga-btn ga-btn-clear'; clrBtn.textContent='초기화';
       clrBtn.addEventListener('click',function(){ slots[_pSlot]=''; sj(SLOTS_KEY,slots); closeGa(); renderAll(); });
       var canBtn=document.createElement('button');
       canBtn.className='ga-btn ga-btn-cancel'; canBtn.textContent='취소';
       canBtn.addEventListener('click',closeGa);
-      ac.appendChild(addBtn); ac.appendChild(clrBtn); ac.appendChild(canBtn);
+      ac.appendChild(clrBtn); ac.appendChild(canBtn);
       document.getElementById('ga-modal').hidden=false;
     }
     function closeGa(){ document.getElementById('ga-modal').hidden=true; _pSlot=null; }
     document.getElementById('ga-bd').addEventListener('click',closeGa);
-
-    // ── ADD TEAM ─────────────────────────────────────────────
-    function openAdd(){
-      document.getElementById('at-name').value='';
-      document.getElementById('at-code').value='';
-      document.getElementById('at-logo').value='';
-      document.getElementById('add-modal').hidden=false;
-    }
-    document.getElementById('add-bd').addEventListener('click',function(){ document.getElementById('add-modal').hidden=true; });
-    document.getElementById('add-cancel').addEventListener('click',function(){ document.getElementById('add-modal').hidden=true; });
-    document.getElementById('add-save').addEventListener('click',function(){
-      var name=document.getElementById('at-name').value.trim(); if(!name) return;
-      var code=document.getElementById('at-code').value.trim()||name.slice(0,5).toUpperCase();
-      var logo=document.getElementById('at-logo').value.trim();
-      var p=pool();
-      if(p.some(function(t){ return t.name===name; })){ alert('이미 등록된 팀입니다.'); return; }
-      p.push({name:name,code:code,logo:logo,white:false}); sj(POOL_KEY,p);
-      document.getElementById('add-modal').hidden=true; renderAll();
-    });
 
     // ── MATCH CARDS ──────────────────────────────────────────
     function makeCard(mid, pair){
