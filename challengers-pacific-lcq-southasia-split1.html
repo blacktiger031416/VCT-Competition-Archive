@@ -288,13 +288,13 @@
     document.body.classList.toggle('view-only', !adm());
 
     var DEFAULT_POOL = [
-      {name:'Asterisk',          code:'AST',  logo:'./assets/teams/AST.png',  white:false},
+      {name:'Asterisk',          code:'AST',  logo:'./assets/teams/AST.png',  white:true},
       {name:'Revenant XSpark',   code:'RNTX', logo:'./assets/teams/RNTX.png', white:false},
       {name:'Gods Reign',        code:'GDR',  logo:'./assets/teams/GDR.png',  white:false},
       {name:'S8UL Esports',      code:'S8UL', logo:'./assets/teams/S8UL.png', white:false},
       {name:'The Rad Syndicate', code:'RAD',  logo:'./assets/teams/RAD.png',  white:false},
       {name:'Leosun Esports',    code:'LSE',  logo:'./assets/teams/LSE.png',  white:false},
-      {name:'xCrew',             code:'XRE',  logo:'./assets/teams/XRE.png',  white:false},
+      {name:'xCrew',             code:'XRE',  logo:'./assets/teams/XRE.png',  white:true},
       {name:'DOT EXE',           code:'DXE',  logo:'./assets/teams/DXE.png',  white:false},
     ];
 
@@ -369,9 +369,9 @@
       card.className='match-card clickable';
       // team divs get data-ts for admin clicking
       card.innerHTML='<span class="match-label">M'+mid+'</span>'
-        +'<div class="match-team"'+(adm()?' data-ts="a"':'')+'>'+lgHtml(a,a&&a.white)+'<span class="match-tname'+(tA?' set':'')+(winA?' win':'')+'">'+esc(nA)+'</span></div>'
+        +'<div class="match-team" data-ts="a">'+lgHtml(a,a&&a.white)+'<span class="match-tname'+(tA?' set':'')+(winA?' win':'')+'">'+esc(nA)+'</span></div>'
         +'<span class="match-score'+(hasScore?' has':'')+'">'+scoreStr+'</span>'
-        +'<div class="match-team r"'+(adm()?' data-ts="b"':'')+'>'+lgHtml(b,b&&b.white)+'<span class="match-tname'+(tB?' set':'')+(winB?' win':'')+'">'+esc(nB)+'</span></div>';
+        +'<div class="match-team r" data-ts="b">'+lgHtml(b,b&&b.white)+'<span class="match-tname'+(tB?' set':'')+(winB?' win':'')+'">'+esc(nB)+'</span></div>';
 
       card.addEventListener('click',function(e){
         if(adm()){
