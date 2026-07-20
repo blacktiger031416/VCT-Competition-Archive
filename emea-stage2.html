@@ -688,14 +688,15 @@
       }
 
       function rankGroup(teams, fixtures) {
-        const stats = new Map(teams.filter(Boolean).map((t) => [t, { team: t, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0 }]));
-        const teamSet = new Set(teams.filter(Boolean));
+        const normTeams = teams.filter(Boolean).map(canonicalName);
+        const stats = new Map(normTeams.map((t) => [t, { team: t, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0 }]));
+        const teamSet = new Set(normTeams);
 
-        fixtures.filter((f) => teamSet.has(f.teamA) && teamSet.has(f.teamB)).forEach((f) => {
+        fixtures.filter((f) => teamSet.has(canonicalName(f.teamA)) && teamSet.has(canonicalName(f.teamB))).forEach((f) => {
           const p = parseScore(f.score);
           if (!p) return;
-          const a = stats.get(f.teamA);
-          const b = stats.get(f.teamB);
+          const a = stats.get(canonicalName(f.teamA));
+          const b = stats.get(canonicalName(f.teamB));
           if (!a || !b) return;
           a.mapsWon += p.a; a.mapsLost += p.b;
           b.mapsWon += p.b; b.mapsLost += p.a;
