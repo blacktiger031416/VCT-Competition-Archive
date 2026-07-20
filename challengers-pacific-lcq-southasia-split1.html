@@ -498,7 +498,7 @@
         s.winner=hw?s.teams[s.score.a>s.score.b?0:1]:'';
       });
       st[3]={teams:[st[1].winner||'',st[2].winner||''],score:fsScores[3]||{a:0,b:0}};
-      var s3=st[3],hw=s3.teams[0]&&s3.teams[1]&&(s3.score.a>=2||s3.score.b>=2)&&s3.score.a!==s3.score.b;
+      var s3=st[3],hw=s3.teams[0]&&s3.teams[1]&&(s3.score.a>=3||s3.score.b>=3)&&s3.score.a!==s3.score.b;
       s3.winner=hw?s3.teams[s3.score.a>s3.score.b?0:1]:'';
       return st;
     }
@@ -563,9 +563,12 @@
     var _fsMid=null;
     function openFsModal(mid,s){
       _fsMid=mid;
-      document.getElementById('fs-title').textContent=(mid===3?'결승':'SF '+mid)+' 결과 입력';
+      var maxScore=mid===3?3:2;
+      document.getElementById('fs-title').textContent=(mid===3?'결승 (Bo5)':'SF '+mid+' (Bo3)')+' 결과 입력';
       document.getElementById('fs-a-name').textContent=s.teams[0];
       document.getElementById('fs-b-name').textContent=s.teams[1];
+      document.getElementById('fs-a').max=maxScore;
+      document.getElementById('fs-b').max=maxScore;
       document.getElementById('fs-a').value=s.score.a;
       document.getElementById('fs-b').value=s.score.b;
       document.getElementById('fs-modal').hidden=false; document.getElementById('fs-a').focus();
