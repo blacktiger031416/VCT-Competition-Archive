@@ -122,24 +122,15 @@
     .sc-modal { position:fixed; inset:0; z-index:9900; display:flex; align-items:center; justify-content:center; }
     .sc-modal[hidden] { display:none !important; }
     .sc-backdrop { position:absolute; inset:0; background:rgba(5,5,5,.65); backdrop-filter:blur(6px); }
-    .sc-panel { position:relative; z-index:1; width:min(420px,calc(100vw - 24px)); background:#0a1e20; border:1.5px solid rgba(1,210,215,.3); border-radius:18px; padding:24px; animation:modal-in .2s ease; }
-    .sc-panel h2 { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; margin-bottom:4px; }
-    .sc-teams-row { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; margin-bottom:18px; }
-    .sc-team-label { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.55); text-align:center; }
-    .sc-team-label.right { text-align:center; }
-    .sc-vs-dot { font-family:'Barlow Condensed',sans-serif; font-size:11px; color:rgba(255,255,255,.2); text-align:center; }
-    .sc-map-row { display:grid; grid-template-columns:52px 1fr auto 1fr 28px; align-items:center; gap:6px; margin-bottom:6px; }
-    .sc-map-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); }
-    .sc-map-input { width:100%; padding:7px 8px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:900; text-align:center; outline:none; }
-    .sc-map-input:focus { border-color:var(--acc); }
-    .sc-map-del { background:none; border:none; color:rgba(255,255,255,.25); cursor:pointer; font-size:14px; padding:0; line-height:1; transition:color .15s; }
-    .sc-map-del:hover { color:rgba(255,100,100,.8); }
-    .sc-add-map { display:flex; align-items:center; gap:6px; margin-top:8px; background:none; border:1px dashed rgba(255,255,255,.12); border-radius:8px; padding:7px 14px; color:rgba(255,255,255,.35); font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; width:100%; justify-content:center; transition:border-color .15s,color .15s; }
-    .sc-add-map:hover { border-color:rgba(1,210,215,.4); color:var(--acc); }
-    .sc-series-bar { display:flex; align-items:center; justify-content:center; gap:12px; margin:14px 0 4px; padding:10px; background:rgba(255,255,255,.04); border-radius:8px; }
-    .sc-series-score { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:900; color:#fff; letter-spacing:.04em; }
-    .sc-series-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.28); }
-    .sc-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+    .sc-panel { position:relative; z-index:1; width:min(360px,calc(100vw - 24px)); background:#0a1e20; border:1.5px solid rgba(1,210,215,.3); border-radius:18px; padding:28px 24px 24px; animation:modal-in .2s ease; }
+    .sc-panel h2 { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; margin-bottom:20px; text-align:center; }
+    .sc-score-grid { display:grid; grid-template-columns:1fr 32px 1fr; align-items:center; gap:8px; margin-bottom:20px; }
+    .sc-team-col { display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .sc-team-name { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.5); text-align:center; }
+    .sc-score-input { width:100%; aspect-ratio:1/1; font-family:'Barlow Condensed',sans-serif; font-size:48px; font-weight:900; text-align:center; background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.12); border-radius:14px; color:#fff; outline:none; padding:0; }
+    .sc-score-input:focus { border-color:var(--acc); background:rgba(1,210,215,.06); }
+    .sc-colon { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:900; color:rgba(255,255,255,.25); text-align:center; }
+    .sc-actions { display:flex; gap:8px; justify-content:center; margin-top:4px; }
     .sc-btn { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:9px 20px; border-radius:8px; border:none; cursor:pointer; transition:background .15s; }
     .sc-btn-save { background:var(--acc); color:#060f14; }
     .sc-btn-save:hover { background:rgba(1,210,215,.8); }
@@ -264,17 +255,16 @@
     <div class="sc-backdrop" id="sc-backdrop"></div>
     <div class="sc-panel" role="dialog" aria-modal="true">
       <h2 id="sc-title">결과 입력</h2>
-      <div class="sc-teams-row">
-        <span class="sc-team-label" id="sc-name-a">팀 A</span>
-        <span class="sc-vs-dot">VS</span>
-        <span class="sc-team-label right" id="sc-name-b">팀 B</span>
-      </div>
-      <div id="sc-maps-list"></div>
-      <button class="sc-add-map" id="sc-add-map">+ 맵 추가</button>
-      <div class="sc-series-bar">
-        <span class="sc-series-label" id="sc-series-a-name">A</span>
-        <span class="sc-series-score" id="sc-series">0 : 0</span>
-        <span class="sc-series-label" id="sc-series-b-name">B</span>
+      <div class="sc-score-grid">
+        <div class="sc-team-col">
+          <span class="sc-team-name" id="sc-name-a">팀 A</span>
+          <input class="sc-score-input" id="sc-a" type="number" min="0" max="3" value="0">
+        </div>
+        <span class="sc-colon">:</span>
+        <div class="sc-team-col">
+          <span class="sc-team-name" id="sc-name-b">팀 B</span>
+          <input class="sc-score-input" id="sc-b" type="number" min="0" max="3" value="0">
+        </div>
       </div>
       <div class="sc-actions">
         <button class="sc-btn sc-btn-clear" id="sc-clear">초기화</button>
@@ -400,45 +390,6 @@
 
     /* ── Score modal ── */
     var _scMid=null;
-
-    function calcSeries(){
-      var rows=document.querySelectorAll('.sc-map-row');
-      var a=0,b=0;
-      rows.forEach(function(row){
-        var va=parseInt(row.querySelector('[data-side="a"]').value)||0;
-        var vb=parseInt(row.querySelector('[data-side="b"]').value)||0;
-        if(va>vb) a++; else if(vb>va) b++;
-      });
-      return {a:a,b:b};
-    }
-
-    function updateSeriesDisplay(){
-      var sc=calcSeries();
-      document.getElementById('sc-series').textContent=sc.a+' : '+sc.b;
-    }
-
-    function addMapRow(num,va,vb){
-      var list=document.getElementById('sc-maps-list');
-      var row=document.createElement('div');
-      row.className='sc-map-row';
-      row.innerHTML='<span class="sc-map-label">Map '+num+'</span>'
-        +'<input class="sc-map-input" type="number" min="0" max="30" value="'+(va||0)+'" data-side="a">'
-        +'<span class="sc-vs-dot">:</span>'
-        +'<input class="sc-map-input" type="number" min="0" max="30" value="'+(vb||0)+'" data-side="b">'
-        +'<button class="sc-map-del" type="button" title="삭제">✕</button>';
-      row.querySelectorAll('input').forEach(function(inp){
-        inp.addEventListener('input',updateSeriesDisplay);
-      });
-      row.querySelector('.sc-map-del').addEventListener('click',function(){
-        row.remove();
-        document.querySelectorAll('.sc-map-row').forEach(function(r,i){
-          r.querySelector('.sc-map-label').textContent='Map '+(i+1);
-        });
-        updateSeriesDisplay();
-      });
-      list.appendChild(row);
-    }
-
     function openScore(mid){
       var st=resolveState(), s=st[mid];
       if(!s||!s.teams[0]||!s.teams[1]) return;
@@ -446,45 +397,27 @@
       document.getElementById('sc-title').textContent='Match '+mid+' 결과 입력';
       document.getElementById('sc-name-a').textContent=s.teams[0];
       document.getElementById('sc-name-b').textContent=s.teams[1];
-      document.getElementById('sc-series-a-name').textContent=s.teams[0];
-      document.getElementById('sc-series-b-name').textContent=s.teams[1];
-      var list=document.getElementById('sc-maps-list');
-      list.innerHTML='';
-      var existing=poScores[mid]||{};
-      var maps=existing.maps||[];
-      if(maps.length>0){
-        maps.forEach(function(m,i){ addMapRow(i+1,m.a,m.b); });
-      } else {
-        addMapRow(1,0,0); addMapRow(2,0,0);
-      }
-      updateSeriesDisplay();
+      document.getElementById('sc-a').value=String(s.score.a);
+      document.getElementById('sc-b').value=String(s.score.b);
       document.getElementById('sc-modal').hidden=false;
+      document.getElementById('sc-a').focus();
+      document.getElementById('sc-a').select();
     }
-
     function closeScore(){ document.getElementById('sc-modal').hidden=true; _scMid=null; }
     document.getElementById('sc-backdrop').addEventListener('click',closeScore);
     document.getElementById('sc-cancel').addEventListener('click',closeScore);
-    document.getElementById('sc-add-map').addEventListener('click',function(){
-      var cnt=document.querySelectorAll('.sc-map-row').length;
-      if(cnt>=3) return;
-      addMapRow(cnt+1,0,0);
-    });
     document.getElementById('sc-clear').addEventListener('click',function(){
       if(_scMid==null) return;
       delete poScores[_scMid]; sj(SCORES_KEY,poScores); closeScore(); renderBracket();
     });
     document.getElementById('sc-save').addEventListener('click',function(){
       if(_scMid==null) return;
-      var maps=[]; document.querySelectorAll('.sc-map-row').forEach(function(row){
-        maps.push({
-          a:parseInt(row.querySelector('[data-side="a"]').value)||0,
-          b:parseInt(row.querySelector('[data-side="b"]').value)||0
-        });
-      });
-      var sc=calcSeries();
-      poScores[_scMid]={maps:maps,a:sc.a,b:sc.b};
-      sj(SCORES_KEY,poScores); closeScore(); renderBracket();
+      var a=Math.max(0,Number(document.getElementById('sc-a').value)||0);
+      var b=Math.max(0,Number(document.getElementById('sc-b').value)||0);
+      poScores[_scMid]={a:a,b:b}; sj(SCORES_KEY,poScores); closeScore(); renderBracket();
     });
+    document.getElementById('sc-a').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('sc-b').focus(); });
+    document.getElementById('sc-b').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('sc-save').click(); });
 
     /* ── Seed picker modal ── */
     var _sdSlot=null;
