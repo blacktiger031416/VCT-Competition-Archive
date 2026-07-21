@@ -413,7 +413,7 @@
 
     /* ── Render Groups ── */
     function renderGroups(){
-      var isAdmin=window.isAdmin&&window.isAdmin();
+      var isAdmin=window.vctIsAdmin&&window.vctIsAdmin();
       var grid=document.getElementById('groups-grid');
       grid.innerHTML='';
 
@@ -548,7 +548,7 @@
     }
 
     function renderBracket(){
-      var isAdmin=window.isAdmin&&window.isAdmin();
+      var isAdmin=window.vctIsAdmin&&window.vctIsAdmin();
       var state=resolveState();
       for(var mid=1;mid<=7;mid++){
         var el=document.getElementById('br-m'+mid); if(!el)continue;
@@ -708,7 +708,7 @@
 
     /* ── Init ── */
     window.storageReady.then(function(){
-      var isAdmin=window.isAdmin&&window.isAdmin();
+      var isAdmin=window.vctIsAdmin&&window.vctIsAdmin();
       if(!isAdmin) document.body.classList.add('view-only');
       renderPool();
       renderGroups();
