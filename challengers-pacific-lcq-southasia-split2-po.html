@@ -68,30 +68,12 @@
     body:not(.view-only) .bt-row[data-seed-slot] { cursor:pointer; }
     body:not(.view-only) .bt-row[data-seed-slot]:hover { background:rgba(1,210,215,.1); }
 
-    /* ── UB 3rd col: → GF indicator ── */
-    .gf-entry { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:16px 10px; background:rgba(1,210,215,.04); border:1px solid rgba(1,210,215,.15); border-radius:4px; min-height:80px; }
-    .gf-entry-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(1,210,215,.5); }
-    .gf-entry-team { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; }
-    .gf-entry-logo { width:28px; height:28px; object-fit:contain; }
-    .gf-entry-logo.logo-white { filter:brightness(0) invert(1); }
-    .gf-entry-empty { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.18); }
-
-    /* ── GRAND FINAL ── */
-    .gf-section { margin-top:40px; min-width:620px; }
-    .gf-section-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; padding:18px 0 8px 10px; border-left:3px solid #fff; color:#fff; margin-bottom:4px; }
-    .gf-round-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.28); text-align:center; padding:0 0 8px; border-bottom:1px solid rgba(255,255,255,.07); margin-bottom:4px; }
-    .gf-wrap { display:grid; grid-template-columns:minmax(190px,360px) 1fr; gap:24px; align-items:center; }
+    /* ── GRAND FINAL card ── */
     .bracket-match.grand-final { border-color:rgba(255,255,255,.2); }
-    .bracket-match.grand-final h3 { color:rgba(255,255,255,.6); font-size:11px; }
-    .bracket-match.grand-final .bt-row.winner .bt-name { color:var(--acc); }
-    .bracket-match.grand-final .bt-row.winner .bt-score { color:var(--acc); }
-    .champion-slot { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:20px; }
-    .champion-slot .champ-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.3); }
-    .champion-slot .champ-logo { width:52px; height:52px; object-fit:contain; }
-    .champion-slot .champ-logo.logo-white { filter:brightness(0) invert(1); }
-    .champion-slot .champ-code { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--acc); }
-    .champion-slot .champ-name { font-size:11px; color:rgba(255,255,255,.35); font-family:'Noto Sans KR',sans-serif; text-align:center; }
-    .champion-slot .champ-empty { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.2); }
+    .bracket-match.grand-final h3 { color:rgba(255,255,255,.5); font-size:11px; }
+    .bracket-match.grand-final .bt-row.champion .bt-name { color:var(--acc); }
+    .bracket-match.grand-final .bt-row.champion .bt-score { color:var(--acc); }
+    .bracket-match.grand-final .bt-row.champion { background:rgba(1,210,215,.07); }
 
     /* ── PARTICIPANTS ── */
     .participants-section { margin-top:48px; }
@@ -195,10 +177,11 @@
             </article>
           </div>
           <div class="de-col de-col-center">
-            <div class="gf-entry" id="gf-ub-entry">
-              <div class="gf-entry-label">Grand Final 진출</div>
-              <div class="gf-entry-empty">TBD</div>
-            </div>
+            <article class="bracket-match grand-final" data-mid="6">
+              <h3>Grand Final <span>(Bo5)</span></h3>
+              <div class="bt-row placeholder"><span class="bt-seed">↗M3</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
+              <div class="bt-row placeholder"><span class="bt-seed">↗M5</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
+            </article>
           </div>
         </div>
 
@@ -221,23 +204,6 @@
               <div class="bt-row placeholder"><span class="bt-seed">↘M3</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
               <div class="bt-row placeholder"><span class="bt-seed">↗M4</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
             </article>
-          </div>
-        </div>
-
-        <!-- ── GRAND FINAL ── -->
-        <div class="gf-section">
-          <div class="de-section-label" style="border-left-color:#fff;color:#fff;min-width:0;">GRAND FINAL</div>
-          <div class="gf-round-label">Bo5</div>
-          <div class="gf-wrap">
-            <article class="bracket-match grand-final" data-mid="6">
-              <h3>Grand Final <span>(Bo5)</span></h3>
-              <div class="bt-row placeholder"><span class="bt-seed">↗M3</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
-              <div class="bt-row placeholder"><span class="bt-seed">↗M5</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
-            </article>
-            <div class="champion-slot" id="champion-slot">
-              <div class="champ-label">🏆 Champion</div>
-              <div class="champ-empty">TBD</div>
-            </div>
           </div>
         </div>
 
@@ -349,11 +315,12 @@
       return st;
     }
 
-    function renderRow(row, name, score, isWin){
+    function renderRow(row, name, score, isWin, isChamp){
       var TM=tmap();
       var ne=row.querySelector('.bt-name'), se=row.querySelector('.bt-score'), li=row.querySelector('.bt-logo');
       row.dataset.teamName=name||'';
-      row.classList.toggle('winner', Boolean(isWin&&name));
+      row.classList.toggle('champion', Boolean(isChamp&&name));
+      row.classList.toggle('winner', Boolean(isWin&&name&&!isChamp));
       row.classList.toggle('placeholder', !name);
       if(ne) ne.textContent=name||(row.querySelector('.bt-seed')?row.querySelector('.bt-seed').textContent:'TBD');
       if(se) se.textContent=name?String(score):'-';
@@ -364,52 +331,21 @@
       }
     }
 
-    function renderGfEntry(teamName){
-      var el=document.getElementById('gf-ub-entry'), TM=tmap(), t=teamName&&TM[teamName];
-      if(t){
-        var logoHtml=t.logo
-          ?'<img class="gf-entry-logo'+(t.white?' logo-white':'')+'" src="'+esc(t.logo)+'" alt="'+esc(t.code)+'">'
-          :'';
-        el.innerHTML='<div class="gf-entry-label">Grand Final 진출</div>'
-          +logoHtml
-          +'<div class="gf-entry-team">'+esc(t.code)+'</div>';
-      } else {
-        el.innerHTML='<div class="gf-entry-label">Grand Final 진출</div><div class="gf-entry-empty">TBD</div>';
-      }
-    }
-
-    function renderChampion(teamName){
-      var el=document.getElementById('champion-slot'), TM=tmap(), t=teamName&&TM[teamName];
-      if(t){
-        var logoHtml=t.logo
-          ?'<img class="champ-logo'+(t.white?' logo-white':'')+'" src="'+esc(t.logo)+'" alt="'+esc(t.code)+'">'
-          :'';
-        el.innerHTML='<div class="champ-label">🏆 Champion</div>'
-          +logoHtml
-          +'<div class="champ-code">'+esc(t.code)+'</div>'
-          +'<div class="champ-name">'+esc(t.name)+'</div>';
-      } else {
-        el.innerHTML='<div class="champ-label">🏆 Champion</div><div class="champ-empty">TBD</div>';
-      }
-    }
-
     function renderBracket(){
       var st=resolveState();
       document.querySelectorAll('.bracket-match').forEach(function(card){
         var mid=Number(card.dataset.mid); var s=st[mid]; if(!s) return;
         var rows=card.querySelectorAll('.bt-row');
-        var w=s.winner;
-        renderRow(rows[0], s.teams[0], s.score.a, w&&w===s.teams[0]);
-        renderRow(rows[1], s.teams[1], s.score.b, w&&w===s.teams[1]);
+        var w=s.winner, isGF=(mid===6);
+        renderRow(rows[0], s.teams[0], s.score.a, !isGF&&w===s.teams[0], isGF&&w===s.teams[0]);
+        renderRow(rows[1], s.teams[1], s.score.b, !isGF&&w===s.teams[1], isGF&&w===s.teams[1]);
         var hasTeams=!!(s.teams[0]&&s.teams[1]);
-        card.classList.toggle('clickable', _isAdmin||hasTeams);
+        card.classList.toggle('clickable', _isAdmin&&hasTeams);
         if(_isAdmin) rows.forEach(function(row,i){
           if(PO_LINKS[mid][i]===null) row.dataset.seedSlot=mid+'_'+i;
           else delete row.dataset.seedSlot;
         });
       });
-      renderGfEntry(st[3]?st[3].winner:'');
-      renderChampion(st[6]?st[6].winner:'');
     }
 
     /* ── Score modal ── */
