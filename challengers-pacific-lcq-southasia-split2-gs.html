@@ -31,15 +31,7 @@
     .page-hero h1 { font-family:'Barlow Condensed',sans-serif; font-size:clamp(32px,6vw,64px); font-weight:900; letter-spacing:.03em; text-transform:uppercase; line-height:.95; color:#fff; }
     .page-hero .intro { font-size:13px; line-height:1.7; color:rgba(255,255,255,.4); margin-top:12px; font-family:'Noto Sans KR',sans-serif; font-weight:500; word-break:keep-all; }
 
-    input[name="section"],input[name="week"],input[name="wk"] { position:absolute; opacity:0; pointer-events:none; }
-
-    .sec-tabs { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:28px; background:rgba(1,210,215,.05); border:1px solid rgba(1,210,215,.1); border-radius:8px; padding:4px; }
-    .sec-tabs label { min-height:44px; display:grid; place-items:center; border-radius:6px; border:1px solid transparent; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s,background .14s; }
-    #sec-gs:checked ~ .sec-tabs label[for="sec-gs"],
-    #sec-fs:checked ~ .sec-tabs label[for="sec-fs"] { background:rgba(1,210,215,.15); border-color:rgba(1,210,215,.25); color:#fff; }
-    .gs-section,.fs-section { display:none; }
-    #sec-gs:checked ~ .gs-section { display:block; }
-    #sec-fs:checked ~ .fs-section { display:block; }
+    input[name="week"] { position:absolute; opacity:0; pointer-events:none; }
 
     .sub-title { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.25); margin-bottom:10px; }
 
@@ -100,26 +92,6 @@
     .diff-pos { color:rgba(1,210,215,.8); }
     .diff-neg { color:rgba(255,100,100,.8); }
 
-    /* Final Stage */
-    .fs-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center; }
-    @media(max-width:600px){ .fs-grid{grid-template-columns:1fr;} }
-    .fs-semis { display:flex; flex-direction:column; gap:16px; }
-    .fs-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.25); margin-bottom:6px; }
-    .bracket-match { background:var(--bg-card); border:1px solid rgba(255,255,255,.07); border-radius:4px; overflow:hidden; transition:border-color .18s,background .18s; }
-    .bracket-match h3 { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.28); padding:5px 9px 4px; border-bottom:1px solid rgba(255,255,255,.05); }
-    .bracket-match.clickable { cursor:pointer; }
-    .bracket-match.clickable:hover { border-color:rgba(1,210,215,.25); background:var(--bg-card2); }
-    .bracket-match.gf { border-color:rgba(1,210,215,.25); }
-    .bracket-match.gf h3 { color:rgba(1,210,215,.8); }
-    .bt-row { display:flex; align-items:center; gap:8px; padding:8px 9px; border-top:1px solid rgba(255,255,255,.04); }
-    .bt-row:first-of-type { border-top:none; }
-    .bt-logo { width:20px; height:20px; object-fit:contain; flex-shrink:0; }
-    .logo-w { filter:brightness(0) invert(1); }
-    .bt-name { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,.35); flex:1; }
-    .bt-score { font-style:normal; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:900; color:rgba(255,255,255,.3); min-width:14px; text-align:right; flex-shrink:0; }
-    .bt-row.winner .bt-name { color:#fff; }
-    .bt-row.winner .bt-score { color:rgba(255,255,255,.9); }
-    .bt-row.champion .bt-name,.bt-row.champion .bt-score { color:var(--accent); }
 
     /* Modals */
     .ga-modal,.sc-modal { position:fixed; inset:0; z-index:9800; display:flex; align-items:center; justify-content:center; }
@@ -165,15 +137,8 @@
       <p class="intro">8개 팀이 풀 라운드로빈(28경기)으로 그룹 스테이지를 진행하며, 상위 4팀이 싱글 엘리미네이션 파이널 스테이지에 진출합니다.</p>
     </div>
 
-    <input type="radio" name="section" id="sec-gs" checked>
-    <input type="radio" name="section" id="sec-fs">
-    <div class="sec-tabs">
-      <label for="sec-gs">그룹 스테이지</label>
-      <label for="sec-fs">파이널 스테이지</label>
-    </div>
-
     <!-- GROUP STAGE -->
-    <div class="gs-section">
+    <div>
       <p class="sub-title">참가 팀</p>
       <div class="team-slots" id="team-slots"></div>
 
@@ -195,37 +160,6 @@
       </div>
     </div>
 
-    <!-- FINAL STAGE -->
-    <div class="fs-section">
-      <div class="fs-grid">
-        <div class="fs-semis">
-          <div>
-            <p class="fs-label">준결승 1</p>
-            <article class="bracket-match" data-fmid="1">
-              <h3>SF 1 · Bo3</h3>
-              <div class="bt-row" data-ph="1위"><img class="bt-logo" src="" alt=""><span class="bt-name">1위</span><em class="bt-score">-</em></div>
-              <div class="bt-row" data-ph="4위"><img class="bt-logo" src="" alt=""><span class="bt-name">4위</span><em class="bt-score">-</em></div>
-            </article>
-          </div>
-          <div>
-            <p class="fs-label">준결승 2</p>
-            <article class="bracket-match" data-fmid="2">
-              <h3>SF 2 · Bo3</h3>
-              <div class="bt-row" data-ph="2위"><img class="bt-logo" src="" alt=""><span class="bt-name">2위</span><em class="bt-score">-</em></div>
-              <div class="bt-row" data-ph="3위"><img class="bt-logo" src="" alt=""><span class="bt-name">3위</span><em class="bt-score">-</em></div>
-            </article>
-          </div>
-        </div>
-        <div>
-          <p class="fs-label">결승</p>
-          <article class="bracket-match gf" data-fmid="3">
-            <h3>Final · Bo5</h3>
-            <div class="bt-row" data-ph="TBD"><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
-            <div class="bt-row" data-ph="TBD"><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
-          </article>
-        </div>
-      </div>
-    </div>
   </main>
 
   <!-- Team picker modal -->
@@ -259,27 +193,7 @@
     </div>
   </div>
 
-  <!-- FS score modal -->
-  <div class="sc-modal" id="fs-modal" hidden>
-    <div class="ga-bd" id="fs-bd"></div>
-    <div class="sc-panel" role="dialog">
-      <h2 id="fs-title">결과 입력</h2>
-      <div class="sc-row">
-        <span class="sc-team" id="fs-a-name">-</span>
-        <input class="sc-input" id="fs-a" type="number" min="0" max="2" value="0">
-        <span class="sc-vs">:</span>
-        <input class="sc-input" id="fs-b" type="number" min="0" max="2" value="0">
-        <span class="sc-team r" id="fs-b-name">-</span>
-      </div>
-      <div class="ga-actions">
-        <button class="ga-btn ga-btn-clear" id="fs-clear">초기화</button>
-        <button class="ga-btn ga-btn-cancel" id="fs-cancel">취소</button>
-        <button class="ga-btn ga-btn-save" id="fs-save">저장</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="./storage.js"></script>
+<script src="./storage.js"></script>
   <script src="./auth.js"></script>
   <script>
   window.storageReady.then(function() {
@@ -301,16 +215,12 @@
       {name:'No Salary Peek',     code:'NSP',  logo:'./assets/teams/NSP.png',  white:true},
     ];
 
-    var PFX           = 'pacific_lcq_sa_s2_';
-    var GS_TEAMS_KEY  = PFX+'gs_match_teams';
-    var SCORES_KEY    = PFX+'gs_scores';
-    var FS_SCORES_KEY = PFX+'fs_scores';
-    var FS_SEEDS_KEY  = PFX+'fs_seeds';
+    var PFX          = 'pacific_lcq_sa_s2_';
+    var GS_TEAMS_KEY = PFX+'gs_match_teams';
+    var SCORES_KEY   = PFX+'gs_scores';
 
-    var gsTeams  = lj(GS_TEAMS_KEY, {});
-    var scores   = lj(SCORES_KEY, {});
-    var fsScores = lj(FS_SCORES_KEY, {});
-    var fsSeeds  = lj(FS_SEEDS_KEY, {});
+    var gsTeams = lj(GS_TEAMS_KEY, {});
+    var scores  = lj(SCORES_KEY, {});
 
     function pool(){ return DEFAULT_POOL; }
     function tmap(){ var m={}; pool().forEach(function(t){ m[t.name]=t; }); return m; }
@@ -483,110 +393,14 @@
       el.appendChild(tb);
     }
 
-    // ── FINAL STAGE ──────────────────────────────────────────
-    function resolveFs(){
-      var st={};
-      st[1]={teams:[fsSeeds['1_0']||'',fsSeeds['1_1']||''],score:fsScores[1]||{a:0,b:0}};
-      st[2]={teams:[fsSeeds['2_0']||'',fsSeeds['2_1']||''],score:fsScores[2]||{a:0,b:0}};
-      [1,2].forEach(function(mid){
-        var s=st[mid],hw=s.teams[0]&&s.teams[1]&&(s.score.a>=2||s.score.b>=2)&&s.score.a!==s.score.b;
-        s.winner=hw?s.teams[s.score.a>s.score.b?0:1]:'';
-      });
-      st[3]={teams:[st[1].winner||'',st[2].winner||''],score:fsScores[3]||{a:0,b:0}};
-      var s3=st[3],hw=s3.teams[0]&&s3.teams[1]&&(s3.score.a>=3||s3.score.b>=3)&&s3.score.a!==s3.score.b;
-      s3.winner=hw?s3.teams[s3.score.a>s3.score.b?0:1]:'';
-      return st;
-    }
-
-    function renderFsRow(row,name,score,isWin,isChamp){
-      var tm=tmap(), t=name&&tm[name];
-      var ne=row.querySelector('.bt-name'),se=row.querySelector('.bt-score'),li=row.querySelector('.bt-logo');
-      row.classList.toggle('winner',!!(isWin&&name&&!isChamp));
-      row.classList.toggle('champion',!!(isChamp&&name));
-      if(ne) ne.textContent=name||(row.dataset.ph||'TBD');
-      if(se) se.textContent=name?String(score):'-';
-      if(li){ li.src=t?t.logo:''; li.alt=t?t.code:''; li.className='bt-logo'+(t&&t.white?' logo-w':''); }
-    }
-
-    function openFsPicker(slot){
-      var parts=slot.split('_');
-      var usedSlots=Object.keys(fsSeeds).filter(function(k){ return k!==slot; });
-      openTeamPicker({
-        title:'SF'+parts[0]+' '+(parts[1]==='0'?'A팀':'B팀')+' 배정',
-        cur: fsSeeds[slot]||'',
-        used: usedSlots.map(function(k){ return fsSeeds[k]; }),
-        onSelect:function(name){ fsSeeds[slot]=name; sj(FS_SEEDS_KEY,fsSeeds); renderFs(); },
-        onClear:function(){ delete fsSeeds[slot]; sj(FS_SEEDS_KEY,fsSeeds); renderFs(); }
-      });
-    }
-
-    function renderFs(){
-      var st=resolveFs();
-      document.querySelectorAll('.bracket-match').forEach(function(card){
-        var mid=Number(card.dataset.fmid), s=st[mid]; if(!s) return;
-        var rows=card.querySelectorAll('.bt-row'), w=s.winner, isGF=mid===3;
-        renderFsRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
-        renderFsRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
-        if(_isAdmin&&mid!==3){
-          rows.forEach(function(row,i){
-            if(!s.teams[i]) row.dataset.seedSlot=mid+'_'+i;
-            else delete row.dataset.seedSlot;
-          });
-        }
-        var hasTeams=!!(s.teams[0]&&s.teams[1]);
-        card.classList.toggle('clickable',_isAdmin||hasTeams);
-        card.onclick=function(e){
-          var s2=resolveFs()[mid];
-          if(_isAdmin){
-            var seedRow=e.target.closest('.bt-row[data-seed-slot]');
-            if(seedRow){ openFsPicker(seedRow.dataset.seedSlot); return; }
-            if(s2&&s2.teams[0]&&s2.teams[1]){ openFsModal(mid,s2); return; }
-          }
-          if(!s2||!s2.teams[0]||!s2.teams[1]) return;
-          var p={date:'pacific_lcq_sa_s2_fs_m'+mid,teamA:s2.teams[0],teamB:s2.teams[1],
-            score:s2.score.a+' : '+s2.score.b,from:'pacific_lcq_sa_s2_fs'};
-          if(mid===3) p.bo5='1';
-          window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
-        };
-      });
-    }
-
-    // ── FS SCORE MODAL ───────────────────────────────────────
-    var _fsMid=null;
-    function openFsModal(mid,s){
-      _fsMid=mid;
-      var maxScore=mid===3?3:2;
-      document.getElementById('fs-title').textContent=(mid===3?'결승 (Bo5)':'SF '+mid+' (Bo3)')+' 결과 입력';
-      document.getElementById('fs-a-name').textContent=s.teams[0];
-      document.getElementById('fs-b-name').textContent=s.teams[1];
-      document.getElementById('fs-a').max=maxScore;
-      document.getElementById('fs-b').max=maxScore;
-      document.getElementById('fs-a').value=s.score.a;
-      document.getElementById('fs-b').value=s.score.b;
-      document.getElementById('fs-modal').hidden=false; document.getElementById('fs-a').focus();
-    }
-    function closeFs(){ document.getElementById('fs-modal').hidden=true; _fsMid=null; }
-    document.getElementById('fs-bd').addEventListener('click',closeFs);
-    document.getElementById('fs-cancel').addEventListener('click',closeFs);
-    document.getElementById('fs-clear').addEventListener('click',function(){
-      if(_fsMid==null) return; delete fsScores[_fsMid]; sj(FS_SCORES_KEY,fsScores); closeFs(); renderFs();
-    });
-    document.getElementById('fs-save').addEventListener('click',function(){
-      if(_fsMid==null) return;
-      var a=Math.max(0,Number(document.getElementById('fs-a').value)||0);
-      var b=Math.max(0,Number(document.getElementById('fs-b').value)||0);
-      fsScores[_fsMid]={a:a,b:b}; sj(FS_SCORES_KEY,fsScores); closeFs(); renderFs();
-    });
-
     // ── ESC ──────────────────────────────────────────────────
     document.addEventListener('keydown',function(e){
       if(e.key!=='Escape') return;
       if(!document.getElementById('sc-modal').hidden) closeSc();
-      else if(!document.getElementById('fs-modal').hidden) closeFs();
       else if(!document.getElementById('ga-modal').hidden) closeGa();
     });
 
-    function renderAll(){ renderSlots(); renderMatches(); renderStandings(); renderFs(); }
+    function renderAll(){ renderSlots(); renderMatches(); renderStandings(); }
     renderAll();
   });
   </script>
