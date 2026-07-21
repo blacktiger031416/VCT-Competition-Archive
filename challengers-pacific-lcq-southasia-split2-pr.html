@@ -38,8 +38,10 @@
     .de-section-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; padding:18px 0 8px 10px; border-left:3px solid var(--acc); color:var(--acc); margin-bottom:4px; min-width:860px; }
     .de-rounds { display:grid; grid-template-columns:repeat(4,minmax(190px,1fr)); gap:8px; min-width:860px; margin-bottom:4px; }
     .de-rounds span { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.28); text-align:center; padding:0 0 8px; border-bottom:1px solid rgba(255,255,255,.07); }
-    .de-grid { display:grid; grid-template-columns:repeat(4,minmax(190px,1fr)); gap:8px; min-width:860px; }
-    .main-grid { min-height:280px; }
+    .de-grid { display:grid; grid-template-columns:repeat(3,minmax(190px,1fr)); gap:8px; min-width:620px; }
+    .ub-grid { min-height:220px; }
+    .lb-grid { min-height:130px; }
+    .lb-label { margin-top:32px; border-left-color:rgba(1,210,215,.45); color:rgba(1,210,215,.65); }
     .de-col { display:flex; flex-direction:column; justify-content:space-around; gap:8px; }
     .de-col-center { justify-content:center; }
     .bracket-match { background:var(--bg-card); border:1px solid rgba(255,255,255,.07); border-radius:4px; overflow:hidden; transition:border-color .18s,background .18s; }
@@ -142,17 +144,14 @@
 
     <div class="bracket-wrap">
       <div class="bracket-scroll">
-        <div class="de-section-label">PROMOTION / RELEGATION BRACKET</div>
+        <!-- ── UPPER BRACKET: Opening → Winner's → Q1 ── -->
+        <div class="de-section-label">UPPER BRACKET</div>
         <div class="de-rounds">
           <span>Opening</span>
-          <span>Winner's · Elimination</span>
-          <span>Decider</span>
+          <span>Winner's</span>
           <span>Qualified</span>
         </div>
-
-        <div class="de-grid main-grid">
-
-          <!-- Col 1: Opening -->
+        <div class="de-grid ub-grid">
           <div class="de-col">
             <article class="bracket-match" data-mid="1">
               <h3>Match 1 · Opening <span>(Bo3)</span></h3>
@@ -165,22 +164,36 @@
               <div class="bt-row placeholder"><span class="bt-seed">D</span><img class="bt-logo" src="" alt=""><span class="bt-name">팀 선택</span><em class="bt-score">-</em></div>
             </article>
           </div>
-
-          <!-- Col 2: Winner's + Elimination -->
-          <div class="de-col">
+          <div class="de-col de-col-center">
             <article class="bracket-match" data-mid="3">
               <h3>Winner's <span>(Bo3)</span></h3>
               <div class="bt-row placeholder"><span class="bt-seed">↗M1</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
               <div class="bt-row placeholder"><span class="bt-seed">↗M2</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
             </article>
+          </div>
+          <div class="de-col de-col-center">
+            <div class="qualified-slot" id="q-1">
+              <div class="q-rank">1위 진출</div>
+              <div class="q-empty">TBD</div>
+            </div>
+          </div>
+        </div><!-- /.ub-grid -->
+
+        <!-- ── LOWER BRACKET: Elimination → Decider → Q2 ── -->
+        <div class="de-section-label lb-label">LOWER BRACKET</div>
+        <div class="de-rounds">
+          <span>Elimination</span>
+          <span>Decider</span>
+          <span>Qualified</span>
+        </div>
+        <div class="de-grid lb-grid">
+          <div class="de-col de-col-center">
             <article class="bracket-match" data-mid="4">
               <h3>Elimination <span>(Bo3)</span></h3>
               <div class="bt-row placeholder"><span class="bt-seed">↘M1</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
               <div class="bt-row placeholder"><span class="bt-seed">↘M2</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
             </article>
           </div>
-
-          <!-- Col 3: Decider -->
           <div class="de-col de-col-center">
             <article class="bracket-match decider" data-mid="5">
               <h3>Decider <span>(Bo3)</span></h3>
@@ -188,22 +201,15 @@
               <div class="bt-row placeholder"><span class="bt-seed">↗M4</span><img class="bt-logo" src="" alt=""><span class="bt-name">TBD</span><em class="bt-score">-</em></div>
             </article>
           </div>
-
-          <!-- Col 4: Qualified -->
-          <div class="de-col">
-            <div class="qualified-slot" id="q-1">
-              <div class="q-rank">1위 진출</div>
-              <div class="q-empty">TBD</div>
-            </div>
+          <div class="de-col de-col-center">
             <div class="qualified-slot" id="q-2">
               <div class="q-rank">2위 진출</div>
               <div class="q-empty">TBD</div>
             </div>
           </div>
+        </div><!-- /.lb-grid -->
 
-        </div><!-- /.de-grid -->
-
-        <div class="adv-info">
+        <div class="adv-info" style="min-width:620px;">
           <div class="adv-info-item"><div class="adv-pip" style="background:var(--acc);"></div><span>Winner's 우승 → 그룹 스테이지 진출 <b>(1위)</b></span></div>
           <div class="adv-info-item"><div class="adv-pip" style="background:rgba(1,210,215,.4);"></div><span>Decider 우승 → 그룹 스테이지 진출 <b>(2위)</b></span></div>
         </div>
