@@ -456,13 +456,11 @@
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
         var mid=Number(card.dataset.mid);
-        var btRow=e.target.closest('.bt-row');
-        if(!btRow) return;
         if(_isAdmin){
-          var seedRow=e.target.closest('.bt-row[data-seed-slot]');
-          if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
           var st=resolveState(), s=st[mid];
           if(s&&s.teams[0]&&s.teams[1]){ openScore(mid); return; }
+          var seedRow=e.target.closest('.bt-row[data-seed-slot]');
+          if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
           return;
         }
         var st2=resolveState(), s2=st2[mid];
