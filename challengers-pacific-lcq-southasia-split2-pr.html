@@ -76,6 +76,19 @@
     .q-name { font-size:10px; color:rgba(255,255,255,.35); font-family:'Noto Sans KR',sans-serif; text-align:center; line-height:1.3; }
     .q-empty { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.2); }
 
+    /* ── PARTICIPANTS ── */
+    .participants-section { margin-top:48px; }
+    .participants-heading { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--acc); margin-bottom:14px; border-left:3px solid var(--acc); padding-left:12px; }
+    .participants-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    @media (max-width:600px) { .participants-grid { grid-template-columns:repeat(2,1fr); } }
+    .participant-card { display:flex; flex-direction:column; align-items:center; gap:8px; padding:20px 10px 16px; background:var(--bg-card); border:1px solid rgba(1,210,215,.1); border-radius:6px; transition:border-color .2s,transform .18s,background .2s; }
+    .participant-card:hover { border-color:rgba(1,210,215,.35); background:var(--bg-card2); transform:translateY(-2px); }
+    .participant-logo { width:52px; height:52px; display:flex; align-items:center; justify-content:center; }
+    .participant-logo img { width:52px; height:52px; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .participant-logo img.logo-white { filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+    .participant-code { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; }
+    .participant-name { font-size:10px; color:rgba(255,255,255,.35); text-align:center; font-family:'Noto Sans KR',sans-serif; }
+
     /* advancement info */
     .adv-info { display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:20px; padding:14px 18px; background:rgba(1,210,215,.05); border:1px solid rgba(1,210,215,.12); border-radius:6px; min-width:860px; }
     .adv-info-item { display:flex; align-items:center; gap:8px; }
@@ -216,6 +229,11 @@
 
       </div><!-- /.bracket-scroll -->
     </div><!-- /.bracket-wrap -->
+
+    <section class="participants-section" aria-labelledby="participants-title">
+      <p class="participants-heading" id="participants-title">Participating Teams</p>
+      <div class="participants-grid" id="participants-grid"></div>
+    </section>
 
   </main>
 
@@ -447,7 +465,23 @@
       else if(!document.getElementById('ga-modal').hidden) closeGaModal();
     });
 
+    function renderTeams(){
+      var pool=loadPool(), grid=document.getElementById('participants-grid');
+      if(!grid) return;
+      grid.innerHTML=pool.map(function(t){
+        var logo=t.logo
+          ?'<img src="'+t.logo+'" alt="'+esc(t.code)+'"'+(t.white?' class="logo-white"':'')+' loading="lazy">'
+          :'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:900;color:rgba(255,255,255,.4);">'+esc(t.code)+'</span>';
+        return '<div class="participant-card">'
+          +'<div class="participant-logo">'+logo+'</div>'
+          +'<div class="participant-code">'+esc(t.code)+'</div>'
+          +'<div class="participant-name">'+esc(t.name)+'</div>'
+          +'</div>';
+      }).join('');
+    }
+
     renderBracket();
+    renderTeams();
   });
   </script>
   <script src="./auth.js"></script>
