@@ -504,12 +504,12 @@
         var btRow=e.target.closest('.bt-row');
 
         if(_isAdmin&&btRow){
+          var seedRow=e.target.closest('.bt-row[data-seed-slot]');
+          if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
           var st=resolveState(), s=st[mid];
           var bothSet=!!(s&&s.teams[0]&&s.teams[1]);
           if(bothSet){ openScore(mid); return; }
-          var seedRow=e.target.closest('.bt-row[data-seed-slot]');
-          if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
-          openScore(mid); return;
+          return;
         }
 
         var st2=resolveState(), s2=st2[mid];
