@@ -31,7 +31,7 @@
     .page-hero h1 { font-family:'Barlow Condensed',sans-serif; font-size:clamp(32px,6vw,64px); font-weight:900; letter-spacing:.03em; text-transform:uppercase; line-height:.95; color:#fff; }
     .page-hero .intro { font-size:13px; line-height:1.7; color:rgba(255,255,255,.4); margin-top:12px; font-family:'Noto Sans KR',sans-serif; font-weight:500; word-break:keep-all; }
 
-    input[name="section"],input[name="week"] { position:absolute; opacity:0; pointer-events:none; }
+    input[name="section"],input[name="week"],input[name="wk"] { position:absolute; opacity:0; pointer-events:none; }
 
     .sec-tabs { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:28px; background:rgba(1,210,215,.05); border:1px solid rgba(1,210,215,.1); border-radius:8px; padding:4px; }
     .sec-tabs label { min-height:44px; display:grid; place-items:center; border-radius:6px; border:1px solid transparent; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.4); cursor:pointer; transition:color .14s,background .14s; }
@@ -55,13 +55,15 @@
     .slot-name.filled { color:#fff; }
 
     /* Week tabs */
-    .wk-tabs { display:grid; grid-template-columns:repeat(2,1fr); gap:4px; margin-bottom:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:6px; padding:3px; }
+    .wk-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-bottom:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:6px; padding:3px; }
     .wk-tabs label { min-height:36px; display:grid; place-items:center; border-radius:4px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); cursor:pointer; transition:color .14s,background .14s; }
     #wk-1:checked ~ .wk-tabs label[for="wk-1"],
-    #wk-2:checked ~ .wk-tabs label[for="wk-2"] { background:rgba(255,255,255,.08); color:#fff; }
-    .wk1-matches,.wk2-matches { display:none; }
+    #wk-2:checked ~ .wk-tabs label[for="wk-2"],
+    #wk-3:checked ~ .wk-tabs label[for="wk-3"] { background:rgba(255,255,255,.08); color:#fff; }
+    .wk1-matches,.wk2-matches,.wk3-matches { display:none; }
     #wk-1:checked ~ .wk1-matches { display:block; }
     #wk-2:checked ~ .wk2-matches { display:block; }
+    #wk-3:checked ~ .wk3-matches { display:block; }
 
     /* Match grid */
     .match-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:32px; }
@@ -177,12 +179,15 @@
 
       <input type="radio" name="week" id="wk-1" checked>
       <input type="radio" name="week" id="wk-2">
+      <input type="radio" name="week" id="wk-3">
       <div class="wk-tabs">
         <label for="wk-1">1주차 · Week 1</label>
         <label for="wk-2">2주차 · Week 2</label>
+        <label for="wk-3">3주차 · Week 3</label>
       </div>
       <div class="wk1-matches"><div class="match-grid" id="mg-wk1"></div></div>
       <div class="wk2-matches"><div class="match-grid" id="mg-wk2"></div></div>
+      <div class="wk3-matches"><div class="match-grid" id="mg-wk3"></div></div>
 
       <div class="standings-wrap">
         <p class="sub-title">순위표</p>
@@ -403,11 +408,12 @@
     }
 
     function renderMatches(){
-      var g1=document.getElementById('mg-wk1'), g2=document.getElementById('mg-wk2');
-      g1.innerHTML=''; g2.innerHTML='';
+      var g1=document.getElementById('mg-wk1'), g2=document.getElementById('mg-wk2'), g3=document.getElementById('mg-wk3');
+      g1.innerHTML=''; g2.innerHTML=''; g3.innerHTML='';
       for(var i=0;i<28;i++){
         var mid=i+1;
-        (i<14?g1:g2).appendChild(makeCard(mid));
+        var g=i<8?g1:i<18?g2:g3;
+        g.appendChild(makeCard(mid));
       }
     }
 
