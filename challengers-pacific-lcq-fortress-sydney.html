@@ -31,6 +31,15 @@
     .page-hero h1 { font-family:'Barlow Condensed',sans-serif; font-size:clamp(32px,6vw,64px); font-weight:900; letter-spacing:.03em; text-transform:uppercase; line-height:.95; color:#fff; }
     .page-hero .intro { font-size:13px; line-height:1.7; color:rgba(255,255,255,.4); margin-top:12px; font-family:'Noto Sans KR',sans-serif; font-weight:500; word-break:keep-all; }
 
+    /* Participating team pool */
+    .pool-section { margin-bottom:28px; }
+    .pool-slots { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    @media(max-width:700px){ .pool-slots{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:420px){ .pool-slots{grid-template-columns:repeat(2,1fr);} }
+    .pool-slot { padding:9px 10px; background:var(--bg-card); border:1px solid rgba(255,255,255,.07); border-radius:4px; display:flex; align-items:center; gap:7px; min-height:48px; }
+    .pool-slot img { width:24px; height:24px; object-fit:contain; flex-shrink:0; }
+    .pool-slot-name { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; text-transform:uppercase; color:#e8e4e0; letter-spacing:.04em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
     /* Tab bar */
     .tab-bar { display:flex; gap:4px; margin-bottom:28px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:6px; padding:3px; width:fit-content; }
     .tab-btn { min-height:36px; padding:0 20px; border-radius:4px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); background:none; border:none; cursor:pointer; transition:color .14s,background .14s; }
@@ -159,6 +168,11 @@
       <p class="eyebrow">2026 Fortress Grassroots Qualifiers</p>
       <h1>Sydney Qualifier</h1>
       <p class="intro">15개 팀이 4개 그룹(A·B·C·D)으로 나뉘어 풀 라운드로빈을 진행합니다. 각 그룹 상위 2팀이 싱글 엘리미네이션 브래킷에 진출합니다.</p>
+    </div>
+
+    <div class="pool-section">
+      <p class="sub-title">참가 팀</p>
+      <div class="pool-slots" id="pool-slots"></div>
     </div>
 
     <div class="tab-bar">
@@ -377,6 +391,23 @@
         return(b.mw-b.ml)-(a.mw-a.ml);
       });
       return rows;
+    }
+
+    /* ── Render Pool ── */
+    function renderPool(){
+      var container=document.getElementById('pool-slots');
+      container.innerHTML='';
+      TEAM_POOL.forEach(function(t){
+        var slot=document.createElement('div'); slot.className='pool-slot';
+        if(t.logo){
+          var img=document.createElement('img'); img.src=t.logo; img.alt=t.code;
+          if(t.white) img.className='logo-w';
+          slot.appendChild(img);
+        }
+        var nm=document.createElement('span'); nm.className='pool-slot-name';
+        nm.textContent=t.name; slot.appendChild(nm);
+        container.appendChild(slot);
+      });
     }
 
     /* ── Render Groups ── */
@@ -678,6 +709,7 @@
     window.storageReady.then(function(){
       var isAdmin=window.isAdmin&&window.isAdmin();
       if(!isAdmin) document.body.classList.add('view-only');
+      renderPool();
       renderGroups();
       renderBracket();
     });
