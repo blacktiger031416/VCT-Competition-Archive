@@ -415,13 +415,22 @@
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
         var mid=Number(card.dataset.mid);
+        var st=resolveState(), s=st[mid];
         if(_isAdmin){
-          var st=resolveState(), s=st[mid];
           if(s&&s.teams[0]&&s.teams[1]){ openScore(mid); return; }
           var seedRow=e.target.closest('.bt-row[data-seed-slot]');
           if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
           return;
         }
+        if(!s||!s.teams[0]||!s.teams[1]) return;
+        var p={
+          date:'pacific_lcq_sa_s2_po_m'+mid,
+          teamA:s.teams[0], teamB:s.teams[1],
+          score:s.score.a+' : '+s.score.b,
+          from:'pacific_lcq_sa_s2_po'
+        };
+        if(mid===6) p.bo5='1';
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
       });
     });
 
