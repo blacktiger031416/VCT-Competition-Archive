@@ -535,14 +535,21 @@
       var state={};
       for(var mid=1;mid<=7;mid++){
         var a=getBrTeam(mid,'a'), b=getBrTeam(mid,'b'), sc=getBrScore(mid);
-        var win=''; if(sc){ if(sc.a>sc.b)win=a; else if(sc.b>sc.a)win=b; }
-        state[mid]={a:a,b:b,sc:sc,winner:win};
+        state[mid]={a:a,b:b,sc:sc,winner:''};
       }
+      // QF winners
+      for(var mid=1;mid<=4;mid++){
+        var st=state[mid];
+        if(st.sc){ if(st.sc.a>st.sc.b) st.winner=st.a; else if(st.sc.b>st.sc.a) st.winner=st.b; }
+      }
+      // SF/Final: propagate then recompute winner
       [5,6,7].forEach(function(mid){
         var lnk=BR_LINKS[mid]; if(!lnk)return;
         var srcA=lnk[0], srcB=lnk[1];
         if(srcA&&state[srcA.m]&&state[srcA.m][srcA.r]) state[mid].a=state[srcA.m][srcA.r];
         if(srcB&&state[srcB.m]&&state[srcB.m][srcB.r]) state[mid].b=state[srcB.m][srcB.r];
+        var st=state[mid];
+        if(st.sc){ if(st.sc.a>st.sc.b) st.winner=st.a; else if(st.sc.b>st.sc.a) st.winner=st.b; }
       });
       return state;
     }
