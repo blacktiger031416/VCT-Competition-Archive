@@ -101,12 +101,26 @@
     .mc-score { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:900; color:rgba(255,255,255,.22); white-space:nowrap; user-select:none; }
     .mc-score.has { color:rgba(255,255,255,.9); }
 
-    /* DE Bracket */
-    .de-bracket { display:flex; gap:16px; overflow-x:auto; padding-bottom:12px; align-items:flex-start; }
-    .de-col { display:flex; flex-direction:column; gap:8px; min-width:220px; flex-shrink:0; }
-    .de-round-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(1,210,215,.55); padding:4px 0 2px; border-bottom:1px solid rgba(1,210,215,.12); margin-bottom:2px; }
-    .de-round-label.lb { color:rgba(215,143,1,.65); border-bottom-color:rgba(215,143,1,.15); margin-top:16px; }
-    .de-round-label.gf { color:rgba(255,215,0,.75); border-bottom-color:rgba(255,215,0,.2); }
+    /* DE Bracket — CSS Grid layout */
+    .de-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 220px);
+      grid-template-rows: auto 40px auto;
+      column-gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    /* Grid cell placements */
+    .dg-ub-sf { grid-column:1; grid-row:1; display:flex; flex-direction:column; gap:8px; }
+    .dg-ub-f  { grid-column:2; grid-row:1; display:flex; flex-direction:column; justify-content:center; }
+    .dg-gf    { grid-column:3; grid-row:1/4; display:flex; flex-direction:column; justify-content:center; }
+    .dg-sep   { grid-column:1/3; grid-row:2; border-top:1px solid rgba(215,143,1,.15); align-self:center; }
+    .dg-lb-r1 { grid-column:1; grid-row:3; display:flex; flex-direction:column; gap:8px; }
+    .dg-lb-f  { grid-column:2; grid-row:3; display:flex; flex-direction:column; justify-content:center; }
+
+    .de-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(1,210,215,.6); padding:4px 0 6px; border-bottom:1px solid rgba(1,210,215,.15); margin-bottom:8px; }
+    .de-label.lb  { color:rgba(215,143,1,.7); border-bottom-color:rgba(215,143,1,.2); }
+    .de-label.gf  { color:rgba(255,215,0,.8); border-bottom-color:rgba(255,215,0,.25); }
 
     .bracket-match { background:var(--bg-card); border:1px solid rgba(255,255,255,.08); border-radius:4px; overflow:hidden; transition:border-color .15s; }
     body:not(.view-only) .bracket-match.clickable { cursor:pointer; }
@@ -191,29 +205,40 @@
 
     <!-- PLAYOFFS TAB -->
     <div id="tab-po" style="display:none;">
-      <div class="de-bracket">
+      <div class="de-grid">
 
-        <!-- Col 1: UB Semis + LB R1 -->
-        <div class="de-col">
-          <div class="de-round-label">Upper Semifinals</div>
+        <!-- Col1 Row1: UB Semis -->
+        <div class="dg-ub-sf">
+          <p class="de-label">Upper Semifinals</p>
           <article class="bracket-match" id="br-m1"></article>
           <article class="bracket-match" id="br-m2"></article>
-          <div class="de-round-label lb">Lower Round 1</div>
+        </div>
+
+        <!-- Col2 Row1: UB Final (centered between SF1/SF2) -->
+        <div class="dg-ub-f">
+          <p class="de-label">Upper Final</p>
+          <article class="bracket-match" id="br-m4"></article>
+        </div>
+
+        <!-- Col3 Rows1-3: Grand Final (vertically centered) -->
+        <div class="dg-gf">
+          <p class="de-label gf">Grand Final ★ Bo5</p>
+          <article class="bracket-match gf-match" id="br-m6"></article>
+        </div>
+
+        <!-- Row2: UB/LB separator -->
+        <div class="dg-sep"></div>
+
+        <!-- Col1 Row3: LB R1 -->
+        <div class="dg-lb-r1">
+          <p class="de-label lb">Lower Round 1</p>
           <article class="bracket-match lb-match" id="br-m3"></article>
         </div>
 
-        <!-- Col 2: UB Final + LB Final -->
-        <div class="de-col">
-          <div class="de-round-label">Upper Final</div>
-          <article class="bracket-match" id="br-m4"></article>
-          <div class="de-round-label lb">Lower Final</div>
+        <!-- Col2 Row3: LB Final (centered) -->
+        <div class="dg-lb-f">
+          <p class="de-label lb">Lower Final</p>
           <article class="bracket-match lb-match" id="br-m5"></article>
-        </div>
-
-        <!-- Col 3: Grand Final -->
-        <div class="de-col">
-          <div class="de-round-label gf">Grand Final ★ Bo5</div>
-          <article class="bracket-match gf-match" id="br-m6"></article>
         </div>
 
       </div>
