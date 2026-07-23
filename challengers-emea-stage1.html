@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Challengers 2026: EMEA Stage 1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --accent: #d4ff1f;
+        --accent-dim: rgba(212,255,31,0.7);
+        --accent-bg: rgba(212,255,31,0.12);
+        --bg-base: #0a0e05;
+        --bg-card: #111508;
+        --bg-card2: #192010;
+      }
+
+      body { background: var(--bg-base); color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(10,14,5,0.92); border-bottom: 1px solid rgba(212,255,31,0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s; }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.15s; }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 72px 0 80px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
+      .league-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(212,255,31,0.12) 0%, transparent 70%); pointer-events: none; }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+      .league-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(42px, 7vw, 80px); font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; line-height: 0.95; color: #fff; margin-bottom: 20px; }
+      .league-hero .intro { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.45); max-width: 420px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all; }
+      .league-mark { flex-shrink: 0; position: relative; z-index: 1; padding: 16px; }
+      .league-mark img { width: clamp(120px, 18vw, 200px); height: clamp(120px, 18vw, 200px); object-fit: contain; opacity: 0.9; filter: brightness(1.2) drop-shadow(0 0 16px rgba(212,255,31,.4)) drop-shadow(0 4px 24px rgba(0,0,0,.5)); }
+
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+      .section-divider { height: 1px; background: rgba(212,255,31,0.12); margin: 0 0 56px; }
+      .section-heading { margin-bottom: 24px; border-left: 3px solid var(--accent); padding-left: 16px; }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
+
+      .tournament-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 600px) { .tournament-grid { grid-template-columns: 1fr; } }
+
+      .tournament-card {
+        display: flex; align-items: center; gap: 16px;
+        padding: 20px 22px;
+        background: var(--bg-card);
+        border: 1px solid rgba(212,255,31,0.1);
+        border-radius: 4px; text-decoration: none;
+        color: #e8e4e0; position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        cursor: pointer;
+      }
+      .tournament-card::before { content: ''; position: absolute; inset: 0 0 0 0; border-bottom: 2px solid var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
+      .tournament-card:hover { border-color: rgba(212,255,31,0.35); background: var(--bg-card2); transform: translateY(-2px); }
+      .tournament-card:hover::before { transform: scaleX(1); }
+
+      .card-logo { width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+      .card-logo img { width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); }
+
+      .card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+      .tournament-kicker { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-dim); }
+      .tournament-card strong { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1.1; }
+
+      /* Main event card */
+      .tournament-card.main-event {
+        grid-column: 1 / -1;
+        border-color: rgba(212,255,31,0.25);
+        background: rgba(212,255,31,0.04);
+      }
+      .tournament-card.main-event strong { color: #e8ff7a; font-size: 24px; }
+      .tournament-card.main-event .card-logo img { width: 64px; height: 64px; }
+      .tournament-card.main-event:hover { border-color: rgba(212,255,31,0.5); background: rgba(212,255,31,0.08); }
+
+      .grid-divider { grid-column: 1 / -1; height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+
+      .locked-toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(14px);
+        background: rgba(10,14,5,.97); border: 1px solid rgba(255,255,255,.11); border-radius: 8px;
+        padding: 12px 26px; font-size: 14px; font-weight: 700; color: rgba(255,255,255,.82);
+        z-index: 99999; opacity: 0; transition: opacity .22s, transform .22s;
+        pointer-events: none; white-space: nowrap; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+      .locked-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./challengers-emea.html">EMEA Challengers</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div class="hero-text">
+          <p class="eyebrow">VCT EMEA Challengers 2026</p>
+          <h1 id="league-title">Stage 1</h1>
+          <p class="intro">
+            EMEA Challengers 2026 Stage 1입니다.<br>
+            DACH, France, NORTH//EAST, Spain, Türkiye, MENA 각 지역 대회와 EMEA 본선으로 구성됩니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/Challengers 2026 EMEA.png" alt="EMEA Stage 1" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <section aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournaments</p>
+          <h2 id="tournament-title">대회 선택</h2>
+        </div>
+
+        <div class="tournament-grid">
+
+          <!-- DACH -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/DACH Evolution.png" alt="DACH Evolution" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">DACH</span>
+              <strong>Evolution Qualifier</strong>
+            </div>
+          </a>
+
+          <!-- France -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/France Revolution.png" alt="France Revolution" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">France</span>
+              <strong>Revolution</strong>
+            </div>
+          </a>
+
+          <!-- NORTH//EAST -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/NORTH::EAST.png" alt="NORTH//EAST" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">Northern Europe</span>
+              <strong>NORTH//EAST</strong>
+            </div>
+          </a>
+
+          <!-- Spain -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/Spain Rising Stage.png" alt="Spain Rising" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">Spain</span>
+              <strong>Rising Stage 2</strong>
+            </div>
+          </a>
+
+          <!-- Türkiye -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/Türkiye Birlik.png" alt="Türkiye Birlik" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">Türkiye</span>
+              <strong>Birlik</strong>
+            </div>
+          </a>
+
+          <!-- 구분선 -->
+          <div class="grid-divider"></div>
+
+          <!-- MENA ME -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/MENA Resilience.png" alt="MENA Resilience" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">MENA</span>
+              <strong>Resilience ME</strong>
+            </div>
+          </a>
+
+          <!-- MENA NA -->
+          <a class="tournament-card" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/MENA Resilience.png" alt="MENA Resilience" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">MENA</span>
+              <strong>Resilience NA</strong>
+            </div>
+          </a>
+
+          <!-- 구분선 -->
+          <div class="grid-divider"></div>
+
+          <!-- Main Event -->
+          <a class="tournament-card main-event" href="javascript:void(0)">
+            <div class="card-logo"><img src="./assets/Challengers 2026 EMEA.png" alt="EMEA Stage 1" /></div>
+            <div class="card-body">
+              <span class="tournament-kicker">EMEA · 본선</span>
+              <strong>Challengers 2026: EMEA Stage 1</strong>
+            </div>
+          </a>
+
+        </div>
+      </section>
+    </main>
+
+    <script src="./auth.js"></script>
+    <script>
+      (function () {
+        var _toastTimer = null;
+        function showLockedToast() {
+          var existing = document.querySelector('.locked-toast');
+          if (existing) { existing.remove(); clearTimeout(_toastTimer); }
+          var toast = document.createElement('div');
+          toast.className = 'locked-toast';
+          toast.textContent = '업데이트 예정입니다.';
+          document.body.appendChild(toast);
+          requestAnimationFrame(function () { requestAnimationFrame(function () { toast.classList.add('show'); }); });
+          _toastTimer = setTimeout(function () {
+            toast.classList.remove('show');
+            setTimeout(function () { toast.remove(); }, 260);
+          }, 2000);
+        }
+        document.querySelectorAll(".tournament-card[href='javascript:void(0)']").forEach(function (card) {
+          card.addEventListener('click', function (e) { e.preventDefault(); showLockedToast(); });
+        });
+      })();
+    </script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
