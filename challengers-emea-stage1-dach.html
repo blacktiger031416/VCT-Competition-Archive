@@ -108,7 +108,7 @@
       .pick-slot .ps-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: .03em; color: #e8e4e0; }
       .pick-slot .ps-side { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-right: 2px; }
 
-      .team-pick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 14px; }
+      .team-pick-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 6px; margin-bottom: 4px; }
       .tpick-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); border-radius: 3px; padding: 8px 4px 6px; cursor: pointer; transition: border-color .15s, background .15s; }
       .tpick-btn:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
       .tpick-btn.sel-a { border-color: rgba(212,255,31,.6); background: rgba(212,255,31,.1); }
@@ -255,12 +255,6 @@
     <div class="modal" id="score-modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <p class="modal-title" id="modal-title">경기 입력</p>
 
-      <!-- UB R1 team picker -->
-      <div id="modal-picker-section">
-        <div class="pick-slots" id="pick-slots"></div>
-        <div class="team-pick-grid" id="team-pick-grid"></div>
-      </div>
-
       <!-- Non-R1 team display -->
       <div id="modal-display-section" hidden>
         <span class="modal-label">Teams</span>
@@ -268,11 +262,22 @@
         <div class="modal-team-row" id="modal-disp-b"></div>
       </div>
 
+      <!-- UB R1 team picker (pick slots shown above score) -->
+      <div id="modal-picker-section">
+        <div class="pick-slots" id="pick-slots"></div>
+      </div>
+
       <span class="modal-label">Score (Bo3)</span>
       <div class="score-row">
         <input class="score-input" id="modal-score-a" type="number" min="0" max="2" placeholder="0" />
         <span class="score-sep">–</span>
         <input class="score-input" id="modal-score-b" type="number" min="0" max="2" placeholder="0" />
+      </div>
+
+      <!-- Team grid below score -->
+      <div id="modal-team-grid-wrap" hidden>
+        <span class="modal-label" style="margin-top:12px;display:block;">팀 선택</span>
+        <div class="team-pick-grid" id="team-pick-grid"></div>
       </div>
       <div class="modal-actions">
         <button class="btn btn-clear" id="modal-clear">초기화</button>
@@ -505,6 +510,7 @@
         var isR1=!!UBR1_MIDS[mid];
         document.getElementById('modal-picker-section').hidden=!isR1;
         document.getElementById('modal-display-section').hidden=isR1;
+        document.getElementById('modal-team-grid-wrap').hidden=!isR1;
 
         if(isR1){
           _activeSlot='a';
