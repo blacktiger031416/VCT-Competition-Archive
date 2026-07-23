@@ -538,8 +538,10 @@
 
       document.getElementById('modal-save').addEventListener('click',function(){
         if(_mid===null)return;
-        var a=parseInt(document.getElementById('modal-score-a').value);
-        var b=parseInt(document.getElementById('modal-score-b').value);
+        var aStr=document.getElementById('modal-score-a').value;
+        var bStr=document.getElementById('modal-score-b').value;
+        var a=aStr===''?0:parseInt(aStr);
+        var b=bStr===''?0:parseInt(bStr);
         if(!isNaN(a)&&!isNaN(b)) setBrScore(_mid,a,b);
         closeModal(); renderBracket();
       });
