@@ -91,16 +91,18 @@
 
       /* ─── Playoff bracket ─── */
       .bracket-wrap { overflow-x: auto; padding-bottom: 8px; }
-      .po-bracket { display: flex; gap: 12px; align-items: flex-start; min-width: max-content; }
-      .po-col { width: 196px; flex-shrink: 0; display: flex; flex-direction: column; }
-      .po-col-mid { min-height: 260px; justify-content: space-between; }
-      .po-col-lbf { min-height: 260px; justify-content: flex-end; }
-      .po-col-gf { min-height: 260px; justify-content: center; }
+      .po-shell { min-width: max-content; }
+      .po-main { display: flex; gap: 12px; align-items: stretch; }
+      .po-timeline { display: flex; flex-direction: column; }
+      .po-ub-row { display: flex; gap: 12px; flex: 1; min-height: 210px; }
+      .po-lb-row { display: flex; gap: 12px; height: 90px; }
+      .po-gf-col { width: 196px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding-top: 16px; }
+      .round-col { width: 196px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .round-col .round-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
       .round-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.55); margin-bottom: 6px; white-space: nowrap; }
       .lb-label { color: rgba(255,150,30,.55); }
       .qual-label { color: rgba(212,255,31,.85); }
-      .round-matches { display: flex; flex-direction: column; gap: 8px; }
-      .lb-sep { height: 1px; background: rgba(255,255,255,.07); margin: 12px 0; }
+      .lb-sep { height: 1px; background: rgba(255,255,255,.07); margin: 10px 0; }
 
       /* ─── Playoff Match card ─── */
       .bracket-match { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 7px 10px; cursor: pointer; transition: border-color .15s, background .15s; }
@@ -249,33 +251,40 @@
 
         <!-- DE bracket -->
         <div class="bracket-wrap">
-          <div class="po-bracket">
-            <!-- Col 1: UB SF -->
-            <div class="po-col">
-              <p class="round-label">UB Semifinals · Bo3</p>
-              <div class="round-matches" id="po-ubsf"></div>
-            </div>
-            <!-- Col 2: UB F (top) + LB R1 (bottom) -->
-            <div class="po-col po-col-mid">
-              <div>
-                <p class="round-label qual-label">UB Final · Bo3</p>
-                <div id="po-ubf"></div>
-              </div>
-              <div>
+          <div class="po-shell">
+            <div class="po-main">
+              <!-- Left: UB + LB timeline -->
+              <div class="po-timeline">
+                <!-- UB row: SF(col1) + UB Final(col2) -->
+                <div class="po-ub-row">
+                  <div class="round-col">
+                    <p class="round-label">UB Semifinals · Bo3</p>
+                    <div class="round-matches" id="po-ubsf"></div>
+                  </div>
+                  <div class="round-col">
+                    <p class="round-label qual-label">UB Final · Bo3</p>
+                    <div class="round-matches" id="po-ubf"></div>
+                  </div>
+                </div>
                 <div class="lb-sep"></div>
-                <p class="round-label lb-label">LB Round 1 · Bo3</p>
-                <div id="po-lbr1"></div>
+                <!-- LB row: spacer(col1) + LB R1(col2) + Lower Final(col3) -->
+                <div class="po-lb-row">
+                  <div style="width:196px;flex-shrink:0;"></div>
+                  <div class="round-col">
+                    <p class="round-label lb-label">LB Round 1 · Bo3</p>
+                    <div class="round-matches" id="po-lbr1"></div>
+                  </div>
+                  <div class="round-col">
+                    <p class="round-label lb-label">Lower Final · Bo5</p>
+                    <div class="round-matches" id="po-lbf"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <!-- Col 3: LB Final -->
-            <div class="po-col po-col-lbf">
-              <p class="round-label lb-label">Lower Final · Bo5</p>
-              <div id="po-lbf"></div>
-            </div>
-            <!-- Col 4: Grand Final -->
-            <div class="po-col po-col-gf">
-              <p class="round-label qual-label">Grand Final · Bo5 ★</p>
-              <div id="po-gf"></div>
+              <!-- Right: Grand Final (vertically centered) -->
+              <div class="po-gf-col">
+                <p class="round-label qual-label">Grand Final · Bo5 ★</p>
+                <div id="po-gf"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -321,9 +330,9 @@
       var TEAM_POOL = [
         {code:'JL',   name:'Joblife',          logo:'./assets/teams/Challengers EMEA/JL.png',   white:true},
         {code:'MDR',  name:'Mandatory',         logo:'./assets/teams/Challengers EMEA/MDR.png',  white:false},
-        {code:'GL',   name:'Galions',           logo:'./assets/teams/Challengers EMEA/GL.png',   white:false},
+        {code:'GL',   name:'Galions',           logo:'./assets/teams/Challengers EMEA/GL.png',   white:true},
         {code:'WIP',  name:'WIP Esports',       logo:'./assets/teams/Challengers EMEA/WIP.png',  white:false},
-        {code:'CLA',  name:'Caldya Esport',     logo:'./assets/teams/Challengers EMEA/CLA.png',  white:false},
+        {code:'CLA',  name:'Caldya Esport',     logo:'./assets/teams/Challengers EMEA/CLA.png',  white:true},
         {code:'ES',   name:'Esprit Shōnen',     logo:'./assets/teams/Challengers EMEA/ES.png',   white:false},
         {code:'ERAH', name:'Erah Esport',       logo:'./assets/teams/Challengers EMEA/ERAH.png', white:false},
         {code:'F9',   name:'F9 EICAR',          logo:'./assets/teams/Challengers EMEA/F9.png',   white:true},
