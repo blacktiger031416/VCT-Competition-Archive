@@ -219,14 +219,7 @@
       localStorage.removeItem('vct_p:' + oldName);
     }
 
-    // 2. stock_p: (주가 데이터) localStorage rename
-    var stockVal = localStorage.getItem('stock_p:' + oldName);
-    if (stockVal !== null) {
-      localStorage.setItem('stock_p:' + newName, stockVal);
-      localStorage.removeItem('stock_p:' + oldName);
-    }
-
-    // 3. players:*:* — 모든 상세 경기 선수 이름 교체
+    // 2. players:*:* — 모든 상세 경기 선수 이름 교체
     var pKeys = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);

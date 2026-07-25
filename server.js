@@ -551,10 +551,9 @@ app.post("/api/admin/rename-player", requireAdmin, async (req, res) => {
   const { from, to } = req.body;
   if (!from || !to) return res.status(400).json({ error: "from, to 필요" });
   try {
-    const prefixes = ["stock_p:", "vct_p:"];
+    const prefixes = ["vct_p:"];
     let renamed = [];
 
-    /* stock_p·vct_p 키 이름 변경 */
     for (const prefix of prefixes) {
       const oldKey = `${prefix}${from}`;
       const newKey = `${prefix}${to}`;
@@ -607,7 +606,7 @@ app.post("/api/admin/delete-player", requireAdmin, async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: "name 필요" });
   try {
-    const prefixes = ["stock_p:", "vct_p:"];
+    const prefixes = ["vct_p:"];
     let deleted = [];
     for (const prefix of prefixes) {
       const key = `${prefix}${name}`;
@@ -643,9 +642,6 @@ app.post("/api/admin/full-reset", requireAdmin, async (req, res) => {
 
     // 5. 출석체크 기록
     await pool.query("DELETE FROM app_data WHERE key LIKE 'attend:%'");
-
-    // 5-1. 보유 주식 초기화
-    await pool.query("DELETE FROM app_data WHERE key LIKE 'holdings:%'");
 
     // 6. Admin·test 제외 모든 계정 삭제
     await pool.query("DELETE FROM users WHERE role NOT IN ('admin', 'test')");
@@ -852,349 +848,6 @@ app.post("/api/admin/reward-all", requireAdmin, async (req, res) => {
     res.json({ ok: true, count, coins, message });
   } catch (e) {
     res.status(500).json({ error: e.message });
-  }
-});
-
-/* ── API: 보유 주식 조회 ────────────────────────────── */
-app.get("/api/stock/holdings", requireAuth, async (req, res) => {
-  const key = `holdings:${req.user.username}`;
-  try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    const raw = result.rows[0] ? JSON.parse(result.rows[0].value) : {};
-    res.json({ holdings: holdingsWithAvail(raw) });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── 거래 규제 상수 ─────────────────────────────────── */
-const HOLD_MS      = 2 * 60 * 60 * 1000; /* 매수 후 2시간 매도 잠금 */
-const BUY_SPREAD   = 0.002;               /* 매수 스프레드: 수량 × 0.2% */
-const SELL_SPREAD  = 0.001;               /* 매도 스프레드: 수량 × 0.1% */
-
-/* holdings 항목에 batches 필드가 없으면 마이그레이션 (기존 보유분 → 즉시 매도 가능) */
-function migrateBatches(h) {
-  if (!h) return h;
-  if (!h.batches) {
-    h.batches = h.qty > 0 ? [{ qty: h.qty, price: h.avgPrice || 0, boughtAt: 0 }] : [];
-  }
-  return h;
-}
-
-/* holdings 전체에서 선수별 availableQty / nextUnlockAt 계산 */
-function holdingsWithAvail(holdings) {
-  const now = Date.now();
-  const result = {};
-  for (const [name, h] of Object.entries(holdings)) {
-    migrateBatches(h);
-    let avail = 0, nextUnlock = null;
-    for (const b of (h.batches || [])) {
-      if (b.boughtAt + HOLD_MS <= now) avail += b.qty;
-      else if (nextUnlock === null || b.boughtAt < nextUnlock) nextUnlock = b.boughtAt;
-    }
-    result[name] = {
-      qty: h.qty, avgPrice: h.avgPrice, batches: h.batches,
-      availableQty: avail,
-      nextUnlockAt: nextUnlock ? nextUnlock + HOLD_MS : null,
-    };
-  }
-  return result;
-}
-
-/* ── API: 주식 매수 ─────────────────────────────────── */
-app.post("/api/stock/buy", requireAuth, async (req, res) => {
-  const { playerName, qty, price } = req.body || {};
-  const qtyN = parseInt(qty, 10), priceN = parseInt(price, 10);
-  if (!playerName || qtyN < 1 || priceN < 1)
-    return res.status(400).json({ error: "잘못된 요청입니다." });
-
-  const username    = req.user.username;
-  const coinKey     = `coins:${username}`;
-  const holdingsKey = `holdings:${username}`;
-
-  /* 호가 스프레드: 수량이 많을수록 주당 가격 상승 (최대 +20%) */
-  const spreadMult  = 1 + Math.min(BUY_SPREAD * qtyN, 0.20);
-  const effPrice    = Math.round(priceN * spreadMult); /* 실제 주당 지불 가격 */
-  const total       = effPrice * qtyN;
-
-  try {
-    const coinRes    = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
-    const curCoins   = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 1000;
-    if (curCoins < total)
-      return res.status(400).json({ error: "코인이 부족합니다." });
-
-    const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
-    const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
-
-    /* 배치 추가 (2시간 잠금용 타임스탬프 포함) */
-    const newBatch = { qty: qtyN, price: effPrice, boughtAt: Date.now() };
-    if (holdings[playerName]) {
-      const old = migrateBatches(holdings[playerName]);
-      const newQty = old.qty + qtyN;
-      holdings[playerName] = {
-        qty:      newQty,
-        avgPrice: Math.round((old.avgPrice * old.qty + effPrice * qtyN) / newQty),
-        batches:  [...old.batches, newBatch],
-      };
-    } else {
-      holdings[playerName] = { qty: qtyN, avgPrice: effPrice, batches: [newBatch] };
-    }
-
-    const newCoins = curCoins - total;
-    await Promise.all([
-      pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [coinKey, String(newCoins)]
-      ),
-      pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [holdingsKey, JSON.stringify(holdings)]
-      ),
-    ]);
-
-    /* 거래 내역 기록 */
-    const histKey = `trade_history:${username}`;
-    const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
-    const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
-    history.push({
-      type: "buy", player: playerName, qty: qtyN,
-      price: effPrice, basePrice: priceN, total,
-      spread: effPrice - priceN,
-      ts: new Date().toISOString(),
-    });
-    if (history.length > 200) history.splice(0, history.length - 200);
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [histKey, JSON.stringify(history)]
-    );
-
-    res.json({ ok: true, coins: newCoins, holdings: holdingsWithAvail(holdings),
-               effPrice, spread: effPrice - priceN });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── API: 주식 매도 ─────────────────────────────────── */
-app.post("/api/stock/sell", requireAuth, async (req, res) => {
-  const { playerName, qty, price } = req.body || {};
-  const qtyN = parseInt(qty, 10), priceN = parseInt(price, 10);
-  if (!playerName || qtyN < 1 || priceN < 1)
-    return res.status(400).json({ error: "잘못된 요청입니다." });
-
-  const username    = req.user.username;
-  const coinKey     = `coins:${username}`;
-  const holdingsKey = `holdings:${username}`;
-
-  try {
-    const holdRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [holdingsKey]);
-    const holdings = holdRes.rows[0] ? JSON.parse(holdRes.rows[0].value) : {};
-
-    const cur = migrateBatches(holdings[playerName]);
-    if (!cur || cur.qty < qtyN)
-      return res.status(400).json({ error: "보유 수량이 부족합니다." });
-
-    /* 잠금 해제된 수량 확인 (2시간 경과한 배치만) */
-    const now = Date.now();
-    let availQty = 0;
-    let nextUnlock = null;
-    for (const b of cur.batches) {
-      if (b.boughtAt + HOLD_MS <= now) availQty += b.qty;
-      else if (nextUnlock === null || b.boughtAt < nextUnlock) nextUnlock = b.boughtAt;
-    }
-    if (availQty < qtyN) {
-      const unlockTime = nextUnlock ? new Date(nextUnlock + HOLD_MS).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—";
-      return res.status(400).json({
-        error: `매도 잠금 중입니다. 매도 가능 수량: ${availQty}주 (다음 해제: ${unlockTime})`,
-      });
-    }
-
-    /* 호가 스프레드: 수량이 많을수록 주당 수령 가격 하락 (최대 -10%) */
-    const spreadMult = 1 - Math.min(SELL_SPREAD * qtyN, 0.10);
-    const effPrice   = Math.max(0, Math.round(priceN * spreadMult));
-    const total      = effPrice * qtyN;
-
-    /* FIFO로 가장 오래된 잠금 해제 배치부터 차감 */
-    let remaining = qtyN;
-    const newBatches = [];
-    for (const b of cur.batches) {
-      if (remaining <= 0) { newBatches.push(b); continue; }
-      if (b.boughtAt + HOLD_MS > now) { newBatches.push(b); continue; } /* 잠금 중 → 보존 */
-      if (b.qty <= remaining) {
-        remaining -= b.qty; /* 이 배치 전부 소진 */
-      } else {
-        newBatches.push({ ...b, qty: b.qty - remaining });
-        remaining = 0;
-      }
-    }
-
-    const newQty = cur.qty - qtyN;
-    if (newQty === 0) delete holdings[playerName];
-    else holdings[playerName] = { qty: newQty, avgPrice: cur.avgPrice, batches: newBatches };
-
-    const coinRes  = await pool.query("SELECT value FROM app_data WHERE key=$1", [coinKey]);
-    const curCoins = coinRes.rows[0] ? parseInt(coinRes.rows[0].value, 10) : 1000;
-    const newCoins = curCoins + total;
-
-    await Promise.all([
-      pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [coinKey, String(newCoins)]
-      ),
-      pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [holdingsKey, JSON.stringify(holdings)]
-      ),
-    ]);
-
-    /* 거래 내역 기록 */
-    const histKey = `trade_history:${username}`;
-    const histRes = await pool.query("SELECT value FROM app_data WHERE key=$1", [histKey]);
-    const history = histRes.rows[0] ? JSON.parse(histRes.rows[0].value) : [];
-    history.push({
-      type: "sell", player: playerName, qty: qtyN,
-      price: effPrice, basePrice: priceN, total,
-      spread: priceN - effPrice,
-      ts: new Date().toISOString(),
-    });
-    if (history.length > 200) history.splice(0, history.length - 200);
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [histKey, JSON.stringify(history)]
-    );
-
-    res.json({ ok: true, coins: newCoins, holdings: holdingsWithAvail(holdings),
-               effPrice, spread: priceN - effPrice });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── API: 거래 내역 조회 ─────────────────────────────── */
-app.get("/api/stock/trade-history", requireAuth, async (req, res) => {
-  const key = `trade_history:${req.user.username}`;
-  try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    const history = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
-    res.json({ history });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── API: 선수 시장 데이터 (전체 공개) ────────────────────────────
-   player-stock.html이 localStorage 대신 서버 DB에서 선수 목록을 로드.
-   vct_roster:* + vct_p:* + stock_p:* 를 합쳐서 반환.              */
-app.get("/api/stock/market", async (req, res) => {
-  try {
-    const [rosterRows, vcpRows, stockRows] = await Promise.all([
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_roster:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'stock_p:%'"),
-    ]);
-
-    /* 팀→선수 맵 (메인/서브 분리)
-       — playerTeam : 메인 로스터 선수  (팀 로고 기준)
-       — subTeam    : 서브 로스터 선수  (메인에 없는 경우에만) */
-    const roster = {};
-    const playerTeam = {}; /* playerName → teamName (main) */
-    const subTeam    = {}; /* playerName → teamName (sub, 메인 없을 때만) */
-
-    /* 1회차: 메인 로스터만 처리 */
-    rosterRows.rows.forEach(r => {
-      const team = r.key.slice(11);
-      let parsed;
-      try { parsed = JSON.parse(r.value); } catch { return; }
-      const mainPlayers = Array.isArray(parsed) ? parsed : (parsed.main || []);
-      roster[team] = mainPlayers;
-      mainPlayers.forEach(p => { if (p) playerTeam[p.trim()] = team; });
-    });
-
-    /* 2회차: 서브 로스터 — 메인에 이미 있으면 무시 */
-    rosterRows.rows.forEach(r => {
-      const team = r.key.slice(11);
-      let parsed;
-      try { parsed = JSON.parse(r.value); } catch { return; }
-      if (Array.isArray(parsed)) return; /* 평탄 배열은 서브 없음 */
-      (parsed.subs || []).forEach(p => {
-        if (p && !playerTeam[p.trim()]) subTeam[p.trim()] = team;
-      });
-    });
-
-    /* 선수 스탯 맵 */
-    const vcpMap = {};  /* playerName → parsed vct_p data */
-    vcpRows.rows.forEach(r => {
-      const name = r.key.slice(6);
-      try { vcpMap[name] = JSON.parse(r.value); } catch {}
-    });
-
-    /* 주가 맵 */
-    const stockMap = {}; /* playerName → parsed stock_p data */
-    stockRows.rows.forEach(r => {
-      const name = r.key.slice(8);
-      try { stockMap[name] = JSON.parse(r.value); } catch {}
-    });
-
-    res.json({ playerTeam, subTeam, vcpMap, stockMap });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-/* ── API: 즐겨찾기 조회 ─────────────────────────────── */
-app.get("/api/stock/watchlist", requireAuth, async (req, res) => {
-  const key = `watchlist:${req.user.username}`;
-  try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    const watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
-    res.json({ watchlist });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── API: 즐겨찾기 추가 ─────────────────────────────── */
-app.post("/api/stock/watchlist", requireAuth, async (req, res) => {
-  const { playerName } = req.body || {};
-  if (!playerName) return res.status(400).json({ error: "playerName 필수" });
-  const key = `watchlist:${req.user.username}`;
-  try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    const watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
-    if (!watchlist.includes(playerName)) watchlist.push(playerName);
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [key, JSON.stringify(watchlist)]
-    );
-    res.json({ ok: true, watchlist });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ── API: 즐겨찾기 제거 ─────────────────────────────── */
-app.delete("/api/stock/watchlist/:name", requireAuth, async (req, res) => {
-  const playerName = decodeURIComponent(req.params.name);
-  const key = `watchlist:${req.user.username}`;
-  try {
-    const result = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-    let watchlist = result.rows[0] ? JSON.parse(result.rows[0].value) : [];
-    watchlist = watchlist.filter((n) => n !== playerName);
-    await pool.query(
-      `INSERT INTO app_data (key,value) VALUES ($1,$2)
-       ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-      [key, JSON.stringify(watchlist)]
-    );
-    res.json({ ok: true, watchlist });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
 });
 
@@ -1813,144 +1466,6 @@ const WATCHED_EVENT_IDS = [
 
 /* 처리 완료 맵 추적: { "matchId": [mapId, ...] }
    맵 단위로 추적 — 경기 중간에 끝난 맵부터 바로 반영 */
-let processedMaps = {};
-
-/* DB에서 stock_p:{name} 읽기 — 대소문자 무관 조회 후 정확한 키 반환 */
-async function getStockState(playerName) {
-  /* 1) 정확한 키로 먼저 시도 */
-  const key = `stock_p:${playerName}`;
-  const res = await pool.query("SELECT value FROM app_data WHERE key=$1", [key]);
-  if (res.rows[0]) {
-    try { return { state: JSON.parse(res.rows[0].value), resolvedKey: key }; } catch { return null; }
-  }
-  /* 2) 대소문자 무관 fallback */
-  const res2 = await pool.query(
-    "SELECT key, value FROM app_data WHERE lower(key)=lower($1) AND key LIKE 'stock_p:%'",
-    [key]
-  );
-  if (res2.rows[0]) {
-    try { return { state: JSON.parse(res2.rows[0].value), resolvedKey: res2.rows[0].key }; } catch { return null; }
-  }
-  /* 3) 특수문자 정규화 fallback — "So Sweet" ↔ "So:Sweet" 등 ':' ↔ 공백 차이 처리 */
-  const normalizedName = playerName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-  const res3 = await pool.query(
-    "SELECT key, value FROM app_data WHERE key LIKE 'stock_p:%'",
-    []
-  );
-  for (const row of res3.rows) {
-    const rowName = row.key.slice(8); // "stock_p:".length === 8
-    const rowNorm = rowName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-    if (rowNorm === normalizedName) {
-      try { return { state: JSON.parse(row.value), resolvedKey: row.key }; } catch { return null; }
-    }
-  }
-  return null;
-}
-
-/* DB에 stock_p:{name} 저장 + SSE 브로드캐스트 */
-async function saveStockState(playerName, state, resolvedKey) {
-  const key   = resolvedKey || `stock_p:${playerName}`;
-  const value = JSON.stringify(state);
-  await pool.query(
-    `INSERT INTO app_data (key, value)
-     VALUES ($1, $2)
-     ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-    [key, value]
-  );
-  broadcast({ type: "set", key, value });
-}
-
-/* vct_p:{name} 에서 평균 ACS 계산 → 초기 stock_p 세팅 (버튼과 동일 로직) */
-async function initStockFromVctP(playerName, fallbackAcs) {
-  const vctKey = `vct_p:${playerName}`;
-  /* 대소문자 무관 조회 */
-  let res = await pool.query(
-    "SELECT key, value FROM app_data WHERE lower(key)=lower($1)",
-    [vctKey]
-  );
-  /* 특수문자 정규화 fallback — ':' ↔ 공백 차이 처리 */
-  if (!res.rows[0]) {
-    const normalizedName = playerName.replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-    const allVct = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'");
-    const matched = allVct.rows.find(r => {
-      const n = r.key.slice(6).replace(/:/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-      return n === normalizedName;
-    });
-    if (matched) res = { rows: [matched] };
-  }
-  let resolvedPlayerName = playerName;
-  let avgAcs = fallbackAcs || 200;
-
-  if (res.rows[0]) {
-    resolvedPlayerName = res.rows[0].key.slice(6); /* "vct_p:" 이후 */
-    let vctData;
-    try { vctData = JSON.parse(res.rows[0].value); } catch { vctData = {}; }
-    const maps = vctData.maps || [];
-    let total = 0, cnt = 0;
-    maps.forEach(m => {
-      const lg = m.league || "";
-      if (!["americas","emea","pacific","cn","masters","champions"].includes(lg)) return;
-      const a = parseFloat(m.acs) || 0;
-      if (a > 0) { total += a; cnt++; }
-    });
-    if (cnt > 0) avgAcs = Math.round(total / cnt);
-  } else if (!fallbackAcs) {
-    return null; /* vct_p도 없고 fallback도 없으면 포기 */
-  }
-
-  /* 가격은 0에서 시작 — 첫 맵 적용 시 ACS 기반으로 부트스트랩됨 */
-  return { state: { price: 0, ref: 0, history: [0], runTotal: 0, runCount: 0 },
-           resolvedKey: `stock_p:${resolvedPlayerName}` };
-}
-
-/* 선수 한 명의 주가 적용 */
-async function applyAcsToStock(playerName, newAcs) {
-  let found = await getStockState(playerName);
-  const isNew = !found;
-  /* stock_p 없으면 초기 상태(price=0)로 등록 */
-  if (!found) found = await initStockFromVctP(playerName, newAcs);
-  if (!found) return;
-
-  const { state, resolvedKey } = found;
-
-  /* 신규 선수: 초기 상태(price=0) 먼저 저장 */
-  if (isNew) {
-    await saveStockState(playerName, state, resolvedKey);
-    console.log(`[stock] ${resolvedKey}: 신규 등록 — 가격 0에서 시작`);
-    /* fall-through: 첫 맵 ACS로 부트스트랩 적용 */
-  }
-
-  /* ref=0 이면 같은 ACS라도 건너뛰지 않음 (부트스트랩 필요) */
-  if (state.ref !== 0 && newAcs === state.ref) {
-    console.log(`[stock] ${playerName}: ACS ${newAcs} 이미 반영됨 — 건너뜀`);
-    return;
-  }
-
-  let newPrice;
-  let logSuffix;
-  if (state.ref === 0 || state.price === 0) {
-    /* 첫 번째 맵: ACS 기반으로 초기 가격 부트스트랩 */
-    newPrice  = Math.max(1, Math.round(newAcs / 10));
-    logSuffix = `첫 맵 부트스트랩 ACS ${newAcs} → 가격 0→${newPrice}`;
-  } else {
-    const pctChange = (newAcs - state.ref) / state.ref;
-    newPrice  = Math.max(1, Math.round(state.price * (1 + pctChange)));
-    logSuffix = `ACS ${newAcs} → 가격 ${state.price}→${newPrice} (${pctChange >= 0 ? "+" : ""}${(pctChange * 100).toFixed(1)}%)`;
-  }
-
-  const newState  = {
-    ...state,
-    price    : newPrice,
-    ref      : newAcs,
-    history  : [...(state.history || [0]), newPrice].slice(-200),
-    runTotal : (state.runTotal || 0) + newAcs,
-    runCount : (state.runCount || 0) + 1,
-  };
-  await saveStockState(playerName, newState, resolvedKey);
-  console.log(`[stock] ${resolvedKey}: ${logSuffix}`);
-}
-
-/* 어드민이 직접 선수 목록을 전달해 즉시 주가 반영 */
 /* ── 기록 DB 진단 (어드민 전용) ───────────────────────────────────────────────
    /api/admin/records-diag 에 GET 요청하면 DB에 저장된 기록 데이터 현황을 반환.
    league별 vct_p 맵 엔트리 수, vct_roster 팀 수, players/rounds/veto 키 수 확인용. */
@@ -3165,322 +2680,20 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
   }
 });
 
-/* ── 선수 주식 전체 환불 (매입가 기준) ─────────────────────────────────────
-   모든 유저의 holdings:* 를 읽어 avgPrice × qty 합산 후 coins: 에 환불,
-   holdings: 는 {} 로 초기화. 폐쇄 시 일괄 정산용.                         */
-app.post("/api/admin/stock-refund-all", requireAdmin, async (req, res) => {
-  try {
-    /* 1. 모든 holdings: 와 coins: 로드 */
-    const [holdRows, coinRows] = await Promise.all([
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'holdings:%'"),
-      pool.query("SELECT key, value FROM app_data WHERE key LIKE 'coins:%'"),
-    ]);
-
-    /* coins 맵: username → 현재 코인 */
-    const coinMap = {};
-    coinRows.rows.forEach(r => {
-      const uname = r.key.slice(6); /* "coins:XXX" → "XXX" */
-      coinMap[uname] = parseInt(r.value, 10) || 0;
-    });
-
-    const report = []; /* { username, refund, holdingsBefore } */
-    const updates = []; /* DB upsert 목록 */
-
-    holdRows.rows.forEach(r => {
-      const uname = r.key.slice(9); /* "holdings:XXX" → "XXX" */
-      let holdings;
-      try { holdings = JSON.parse(r.value); } catch { return; }
-      if (!holdings || typeof holdings !== "object") return;
-
-      /* 환불액 계산: avgPrice × qty 합산 */
-      let refund = 0;
-      const holdingsBefore = {};
-      Object.entries(holdings).forEach(([pName, h]) => {
-        if (!h || !h.qty || h.qty <= 0) return;
-        const amt = (h.avgPrice || 0) * h.qty;
-        refund += amt;
-        holdingsBefore[pName] = { qty: h.qty, avgPrice: h.avgPrice || 0, refund: amt };
-      });
-
-      if (refund === 0 && Object.keys(holdingsBefore).length === 0) return; /* 보유 없으면 스킵 */
-
-      const newCoins = (coinMap[uname] || 0) + refund;
-      report.push({ username: uname, refund, holdingsBefore, newCoins });
-
-      /* coins 갱신 */
-      updates.push(pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [`coins:${uname}`, String(newCoins)]
-      ));
-      /* holdings 초기화 */
-      updates.push(pool.query(
-        `INSERT INTO app_data (key,value) VALUES ($1,$2)
-         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
-        [`holdings:${uname}`, "{}"]
-      ));
-    });
-
-    await Promise.all(updates);
-
-    const totalRefund  = report.reduce((s, r) => s + r.refund, 0);
-    const totalUsers   = report.length;
-    console.log(`[stock-refund-all] ${totalUsers}명 환불 완료, 총 ${totalRefund}코인 반환`);
-    res.json({ ok: true, totalUsers, totalRefund, detail: report });
-  } catch (e) {
-    console.error("[stock-refund-all]", e);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-/* ── 선수 주식 전체 초기화 (price=0 리셋) ─────────────────────────────────
-   DB의 모든 stock_p: 키를 삭제해 가격을 0으로 초기화.
-   이후 경기 반영 시 첫 맵 ACS 기준으로 부트스트랩됨.                       */
-app.post("/api/admin/stock-reset-all", requireAdmin, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "DELETE FROM app_data WHERE key LIKE 'stock_p:%'"
-    );
-    const deleted = result.rowCount;
-    console.log(`[stock-reset-all] stock_p: 키 ${deleted}개 삭제 완료`);
-    res.json({ ok: true, deleted });
-  } catch (e) {
-    console.error("[stock-reset-all]", e);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.post("/api/admin/stock-apply-players", requireAdmin, async (req, res) => {
-  try {
-    const players = req.body.players || []; // [{ name, acs }]
-    const matchKey = req.body.matchKey || null;
-
-    /* matchKey가 있으면 auto-match가 이미 처리했는지 확인 */
-    if (matchKey) {
-      const amRow = await pool.query(
-        "SELECT value FROM app_data WHERE key=$1",
-        [`auto-match:${matchKey}`]
-      );
-      if (amRow.rows.length > 0) {
-        const am = JSON.parse(amRow.rows[0].value || "{}");
-        if (am.filledMaps && am.filledMaps.length > 0) {
-          console.log(`[stock-apply] ${matchKey} auto-match이 이미 처리함 (filledMaps=${am.filledMaps.length}) → 수동 주식 적용 skip`);
-          return res.json({ ok: true, applied: 0, skipped: "auto-match already applied" });
-        }
-      }
-    }
-
-    for (const p of players) {
-      if (p.name && typeof p.acs === "number" && p.acs > 0) {
-        await applyAcsToStock(p.name, p.acs);
-      }
-    }
-    res.json({ ok: true, applied: players.length });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-/* ── 역대 경기 전체 주식 일괄 적용 ─────────────────────────────────────────
-   players:{matchKey}:{mapIdx} 전체를 읽어 시간 순으로 정렬 후 ACS를 주식에 반영.
-   정렬 기준:
-   - santiago|swiss|*    → r1 → r2w → r2l → r3 (고정)
-   - santiago|playoffs|* → m1~m13 → gf (고정)
-   - london|swiss|*      → r1 → r2w → r2l → r3 (고정)
-   - london|playoffs|*   → m1~m13 → gf (고정)
-   - 나머지 (Match N, MM.DD, Grand Finals 등) → updated_at 오름차순
-     (어드민이 경기를 입력한 순서 ≈ 대회 진행 순서) */
-app.post("/api/admin/bulk-stock-apply", requireAdmin, async (req, res) => {
-  try {
-    /* 1. players:* 전체 조회 (updated_at 포함) */
-    const rows = await pool.query(
-      "SELECT key, value, updated_at FROM app_data WHERE key LIKE 'players:%' ORDER BY updated_at ASC"
-    );
-
-    /* 2. matchKey별로 그룹핑 — 각 matchKey의 최초 updated_at을 기록 */
-    const matchMaps = {}; // { matchKey: { mapIdx: playersData, __ts: earliest_ms } }
-    for (const row of rows.rows) {
-      const m = row.key.match(/^players:(.+):(\d+)$/);
-      if (!m) continue;
-      const [, matchKey, mapIdxStr] = m;
-      const mapIdx = parseInt(mapIdxStr, 10);
-      const ts = row.updated_at ? new Date(row.updated_at).getTime() : 0;
-      if (!matchMaps[matchKey]) matchMaps[matchKey] = { __ts: ts };
-      else if (ts < matchMaps[matchKey].__ts) matchMaps[matchKey].__ts = ts;
-      try { matchMaps[matchKey][mapIdx] = JSON.parse(row.value); } catch {}
-    }
-
-    /* 3. 정렬 헬퍼 */
-    function phaseOf(mk) {
-      const p = mk.split("|");
-      if (p[0] === "santiago" && p[1] === "swiss")    return 20;
-      if (p[0] === "santiago" && p[1] === "playoffs") return 30;
-      if (p[0] === "london"   && p[1] === "swiss")    return 60;
-      if (p[0] === "london"   && p[1] === "playoffs") return 70;
-      return 0; /* timestamp 정렬 */
-    }
-    function subKeyOf(mk) {
-      const p = mk.split("|");
-      const ROUND = { r1: 0, r2w: 1, r2l: 2, r3: 3 };
-      if ((p[0] === "santiago" || p[0] === "london") && p[1] === "swiss") {
-        return (ROUND[p[2]] ?? 9) * 100 + (parseInt(p[3], 10) || 0);
-      }
-      if ((p[0] === "santiago" || p[0] === "london") && p[1] === "playoffs") {
-        return p[2] === "gf" ? 9999 : (parseInt(p[2].replace("m",""), 10) || 0);
-      }
-      return 0;
-    }
-
-    const sortedMatchKeys = Object.keys(matchMaps).filter(k => k !== "__ts");
-    sortedMatchKeys.sort((a, b) => {
-      const pa = phaseOf(a), pb = phaseOf(b);
-      if (pa !== pb) return pa - pb;
-      if (pa !== 0) return subKeyOf(a) - subKeyOf(b); /* 고정 패턴 */
-      /* timestamp 정렬 (kickoff, stage1, stage1playoffs 등) */
-      return (matchMaps[a].__ts || 0) - (matchMaps[b].__ts || 0);
-    });
-
-    /* 4. 순서대로 ACS 적용 */
-    let totalApplied = 0;
-    const errors = [];
-    for (const matchKey of sortedMatchKeys) {
-      const entry = matchMaps[matchKey];
-      const mapIdxs = Object.keys(entry)
-        .filter(k => k !== "__ts")
-        .map(Number)
-        .sort((a, b) => a - b);
-      for (const mapIdx of mapIdxs) {
-        const slots = entry[mapIdx];
-        if (!slots || typeof slots !== "object") continue;
-        for (const slotKey of ["a0","a1","a2","a3","a4","b0","b1","b2","b3","b4"]) {
-          const p = slots[slotKey];
-          if (!p || !p.name || p.name === "-" || !p.name.trim()) continue;
-          const acs = parseInt(p.acs, 10) || 0;
-          if (acs <= 0) continue;
-          try {
-            await applyAcsToStock(p.name.trim(), acs);
-            totalApplied++;
-          } catch (e) {
-            errors.push(`${p.name}: ${e.message}`);
-          }
-        }
-      }
-    }
-
-    console.log(`[bulk-stock] 완료: matchKey ${sortedMatchKeys.length}개, 적용 ${totalApplied}건, 오류 ${errors.length}건`);
-    res.json({
-      ok: true,
-      matchCount: sortedMatchKeys.length,
-      totalApplied,
-      errors: errors.slice(0, 20),
-    });
-  } catch (e) {
-    console.error("[bulk-stock] 오류:", e.message);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-/* 매치 한 건 처리 — 완료된 맵만 골라서 적용 */
-async function processMatch(matchId) {
-  try {
-    const res  = await fetch(`https://api.thespike.gg/match/${matchId}/stats`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const maps = data.maps || [];
-
-    if (!processedMaps[matchId]) processedMaps[matchId] = [];
-    const done = processedMaps[matchId];
-
-    let newMapCount = 0;
-    for (const map of maps) {
-      const mapId   = map.id;
-      const players = map.players || [];
-
-      /* 이미 처리한 맵이면 skip */
-      if (done.includes(mapId)) continue;
-
-      /* 플레이어 ACS 데이터가 없으면 아직 끝나지 않은 맵 */
-      const hasData = players.some(p => typeof p.averageCombatScore === "number" && p.averageCombatScore > 0);
-      if (!hasData) continue;
-
-      /* 새로 완료된 맵 감지 — 주식은 pollAutoMatches(자동입력 ON) 또는 수동 import에서만 적용 */
-      console.log(`[stock] 매치 ${matchId} / 맵 ${map.title || mapId} 완료 감지 (주식 적용은 auto-match 등록 경기만)`);
-      done.push(mapId);
-      newMapCount++;
-    }
-
-    if (newMapCount > 0) {
-      console.log(`[stock] 매치 ${matchId}: ${newMapCount}개 맵 신규 처리`);
-    }
-  } catch (e) {
-    console.error(`[stock] 매치 ${matchId} 처리 오류:`, e.message);
-  }
-}
-
-/* 폴링 메인 함수 — 진행 중인 경기도 포함 */
+/* ── auto-match 폴링 메인 함수 ───────────────────────── */
 async function pollVctMatches() {
-  const allEventMatches = {}; /* eventId → matches[] — auto-match에도 재사용 */
-
+  const allEventMatches = {};
   for (const eventId of WATCHED_EVENT_IDS) {
     try {
       const res  = await fetch(`https://api.thespike.gg/matches?eventId=${eventId}`);
       if (!res.ok) continue;
       const data = await res.json();
-      const matches = Array.isArray(data) ? data : (data.matches || data.data || []);
-      allEventMatches[eventId] = matches;
-
-      for (const match of matches) {
-        const id = match.id;
-        if (!id) continue;
-
-        /* 완전히 끝난 매치 + 모든 맵 처리 완료 → skip */
-        if (match.isFinished) {
-          const done = processedMaps[id] || [];
-          if (done.length > 0) continue;
-        }
-
-        await processMatch(id);
-      }
+      allEventMatches[eventId] = Array.isArray(data) ? data : (data.matches || data.data || []);
     } catch (e) {
-      console.error(`[stock] eventId ${eventId} 폴링 오류:`, e.message);
+      console.error(`[auto-match] eventId ${eventId} 폴링 오류:`, e.message);
     }
   }
-
-  /* auto-match 경기 입력 처리 */
   await pollAutoMatches(allEventMatches);
-}
-
-/* 서버 재시작 시 처리 완료 맵 복원 */
-async function initProcessedMaps() {
-  try {
-    const res = await pool.query("SELECT value FROM app_data WHERE key='stock:processed_maps'");
-    if (res.rows[0]) {
-      processedMaps = JSON.parse(res.rows[0].value);
-      const total = Object.values(processedMaps).reduce((s, v) => s + v.length, 0);
-      console.log(`[stock] 처리 완료 맵 ${total}건 복원`);
-    }
-  } catch (e) {
-    console.error("[stock] 처리 완료 맵 복원 오류:", e.message);
-  }
-}
-
-/* 처리 완료 맵을 DB에 주기적으로 저장 */
-async function saveProcessedMaps() {
-  try {
-    /* 최근 200개 matchId만 유지 (오래된 항목 정리) */
-    const keys = Object.keys(processedMaps);
-    if (keys.length > 200) {
-      keys.slice(0, keys.length - 200).forEach(k => delete processedMaps[k]);
-    }
-    await pool.query(
-      `INSERT INTO app_data (key, value)
-       VALUES ('stock:processed_maps', $1)
-       ON CONFLICT (key) DO UPDATE SET value=$1, updated_at=NOW()`,
-      [JSON.stringify(processedMaps)]
-    );
-  } catch (e) {
-    console.error("[stock] 처리 완료 맵 저장 오류:", e.message);
-  }
 }
 
 /* ── 자동 경기 입력 (Auto-match) ────────────────────────
@@ -3546,10 +2759,10 @@ function teamFuzzyMatch(apiTitle, queryName) {
    am        : auto-match 레코드 (matchKey, team1, team2, league, filledMaps)
    map       : thespike stats.maps[mapIdx]
    mapIdx    : 0-based 인덱스
-   tsMatchId : thespike 매치 ID (processedMaps 업데이트용)
+   tsMatchId : thespike 매치 ID
    반환값    : true=처리 완료, false=미완료 맵(skip)
    ─────────────────────────────────────────────────────────────────────── */
-async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = false) {
+async function processAutoMatchMap(am, map, mapIdx, tsMatchId) {
   const players = map.players || [];
   if (!players.some((p) => p.averageCombatScore > 0)) return false; /* 미완료 맵 */
 
@@ -3634,19 +2847,6 @@ async function processAutoMatchMap(am, map, mapIdx, tsMatchId, applyStock = fals
     broadcast({ type: "set", key: vKey, value: vVal });
   }
 
-  /* ── 선수 주식 반영 (실시간 적용 ON일 때만) ── */
-  if (applyStock) {
-    for (const p of [...teamAPlayers, ...teamBPlayers]) {
-      if (p.nickname && typeof p.averageCombatScore === "number" && p.averageCombatScore > 0) {
-        try { await applyAcsToStock(p.nickname, p.averageCombatScore); }
-        catch (e) { console.error(`[auto-match] 주식 적용 오류 (${p.nickname}):`, e.message); }
-      }
-    }
-  }
-  if (tsMatchId) {
-    if (!processedMaps[tsMatchId]) processedMaps[tsMatchId] = [];
-    if (!processedMaps[tsMatchId].includes(map.id)) processedMaps[tsMatchId].push(map.id);
-  }
 
   /* ── 라운드 & 스코어 ── */
   try {
@@ -3785,7 +2985,7 @@ async function pollAutoMatches(allEventMatches) {
           const map = maps[mapIdx];
           if ((am.filledMaps || []).includes(map.id)) continue; /* 이미 처리된 맵 skip */
 
-          const ok = await processAutoMatchMap(am, map, mapIdx, tsMatchId, true /* 실시간: 주식 반영 */);
+          const ok = await processAutoMatchMap(am, map, mapIdx, tsMatchId);
 
           if (ok) {
             await pool.query(
@@ -3858,12 +3058,8 @@ app.listen(PORT, async () => {
     }
   }, 60 * 1000);
 
-  /* ── 자동 주가 폴링 시작 ── */
-  await initProcessedMaps();
-  pollVctMatches(); /* 서버 시작 즉시 1회 실행 */
-  setInterval(async () => {
-    await pollVctMatches();
-    await saveProcessedMaps();
-  }, 60 * 1000); /* 1분마다 */
-  console.log("[stock] 자동 주가 폴링 시작 (1분 주기, 맵별 감지)");
+  /* ── auto-match 폴링 시작 ── */
+  pollVctMatches();
+  setInterval(pollVctMatches, 60 * 1000);
+  console.log("[auto-match] 폴링 시작 (1분 주기)");
 });
