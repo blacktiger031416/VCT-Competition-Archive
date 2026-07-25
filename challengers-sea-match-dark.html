@@ -2422,6 +2422,11 @@ function _loadRoster(teamFullName, code) {
 }
 TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
 TEAM_ROSTERS[TEAM_B_CODE] = _loadRoster(MATCH_TEAM_B, TEAM_B_CODE);
+/* storageReady 이후 DB 로스터로 갱신 */
+(window.storageReady || Promise.resolve()).then(function() {
+  TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
+  TEAM_ROSTERS[TEAM_B_CODE] = _loadRoster(MATCH_TEAM_B, TEAM_B_CODE);
+});
 
 var maps = [
   createBlankMapData(0),
