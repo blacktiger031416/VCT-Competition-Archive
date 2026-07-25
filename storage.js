@@ -1,14 +1,13 @@
 /**
- * storage.js — localStorage ↔ 서버 DB 동기화 + 실시간 SSE 레이어
+ * storage.js — 서버 DB 동기화 + 실시간 SSE 레이어
  *
  * 동작 원리:
- * 1. 페이지 로드 시 서버에서 모든 데이터를 가져옴
- *    - 관리자(vct_admin_auth): localStorage 우선 (Render 슬립 중 저장 보호)
- *    - 일반 방문자: DB 우선 (항상 최신 데이터 표시)
- * 2. localStorage.setItem / removeItem 오버라이드 → 변경 즉시 DB에 저장 시도
+ * 1. 페이지 로드 시 서버에서 모든 데이터를 가져옴 → 메모리(_mem)에 캐싱
+ *    localStorage는 LOCAL_ONLY 키(auth 토큰 등)만 사용 — 용량 초과 방지
+ * 2. localStorage.setItem / getItem / removeItem 오버라이드
+ *    setItem: _mem 저장 + DB pushKey (LOCAL_ONLY는 localStorage에만)
+ *    getItem: localStorage 우선, 없으면 _mem fallback
  * 3. SSE(/api/events) 구독 → 다른 클라이언트의 변경사항 실시간 수신
- *    - match-dark 편집 페이지: localStorage만 업데이트 (새로고침 없음)
- *    - 그 외 페이지: 변경 감지 시 0.8초 후 자동 새로고침 (스크롤 위치 유지)
  * 4. 페이지 포커스 복귀 시 실패한 저장 자동 재시도 (관리자만)
  * 5. window.storageReady — 초기 로드가 끝나면 resolve되는 Promise
  */
@@ -30,22 +29,17 @@
   /*
    * 서버 API 전용 접두사 — localStorage에 캐시하지 않음.
    * 이 키들은 API 엔드포인트로만 관리되므로 storage.js 동기화 대상에서 완전히 제외.
-   * (이 키가 localStorage에 남아 있으면 Admin의 syncLocalToDB가 삭제된 데이터를 복원하는 버그 발생)
-   *
-   * ── 유저별 데이터 (Admin localStorage와 완전 분리) ──────────────────────────
-   * Admin ↔ 일반 계정을 오가며 접속해도 서로의 데이터를 덮어쓰지 않도록
-   * 아래 접두사는 항상 API 엔드포인트로만 읽고 쓴다.
    */
   var SERVER_ONLY_PREFIXES = [
     /* 티어리스트 */
     "tlevt:", "tlpost:", "tllike:",
     /* 건의함 */
     "suggest:",
-    /* 유저별 코인·금고·출석·보유주식 — Admin localStorage가 덮어쓰는 버그 방지 */
+    /* 유저별 코인·금고·출석·보유주식 */
     "coins:", "vault:", "attend:", "holdings:",
     /* 승부 예측 배팅 기록 */
     "pred-bet:",
-    /* 승부 예측 경기 데이터 (서버가 broadcast로 배포) */
+    /* 승부 예측 경기 데이터 */
     "pred-match:",
     /* 시즌 기록 */
     "season:",
@@ -75,29 +69,31 @@
     return false;
   }
 
-  /* localStorage에 남아 있는 서버 전용 키 즉시 정리 (원본 메서드 사용) */
+  /* localStorage에 남아 있는 서버 전용 키 즉시 정리 */
   (function cleanServerOnlyFromLocal() {
     var toRemove = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (k && isServerOnly(k)) toRemove.push(k);
     }
-    toRemove.forEach(function (k) {
-      localStorage.removeItem(k); /* 오버라이드 전이므로 원본이 아직 없음 — 바로 호출 */
-    });
+    toRemove.forEach(function (k) { localStorage.removeItem(k); });
   })();
 
-  /* 관리자 여부: 구형 vct_admin_auth 또는 신형 JWT vct_auth_user(role=admin) */
+  /* ── 인메모리 캐시 (localStorage 용량 초과 방지) ─────── */
+  var _mem = {};
+
+  /* 관리자 여부 */
   var _isAdmin = !!localStorage.getItem("vct_admin_auth") || (function () {
     try { var u = JSON.parse(localStorage.getItem("vct_auth_user")); return !!(u && u.role === "admin"); }
     catch (e) { return false; }
   })();
 
-  /* 편집 페이지(match-dark) 여부: 실시간 새로고침 제외 */
+  /* 편집 페이지(match-dark) 여부 */
   var _isEditPage = window.location.pathname.indexOf("match-dark") !== -1;
 
   /* 원본 메서드 보존 */
   var _origSet    = localStorage.setItem.bind(localStorage);
+  var _origGet    = localStorage.getItem.bind(localStorage);
   var _origRemove = localStorage.removeItem.bind(localStorage);
 
   /* ── DB에 키 하나 업로드 ──────────────────────────────── */
@@ -111,30 +107,47 @@
     });
   }
 
+  /* ── getItem 오버라이드 — localStorage 없으면 _mem fallback ── */
+  localStorage.getItem = function (key) {
+    var v = _origGet(key);
+    if (v !== null) return v;
+    return (Object.prototype.hasOwnProperty.call(_mem, key)) ? _mem[key] : null;
+  };
+
   /* ── setItem 오버라이드 ───────────────────────────────── */
   localStorage.setItem = function (key, value) {
-    /* vct_p:* — localStorage/DB 모두 최근 15개만 */
     var localValue = value;
     var dbValue = value;
+    /* vct_p:* — 최근 15개만 */
     if (key.indexOf("vct_p:") === 0) {
       try {
         var _pd = JSON.parse(value);
-        if (_pd && Array.isArray(_pd.maps)) {
-          if (_pd.maps.length > 15) {
-            localValue = JSON.stringify({ maps: _pd.maps.slice(-15) });
-            dbValue = localValue;
-          }
+        if (_pd && Array.isArray(_pd.maps) && _pd.maps.length > 15) {
+          localValue = JSON.stringify({ maps: _pd.maps.slice(-15) });
+          dbValue = localValue;
         }
       } catch (_e) {}
     }
-    try { _origSet(key, localValue); } catch (_qe) { /* localStorage quota exceeded — skip local cache */ }
-    if (!isLocalOnly(key) && !isServerOnly(key)) {
+
+    if (isLocalOnly(key)) {
+      /* auth 토큰 등 — 실제 localStorage에만 저장 */
+      try { _origSet(key, localValue); } catch (_qe) {}
+      return;
+    }
+
+    /* 일반 키 — 메모리에 저장하고 DB에 push */
+    _mem[key] = localValue;
+    /* localStorage에도 시도 (Render 슬립 중 보호 목적, 용량 초과 시 skip) */
+    try { _origSet(key, localValue); } catch (_qe) {}
+
+    if (!isServerOnly(key)) {
       pushKey(key, dbValue);
     }
   };
 
   /* ── removeItem 오버라이드 ───────────────────────────── */
   localStorage.removeItem = function (key) {
+    delete _mem[key];
     _origRemove(key);
     if (!isLocalOnly(key) && !isServerOnly(key)) {
       fetch("/api/data/" + encodeURIComponent(key), {
@@ -145,30 +158,40 @@
     }
   };
 
-  /* ── localStorage → DB 전체 재동기화 (관리자 전용) ───── */
+  /* ── localStorage + _mem → DB 전체 재동기화 (관리자 전용) ── */
   function syncLocalToDB(dbData) {
     if (!_isAdmin) return Promise.resolve();
     var syncs = [];
+    var seen = {};
+
+    /* localStorage 스캔 */
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
       if (!key || isLocalOnly(key) || isServerOnly(key)) continue;
-      var localVal = localStorage.getItem(key);
+      seen[key] = true;
+      var localVal = _origGet(key);
       if (localVal === null) continue;
-      /* vct_p:* — DB에 올릴 때도 15맵 초과분 제거 */
       var dbVal = localVal;
       if (key.indexOf("vct_p:") === 0) {
         try {
           var _sd = JSON.parse(localVal);
           if (_sd && Array.isArray(_sd.maps) && _sd.maps.length > 15) {
             dbVal = JSON.stringify({ maps: _sd.maps.slice(-15) });
-            try { _origSet(key, dbVal); } catch (_qe) {} /* localStorage도 동시에 정리 */
+            _mem[key] = dbVal;
+            try { _origSet(key, dbVal); } catch (_qe) {}
           }
         } catch (_se) {}
       }
-      if (dbData[key] !== dbVal) {
-        syncs.push(pushKey(key, dbVal));
-      }
+      if (dbData[key] !== dbVal) syncs.push(pushKey(key, dbVal));
     }
+
+    /* _mem 스캔 (localStorage에 없는 키) */
+    Object.keys(_mem).forEach(function (key) {
+      if (seen[key] || isLocalOnly(key) || isServerOnly(key)) return;
+      var memVal = _mem[key];
+      if (dbData[key] !== memVal) syncs.push(pushKey(key, memVal));
+    });
+
     return Promise.all(syncs);
   }
 
@@ -183,11 +206,10 @@
 
       dbKeys.forEach(function (key) {
         if (isLocalOnly(key) || isServerOnly(key)) return;
-        /* 관리자: 이 fetch가 진행되는 동안 직접 수정한(localStorage에 이미 있는) 값은
-           지금 받아온 구버전 DB 스냅샷으로 덮어쓰지 않음 (편집 직후 되돌아가는 버그 방지) */
-        if (_isAdmin && localStorage.getItem(key) !== null) return;
-        /* vct_p:* — DB에서 불러올 때도 localStorage에는 최근 15개만 저장 */
+        /* 관리자: 이미 로컬에 있는 값은 덮어쓰지 않음 (편집 직후 되돌아가는 버그 방지) */
+        if (_isAdmin && (localStorage.getItem(key) !== null || Object.prototype.hasOwnProperty.call(_mem, key))) return;
         var storeVal = data[key];
+        /* vct_p:* — 최근 15개만 */
         if (key.indexOf("vct_p:") === 0) {
           try {
             var _pd2 = JSON.parse(storeVal);
@@ -196,21 +218,10 @@
             }
           } catch (_e2) {}
         }
-        try { _origSet(key, storeVal); } catch (_qe) { /* quota exceeded — skip local cache */ }
+        /* 메모리에 저장 (localStorage는 시도만, 초과 시 skip) */
+        _mem[key] = storeVal;
+        try { _origSet(key, storeVal); } catch (_qe) {}
       });
-
-      /* vct_p:* — localStorage에 남아있는 오래된 데이터도 15맵으로 정리 */
-      for (var _ti = 0; _ti < localStorage.length; _ti++) {
-        var _tk = localStorage.key(_ti);
-        if (!_tk || _tk.indexOf("vct_p:") !== 0) continue;
-        try {
-          var _tv = localStorage.getItem(_tk);
-          var _td = JSON.parse(_tv);
-          if (_td && Array.isArray(_td.maps) && _td.maps.length > 15) {
-            try { _origSet(_tk, JSON.stringify({ maps: _td.maps.slice(-15) })); } catch (_qe) {}
-          }
-        } catch (_te) {}
-      }
 
       /* 관리자: 슬립 중 실패한 저장을 DB에 재동기화 */
       return syncLocalToDB(data).then(function () {
@@ -226,7 +237,6 @@
   (function initSSE() {
     if (typeof EventSource === "undefined") return;
 
-    /* 스크롤 복원 (새로고침 후) */
     var _savedScroll = sessionStorage.getItem("_vct_scroll_y");
     if (_savedScroll) {
       sessionStorage.removeItem("_vct_scroll_y");
@@ -236,13 +246,11 @@
     }
 
     var _sse = new EventSource("/api/events");
-    var _reloadTimer = null;
 
     _sse.onmessage = function (e) {
       try {
         var update = JSON.parse(e.data);
 
-        /* 관리자가 새로고침 버튼을 눌렀을 때 → 뷰어만 새로고침 */
         if (update.type === "force-reload") {
           if (!_isAdmin) {
             sessionStorage.setItem("_vct_scroll_y", String(window.scrollY));
@@ -251,19 +259,16 @@
           return;
         }
 
-        /* 보상 이벤트 → auth.js 토스트로 relay */
         if (update.type === "reward") {
           window.dispatchEvent(new CustomEvent("vct-sse-reward", { detail: update }));
           return;
         }
 
-        /* 새 공지 이벤트 → auth.js 배지로 relay */
         if (update.type === "new-notice") {
           window.dispatchEvent(new CustomEvent("vct-new-notice", { detail: update }));
           return;
         }
 
-        /* 자동 경기 입력 완료 → auto-match.js로 relay */
         if (update.type === "auto-match-filled") {
           window.dispatchEvent(new CustomEvent("vct-auto-match-filled", { detail: update }));
           return;
@@ -271,22 +276,18 @@
 
         if (!update.key || isLocalOnly(update.key) || isServerOnly(update.key)) return;
 
-        /* localStorage 즉시 반영 (push 없이 원본 메서드로) */
         if (update.type === "delete") {
+          delete _mem[update.key];
           _origRemove(update.key);
         } else if (update.value !== undefined) {
+          _mem[update.key] = update.value;
           try { _origSet(update.key, update.value); } catch (_qe) {}
         }
 
-        /* 자동 새로고침 없음 — 관리자가 버튼으로 직접 트리거 */
-      } catch (err) {
-        /* 파싱 오류 무시 */
-      }
+      } catch (err) {}
     };
 
-    _sse.onerror = function () {
-      /* EventSource가 자동으로 재연결 처리 */
-    };
+    _sse.onerror = function () {};
   })();
 
   /* ── 페이지 포커스 복귀 시 재동기화 (관리자 전용) ───── */
@@ -302,6 +303,7 @@
       .then(function (data) {
         Object.keys(data).forEach(function (key) {
           if (!isLocalOnly(key) && !isServerOnly(key) && localStorage.getItem(key) === null) {
+            _mem[key] = data[key];
             try { _origSet(key, data[key]); } catch (_qe) {}
           }
         });
@@ -313,9 +315,7 @@
       .catch(function () {});
   });
 
-  /* ── bfcache 복원 시 자동 새로고침 ─────────────────────
-     Chrome 뒤로가기 버튼으로 돌아올 때 JS 애니메이션이 멈춘
-     상태로 복원되어 카드가 투명하게 보이는 버그 방지 */
+  /* ── bfcache 복원 시 자동 새로고침 ───────────────────── */
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) {
       window.location.reload();
