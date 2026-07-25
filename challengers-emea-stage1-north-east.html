@@ -44,7 +44,7 @@
       .section-heading .eyebrow { margin-bottom: 4px; }
       .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
 
-      /* ─── Participants + Group Assignment ─── */
+      /* ─── Participants ─── */
       .pool-section-wrap { margin-bottom: 52px; }
       .pool-group-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
       .pool-group-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: rgba(212,255,31,.6); }
@@ -58,12 +58,8 @@
       .pool-tile img { width: 40px; height: 40px; object-fit: contain; }
       .pool-tile .pt-code { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.7); }
       .pool-tile .pt-name { font-size: 9px; color: rgba(255,255,255,.3); text-align: center; line-height: 1.3; font-family: 'Noto Sans KR', sans-serif; }
-      .unassigned-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,100,80,.5); margin-bottom: 6px; display: none; }
-      .has-unassigned .unassigned-label { display: block; }
-      .unassigned-pool { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 16px; }
-      @media (max-width: 700px) { .unassigned-pool { grid-template-columns: repeat(4, 1fr); } }
 
-      /* ─── Group Stage layout ─── */
+      /* ─── Group Stage ─── */
       .gs-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 56px; }
       @media (max-width: 800px) { .gs-groups { grid-template-columns: 1fr; } }
       .gs-group-hdr { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid rgba(212,255,31,.2); }
@@ -87,8 +83,7 @@
       .s-stat.diff { font-weight: 700; }
       .qual-divider { height: 2px; background: rgba(212,255,31,.3); margin: 2px 0; }
 
-      /* ─── GS Match Cards ─── */
-      .gs-rounds-wrap { margin-bottom: 8px; }
+      /* ─── GS match cards ─── */
       .gs-round { margin-bottom: 12px; }
       .gs-round-hdr { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.45); margin-bottom: 5px; }
       .gs-round-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
@@ -99,6 +94,7 @@
       .gs-side.right { flex-direction: row-reverse; }
       .gs-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
       .gs-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .gs-name.tbd { color: rgba(255,255,255,.2); font-weight: 400; font-size: 11px; }
       .gs-side.winner .gs-name { color: var(--accent); }
       .gs-sc { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 900; color: rgba(255,255,255,.3); flex-shrink: 0; min-width: 32px; text-align: center; }
 
@@ -113,7 +109,6 @@
       .lb-label { color: rgba(255,150,30,.55); }
       .qual-label { color: rgba(212,255,31,.85); }
       .round-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
-
       .bracket-match { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 7px 10px; transition: border-color .15s, background .15s; }
       body.is-admin .bracket-match { cursor: pointer; }
       body.is-admin .bracket-match:hover { border-color: rgba(212,255,31,.3); background: var(--bg-card2); }
@@ -130,7 +125,7 @@
       .m-score.win { color: var(--accent); }
       .m-divider { height: 1px; background: rgba(255,255,255,.06); margin: 1px 0; }
 
-      /* ─── Qualified ─── */
+      /* ─── Qualified slots ─── */
       .qualified-grid { display: flex; gap: 12px; margin-bottom: 36px; flex-wrap: wrap; }
       .qual-slot { flex: 1; min-width: 120px; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
       .qs-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
@@ -138,14 +133,23 @@
       .qs-team { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
       .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; }
 
-      /* ─── Modal (score) ─── */
+      /* ─── Modal (score + team picker) ─── */
       .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
       .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 501;
         background: #141a08; border: 1px solid rgba(212,255,31,.2); border-radius: 6px;
-        padding: 22px; width: min(420px, 94vw); max-height: 90vh; overflow-y: auto; }
+        padding: 22px; width: min(460px, 94vw); max-height: 90vh; overflow-y: auto; }
       .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
       .modal-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(212,255,31,.5); margin-bottom: 6px; display: block; }
-      .modal-teams { display: flex; gap: 8px; margin-bottom: 14px; }
+      /* Team picker grid */
+      .team-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; margin-bottom: 14px; }
+      .tp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 8px 4px 6px; cursor: pointer; transition: all .12s; }
+      .tp-btn:hover { border-color: rgba(212,255,31,.3); background: rgba(212,255,31,.06); }
+      .tp-btn.selected { border-color: var(--accent); background: rgba(212,255,31,.12); }
+      .tp-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .tp-btn .tp-code { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      .tp-btn.selected .tp-code { color: var(--accent); }
+      /* Score */
+      .modal-matchup { display: flex; gap: 8px; margin-bottom: 14px; }
       .modal-team { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 9px 12px; }
       .modal-team img { width: 20px; height: 20px; object-fit: contain; }
       .modal-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.65); }
@@ -161,7 +165,7 @@
       .btn-clear:hover { background: rgba(255,255,255,.14); }
       .btn-cancel { background: transparent; color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.12); }
 
-      /* ─── Modal (group assign) ─── */
+      /* ─── Group assign modal ─── */
       .assign-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 502;
         background: #141a08; border: 1px solid rgba(212,255,31,.22); border-radius: 6px;
         padding: 22px; width: min(320px, 94vw); }
@@ -203,37 +207,29 @@
     <main class="league-shell">
       <div class="section-divider"></div>
 
-      <!-- ─── 참가팀 / 그룹 배정 ─── -->
+      <!-- 참가팀 -->
       <section class="pool-section-wrap" aria-labelledby="pool-title">
         <div class="section-heading">
           <p class="eyebrow">Participants</p>
           <h2 id="pool-title">참가팀</h2>
         </div>
-
-        <div id="unassigned-wrap">
-          <div class="unassigned-label">미배정 팀</div>
-          <div class="unassigned-pool" id="pool-unassigned"></div>
-        </div>
-
         <div class="pool-group-bar">
           <span class="pool-group-label">Group A</span>
           <span class="assign-hint">팀 타일 클릭 → 그룹 변경</span>
         </div>
         <div class="pool-grid" id="pool-grid-a"></div>
-
         <div class="pool-group-bar" style="margin-top:4px;">
           <span class="pool-group-label">Group B</span>
         </div>
         <div class="pool-grid" id="pool-grid-b"></div>
       </section>
 
-      <!-- ─── Group Stage ─── -->
+      <!-- Group Stage -->
       <section aria-labelledby="gs-title" style="margin-bottom:56px;">
         <div class="section-heading">
           <p class="eyebrow">Phase 1</p>
           <h2 id="gs-title">Group Stage</h2>
         </div>
-
         <div class="gs-groups">
           <div>
             <div class="gs-group-hdr">Group A</div>
@@ -248,7 +244,6 @@
             </div>
             <div id="gs-rounds-a"></div>
           </div>
-
           <div>
             <div class="gs-group-hdr">Group B</div>
             <div class="standings-wrap">
@@ -265,13 +260,12 @@
         </div>
       </section>
 
-      <!-- ─── Playoff ─── -->
+      <!-- Playoff -->
       <section aria-labelledby="po-title">
         <div class="section-heading">
           <p class="eyebrow">Phase 2 · Double Elimination</p>
           <h2 id="po-title">Playoff</h2>
         </div>
-
         <div class="qualified-grid">
           <div class="qual-slot">
             <span class="qs-label">Champion</span>
@@ -284,7 +278,6 @@
             <div class="qs-team tbd" id="qt-runner">TBD</div>
           </div>
         </div>
-
         <div class="bracket-wrap">
           <div class="bracket-scroll">
             <div class="ub-section">
@@ -305,9 +298,7 @@
                 <div class="round-matches" id="po-gf"></div>
               </div>
             </div>
-
             <div class="lb-sep"></div>
-
             <div class="lb-section">
               <div class="round-col">
                 <p class="round-label lb-label">LB Round 1 · Bo3</p>
@@ -331,12 +322,23 @@
       </section>
     </main>
 
-    <!-- ─── Score modal ─── -->
+    <!-- Score modal (GS: team picker + score / PO: score only) -->
     <div class="modal-backdrop" id="modal-backdrop" hidden></div>
     <div class="modal" id="score-modal" hidden role="dialog" aria-modal="true">
       <p class="modal-title" id="modal-title">경기 입력</p>
-      <span class="modal-label">Teams</span>
-      <div class="modal-teams" id="modal-teams"></div>
+
+      <!-- GS용 팀 피커 (PO에서는 hidden) -->
+      <div id="picker-wrap">
+        <span class="modal-label" id="picker-label-a">Team A 선택</span>
+        <div class="team-picker" id="tp-a"></div>
+        <span class="modal-label" id="picker-label-b">Team B 선택</span>
+        <div class="team-picker" id="tp-b"></div>
+      </div>
+
+      <!-- 선택된 팀 표시 -->
+      <span class="modal-label" id="matchup-label" hidden>Teams</span>
+      <div class="modal-matchup" id="modal-matchup" hidden></div>
+
       <span class="modal-label" id="score-label">Score (Bo3)</span>
       <div class="score-row">
         <input class="score-input" id="modal-score-a" type="number" min="0" max="2" placeholder="0" />
@@ -350,7 +352,7 @@
       </div>
     </div>
 
-    <!-- ─── Group assign modal ─── -->
+    <!-- Group assign modal -->
     <div class="modal-backdrop" id="assign-backdrop" hidden></div>
     <div class="assign-modal" id="assign-modal" hidden role="dialog" aria-modal="true">
       <h3>그룹 배정</h3>
@@ -390,92 +392,87 @@
         {code:'UNI',  name:'UNIWAY',               logo:'./assets/teams/Challengers EMEA/UNI.png',  white:false},
       ];
 
-      /* ── 라운드로빈 대진 (8팀, 7라운드 × 4경기) ── */
-      var GS_ROUNDS = [
-        [[0,1],[2,3],[4,5],[6,7]],
-        [[0,2],[1,3],[4,6],[5,7]],
-        [[0,3],[1,2],[4,7],[5,6]],
-        [[0,4],[1,5],[2,6],[3,7]],
-        [[0,5],[1,4],[2,7],[3,6]],
-        [[0,6],[1,7],[2,4],[3,5]],
-        [[0,7],[1,6],[2,5],[3,4]],
+      /* GS 라운드: 7라운드 × 4경기 = 28경기 (매치 ID 1-28) */
+      var GS_ROUND_MATCHES = [
+        [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],
+        [17,18,19,20],[21,22,23,24],[25,26,27,28],
       ];
 
       var PO_LABELS = {
-        1:'UB R1 M1 · Bo3', 2:'UB R1 M2 · Bo3', 3:'UB R1 M3 · Bo3', 4:'UB R1 M4 · Bo3',
-        5:'UB QF M1 · Bo3', 6:'UB QF M2 · Bo3',
-        7:'UB Semifinals · Bo3',
-        8:'LB R1 M1 · Bo3', 9:'LB R1 M2 · Bo3',
-        10:'LB R2 M1 · Bo3', 11:'LB R2 M2 · Bo3',
-        12:'LB Semifinals · Bo3',
-        13:'LB Final · Bo3',
-        14:'Grand Final · Bo5',
+        1:'UB R1 M1 · Bo3',2:'UB R1 M2 · Bo3',3:'UB R1 M3 · Bo3',4:'UB R1 M4 · Bo3',
+        5:'UB QF M1 · Bo3',6:'UB QF M2 · Bo3',7:'UB Semifinals · Bo3',
+        8:'LB R1 M1 · Bo3',9:'LB R1 M2 · Bo3',
+        10:'LB R2 M1 · Bo3',11:'LB R2 M2 · Bo3',
+        12:'LB Semifinals · Bo3',13:'LB Final · Bo3',14:'Grand Final · Bo5',
       };
       var PO_BO5 = {14:true};
       var PO_LB  = {8:1,9:1,10:1,11:1,12:1,13:1};
 
       /* ── 스토리지 ── */
-      function sGet(k)   { return localStorage.getItem(PFX + k); }
-      function sSet(k,v) { if (v !== null && v !== undefined) localStorage.setItem(PFX+k, v); else localStorage.removeItem(PFX+k); }
+      function sGet(k)   { return localStorage.getItem(PFX+k); }
+      function sSet(k,v) { if(v!==null&&v!==undefined) localStorage.setItem(PFX+k,v); else localStorage.removeItem(PFX+k); }
 
-      /* 그룹 배정: 기본 첫 8팀→A, 나머지→B */
+      /* 그룹 배정 */
       function getTeamGroup(code) {
-        var stored = sGet('grp_' + code);
-        if (stored === 'A' || stored === 'B') return stored;
-        var idx = TEAM_POOL.findIndex(function(t){ return t.code === code; });
-        return idx < 8 ? 'A' : 'B';
+        var s=sGet('grp_'+code);
+        if(s==='A'||s==='B') return s;
+        return TEAM_POOL.findIndex(function(t){return t.code===code;})<8?'A':'B';
       }
-      function setTeamGroup(code, grp) { sSet('grp_' + code, grp); }
-      function getGroupPool(grp) {
-        return TEAM_POOL.filter(function(t){ return getTeamGroup(t.code) === grp; });
+      function setTeamGroup(code,grp) { sSet('grp_'+code,grp); }
+      function getGroupPool(grp) { return TEAM_POOL.filter(function(t){return getTeamGroup(t.code)===grp;}); }
+
+      /* GS match data: 팀 A/B 이름 + 스코어 */
+      function gsTeamKey(grp,mid,side) { return 'gs_'+grp+'_t_'+mid+'_'+side; }
+      function gsScKey(grp,mid)        { return 'gs_'+grp+'_s_'+mid; }
+      function getGsTeam(grp,mid,side) { return sGet(gsTeamKey(grp,mid,side))||''; }
+      function setGsTeam(grp,mid,side,name) { sSet(gsTeamKey(grp,mid,side),name||null); }
+      function getGsSc(grp,mid)  { var v=sGet(gsScKey(grp,mid)); return v?JSON.parse(v):null; }
+      function setGsSc(grp,mid,a,b) {
+        if(a===null) sSet(gsScKey(grp,mid),null);
+        else sSet(gsScKey(grp,mid),JSON.stringify({a:a,b:b}));
       }
 
-      /* GS 스코어 */
-      function getGsSc(g,r,m) { var v = sGet('gs_'+g+'_'+r+'_'+m); return v ? JSON.parse(v) : null; }
-      function setGsSc(g,r,m,a,b) {
-        if (a===null) sSet('gs_'+g+'_'+r+'_'+m, null);
-        else sSet('gs_'+g+'_'+r+'_'+m, JSON.stringify({a:a,b:b}));
-      }
       /* PO 스코어 */
-      function getPoSc(mid) { var v = sGet('po_'+mid); return v ? JSON.parse(v) : null; }
+      function getPoSc(mid) { var v=sGet('po_'+mid); return v?JSON.parse(v):null; }
       function setPoSc(mid,a,b) {
-        if (a===null) sSet('po_'+mid, null);
-        else sSet('po_'+mid, JSON.stringify({a:a,b:b}));
+        if(a===null) sSet('po_'+mid,null);
+        else sSet('po_'+mid,JSON.stringify({a:a,b:b}));
       }
 
-      function getTeamByName(n) { return TEAM_POOL.find(function(t){ return t.name===n; })||null; }
-      function getTeamByCode(c) { return TEAM_POOL.find(function(t){ return t.code===c; })||null; }
-      function isAdmin() { return typeof window.vctIsAdmin==='function' && window.vctIsAdmin(); }
+      function getTeamByName(n) { return TEAM_POOL.find(function(t){return t.name===n;})||null; }
+      function getTeamByCode(c) { return TEAM_POOL.find(function(t){return t.code===c;})||null; }
+      function isAdmin() { return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
 
-      function logoHTML(name, cls) {
-        var t = getTeamByName(name); if (!t||!t.logo) return '';
+      function logoHTML(name,cls) {
+        var t=getTeamByName(name); if(!t||!t.logo) return '';
         return '<img src="'+t.logo+'" class="'+(cls||'')+(t.white?' logo-w':'')+'" alt="" />';
       }
 
       /* ── 순위 계산 ── */
-      function computeStandings(pool, grp) {
-        var map = {};
-        pool.forEach(function(t){ map[t.name]={name:t.name,w:0,l:0,mw:0,ml:0}; });
-        GS_ROUNDS.forEach(function(round, ri) {
-          round.forEach(function(pair, mi) {
-            if (pair[0]>=pool.length||pair[1]>=pool.length) return;
-            var ta=pool[pair[0]].name, tb=pool[pair[1]].name;
-            var sc=getGsSc(grp,ri,mi); if (!sc) return;
-            if (sc.a>sc.b){map[ta].w++;map[tb].l++;}
+      function computeStandings(grp) {
+        var pool=getGroupPool(grp);
+        var map={};
+        pool.forEach(function(t){map[t.name]={name:t.name,w:0,l:0,mw:0,ml:0};});
+        GS_ROUND_MATCHES.forEach(function(round){
+          round.forEach(function(mid){
+            var ta=getGsTeam(grp,mid,'a'), tb=getGsTeam(grp,mid,'b');
+            if(!ta||!tb||!map[ta]||!map[tb]) return;
+            var sc=getGsSc(grp,mid); if(!sc) return;
+            if(sc.a>sc.b){map[ta].w++;map[tb].l++;}
             else if(sc.b>sc.a){map[tb].w++;map[ta].l++;}
             map[ta].mw+=sc.a; map[ta].ml+=sc.b;
             map[tb].mw+=sc.b; map[tb].ml+=sc.a;
           });
         });
         return pool.map(function(t){
-          var s=map[t.name];
+          var s=map[t.name]||{w:0,l:0,mw:0,ml:0};
           return {name:t.name,w:s.w,l:s.l,mw:s.mw,ml:s.ml,diff:s.mw-s.ml};
-        }).sort(function(a,b){ return b.w-a.w||b.diff-a.diff||b.mw-a.mw; });
+        }).sort(function(a,b){return b.w-a.w||b.diff-a.diff||b.mw-a.mw;});
       }
 
-      /* ── 플레이오프 상태 ── */
-      function resolvePO(stA, stB) {
-        var a=stA.slice(0,4), b=stB.slice(0,4);
+      /* ── 플레이오프 계산 ── */
+      function resolvePO(stA,stB) {
+        var a=stA.slice(0,4),b=stB.slice(0,4);
         var po={};
         for(var i=1;i<=14;i++) po[i]={a:'',b:'',sc:getPoSc(i),winner:'',loser:''};
         if(a[0]) po[1].a=a[0].name; if(b[3]) po[1].b=b[3].name;
@@ -510,26 +507,18 @@
           +'</div>';
       }
 
-      /* ── 풀 렌더 ── */
       function renderPool() {
-        var poolA=getGroupPool('A'), poolB=getGroupPool('B');
-        var uEl=document.getElementById('pool-unassigned');
-        var uWrap=document.getElementById('unassigned-wrap');
-        /* 미배정: grp_ 키가 있지만 A도 B도 아닌 경우는 없으므로 그룹 외 팀 체크 */
-        var unassigned=[];
-        uEl.innerHTML=unassigned.map(tileHTML).join('');
-        uWrap.className=unassigned.length?'has-unassigned':'';
-        document.getElementById('pool-grid-a').innerHTML=poolA.map(tileHTML).join('');
-        document.getElementById('pool-grid-b').innerHTML=poolB.map(tileHTML).join('');
-        if (isAdmin()) {
+        document.getElementById('pool-grid-a').innerHTML=getGroupPool('A').map(tileHTML).join('');
+        document.getElementById('pool-grid-b').innerHTML=getGroupPool('B').map(tileHTML).join('');
+        if(isAdmin()){
           document.querySelectorAll('.pool-tile[data-code]').forEach(function(el){
-            el.addEventListener('click', function(){ openAssignModal(el.dataset.code); });
+            el.addEventListener('click',function(){openAssignModal(el.dataset.code);});
           });
         }
       }
 
       /* ── 순위표 렌더 ── */
-      function renderStandings(st, tbodyId) {
+      function renderStandings(st,tbodyId) {
         var el=document.getElementById(tbodyId); if(!el) return;
         var html='';
         st.forEach(function(s,rank){
@@ -548,21 +537,24 @@
       }
 
       /* ── GS 라운드 렌더 ── */
-      function renderGSRounds(pool, grp, wrapperId) {
+      function renderGSRounds(grp,wrapperId) {
         var el=document.getElementById(wrapperId); if(!el) return;
-        if(pool.length<2){el.innerHTML='<p style="color:rgba(255,255,255,.25);font-size:12px;padding:8px 0;">팀 배정 후 표시됩니다.</p>';return;}
         var html='';
-        GS_ROUNDS.forEach(function(round,ri){
+        GS_ROUND_MATCHES.forEach(function(round,ri){
           html+='<div class="gs-round"><div class="gs-round-hdr">Round '+(ri+1)+'</div><div class="gs-round-grid">';
-          round.forEach(function(pair,mi){
-            if(pair[0]>=pool.length||pair[1]>=pool.length) return;
-            var ta=pool[pair[0]],tb=pool[pair[1]];
-            var sc=getGsSc(grp,ri,mi);
+          round.forEach(function(mid){
+            var ta=getGsTeam(grp,mid,'a'), tb=getGsTeam(grp,mid,'b');
+            var tao=getTeamByName(ta), tbo=getTeamByName(tb);
+            var sc=getGsSc(grp,mid);
             var winA=sc&&sc.a>sc.b, winB=sc&&sc.b>sc.a;
-            html+='<div class="gs-match-card" data-gs-g="'+grp+'" data-gs-r="'+ri+'" data-gs-m="'+mi+'">';
-            html+='<div class="gs-side'+(winA?' winner':'')+'"><img class="gs-logo'+(ta.white?' logo-w':'')+'" src="'+ta.logo+'" alt="" onerror="this.style.display=\'none\'" /><span class="gs-name">'+ta.code+'</span></div>';
+            html+='<div class="gs-match-card" data-gs-grp="'+grp+'" data-gs-mid="'+mid+'">';
+            /* Left */
+            html+='<div class="gs-side'+(winA?' winner':'')+'"><img class="gs-logo'+(tao&&tao.white?' logo-w':'')+'" src="'+(tao?tao.logo:'')+'" alt="" onerror="this.style.display=\'none\'" />'
+              +'<span class="gs-name'+(ta?'':' tbd')+'">'+(ta?ta:'TBD')+'</span></div>';
             html+='<div class="gs-sc">'+(sc?sc.a+'–'+sc.b:'vs')+'</div>';
-            html+='<div class="gs-side right'+(winB?' winner':'')+'"><img class="gs-logo'+(tb.white?' logo-w':'')+'" src="'+tb.logo+'" alt="" onerror="this.style.display=\'none\'" /><span class="gs-name">'+tb.code+'</span></div>';
+            /* Right */
+            html+='<div class="gs-side right'+(winB?' winner':'')+'"><img class="gs-logo'+(tbo&&tbo.white?' logo-w':'')+'" src="'+(tbo?tbo.logo:'')+'" alt="" onerror="this.style.display=\'none\'" />'
+              +'<span class="gs-name'+(tb?'':' tbd')+'">'+(tb?tb:'TBD')+'</span></div>';
             html+='</div>';
           });
           html+='</div></div>';
@@ -571,14 +563,14 @@
         if(isAdmin()){
           el.querySelectorAll('.gs-match-card').forEach(function(card){
             card.addEventListener('click',function(){
-              openScoreModal({type:'gs',group:card.dataset.gsG,ri:parseInt(card.dataset.gsR),mi:parseInt(card.dataset.gsM)});
+              openScoreModal({type:'gs',grp:card.dataset.gsGrp,mid:parseInt(card.dataset.gsMid)});
             });
           });
         }
       }
 
       /* ── 브래킷 카드 ── */
-      function brCard(mid, po) {
+      function brCard(mid,po) {
         var m=po[mid];
         var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
         var isLB=!!PO_LB[mid], isGF=(mid===14);
@@ -593,14 +585,13 @@
           +'</div></article>';
       }
 
-      /* ── 플레이오프 렌더 ── */
       function renderPO(po) {
         var map={'po-ubr1':[1,2,3,4],'po-ubqf':[5,6],'po-ubsf':[7],'po-gf':[14],'po-lbr1':[8,9],'po-lbr2':[10,11],'po-lbsf':[12],'po-lbf':[13]};
         Object.keys(map).forEach(function(id){
           var el=document.getElementById(id);
           if(el) el.innerHTML=map[id].map(function(mid){return brCard(mid,po);}).join('');
         });
-        var ch=document.getElementById('qt-champ'), ru=document.getElementById('qt-runner');
+        var ch=document.getElementById('qt-champ'),ru=document.getElementById('qt-runner');
         ch.textContent=po[14].winner||'TBD'; ch.className='qs-team'+(po[14].winner?'':' tbd');
         ru.textContent=po[14].loser||'TBD';  ru.className='qs-team'+(po[14].loser?'':' tbd');
         if(isAdmin()){
@@ -614,76 +605,122 @@
       function render() {
         if(isAdmin()) document.body.classList.add('is-admin');
         renderPool();
-        var poolA=getGroupPool('A'), poolB=getGroupPool('B');
-        var stA=computeStandings(poolA,'A'), stB=computeStandings(poolB,'B');
+        var stA=computeStandings('A'), stB=computeStandings('B');
         renderStandings(stA,'standings-a');
         renderStandings(stB,'standings-b');
-        renderGSRounds(poolA,'A','gs-rounds-a');
-        renderGSRounds(poolB,'B','gs-rounds-b');
+        renderGSRounds('A','gs-rounds-a');
+        renderGSRounds('B','gs-rounds-b');
         renderPO(resolvePO(stA,stB));
       }
 
       /* ── 스코어 모달 ── */
       var _ctx=null;
+      var _selA='', _selB='';
 
       function openScoreModal(ctx) {
         _ctx=ctx;
-        var isBo5=false, ta='', tb='', label='';
-        if(ctx.type==='gs'){
-          var pool=getGroupPool(ctx.group);
-          var pair=GS_ROUNDS[ctx.ri][ctx.mi];
-          if(!pool[pair[0]]||!pool[pair[1]]) return;
-          ta=pool[pair[0]].name; tb=pool[pair[1]].name;
-          label='Group '+ctx.group+' · Round '+(ctx.ri+1)+' · M'+(ctx.mi+1);
-          var sc=getGsSc(ctx.group,ctx.ri,ctx.mi);
+        var pickerWrap=document.getElementById('picker-wrap');
+        var matchupLabel=document.getElementById('matchup-label');
+        var matchupDiv=document.getElementById('modal-matchup');
+
+        if(ctx.type==='gs') {
+          /* 팀 피커 표시 */
+          pickerWrap.hidden=false;
+          matchupLabel.hidden=true;
+          matchupDiv.hidden=true;
+
+          var pool=getGroupPool(ctx.grp);
+          _selA=getGsTeam(ctx.grp,ctx.mid,'a');
+          _selB=getGsTeam(ctx.grp,ctx.mid,'b');
+
+          function makeTP(elId,exclude,current,onPick) {
+            var el=document.getElementById(elId); el.innerHTML='';
+            pool.forEach(function(t){
+              var btn=document.createElement('button');
+              btn.className='tp-btn'+(current===t.name?' selected':'');
+              btn.innerHTML='<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />'
+                +'<span class="tp-code">'+t.code+'</span>';
+              btn.addEventListener('click',function(){
+                current=t.name; onPick(t.name);
+                el.querySelectorAll('.tp-btn').forEach(function(b){b.classList.remove('selected');});
+                btn.classList.add('selected');
+              });
+              el.appendChild(btn);
+            });
+          }
+
+          makeTP('tp-a','',_selA,function(n){_selA=n;});
+          makeTP('tp-b','',_selB,function(n){_selB=n;});
+
+          document.getElementById('modal-title').textContent='Group '+ctx.grp+' · Match '+ctx.mid;
+          var sc=getGsSc(ctx.grp,ctx.mid);
           document.getElementById('modal-score-a').value=sc?sc.a:0;
           document.getElementById('modal-score-b').value=sc?sc.b:0;
+          document.getElementById('score-label').textContent='Score (Bo3)';
+          document.getElementById('modal-score-a').max=2;
+          document.getElementById('modal-score-b').max=2;
+
         } else {
-          var poolA=getGroupPool('A'),poolB=getGroupPool('B');
-          var po=resolvePO(computeStandings(poolA,'A'),computeStandings(poolB,'B'));
+          /* PO: 팀 피커 숨기고 팀 표시만 */
+          pickerWrap.hidden=true;
+          matchupLabel.hidden=false;
+          matchupDiv.hidden=false;
+          var stA=computeStandings('A'),stB=computeStandings('B');
+          var po=resolvePO(stA,stB);
           var m=po[ctx.mid];
-          ta=m.a||'TBD'; tb=m.b||'TBD';
-          label=PO_LABELS[ctx.mid]||'Match '+ctx.mid;
-          isBo5=!!PO_BO5[ctx.mid];
+          var isBo5=!!PO_BO5[ctx.mid];
+          document.getElementById('modal-title').textContent=PO_LABELS[ctx.mid]||'Match '+ctx.mid;
+          document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
+          var maxS=isBo5?3:2;
+          document.getElementById('modal-score-a').max=maxS;
+          document.getElementById('modal-score-b').max=maxS;
+          function slot(name){
+            var t=getTeamByName(name);
+            return '<div class="modal-team">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')
+              +'<span class="modal-team-name">'+(name||'TBD')+'</span></div>';
+          }
+          matchupDiv.innerHTML=slot(m.a)+slot(m.b);
           var sc=getPoSc(ctx.mid);
           document.getElementById('modal-score-a').value=sc?sc.a:0;
           document.getElementById('modal-score-b').value=sc?sc.b:0;
         }
-        document.getElementById('modal-title').textContent=label;
-        document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
-        var maxS=isBo5?3:2;
-        document.getElementById('modal-score-a').max=maxS;
-        document.getElementById('modal-score-b').max=maxS;
-        function slot(name){
-          var t=getTeamByName(name);
-          return '<div class="modal-team">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')+'<span class="modal-team-name">'+name+'</span></div>';
-        }
-        document.getElementById('modal-teams').innerHTML=slot(ta)+slot(tb);
+
         document.getElementById('modal-backdrop').hidden=false;
         document.getElementById('score-modal').hidden=false;
-        document.getElementById('modal-score-a').focus();
       }
 
-      function closeScoreModal(){
+      function closeScoreModal() {
         document.getElementById('modal-backdrop').hidden=true;
         document.getElementById('score-modal').hidden=true;
-        _ctx=null;
+        _ctx=null; _selA=''; _selB='';
       }
 
       document.getElementById('modal-save').addEventListener('click',function(){
         if(!_ctx) return;
         var a=parseInt(document.getElementById('modal-score-a').value)||0;
         var b=parseInt(document.getElementById('modal-score-b').value)||0;
-        if(_ctx.type==='gs') setGsSc(_ctx.group,_ctx.ri,_ctx.mi,a,b);
-        else setPoSc(_ctx.mid,a,b);
+        if(_ctx.type==='gs'){
+          if(_selA) setGsTeam(_ctx.grp,_ctx.mid,'a',_selA);
+          if(_selB) setGsTeam(_ctx.grp,_ctx.mid,'b',_selB);
+          setGsSc(_ctx.grp,_ctx.mid,a,b);
+        } else {
+          setPoSc(_ctx.mid,a,b);
+        }
         closeScoreModal(); render();
       });
+
       document.getElementById('modal-clear').addEventListener('click',function(){
         if(!_ctx) return;
-        if(_ctx.type==='gs') setGsSc(_ctx.group,_ctx.ri,_ctx.mi,null,null);
-        else setPoSc(_ctx.mid,null,null);
+        if(_ctx.type==='gs'){
+          setGsTeam(_ctx.grp,_ctx.mid,'a',null);
+          setGsTeam(_ctx.grp,_ctx.mid,'b',null);
+          setGsSc(_ctx.grp,_ctx.mid,null,null);
+        } else {
+          setPoSc(_ctx.mid,null,null);
+        }
         closeScoreModal(); render();
       });
+
       document.getElementById('modal-cancel').addEventListener('click',closeScoreModal);
       document.getElementById('modal-backdrop').addEventListener('click',closeScoreModal);
 
