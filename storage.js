@@ -127,7 +127,7 @@
         }
       } catch (_e) {}
     }
-    _origSet(key, localValue);
+    try { _origSet(key, localValue); } catch (_qe) { /* localStorage quota exceeded — skip local cache */ }
     if (!isLocalOnly(key) && !isServerOnly(key)) {
       pushKey(key, dbValue);
     }
@@ -161,7 +161,7 @@
           var _sd = JSON.parse(localVal);
           if (_sd && Array.isArray(_sd.maps) && _sd.maps.length > 15) {
             dbVal = JSON.stringify({ maps: _sd.maps.slice(-15) });
-            _origSet(key, dbVal); /* localStorage도 동시에 정리 */
+            try { _origSet(key, dbVal); } catch (_qe) {} /* localStorage도 동시에 정리 */
           }
         } catch (_se) {}
       }
@@ -196,7 +196,7 @@
             }
           } catch (_e2) {}
         }
-        _origSet(key, storeVal);
+        try { _origSet(key, storeVal); } catch (_qe) { /* quota exceeded — skip local cache */ }
       });
 
       /* vct_p:* — localStorage에 남아있는 오래된 데이터도 15맵으로 정리 */
@@ -207,7 +207,7 @@
           var _tv = localStorage.getItem(_tk);
           var _td = JSON.parse(_tv);
           if (_td && Array.isArray(_td.maps) && _td.maps.length > 15) {
-            _origSet(_tk, JSON.stringify({ maps: _td.maps.slice(-15) }));
+            try { _origSet(_tk, JSON.stringify({ maps: _td.maps.slice(-15) })); } catch (_qe) {}
           }
         } catch (_te) {}
       }
@@ -275,7 +275,7 @@
         if (update.type === "delete") {
           _origRemove(update.key);
         } else if (update.value !== undefined) {
-          _origSet(update.key, update.value);
+          try { _origSet(update.key, update.value); } catch (_qe) {}
         }
 
         /* 자동 새로고침 없음 — 관리자가 버튼으로 직접 트리거 */
@@ -302,7 +302,7 @@
       .then(function (data) {
         Object.keys(data).forEach(function (key) {
           if (!isLocalOnly(key) && !isServerOnly(key) && localStorage.getItem(key) === null) {
-            _origSet(key, data[key]);
+            try { _origSet(key, data[key]); } catch (_qe) {}
           }
         });
         return syncLocalToDB(data);
