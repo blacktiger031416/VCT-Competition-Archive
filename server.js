@@ -1747,9 +1747,10 @@ app.get("/api/records/compute", async (req, res) => {
       var s = mapEntry.stage || "";
       if (tgt === "all") {
         if (isRegionalLeague) {
-          /* "전체" = KickOff + Stage1 + Stage2만. tournament 없고 + 인정된 stage여야 함.
-             → 챌린저스/무대회 데이터(stage="", 또는 인식불가 stage)는 자동 제외 */
-          return !mapEntry.tournament && REGIONAL_STAGES.has(s);
+          /* "전체" = KickOff + Stage1 + Stage2만. tournament 있으면 제외.
+             stage 태그 없는 구형 데이터는 regional로 허용 (tournament 없으면 통과) */
+          if (mapEntry.tournament) return false;
+          return !s || REGIONAL_STAGES.has(s);
         }
         return true; /* Masters/Champions 탭 전체는 진짜 전체 */
       }
@@ -1948,19 +1949,25 @@ app.get("/api/records/compute", async (req, res) => {
       if (trackB && bWins > aWins) teamStats[teamB].mapWins++;
 
       rounds.forEach(function(r, idx) {
+        if (!r || !r.winner) return; /* 미입력 라운드 스킵 */
         var isPistol = (idx === 0 || idx === 12);
         var type = r.type || "";
-        var winner = r.winner || "";
+        var winner = r.winner; /* "a" | "b" */
 
         var isAtk = type.indexOf("attack_") === 0;
         var isDef = type.indexOf("def_") === 0;
 
-        if (isAtk) {
-          if (trackA) { teamStats[teamA].atkTotal++; if (winner === "a") teamStats[teamA].atkWins++; }
-          if (trackB) { teamStats[teamB].defTotal++; if (winner === "b") teamStats[teamB].defWins++; }
-        } else if (isDef) {
-          if (trackA) { teamStats[teamA].defTotal++; if (winner === "a") teamStats[teamA].defWins++; }
-          if (trackB) { teamStats[teamB].atkTotal++; if (winner === "b") teamStats[teamB].atkWins++; }
+        /* 공격/수비 추적: type이 결과를 결정 (attacker won → winner was attacker) */
+        if (isAtk || isDef) {
+          /* isAtk: 공격팀(winner side)이 이김 / isDef: 수비팀(winner side)이 이김 */
+          var atkSide = isAtk ? winner : (winner === "a" ? "b" : "a");
+          if (atkSide === "a") {
+            if (trackA) { teamStats[teamA].atkTotal++; if (isAtk) teamStats[teamA].atkWins++; }
+            if (trackB) { teamStats[teamB].defTotal++; if (isDef) teamStats[teamB].defWins++; }
+          } else {
+            if (trackB) { teamStats[teamB].atkTotal++; if (isAtk) teamStats[teamB].atkWins++; }
+            if (trackA) { teamStats[teamA].defTotal++; if (isDef) teamStats[teamA].defWins++; }
+          }
         }
 
         if (isPistol) {
