@@ -64,16 +64,15 @@
       body.is-admin .gs-card { cursor: pointer; }
       body.is-admin .gs-card:hover { border-color: rgba(212,255,31,.3); background: var(--bg-card2); }
       .gs-side { display: flex; align-items: center; gap: 8px; }
-      .gs-side.b { flex-direction: row-reverse; }
-      .gs-team { display: flex; align-items: center; gap: 6px; }
-      .gs-team.b { flex-direction: row-reverse; }
+      .gs-side.b { justify-content: flex-end; }
       .gs-logo { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
       .gs-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,.8); }
       .gs-name.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 13px; }
       .gs-name.win { color: var(--accent); }
-      .gs-score { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.25); min-width: 20px; text-align: center; }
+      .gs-ctr { display: flex; align-items: center; gap: 4px; padding: 0 12px; }
+      .gs-score { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.25); min-width: 18px; text-align: center; }
       .gs-score.win { color: var(--accent); }
-      .gs-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: rgba(255,255,255,.18); padding: 0 12px; }
+      .gs-vs { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: rgba(255,255,255,.18); }
 
       /* ─── Standings ─── */
       .standings-wrap { overflow-x: auto; margin-top: 36px; }
@@ -409,17 +408,21 @@
         var tao=ta?getTeamByName(ta):null, tbo=tb?getTeamByName(tb):null;
         var sc=getRsSc(mid);
         var winA=sc&&sc.a>sc.b, winB=sc&&sc.b>sc.a;
+        var ctr=sc!==null
+          ?'<span class="gs-score'+(winA?' win':'')+'">'+(sc.a)+'</span>'
+            +'<span class="gs-vs">:</span>'
+            +'<span class="gs-score'+(winB?' win':'')+'">'+(sc.b)+'</span>'
+          :'<span class="gs-vs">VS</span>';
         return '<div class="gs-card" data-rs-mid="'+mid+'">'
-          +'<div class="gs-side a"><div class="gs-team">'
+          +'<div class="gs-side a">'
           +(tao?'<img src="'+tao.logo+'" class="gs-logo'+(tao.white?' logo-w':'')+'" alt="" />':'')
           +'<span class="gs-name'+(winA?' win':'')+(ta?'':' tbd')+'">'+(tao?tao.code:(ta||'TBD'))+'</span>'
-          +'</div><span class="gs-score'+(winA?' win':'')+'">'+(sc!==null?sc.a:'–')+'</span></div>'
-          +'<div class="gs-vs">VS</div>'
-          +'<div class="gs-side b"><span class="gs-score'+(winB?' win':'')+'">'+(sc!==null?sc.b:'–')+'</span>'
-          +'<div class="gs-team b">'
+          +'</div>'
+          +'<div class="gs-ctr">'+ctr+'</div>'
+          +'<div class="gs-side b">'
           +'<span class="gs-name'+(winB?' win':'')+(tb?'':' tbd')+'">'+(tbo?tbo.code:(tb||'TBD'))+'</span>'
           +(tbo?'<img src="'+tbo.logo+'" class="gs-logo'+(tbo.white?' logo-w':'')+'" alt="" />':'')
-          +'</div></div>'
+          +'</div>'
           +'</div>';
       }
 
