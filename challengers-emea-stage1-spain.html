@@ -113,11 +113,22 @@
       .dm-divider { height: 1px; background: rgba(255,255,255,.06); margin: 1px 0; }
       .de-spacer { flex: 1; }
 
-      /* ─── Playoff (SE 4팀) ─── */
-      .po-wrap { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 40px; }
-      .po-col { display: flex; flex-direction: column; flex: 1; }
-      .po-col-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.55); margin-bottom: 6px; white-space: nowrap; }
-      .po-col-label.gf { color: rgba(212,255,31,.9); }
+      /* ─── Playoff bracket (SE 4팀) ─── */
+      .po-wrap { margin-bottom: 40px; }
+      .po-outer { display: flex; gap: 0; }
+      .po-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.55); margin-bottom: 6px; white-space: nowrap; height: 20px; line-height: 20px; }
+      .po-lbl.gf { color: rgba(212,255,31,.9); }
+      .po-sf-col { flex: 1; display: flex; flex-direction: column; }
+      .po-sf-matches { flex: 1; display: flex; flex-direction: column; }
+      .po-sf-slot { flex: 1; display: flex; align-items: center; padding: 8px 0; }
+      .po-conn { width: 28px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .po-conn-spc { height: 26px; flex-shrink: 0; } /* label height offset */
+      .po-conn-lines { flex: 1; display: flex; flex-direction: column; }
+      .po-conn-empty { flex: 1; }
+      .po-conn-t { flex: 1; border-left: 1px solid rgba(212,255,31,.2); border-bottom: 1px solid rgba(212,255,31,.2); }
+      .po-conn-b { flex: 1; border-left: 1px solid rgba(212,255,31,.2); border-top: 1px solid rgba(212,255,31,.2); }
+      .po-gf-col { flex: 1; display: flex; flex-direction: column; }
+      .po-gf-match { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
       /* champion */
       .champion-wrap { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
@@ -500,9 +511,29 @@
         var el=document.getElementById('po-bracket');
         if(!el) return;
         el.innerHTML=
-          '<div class="po-col"><p class="po-col-label">Semifinal 1 · Bo3</p>'+poCard(po,1)+'</div>'
-          +'<div class="po-col"><p class="po-col-label">Semifinal 2 · Bo3</p>'+poCard(po,2)+'</div>'
-          +'<div class="po-col"><p class="po-col-label gf">Grand Final · Bo5 ★</p>'+poCard(po,3)+'</div>';
+          '<div class="po-outer">'
+          /* SF column: SF1 top, SF2 bottom */
+          +'<div class="po-sf-col">'
+          +'<p class="po-lbl">Semifinals · Bo3</p>'
+          +'<div class="po-sf-matches">'
+          +'<div class="po-sf-slot">'+poCard(po,1)+'</div>'
+          +'<div class="po-sf-slot">'+poCard(po,2)+'</div>'
+          +'</div></div>'
+          /* Connector lines (4-div: empty/t/b/empty = aligns with card centers) */
+          +'<div class="po-conn" aria-hidden="true">'
+          +'<div class="po-conn-spc"></div>'
+          +'<div class="po-conn-lines">'
+          +'<div class="po-conn-empty"></div>'
+          +'<div class="po-conn-t"></div>'
+          +'<div class="po-conn-b"></div>'
+          +'<div class="po-conn-empty"></div>'
+          +'</div></div>'
+          /* GF column: centered */
+          +'<div class="po-gf-col">'
+          +'<p class="po-lbl gf">Grand Final · Bo5 ★</p>'
+          +'<div class="po-gf-match">'+poCard(po,3)+'</div>'
+          +'</div>'
+          +'</div>';
         var ch=document.getElementById('champ-slot'), ru=document.getElementById('runner-slot');
         function champHTML(name){
           if(!name) return 'TBD';
