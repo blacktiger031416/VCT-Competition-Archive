@@ -537,7 +537,7 @@
           +'<div class="de-lb">'
           +'<div class="de-col"><p class="de-col-label lb-col">LB R1 · Bo3</p>'
           +'<div class="de-col-matches single">'+poCard(po,4)+'</div></div>'
-          +'<div class="de-col"><p class="de-col-label lb-col">LB Final · Bo3</p>'
+          +'<div class="de-col"><p class="de-col-label lb-col">LB Final · Bo5</p>'
           +'<div class="de-col-matches single">'+poCard(po,5)+'</div></div>'
           +'</div>'
           +'</div>'
@@ -584,7 +584,7 @@
         var pw=document.getElementById('picker-wrap');
         var ml=document.getElementById('matchup-label');
         var md=document.getElementById('modal-matchup');
-        var isBo5=(ctx.type==='po'&&ctx.mid===6);
+        var isBo5=(ctx.type==='po'&&(ctx.mid===5||ctx.mid===6));
         var needPicker=(ctx.type==='rs')||( ctx.type==='po'&&PO_PICKER[ctx.mid]);
 
         document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
@@ -634,7 +634,7 @@
           } else {
             var standings=calcStandings(), po=resolvePO(standings);
             var pm=po[ctx.mid]; ta=pm.a||'TBD'; tb=pm.b||'TBD';
-            var lbls={3:'UB Final · Bo3',4:'LB R1 · Bo3',5:'LB Final · Bo3',6:'Grand Final · Bo5'};
+            var lbls={3:'UB Final · Bo3',4:'LB R1 · Bo3',5:'LB Final · Bo5',6:'Grand Final · Bo5'};
             document.getElementById('modal-title').textContent=lbls[ctx.mid]||'PO M'+ctx.mid;
             sc=getPoSc(ctx.mid);
           }
