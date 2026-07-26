@@ -304,6 +304,9 @@
         {code:'BW',   name:'Bushido Wildcats',       logo:'./assets/teams/Challengers EMEA/BW.png',   white:false},
       ];
 
+      /* 순위 수동 교체 [[rank1, rank2], ...] — 1-indexed, 빈 배열이면 비활성 */
+      var SWAP_RANKS = [[4,5]];
+
       /* 7라운드 × 4경기 = 28경기 */
       var RS_ROUNDS = [
         [1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],
@@ -402,6 +405,12 @@
           result=result.concat(grp);
           i=j;
         }
+        SWAP_RANKS.forEach(function(pair){
+          var a=pair[0]-1, b=pair[1]-1;
+          if(a>=0&&b>=0&&a<result.length&&b<result.length){
+            var tmp=result[a]; result[a]=result[b]; result[b]=tmp;
+          }
+        });
         return result;
       }
 
