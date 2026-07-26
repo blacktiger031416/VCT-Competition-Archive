@@ -130,8 +130,9 @@
       .qual-slot { flex: 1; min-width: 120px; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
       .qs-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
       .qs-dest { font-size: 10px; color: rgba(255,255,255,.3); font-family: 'Noto Sans KR', sans-serif; }
-      .qs-team { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
-      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; }
+      .qs-team { display: flex; align-items: center; gap: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
+      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; display: block; }
+      .qs-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
 
       /* ─── Modal (score + team picker) ─── */
       .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
@@ -598,8 +599,14 @@
           if(el) el.innerHTML=map[id].map(function(mid){return brCard(mid,po);}).join('');
         });
         var ch=document.getElementById('qt-champ'),ru=document.getElementById('qt-runner');
-        ch.textContent=po[14].winner||'TBD'; ch.className='qs-team'+(po[14].winner?'':' tbd');
-        ru.textContent=po[14].loser||'TBD';  ru.className='qs-team'+(po[14].loser?'':' tbd');
+        function qsHTML(name){
+          if(!name) return 'TBD';
+          var t=getTeamByName(name);
+          return (t&&t.logo?'<img src="'+t.logo+'" class="qs-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:name)+'</span>';
+        }
+        ch.innerHTML=qsHTML(po[14].winner); ch.className='qs-team'+(po[14].winner?'':' tbd');
+        ru.innerHTML=qsHTML(po[14].loser);  ru.className='qs-team'+(po[14].loser?'':' tbd');
         if(isAdmin()){
           document.querySelectorAll('[data-po-mid]').forEach(function(el){
             el.addEventListener('click',function(){openScoreModal({type:'po',mid:parseInt(el.dataset.poMid)});});

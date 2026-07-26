@@ -72,9 +72,10 @@
       .qc-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; flex-shrink: 0; }
       .qual-chip.ub .qc-label { color: rgba(212,255,31,.5); }
       .qual-chip.lb .qc-label { color: rgba(255,150,30,.5); }
-      .qc-team { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 900; text-transform: uppercase; color: var(--accent); }
-      .qc-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 12px; }
+      .qc-team { display: flex; align-items: center; gap: 7px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 900; text-transform: uppercase; color: var(--accent); }
+      .qc-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 12px; display: block; }
       .qual-chip.lb .qc-team { color: rgba(255,180,60,.9); }
+      .qc-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
 
       /* ─── DE Bracket (4-team) ─── */
       .de-wrap { display: flex; flex-direction: column; gap: 0; }
@@ -122,8 +123,9 @@
       .champion-wrap { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
       .champ-slot { flex: 1; min-width: 120px; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 14px 16px; }
       .champ-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); display: block; margin-bottom: 3px; }
-      .champ-team { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
-      .champ-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; }
+      .champ-team { display: flex; align-items: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
+      .champ-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; display: block; }
+      .champ-logo { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
 
       /* ─── Score modal ─── */
       .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
@@ -495,8 +497,14 @@
           +'<div class="po-col"><p class="po-col-label">Semifinal 2 · Bo3</p>'+poCard(po,2)+'</div>'
           +'<div class="po-col"><p class="po-col-label gf">Grand Final · Bo5 ★</p>'+poCard(po,3)+'</div>';
         var ch=document.getElementById('champ-slot'), ru=document.getElementById('runner-slot');
-        ch.textContent=po[3].winner||'TBD'; ch.className='champ-team'+(po[3].winner?'':' tbd');
-        ru.textContent=po[3].loser||'TBD';  ru.className='champ-team'+(po[3].loser?'':' tbd');
+        function champHTML(name){
+          if(!name) return 'TBD';
+          var t=getTeamByName(name);
+          return (t&&t.logo?'<img src="'+t.logo+'" class="champ-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:name)+'</span>';
+        }
+        ch.innerHTML=champHTML(po[3].winner); ch.className='champ-team'+(po[3].winner?'':' tbd');
+        ru.innerHTML=champHTML(po[3].loser);  ru.className='champ-team'+(po[3].loser?'':' tbd');
         if(isAdmin()){
           el.querySelectorAll('[data-po-mid]').forEach(function(c){
             c.addEventListener('click',function(){openScoreModal({type:'po',mid:parseInt(c.dataset.poMid)});});
@@ -510,12 +518,18 @@
         renderPool();
         var rsA=resolveRS('A'), rsB=resolveRS('B');
         /* qualifier banners */
+        function qcHTML(name){
+          if(!name) return 'TBD';
+          var t=getTeamByName(name);
+          return (t&&t.logo?'<img src="'+t.logo+'" class="qc-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:name)+'</span>';
+        }
         var uqA=document.getElementById('rs-a-uq'), lqA=document.getElementById('rs-a-lq');
         var uqB=document.getElementById('rs-b-uq'), lqB=document.getElementById('rs-b-lq');
-        uqA.textContent=rsA[3].winner||'TBD'; uqA.className='qc-team'+(rsA[3].winner?'':' tbd');
-        lqA.textContent=rsA[5].winner||'TBD'; lqA.className='qc-team'+(rsA[5].winner?'':' tbd');
-        uqB.textContent=rsB[3].winner||'TBD'; uqB.className='qc-team'+(rsB[3].winner?'':' tbd');
-        lqB.textContent=rsB[5].winner||'TBD'; lqB.className='qc-team'+(rsB[5].winner?'':' tbd');
+        uqA.innerHTML=qcHTML(rsA[3].winner); uqA.className='qc-team'+(rsA[3].winner?'':' tbd');
+        lqA.innerHTML=qcHTML(rsA[5].winner); lqA.className='qc-team'+(rsA[5].winner?'':' tbd');
+        uqB.innerHTML=qcHTML(rsB[3].winner); uqB.className='qc-team'+(rsB[3].winner?'':' tbd');
+        lqB.innerHTML=qcHTML(rsB[5].winner); lqB.className='qc-team'+(rsB[5].winner?'':' tbd');
         renderDEBracket('A',rsA,'de-bracket-a');
         renderDEBracket('B',rsB,'de-bracket-b');
         renderPO(resolvePO(rsA,rsB));

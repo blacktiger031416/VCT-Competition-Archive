@@ -55,8 +55,9 @@
       .qual-slot { flex: 1; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
       .qs-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
       .qs-dest { font-size: 11px; color: rgba(255,255,255,.3); font-family: 'Noto Sans KR', sans-serif; }
-      .qs-team { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #d4ff1f; min-height: 28px; }
-      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 16px; }
+      .qs-team { display: flex; align-items: center; gap: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #d4ff1f; min-height: 28px; }
+      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 16px; display: block; }
+      .qs-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 
       /* ─── Bracket ─── */
       .bracket-wrap { overflow-x: auto; padding-bottom: 8px; }
@@ -440,8 +441,14 @@
         });
         var ubC=state[15].winner, lbC=state[29].winner;
         var ubEl=document.getElementById('qt-ub'), lbEl=document.getElementById('qt-lb');
-        ubEl.textContent=ubC||'TBD'; ubEl.className='qs-team'+(ubC?'':' tbd');
-        lbEl.textContent=lbC||'TBD'; lbEl.className='qs-team'+(lbC?'':' tbd');
+        function qsHTML(name){
+          if(!name) return 'TBD';
+          var t=getTeam(name);
+          return (t&&t.logo?'<img src="'+t.logo+'" class="qs-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:name)+'</span>';
+        }
+        ubEl.innerHTML=qsHTML(ubC); ubEl.className='qs-team'+(ubC?'':' tbd');
+        lbEl.innerHTML=qsHTML(lbC); lbEl.className='qs-team'+(lbC?'':' tbd');
         if(isAdmin()){
           document.querySelectorAll('.bracket-match').forEach(function(el){
             el.addEventListener('click',function(){openModal(parseInt(el.dataset.mid));});
