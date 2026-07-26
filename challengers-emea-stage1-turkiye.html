@@ -53,16 +53,11 @@
       .pool-tile .pt-name { font-size: 9px; color: rgba(255,255,255,.3); text-align: center; line-height: 1.3; }
       .logo-w { filter: brightness(0) invert(1); }
 
-      /* ─── RS Tabs ─── */
-      .rs-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-      .rs-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 6px 16px; color: rgba(255,255,255,.4); cursor: pointer; transition: all .15s; }
-      .rs-tab:hover { color: rgba(255,255,255,.7); border-color: rgba(255,255,255,.15); }
-      .rs-tab.active { background: rgba(212,255,31,.1); border-color: rgba(212,255,31,.3); color: var(--accent); }
-
-      /* ─── RS Match panel ─── */
-      .rs-round-panel { display: none; }
-      .rs-round-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      @media(max-width:600px){ .rs-round-panel.active { grid-template-columns: 1fr; } }
+      /* ─── RS All Rounds ─── */
+      .rs-all { display: flex; flex-direction: column; gap: 24px; }
+      .rs-round-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(212,255,31,.4); margin-bottom: 8px; }
+      .rs-round-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      @media(max-width:600px){ .rs-round-grid { grid-template-columns: 1fr; } }
 
       /* ─── GS card ─── */
       .gs-card { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 10px 14px; transition: border-color .15s; }
@@ -119,9 +114,16 @@
       .de-col-matches.center { justify-content: center; }
       .de-col-matches.single { justify-content: flex-start; }
       .de-lb-sep { height: 1px; background: rgba(255,255,255,.07); margin: 2px 0 10px; }
-      .de-lb { display: flex; gap: 8px; height: 100px; margin-bottom: 10px; }
-      .de-gf-sep { height: 1px; background: rgba(212,255,31,.12); margin: 2px 0 10px; }
-      .de-gf { height: 80px; display: flex; flex-direction: column; }
+      .de-lb { display: flex; gap: 8px; height: 100px; }
+
+      /* ─── PO bracket with GF column ─── */
+      .po-bracket-outer { display: flex; gap: 0; align-items: stretch; }
+      .po-de-section { flex: 2; display: flex; flex-direction: column; }
+      .po-gf-conn { width: 24px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .po-gf-conn-t { flex: 3; border-left: 1px solid rgba(212,255,31,.2); border-bottom: 1px solid rgba(212,255,31,.2); }
+      .po-gf-conn-b { flex: 2; border-left: 1px solid rgba(212,255,31,.2); border-top: 1px solid rgba(212,255,31,.2); }
+      .po-gf-section { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-left: 8px; }
+      .po-gf-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(212,255,31,.85); margin-bottom: 6px; flex-shrink: 0; }
 
       /* ─── Match card ─── */
       .de-card { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 8px 10px; transition: border-color .15s; }
@@ -215,7 +217,6 @@
           <p class="eyebrow">Phase 1 · Round Robin · Bo3</p>
           <h2 id="rs-title">Regular Season</h2>
         </div>
-        <div class="rs-tabs" id="rs-tabs"></div>
         <div id="rs-rounds"></div>
         <!-- Standings -->
         <div class="standings-wrap">
@@ -416,24 +417,14 @@
       }
 
       /* ── RS 렌더 ── */
-      var _activeRound=0;
       function renderRS() {
-        /* Tabs */
-        var tabsEl=document.getElementById('rs-tabs');
-        tabsEl.innerHTML=RS_ROUNDS.map(function(r,i){
-          return '<button class="rs-tab'+(i===_activeRound?' active':'')+'" data-ri="'+i+'">R'+(i+1)+'</button>';
-        }).join('');
-        tabsEl.querySelectorAll('.rs-tab').forEach(function(btn){
-          btn.addEventListener('click',function(){
-            _activeRound=parseInt(btn.dataset.ri);
-            renderRS();
-          });
-        });
-
-        /* Round panels */
         var roundsEl=document.getElementById('rs-rounds');
+        roundsEl.className='rs-all';
         roundsEl.innerHTML=RS_ROUNDS.map(function(mids,ri){
-          return '<div class="rs-round-panel'+(ri===_activeRound?' active':'')+'">'+mids.map(rsCard).join('')+'</div>';
+          return '<div class="rs-round-group">'
+            +'<div class="rs-round-label">Round '+(ri+1)+'</div>'
+            +'<div class="rs-round-grid">'+mids.map(rsCard).join('')+'</div>'
+            +'</div>';
         }).join('');
 
         if(isAdmin()){
@@ -484,14 +475,15 @@
       function renderPO(po) {
         var el=document.getElementById('po-bracket'); if(!el) return;
         el.innerHTML=
-          /* UB */
-          '<div class="de-ub">'
+          '<div class="po-bracket-outer">'
+          /* UB + LB section */
+          +'<div class="po-de-section">'
+          +'<div class="de-ub">'
           +'<div class="de-col"><p class="de-col-label">UB R1 · Bo3</p>'
           +'<div class="de-col-matches">'+poCard(po,1)+poCard(po,2)+'</div></div>'
           +'<div class="de-col"><p class="de-col-label">UB Final · Bo3</p>'
           +'<div class="de-col-matches center">'+poCard(po,3)+'</div></div>'
           +'</div>'
-          /* LB */
           +'<div class="de-lb-sep"></div>'
           +'<div class="de-lb">'
           +'<div class="de-col"><p class="de-col-label lb-col">LB R1 · Bo3</p>'
@@ -499,11 +491,14 @@
           +'<div class="de-col"><p class="de-col-label lb-col">LB Final · Bo3</p>'
           +'<div class="de-col-matches single">'+poCard(po,5)+'</div></div>'
           +'</div>'
+          +'</div>'
+          /* Connector */
+          +'<div class="po-gf-conn"><div class="po-gf-conn-t"></div><div class="po-gf-conn-b"></div></div>'
           /* GF */
-          +'<div class="de-gf-sep"></div>'
-          +'<div class="de-gf">'
-          +'<p class="de-col-label gf-col" style="margin-bottom:8px;">Grand Final · Bo5 ★</p>'
-          +'<div>'+poCard(po,6)+'</div>'
+          +'<div class="po-gf-section">'
+          +'<p class="po-gf-label">Grand Final · Bo5 ★</p>'
+          +poCard(po,6)
+          +'</div>'
           +'</div>';
 
         /* 진출 슬롯 */
