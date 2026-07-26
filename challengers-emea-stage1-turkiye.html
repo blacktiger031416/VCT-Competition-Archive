@@ -373,7 +373,7 @@
           if(b.w!==a.w) return b.w-a.w;
           return a.l-b.l;
         });
-        /* 동률 그룹 내 승자승 → 맵차 */
+        /* 동률 그룹 내 승자승(H2H 사전 계산) → H2H 맵차 → 전체 맵차 */
         var result=[], i=0;
         while(i<teams.length){
           var j=i;
@@ -381,18 +381,19 @@
           var grp=teams.slice(i,j);
           if(grp.length>1){
             var names=grp.map(function(t){return t.name;});
-            grp.sort(function(a,b){
-              var aW=0,bW=0,aMD=0,bMD=0;
+            /* 그룹 내 H2H 스코어 사전 계산 */
+            grp.forEach(function(t){
+              t._h2hW=0; t._h2hMD=0;
               names.forEach(function(n){
-                if(n!==a.name&&h2h[a.name]&&h2h[a.name][n]){
-                  aW+=h2h[a.name][n].w; aMD+=h2h[a.name][n].mw-h2h[a.name][n].ml;
-                }
-                if(n!==b.name&&h2h[b.name]&&h2h[b.name][n]){
-                  bW+=h2h[b.name][n].w; bMD+=h2h[b.name][n].mw-h2h[b.name][n].ml;
+                if(n!==t.name&&h2h[t.name]&&h2h[t.name][n]){
+                  t._h2hW+=h2h[t.name][n].w;
+                  t._h2hMD+=h2h[t.name][n].mw-h2h[t.name][n].ml;
                 }
               });
-              if(bW!==aW) return bW-aW;
-              if(bMD!==aMD) return bMD-aMD;
+            });
+            grp.sort(function(a,b){
+              if(b._h2hW!==a._h2hW) return b._h2hW-a._h2hW;
+              if(b._h2hMD!==a._h2hMD) return b._h2hMD-a._h2hMD;
               return (b.mw-b.ml)-(a.mw-a.ml);
             });
           }
