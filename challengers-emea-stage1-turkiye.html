@@ -336,44 +336,42 @@
         return '<img src="'+t.logo+'" class="'+(cls||'')+(t.white?' logo-w':'')+'" alt="" />';
       }
 
-      /* ── 스탠딩 계산 (W → L → 승자승 → 맵차) ── */
+      /* ── 스탠딩 계산 (W → L → 승자승 → H2H맵차 → 전체맵차) ── */
       function calcStandings() {
-        var stats = {}, h2h = {};
-        TEAM_POOL.forEach(function(t){
-          stats[t.name]={w:0,l:0,mw:0,ml:0};
-          h2h[t.name]={};
-        });
+        /* 전체 경기 수집 */
+        var allMatches=[];
         for(var mid=1;mid<=28;mid++){
-          var ta=getRsTeam(mid,'a'), tb=getRsTeam(mid,'b'), sc=getRsSc(mid);
-          if(!ta||!tb||!sc) continue;
-          if(!h2h[ta]) h2h[ta]={}; if(!h2h[tb]) h2h[tb]={};
-          if(!h2h[ta][tb]) h2h[ta][tb]={w:0,mw:0,ml:0};
-          if(!h2h[tb][ta]) h2h[tb][ta]={w:0,mw:0,ml:0};
-          if(sc.a>sc.b){
-            if(stats[ta]){stats[ta].w++;stats[ta].mw+=sc.a;stats[ta].ml+=sc.b;}
-            if(stats[tb]){stats[tb].l++;stats[tb].mw+=sc.b;stats[tb].ml+=sc.a;}
-            h2h[ta][tb].w++; h2h[ta][tb].mw+=sc.a; h2h[ta][tb].ml+=sc.b;
-            h2h[tb][ta].mw+=sc.b; h2h[tb][ta].ml+=sc.a;
-          } else if(sc.b>sc.a){
-            if(stats[tb]){stats[tb].w++;stats[tb].mw+=sc.b;stats[tb].ml+=sc.a;}
-            if(stats[ta]){stats[ta].l++;stats[ta].mw+=sc.a;stats[ta].ml+=sc.b;}
-            h2h[tb][ta].w++; h2h[tb][ta].mw+=sc.b; h2h[tb][ta].ml+=sc.a;
-            h2h[ta][tb].mw+=sc.a; h2h[ta][tb].ml+=sc.b;
-          }
+          var ta=getRsTeam(mid,'a'), tb=getRsTeam(mid,'b');
+          allMatches.push({ta:ta||'', tb:tb||'', sc:getRsSc(mid)});
         }
-        var teams=TEAM_POOL.map(function(t){
-          return {code:t.code,name:t.name,logo:t.logo,white:t.white,
-            w:stats[t.name]?stats[t.name].w:0,
-            l:stats[t.name]?stats[t.name].l:0,
-            mw:stats[t.name]?stats[t.name].mw:0,
-            ml:stats[t.name]?stats[t.name].ml:0};
+
+        /* 전체 성적 */
+        var stats={};
+        TEAM_POOL.forEach(function(t){ stats[t.name]={w:0,l:0,mw:0,ml:0}; });
+        allMatches.forEach(function(m){
+          if(!m.sc||!m.ta||!m.tb) return;
+          if(m.sc.a>m.sc.b){
+            if(stats[m.ta]){stats[m.ta].w++;stats[m.ta].mw+=m.sc.a;stats[m.ta].ml+=m.sc.b;}
+            if(stats[m.tb]){stats[m.tb].l++;stats[m.tb].mw+=m.sc.b;stats[m.tb].ml+=m.sc.a;}
+          } else if(m.sc.b>m.sc.a){
+            if(stats[m.tb]){stats[m.tb].w++;stats[m.tb].mw+=m.sc.b;stats[m.tb].ml+=m.sc.a;}
+            if(stats[m.ta]){stats[m.ta].l++;stats[m.ta].mw+=m.sc.a;stats[m.ta].ml+=m.sc.b;}
+          }
         });
+
+        var teams=TEAM_POOL.map(function(t){
+          var s=stats[t.name]||{w:0,l:0,mw:0,ml:0};
+          return {code:t.code,name:t.name,logo:t.logo,white:t.white,
+            w:s.w,l:s.l,mw:s.mw,ml:s.ml};
+        });
+
         /* 1차 정렬: W desc → L asc */
         teams.sort(function(a,b){
           if(b.w!==a.w) return b.w-a.w;
           return a.l-b.l;
         });
-        /* 동률 그룹 내 승자승(H2H 사전 계산) → H2H 맵차 → 전체 맵차 */
+
+        /* 동률 그룹 내 승자승 → H2H 맵차 → 전체 맵차 */
         var result=[], i=0;
         while(i<teams.length){
           var j=i;
@@ -381,14 +379,18 @@
           var grp=teams.slice(i,j);
           if(grp.length>1){
             var names=grp.map(function(t){return t.name;});
-            /* 그룹 내 H2H 스코어 사전 계산 */
+            /* allMatches 직접 스캔하여 그룹 내 H2H 계산 */
             grp.forEach(function(t){
               t._h2hW=0; t._h2hMD=0;
-              names.forEach(function(n){
-                if(n!==t.name&&h2h[t.name]&&h2h[t.name][n]){
-                  t._h2hW+=h2h[t.name][n].w;
-                  t._h2hMD+=h2h[t.name][n].mw-h2h[t.name][n].ml;
-                }
+              allMatches.forEach(function(m){
+                if(!m.sc||!m.ta||!m.tb) return;
+                var isA=(m.ta===t.name), isB=(m.tb===t.name);
+                if(!isA&&!isB) return;
+                var opp=isA?m.tb:m.ta;
+                if(names.indexOf(opp)<0) return;
+                var myMap=isA?m.sc.a:m.sc.b, opMap=isA?m.sc.b:m.sc.a;
+                if(myMap>opMap) t._h2hW++;
+                t._h2hMD+=(myMap-opMap);
               });
             });
             grp.sort(function(a,b){
