@@ -635,7 +635,7 @@
       function rankGroup(teams, fixtures) {
         const stats = new Map(teams.filter(Boolean).map((t) => [t, { team: t, wins: 0, losses: 0, mapsWon: 0, mapsLost: 0, roundsWon: 0, roundsLost: 0 }]));
         const teamSet = new Set(teams.filter(Boolean));
-
+        const completed = [];
         fixtures.filter((f) => teamSet.has(f.teamA) && teamSet.has(f.teamB)).forEach((f) => {
           const p = parseScore(f.score);
           if (!p) return;
@@ -649,13 +649,30 @@
           const rounds = getSavedSetRounds(f.date, f.teamA, f.teamB);
           a.roundsWon += rounds.a; a.roundsLost += rounds.b;
           b.roundsWon += rounds.b; b.roundsLost += rounds.a;
+          completed.push({ teamA: f.teamA, teamB: f.teamB, parsed: p });
         });
-
-        return [...stats.values()].sort((a, b) =>
-          b.wins - a.wins || a.losses - b.losses ||
-          (b.mapsWon - b.mapsLost) - (a.mapsWon - a.mapsLost) ||
-          (b.roundsWon - b.roundsLost) - (a.roundsWon - a.roundsLost)
-        );
+        const headToHead = (team, tiedTeams) => completed.reduce((total, m) => {
+          if (!tiedTeams.has(m.teamA) || !tiedTeams.has(m.teamB)) return total;
+          if (m.teamA !== team && m.teamB !== team) return total;
+          const won = (m.teamA === team && m.parsed.a > m.parsed.b) || (m.teamB === team && m.parsed.b > m.parsed.a);
+          const lost = (m.teamA === team && m.parsed.a < m.parsed.b) || (m.teamB === team && m.parsed.b < m.parsed.a);
+          if (won) total.wins++; if (lost) total.losses++;
+          return total;
+        }, { wins: 0, losses: 0 });
+        const baseSorted = [...stats.values()].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+        const ranked = [];
+        for (let i = 0; i < baseSorted.length;) {
+          const tied = baseSorted.filter(t => t.wins === baseSorted[i].wins && t.losses === baseSorted[i].losses);
+          const tiedTeams = new Set(tied.map(t => t.team));
+          tied.sort((a, b) => {
+            const h2hA = headToHead(a.team, tiedTeams), h2hB = headToHead(b.team, tiedTeams);
+            const h2hOrder = h2hB.wins - h2hA.wins || h2hA.losses - h2hB.losses;
+            if (h2hOrder) return h2hOrder;
+            return (b.mapsWon - b.mapsLost) - (a.mapsWon - a.mapsLost) || (b.roundsWon - b.roundsLost) - (a.roundsWon - a.roundsLost);
+          });
+          ranked.push(...tied); i += tied.length;
+        }
+        return ranked;
       }
 
       function renderStandings() {
