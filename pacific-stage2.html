@@ -1056,7 +1056,7 @@
           const pos = rankGroup(rows, fixtures).findIndex(t => t.team === team);
           if (pos >= 0 && pos < 2) winningScores.push([]);
         }
-        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [], mustLose: [] };
+        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [], mustLose: [], guaranteed: [] };
         const required = [], flexible = [], flexWithMi = [];
         remaining.forEach((match, mi) => {
           const winners = winningScores.map(s => { const p = s[mi].match(/\d+/g); return Number(p[0]) > Number(p[1]) ? match.teamA : match.teamB; });
@@ -1072,7 +1072,17 @@
           const must = winningScores.every(s => tIdxs.some(mi => { const p = s[mi].match(/\d+/g); const w = Number(p[0]) > Number(p[1]) ? remaining[mi].teamA : remaining[mi].teamB; return w !== t; }));
           if (must) mustLose.push(t);
         }
-        return { total, winning: winningScores.length, required, flexible, mustLose };
+        // 이 경기에서 이기면 직행이 확정되는 경기 분석 (충분 조건)
+        const guaranteed = [];
+        const halfTotal = total / 2;
+        remaining.forEach((match, mi) => {
+          const isA = match.teamA === team, isB = match.teamB === team;
+          if (!isA && !isB) return;
+          const winOutcomes = new Set(isA ? ["2 : 0","2 : 1"] : ["1 : 2","0 : 2"]);
+          const wins = winningScores.filter(s => winOutcomes.has(s[mi])).length;
+          if (wins === halfTotal) guaranteed.push(isA ? match.teamB : match.teamA);
+        });
+        return { total, winning: winningScores.length, required, flexible, mustLose, guaranteed };
       }
 
       function renderStandings() {
@@ -1428,6 +1438,19 @@
             }
             const pct = Math.round(result.winning / result.total * 100);
             let html = `<p class="scn-count">전체 <strong>${result.total.toLocaleString()}</strong>가지 경우의 수 중 <strong>${result.winning.toLocaleString()}</strong>가지 (<strong>${pct}%</strong>)에서 직행 진출</p>`;
+            if (result.winning === result.total) {
+              html += `<p class="scn-note">어떤 경기 결과든 직행이 확정됩니다.</p>`;
+              bodyEl.innerHTML = html; return;
+            }
+            // 충분 조건: 이기면 직행 확정
+            if (result.guaranteed && result.guaranteed.length > 0) {
+              html += `<div class="scn-section"><div class="scn-label">이기면 직행 확정</div><ul class="scn-list required">`;
+              result.guaranteed.forEach(opp => {
+                html += `<li><span class="scn-winner">vs ${opp}</span> <span class="scn-vs">승리 시 즉시 확정</span></li>`;
+              });
+              html += `</ul></div>`;
+            }
+            // 필수 조건: 모든 직행 시나리오에서 반드시 필요
             const hasRequired = result.required.length > 0 || (result.mustLose && result.mustLose.length > 0);
             if (hasRequired) {
               html += `<div class="scn-section"><div class="scn-label">반드시 필요한 조건</div><ul class="scn-list required">`;
@@ -1447,9 +1470,7 @@
               });
               html += `</ul></div>`;
             }
-            if (result.winning === result.total) {
-              html += `<p class="scn-note">어떤 경기 결과든 직행이 확정됩니다.</p>`;
-            } else if (!hasRequired) {
+            if (!hasRequired && !(result.guaranteed && result.guaranteed.length > 0)) {
               html += `<p class="scn-note">단일 필수 조건 없음 — 여러 경기 결과의 조합에 따라 결정됩니다.</p>`;
             }
             bodyEl.innerHTML = html;
