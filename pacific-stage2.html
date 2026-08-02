@@ -1082,7 +1082,7 @@
             const isUncertain = state?.canDirect && state?.canPlayin;
             const confirmedCls = isConfirmed ? " confirmed" : "";
             const logoCls = isUncertain ? " sc-clickable" : "";
-            const logoAttr = isUncertain ? ` data-sc-team="${team.team}"` : "";
+            const logoAttr = isUncertain ? ` data-sc-team="${team.team}" data-sc-group="${groupIndex}"` : "";
             return `<div class="standings-row ${isDirect ? "clinched" : "playin"}${confirmedCls}" role="row">
               <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo${logoCls}"${logoAttr}>${standingsLogoHtml(team.team) || team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
               <span>${team.wins} - ${team.losses}</span><span>${team.mapsWon} / ${team.mapsLost}</span>
@@ -1443,10 +1443,8 @@
         const logo = e.target.closest(".stage-team-logo.sc-clickable");
         if (!logo) return;
         const team = logo.dataset.scTeam;
-        if (!team) return;
-        const table = logo.closest(".standings-table");
-        const groupIndex = standingsTables.indexOf(table);
-        if (groupIndex < 0 || !_scnGroupData[groupIndex]) return;
+        const groupIndex = parseInt(logo.dataset.scGroup, 10);
+        if (!team || isNaN(groupIndex) || !_scnGroupData[groupIndex]) return;
         const { rows, fixtures } = _scnGroupData[groupIndex];
         openScenarioModal(team, rows, fixtures);
       });
