@@ -139,6 +139,33 @@
       .standings-row.clinched::before { background: #3ddc84; }
       .standings-row.playin { background: rgba(255,87,12,0.04); }
       .standings-row.playin::before { background: rgba(255,87,12,0.55); }
+      .standings-row.clinched.confirmed { background: rgba(61,220,132,0.16); }
+      .standings-row.clinched.confirmed::before { box-shadow: 0 0 10px rgba(61,220,132,0.55); }
+      .standings-row.playin.confirmed { background: rgba(255,87,12,0.16); }
+      .standings-row.playin.confirmed::before { box-shadow: 0 0 10px rgba(255,87,12,0.5); }
+      .stage-team-logo.sc-clickable { cursor: pointer; }
+      .stage-team-logo.sc-clickable:hover img { opacity: 0.75; transition: opacity 0.15s; }
+      .scn-modal { position: fixed; inset: 0; z-index: 9910; display: flex; align-items: center; justify-content: center; }
+      .scn-modal[hidden] { display: none !important; }
+      .scn-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.68); backdrop-filter: blur(6px); }
+      .scn-panel { position: relative; z-index: 1; width: min(480px,calc(100vw - 24px)); max-height: 82vh; overflow-y: auto; background: #0e1622; border: 1.5px solid rgba(255,195,0,0.25); border-radius: 18px; padding: 24px 22px 20px; animation: panelIn 0.2s ease; }
+      .scn-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+      .scn-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; color: #fff; line-height: 1.2; }
+      .scn-subtitle { font-size: 11px; color: rgba(255,195,0,0.7); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+      .scn-close { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 22px; cursor: pointer; line-height: 1; padding: 2px; flex-shrink: 0; transition: color 0.12s; }
+      .scn-close:hover { color: #fff; }
+      .scn-count { font-size: 13px; color: rgba(255,255,255,0.45); font-family: 'Noto Sans KR', sans-serif; margin: 0 0 14px; }
+      .scn-count strong { color: #ffc300; }
+      .scn-section { margin-bottom: 14px; }
+      .scn-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 6px; }
+      .scn-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+      .scn-list.required li { background: rgba(61,220,132,0.08); border: 1px solid rgba(61,220,132,0.2); border-radius: 8px; padding: 8px 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 6px; }
+      .scn-list.flex li { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: rgba(255,255,255,0.35); }
+      .scn-winner { color: #3ddc84; font-weight: 700; }
+      .scn-vs { color: rgba(255,255,255,0.25); font-size: 11px; }
+      .scn-note { font-size: 12px; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; text-align: center; margin-top: 10px; }
+      .scn-impossible { text-align: center; padding: 16px 0 8px; }
+      .scn-impossible p { color: rgba(255,255,255,0.4); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; }
       .standings-head { min-height: 48px; background: rgba(255,255,255,0.025); color: rgba(255,255,255,0.3); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
       .standings-head::before { display: none; }
       .standings-row > span, .team-cell { display: flex; align-items: center; border-left: 1px solid rgba(255,255,255,0.05); }
@@ -343,9 +370,23 @@
         <div class="ga-actions" id="ch-actions"></div>
       </div>
     </div>
+    <div class="scn-modal" id="scn-modal" hidden>
+      <div class="scn-backdrop" id="scn-backdrop"></div>
+      <div class="scn-panel">
+        <div class="scn-header">
+          <div>
+            <div class="scn-title" id="scn-team-name"></div>
+            <div class="scn-subtitle">직행 진출 경우의 수</div>
+          </div>
+          <button class="scn-close" id="scn-close-btn">✕</button>
+        </div>
+        <div id="scn-body"></div>
+      </div>
+    </div>
     <script src="./storage.js"></script>
     <script>
     window.storageReady.then(function () {
+      window._scnGroupData = [];
 
       /* ── 팀 데이터 ──────────────────────────────────── */
       const TEAMS = [
@@ -679,13 +720,78 @@
         return ranked;
       }
 
+      function classifyQualification(teams, fixtures) {
+        const teamSet = new Set(teams.filter(Boolean));
+        const remaining = fixtures.filter(m => !parseScore(m.score) && teamSet.has(m.teamA) && teamSet.has(m.teamB));
+        const outcomes = ["2 : 0","2 : 1","1 : 2","0 : 2"];
+        const poss = new Map(teams.filter(Boolean).map(t => [t, { canDirect: false, canPlayin: false }]));
+        if (remaining.length > 10) { teams.filter(Boolean).forEach(t => poss.set(t, { canDirect: true, canPlayin: true })); return poss; }
+        const remainingIdx = new Map(remaining.map((m, i) => [m, i]));
+        const record = scores => {
+          const mf = fixtures.map(f => { const idx = remainingIdx.get(f); return idx !== undefined ? { ...f, score: scores[idx] } : f; });
+          rankGroup(teams, mf).forEach((t, i) => { const s = poss.get(t.team); if (s) { if (i < 2) s.canDirect = true; else s.canPlayin = true; } });
+        };
+        const explore = (index, scores) => {
+          if (index >= remaining.length) { record(scores); return; }
+          outcomes.forEach(score => explore(index + 1, [...scores, score]));
+        };
+        if (remaining.length) explore(0, []); else record([]);
+        return poss;
+      }
+
+      function computeScenarios(team, teams, fixtures) {
+        const teamSet = new Set(teams.filter(Boolean));
+        const remaining = fixtures.filter(m => !parseScore(m.score) && teamSet.has(m.teamA) && teamSet.has(m.teamB));
+        const outcomes = ["2 : 0","2 : 1","1 : 2","0 : 2"];
+        const total = Math.pow(4, remaining.length);
+        if (remaining.length > 10) return { total: -1, winning: -1, required: [], flexible: [], mustLose: [], guaranteed: [] };
+        const remainingIdx = new Map(remaining.map((m, i) => [m, i]));
+        const winningScores = [];
+        const explore = (index, scores) => {
+          if (index >= remaining.length) {
+            const mf = fixtures.map(f => { const idx = remainingIdx.get(f); return idx !== undefined ? { ...f, score: scores[idx] } : f; });
+            const pos = rankGroup(teams, mf).findIndex(t => t.team === team);
+            if (pos >= 0 && pos < 2) winningScores.push(scores.slice());
+            return;
+          }
+          outcomes.forEach(score => explore(index + 1, [...scores, score]));
+        };
+        if (remaining.length) explore(0, []);
+        else { const pos = rankGroup(teams, fixtures).findIndex(t => t.team === team); if (pos >= 0 && pos < 2) winningScores.push([]); }
+        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [], mustLose: [], guaranteed: [] };
+        const required = [], flexible = [], flexWithMi = [];
+        remaining.forEach((match, mi) => {
+          const winners = winningScores.map(s => { const p = s[mi].match(/\d+/g); return Number(p[0]) > Number(p[1]) ? match.teamA : match.teamB; });
+          if (winners.every(w => w === winners[0])) required.push({ teamA: match.teamA, teamB: match.teamB, winner: winners[0] });
+          else { flexible.push({ teamA: match.teamA, teamB: match.teamB }); flexWithMi.push({ teamA: match.teamA, teamB: match.teamB, mi }); }
+        });
+        const mustLose = [];
+        const flexTeams = new Set();
+        flexWithMi.forEach(({ teamA, teamB }) => { if (teamA !== team) flexTeams.add(teamA); if (teamB !== team) flexTeams.add(teamB); });
+        for (const t of flexTeams) {
+          const tIdxs = flexWithMi.filter(f => f.teamA === t || f.teamB === t).map(f => f.mi);
+          const must = winningScores.every(s => tIdxs.some(mi => { const p = s[mi].match(/\d+/g); const w = Number(p[0]) > Number(p[1]) ? remaining[mi].teamA : remaining[mi].teamB; return w !== t; }));
+          if (must) mustLose.push(t);
+        }
+        const guaranteed = [];
+        const halfTotal = total / 2;
+        remaining.forEach((match, mi) => {
+          const isA = match.teamA === team, isB = match.teamB === team;
+          if (!isA && !isB) return;
+          const winOutcomes = new Set(isA ? ["2 : 0","2 : 1"] : ["1 : 2","0 : 2"]);
+          const wins = winningScores.filter(s => winOutcomes.has(s[mi])).length;
+          if (wins === halfTotal) guaranteed.push(isA ? match.teamB : match.teamA);
+        });
+        return { total, winning: winningScores.length, required, flexible, mustLose, guaranteed };
+      }
+
       function renderStandings() {
         const grid = document.getElementById("standings-grid");
         if (!grid) return;
         const groups = loadGroups();
         const fixtures = collectAllFixtures();
 
-        ["alpha", "omega"].forEach((grp) => {
+        ["alpha", "omega"].forEach((grp, grpIndex) => {
           const teams = groups[grp].filter(Boolean);
           const label = grp === "alpha" ? "알파조 (α)" : "오메가조 (ω)";
 
@@ -709,14 +815,24 @@
             return;
           }
 
+          const qualification = classifyQualification(teams, fixtures);
           const ranked = rankGroup(teams, fixtures);
+          window._scnGroupData[grpIndex] = { teams, fixtures };
           const rows = ranked.map((s, i) => {
             const diff = s.mapsWon - s.mapsLost;
+            const isDirect = i < 2;
+            const state = qualification.get(s.team);
+            const isConfirmed = isDirect ? (state?.canDirect && !state?.canPlayin) : (!state?.canDirect && state?.canPlayin);
+            const isUncertain = state?.canDirect && state?.canPlayin;
+            const confirmedCls = isConfirmed ? " confirmed" : "";
+            const logoCls = isUncertain ? " sc-clickable" : "";
+            const safeTeam = s.team.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+            const logoAttr = isUncertain ? ` onclick="window._scnClick(${grpIndex},'${safeTeam}')"` : "";
             return `
-              <div class="standings-row ${i < 2 ? "clinched" : i < 6 ? "playin" : "out"}" role="row">
+              <div class="standings-row ${isDirect ? "clinched" : "playin"}${confirmedCls}" role="row">
                 <div class="team-cell">
                   <div class="rank-badge">${i + 1}</div>
-                  <div class="stage-team-logo">${logoHtml(s.team)}</div>
+                  <div class="stage-team-logo${logoCls}"${logoAttr}>${logoHtml(s.team)}</div>
                   <div><strong>${s.team}</strong><span>${teamNationality[s.team] || ""}</span></div>
                 </div>
                 <span>${s.wins} - ${s.losses}</span>
@@ -954,6 +1070,76 @@
       document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
       document.addEventListener("keydown", function(e) { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
       renderChInvite();
+
+      /* ── 시나리오 모달 ── */
+      function openScenarioModal(team, teams, fixtures) {
+        document.getElementById("scn-team-name").textContent = team;
+        const bodyEl = document.getElementById("scn-body");
+        bodyEl.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.35);font-family:\'Noto Sans KR\',sans-serif;font-size:13px;padding:16px 0;">계산 중...</p>';
+        document.getElementById("scn-modal").hidden = false;
+        setTimeout(() => {
+          try {
+            const result = computeScenarios(team, teams, fixtures);
+            if (result.total < 0) {
+              bodyEl.innerHTML = '<div class="scn-impossible"><p>남은 경기 수가 너무 많아<br>계산할 수 없습니다.</p></div>';
+              return;
+            }
+            if (result.winning === 0) {
+              bodyEl.innerHTML = '<div class="scn-impossible"><p>어떤 경우에도<br><strong style="color:rgba(239,74,94,0.9)">직행 진출이 불가능</strong>합니다.</p></div>';
+              return;
+            }
+            const pct = Math.round(result.winning / result.total * 100);
+            let html = `<p class="scn-count">전체 <strong>${result.total.toLocaleString()}</strong>가지 경우의 수 중 <strong>${result.winning.toLocaleString()}</strong>가지 (<strong>${pct}%</strong>)에서 직행 진출</p>`;
+            if (result.winning === result.total) {
+              html += `<p class="scn-note">어떤 경기 결과든 직행이 확정됩니다.</p>`;
+              bodyEl.innerHTML = html; return;
+            }
+            if (result.guaranteed && result.guaranteed.length > 0) {
+              html += `<div class="scn-section"><div class="scn-label">이기면 직행 확정</div><ul class="scn-list required">`;
+              result.guaranteed.forEach(opp => {
+                html += `<li><span class="scn-winner">vs ${opp}</span> <span class="scn-vs">승리 시 즉시 확정</span></li>`;
+              });
+              html += `</ul></div>`;
+            }
+            const hasRequired = result.required.length > 0 || (result.mustLose && result.mustLose.length > 0);
+            if (hasRequired) {
+              html += `<div class="scn-section"><div class="scn-label">반드시 필요한 조건</div><ul class="scn-list required">`;
+              result.required.forEach(({ teamA, teamB, winner }) => {
+                const loser = winner === teamA ? teamB : teamA;
+                html += `<li><span class="scn-winner">${winner}</span> <span class="scn-vs">승리</span> <span style="color:rgba(255,255,255,0.35);font-size:11px;">(vs ${loser})</span></li>`;
+              });
+              if (result.mustLose) result.mustLose.forEach(t => {
+                html += `<li><span class="scn-winner" style="color:#ffc300">${t}</span> <span class="scn-vs">1패 이상</span></li>`;
+              });
+              html += `</ul></div>`;
+            }
+            if (result.flexible.length > 0) {
+              html += `<div class="scn-section"><div class="scn-label">결과 무관한 경기</div><ul class="scn-list flex">`;
+              result.flexible.forEach(({ teamA, teamB }) => {
+                html += `<li>${teamA} <span class="scn-vs">vs</span> ${teamB}</li>`;
+              });
+              html += `</ul></div>`;
+            }
+            if (!hasRequired && !(result.guaranteed && result.guaranteed.length > 0)) {
+              html += `<p class="scn-note">단일 필수 조건 없음 — 여러 경기 결과의 조합에 따라 결정됩니다.</p>`;
+            }
+            bodyEl.innerHTML = html;
+          } catch (err) {
+            bodyEl.innerHTML = `<div class="scn-impossible"><p style="color:rgba(239,74,94,0.8);font-size:12px;">${err.message}</p></div>`;
+          }
+        }, 50);
+      }
+      function closeScenarioModal() { document.getElementById("scn-modal").hidden = true; }
+      window.closeScenarioModal = closeScenarioModal;
+      window._scnClick = function(gi, teamName) {
+        const d = window._scnGroupData[gi];
+        if (d) openScenarioModal(teamName, d.teams, d.fixtures);
+      };
+      document.getElementById("scn-backdrop").addEventListener("click", closeScenarioModal);
+      document.getElementById("scn-close-btn").addEventListener("click", closeScenarioModal);
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && !document.getElementById("scn-modal").hidden) closeScenarioModal();
+      });
 
     });
     </script>
