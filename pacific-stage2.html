@@ -1056,14 +1056,23 @@
           const pos = rankGroup(rows, fixtures).findIndex(t => t.team === team);
           if (pos >= 0 && pos < 2) winningScores.push([]);
         }
-        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [] };
-        const required = [], flexible = [];
+        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [], mustLose: [] };
+        const required = [], flexible = [], flexWithMi = [];
         remaining.forEach((match, mi) => {
           const winners = winningScores.map(s => { const p = s[mi].match(/\d+/g); return Number(p[0]) > Number(p[1]) ? match.teamA : match.teamB; });
           if (winners.every(w => w === winners[0])) required.push({ teamA: match.teamA, teamB: match.teamB, winner: winners[0] });
-          else flexible.push({ teamA: match.teamA, teamB: match.teamB });
+          else { flexible.push({ teamA: match.teamA, teamB: match.teamB }); flexWithMi.push({ teamA: match.teamA, teamB: match.teamB, mi }); }
         });
-        return { total, winning: winningScores.length, required, flexible };
+        // 어떤 팀이 반드시 1패 이상해야 하는지 분석
+        const mustLose = [];
+        const flexTeams = new Set();
+        flexWithMi.forEach(({ teamA, teamB }) => { if (teamA !== team) flexTeams.add(teamA); if (teamB !== team) flexTeams.add(teamB); });
+        for (const t of flexTeams) {
+          const tIdxs = flexWithMi.filter(f => f.teamA === t || f.teamB === t).map(f => f.mi);
+          const must = winningScores.every(s => tIdxs.some(mi => { const p = s[mi].match(/\d+/g); const w = Number(p[0]) > Number(p[1]) ? remaining[mi].teamA : remaining[mi].teamB; return w !== t; }));
+          if (must) mustLose.push(t);
+        }
+        return { total, winning: winningScores.length, required, flexible, mustLose };
       }
 
       function renderStandings() {
@@ -1417,12 +1426,17 @@
               bodyEl.innerHTML = '<div class="scn-impossible"><p>어떤 경우에도<br><strong style="color:rgba(239,74,94,0.9)">직행 진출이 불가능</strong>합니다.</p></div>';
               return;
             }
-            let html = `<p class="scn-count">전체 <strong>${result.total.toLocaleString()}</strong>가지 경우의 수 중 <strong>${result.winning.toLocaleString()}</strong>가지에서 직행 진출</p>`;
-            if (result.required.length > 0) {
+            const pct = Math.round(result.winning / result.total * 100);
+            let html = `<p class="scn-count">전체 <strong>${result.total.toLocaleString()}</strong>가지 경우의 수 중 <strong>${result.winning.toLocaleString()}</strong>가지 (<strong>${pct}%</strong>)에서 직행 진출</p>`;
+            const hasRequired = result.required.length > 0 || (result.mustLose && result.mustLose.length > 0);
+            if (hasRequired) {
               html += `<div class="scn-section"><div class="scn-label">반드시 필요한 조건</div><ul class="scn-list required">`;
               result.required.forEach(({ teamA, teamB, winner }) => {
                 const loser = winner === teamA ? teamB : teamA;
                 html += `<li><span class="scn-winner">${winner}</span> <span class="scn-vs">승리</span> <span style="color:rgba(255,255,255,0.35);font-size:11px;">(vs ${loser})</span></li>`;
+              });
+              if (result.mustLose) result.mustLose.forEach(t => {
+                html += `<li><span class="scn-winner" style="color:#ffc300">${t}</span> <span class="scn-vs">1패 이상</span></li>`;
               });
               html += `</ul></div>`;
             }
@@ -1433,8 +1447,10 @@
               });
               html += `</ul></div>`;
             }
-            if (result.required.length === 0) {
-              html += `<p class="scn-note">남은 어떤 경기 결과든 직행이 가능합니다.</p>`;
+            if (result.winning === result.total) {
+              html += `<p class="scn-note">어떤 경기 결과든 직행이 확정됩니다.</p>`;
+            } else if (!hasRequired) {
+              html += `<p class="scn-note">단일 필수 조건 없음 — 여러 경기 결과의 조합에 따라 결정됩니다.</p>`;
             }
             bodyEl.innerHTML = html;
           } catch (err) {
