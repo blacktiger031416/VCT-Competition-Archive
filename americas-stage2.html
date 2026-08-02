@@ -135,6 +135,10 @@
       .standings-row::before { position: absolute; top: 0; bottom: 0; left: 0; width: 4px; content: ''; background: rgba(255,255,255,0.06); }
       .standings-row.advance::before { background: rgba(255,87,12,0.45); }
       .standings-row.out::before { background: rgba(255,255,255,0.06); }
+      .standings-row.clinched { background: rgba(61,220,132,0.05); }
+      .standings-row.clinched::before { background: #3ddc84; }
+      .standings-row.playin { background: rgba(255,87,12,0.04); }
+      .standings-row.playin::before { background: rgba(255,87,12,0.55); }
       .standings-head { min-height: 48px; background: rgba(255,255,255,0.025); color: rgba(255,255,255,0.3); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
       .standings-head::before { display: none; }
       .standings-row > span, .team-cell { display: flex; align-items: center; border-left: 1px solid rgba(255,255,255,0.05); }
@@ -709,7 +713,7 @@
           const rows = ranked.map((s, i) => {
             const diff = s.mapsWon - s.mapsLost;
             return `
-              <div class="standings-row ${i < 4 ? "advance" : "out"}" role="row">
+              <div class="standings-row ${i < 2 ? "clinched" : i < 6 ? "playin" : "out"}" role="row">
                 <div class="team-cell">
                   <div class="rank-badge">${i + 1}</div>
                   <div class="stage-team-logo">${logoHtml(s.team)}</div>
