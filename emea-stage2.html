@@ -208,8 +208,8 @@
       .sc-btn-save:hover { background: #2070ff; }
       .sc-btn-clear { background: rgba(255,80,80,0.12); color: #ff6b6b; border: 1px solid rgba(255,80,80,0.25); }
       .sc-btn-clear:hover { background: rgba(255,80,80,0.24); }
-      .match-card em { cursor: pointer; }
-      .match-card em:hover { background: rgba(20,100,246,0.15); border-color: rgba(20,100,246,0.5); }
+      body:not(.view-only) .match-card em { cursor: pointer; }
+      body:not(.view-only) .match-card em:hover { background: rgba(20,100,246,0.15); border-color: rgba(20,100,246,0.5); }
 
       /* 흰색으로 표시할 팀 로고 */
       .stage-team-logo img[alt="Gentle Mates"],
@@ -508,6 +508,7 @@
          그룹 슬롯 렌더링
       ══════════════════════════════════════════════════ */
       const isAdmin = () => typeof window.vctIsAdmin === "function" && window.vctIsAdmin();
+      if (!isAdmin()) document.body.classList.add("view-only");
 
       function renderGroupSlots() {
         const groups = loadGroups();
@@ -600,7 +601,7 @@
 
             const scoreEl = document.createElement("em");
             scoreEl.textContent = score;
-            if (hasTeams) {
+            if (hasTeams && isAdmin()) {
               scoreEl.addEventListener("click", (e) => {
                 e.stopPropagation();
                 openScoreModal(date || `stage2_emea_w${w}_m${m}`, teamA, teamB, `stage2_emea_w${w}_m${m}`);
