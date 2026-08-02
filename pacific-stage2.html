@@ -470,9 +470,8 @@
       .standings-row.playin.confirmed { background: rgba(74,144,226,0.16); }
       .standings-row.playin.confirmed::before { box-shadow: 0 0 10px rgba(74,144,226,0.5); }
       /* 미확정 로고 클릭 */
-      .stage-team-logo.sc-clickable { cursor: pointer; position: relative; }
-      .stage-team-logo.sc-clickable::after { content: "?"; position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; background: rgba(255,195,0,0.92); color: #111; font-size: 9px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; }
-      .stage-team-logo.sc-clickable:hover img { opacity: 0.82; }
+      .stage-team-logo.sc-clickable { cursor: pointer; }
+      .stage-team-logo.sc-clickable:hover img { opacity: 0.75; transition: opacity 0.15s; }
       /* 시나리오 모달 */
       .scn-modal { position: fixed; inset: 0; z-index: 9910; display: flex; align-items: center; justify-content: center; }
       .scn-modal[hidden] { display: none !important; }
@@ -815,6 +814,8 @@
     <script>
     window.storageReady.then(function () {
 
+      let _scnGroupData = []; // [{rows, fixtures}] — 이벤트 위임용
+
       const FIXTURES_KEY = "fixtures:stage2:pacific";
       const FROM_PARAM = "stage2";
 
@@ -1075,9 +1076,7 @@
               <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
             </div>`;
           }).join("");
-          table.querySelectorAll(".stage-team-logo.sc-clickable").forEach(el => {
-            el.addEventListener("click", () => openScenarioModal(el.dataset.scTeam, rows, fixtures));
-          });
+          _scnGroupData[groupIndex] = { rows, fixtures };
         });
       }
 
@@ -1426,6 +1425,17 @@
       function closeScenarioModal() { document.getElementById("scn-modal").hidden = true; }
       document.getElementById("scn-backdrop").addEventListener("click", closeScenarioModal);
       document.getElementById("scn-close-btn").addEventListener("click", closeScenarioModal);
+      document.addEventListener("click", e => {
+        const logo = e.target.closest(".stage-team-logo.sc-clickable");
+        if (!logo) return;
+        const team = logo.dataset.scTeam;
+        if (!team) return;
+        const table = logo.closest(".standings-table");
+        const groupIndex = standingsTables.indexOf(table);
+        if (groupIndex < 0 || !_scnGroupData[groupIndex]) return;
+        const { rows, fixtures } = _scnGroupData[groupIndex];
+        openScenarioModal(team, rows, fixtures);
+      });
 
     });
     </script>
