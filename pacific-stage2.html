@@ -828,7 +828,7 @@
     <script>
     window.storageReady.then(function () {
 
-      let _scnGroupData = []; // [{rows, fixtures}] — 이벤트 위임용
+      window._scnGroupData = [];
 
       const FIXTURES_KEY = "fixtures:stage2:pacific";
       const FROM_PARAM = "stage2";
@@ -1082,7 +1082,8 @@
             const isUncertain = state?.canDirect && state?.canPlayin;
             const confirmedCls = isConfirmed ? " confirmed" : "";
             const logoCls = isUncertain ? " sc-clickable" : "";
-            const logoAttr = isUncertain ? ` data-sc-team="${team.team}" data-sc-group="${groupIndex}"` : "";
+            const safeTeam = team.team.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+            const logoAttr = isUncertain ? ` onclick="window._scnClick(${groupIndex},'${safeTeam}')"` : "";
             return `<div class="standings-row ${isDirect ? "clinched" : "playin"}${confirmedCls}" role="row">
               <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo${logoCls}"${logoAttr}>${standingsLogoHtml(team.team) || team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
               <span>${team.wins} - ${team.losses}</span><span>${team.mapsWon} / ${team.mapsLost}</span>
@@ -1090,7 +1091,7 @@
               <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
             </div>`;
           }).join("");
-          _scnGroupData[groupIndex] = { rows, fixtures };
+          window._scnGroupData[groupIndex] = { rows, fixtures };
         });
       }
 
@@ -1437,17 +1438,13 @@
         });
       }
       function closeScenarioModal() { document.getElementById("scn-modal").hidden = true; }
+      window.closeScenarioModal = closeScenarioModal;
+      window._scnClick = function(groupIndex, teamName) {
+        const d = window._scnGroupData[groupIndex];
+        if (d) openScenarioModal(teamName, d.rows, d.fixtures);
+      };
       document.getElementById("scn-backdrop").addEventListener("click", closeScenarioModal);
       document.getElementById("scn-close-btn").addEventListener("click", closeScenarioModal);
-      document.addEventListener("click", e => {
-        const logo = e.target.closest(".stage-team-logo.sc-clickable");
-        if (!logo) return;
-        const team = logo.dataset.scTeam;
-        const groupIndex = parseInt(logo.dataset.scGroup, 10);
-        if (!team || isNaN(groupIndex) || !_scnGroupData[groupIndex]) return;
-        const { rows, fixtures } = _scnGroupData[groupIndex];
-        openScenarioModal(team, rows, fixtures);
-      });
 
     });
     </script>
