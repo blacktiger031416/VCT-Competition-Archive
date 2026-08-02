@@ -1169,6 +1169,7 @@
 
       /* ── Init ────────────────────────────── */
       window._renderStandings = renderStandings;
+      window._computeScenarios = computeScenarios;
       renderAllFixtures();
       renderStandings();
     });
@@ -1407,7 +1408,7 @@
         document.getElementById("scn-modal").hidden = false;
         setTimeout(() => {
           try {
-            const result = computeScenarios(team, rows, fixtures);
+            const result = window._computeScenarios(team, rows, fixtures);
             if (result.total < 0) {
               bodyEl.innerHTML = '<div class="scn-impossible"><p>남은 경기 수가 너무 많아<br>계산할 수 없습니다.</p></div>';
               return;
