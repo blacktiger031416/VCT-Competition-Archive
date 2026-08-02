@@ -464,6 +464,37 @@
       .standings-row.eliminated::before { background: #ef4a5e; }
       .standings-row.playin { background: rgba(74,144,226,0.06); }
       .standings-row.playin::before { background: #4a90e2; }
+      /* 확정 강조 */
+      .standings-row.clinched.confirmed { background: rgba(61,220,132,0.16); }
+      .standings-row.clinched.confirmed::before { box-shadow: 0 0 10px rgba(61,220,132,0.55); }
+      .standings-row.playin.confirmed { background: rgba(74,144,226,0.16); }
+      .standings-row.playin.confirmed::before { box-shadow: 0 0 10px rgba(74,144,226,0.5); }
+      /* 미확정 로고 클릭 */
+      .stage-team-logo.sc-clickable { cursor: pointer; position: relative; }
+      .stage-team-logo.sc-clickable::after { content: "?"; position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; background: rgba(255,195,0,0.92); color: #111; font-size: 9px; font-weight: 900; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; }
+      .stage-team-logo.sc-clickable:hover img { opacity: 0.82; }
+      /* 시나리오 모달 */
+      .scn-modal { position: fixed; inset: 0; z-index: 9910; display: flex; align-items: center; justify-content: center; }
+      .scn-modal[hidden] { display: none !important; }
+      .scn-backdrop { position: absolute; inset: 0; background: rgba(5,5,5,0.68); backdrop-filter: blur(6px); }
+      .scn-panel { position: relative; z-index: 1; width: min(480px,calc(100vw - 24px)); max-height: 82vh; overflow-y: auto; background: #0e1622; border: 1.5px solid rgba(255,195,0,0.25); border-radius: 18px; padding: 24px 22px 20px; animation: panelIn 0.2s ease; }
+      .scn-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+      .scn-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; color: #fff; line-height: 1.2; }
+      .scn-subtitle { font-size: 11px; color: rgba(255,195,0,0.7); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+      .scn-close { background: none; border: none; color: rgba(255,255,255,0.35); font-size: 22px; cursor: pointer; line-height: 1; padding: 2px; flex-shrink: 0; transition: color 0.12s; }
+      .scn-close:hover { color: #fff; }
+      .scn-count { font-size: 13px; color: rgba(255,255,255,0.45); font-family: 'Noto Sans KR', sans-serif; margin: 0 0 14px; }
+      .scn-count strong { color: #ffc300; }
+      .scn-section { margin-bottom: 14px; }
+      .scn-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 6px; }
+      .scn-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+      .scn-list.required li { background: rgba(61,220,132,0.08); border: 1px solid rgba(61,220,132,0.2); border-radius: 8px; padding: 8px 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 6px; }
+      .scn-list.flex li { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: rgba(255,255,255,0.35); }
+      .scn-winner { color: #3ddc84; font-weight: 700; }
+      .scn-vs { color: rgba(255,255,255,0.25); font-size: 11px; }
+      .scn-note { font-size: 12px; color: rgba(255,255,255,0.35); font-family: 'Noto Sans KR', sans-serif; text-align: center; margin-top: 10px; }
+      .scn-impossible { text-align: center; padding: 16px 0 8px; }
+      .scn-impossible p { color: rgba(255,255,255,0.4); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; }
       .standings-row:not(.standings-head) { animation: row-in 420ms ease both; }
       .standings-row:nth-child(2) { animation-delay: 40ms; }
       .standings-row:nth-child(3) { animation-delay: 90ms; }
@@ -973,16 +1004,51 @@
         const teamSet = new Set(rows.map(r => r.team));
         const remaining = fixtures.filter(m => !parseScore(m.score) && teamSet.has(m.teamA) && teamSet.has(m.teamB));
         const outcomes = ["2 : 0","2 : 1","1 : 2","0 : 2"];
-        const possibilities = new Map(rows.map(r => [r.team, { top: false, bottom: false }]));
-        if (remaining.length > 8) { rows.forEach(r => possibilities.set(r.team, { top: true, bottom: true })); return possibilities; }
-        const recordScenario = sf => rankGroup(rows, sf).forEach((t, i) => { const s = possibilities.get(t.team); if (i < 4) s.top = true; else s.bottom = true; });
-        const explore = (index, sf) => {
-          if (index >= remaining.length) { recordScenario(sf); return; }
-          const match = remaining[index];
-          outcomes.forEach(score => explore(index + 1, sf.map(f => f === match ? { ...f, score } : f)));
+        const poss = new Map(rows.map(r => [r.team, { canDirect: false, canPlayin: false }]));
+        if (remaining.length > 10) { rows.forEach(r => poss.set(r.team, { canDirect: true, canPlayin: true })); return poss; }
+        const remainingIdx = new Map(remaining.map((m, i) => [m, i]));
+        const record = scores => {
+          const mf = fixtures.map(f => { const idx = remainingIdx.get(f); return idx !== undefined ? { ...f, score: scores[idx] } : f; });
+          rankGroup(rows, mf).forEach((t, i) => { const s = poss.get(t.team); if (i < 2) s.canDirect = true; else s.canPlayin = true; });
         };
-        if (remaining.length) explore(0, fixtures); else recordScenario(fixtures);
-        return possibilities;
+        const explore = (index, scores) => {
+          if (index >= remaining.length) { record(scores); return; }
+          outcomes.forEach(score => explore(index + 1, [...scores, score]));
+        };
+        if (remaining.length) explore(0, []); else record([]);
+        return poss;
+      }
+
+      function computeScenarios(team, rows, fixtures) {
+        const teamSet = new Set(rows.map(r => r.team));
+        const remaining = fixtures.filter(m => !parseScore(m.score) && teamSet.has(m.teamA) && teamSet.has(m.teamB));
+        const outcomes = ["2 : 0","2 : 1","1 : 2","0 : 2"];
+        const total = Math.pow(4, remaining.length);
+        if (remaining.length > 10) return { total: -1, winning: -1, required: [], flexible: [] };
+        const remainingIdx = new Map(remaining.map((m, i) => [m, i]));
+        const winningScores = [];
+        const explore = (index, scores) => {
+          if (index >= remaining.length) {
+            const mf = fixtures.map(f => { const idx = remainingIdx.get(f); return idx !== undefined ? { ...f, score: scores[idx] } : f; });
+            const pos = rankGroup(rows, mf).findIndex(t => t.team === team);
+            if (pos >= 0 && pos < 2) winningScores.push(scores.slice());
+            return;
+          }
+          outcomes.forEach(score => explore(index + 1, [...scores, score]));
+        };
+        if (remaining.length) explore(0, []);
+        else {
+          const pos = rankGroup(rows, fixtures).findIndex(t => t.team === team);
+          if (pos >= 0 && pos < 2) winningScores.push([]);
+        }
+        if (winningScores.length === 0) return { total, winning: 0, required: [], flexible: [] };
+        const required = [], flexible = [];
+        remaining.forEach((match, mi) => {
+          const winners = winningScores.map(s => { const p = s[mi].match(/\d+/g); return Number(p[0]) > Number(p[1]) ? match.teamA : match.teamB; });
+          if (winners.every(w => w === winners[0])) required.push({ teamA: match.teamA, teamB: match.teamB, winner: winners[0] });
+          else flexible.push({ teamA: match.teamA, teamB: match.teamB });
+        });
+        return { total, winning: winningScores.length, required, flexible };
       }
 
       function renderStandings() {
@@ -992,17 +1058,26 @@
           if (!table) return;
           const head = table.querySelector(".standings-head").outerHTML;
           const qualification = classifyQualification(rows, fixtures);
-          table.innerHTML = head + rankGroup(rows, fixtures).map((team, index) => {
+          const ranked = rankGroup(rows, fixtures);
+          table.innerHTML = head + ranked.map((team, index) => {
             const diff = team.roundsWon - team.roundsLost;
             const state = qualification.get(team.team);
-            const statusClass = state?.top && !state?.bottom ? " clinched" : !state?.top && state?.bottom ? " eliminated" : "";
-            return `<div class="standings-row ${index < 2 ? "clinched" : "playin"}" role="row">
-              <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo">${standingsLogoHtml(team.team) || team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
+            const isDirect = index < 2;
+            const isConfirmed = isDirect ? (state?.canDirect && !state?.canPlayin) : (!state?.canDirect && state?.canPlayin);
+            const isUncertain = state?.canDirect && state?.canPlayin;
+            const confirmedCls = isConfirmed ? " confirmed" : "";
+            const logoCls = isUncertain ? " sc-clickable" : "";
+            const logoAttr = isUncertain ? ` data-sc-team="${team.team}"` : "";
+            return `<div class="standings-row ${isDirect ? "clinched" : "playin"}${confirmedCls}" role="row">
+              <div class="team-cell"><div class="rank-badge">${index + 1}</div><div class="stage-team-logo${logoCls}"${logoAttr}>${standingsLogoHtml(team.team) || team.logo}</div><div><strong>${team.team}</strong><span>${team.country}</span></div></div>
               <span>${team.wins} - ${team.losses}</span><span>${team.mapsWon} / ${team.mapsLost}</span>
               <span>${team.roundsWon} / ${team.roundsLost}</span>
               <span class="delta ${diff >= 0 ? "plus" : "minus"}">${diff > 0 ? "+" : ""}${diff}</span>
             </div>`;
           }).join("");
+          table.querySelectorAll(".stage-team-logo.sc-clickable").forEach(el => {
+            el.addEventListener("click", () => openScenarioModal(el.dataset.scTeam, rows, fixtures));
+          });
         });
       }
 
@@ -1302,11 +1377,72 @@
       }
       function closeChModal() { document.getElementById("ch-modal").hidden = true; _chCtx = null; }
       document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
-      document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          if (!document.getElementById("scn-modal").hidden) { closeScenarioModal(); return; }
+          if (!document.getElementById("ch-modal").hidden) closeChModal();
+        }
+      });
       renderChInvite();
+
+      /* ── Scenario Modal ── */
+      function openScenarioModal(team, rows, fixtures) {
+        document.getElementById("scn-team-name").textContent = team;
+        const bodyEl = document.getElementById("scn-body");
+        bodyEl.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.35);font-family:\'Noto Sans KR\',sans-serif;font-size:13px;padding:16px 0;">계산 중...</p>';
+        document.getElementById("scn-modal").hidden = false;
+        requestAnimationFrame(() => {
+          const result = computeScenarios(team, rows, fixtures);
+          if (result.total < 0) {
+            bodyEl.innerHTML = '<div class="scn-impossible"><p>남은 경기 수가 너무 많아<br>계산할 수 없습니다.</p></div>';
+            return;
+          }
+          if (result.winning === 0) {
+            bodyEl.innerHTML = '<div class="scn-impossible"><p>어떤 경우에도<br><strong style="color:rgba(239,74,94,0.9)">직행 진출이 불가능</strong>합니다.</p></div>';
+            return;
+          }
+          let html = `<p class="scn-count">전체 <strong>${result.total.toLocaleString()}</strong>가지 경우의 수 중 <strong>${result.winning.toLocaleString()}</strong>가지에서 직행 진출</p>`;
+          if (result.required.length > 0) {
+            html += `<div class="scn-section"><div class="scn-label">반드시 필요한 조건</div><ul class="scn-list required">`;
+            result.required.forEach(({ teamA, teamB, winner }) => {
+              const loser = winner === teamA ? teamB : teamA;
+              html += `<li><span class="scn-winner">${winner}</span> <span class="scn-vs">승리</span> <span style="color:rgba(255,255,255,0.35);font-size:11px;">(vs ${loser})</span></li>`;
+            });
+            html += `</ul></div>`;
+          }
+          if (result.flexible.length > 0) {
+            html += `<div class="scn-section"><div class="scn-label">결과 무관한 경기</div><ul class="scn-list flex">`;
+            result.flexible.forEach(({ teamA, teamB }) => {
+              html += `<li>${teamA} <span class="scn-vs">vs</span> ${teamB}</li>`;
+            });
+            html += `</ul></div>`;
+          }
+          if (result.required.length === 0) {
+            html += `<p class="scn-note">남은 어떤 경기 결과든 직행이 가능합니다.</p>`;
+          }
+          bodyEl.innerHTML = html;
+        });
+      }
+      function closeScenarioModal() { document.getElementById("scn-modal").hidden = true; }
+      document.getElementById("scn-backdrop").addEventListener("click", closeScenarioModal);
+      document.getElementById("scn-close-btn").addEventListener("click", closeScenarioModal);
 
     });
     </script>
+    <!-- 시나리오 모달 -->
+    <div class="scn-modal" id="scn-modal" hidden>
+      <div class="scn-backdrop" id="scn-backdrop"></div>
+      <div class="scn-panel">
+        <div class="scn-header">
+          <div>
+            <div class="scn-title" id="scn-team-name"></div>
+            <div class="scn-subtitle">직행 진출 경우의 수</div>
+          </div>
+          <button class="scn-close" id="scn-close-btn">✕</button>
+        </div>
+        <div id="scn-body"></div>
+      </div>
+    </div>
     <script src="./auth.js"></script>
     <script src="./help.js" defer></script>
   </body>
