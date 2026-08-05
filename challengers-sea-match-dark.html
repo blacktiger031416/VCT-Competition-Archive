@@ -2425,6 +2425,11 @@ function _loadRoster(teamFullName, code) {
     var s2 = localStorage.getItem("vct_roster:" + code);
     if (s2) { var r2 = _parseRoster(s2); if (r2 && r2.length) return r2; }
   }
+  var shortName = teamFullName.replace(/\s+(Esports?|Gaming|Club|Academy)$/i, '').trim();
+  if (shortName && shortName !== teamFullName) {
+    var s3 = localStorage.getItem("vct_roster:" + shortName);
+    if (s3) { var r3 = _parseRoster(s3); if (r3 && r3.length) return r3; }
+  }
   return _ALL_ROSTERS[teamFullName] || [];
 }
 TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
