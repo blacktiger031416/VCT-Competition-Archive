@@ -906,7 +906,9 @@
           const team = data[s.key] || {};
           const slot = document.createElement("div");
           slot.className = "group-slot" + (team.name ? " has-team" : " empty");
-          const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;">' : "";
+          const chTeamDef = CH_TEAMS.find(function(t){ return t.name === team.name; });
+          const whiteFilter = chTeamDef && chTeamDef.white ? "filter:brightness(0) invert(1);" : "";
+          const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;' + whiteFilter + '">' : "";
           slot.innerHTML = '<div class="slot-logo">' + logo + '</div><span class="slot-name">' + (team.name || "팀 선택") + '</span><span class="slot-rank">' + s.label + '</span>';
           if (isAdmin()) slot.addEventListener("click", function() { openChPicker(s.key, s.label); });
           el.innerHTML = ""; el.appendChild(slot);
