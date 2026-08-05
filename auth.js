@@ -1428,3 +1428,57 @@
   /* ── 초기 auth 상태 알림 (defer 완료 후 인라인 스크립트에 admin 상태 전파) ── */
   window.dispatchEvent(new CustomEvent("auth-state-change"));
 })();
+
+/* ── match-dark 페이지: 브라우저 캐싱으로 구 버전 openRosterPicker가 로드된 경우 패치 ── */
+(function patchRosterPicker() {
+  if (window.location.pathname.indexOf('match-dark') === -1) return;
+
+  function _pr(s) {
+    try {
+      var d = JSON.parse(s);
+      if (d && !Array.isArray(d) && d.main) return d.main.filter(Boolean).concat(d.subs || []);
+      if (Array.isArray(d)) return d;
+    } catch(e) {}
+    return null;
+  }
+
+  function _findRoster(teamFull, teamCode) {
+    var exact = ['vct_roster:' + teamFull, 'vct_roster:' + teamCode];
+    for (var i = 0; i < exact.length; i++) {
+      var s = localStorage.getItem(exact[i]);
+      if (s) { var r = _pr(s); if (r && r.length) return r; }
+    }
+    var all = window.storageKeys ? window.storageKeys() : [];
+    var tfl = teamFull.toLowerCase();
+    var tcl = teamCode.toLowerCase();
+    for (var j = 0; j < all.length; j++) {
+      var k = all[j];
+      if (!k || k.indexOf('vct_roster:') !== 0) continue;
+      var kn = k.substring(11).toLowerCase();
+      if (kn.length >= 3 && (tfl.indexOf(kn) !== -1 || kn.indexOf(tcl) !== -1)) {
+        var s2 = localStorage.getItem(k);
+        if (s2) { var r2 = _pr(s2); if (r2 && r2.length) return r2; }
+      }
+    }
+    return null;
+  }
+
+  var _orig = window.openRosterPicker;
+  window.openRosterPicker = function(mapIdx, playerIdx) {
+    try {
+      var m = window.maps && window.maps[mapIdx];
+      if (m) {
+        var p = m.players && m.players[playerIdx];
+        if (p) {
+          var tc = p.side === 'a' ? m.teamA : m.teamB;
+          var tf = tc === window.TEAM_A_CODE ? window.MATCH_TEAM_A : window.MATCH_TEAM_B;
+          if (window.TEAM_ROSTERS && !(window.TEAM_ROSTERS[tc] && window.TEAM_ROSTERS[tc].length)) {
+            var found = _findRoster(tf || '', tc || '');
+            if (found) window.TEAM_ROSTERS[tc] = found;
+          }
+        }
+      }
+    } catch(e) {}
+    if (typeof _orig === 'function') return _orig(mapIdx, playerIdx);
+  };
+})();
