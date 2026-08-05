@@ -3387,6 +3387,7 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
   if (!data[pKey]) data[pKey] = {};
   data[pKey][field] = value;
   try { localStorage.setItem(PKEY, JSON.stringify(data)); } catch(e) {}
+  (function(k,v){fetch('/api/data/'+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({value:v})}).catch(function(){});})(PKEY, JSON.stringify(data));
   // vct_p: 구조에도 동기화 (player-modal.js 없이 직접 처리)
   try {
     var _slot = data[pKey];
