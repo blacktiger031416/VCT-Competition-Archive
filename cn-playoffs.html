@@ -447,11 +447,13 @@
         const normalizedTeams = teams.map((team) => fullTeamName(team) || team || "미정");
         const codedTeams = normalizedTeams.map((team) => teamCode(team) || team || "미정");
         return [
+          /* 스코프된 기본 키 (stage1playoffs 전용) */
+          `result:stage1playoffs|Match_${matchId}`,
+          /* 하위 호환 후보들 */
           resultKey(matchId, normalizedTeams),
           resultKey(matchId, codedTeams),
           resultKey(matchId, [normalizedTeams[0], codedTeams[1]]),
           resultKey(matchId, [codedTeams[0], normalizedTeams[1]]),
-          /* cn-match-dark.html이 match= 파라미터를 받을 때 생성하는 키 포맷 */
           `result:stage1playoffs|${matchId}`,
         ];
       }
@@ -556,6 +558,7 @@
         const scoreB = rows[1]?.querySelector("em")?.textContent?.trim() || "0";
         const isBo5 = matchId === "Grand Finals" || matchId === "13";
         const query = new URLSearchParams({
+          match: `Match_${matchId}`,
           date: `Match ${matchId}`,
           teamA,
           teamB,
