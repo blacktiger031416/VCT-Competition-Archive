@@ -2508,12 +2508,16 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     const MK_LEAGUE_KEYWORDS = {
       "pacific":"pacific","emea":"emea","americas":"americas","cn":"cn",
       "masters":"masters","champions":"champions",
+      "challengers-korea":"challengers-korea","challengers-japan":"challengers-japan","challengers-sea":"challengers-sea",
     };
     function inferLeague(mkParts) {
       for (const part of mkParts) {
         const pl = part.toLowerCase();
         if (MK_TOURNAMENTS.has(pl)) return "masters";
         if (MK_LEAGUE_KEYWORDS[pl]) return MK_LEAGUE_KEYWORDS[pl];
+        if (pl.startsWith("ck_")) return "challengers-korea";
+        if (pl.startsWith("cj_")) return "challengers-japan";
+        if (pl.startsWith("sea_") || pl.startsWith("pacific_lcq_")) return "challengers-sea";
       }
       return "";
     }
@@ -2586,7 +2590,10 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
 
       const mkParts    = matchKey.split("|");
       const tournament = mkParts.find(p => MK_TOURNAMENTS.has(p.toLowerCase()))?.toLowerCase() || "";
-      const stage      = mkParts.find(p => MK_STAGES.has(p.toLowerCase()))?.toLowerCase() || "";
+      const stage      = mkParts.find(p => {
+        const pl = p.toLowerCase();
+        return MK_STAGES.has(pl) || pl.startsWith("ck_") || pl.startsWith("cj_") || pl.startsWith("sea_") || pl.startsWith("pacific_lcq_");
+      })?.toLowerCase() || "";
       const amRec      = amMap[`auto-match:${matchKey}`];
       const metaRec    = metaMap[matchKey];
       /* league 우선순위: auto-match > match-meta > matchKey 추론 */

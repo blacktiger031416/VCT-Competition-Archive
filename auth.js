@@ -382,13 +382,17 @@
   var MK_STAGES_CL      = { "swiss":1,"playoffs":1,"groupstage":1,"stage1":1,"stage2":1,
                              "stage1playoffs":1,"stage2playoffs":1,"kickoff":1 };
   var MK_LEAGUES_CL     = { "pacific":"pacific","emea":"emea","americas":"americas",
-                             "cn":"cn","masters":"masters","champions":"champions" };
+                             "cn":"cn","masters":"masters","champions":"champions",
+                             "challengers-korea":"challengers-korea","challengers-japan":"challengers-japan","challengers-sea":"challengers-sea" };
 
   function inferLeagueCl(parts) {
     for (var i = 0; i < parts.length; i++) {
       var p = parts[i].toLowerCase();
       if (MK_TOURNAMENTS_CL[p]) return "masters";
       if (MK_LEAGUES_CL[p])     return MK_LEAGUES_CL[p];
+      if (p.indexOf("ck_") === 0) return "challengers-korea";
+      if (p.indexOf("cj_") === 0) return "challengers-japan";
+      if (p.indexOf("sea_") === 0 || p.indexOf("pacific_lcq_") === 0) return "challengers-sea";
     }
     return "";
   }
@@ -421,7 +425,8 @@
       mkParts.forEach(function(p) {
         var pl = p.toLowerCase();
         if (MK_TOURNAMENTS_CL[pl]) tournament = pl;
-        if (MK_STAGES_CL[pl])      stage      = pl;
+        if (MK_STAGES_CL[pl] || pl.indexOf("ck_") === 0 || pl.indexOf("cj_") === 0 ||
+            pl.indexOf("sea_") === 0 || pl.indexOf("pacific_lcq_") === 0) stage = pl;
       });
 
       /* 각 선수 슬롯 처리 */
