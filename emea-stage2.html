@@ -1314,6 +1314,90 @@
 
     });
     </script>
+    <div class="ch-roster-modal" id="ch-roster-modal" hidden>
+      <div class="ch-roster-backdrop" id="ch-roster-backdrop"></div>
+      <div class="ch-roster-panel">
+        <div class="ch-roster-header">
+          <div class="ch-roster-logo-wrap" id="ch-roster-logo"></div>
+          <div class="ch-roster-htxt">
+            <p class="eyebrow">선수 명단</p>
+            <h2 id="ch-roster-title">팀</h2>
+          </div>
+          <button class="ch-roster-close" id="ch-roster-close">×</button>
+        </div>
+        <div class="ch-roster-body">
+          <span class="ch-roster-slabel">메인 선수 <span style="opacity:.5;font-size:10px">(5명)</span></span>
+          <ul class="ch-roster-list" id="ch-roster-main"></ul>
+          <span class="ch-roster-slabel" style="margin-top:2px">서브 선수</span>
+          <ul class="ch-roster-list" id="ch-roster-sub"></ul>
+          <div class="ch-roster-add-row" id="ch-roster-add-row">
+            <input type="text" class="ch-roster-add-input" id="ch-roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
+            <button class="ch-roster-add-btn" id="ch-roster-add-btn">추가</button>
+          </div>
+          <button class="ch-roster-change-btn" id="ch-roster-change-btn" style="display:none">팀 배정 변경</button>
+        </div>
+      </div>
+    </div>
+    <script>
+    (function(){
+      var _t=null,_k=null;
+      function rK(t){return"vct_roster:"+t;}
+      function ldR(t){try{var s=localStorage.getItem(rK(t));if(s){var p=JSON.parse(s);if(p&&p.main)return p;if(Array.isArray(p))return{main:p.slice(0,5),subs:p.slice(5)};}}catch(e){}return{main:["","","","",""],subs:[]};}
+      function svR(t,d){var k=rK(t),v=JSON.stringify(d);try{localStorage.setItem(k,v);}catch(e){}fetch("/api/data/"+encodeURIComponent(k),{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({value:v})}).catch(function(){});}
+      var modal=document.getElementById("ch-roster-modal");
+      var logoEl=document.getElementById("ch-roster-logo");
+      var titleEl=document.getElementById("ch-roster-title");
+      var mainEl=document.getElementById("ch-roster-main");
+      var subEl=document.getElementById("ch-roster-sub");
+      var addInp=document.getElementById("ch-roster-add-input");
+      var addRow=document.getElementById("ch-roster-add-row");
+      var chgBtn=document.getElementById("ch-roster-change-btn");
+      function openCR(key,team,label){
+        _t=team.name;_k=key;
+        titleEl.textContent=team.name;
+        var wc=team.white?' class="logo-white"':'';
+        logoEl.innerHTML=team.logo?'<img src="'+team.logo+'" alt="'+team.name+'"'+wc+'>':'';
+        var admin=window.vctIsAdmin&&window.vctIsAdmin();
+        addRow.style.display=admin?"flex":"none";
+        chgBtn.style.display=admin?"block":"none";
+        if(admin)chgBtn.onclick=function(){closeCR();openChPicker(key,label);};
+        addInp.value="";rndrCR();modal.removeAttribute("hidden");
+      }
+      function closeCR(){modal.setAttribute("hidden","");_t=null;}
+      function rndrCR(){
+        if(!_t)return;
+        var d=ldR(_t);
+        var admin=window.vctIsAdmin&&window.vctIsAdmin();
+        mainEl.innerHTML=[0,1,2,3,4].map(function(i){
+          var n=d.main[i]||"";
+          if(admin)return'<li><input class="ch-rm-input" data-i="'+i+'" value="'+n.replace(/"/g,"&quot;")+'" placeholder="선수 이름" />'+(n?'<button class="ch-rm-btn ch-dm" data-i="'+i+'">↓</button>':'')+'</li>';
+          return'<li><span>'+(n||'—')+'</span></li>';
+        }).join("");
+        if(admin){
+          mainEl.querySelectorAll(".ch-rm-input").forEach(function(inp){inp.addEventListener("blur",svMain);inp.addEventListener("keydown",function(e){if(e.key==="Enter"){svMain();inp.blur();}});});
+          mainEl.querySelectorAll(".ch-dm").forEach(function(b){b.addEventListener("click",function(){var d=ldR(_t);var n=(d.main[b.dataset.i]||"").trim();if(!n)return;d.main[b.dataset.i]="";if(!d.subs)d.subs=[];d.subs.push(n);svR(_t,d);rndrCR();});});
+        }
+        if(!d.subs||!d.subs.length){subEl.innerHTML='<li class="ch-roster-empty">등록된 서브 선수가 없습니다</li>';}
+        else{
+          subEl.innerHTML=d.subs.map(function(p,i){
+            if(admin)return'<li><button class="ch-rm-btn ch-pm" data-i="'+i+'">↑</button><input class="ch-rm-input" data-i="'+i+'" value="'+p.replace(/"/g,"&quot;")+'" style="flex:1" /><button class="ch-rm-btn ch-rs" data-i="'+i+'">×</button></li>';
+            return'<li><span>'+p+'</span></li>';
+          }).join("");
+          if(admin){
+            subEl.querySelectorAll(".ch-pm").forEach(function(b){b.addEventListener("click",function(){var d=ldR(_t);var n=(d.subs[b.dataset.i]||"").trim();if(!n)return;var e=-1;for(var j=0;j<5;j++){if(!d.main[j]||!d.main[j].trim()){e=j;break;}}if(e===-1){alert("메인 슬롯이 모두 찼습니다.");return;}d.main[e]=n;d.subs.splice(b.dataset.i,1);svR(_t,d);rndrCR();});});
+            subEl.querySelectorAll(".ch-rm-input").forEach(function(inp){inp.addEventListener("blur",function(){var d=ldR(_t);d.subs[inp.dataset.i]=inp.value.trim();svR(_t,d);});});
+            subEl.querySelectorAll(".ch-rs").forEach(function(b){b.addEventListener("click",function(){var d=ldR(_t);d.subs.splice(b.dataset.i,1);svR(_t,d);rndrCR();});});
+          }
+        }
+      }
+      function svMain(){if(!_t)return;var d=ldR(_t);d.main=Array.from(mainEl.querySelectorAll(".ch-rm-input")).map(function(i){return i.value.trim();});svR(_t,d);}
+      document.getElementById("ch-roster-add-btn").addEventListener("click",function(){var n=addInp.value.trim();if(!n||!_t)return;var d=ldR(_t);if(!d.subs)d.subs=[];d.subs.push(n);svR(_t,d);addInp.value="";rndrCR();});
+      addInp.addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("ch-roster-add-btn").click();});
+      document.getElementById("ch-roster-close").addEventListener("click",closeCR);
+      document.getElementById("ch-roster-backdrop").addEventListener("click",closeCR);
+      window.openChRoster=openCR;
+    })();
+    </script>
     <script src="./auth.js"></script>
     <script src="./help.js" defer></script>
   </body>
