@@ -48,7 +48,13 @@ initDB().catch((e) => console.error("DB init error:", e.message));
 
 /* ── 미들웨어 ─────────────────────────────────────── */
 app.use(express.json({ limit: "10mb" })); /* rebuild-vct-p에서 localData 대량 전송 허용 */
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), {
+  setHeaders: function(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+  }
+}));
 
 /* ── SSE: 실시간 브로드캐스트 ────────────────────── */
 const sseClients = new Set();
