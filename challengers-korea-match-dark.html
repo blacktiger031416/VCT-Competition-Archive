@@ -2323,6 +2323,19 @@ function _loadRoster(teamFullName, code) {
     var s3 = localStorage.getItem("vct_roster:" + shortName);
     if (s3) { var r3 = _parseRoster(s3); if (r3 && r3.length) return r3; }
   }
+  /* case-insensitive 전체 탐색 (대소문자 불일치 대응) */
+  var _ciTargets = [teamFullName.toLowerCase()];
+  if (code) _ciTargets.push(code.toLowerCase());
+  if (shortName) _ciTargets.push(shortName.toLowerCase());
+  var _allRK = window.storageKeys ? window.storageKeys() : [];
+  for (var _ri = 0; _ri < _allRK.length; _ri++) {
+    var _rk = _allRK[_ri];
+    if (!_rk || _rk.indexOf('vct_roster:') !== 0) continue;
+    if (_ciTargets.indexOf(_rk.substring(11).toLowerCase()) !== -1) {
+      var _rr = _parseRoster(localStorage.getItem(_rk));
+      if (_rr && _rr.length) return _rr;
+    }
+  }
   return _ALL_ROSTERS[teamFullName] || [];
 }
 TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
