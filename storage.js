@@ -155,6 +155,9 @@
     return Promise.all(syncs);
   }
 
+  /* ── _mem 키 목록 공개 (localStorage.length/key()가 _mem을 못 읽는 문제 해결) ── */
+  window.storageKeys = function() { return Object.keys(_mem); };
+
   /* ── 서버 전체 데이터 로드 ───────────────────────────── */
   window.storageReady = fetch("/api/data/all")
     .then(function (r) {

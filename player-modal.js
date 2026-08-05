@@ -59,8 +59,9 @@
     // maps가 없으면 players: 키에서 lazy 복구 (cross-page DB 누락 대응)
     if (!pd.maps || pd.maps.length === 0) {
       var rebuilt = false;
-      for (var _i = 0; _i < localStorage.length; _i++) {
-        var _k = localStorage.key(_i);
+      var _allStorageKeys = window.storageKeys ? window.storageKeys() : [];
+      for (var _i = 0; _i < _allStorageKeys.length; _i++) {
+        var _k = _allStorageKeys[_i];
         if (!_k || !_k.startsWith('players:')) continue;
         // players:MATCH_KEY:mapIdx 형태
         var _withoutPrefix = _k.substring('players:'.length);
@@ -114,8 +115,9 @@
 
     var count = 0;
     var keys = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
+    var _migKeys = window.storageKeys ? window.storageKeys() : [];
+    for (var i = 0; i < _migKeys.length; i++) {
+      var k = _migKeys[i];
       if (k && k.startsWith('players:')) keys.push(k);
     }
 
@@ -158,9 +160,10 @@
       } catch(e) {}
     });
 
+    var _migAllKeys = window.storageKeys ? window.storageKeys() : [];
     var metaKeys = [];
-    for (var ii = 0; ii < localStorage.length; ii++) {
-      var kk = localStorage.key(ii);
+    for (var ii = 0; ii < _migAllKeys.length; ii++) {
+      var kk = _migAllKeys[ii];
       if (kk && kk.startsWith('vct_player_meta:')) metaKeys.push(kk);
     }
     metaKeys.forEach(function(mk) {
@@ -174,8 +177,8 @@
     });
 
     var winsKeys = [];
-    for (var jj = 0; jj < localStorage.length; jj++) {
-      var wk = localStorage.key(jj);
+    for (var jj = 0; jj < _migAllKeys.length; jj++) {
+      var wk = _migAllKeys[jj];
       if (wk && wk.startsWith('vct_player_wins:')) winsKeys.push(wk);
     }
     winsKeys.forEach(function(wkk) {

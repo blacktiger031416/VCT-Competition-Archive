@@ -399,10 +399,11 @@
 
   function rebuildVctpFromLocal() {
     var updated = 0, skipped = 0;
-    /* localStorage에서 players: 키 전부 수집 */
+    /* localStorage에서 players: 키 전부 수집 (_mem 포함) */
     var playerKeys = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
+    var allKeys = window.storageKeys ? window.storageKeys() : [];
+    for (var i = 0; i < allKeys.length; i++) {
+      var k = allKeys[i];
       if (k && k.indexOf("players:") === 0) playerKeys.push(k);
     }
 
@@ -482,11 +483,12 @@
     rebuildBtn.disabled = true;
     rebuildBtn.innerHTML = "⏳ 처리중...";
 
-    /* ── 로컬 players:* / vct_roster:* / match-meta:* / vct_p:* 전부 수집 ── */
+    /* ── 로컬 players:* / vct_roster:* / match-meta:* / vct_p:* 전부 수집 (_mem 포함) ── */
     var localData = {};
     var localCount = 0;
-    for (var i = 0; i < localStorage.length; i++) {
-      var lk = localStorage.key(i);
+    var _allKeys = window.storageKeys ? window.storageKeys() : [];
+    for (var i = 0; i < _allKeys.length; i++) {
+      var lk = _allKeys[i];
       if (!lk) continue;
       if (lk.indexOf("players:")    === 0 ||
           lk.indexOf("vct_roster:") === 0 ||
