@@ -3277,9 +3277,36 @@ function openRosterPicker(mapIdx, playerIdx) {
   const p = m.players[playerIdx];
   const teamCode = p.side === "a" ? m.teamA : m.teamB;
   var _teamFull = teamCode === TEAM_A_CODE ? MATCH_TEAM_A : MATCH_TEAM_B;
-  var _fresh = _loadRoster(_teamFull, teamCode);
-  if (_fresh.length) TEAM_ROSTERS[teamCode] = _fresh;
-  const roster   = TEAM_ROSTERS[teamCode] || [];
+  /* 클릭 시점에 storageKeys() 직접 스캔 — _loadRoster 버전 의존 없이 안전하게 */
+  var roster = (function() {
+    var _pr = function(s) {
+      try {
+        var _d = JSON.parse(s);
+        if (_d && !Array.isArray(_d) && _d.main) return _d.main.filter(Boolean).concat(_d.subs || []);
+        if (Array.isArray(_d)) return _d;
+      } catch(e) {}
+      return null;
+    };
+    var _exactKeys = ['vct_roster:' + _teamFull, 'vct_roster:' + teamCode];
+    for (var _ei = 0; _ei < _exactKeys.length; _ei++) {
+      var _es = localStorage.getItem(_exactKeys[_ei]);
+      if (_es) { var _er = _pr(_es); if (_er && _er.length) return _er; }
+    }
+    var _all = window.storageKeys ? window.storageKeys() : [];
+    var _tfl = _teamFull.toLowerCase();
+    var _tcl = teamCode.toLowerCase();
+    for (var _ri = 0; _ri < _all.length; _ri++) {
+      var _rk = _all[_ri];
+      if (!_rk || _rk.indexOf('vct_roster:') !== 0) continue;
+      var _kn = _rk.substring(11).toLowerCase();
+      if (_kn.length >= 3 && (_tfl.indexOf(_kn) !== -1 || _kn.indexOf(_tcl) !== -1)) {
+        var _rs = localStorage.getItem(_rk);
+        if (_rs) { var _rr = _pr(_rs); if (_rr && _rr.length) return _rr; }
+      }
+    }
+    return TEAM_ROSTERS[teamCode] || [];
+  })();
+  if (roster.length) TEAM_ROSTERS[teamCode] = roster;
   const customVal = roster.includes(p.name) ? "" : (p.name || "");
 
   const popup = document.createElement("div");
