@@ -362,7 +362,7 @@
 
       function readStoredResult(matchId, teams) {
         try {
-          const raw = localStorage.getItem(`result:Match ${matchId}|${teams[0] || "미정"}|${teams[1] || "미정"}`);
+          const raw = localStorage.getItem(`result:stage2playoffs|Match_${matchId}`);
           if (raw) { const s = JSON.parse(raw); return { scoreA: normalizeScore(s.scoreA), scoreB: normalizeScore(s.scoreB) }; }
         } catch {}
         return { scoreA: 0, scoreB: 0 };
@@ -446,7 +446,7 @@
             const score  = `${state.score.scoreA} : ${state.score.scoreB}`;
             const isBo5  = card.classList.contains("grand-final-card") || matchId === "13";
             const params = new URLSearchParams({
-              date: `Match ${matchId}`, teamA, teamB, score,
+              match: `Match_${matchId}`, date: `Match ${matchId}`, teamA, teamB, score,
               from: "stage2playoffs",
               ...(isBo5 ? { bo5: "1" } : {}),
             });
