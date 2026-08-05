@@ -1008,10 +1008,10 @@
       return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
     });
 
-    // 어드민 경고: 인식된 스탯이 없으면 표시
+    // 어드민 경고: 실제 데이터가 없으면 표시 (league 미태그 포함)
     if (admin) {
       var warnEl = document.getElementById('pm-key-warn');
-      if (warnEl) warnEl.style.display = recognizedMaps.length === 0 ? 'inline' : 'none';
+      if (warnEl) warnEl.style.display = allMaps.length === 0 ? 'inline' : 'none';
     }
 
     if (knownGroups.length >= 1) {
@@ -1027,7 +1027,7 @@
       var currentLabel, currentCount;
       if (_activeFilter === 'all') {
         currentLabel = '전체';
-        currentCount = recognizedMaps.length; // 기타 제외
+        currentCount = allMaps.length;
       } else {
         var activeGroup = null;
         for (var gi = 0; gi < knownGroups.length; gi++) {
@@ -1051,7 +1051,7 @@
 
     /* ── 필터 적용 ── */
     var maps = _activeFilter === 'all'
-      ? recognizedMaps  // 기타 맵 제외
+      ? allMaps  // league 미태그 맵 포함 전체 표시
       : allMaps.filter(function(m) {
           var key = (m.league || '') + '|' + (m.tournament || '') + '|' + normalizeStage(m.stage);
           return key === _activeFilter;

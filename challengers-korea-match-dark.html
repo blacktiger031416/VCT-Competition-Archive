@@ -1726,8 +1726,9 @@ var MATCH_KEY = (function() {
   if (_MATCH_TOURNAMENT && _oldKey.indexOf(_MATCH_TOURNAMENT) === -1) return;
   // 구버전 키로 저장된 항목을 모두 찾아 신버전 키로 복사
   var toMove = [];
-  for (var i = 0; i < localStorage.length; i++) {
-    var k = localStorage.key(i);
+  var _allMoveKeys = window.storageKeys ? window.storageKeys() : [];
+  for (var i = 0; i < _allMoveKeys.length; i++) {
+    var k = _allMoveKeys[i];
     if (!k) continue;
     if (k === _oldKey ||
         k.startsWith('set:'         + _oldKey) ||
@@ -3382,9 +3383,10 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
     } else {
       /* 선수 이름이 지워진 경우: 해당 matchKey+mapIdx 항목을 모든 vct_p에서 제거 */
       try {
-        for (var _vi = 0; _vi < localStorage.length; _vi++) {
-          var _vkk = localStorage.key(_vi);
-          if (!_vkk || !_vkk.startsWith('vct_p:')) continue;
+        var _vctpKeys = window.storageKeys ? window.storageKeys().filter(function(x){return x&&x.startsWith('vct_p:');}) : [];
+        for (var _vi = 0; _vi < _vctpKeys.length; _vi++) {
+          var _vkk = _vctpKeys[_vi];
+          if (!_vkk) continue;
           try {
             var _pdd = JSON.parse(localStorage.getItem(_vkk) || '{}');
             if (!_pdd.maps) continue;
