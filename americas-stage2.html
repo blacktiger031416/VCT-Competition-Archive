@@ -362,7 +362,8 @@
       <div class="ga-backdrop" id="ch-backdrop"></div>
       <div class="ga-panel" role="dialog" aria-modal="true" style="max-width:400px">
         <h2 id="ch-modal-title">팀 배정</h2>
-        <p>팀 이름과 로고 URL을 입력하세요.</p>
+        <p>팀을 선택하거나 직접 입력하세요.</p>
+        <div id="ch-team-picker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px"></div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
           <input type="text" id="ch-name-input" placeholder="팀 이름" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none">
           <input type="text" id="ch-logo-input" placeholder="로고 URL (선택)" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none">
@@ -1021,6 +1022,12 @@
       renderStandings();
 
       // ── Challengers 초청 팀 ──────────────────────
+      const CH_TEAMS = [
+        { code: 'M80',  name: 'M80',              logo: './assets/teams/M80.png',  white: false },
+        { code: 'MAS',  name: 'LA MASIA',         logo: './assets/teams/MAS.png',  white: false },
+        { code: 'BST',  name: 'BESTIA',           logo: './assets/teams/BST.png',  white: true  },
+        { code: '2G',   name: '2Game Esports',    logo: './assets/teams/2G.png',   white: false },
+      ];
       const CH_KEY = "stage2_americas_ch_invite";
       const CH_SLOTS = [
         { id: "ch-japan-slot", key: "japan", label: "Challengers" },
@@ -1038,7 +1045,9 @@
           const team = data[s.key] || {};
           const slot = document.createElement("div");
           slot.className = "group-slot" + (team.name ? " has-team" : " empty");
-          const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;">' : "";
+          const chTeamDef = CH_TEAMS.find(function(t){ return t.name === team.name; });
+          const whiteFilter = chTeamDef && chTeamDef.white ? "filter:brightness(0) invert(1);" : "";
+          const logo = team.logo ? '<img src="' + team.logo + '" alt="' + (team.name||'') + '" style="width:40px;height:40px;object-fit:contain;' + whiteFilter + '">' : "";
           slot.innerHTML = '<div class="slot-logo">' + logo + '</div><span class="slot-name">' + (team.name || "팀 선택") + '</span><span class="slot-rank">' + s.label + '</span>';
           if (isAdmin()) slot.addEventListener("click", function() { openChPicker(s.key, s.label); });
           el.innerHTML = ""; el.appendChild(slot);
@@ -1051,6 +1060,22 @@
         document.getElementById("ch-modal-title").textContent = label + " 팀 배정";
         document.getElementById("ch-name-input").value = team.name || "";
         document.getElementById("ch-logo-input").value = team.logo || "";
+        const pickerEl = document.getElementById("ch-team-picker");
+        pickerEl.innerHTML = "";
+        CH_TEAMS.forEach(function(t) {
+          const btn = document.createElement("button");
+          btn.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 6px 8px;cursor:pointer;transition:all .12s;";
+          if (team.name === t.name) btn.style.borderColor = "rgba(255,87,12,.6)";
+          btn.innerHTML = '<img src="' + t.logo + '" style="width:28px;height:28px;object-fit:contain;' + (t.white ? 'filter:brightness(0) invert(1);' : '') + '" alt="" />'
+            + '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:900;letter-spacing:.06em;color:rgba(255,255,255,.6);">' + t.code + '</span>';
+          btn.addEventListener("click", function() {
+            document.getElementById("ch-name-input").value = t.name;
+            document.getElementById("ch-logo-input").value = t.logo;
+            pickerEl.querySelectorAll("button").forEach(function(b) { b.style.borderColor = "rgba(255,255,255,.08)"; });
+            btn.style.borderColor = "rgba(255,87,12,.6)";
+          });
+          pickerEl.appendChild(btn);
+        });
         const actions = document.getElementById("ch-actions");
         actions.innerHTML = '<button class="ga-btn ga-btn-clear" id="ch-clear">비우기</button><button class="ga-btn ga-btn-cancel" id="ch-cancel">취소</button><button class="ga-btn ga-btn-save" id="ch-save">저장</button>';
         document.getElementById("ch-cancel").addEventListener("click", closeChModal);
