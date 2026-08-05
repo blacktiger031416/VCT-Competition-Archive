@@ -109,16 +109,6 @@
 
     var memValue = value;
     var dbValue = value;
-    /* vct_p:* — 최근 15개만 */
-    if (key.indexOf("vct_p:") === 0) {
-      try {
-        var _pd = JSON.parse(value);
-        if (_pd && Array.isArray(_pd.maps) && _pd.maps.length > 15) {
-          memValue = JSON.stringify({ maps: _pd.maps.slice(-15) });
-          dbValue = memValue;
-        }
-      } catch (_e) {}
-    }
 
     _mem[key] = memValue;
 
@@ -172,14 +162,6 @@
         /* 관리자: 이미 _mem에 있는 값은 덮어쓰지 않음 */
         if (_isAdmin && Object.prototype.hasOwnProperty.call(_mem, key)) return;
         var storeVal = data[key];
-        if (key.indexOf("vct_p:") === 0) {
-          try {
-            var _pd2 = JSON.parse(storeVal);
-            if (_pd2 && Array.isArray(_pd2.maps) && _pd2.maps.length > 15) {
-              storeVal = JSON.stringify({ maps: _pd2.maps.slice(-15) });
-            }
-          } catch (_e2) {}
-        }
         _mem[key] = storeVal;
       });
 

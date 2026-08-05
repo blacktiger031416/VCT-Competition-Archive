@@ -2304,14 +2304,20 @@ var _ALL_ROSTERS = {
 };
 var TEAM_ROSTERS = {};
 function _loadRoster(teamFullName, code) {
-  try {
-    var s = localStorage.getItem("vct_roster:" + teamFullName);
-    if (s) {
+  var _parseRoster = function(s) {
+    try {
       var p = JSON.parse(s);
       if (p && !Array.isArray(p) && p.main) return p.main.filter(Boolean).concat(p.subs || []);
       if (Array.isArray(p)) return p;
-    }
-  } catch (e) {}
+    } catch(e) {}
+    return null;
+  };
+  var s1 = localStorage.getItem("vct_roster:" + teamFullName);
+  if (s1) { var r1 = _parseRoster(s1); if (r1 && r1.length) return r1; }
+  if (code && code !== teamFullName) {
+    var s2 = localStorage.getItem("vct_roster:" + code);
+    if (s2) { var r2 = _parseRoster(s2); if (r2 && r2.length) return r2; }
+  }
   return _ALL_ROSTERS[teamFullName] || [];
 }
 TEAM_ROSTERS[TEAM_A_CODE] = _loadRoster(MATCH_TEAM_A, TEAM_A_CODE);
