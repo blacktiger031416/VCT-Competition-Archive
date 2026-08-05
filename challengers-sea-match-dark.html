@@ -3344,6 +3344,9 @@ function openRosterPicker(mapIdx, playerIdx) {
   const m = maps[mapIdx];
   const p = m.players[playerIdx];
   const teamCode = p.side === "a" ? m.teamA : m.teamB;
+  var _teamFull = teamCode === TEAM_A_CODE ? MATCH_TEAM_A : MATCH_TEAM_B;
+  var _fresh = _loadRoster(_teamFull, teamCode);
+  if (_fresh.length) TEAM_ROSTERS[teamCode] = _fresh;
   const roster   = TEAM_ROSTERS[teamCode] || [];
   const customVal = roster.includes(p.name) ? "" : (p.name || "");
 
