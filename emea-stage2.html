@@ -1371,7 +1371,7 @@
         mainEl.innerHTML=[0,1,2,3,4].map(function(i){
           var n=d.main[i]||"";
           if(admin)return'<li><input class="ch-rm-input" data-i="'+i+'" value="'+n.replace(/"/g,"&quot;")+'" placeholder="선수 이름" />'+(n?'<button class="ch-rm-btn ch-dm" data-i="'+i+'">↓</button>':'')+'</li>';
-          return'<li><span>'+(n||'—')+'</span></li>';
+          return'<li><span data-player="'+n.replace(/"/g,"&quot;")+'">'+( n||'—')+'</span></li>';
         }).join("");
         if(admin){
           mainEl.querySelectorAll(".ch-rm-input").forEach(function(inp){inp.addEventListener("blur",svMain);inp.addEventListener("keydown",function(e){if(e.key==="Enter"){svMain();inp.blur();}});});
@@ -1381,7 +1381,7 @@
         else{
           subEl.innerHTML=d.subs.map(function(p,i){
             if(admin)return'<li><button class="ch-rm-btn ch-pm" data-i="'+i+'">↑</button><input class="ch-rm-input" data-i="'+i+'" value="'+p.replace(/"/g,"&quot;")+'" style="flex:1" /><button class="ch-rm-btn ch-rs" data-i="'+i+'">×</button></li>';
-            return'<li><span>'+p+'</span></li>';
+            return'<li><span data-player="'+p.replace(/"/g,"&quot;")+'">'+p+'</span></li>';
           }).join("");
           if(admin){
             subEl.querySelectorAll(".ch-pm").forEach(function(b){b.addEventListener("click",function(){var d=ldR(_t);var n=(d.subs[b.dataset.i]||"").trim();if(!n)return;var e=-1;for(var j=0;j<5;j++){if(!d.main[j]||!d.main[j].trim()){e=j;break;}}if(e===-1){alert("메인 슬롯이 모두 찼습니다.");return;}d.main[e]=n;d.subs.splice(b.dataset.i,1);svR(_t,d);rndrCR();});});
@@ -1389,6 +1389,7 @@
             subEl.querySelectorAll(".ch-rs").forEach(function(b){b.addEventListener("click",function(){var d=ldR(_t);d.subs.splice(b.dataset.i,1);svR(_t,d);rndrCR();});});
           }
         }
+        if(!admin)[mainEl,subEl].forEach(function(c){c.querySelectorAll('[data-player]').forEach(function(s){var pn=s.getAttribute('data-player');if(!pn)return;s.style.cursor='pointer';s.addEventListener('click',function(){if(window.openPlayerModal)window.openPlayerModal(pn,_t,logoEl.innerHTML);});});});
       }
       function svMain(){if(!_t)return;var d=ldR(_t);d.main=Array.from(mainEl.querySelectorAll(".ch-rm-input")).map(function(i){return i.value.trim();});svR(_t,d);}
       document.getElementById("ch-roster-add-btn").addEventListener("click",function(){var n=addInp.value.trim();if(!n||!_t)return;var d=ldR(_t);if(!d.subs)d.subs=[];d.subs.push(n);svR(_t,d);addInp.value="";rndrCR();});
@@ -1398,6 +1399,7 @@
       window.openChRoster=openCR;
     })();
     </script>
+    <script src="./player-modal.js"></script>
     <script src="./auth.js"></script>
     <script src="./help.js" defer></script>
   </body>
