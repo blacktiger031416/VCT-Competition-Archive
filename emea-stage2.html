@@ -1185,6 +1185,7 @@
       function closeChModal() { document.getElementById("ch-modal").hidden = true; _chCtx = null; }
       document.getElementById("ch-backdrop").addEventListener("click", closeChModal);
       document.addEventListener("keydown", function(e) { if (e.key === "Escape" && !document.getElementById("ch-modal").hidden) closeChModal(); });
+      window.openChPicker = openChPicker;
       renderChInvite();
 
       /* ══════════════════════════════════════════════════
@@ -1360,7 +1361,7 @@
         var admin=window.vctIsAdmin&&window.vctIsAdmin();
         addRow.style.display=admin?"flex":"none";
         chgBtn.style.display=admin?"block":"none";
-        if(admin)chgBtn.onclick=function(){closeCR();openChPicker(key,label);};
+        if(admin)chgBtn.onclick=function(){closeCR();if(window.openChPicker)window.openChPicker(key,label);};
         addInp.value="";rndrCR();modal.removeAttribute("hidden");
       }
       function closeCR(){modal.setAttribute("hidden","");_t=null;}
