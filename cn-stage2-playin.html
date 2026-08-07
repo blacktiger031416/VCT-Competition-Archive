@@ -26,7 +26,7 @@
     .playoff-hero p{font-size:13px;color:rgba(255,255,255,.35);font-family:"Noto Sans KR",sans-serif;font-weight:500}
     .playoff-board{max-width:1280px;margin:0 auto;padding:0 48px}
     .bracket-scroll{overflow-x:auto;padding-bottom:20px}
-    .bracket-rounds{display:grid;grid-template-columns:repeat(5,minmax(190px,1fr));gap:8px;min-width:950px;margin-bottom:4px}
+    .bracket-rounds{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:8px;min-width:760px;margin-bottom:4px}
     .bracket-rounds span{font-family:"Barlow Condensed",sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:center;padding:0 0 10px;border-bottom:1px solid rgba(255,255,255,.07)}
     .bracket-section-title{font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);padding:24px 0 10px 12px;border-left:3px solid var(--acc);margin:8px 0 6px}
     .bracket-section-title.lower-title{padding-top:16px}
@@ -103,7 +103,7 @@
     <section class="playoff-board" aria-label="Play-In 대진표">
       <div class="bracket-scroll">
         <div class="bracket-rounds" aria-hidden="true">
-          <span>UB Round 1</span><span>UB Round 2</span><span>UB Semifinals</span><span>UB Final</span><span>Grand Final</span>
+          <span>UB Round 1</span><span>UB Round 2</span><span>UB Semifinals</span><span>UB Final</span>
         </div>
         <h2 class="bracket-section-title">상위조 대진표</h2>
         <div class="bracket-grid upper-bracket">
@@ -140,21 +140,15 @@
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M5</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M6</span><strong>—</strong><em>0</em></div></article>
           </div>
-          <!-- Col 4: UB Final — M15 (both qualify) -->
+          <!-- Col 4: UB Final — M15 (양 팀 모두 진출) -->
           <div class="bracket-column bracket-column-center">
             <article class="bracket-match qualifier-card"><h3>Match 15 · UB Final <span>(Bo3)</span></h3>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M11</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M12</span><strong>—</strong><em>0</em></div></article>
           </div>
-          <!-- Col 5: Grand Final — M18 -->
-          <div class="bracket-column bracket-column-center">
-            <article class="bracket-match"><h3>Match 18 · Grand Final <span>(Bo3)</span></h3>
-              <div class="bracket-team placeholder"><span class="bracket-seed">↗ M15</span><strong>—</strong><em>0</em></div>
-              <div class="bracket-team placeholder"><span class="bracket-seed">↗ M17</span><strong>—</strong><em>0</em></div></article>
-          </div>
         </div>
         <div class="bracket-rounds" aria-hidden="true" style="margin-top:8px">
-          <span>LB Round 1</span><span>LB Round 2</span><span>LB Round 3</span><span>LB Round 4</span><span>LB Final</span>
+          <span>LB Round 1</span><span>LB Round 2</span><span>LB Round 3</span><span>LB Round 4</span>
         </div>
         <h2 class="bracket-section-title lower-title">하위조 대진표</h2>
         <div class="bracket-grid lower-bracket">
@@ -185,23 +179,17 @@
               <div class="bracket-team placeholder"><span class="bracket-seed">M12 패자</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M10</span><strong>—</strong><em>0</em></div></article>
           </div>
-          <!-- Col 4: LBR4 — M16 -->
+          <!-- Col 4: LBR4 — M16 (양 팀 모두 진출) -->
           <div class="bracket-column bracket-column-center">
-            <article class="bracket-match"><h3>Match 16 <span>(Bo3)</span></h3>
+            <article class="bracket-match qualifier-card"><h3>Match 16 · LB Final <span>(Bo3)</span></h3>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M13</span><strong>—</strong><em>0</em></div>
               <div class="bracket-team placeholder"><span class="bracket-seed">↗ M14</span><strong>—</strong><em>0</em></div></article>
-          </div>
-          <!-- Col 5: LB Final — M17 (both qualify) -->
-          <div class="bracket-column bracket-column-center">
-            <article class="bracket-match qualifier-card"><h3>Match 17 · LB Final <span>(Bo3)</span></h3>
-              <div class="bracket-team placeholder"><span class="bracket-seed">M15 패자</span><strong>—</strong><em>0</em></div>
-              <div class="bracket-team placeholder"><span class="bracket-seed">↗ M16</span><strong>—</strong><em>0</em></div></article>
           </div>
         </div>
         <div class="bracket-footer">
           <div class="kickoff-legend">
             <span><span class="legend-pip win-pip"></span>다음 라운드 진출</span>
-            <span><span class="legend-pip qual-pip"></span>PlayOff 진출 (M15·M17 양 팀 모두)</span>
+            <span><span class="legend-pip qual-pip"></span>PlayOff 진출 (M15·M16 양 팀 모두)</span>
           </div>
         </div>
       </div>
@@ -277,12 +265,8 @@
       15:[{match:11,result:"winner"},{match:12,result:"winner"}],
       // LBR4
       16:[{match:13,result:"winner"},{match:14,result:"winner"}],
-      // LB Final (qualifier)
-      17:[{match:15,result:"loser"},{match:16,result:"winner"}],
-      // Grand Final
-      18:[{match:15,result:"winner"},{match:17,result:"winner"}],
     };
-    var QUALIFIER_MATCHES=[15,17];
+    var QUALIFIER_MATCHES=[15,16];
     function isSeeded(mid,si){
       if(mid===1||mid===2)return true;
       if(mid===3&&si===0)return true;
@@ -313,7 +297,7 @@
     }
     function resolveState(){
       var st={};
-      for(var mid=1;mid<=18;mid++){
+      for(var mid=1;mid<=16;mid++){
         var teams=resolveTeams(mid,st);
         var score=readResult(mid,teams);
         var hasW=teams[0]&&teams[1]&&score.scoreA!==score.scoreB;
