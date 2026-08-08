@@ -226,6 +226,11 @@
             <span class="qs-dest">→ Challengers 2026: EMEA Stage 2</span>
             <div class="qs-team tbd" id="qt-champ">TBD</div>
           </div>
+          <div class="qual-slot">
+            <span class="qs-label">Runner-up</span>
+            <span class="qs-dest">→ Challengers 2026: EMEA Stage 2</span>
+            <div class="qs-team tbd" id="qt-runner">TBD</div>
+          </div>
         </div>
 
         <div class="bracket-wrap">
@@ -426,7 +431,7 @@
       function renderPO(po){
         document.getElementById('po-sf').innerHTML=makePoBrCard(1,po)+makePoBrCard(2,po);
         document.getElementById('po-gf').innerHTML=makePoBrCard(3,po);
-        var chEl=document.getElementById('qt-champ');
+        var chEl=document.getElementById('qt-champ'), ruEl=document.getElementById('qt-runner');
         function qsHTML(name){
           if(!name) return 'TBD';
           var t=getTeam(name);
@@ -434,6 +439,7 @@
             +'<span>'+(t?t.code:name)+'</span>';
         }
         chEl.innerHTML=qsHTML(po[3].winner); chEl.className='qs-team'+(po[3].winner?'':' tbd');
+        ruEl.innerHTML=qsHTML(po[3].loser);  ruEl.className='qs-team'+(po[3].loser?'':' tbd');
         if(isAdmin()){
           document.querySelectorAll('[data-po-mid]').forEach(function(el){
             el.addEventListener('click',function(){ openModal({type:'po', mid:parseInt(el.dataset.poMid)}); });
