@@ -97,22 +97,35 @@
 
       /* Playoff bracket */
       .bracket-wrap { overflow-x: auto; padding-bottom: 12px; }
-      .bracket-scroll { min-width: max-content; display: flex; flex-direction: column; }
-      .ub-section { display: flex; gap: 12px; height: 440px; }
-      .lb-section { display: flex; gap: 12px; height: 250px; }
-      .lb-sep { height: 1px; background: rgba(255,255,255,.07); margin: 14px 0; }
-      .round-col { width: 190px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .bracket-scroll { min-width: max-content; display: flex; flex-direction: column; gap: 0; }
+
+      .br-section { display: flex; gap: 10px; }
+      .br-section.ub-row  { height: 380px; margin-bottom: 0; }
+      .br-section.mid-row { height: 280px; }
+      .br-section.lb-row  { height: 260px; }
+      .br-sep { height: 1px; background: rgba(255,255,255,.06); margin: 10px 0; }
+
+      .round-col { width: 170px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .round-col.wide { width: 190px; }
       .round-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.55); margin-bottom: 6px; white-space: nowrap; }
-      .lb-label { color: rgba(255,150,30,.55); }
-      .qual-label { color: rgba(212,255,31,.85); }
+      .mid-label  { color: rgba(100,200,255,.55); }
+      .lb-label   { color: rgba(255,150,30,.55); }
+      .qual-label { color: rgba(212,255,31,.9) !important; }
+      .finals-label { color: rgba(255,255,200,.7); }
       .round-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+
       .bracket-match { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 7px 10px; transition: border-color .15s, background .15s; }
       body.is-admin .bracket-match { cursor: pointer; }
       body.is-admin .bracket-match:hover { border-color: rgba(212,255,31,.3); background: var(--bg-card2); }
-      .lb-match { border-color: rgba(255,150,30,.15); }
-      body.is-admin .lb-match:hover { border-color: rgba(255,150,30,.4); }
-      .qual-match { border-color: rgba(212,255,31,.28); background: rgba(212,255,31,.03); }
-      body.is-admin .qual-match:hover { border-color: rgba(212,255,31,.5); }
+      .mid-match  { border-color: rgba(100,200,255,.15); }
+      body.is-admin .mid-match:hover  { border-color: rgba(100,200,255,.4); }
+      .lb-match   { border-color: rgba(255,150,30,.15); }
+      body.is-admin .lb-match:hover   { border-color: rgba(255,150,30,.4); }
+      .qual-match { border-color: rgba(212,255,31,.3); background: rgba(212,255,31,.04); }
+      body.is-admin .qual-match:hover { border-color: rgba(212,255,31,.55); }
+      .finals-match { border-color: rgba(255,255,200,.25); background: rgba(255,255,200,.02); }
+      body.is-admin .finals-match:hover { border-color: rgba(255,255,200,.5); }
+
       .m-row { display: flex; align-items: center; gap: 5px; padding: 3px 0; }
       .m-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
       .m-name { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #e8e4e0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -123,13 +136,13 @@
       .m-divider { height: 1px; background: rgba(255,255,255,.06); margin: 1px 0; }
 
       /* Qualified slots */
-      .qualified-grid { display: flex; gap: 12px; margin-bottom: 36px; flex-wrap: wrap; }
-      .qual-slot { flex: 1; min-width: 120px; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
+      .qualified-grid { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+      .qual-slot { flex: 1; min-width: 100px; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
       .qs-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
       .qs-dest { font-size: 10px; color: rgba(255,255,255,.3); font-family: 'Noto Sans KR', sans-serif; }
-      .qs-team { display: flex; align-items: center; gap: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
-      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; display: block; }
-      .qs-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+      .qs-team { display: flex; align-items: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 22px; }
+      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 13px; display: block; }
+      .qs-logo { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
 
       /* Modal */
       .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
@@ -190,8 +203,9 @@
           <p class="intro">
             북유럽·동유럽 지역 NORTH//EAST입니다.<br>
             16팀이 Group A/B로 나뉘어 라운드로빈(각 28경기)을 치르고,<br>
-            각 그룹 상위 4팀씩 총 8팀이 더블 엘리미네이션 플레이오프에 진출합니다.<br>
-            Grand Final만 Bo5로 진행됩니다.
+            각 그룹 상위 4팀씩 총 8팀이 트리플 엘리미네이션 플레이오프에 진출합니다.<br>
+            Upper Final · Lower Final · Grand Final은 Bo5입니다.<br>
+            Middle R3 진출팀 2팀 + Grand Final 진출팀 2팀, 총 4팀이 EMEA Stage 2에 진출합니다.
           </p>
         </div>
         <div class="league-mark">
@@ -259,60 +273,110 @@
       <!-- Playoff -->
       <section aria-labelledby="po-title">
         <div class="section-heading">
-          <p class="eyebrow">Phase 2 · Double Elimination</p>
+          <p class="eyebrow">Phase 2 · Triple Elimination</p>
           <h2 id="po-title">Playoff</h2>
         </div>
+
+        <!-- 진출 슬롯 -->
         <div class="qualified-grid">
           <div class="qual-slot">
-            <span class="qs-label">Champion</span>
-            <span class="qs-dest">→ Challengers 2026: EMEA Stage 2</span>
-            <div class="qs-team tbd" id="qt-champ">TBD</div>
+            <span class="qs-label">3rd / 4th</span>
+            <span class="qs-dest">Middle R3 진출 → EMEA Stage 2</span>
+            <div class="qs-team tbd" id="qt-q3">TBD</div>
+          </div>
+          <div class="qual-slot">
+            <span class="qs-label">3rd / 4th</span>
+            <span class="qs-dest">Middle R3 진출 → EMEA Stage 2</span>
+            <div class="qs-team tbd" id="qt-q4">TBD</div>
           </div>
           <div class="qual-slot">
             <span class="qs-label">Runner-up</span>
-            <span class="qs-dest">→ Challengers 2026: EMEA Stage 2</span>
+            <span class="qs-dest">GF 준우승 → EMEA Stage 2</span>
             <div class="qs-team tbd" id="qt-runner">TBD</div>
           </div>
+          <div class="qual-slot">
+            <span class="qs-label">Champion ★</span>
+            <span class="qs-dest">GF 우승 → EMEA Stage 2</span>
+            <div class="qs-team tbd" id="qt-champ">TBD</div>
+          </div>
         </div>
+
+        <!-- Bracket -->
         <div class="bracket-wrap">
           <div class="bracket-scroll">
-            <div class="ub-section">
+
+            <!-- Upper Row -->
+            <div class="br-section ub-row">
               <div class="round-col">
-                <p class="round-label">UB Round 1 · Bo3</p>
+                <p class="round-label">Upper R1 · Bo3</p>
                 <div class="round-matches" id="po-ubr1"></div>
               </div>
               <div class="round-col">
-                <p class="round-label">UB Quarterfinals · Bo3</p>
-                <div class="round-matches" id="po-ubqf"></div>
+                <p class="round-label">Upper R2 · Bo3</p>
+                <div class="round-matches" id="po-ubr2"></div>
               </div>
               <div class="round-col">
-                <p class="round-label qual-label">UB Semifinals · Bo3</p>
-                <div class="round-matches" id="po-ubsf"></div>
+                <p class="round-label">Upper R3 · Bo3</p>
+                <div class="round-matches" id="po-ubr3"></div>
               </div>
-              <div class="round-col">
-                <p class="round-label qual-label">Grand Final · Bo5 ★</p>
+              <div class="round-col wide">
+                <p class="round-label finals-label">Upper Final · Bo5</p>
+                <div class="round-matches" id="po-uf"></div>
+              </div>
+              <div class="round-col wide">
+                <p class="round-label finals-label">Grand Final · Bo5 ★</p>
                 <div class="round-matches" id="po-gf"></div>
               </div>
             </div>
-            <div class="lb-sep"></div>
-            <div class="lb-section">
+
+            <div class="br-sep"></div>
+
+            <!-- Middle Row -->
+            <div class="br-section mid-row">
               <div class="round-col">
-                <p class="round-label lb-label">LB Round 1 · Bo3</p>
+                <p class="round-label mid-label">Middle R1 · Bo3</p>
+                <div class="round-matches" id="po-midr1"></div>
+              </div>
+              <div class="round-col">
+                <p class="round-label mid-label">Middle R2 · Bo3</p>
+                <div class="round-matches" id="po-midr2"></div>
+              </div>
+              <div class="round-col">
+                <p class="round-label mid-label qual-label">Middle R3 · Bo3 ✦ QUAL</p>
+                <div class="round-matches" id="po-midr3"></div>
+              </div>
+              <div class="round-col">
+                <p class="round-label mid-label">Middle Final · Bo3</p>
+                <div class="round-matches" id="po-midf"></div>
+              </div>
+            </div>
+
+            <div class="br-sep"></div>
+
+            <!-- Lower Row -->
+            <div class="br-section lb-row">
+              <div class="round-col">
+                <p class="round-label lb-label">Lower R1 · Bo3</p>
                 <div class="round-matches" id="po-lbr1"></div>
               </div>
               <div class="round-col">
-                <p class="round-label lb-label">LB Round 2 · Bo3</p>
+                <p class="round-label lb-label">Lower R2 · Bo3</p>
                 <div class="round-matches" id="po-lbr2"></div>
               </div>
               <div class="round-col">
-                <p class="round-label lb-label">LB Semifinals · Bo3</p>
-                <div class="round-matches" id="po-lbsf"></div>
+                <p class="round-label lb-label">Lower R3 · Bo3</p>
+                <div class="round-matches" id="po-lbr3"></div>
               </div>
               <div class="round-col">
-                <p class="round-label lb-label">LB Final · Bo3</p>
+                <p class="round-label lb-label">Lower R4 · Bo3</p>
+                <div class="round-matches" id="po-lbr4"></div>
+              </div>
+              <div class="round-col wide">
+                <p class="round-label lb-label finals-label">Lower Final · Bo5</p>
                 <div class="round-matches" id="po-lbf"></div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -387,16 +451,34 @@
         [17,18,19,20],[21,22,23,24],[25,26,27,28],
       ];
 
+      /* Match IDs
+         Upper:  1-4=UBR1, 5-6=UBR2, 7=UBR3
+         Middle: 8-9=MIDR1, 10-11=MIDR2, 12=MIDR3(QUAL), 13=MID Final
+         Upper Final: 14 (Bo5)
+         Lower:  15-16=LBR1, 17=LBR2, 18=LBR3, 19=LBR4, 20=LBF(Bo5)
+         Grand Final: 21 (Bo5)
+      */
       var PO_LABELS = {
-        1:'UB R1 M1 · Bo3',2:'UB R1 M2 · Bo3',3:'UB R1 M3 · Bo3',4:'UB R1 M4 · Bo3',
-        5:'UB QF M1 · Bo3',6:'UB QF M2 · Bo3',7:'UB Semifinals · Bo3',
-        8:'LB R1 M1 · Bo3',9:'LB R1 M2 · Bo3',
-        10:'LB R2 M1 · Bo3',11:'LB R2 M2 · Bo3',
-        12:'LB Semifinals · Bo3',13:'LB Final · Bo3',14:'Grand Final · Bo5',
+        1:'Upper R1 M1·Bo3', 2:'Upper R1 M2·Bo3', 3:'Upper R1 M3·Bo3', 4:'Upper R1 M4·Bo3',
+        5:'Upper R2 M1·Bo3', 6:'Upper R2 M2·Bo3',
+        7:'Upper R3·Bo3',
+        8:'Middle R1 M1·Bo3', 9:'Middle R1 M2·Bo3',
+        10:'Middle R2 M1·Bo3', 11:'Middle R2 M2·Bo3',
+        12:'Middle R3·Bo3',
+        13:'Middle Final·Bo3',
+        14:'Upper Final·Bo5',
+        15:'Lower R1 M1·Bo3', 16:'Lower R1 M2·Bo3',
+        17:'Lower R2·Bo3',
+        18:'Lower R3·Bo3',
+        19:'Lower R4·Bo3',
+        20:'Lower Final·Bo5',
+        21:'Grand Final·Bo5',
       };
-      var PO_BO5   = {14:true};
-      var PO_LB    = {8:1,9:1,10:1,11:1,12:1,13:1};
-      var PO_PICKER= {1:1,2:1,3:1,4:1};
+      var PO_BO5    = {14:true, 20:true, 21:true};
+      var PO_LB     = {15:1,16:1,17:1,18:1,19:1,20:1};
+      var PO_MID    = {8:1,9:1,10:1,11:1,12:1,13:1};
+      var PO_PICKER = {1:1,2:1,3:1,4:1};
+      var PO_QUAL_MID = 12; /* both teams in this match qualify */
 
       function sGet(k)   { return localStorage.getItem(PFX+k); }
       function sSet(k,v) { if(v!==null&&v!==undefined) localStorage.setItem(PFX+k,v); else localStorage.removeItem(PFX+k); }
@@ -457,30 +539,68 @@
         }).sort(function(a,b){return b.w-a.w||b.diff-a.diff||b.mw-a.mw;});
       }
 
-      function resolvePO(stA,stB) {
+      function wl(po, mid) {
+        var m=po[mid]; if(!m||!m.sc) return;
+        if(m.sc.a>m.sc.b){m.winner=m.a;m.loser=m.b;}
+        else if(m.sc.b>m.sc.a){m.winner=m.b;m.loser=m.a;}
+      }
+
+      function resolvePO(stA, stB) {
         var po={};
-        for(var i=1;i<=14;i++) po[i]={a:'',b:'',sc:getPoSc(i),winner:'',loser:''};
-        var a=stA.slice(0,4),b=stB.slice(0,4);
+        for(var i=1;i<=21;i++) po[i]={a:'',b:'',sc:getPoSc(i),winner:'',loser:''};
+
+        var a=stA.slice(0,4), b=stB.slice(0,4);
+
+        /* UBR1: A1 vs B4, A2 vs B3, A3 vs B2, A4 vs B1 */
         po[1].a=getPoTeam(1,'a')||(a[0]?a[0].name:''); po[1].b=getPoTeam(1,'b')||(b[3]?b[3].name:'');
         po[2].a=getPoTeam(2,'a')||(a[1]?a[1].name:''); po[2].b=getPoTeam(2,'b')||(b[2]?b[2].name:'');
         po[3].a=getPoTeam(3,'a')||(a[2]?a[2].name:''); po[3].b=getPoTeam(3,'b')||(b[1]?b[1].name:'');
         po[4].a=getPoTeam(4,'a')||(a[3]?a[3].name:''); po[4].b=getPoTeam(4,'b')||(b[0]?b[0].name:'');
-        function wl(mid){
-          var m=po[mid]; if(!m.sc) return;
-          if(m.sc.a>m.sc.b){m.winner=m.a;m.loser=m.b;}
-          else if(m.sc.b>m.sc.a){m.winner=m.b;m.loser=m.a;}
-        }
-        [1,2,3,4].forEach(wl);
-        po[5].a=po[1].winner; po[5].b=po[2].winner; wl(5);
-        po[6].a=po[3].winner; po[6].b=po[4].winner; wl(6);
-        po[7].a=po[5].winner; po[7].b=po[6].winner; wl(7);
-        po[8].a=po[1].loser;  po[8].b=po[2].loser;  wl(8);
-        po[9].a=po[3].loser;  po[9].b=po[4].loser;  wl(9);
-        po[10].a=po[8].winner; po[10].b=po[6].loser; wl(10);
-        po[11].a=po[9].winner; po[11].b=po[5].loser; wl(11);
-        po[12].a=po[10].winner; po[12].b=po[11].winner; wl(12);
-        po[13].a=po[12].winner; po[13].b=po[7].loser; wl(13);
-        po[14].a=po[7].winner; po[14].b=po[13].winner; wl(14);
+        [1,2,3,4].forEach(function(i){wl(po,i);});
+
+        /* UBR2 */
+        po[5].a=po[1].winner; po[5].b=po[2].winner; wl(po,5);
+        po[6].a=po[3].winner; po[6].b=po[4].winner; wl(po,6);
+
+        /* UBR3 */
+        po[7].a=po[5].winner; po[7].b=po[6].winner; wl(po,7);
+
+        /* MIDR1: UBR1 losers */
+        po[8].a=po[1].loser; po[8].b=po[2].loser; wl(po,8);
+        po[9].a=po[3].loser; po[9].b=po[4].loser; wl(po,9);
+
+        /* MIDR2: UBR2 losers + MIDR1 winners */
+        po[10].a=po[5].loser; po[10].b=po[8].winner; wl(po,10);
+        po[11].a=po[6].loser; po[11].b=po[9].winner; wl(po,11);
+
+        /* MIDR3 (QUAL – both teams qualify) */
+        po[12].a=po[10].winner; po[12].b=po[11].winner; wl(po,12);
+
+        /* MID Final: UBR3 loser vs MIDR3 winner */
+        po[13].a=po[7].loser; po[13].b=po[12].winner; wl(po,13);
+
+        /* Upper Final (Bo5): UBR3 winner vs MID Final winner */
+        po[14].a=po[7].winner; po[14].b=po[13].winner; wl(po,14);
+
+        /* LBR1: MIDR1 losers paired with MIDR2 losers */
+        po[15].a=po[8].loser; po[15].b=po[10].loser; wl(po,15);
+        po[16].a=po[9].loser; po[16].b=po[11].loser; wl(po,16);
+
+        /* LBR2: LBR1 winners */
+        po[17].a=po[15].winner; po[17].b=po[16].winner; wl(po,17);
+
+        /* LBR3: MIDR3 loser enters here */
+        po[18].a=po[12].loser; po[18].b=po[17].winner; wl(po,18);
+
+        /* LBR4: MID Final loser enters here */
+        po[19].a=po[13].loser; po[19].b=po[18].winner; wl(po,19);
+
+        /* Lower Final (Bo5): Upper Final loser enters here */
+        po[20].a=po[14].loser; po[20].b=po[19].winner; wl(po,20);
+
+        /* Grand Final (Bo5) */
+        po[21].a=po[14].winner; po[21].b=po[20].winner; wl(po,21);
+
         return po;
       }
 
@@ -553,8 +673,12 @@
       function brCard(mid,po) {
         var m=po[mid];
         var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
-        var isLB=!!PO_LB[mid], isGF=(mid===14);
-        var cls='bracket-match'+(isLB?' lb-match':'')+(isGF?' qual-match':'');
+        var isMid=!!PO_MID[mid], isLB=!!PO_LB[mid], isFinals=(mid===14||mid===20||mid===21), isQual=(mid===PO_QUAL_MID);
+        var cls='bracket-match';
+        if(isQual) cls+=' qual-match';
+        else if(isFinals) cls+=' finals-match';
+        else if(isMid) cls+=' mid-match';
+        else if(isLB) cls+=' lb-match';
         return '<article class="'+cls+'" data-po-mid="'+mid+'">'
           +'<div class="m-row">'+logoHTML(m.a,'m-logo')
           +'<span class="m-name'+(winA?' win':'')+(m.a?'':' tbd')+'">'+(m.a||'TBD')+'</span>'
@@ -566,20 +690,44 @@
       }
 
       function renderPO(po) {
-        var map={'po-ubr1':[1,2,3,4],'po-ubqf':[5,6],'po-ubsf':[7],'po-gf':[14],'po-lbr1':[8,9],'po-lbr2':[10,11],'po-lbsf':[12],'po-lbf':[13]};
+        var map={
+          'po-ubr1':[1,2,3,4],
+          'po-ubr2':[5,6],
+          'po-ubr3':[7],
+          'po-uf':[14],
+          'po-gf':[21],
+          'po-midr1':[8,9],
+          'po-midr2':[10,11],
+          'po-midr3':[12],
+          'po-midf':[13],
+          'po-lbr1':[15,16],
+          'po-lbr2':[17],
+          'po-lbr3':[18],
+          'po-lbr4':[19],
+          'po-lbf':[20],
+        };
         Object.keys(map).forEach(function(id){
           var el=document.getElementById(id);
           if(el) el.innerHTML=map[id].map(function(mid){return brCard(mid,po);}).join('');
         });
-        var ch=document.getElementById('qt-champ'),ru=document.getElementById('qt-runner');
+
         function qsHTML(name){
           if(!name) return 'TBD';
           var t=getTeamByName(name);
           return (t&&t.logo?'<img src="'+t.logo+'" class="qs-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
             +'<span>'+(t?t.code:name)+'</span>';
         }
-        ch.innerHTML=qsHTML(po[14].winner); ch.className='qs-team'+(po[14].winner?'':' tbd');
-        ru.innerHTML=qsHTML(po[14].loser);  ru.className='qs-team'+(po[14].loser?'':' tbd');
+
+        var ch=document.getElementById('qt-champ');
+        var ru=document.getElementById('qt-runner');
+        var q3=document.getElementById('qt-q3');
+        var q4=document.getElementById('qt-q4');
+
+        ch.innerHTML=qsHTML(po[21].winner); ch.className='qs-team'+(po[21].winner?'':' tbd');
+        ru.innerHTML=qsHTML(po[21].loser);  ru.className='qs-team'+(po[21].loser?'':' tbd');
+        q3.innerHTML=qsHTML(po[12].a);      q3.className='qs-team'+(po[12].a?'':' tbd');
+        q4.innerHTML=qsHTML(po[12].b);      q4.className='qs-team'+(po[12].b?'':' tbd');
+
         if(isAdmin()){
           document.querySelectorAll('[data-po-mid]').forEach(function(el){
             el.addEventListener('click',function(){openScoreModal({type:'po',mid:parseInt(el.dataset.poMid)});});
