@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Challengers 2026: EMEA Last Chance Qualifier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --accent: #d4ff1f;
+        --accent-dim: rgba(212,255,31,.7);
+        --bg-base: #0a0e05;
+        --bg-card: #111508;
+        --bg-card2: #192010;
+      }
+      body { background: var(--bg-base); color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      /* ─── Header ─── */
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(10,14,5,.92); border-bottom: 1px solid rgba(212,255,31,.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); text-decoration: none; transition: color .15s; }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.4); text-decoration: none; transition: color .15s; }
+      .back-link:hover { color: rgba(255,255,255,.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      /* ─── Hero ─── */
+      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 64px 0 72px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
+      .league-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(212,255,31,.1) 0%, transparent 70%); pointer-events: none; }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+      .league-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px,5.5vw,68px); font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: .95; color: #fff; margin-bottom: 18px; }
+      .league-hero .intro { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.45); max-width: 460px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all; }
+      .league-mark { flex-shrink: 0; z-index: 1; padding: 16px; }
+      .league-mark img { width: clamp(100px,14vw,160px); height: clamp(100px,14vw,160px); object-fit: contain; filter: brightness(1.1) drop-shadow(0 0 14px rgba(212,255,31,.3)); }
+
+      /* ─── Shell ─── */
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+      .section-divider { height: 1px; background: rgba(212,255,31,.12); margin: 0 0 52px; }
+      .section-heading { margin-bottom: 24px; border-left: 3px solid var(--accent); padding-left: 16px; }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
+
+      /* ─── Group grid ─── */
+      .groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      @media(max-width:700px){ .groups-grid { grid-template-columns: 1fr; } }
+      .group-card { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 4px; padding: 18px; }
+      .group-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 12px; }
+
+      /* ─── Group Slots ─── */
+      .group-slots-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 16px; }
+      .group-slot-h { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 3px; min-height: 72px; justify-content: center; }
+      .group-slot-h.has-team { border-color: rgba(212,255,31,.2); }
+      body.is-admin .group-slot-h { cursor: pointer; }
+      body.is-admin .group-slot-h:hover { background: rgba(212,255,31,.06); border-color: rgba(212,255,31,.35); }
+      .slot-logo-sm img { width: 28px; height: 28px; object-fit: contain; }
+      .slot-code-sm { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      .slot-code-sm.empty { color: rgba(255,255,255,.2); font-style: italic; font-size: 10px; }
+
+      /* ─── Group DE bracket ─── */
+      .gde-section { }
+      .gde-header { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.2); margin-bottom: 8px; }
+      .gde-header.lb { color: rgba(255,150,30,.3); }
+      .gde-row { display: flex; gap: 8px; align-items: stretch; }
+      .gde-col { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+      .gde-col-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(212,255,31,.4); margin-bottom: 3px; }
+      .gde-col-label.lb { color: rgba(255,150,30,.4); }
+      .gde-col-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; margin-top: 4px; }
+      .gde-col-matches.center { justify-content: center; }
+      .gde-sep { height: 1px; background: rgba(255,255,255,.07); margin: 10px 0; }
+
+      /* Group advancement slot */
+      .gde-adv-col { flex-shrink: 0; width: 106px; display: flex; align-items: center; }
+      .gde-adv { background: rgba(212,255,31,.04); border: 1px solid rgba(212,255,31,.15); border-radius: 3px; padding: 6px 8px; }
+      .gde-adv.lb { background: rgba(255,150,30,.04); border-color: rgba(255,150,30,.2); }
+      .gde-adv-label { font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(212,255,31,.5); display: block; margin-bottom: 4px; }
+      .gde-adv.lb .gde-adv-label { color: rgba(255,150,30,.5); }
+      .gde-adv-team { display: flex; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; color: var(--accent); min-height: 18px; }
+      .gde-adv-team.tbd { color: rgba(255,255,255,.18); font-style: italic; font-size: 11px; }
+      .gde-adv.lb .gde-adv-team { color: rgba(255,180,60,.9); }
+      .gde-adv-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+      .logo-w { filter: brightness(0) invert(1); }
+
+      /* ─── Advancement ─── */
+      .adv-dest { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: rgba(212,255,31,.45); margin-bottom: 10px; }
+      .adv-wrap { display: flex; gap: 16px; margin-bottom: 36px; }
+      @media(max-width:500px){ .adv-wrap { flex-direction: column; } }
+      .adv-slot { flex: 1; background: rgba(212,255,31,.04); border: 1px solid rgba(212,255,31,.18); border-radius: 4px; padding: 14px 18px; }
+      .adv-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); display: block; margin-bottom: 6px; }
+      .adv-team { display: flex; align-items: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 26px; }
+      .adv-team.tbd { color: rgba(255,255,255,.18); font-style: italic; font-size: 14px; display: block; }
+      .adv-logo { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+
+      /* ─── SE Bracket (Single Elim) ─── */
+      .se-bracket { display: flex; gap: 8px; align-items: stretch; min-width: 580px; height: 380px; }
+      .de-col { display: flex; flex-direction: column; flex: 1; }
+      .de-col-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(212,255,31,.4); margin-bottom: 6px; flex-shrink: 0; }
+      .de-col-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+      .de-col-matches.center { justify-content: center; }
+      .de-col-matches.spaced { justify-content: space-evenly; }
+
+      /* ─── Match card ─── */
+      .de-card { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 8px 10px; transition: border-color .15s; }
+      body.is-admin .de-card { cursor: pointer; }
+      body.is-admin .de-card:hover { border-color: rgba(212,255,31,.35); background: var(--bg-card2); }
+      .de-card.gf { border-color: rgba(212,255,31,.4); background: rgba(212,255,31,.04); }
+      .dm-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+      .dm-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+      .dm-name { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255,255,255,.75); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .dm-name.tbd { color: rgba(255,255,255,.22); font-style: italic; }
+      .dm-name.win { color: var(--accent); }
+      .de-card.gf .dm-name.win { color: var(--accent); }
+      .dm-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; color: rgba(255,255,255,.3); min-width: 14px; text-align: right; flex-shrink: 0; }
+      .dm-score.win { color: var(--accent); }
+      .dm-divider { height: 1px; background: rgba(255,255,255,.06); margin: 1px 0; }
+
+      /* ─── Score modal ─── */
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
+      .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 501;
+        background: #141a08; border: 1px solid rgba(212,255,31,.2); border-radius: 6px;
+        padding: 22px; width: min(480px,94vw); max-height: 90vh; overflow-y: auto; }
+      .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+      .modal-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(212,255,31,.5); margin-bottom: 6px; display: block; }
+      .team-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; margin-bottom: 14px; max-height: 220px; overflow-y: auto; }
+      .tp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 8px 4px 6px; cursor: pointer; transition: all .12s; }
+      .tp-btn:hover { border-color: rgba(212,255,31,.3); background: rgba(212,255,31,.06); }
+      .tp-btn.selected { border-color: var(--accent); background: rgba(212,255,31,.12); }
+      .tp-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .tp-btn .tp-code { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      .tp-btn.selected .tp-code { color: var(--accent); }
+      .modal-matchup { display: flex; gap: 8px; margin-bottom: 14px; }
+      .modal-team { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 9px 12px; }
+      .modal-team img { width: 20px; height: 20px; object-fit: contain; }
+      .modal-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.65); }
+      .score-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+      .score-input { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 3px; padding: 8px; color: #e8e4e0; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; text-align: center; width: 60px; }
+      .score-input:focus { outline: none; border-color: rgba(212,255,31,.4); }
+      .score-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.3); }
+      .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+      .btn { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: none; cursor: pointer; }
+      .btn-save { background: var(--accent); color: #0a0e05; }
+      .btn-save:hover { background: #e8ff5a; }
+      .btn-clear { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+      .btn-cancel { background: transparent; color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.12); }
+
+      /* ─── Slot modal ─── */
+      .slot-modal-input { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 3px; padding: 9px 12px; color: #e8e4e0; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+      .slot-modal-input:focus { outline: none; border-color: rgba(212,255,31,.4); }
+      .slot-tp { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; margin-bottom: 14px; max-height: 260px; overflow-y: auto; }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./challengers-emea.html">EMEA Challengers</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div class="hero-text">
+          <p class="eyebrow">VCT EMEA Challengers 2026 · LCQ</p>
+          <h1 id="league-title">EMEA Last<br>Chance<br>Qualifier</h1>
+          <p class="intro">
+            EMEA Challengers 2026 Last Chance Qualifier입니다.<br>
+            16팀이 4개 그룹으로 나뉘어 각 그룹별 더블 엘리미네이션을 치르며, 각 그룹 UB·LB 우승 팀(총 8팀)이 싱글 엘리미네이션 Playoff에 진출합니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/Challengers 2026 EMEA.png" alt="EMEA Challengers LCQ" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <!-- Group Stage -->
+      <section style="margin-bottom:64px;" aria-labelledby="gs-title">
+        <div class="section-heading">
+          <p class="eyebrow">Phase 1 · Group Double Elimination · Bo3</p>
+          <h2 id="gs-title">Group Stage</h2>
+        </div>
+        <div class="groups-grid" id="groups-grid"></div>
+      </section>
+
+      <!-- Playoff -->
+      <section aria-labelledby="po-title">
+        <div class="section-heading">
+          <p class="eyebrow">Phase 2 · Single Elimination</p>
+          <h2 id="po-title">Playoff</h2>
+        </div>
+
+        <div class="adv-wrap">
+          <div class="adv-slot">
+            <span class="adv-label">Champion</span>
+            <div class="adv-team tbd" id="adv-1">TBD</div>
+          </div>
+          <div class="adv-slot">
+            <span class="adv-label">Runner-up</span>
+            <div class="adv-team tbd" id="adv-2">TBD</div>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <div id="po-bracket"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Score modal -->
+    <div class="modal-backdrop" id="modal-backdrop" hidden></div>
+    <div class="modal" id="score-modal" hidden role="dialog" aria-modal="true">
+      <p class="modal-title" id="modal-title">경기 입력</p>
+      <div id="picker-wrap">
+        <span class="modal-label">Team A 선택</span>
+        <div class="team-picker" id="tp-a"></div>
+        <span class="modal-label">Team B 선택</span>
+        <div class="team-picker" id="tp-b"></div>
+      </div>
+      <span class="modal-label" id="matchup-label" hidden>Teams</span>
+      <div class="modal-matchup" id="modal-matchup" hidden></div>
+      <span class="modal-label" id="score-label">Score (Bo3)</span>
+      <div class="score-row">
+        <input class="score-input" id="modal-score-a" type="number" min="0" max="2" placeholder="0" />
+        <span class="score-sep">–</span>
+        <input class="score-input" id="modal-score-b" type="number" min="0" max="2" placeholder="0" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-clear" id="modal-clear">초기화</button>
+        <button class="btn btn-cancel" id="modal-cancel">취소</button>
+        <button class="btn btn-save" id="modal-save">저장</button>
+      </div>
+    </div>
+
+    <!-- Slot modal -->
+    <div class="modal-backdrop" id="slot-backdrop" hidden></div>
+    <div class="modal" id="slot-modal" hidden role="dialog" aria-modal="true">
+      <p class="modal-title" id="slot-modal-title">팀 배정</p>
+      <span class="modal-label">팀 선택</span>
+      <div class="slot-tp" id="slot-tp"></div>
+      <span class="modal-label">또는 직접 입력</span>
+      <input class="slot-modal-input" id="slot-input" type="text" placeholder="팀 이름 입력..." />
+      <div class="modal-actions">
+        <button class="btn btn-clear" id="slot-clear">초기화</button>
+        <button class="btn btn-cancel" id="slot-cancel">취소</button>
+        <button class="btn btn-save" id="slot-save">저장</button>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script src="./auth.js"></script>
+    <script>
+    (function () {
+      var PFX = 'celcq_';
+
+      var TEAM_POOL = [
+        {code:'FKS',  name:'FOKUS',                 logo:'./assets/teams/Challengers EMEA/FKS.png',  white:false},
+        {code:'MISA', name:'Misa Esports',           logo:'./assets/teams/Challengers EMEA/MISA.png', white:true},
+        {code:'MDR',  name:'Mandatory',              logo:'./assets/teams/Challengers EMEA/MDR.png',  white:false},
+        {code:'MIR',  name:'MIR',                   logo:'./assets/teams/Challengers EMEA/MIR.png',  white:true},
+        {code:'BJK',  name:'Beşiktaş Esports',      logo:'./assets/teams/Challengers EMEA/BJK.png',  white:false},
+        {code:'BAR',  name:'Barça eSports',          logo:'./assets/teams/Challengers EMEA/BAR.png',  white:false},
+        {code:'UCAM', name:'UCAM Esports Club',      logo:'./assets/teams/Challengers EMEA/UCAM.png', white:false},
+        {code:'CGN',  name:'CGN Esports',            logo:'./assets/teams/Challengers EMEA/CGN.png',  white:true},
+        {code:'PXL',  name:'Pixel Lumina',           logo:'./assets/teams/Challengers EMEA/PXL.png',  white:false},
+        {code:'GLS',  name:'Ghools Esports',         logo:'./assets/teams/Challengers EMEA/GLS.png',  white:false},
+        {code:'FMG',  name:'Formulation Gaming',     logo:'./assets/teams/Challengers EMEA/FMG.png',  white:false},
+        {code:'SGE',  name:'Eintracht Frankfurt',    logo:'./assets/teams/Challengers EMEA/SGE.png',  white:false},
+        {code:'FF',   name:'Fire Flux Esports',      logo:'./assets/teams/Challengers EMEA/FF.png',   white:false},
+        {code:'CLK',  name:'Çilekler',               logo:'./assets/teams/Challengers EMEA/CLK.png',  white:false},
+        {code:'MSA',  name:'La Masia',               logo:'./assets/teams/Challengers EMEA/MSA.png',  white:false},
+        {code:'TSE',  name:'Twisted Saints Esports', logo:'./assets/teams/Challengers EMEA/TSE.png',  white:false},
+      ];
+
+      var GROUPS = ['A','B','C','D'];
+      var PO_PICKER = {1:1,2:1,3:1,4:1};
+      var PO_BO5 = {7:1};
+
+      /* ── 스토리지 ── */
+      function sGet(k)   { return localStorage.getItem(PFX+k); }
+      function sSet(k,v) { if(v!=null) localStorage.setItem(PFX+k,v); else localStorage.removeItem(PFX+k); }
+
+      function getGrpTeam(g,slot)     { return sGet('g'+g+'_t'+slot)||''; }
+      function setGrpTeam(g,slot,n)   { sSet('g'+g+'_t'+slot,n||null); }
+      function getGrpMatchSc(g,m)     { var v=sGet('g'+g+'_m'+m); return v?JSON.parse(v):null; }
+      function setGrpMatchSc(g,m,a,b) { if(a===null) sSet('g'+g+'_m'+m,null); else sSet('g'+g+'_m'+m,JSON.stringify({a:a,b:b})); }
+      function getPoTeam(mid,side)    { return sGet('po_t_'+mid+'_'+side)||''; }
+      function setPoTeam(mid,side,n)  { sSet('po_t_'+mid+'_'+side,n||null); }
+      function getPoSc(mid)           { var v=sGet('po_s_'+mid); return v?JSON.parse(v):null; }
+      function setPoSc(mid,a,b)       { if(a===null) sSet('po_s_'+mid,null); else sSet('po_s_'+mid,JSON.stringify({a:a,b:b})); }
+
+      function getTeamByName(n) { return TEAM_POOL.find(function(t){return t.name===n;})||null; }
+      function isAdmin() { return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
+
+      function logoImg(name,cls) {
+        var t=getTeamByName(name); if(!t||!t.logo) return '';
+        return '<img src="'+t.logo+'" class="'+(cls||'')+(t.white?' logo-w':'')+'" alt="" />';
+      }
+      function codeOf(name) { var t=getTeamByName(name); return t?t.code:name; }
+
+      /* ── 그룹 DE 해석 ── */
+      function resolveGM(m) {
+        if(!m.sc) return;
+        if(m.sc.a>m.sc.b){m.winner=m.a;m.loser=m.b;}
+        else if(m.sc.b>m.sc.a){m.winner=m.b;m.loser=m.a;}
+      }
+
+      function resolveGroup(g) {
+        var t=[];
+        for(var i=1;i<=4;i++) t.push(getGrpTeam(g,i));
+        var ms={};
+        for(var i=1;i<=5;i++) ms[i]={a:'',b:'',sc:getGrpMatchSc(g,i),winner:'',loser:''};
+        ms[1].a=t[0]; ms[1].b=t[1]; resolveGM(ms[1]);
+        ms[2].a=t[2]; ms[2].b=t[3]; resolveGM(ms[2]);
+        ms[3].a=ms[1].loser;  ms[3].b=ms[2].loser;  resolveGM(ms[3]);
+        ms[4].a=ms[1].winner; ms[4].b=ms[2].winner; resolveGM(ms[4]);
+        ms[5].a=ms[3].winner; ms[5].b=ms[4].loser;  resolveGM(ms[5]);
+        return {matches:ms, ubAdv:ms[4].winner, lbAdv:ms[5].winner};
+      }
+
+      /* ── PO 해석 (7경기, 싱글 엘리미네이션) ── */
+      function resolvePO() {
+        var advs={};
+        GROUPS.forEach(function(g){
+          var gr=resolveGroup(g);
+          advs[g]={ub:gr.ubAdv,lb:gr.lbAdv};
+        });
+        var po={};
+        for(var i=1;i<=7;i++) po[i]={a:'',b:'',sc:getPoSc(i),winner:'',loser:''};
+        /* QF — picker, auto-fill from groups */
+        po[1].a=getPoTeam(1,'a')||advs.A.ub; po[1].b=getPoTeam(1,'b')||advs.B.lb;
+        po[2].a=getPoTeam(2,'a')||advs.B.ub; po[2].b=getPoTeam(2,'b')||advs.A.lb;
+        po[3].a=getPoTeam(3,'a')||advs.C.ub; po[3].b=getPoTeam(3,'b')||advs.D.lb;
+        po[4].a=getPoTeam(4,'a')||advs.D.ub; po[4].b=getPoTeam(4,'b')||advs.C.lb;
+        function wl(mid){var m=po[mid];if(!m.sc)return;if(m.sc.a>m.sc.b){m.winner=m.a;m.loser=m.b;}else if(m.sc.b>m.sc.a){m.winner=m.b;m.loser=m.a;}}
+        wl(1);wl(2);wl(3);wl(4);
+        /* SF */
+        po[5].a=po[1].winner; po[5].b=po[2].winner; wl(5);
+        po[6].a=po[3].winner; po[6].b=po[4].winner; wl(6);
+        /* GF Bo5 */
+        po[7].a=po[5].winner; po[7].b=po[6].winner; wl(7);
+        return po;
+      }
+
+      /* ── 그룹 카드 렌더 ── */
+      function renderGroupCard(g) {
+        var gr=resolveGroup(g);
+        var ms=gr.matches;
+
+        var slotsHtml='<div class="group-slots-4">';
+        for(var i=1;i<=4;i++){
+          var nm=getGrpTeam(g,i);
+          var t=nm?getTeamByName(nm):null;
+          slotsHtml+='<div class="group-slot-h'+(nm?' has-team':'')+'" data-grp="'+g+'" data-slot="'+i+'">'
+            +'<div class="slot-logo-sm">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />':'')+'</div>'
+            +'<span class="slot-code-sm'+(nm?'':' empty')+'">'+(t?t.code:(nm||'—'))+'</span>'
+            +'</div>';
+        }
+        slotsHtml+='</div>';
+
+        function gdeCard(m,mid,isLb){
+          var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
+          var cls='de-card'+(isLb?' lb':'');
+          return '<div class="'+cls+'" data-grp="'+g+'" data-mid="'+mid+'">'
+            +'<div class="dm-row">'+logoImg(m.a,'dm-logo')
+            +'<span class="dm-name'+(winA?' win':'')+(m.a?'':' tbd')+'">'+(m.a?codeOf(m.a):'TBD')+'</span>'
+            +'<span class="dm-score'+(winA?' win':'')+'">'+(m.sc?m.sc.a:'–')+'</span>'
+            +'</div><div class="dm-divider"></div><div class="dm-row">'+logoImg(m.b,'dm-logo')
+            +'<span class="dm-name'+(winB?' win':'')+(m.b?'':' tbd')+'">'+(m.b?codeOf(m.b):'TBD')+'</span>'
+            +'<span class="dm-score'+(winB?' win':'')+'">'+(m.sc?m.sc.b:'–')+'</span>'
+            +'</div></div>';
+        }
+
+        function advSlot(name,isLb){
+          var t=name?getTeamByName(name):null;
+          return '<div class="gde-adv'+(isLb?' lb':'')+'">'
+            +'<span class="gde-adv-label">'+(isLb?'↑ LB Playoff':'↑ UB Playoff')+'</span>'
+            +'<div class="gde-adv-team'+(name?'':' tbd')+'">'
+            +(t&&t.logo?'<img src="'+t.logo+'" class="gde-adv-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:(name||'TBD'))+'</span></div></div>';
+        }
+
+        var deHtml=
+          '<div class="gde-section">'
+          +'<div class="gde-header">— Upper Bracket —</div>'
+          +'<div class="gde-row">'
+          +'<div class="gde-col"><p class="gde-col-label">UB R1</p><div class="gde-col-matches">'+gdeCard(ms[1],1,false)+gdeCard(ms[2],2,false)+'</div></div>'
+          +'<div class="gde-col"><p class="gde-col-label">UB Final</p><div class="gde-col-matches center">'+gdeCard(ms[4],4,false)+'</div></div>'
+          +'<div class="gde-adv-col">'+advSlot(gr.ubAdv,false)+'</div>'
+          +'</div>'
+          +'</div>'
+          +'<div class="gde-sep"></div>'
+          +'<div class="gde-section">'
+          +'<div class="gde-header lb">— Lower Bracket —</div>'
+          +'<div class="gde-row">'
+          +'<div class="gde-col"><p class="gde-col-label lb">LB R1</p><div class="gde-col-matches center">'+gdeCard(ms[3],3,true)+'</div></div>'
+          +'<div class="gde-col"><p class="gde-col-label lb">LB Final</p><div class="gde-col-matches center">'+gdeCard(ms[5],5,true)+'</div></div>'
+          +'<div class="gde-adv-col">'+advSlot(gr.lbAdv,true)+'</div>'
+          +'</div>'
+          +'</div>';
+
+        return '<div class="group-card">'
+          +'<p class="group-label">Group '+g+'</p>'
+          +slotsHtml+deHtml
+          +'</div>';
+      }
+
+      function renderGroups(){
+        var el=document.getElementById('groups-grid');
+        el.innerHTML=GROUPS.map(renderGroupCard).join('');
+        var admin=isAdmin();
+        if(admin) document.body.classList.add('is-admin');
+        el.querySelectorAll('.group-slot-h').forEach(function(slot){
+          if(!admin) return;
+          slot.addEventListener('click',function(){openSlotModal(slot.dataset.grp,parseInt(slot.dataset.slot));});
+        });
+        el.querySelectorAll('[data-grp][data-mid]').forEach(function(card){
+          if(!admin) return;
+          card.addEventListener('click',function(){
+            openScoreModal({type:'gs',grp:card.dataset.grp,mid:parseInt(card.dataset.mid)});
+          });
+        });
+      }
+
+      /* ── PO 카드 ── */
+      function poCard(po,mid){
+        var m=po[mid];
+        var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
+        var isGF=(mid===7);
+        var cls='de-card'+(isGF?' gf':'');
+        return '<div class="'+cls+'" data-po-mid="'+mid+'">'
+          +'<div class="dm-row">'+logoImg(m.a,'dm-logo')
+          +'<span class="dm-name'+(winA?' win':'')+(m.a?'':' tbd')+'">'+(m.a?codeOf(m.a):'TBD')+'</span>'
+          +'<span class="dm-score'+(winA?' win':'')+'">'+(m.sc?m.sc.a:'–')+'</span>'
+          +'</div><div class="dm-divider"></div><div class="dm-row">'+logoImg(m.b,'dm-logo')
+          +'<span class="dm-name'+(winB?' win':'')+(m.b?'':' tbd')+'">'+(m.b?codeOf(m.b):'TBD')+'</span>'
+          +'<span class="dm-score'+(winB?' win':'')+'">'+(m.sc?m.sc.b:'–')+'</span>'
+          +'</div></div>';
+      }
+
+      function renderPO(po){
+        var el=document.getElementById('po-bracket'); if(!el) return;
+        el.innerHTML=
+          '<div class="se-bracket">'
+          +'<div class="de-col"><p class="de-col-label">QF · Bo3</p><div class="de-col-matches">'+poCard(po,1)+poCard(po,2)+poCard(po,3)+poCard(po,4)+'</div></div>'
+          +'<div class="de-col"><p class="de-col-label">SF · Bo3</p><div class="de-col-matches spaced">'+poCard(po,5)+poCard(po,6)+'</div></div>'
+          +'<div class="de-col"><p class="de-col-label">Grand Final · Bo5 ★</p><div class="de-col-matches center">'+poCard(po,7)+'</div></div>'
+          +'</div>';
+
+        function advHTML(name){
+          if(!name) return 'TBD';
+          var t=getTeamByName(name);
+          return (t&&t.logo?'<img src="'+t.logo+'" class="adv-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +'<span>'+(t?t.code:name)+'</span>';
+        }
+        var a1=document.getElementById('adv-1'),a2=document.getElementById('adv-2');
+        a1.innerHTML=advHTML(po[7].winner); a1.className='adv-team'+(po[7].winner?'':' tbd');
+        a2.innerHTML=advHTML(po[7].loser);  a2.className='adv-team'+(po[7].loser?'':' tbd');
+
+        if(isAdmin()){
+          el.querySelectorAll('[data-po-mid]').forEach(function(c){
+            c.addEventListener('click',function(){openScoreModal({type:'po',mid:parseInt(c.dataset.poMid)});});
+          });
+        }
+      }
+
+      function render(){renderGroups();renderPO(resolvePO());}
+
+      /* ─── SLOT MODAL ─── */
+      var _slotCtx=null,_slotSel='';
+      function openSlotModal(grp,slot){
+        _slotCtx={grp:grp,slot:slot};
+        _slotSel=getGrpTeam(grp,slot)||'';
+        document.getElementById('slot-modal-title').textContent='Group '+grp+' · Slot '+grp+slot+' 배정';
+        document.getElementById('slot-input').value=_slotSel;
+        var tp=document.getElementById('slot-tp'); tp.innerHTML='';
+        TEAM_POOL.forEach(function(t){
+          var btn=document.createElement('button');
+          btn.className='tp-btn'+(t.name===_slotSel?' selected':'');
+          btn.innerHTML=(t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />':'')
+            +'<span class="tp-code">'+t.code+'</span>';
+          btn.addEventListener('click',function(){
+            _slotSel=t.name;
+            document.getElementById('slot-input').value=t.name;
+            tp.querySelectorAll('.tp-btn').forEach(function(b){b.classList.remove('selected');});
+            btn.classList.add('selected');
+          });
+          tp.appendChild(btn);
+        });
+        document.getElementById('slot-backdrop').hidden=false;
+        document.getElementById('slot-modal').hidden=false;
+        document.getElementById('slot-input').focus();
+      }
+      function closeSlotModal(){
+        document.getElementById('slot-backdrop').hidden=true;
+        document.getElementById('slot-modal').hidden=true;
+        _slotCtx=null;_slotSel='';
+      }
+      document.getElementById('slot-save').addEventListener('click',function(){
+        if(!_slotCtx) return;
+        var val=document.getElementById('slot-input').value.trim()||_slotSel;
+        setGrpTeam(_slotCtx.grp,_slotCtx.slot,val||null);
+        closeSlotModal(); render();
+      });
+      document.getElementById('slot-clear').addEventListener('click',function(){
+        if(!_slotCtx) return;
+        setGrpTeam(_slotCtx.grp,_slotCtx.slot,null);
+        closeSlotModal(); render();
+      });
+      document.getElementById('slot-cancel').addEventListener('click',closeSlotModal);
+      document.getElementById('slot-backdrop').addEventListener('click',closeSlotModal);
+
+      /* ─── SCORE MODAL ─── */
+      var _ctx=null,_selA='',_selB='';
+      function openScoreModal(ctx){
+        _ctx=ctx;
+        var pw=document.getElementById('picker-wrap');
+        var ml=document.getElementById('matchup-label');
+        var md=document.getElementById('modal-matchup');
+
+        var isBo5=(ctx.type==='po'&&PO_BO5[ctx.mid]);
+        document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
+        document.getElementById('modal-score-a').max=isBo5?3:2;
+        document.getElementById('modal-score-b').max=isBo5?3:2;
+
+        if(ctx.type==='gs'){
+          var gr=resolveGroup(ctx.grp);
+          var m=gr.matches[ctx.mid];
+          var sc=getGrpMatchSc(ctx.grp,ctx.mid);
+          var lbls={1:'UB R1 · M1',2:'UB R1 · M2',3:'LB R1',4:'UB Final',5:'LB Final'};
+          document.getElementById('modal-title').textContent='Group '+ctx.grp+' · '+lbls[ctx.mid];
+          document.getElementById('modal-score-a').value=sc?sc.a:0;
+          document.getElementById('modal-score-b').value=sc?sc.b:0;
+          pw.hidden=true; ml.hidden=false; md.hidden=false;
+          function slotGS(nm){
+            var t=nm?getTeamByName(nm):null;
+            return '<div class="modal-team">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')
+              +'<span class="modal-team-name">'+(t?t.code:(nm||'TBD'))+'</span></div>';
+          }
+          md.innerHTML=slotGS(m.a)+slotGS(m.b);
+        } else {
+          var needPicker=PO_PICKER[ctx.mid];
+          var po=resolvePO();
+          var pm=po[ctx.mid];
+          var sc=getPoSc(ctx.mid);
+          var lbls={1:'QF · M1',2:'QF · M2',3:'QF · M3',4:'QF · M4',5:'SF · M5',6:'SF · M6',7:'Grand Final'};
+          document.getElementById('modal-title').textContent=lbls[ctx.mid]||'PO M'+ctx.mid;
+          document.getElementById('modal-score-a').value=sc?sc.a:0;
+          document.getElementById('modal-score-b').value=sc?sc.b:0;
+          if(needPicker){
+            pw.hidden=false; ml.hidden=true; md.hidden=true;
+            _selA=getPoTeam(ctx.mid,'a')||pm.a; _selB=getPoTeam(ctx.mid,'b')||pm.b;
+            function buildPicker(tpId,side,curSel){
+              var tp=document.getElementById(tpId); tp.innerHTML='';
+              TEAM_POOL.forEach(function(t){
+                var btn=document.createElement('button');
+                btn.className='tp-btn'+(t.name===curSel?' selected':'');
+                btn.innerHTML=(t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />':'')
+                  +'<span class="tp-code">'+t.code+'</span>';
+                btn.addEventListener('click',function(){
+                  if(side==='a') _selA=t.name; else _selB=t.name;
+                  tp.querySelectorAll('.tp-btn').forEach(function(b){b.classList.remove('selected');});
+                  btn.classList.add('selected');
+                });
+                tp.appendChild(btn);
+              });
+            }
+            buildPicker('tp-a','a',_selA);
+            buildPicker('tp-b','b',_selB);
+          } else {
+            pw.hidden=true; ml.hidden=false; md.hidden=false;
+            function slotPO(nm){
+              var t=nm?getTeamByName(nm):null;
+              return '<div class="modal-team">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')
+                +'<span class="modal-team-name">'+(t?t.code:(nm||'TBD'))+'</span></div>';
+            }
+            md.innerHTML=slotPO(pm.a)+slotPO(pm.b);
+          }
+        }
+
+        document.getElementById('modal-backdrop').hidden=false;
+        document.getElementById('score-modal').hidden=false;
+        document.getElementById('modal-score-a').focus();
+      }
+
+      function closeScoreModal(){ document.getElementById('modal-backdrop').hidden=true; document.getElementById('score-modal').hidden=true; _ctx=null; _selA=''; _selB=''; }
+
+      document.getElementById('modal-save').addEventListener('click',function(){
+        if(!_ctx) return;
+        var a=parseInt(document.getElementById('modal-score-a').value)||0;
+        var b=parseInt(document.getElementById('modal-score-b').value)||0;
+        if(_ctx.type==='gs'){
+          setGrpMatchSc(_ctx.grp,_ctx.mid,a,b);
+        } else {
+          if(PO_PICKER[_ctx.mid]){ setPoTeam(_ctx.mid,'a',_selA||null); setPoTeam(_ctx.mid,'b',_selB||null); }
+          setPoSc(_ctx.mid,a,b);
+        }
+        closeScoreModal(); render();
+      });
+      document.getElementById('modal-clear').addEventListener('click',function(){
+        if(!_ctx) return;
+        if(_ctx.type==='gs'){ setGrpMatchSc(_ctx.grp,_ctx.mid,null,null); }
+        else { if(PO_PICKER[_ctx.mid]){ setPoTeam(_ctx.mid,'a',null); setPoTeam(_ctx.mid,'b',null); } setPoSc(_ctx.mid,null,null); }
+        closeScoreModal(); render();
+      });
+      document.getElementById('modal-cancel').addEventListener('click',closeScoreModal);
+      document.getElementById('modal-backdrop').addEventListener('click',closeScoreModal);
+
+      /* ── init ── */
+      window.storageReady.then(function(){
+        if(typeof window.vctIsAdmin==='function'&&window.vctIsAdmin()) document.body.classList.add('is-admin');
+        render();
+      });
+    })();
+    </script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
