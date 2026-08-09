@@ -312,7 +312,7 @@
           M6 (GF Bo5): M3W vs M5W → Champion
       */
 
-      var SW_R1      = {1:1,2:1,3:1,4:1};
+      /* all 10 Swiss matches use full team pickers */
       var PO_BO5     = {6:true};
       var PO_LB      = {4:1,5:1};
       var PO_PICKER_FULL = {1:1,2:1};
@@ -351,17 +351,10 @@
 
       function resolveSW() {
         var sw={};
-        for(var i=1;i<=10;i++) sw[i]={a:'',b:'',sc:getSwSc(i),winner:'',loser:''};
-        sw[1].a=getSwTeam(1,'a'); sw[1].b=getSwTeam(1,'b'); resolveMatch(sw[1]);
-        sw[2].a=getSwTeam(2,'a'); sw[2].b=getSwTeam(2,'b'); resolveMatch(sw[2]);
-        sw[3].a=getSwTeam(3,'a'); sw[3].b=getSwTeam(3,'b'); resolveMatch(sw[3]);
-        sw[4].a=getSwTeam(4,'a'); sw[4].b=getSwTeam(4,'b'); resolveMatch(sw[4]);
-        sw[5].a=sw[1].winner;  sw[5].b=sw[2].winner;  resolveMatch(sw[5]);
-        sw[6].a=sw[3].winner;  sw[6].b=sw[4].winner;  resolveMatch(sw[6]);
-        sw[7].a=sw[1].loser;   sw[7].b=sw[2].loser;   resolveMatch(sw[7]);
-        sw[8].a=sw[3].loser;   sw[8].b=sw[4].loser;   resolveMatch(sw[8]);
-        sw[9].a=sw[5].loser;   sw[9].b=sw[6].loser;   resolveMatch(sw[9]);
-        sw[10].a=sw[7].winner; sw[10].b=sw[8].winner; resolveMatch(sw[10]);
+        for(var i=1;i<=10;i++) {
+          sw[i]={a:getSwTeam(i,'a'),b:getSwTeam(i,'b'),sc:getSwSc(i),winner:'',loser:''};
+          resolveMatch(sw[i]);
+        }
         return sw;
       }
 
@@ -502,16 +495,10 @@
 
         if(ctx.type==='sw'){
           document.getElementById('modal-title').textContent='Swiss · Match '+ctx.mid;
-          if(SW_R1[ctx.mid]){
-            _selA=getSwTeam(ctx.mid,'a'); _selB=getSwTeam(ctx.mid,'b');
-            pwA.hidden=false; pwB.hidden=false; mLabel.hidden=true; mDiv.hidden=true;
-            makeTP('tp-a',_selA,function(n){_selA=n;});
-            makeTP('tp-b',_selB,function(n){_selB=n;});
-          } else {
-            pwA.hidden=true; pwB.hidden=true; mLabel.hidden=false; mDiv.hidden=false;
-            var sw=resolveSW(); var m=sw[ctx.mid];
-            mDiv.innerHTML=teamSlot(m.a)+teamSlot(m.b);
-          }
+          _selA=getSwTeam(ctx.mid,'a'); _selB=getSwTeam(ctx.mid,'b');
+          pwA.hidden=false; pwB.hidden=false; mLabel.hidden=true; mDiv.hidden=true;
+          makeTP('tp-a',_selA,function(n){_selA=n;});
+          makeTP('tp-b',_selB,function(n){_selB=n;});
           var sc=getSwSc(ctx.mid);
           document.getElementById('modal-score-a').value=sc?sc.a:0;
           document.getElementById('modal-score-b').value=sc?sc.b:0;
@@ -551,9 +538,8 @@
         var a=parseInt(document.getElementById('modal-score-a').value)||0;
         var b=parseInt(document.getElementById('modal-score-b').value)||0;
         if(_ctx.type==='sw'){
-          if(SW_R1[_ctx.mid]){
-            if(_selA) setSwTeam(_ctx.mid,'a',_selA); if(_selB) setSwTeam(_ctx.mid,'b',_selB);
-          }
+          if(_selA) setSwTeam(_ctx.mid,'a',_selA);
+          if(_selB) setSwTeam(_ctx.mid,'b',_selB);
           setSwSc(_ctx.mid,a,b);
         } else {
           if(PO_PICKER_FULL[_ctx.mid]){
@@ -567,7 +553,7 @@
       document.getElementById('modal-clear').addEventListener('click',function(){
         if(!_ctx) return;
         if(_ctx.type==='sw'){
-          if(SW_R1[_ctx.mid]){setSwTeam(_ctx.mid,'a',null);setSwTeam(_ctx.mid,'b',null);}
+          setSwTeam(_ctx.mid,'a',null); setSwTeam(_ctx.mid,'b',null);
           setSwSc(_ctx.mid,null,null);
         } else {
           if(PO_PICKER_FULL[_ctx.mid]){setPoTeam(_ctx.mid,'a',null);setPoTeam(_ctx.mid,'b',null);}
