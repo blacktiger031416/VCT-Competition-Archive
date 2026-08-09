@@ -102,6 +102,7 @@
       .logo-w { filter: brightness(0) invert(1); }
 
       /* ─── Advancement ─── */
+      .adv-dest { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: rgba(212,255,31,.45); margin-bottom: 10px; }
       .adv-wrap { display: flex; gap: 16px; margin-bottom: 36px; }
       @media(max-width:500px){ .adv-wrap { flex-direction: column; } }
       .adv-slot { flex: 1; background: rgba(212,255,31,.04); border: 1px solid rgba(212,255,31,.18); border-radius: 4px; padding: 14px 18px; }
@@ -225,6 +226,7 @@
           <h2 id="po-title">Playoff</h2>
         </div>
 
+        <p class="adv-dest">TOP 3 &rarr; EMEA Stage 2 Play-In</p>
         <div class="adv-wrap">
           <div class="adv-slot">
             <span class="adv-label">Champion</span>
@@ -233,6 +235,10 @@
           <div class="adv-slot">
             <span class="adv-label">Runner-up</span>
             <div class="adv-team tbd" id="adv-2">TBD</div>
+          </div>
+          <div class="adv-slot">
+            <span class="adv-label">3rd Place</span>
+            <div class="adv-team tbd" id="adv-3">TBD</div>
           </div>
         </div>
 
@@ -523,9 +529,10 @@
           return (t&&t.logo?'<img src="'+t.logo+'" class="adv-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
             +'<span>'+(t?t.code:name)+'</span>';
         }
-        var a1=document.getElementById('adv-1'),a2=document.getElementById('adv-2');
+        var a1=document.getElementById('adv-1'),a2=document.getElementById('adv-2'),a3=document.getElementById('adv-3');
         a1.innerHTML=advHTML(po[14].winner); a1.className='adv-team'+(po[14].winner?'':' tbd');
         a2.innerHTML=advHTML(po[14].loser);  a2.className='adv-team'+(po[14].loser?'':' tbd');
+        a3.innerHTML=advHTML(po[13].loser);  a3.className='adv-team'+(po[13].loser?'':' tbd');
 
         if(isAdmin()){
           el.querySelectorAll('[data-po-mid]').forEach(function(c){
