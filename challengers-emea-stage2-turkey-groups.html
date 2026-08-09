@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Türkiye Birlik Group Stage – EMEA Challengers Stage 2 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root { --accent: #d4ff1f; --accent-dim: rgba(212,255,31,.7); --bg-base: #0a0e05; --bg-card: #111508; --bg-card2: #192010; }
+      body { background: var(--bg-base); color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(10,14,5,.92); border-bottom: 1px solid rgba(212,255,31,.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); text-decoration: none; transition: color .15s; }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.4); text-decoration: none; transition: color .15s; }
+      .back-link:hover { color: rgba(255,255,255,.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 56px 0 64px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
+      .league-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(212,255,31,.1) 0%, transparent 70%); pointer-events: none; }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+      .league-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px,6vw,68px); font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: .95; color: #fff; margin-bottom: 18px; }
+      .league-hero .intro { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.45); max-width: 400px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all; }
+      .league-mark { flex-shrink: 0; position: relative; z-index: 1; padding: 16px; }
+      .league-mark img { width: clamp(90px,14vw,160px); height: clamp(90px,14vw,160px); object-fit: contain; filter: brightness(1.15) drop-shadow(0 0 16px rgba(212,255,31,.35)) drop-shadow(0 4px 24px rgba(0,0,0,.5)); }
+
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+      .section-divider { height: 1px; background: rgba(212,255,31,.12); margin: 0 0 52px; }
+      .section-heading { margin-bottom: 20px; border-left: 3px solid var(--accent); padding-left: 16px; }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
+
+      .logo-w { filter: brightness(0) invert(1); }
+
+      /* Group layout */
+      .groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+      @media (max-width: 720px) { .groups-grid { grid-template-columns: 1fr; } }
+
+      .group-block { display: flex; flex-direction: column; gap: 16px; }
+      .group-label { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: #fff; padding: 8px 12px; background: rgba(212,255,31,.08); border-left: 3px solid var(--accent); border-radius: 0 2px 2px 0; }
+
+      /* Team slots */
+      .slot-row { display: flex; gap: 6px; }
+      .slot-tile { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 10px 4px 8px; min-height: 70px; justify-content: center; }
+      body.is-admin .slot-tile { cursor: pointer; transition: border-color .15s, background .15s; }
+      body.is-admin .slot-tile:hover { border-color: rgba(212,255,31,.35); background: var(--bg-card2); }
+      .slot-tile img { width: 28px; height: 28px; object-fit: contain; }
+      .slot-tile .st-code { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+      .slot-tile .st-empty { font-size: 10px; color: rgba(255,255,255,.2); font-style: italic; }
+
+      /* Standings */
+      .standings-wrap { overflow-x: auto; }
+      .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .standings-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.35); padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.06); }
+      .standings-table th:not(:nth-child(2)) { text-align: center; }
+      .standings-table td { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+      .standings-table td:not(:nth-child(2)) { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; }
+      .standings-table .rank { color: rgba(255,255,255,.3); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; }
+      .standings-table .team-cell { display: flex; align-items: center; gap: 8px; }
+      .standings-table .team-cell img { width: 18px; height: 18px; object-fit: contain; }
+      .standings-table .team-cell span { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #e8e4e0; }
+      .standings-table .adv td { background: rgba(212,255,31,.04); }
+      .standings-table .adv .rank { color: var(--accent); }
+      .standings-table .adv-sep td { border-top: 2px solid rgba(212,255,31,.25); }
+      .standings-table .md-pos { color: var(--accent); }
+      .standings-table .md-neg { color: rgba(255,100,100,.7); }
+
+      /* Match cards */
+      .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .group-match { background: var(--bg-card); border: 1px solid rgba(212,255,31,.08); border-radius: 3px; padding: 7px 9px; }
+      body.is-admin .group-match { cursor: pointer; transition: border-color .15s, background .15s; }
+      body.is-admin .group-match:hover { border-color: rgba(212,255,31,.28); background: var(--bg-card2); }
+      .gm-row { display: flex; align-items: center; gap: 5px; padding: 2px 0; }
+      .gm-logo { width: 14px; height: 14px; object-fit: contain; flex-shrink: 0; }
+      .gm-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #e8e4e0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .gm-name.tbd { color: rgba(255,255,255,.22); font-style: italic; }
+      .gm-name.win { color: var(--accent); }
+      .gm-score { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; color: rgba(255,255,255,.35); min-width: 12px; text-align: center; flex-shrink: 0; }
+      .gm-score.win { color: var(--accent); }
+      .gm-div { height: 1px; background: rgba(255,255,255,.05); margin: 1px 0; }
+
+      /* Modal */
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
+      .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 501;
+        background: #141a08; border: 1px solid rgba(212,255,31,.2); border-radius: 6px;
+        padding: 22px; width: min(480px,94vw); max-height: 90vh; overflow-y: auto; }
+      .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+      .modal-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(212,255,31,.5); margin-bottom: 6px; display: block; }
+      .team-picker { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-bottom: 14px; }
+      .tp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 8px 4px 6px; cursor: pointer; transition: all .12s; }
+      .tp-btn:hover { border-color: rgba(212,255,31,.3); background: rgba(212,255,31,.06); }
+      .tp-btn.selected { border-color: var(--accent); background: rgba(212,255,31,.12); }
+      .tp-btn.used { opacity: .35; }
+      .tp-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .tp-btn .tp-code { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      .tp-btn.selected .tp-code { color: var(--accent); }
+      .modal-matchup { display: flex; gap: 8px; margin-bottom: 14px; }
+      .modal-team { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 9px 12px; }
+      .modal-team img { width: 20px; height: 20px; object-fit: contain; }
+      .modal-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.65); }
+      .score-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+      .score-input { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 3px; padding: 8px; color: #e8e4e0; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; text-align: center; width: 60px; }
+      .score-input:focus { outline: none; border-color: rgba(212,255,31,.4); }
+      .score-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.3); }
+      .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+      .btn { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: none; cursor: pointer; }
+      .btn-save { background: var(--accent); color: #0a0e05; }
+      .btn-save:hover { background: #e8ff5a; }
+      .btn-clear { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+      .btn-clear:hover { background: rgba(255,255,255,.14); }
+      .btn-cancel { background: transparent; color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.12); }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./challengers-emea-stage2-turkey.html">Türkiye Birlik</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div class="hero-text">
+          <p class="eyebrow">VCT EMEA Challengers 2026 · Stage 2 · Türkiye · Group Stage</p>
+          <h1 id="league-title">Birlik<br>Group Stage</h1>
+          <p class="intro">
+            10팀 · Group A / B 각 5팀 리그.<br>
+            각 그룹 내 풀 리그 10경기 (Bo3).<br>
+            그룹별 상위 4팀 PlayOff 진출.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/Türkiye Birlik.png" alt="Türkiye Birlik" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <section aria-labelledby="groups-title">
+        <div class="section-heading">
+          <p class="eyebrow">Groups</p>
+          <h2 id="groups-title">그룹 스테이지</h2>
+        </div>
+
+        <div class="groups-grid">
+          <!-- Group A -->
+          <div class="group-block">
+            <div class="group-label">Group A</div>
+            <div class="slot-row" id="ga-slots"></div>
+            <div class="standings-wrap"><div id="ga-standings"></div></div>
+            <div class="match-grid" id="ga-matches"></div>
+          </div>
+
+          <!-- Group B -->
+          <div class="group-block">
+            <div class="group-label">Group B</div>
+            <div class="slot-row" id="gb-slots"></div>
+            <div class="standings-wrap"><div id="gb-standings"></div></div>
+            <div class="match-grid" id="gb-matches"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Slot picker modal -->
+    <div class="modal-backdrop" id="slot-modal-backdrop" hidden></div>
+    <div class="modal" id="slot-modal" hidden role="dialog">
+      <p class="modal-title" id="slot-modal-title">팀 선택</p>
+      <span class="modal-label">팀 선택</span>
+      <div class="team-picker" id="slot-tp"></div>
+      <div class="modal-actions">
+        <button class="btn btn-clear" id="slot-clear">선택 해제</button>
+        <button class="btn btn-cancel" id="slot-cancel">취소</button>
+        <button class="btn btn-save" id="slot-save">저장</button>
+      </div>
+    </div>
+
+    <!-- Score modal -->
+    <div class="modal-backdrop" id="score-modal-backdrop" hidden></div>
+    <div class="modal" id="score-modal" hidden role="dialog">
+      <p class="modal-title" id="score-modal-title">경기 입력</p>
+      <span class="modal-label">Teams</span>
+      <div class="modal-matchup" id="score-matchup"></div>
+      <span class="modal-label">Score (Bo3)</span>
+      <div class="score-row">
+        <input class="score-input" id="sc-a" type="number" min="0" max="2" placeholder="0" />
+        <span class="score-sep">–</span>
+        <input class="score-input" id="sc-b" type="number" min="0" max="2" placeholder="0" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-clear" id="score-clear">초기화</button>
+        <button class="btn btn-cancel" id="score-cancel">취소</button>
+        <button class="btn btn-save" id="score-save">저장</button>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script src="./auth.js"></script>
+    <script>
+    (function () {
+      var PFX = 'tr_';
+
+      var TEAM_POOL = [
+        {code:'BJK',  name:'Beşiktaş Esports',    logo:'./assets/teams/Challengers EMEA/BJK.png',  white:false},
+        {code:'MYM',  name:'Misa Esports',         logo:'./assets/teams/Challengers EMEA/MYM.png',  white:false},
+        {code:'EFP',  name:'Eternal Fire Passion', logo:'./assets/teams/Challengers EMEA/EFP.png',  white:false},
+        {code:'DP',   name:'Dark Passage',         logo:'./assets/teams/Challengers EMEA/DP.png',   white:false},
+        {code:'BW',   name:'Bushido Wildcats',     logo:'./assets/teams/Challengers EMEA/BW.png',   white:false},
+        {code:'REBO', name:'REBORN',               logo:'./assets/teams/Challengers EMEA/REBO.png', white:false},
+        {code:'FUTA', name:'FUT Esports Academy',  logo:'./assets/teams/Challengers EMEA/FUTA.png', white:false},
+        {code:'GS',   name:'Galatasaray Esports',  logo:'./assets/teams/Challengers EMEA/GS.png',   white:false},
+        {code:'FF',   name:'Fire Flux Esports',    logo:'./assets/teams/Challengers EMEA/FF.png',   white:false},
+        {code:'GHOS', name:'GHOSTS',               logo:'./assets/teams/Challengers EMEA/GHOS.png', white:false},
+      ];
+
+      var DEFAULT_GA = ['Beşiktaş Esports','Misa Esports','Eternal Fire Passion','Dark Passage','Bushido Wildcats'];
+      var DEFAULT_GB = ['REBORN','FUT Esports Academy','Galatasaray Esports','Fire Flux Esports','GHOSTS'];
+
+      var MATCH_PAIRS = [
+        [1,2],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5],[3,4],[3,5],[4,5]
+      ];
+
+      function sGet(k)   { return localStorage.getItem(PFX+k); }
+      function sSet(k,v) { if(v!==null&&v!==undefined) localStorage.setItem(PFX+k,v); else localStorage.removeItem(PFX+k); }
+
+      function getSlot(grp,idx)      { return sGet(grp+'_t'+idx)||''; }
+      function setSlot(grp,idx,name) { sSet(grp+'_t'+idx, name||null); }
+      function getGrpSc(grp,mid)     { var v=sGet(grp+'_m'+mid); return v?JSON.parse(v):null; }
+      function setGrpSc(grp,mid,a,b) { if(a===null) sSet(grp+'_m'+mid,null); else sSet(grp+'_m'+mid,JSON.stringify({a:a,b:b})); }
+      function getTeamByName(n)      { return TEAM_POOL.find(function(t){return t.name===n;})||null; }
+      function isAdmin()             { return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
+
+      function getTeams(grp) {
+        var t=[];
+        for(var i=1;i<=5;i++) t.push(getSlot(grp,i));
+        return t;
+      }
+
+      function initDefaults() {
+        DEFAULT_GA.forEach(function(n,i){ if(!getSlot('ga',i+1)) setSlot('ga',i+1,n); });
+        DEFAULT_GB.forEach(function(n,i){ if(!getSlot('gb',i+1)) setSlot('gb',i+1,n); });
+      }
+
+      function getAllAssigned() {
+        var all=[];
+        ['ga','gb'].forEach(function(g){ for(var i=1;i<=5;i++){ var n=getSlot(g,i); if(n) all.push(n); } });
+        return all;
+      }
+
+      function computeStandings(grp) {
+        var teams=getTeams(grp);
+        var stats={};
+        teams.forEach(function(n){ if(n) stats[n]={w:0,l:0,mw:0,ml:0}; });
+        MATCH_PAIRS.forEach(function(pair,idx){
+          var sc=getGrpSc(grp,idx+1); if(!sc) return;
+          var a=teams[pair[0]-1], b=teams[pair[1]-1]; if(!a||!b) return;
+          if(!stats[a]) stats[a]={w:0,l:0,mw:0,ml:0};
+          if(!stats[b]) stats[b]={w:0,l:0,mw:0,ml:0};
+          if(sc.a>sc.b){stats[a].w++;stats[b].l++;}
+          else if(sc.b>sc.a){stats[b].w++;stats[a].l++;}
+          stats[a].mw+=sc.a; stats[a].ml+=sc.b;
+          stats[b].mw+=sc.b; stats[b].ml+=sc.a;
+        });
+        return teams.map(function(n){
+          var s=stats[n]||{w:0,l:0,mw:0,ml:0};
+          return {name:n,w:s.w,l:s.l,mw:s.mw,ml:s.ml,md:s.mw-s.ml};
+        }).sort(function(a,b){
+          if(b.w!==a.w) return b.w-a.w;
+          return (b.mw-b.ml)-(a.mw-a.ml);
+        });
+      }
+
+      function logoImg(name,cls){
+        var t=getTeamByName(name); if(!t) return '';
+        return '<img src="'+t.logo+'" class="'+(cls||'')+(t.white?' logo-w':'')+'" alt="" onerror="this.style.display=\'none\'" />';
+      }
+
+      function renderSlots(grp) {
+        var el=document.getElementById(grp+'-slots'); var html='';
+        for(var i=1;i<=5;i++){
+          var name=getSlot(grp,i); var t=getTeamByName(name);
+          html+='<div class="slot-tile" data-grp="'+grp+'" data-idx="'+i+'">';
+          if(t) html+=logoImg(name,'')+'<span class="st-code">'+t.code+'</span>';
+          else html+='<span class="st-empty">선택</span>';
+          html+='</div>';
+        }
+        el.innerHTML=html;
+        if(isAdmin()) el.querySelectorAll('.slot-tile').forEach(function(tile){
+          tile.addEventListener('click',function(){ openSlotModal(tile.dataset.grp,parseInt(tile.dataset.idx)); });
+        });
+      }
+
+      function renderStandings(grp) {
+        var el=document.getElementById(grp+'-standings');
+        var st=computeStandings(grp);
+        var html='<table class="standings-table"><thead><tr>'
+          +'<th>#</th><th>Team</th><th>W</th><th>L</th><th>MD</th><th>MW</th><th>ML</th>'
+          +'</tr></thead><tbody>';
+        st.forEach(function(s,i){
+          var t=getTeamByName(s.name);
+          var adv=i<4;
+          var sepCls=(i===4)?' class="adv-sep"':'';
+          html+='<tr'+(adv?' class="adv"':'')+sepCls+'>'
+            +'<td class="rank">'+(i+1)+'</td>'
+            +'<td><div class="team-cell">'
+              +(t?logoImg(s.name,''):'')
+              +'<span>'+(s.name||'–')+'</span>'
+            +'</div></td>'
+            +'<td>'+s.w+'</td><td>'+s.l+'</td>'
+            +'<td class="'+(s.md>0?'md-pos':s.md<0?'md-neg':'')+'">'+(s.md>0?'+':'')+s.md+'</td>'
+            +'<td>'+s.mw+'</td><td>'+s.ml+'</td>'
+            +'</tr>';
+          if(i===3&&st.length>4) html+='<tr class="adv-sep"><td colspan="7" style="padding:0;height:0;border:none;"></td></tr>';
+        });
+        html+='</tbody></table>';
+        el.innerHTML=html;
+      }
+
+      function renderMatches(grp) {
+        var el=document.getElementById(grp+'-matches');
+        var teams=getTeams(grp); var html='';
+        MATCH_PAIRS.forEach(function(pair,idx){
+          var mid=idx+1; var sc=getGrpSc(grp,mid);
+          var a=teams[pair[0]-1], b=teams[pair[1]-1];
+          var ta=getTeamByName(a), tb=getTeamByName(b);
+          var winA=sc&&sc.a>sc.b, winB=sc&&sc.b>sc.a;
+          html+='<article class="group-match" data-grp="'+grp+'" data-mid="'+mid+'">'
+            +'<div class="gm-row">'
+              +(ta?'<img src="'+ta.logo+'"'+(ta.white?' class="gm-logo logo-w"':' class="gm-logo"')+' alt="" />':'<span class="gm-logo"></span>')
+              +'<span class="gm-name'+(winA?' win':'')+(a?'':' tbd')+'">'+(a||'TBD')+'</span>'
+              +'<span class="gm-score'+(winA?' win':'')+'">'+(sc!==null?sc.a:'–')+'</span>'
+            +'</div><div class="gm-div"></div><div class="gm-row">'
+              +(tb?'<img src="'+tb.logo+'"'+(tb.white?' class="gm-logo logo-w"':' class="gm-logo"')+' alt="" />':'<span class="gm-logo"></span>')
+              +'<span class="gm-name'+(winB?' win':'')+(b?'':' tbd')+'">'+(b||'TBD')+'</span>'
+              +'<span class="gm-score'+(winB?' win':'')+'">'+(sc!==null?sc.b:'–')+'</span>'
+            +'</div></article>';
+        });
+        el.innerHTML=html;
+        if(isAdmin()) el.querySelectorAll('.group-match').forEach(function(card){
+          card.addEventListener('click',function(){ openMatchModal(card.dataset.grp,parseInt(card.dataset.mid)); });
+        });
+      }
+
+      function render() {
+        if(isAdmin()) document.body.classList.add('is-admin');
+        initDefaults();
+        ['ga','gb'].forEach(function(grp){
+          renderSlots(grp);
+          renderStandings(grp);
+          renderMatches(grp);
+        });
+      }
+
+      /* Slot modal */
+      var _slotCtx=null; var _slotSel='';
+
+      function openSlotModal(grp,idx) {
+        _slotCtx={grp:grp,idx:idx};
+        _slotSel=getSlot(grp,idx);
+        var assigned=getAllAssigned();
+        var cur=getSlot(grp,idx);
+        document.getElementById('slot-modal-title').textContent='Group '+(grp==='ga'?'A':'B')+' · 슬롯 '+idx;
+        var tp=document.getElementById('slot-tp'); tp.innerHTML='';
+        TEAM_POOL.forEach(function(t){
+          var isCur=t.name===cur;
+          var isUsed=!isCur&&assigned.indexOf(t.name)!==-1;
+          var btn=document.createElement('button');
+          btn.className='tp-btn'+(isCur?' selected':'')+(isUsed?' used':'');
+          btn.innerHTML='<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />'
+            +'<span class="tp-code">'+t.code+'</span>';
+          btn.addEventListener('click',function(){
+            _slotSel=t.name;
+            tp.querySelectorAll('.tp-btn').forEach(function(b){b.classList.remove('selected');});
+            btn.classList.add('selected');
+          });
+          tp.appendChild(btn);
+        });
+        document.getElementById('slot-modal-backdrop').hidden=false;
+        document.getElementById('slot-modal').hidden=false;
+      }
+
+      function closeSlotModal() {
+        document.getElementById('slot-modal-backdrop').hidden=true;
+        document.getElementById('slot-modal').hidden=true;
+        _slotCtx=null; _slotSel='';
+      }
+
+      document.getElementById('slot-save').addEventListener('click',function(){
+        if(!_slotCtx) return;
+        setSlot(_slotCtx.grp,_slotCtx.idx,_slotSel||null);
+        closeSlotModal(); render();
+      });
+      document.getElementById('slot-clear').addEventListener('click',function(){
+        if(!_slotCtx) return;
+        setSlot(_slotCtx.grp,_slotCtx.idx,null);
+        closeSlotModal(); render();
+      });
+      document.getElementById('slot-cancel').addEventListener('click',closeSlotModal);
+      document.getElementById('slot-modal-backdrop').addEventListener('click',closeSlotModal);
+
+      /* Score modal */
+      var _scoreCtx=null;
+
+      function openMatchModal(grp,mid) {
+        _scoreCtx={grp:grp,mid:mid};
+        var teams=getTeams(grp);
+        var pair=MATCH_PAIRS[mid-1];
+        var a=teams[pair[0]-1], b=teams[pair[1]-1];
+        var ta=getTeamByName(a), tb=getTeamByName(b);
+        document.getElementById('score-modal-title').textContent='Group '+(grp==='ga'?'A':'B')+' · M'+mid+' · Bo3';
+        function teamSlot(name,t){
+          return '<div class="modal-team">'+(t?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')
+            +'<span class="modal-team-name">'+(name||'TBD')+'</span></div>';
+        }
+        document.getElementById('score-matchup').innerHTML=teamSlot(a,ta)+teamSlot(b,tb);
+        var sc=getGrpSc(grp,mid);
+        document.getElementById('sc-a').value=sc?sc.a:0;
+        document.getElementById('sc-b').value=sc?sc.b:0;
+        document.getElementById('score-modal-backdrop').hidden=false;
+        document.getElementById('score-modal').hidden=false;
+      }
+
+      function closeMatchModal() {
+        document.getElementById('score-modal-backdrop').hidden=true;
+        document.getElementById('score-modal').hidden=true;
+        _scoreCtx=null;
+      }
+
+      document.getElementById('score-save').addEventListener('click',function(){
+        if(!_scoreCtx) return;
+        var a=parseInt(document.getElementById('sc-a').value)||0;
+        var b=parseInt(document.getElementById('sc-b').value)||0;
+        setGrpSc(_scoreCtx.grp,_scoreCtx.mid,a,b);
+        closeMatchModal(); render();
+      });
+      document.getElementById('score-clear').addEventListener('click',function(){
+        if(!_scoreCtx) return;
+        setGrpSc(_scoreCtx.grp,_scoreCtx.mid,null,null);
+        closeMatchModal(); render();
+      });
+      document.getElementById('score-cancel').addEventListener('click',closeMatchModal);
+      document.getElementById('score-modal-backdrop').addEventListener('click',closeMatchModal);
+      document.addEventListener('keydown',function(e){
+        if(e.key==='Escape'){
+          if(!document.getElementById('score-modal').hidden) closeMatchModal();
+          if(!document.getElementById('slot-modal').hidden) closeSlotModal();
+        }
+      });
+
+      window.storageReady.then(function(){ render(); });
+    })();
+    </script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
