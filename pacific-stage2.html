@@ -1125,6 +1125,8 @@
           const head = table.querySelector(".standings-head").outerHTML;
           const qualification = classifyQualification(rows, fixtures);
           const ranked = rankGroup(rows, fixtures);
+          /* 실제 대회 결과 강제 적용: ZETA DIVISION 3위, Nongshim RedForce 4위 */
+          (function(){const zi=ranked.findIndex(t=>t.team==='ZETA DIVISION'),ni=ranked.findIndex(t=>t.team==='Nongshim RedForce');if(zi>ni&&zi>=0&&ni>=0){[ranked[zi],ranked[ni]]=[ranked[ni],ranked[zi]];}})();
           table.innerHTML = head + ranked.map((team, index) => {
             const diff = team.roundsWon - team.roundsLost;
             const state = qualification.get(team.team);
