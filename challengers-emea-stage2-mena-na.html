@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MENA Resilience NA – EMEA Challengers Stage 2 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root { --accent: #d4ff1f; --accent-dim: rgba(212,255,31,.7); --bg-base: #0a0e05; --bg-card: #111508; --bg-card2: #192010; }
+      body { background: var(--bg-base); color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+      .site-header { display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 56px; background: rgba(10,14,5,.92); border-bottom: 1px solid rgba(212,255,31,.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .home-link { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); text-decoration: none; transition: color .15s; }
+      .home-link:hover { color: #fff; }
+      .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.4); text-decoration: none; transition: color .15s; }
+      .back-link:hover { color: rgba(255,255,255,.8); }
+      .site-header .auth-header-btn { margin-left: auto !important; }
+
+      .league-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 64px 0 72px; max-width: 1080px; margin: 0 auto; overflow: hidden; }
+      .league-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(212,255,31,.1) 0%, transparent 70%); pointer-events: none; }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+      .league-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(38px,6vw,72px); font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: .95; color: #fff; margin-bottom: 18px; }
+      .league-hero .intro { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.45); max-width: 420px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; word-break: keep-all; }
+      .league-mark { flex-shrink: 0; position: relative; z-index: 1; padding: 16px; }
+      .league-mark img { width: clamp(100px,16vw,180px); height: clamp(100px,16vw,180px); object-fit: contain; filter: brightness(1.15) drop-shadow(0 0 16px rgba(212,255,31,.35)) drop-shadow(0 4px 24px rgba(0,0,0,.5)); }
+
+      .league-shell { max-width: 1080px; margin: 0 auto; padding: 0 32px 80px; }
+      .section-divider { height: 1px; background: rgba(212,255,31,.12); margin: 0 0 52px; }
+      .section-heading { margin-bottom: 20px; border-left: 3px solid var(--accent); padding-left: 16px; }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
+
+      /* Pool */
+      .pool-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-bottom: 40px; }
+      @media (max-width: 700px) { .pool-grid { grid-template-columns: repeat(4, 1fr); } }
+      .pool-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--bg-card); border: 1px solid rgba(212,255,31,.08); border-radius: 3px; padding: 12px 6px 10px; }
+      .pool-tile img { width: 40px; height: 40px; object-fit: contain; }
+      .pool-tile .pt-code { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+      .pool-tile .pt-name { font-size: 9px; color: rgba(255,255,255,.3); text-align: center; line-height: 1.3; font-family: 'Noto Sans KR', sans-serif; }
+      .logo-w { filter: brightness(0) invert(1); }
+
+      /* Swiss match cards */
+      .sw-rounds { display: flex; flex-direction: column; gap: 18px; margin-bottom: 40px; }
+      .sw-round-hdr { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: rgba(212,255,31,.5); margin-bottom: 7px; }
+      .sw-round-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+      @media (max-width: 600px) { .sw-round-grid { grid-template-columns: 1fr; } }
+      .sw-match-card { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; background: var(--bg-card); border: 1px solid rgba(212,255,31,.09); border-radius: 3px; padding: 10px 12px; min-height: 56px; transition: border-color .15s, background .15s; }
+      body.is-admin .sw-match-card { cursor: pointer; }
+      body.is-admin .sw-match-card:hover { border-color: rgba(212,255,31,.28); background: var(--bg-card2); }
+      .sw-side { display: flex; align-items: center; gap: 7px; justify-content: flex-end; min-width: 0; }
+      .sw-side.right { flex-direction: row-reverse; justify-content: flex-end; }
+      .sw-logo { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+      .sw-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sw-name.tbd { color: rgba(255,255,255,.2); font-weight: 400; font-size: 13px; }
+      .sw-side.winner .sw-name { color: var(--accent); }
+      .sw-sc { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; color: rgba(255,255,255,.35); min-width: 36px; text-align: center; }
+
+      /* Swiss advance slots */
+      .sw-qualified { display: flex; gap: 10px; margin-bottom: 52px; flex-wrap: wrap; }
+      .sw-slot { flex: 1; min-width: 130px; background: rgba(212,255,31,.04); border: 1px solid rgba(212,255,31,.18); border-radius: 4px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; }
+      .sw-slot-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
+      .sw-slot-team { display: flex; align-items: center; gap: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 20px; }
+      .sw-slot-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 12px; display: block; }
+      .sw-slot-logo { width: 22px; height: 22px; object-fit: contain; }
+
+      /* Playoff qualified slot */
+      .qualified-grid { display: flex; gap: 12px; margin-bottom: 28px; }
+      .qual-slot { flex: 1; background: rgba(212,255,31,.05); border: 1px solid rgba(212,255,31,.2); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
+      .qs-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-dim); }
+      .qs-dest { font-size: 10px; color: rgba(255,255,255,.3); font-family: 'Noto Sans KR', sans-serif; }
+      .qs-team { display: flex; align-items: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); min-height: 24px; }
+      .qs-team.tbd { color: rgba(255,255,255,.2); font-style: italic; font-size: 14px; display: block; }
+      .qs-logo { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+
+      /* Bracket */
+      .bracket-wrap { overflow-x: auto; padding-bottom: 12px; }
+      .bracket-scroll { min-width: max-content; display: flex; flex-direction: column; gap: 0; }
+      .br-section { display: flex; gap: 10px; }
+      .br-section.ub-row { height: 280px; }
+      .br-section.lb-row { height: 180px; }
+      .br-sep { height: 1px; background: rgba(255,255,255,.06); margin: 10px 0; }
+
+      .round-col { width: 170px; flex-shrink: 0; display: flex; flex-direction: column; }
+      .round-col.wide { width: 190px; }
+      .round-col.spacer { width: 30px; }
+      .round-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(212,255,31,.55); margin-bottom: 6px; white-space: nowrap; }
+      .lb-label { color: rgba(255,150,30,.55); }
+      .finals-label { color: rgba(255,255,200,.7); }
+      .round-matches { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+
+      .bracket-match { background: var(--bg-card); border: 1px solid rgba(212,255,31,.1); border-radius: 3px; padding: 7px 10px; transition: border-color .15s, background .15s; }
+      body.is-admin .bracket-match { cursor: pointer; }
+      body.is-admin .bracket-match:hover { border-color: rgba(212,255,31,.3); background: var(--bg-card2); }
+      .lb-match { border-color: rgba(255,150,30,.15); }
+      body.is-admin .lb-match:hover { border-color: rgba(255,150,30,.4); }
+      .finals-match { border-color: rgba(255,255,200,.25); background: rgba(255,255,200,.02); }
+      body.is-admin .finals-match:hover { border-color: rgba(255,255,200,.5); }
+
+      .m-row { display: flex; align-items: center; gap: 5px; padding: 3px 0; }
+      .m-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+      .m-name { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #e8e4e0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .m-name.tbd { color: rgba(255,255,255,.22); font-style: italic; }
+      .m-name.win { color: var(--accent); }
+      .m-score { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 900; color: rgba(255,255,255,.4); min-width: 14px; text-align: center; flex-shrink: 0; }
+      .m-score.win { color: var(--accent); }
+      .m-divider { height: 1px; background: rgba(255,255,255,.06); margin: 1px 0; }
+
+      /* Modal */
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 500; }
+      .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 501;
+        background: #141a08; border: 1px solid rgba(212,255,31,.2); border-radius: 6px;
+        padding: 22px; width: min(480px, 94vw); max-height: 90vh; overflow-y: auto; }
+      .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+      .modal-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(212,255,31,.5); margin-bottom: 6px; display: block; }
+      .team-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; margin-bottom: 14px; }
+      .tp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 8px 4px 6px; cursor: pointer; transition: all .12s; }
+      .tp-btn:hover { border-color: rgba(212,255,31,.3); background: rgba(212,255,31,.06); }
+      .tp-btn.selected { border-color: var(--accent); background: rgba(212,255,31,.12); }
+      .tp-btn img { width: 24px; height: 24px; object-fit: contain; }
+      .tp-btn .tp-code { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+      .tp-btn.selected .tp-code { color: var(--accent); }
+      .modal-matchup { display: flex; gap: 8px; margin-bottom: 14px; }
+      .modal-team { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 3px; padding: 9px 12px; }
+      .modal-team img { width: 20px; height: 20px; object-fit: contain; }
+      .modal-team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.65); }
+      .score-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+      .score-input { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 3px; padding: 8px; color: #e8e4e0; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; text-align: center; width: 60px; }
+      .score-input:focus { outline: none; border-color: rgba(212,255,31,.4); }
+      .score-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.3); }
+      .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+      .btn { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 8px 16px; border-radius: 3px; border: none; cursor: pointer; }
+      .btn-save { background: var(--accent); color: #0a0e05; }
+      .btn-save:hover { background: #e8ff5a; }
+      .btn-clear { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+      .btn-clear:hover { background: rgba(255,255,255,.14); }
+      .btn-cancel { background: transparent; color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.12); }
+
+      .phase-sep { height: 1px; background: rgba(212,255,31,.1); margin: 60px 0 52px; }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./challengers-emea-stage2.html">EMEA Stage 2</a>
+    </header>
+
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;">
+      <section class="league-hero" aria-labelledby="league-title">
+        <div class="hero-text">
+          <p class="eyebrow">VCT EMEA Challengers 2026 · Stage 2 · MENA · NA</p>
+          <h1 id="league-title">Resilience<br>NA</h1>
+          <p class="intro">
+            MENA 지역 North Africa 대회입니다.<br>
+            8팀이 Swiss Stage (10경기)를 거쳐 Top 4가 Playoff에 진출하며,<br>
+            더블 엘리미네이션 방식으로 Grand Final만 Bo5입니다.<br>
+            단 1팀만 EMEA Challengers Stage 2에 진출합니다.
+          </p>
+        </div>
+        <div class="league-mark">
+          <img src="./assets/MENA Resilience.png" alt="MENA Resilience" />
+        </div>
+      </section>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <!-- 참가팀 -->
+      <section style="margin-bottom:40px;" aria-labelledby="pool-title">
+        <div class="section-heading">
+          <p class="eyebrow">Participants</p>
+          <h2 id="pool-title">참가팀</h2>
+        </div>
+        <div class="pool-grid" id="pool-grid"></div>
+      </section>
+
+      <!-- Swiss Stage -->
+      <section aria-labelledby="sw-title">
+        <div class="section-heading">
+          <p class="eyebrow">Phase 1 · Swiss Format</p>
+          <h2 id="sw-title">Swiss Stage</h2>
+        </div>
+        <div class="sw-rounds" id="sw-rounds"></div>
+        <div style="margin-bottom:10px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(212,255,31,.5);">Playoff 진출 · Top 4</span>
+        </div>
+        <div class="sw-qualified" id="sw-qualified"></div>
+      </section>
+
+      <div class="phase-sep"></div>
+
+      <!-- Playoff -->
+      <section aria-labelledby="po-title">
+        <div class="section-heading">
+          <p class="eyebrow">Phase 2 · Double Elimination</p>
+          <h2 id="po-title">Playoff</h2>
+        </div>
+
+        <div class="qualified-grid">
+          <div class="qual-slot">
+            <span class="qs-label">Champion ★</span>
+            <span class="qs-dest">GF 우승 → EMEA Challengers Stage 2</span>
+            <div class="qs-team tbd" id="qt-champ">TBD</div>
+          </div>
+        </div>
+
+        <div class="bracket-wrap">
+          <div class="bracket-scroll">
+            <div class="br-section ub-row">
+              <div class="round-col">
+                <p class="round-label">Upper R1 · Bo3</p>
+                <div class="round-matches" id="po-ubr1"></div>
+              </div>
+              <div class="round-col spacer"></div>
+              <div class="round-col wide">
+                <p class="round-label finals-label">Upper Final · Bo3</p>
+                <div class="round-matches" id="po-uf"></div>
+              </div>
+              <div class="round-col spacer"></div>
+              <div class="round-col wide">
+                <p class="round-label finals-label">Grand Final · Bo5 ★</p>
+                <div class="round-matches" id="po-gf"></div>
+              </div>
+            </div>
+            <div class="br-sep"></div>
+            <div class="br-section lb-row">
+              <div class="round-col">
+                <p class="round-label lb-label">Lower R1 · Bo3</p>
+                <div class="round-matches" id="po-lbr1"></div>
+              </div>
+              <div class="round-col spacer"></div>
+              <div class="round-col wide">
+                <p class="round-label lb-label finals-label">Lower Final · Bo3</p>
+                <div class="round-matches" id="po-lbf"></div>
+              </div>
+              <div class="round-col spacer"></div>
+              <div class="round-col spacer"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" id="modal-backdrop" hidden></div>
+    <div class="modal" id="score-modal" hidden role="dialog" aria-modal="true">
+      <p class="modal-title" id="modal-title">경기 입력</p>
+      <div id="picker-wrap-a" hidden>
+        <span class="modal-label">Team A 선택</span>
+        <div class="team-picker" id="tp-a"></div>
+      </div>
+      <div id="picker-wrap-b" hidden>
+        <span class="modal-label">Team B 선택</span>
+        <div class="team-picker" id="tp-b"></div>
+      </div>
+      <span class="modal-label" id="matchup-label" hidden>Teams</span>
+      <div class="modal-matchup" id="modal-matchup" hidden></div>
+      <span class="modal-label" id="score-label">Score (Bo3)</span>
+      <div class="score-row">
+        <input class="score-input" id="modal-score-a" type="number" min="0" max="2" placeholder="0" />
+        <span class="score-sep">–</span>
+        <input class="score-input" id="modal-score-b" type="number" min="0" max="2" placeholder="0" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-clear" id="modal-clear">초기화</button>
+        <button class="btn btn-cancel" id="modal-cancel">취소</button>
+        <button class="btn btn-save" id="modal-save">저장</button>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script src="./auth.js"></script>
+    <script>
+    (function () {
+      var PFX = 'na_';
+
+      var TEAM_POOL = [
+        {code:'GMX',  name:'Gamax Esports',       logo:'./assets/teams/Challengers EMEA/GMX.png',  white:false},
+        {code:'BAM',  name:'BAAM Esports',         logo:'./assets/teams/Challengers EMEA/BAM.png',  white:false},
+        {code:'GLS',  name:'Ghools Esports',       logo:'./assets/teams/Challengers EMEA/GLS.png',  white:false},
+        {code:'RAAD', name:'Team RA\'AD',          logo:'./assets/teams/Challengers EMEA/RAAD.png', white:false},
+        {code:'GNG',  name:'GnG Esports',          logo:'./assets/teams/Challengers EMEA/GNG.png',  white:false},
+        {code:'RAF',  name:'RAFHA eSPORTS',        logo:'./assets/teams/Challengers EMEA/RAF.png',  white:false},
+        {code:'VIB',  name:'Vibranium Esports',    logo:'./assets/teams/Challengers EMEA/VIB.png',  white:false},
+        {code:'1M',   name:'One More Esports',     logo:'./assets/teams/Challengers EMEA/1M.png',   white:false},
+      ];
+
+      /*
+        Swiss Stage — 3 rounds, 10 matches
+        R1 (M1-M4): full picker (all 8 teams 0-0)
+        R2 (M5-M8): auto-resolved from R1
+          M5: M1W vs M2W  (1-0 bucket A)
+          M6: M3W vs M4W  (1-0 bucket B)
+          M7: M1L vs M2L  (0-1 bucket A)
+          M8: M3L vs M4L  (0-1 bucket B)
+        R3 (M9-M10): auto-resolved from R2
+          M9:  M5L vs M6L  (1-1 → winner advances)
+          M10: M7W vs M8W  (1-1 → winner advances)
+        Advance → Playoff: M5W(#1), M6W(#2), M9W(#3), M10W(#4)
+
+        Playoff DE — 6 matches
+          M1 (UBR1): full picker
+          M2 (UBR1): full picker
+          M3 (UF):   M1W vs M2W
+          M4 (LBR1): M1L vs M2L
+          M5 (LF):   M3L vs M4W
+          M6 (GF Bo5): M3W vs M5W → Champion
+      */
+
+      /* all 10 Swiss matches use full team pickers */
+      var PO_BO5     = {6:true};
+      var PO_LB      = {4:1,5:1};
+      var PO_PICKER_FULL = {1:1,2:1};
+      var PO_LABELS  = {
+        1:'Upper R1 M1·Bo3', 2:'Upper R1 M2·Bo3',
+        3:'Upper Final·Bo3', 4:'Lower R1·Bo3',
+        5:'Lower Final·Bo3', 6:'Grand Final·Bo5',
+      };
+
+      function sGet(k)   { return localStorage.getItem(PFX+k); }
+      function sSet(k,v) { if(v!==null&&v!==undefined) localStorage.setItem(PFX+k,v); else localStorage.removeItem(PFX+k); }
+
+      function getSwTeam(mid,side) { return sGet('sw_t_'+mid+'_'+side)||''; }
+      function setSwTeam(mid,side,n) { sSet('sw_t_'+mid+'_'+side, n||null); }
+      function getSwSc(mid) { var v=sGet('sw_'+mid); return v?JSON.parse(v):null; }
+      function setSwSc(mid,a,b) { if(a===null) sSet('sw_'+mid,null); else sSet('sw_'+mid,JSON.stringify({a:a,b:b})); }
+
+      function getPoTeam(mid,side) { return sGet('po_t_'+mid+'_'+side)||''; }
+      function setPoTeam(mid,side,n) { sSet('po_t_'+mid+'_'+side, n||null); }
+      function getPoSc(mid) { var v=sGet('po_'+mid); return v?JSON.parse(v):null; }
+      function setPoSc(mid,a,b) { if(a===null) sSet('po_'+mid,null); else sSet('po_'+mid,JSON.stringify({a:a,b:b})); }
+
+      function getTeamByName(n) { return TEAM_POOL.find(function(t){return t.name===n;})||null; }
+      function isAdmin() { return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
+
+      function logoHTML(name,cls) {
+        var t=getTeamByName(name); if(!t||!t.logo) return '';
+        return '<img src="'+t.logo+'" class="'+(cls||'')+(t.white?' logo-w':'')+'" alt="" />';
+      }
+
+      function resolveMatch(m) {
+        if(!m.sc) return;
+        if(m.sc.a>m.sc.b){m.winner=m.a;m.loser=m.b;}
+        else if(m.sc.b>m.sc.a){m.winner=m.b;m.loser=m.a;}
+      }
+
+      function resolveSW() {
+        var sw={};
+        for(var i=1;i<=10;i++) {
+          sw[i]={a:getSwTeam(i,'a'),b:getSwTeam(i,'b'),sc:getSwSc(i),winner:'',loser:''};
+          resolveMatch(sw[i]);
+        }
+        return sw;
+      }
+
+      function resolvePO() {
+        var po={};
+        for(var i=1;i<=6;i++) po[i]={a:'',b:'',sc:getPoSc(i),winner:'',loser:''};
+        po[1].a=getPoTeam(1,'a'); po[1].b=getPoTeam(1,'b'); resolveMatch(po[1]);
+        po[2].a=getPoTeam(2,'a'); po[2].b=getPoTeam(2,'b'); resolveMatch(po[2]);
+        po[3].a=po[1].winner; po[3].b=po[2].winner; resolveMatch(po[3]);
+        po[4].a=po[1].loser;  po[4].b=po[2].loser;  resolveMatch(po[4]);
+        po[5].a=po[3].loser;  po[5].b=po[4].winner; resolveMatch(po[5]);
+        po[6].a=po[3].winner; po[6].b=po[5].winner; resolveMatch(po[6]);
+        return po;
+      }
+
+      var SW_ROUNDS = [
+        {label:'Round 1  ·  0-0 vs 0-0', mids:[1,2,3,4]},
+        {label:'Round 2  ·  1-0 vs 1-0  /  0-1 vs 0-1', mids:[5,6,7,8]},
+        {label:'Round 3  ·  1-1 vs 1-1', mids:[9,10]},
+      ];
+
+      function swCard(mid, sw) {
+        var m=sw[mid];
+        var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
+        var tao=getTeamByName(m.a), tbo=getTeamByName(m.b);
+        return '<div class="sw-match-card" data-sw-mid="'+mid+'">'
+          +'<div class="sw-side'+(winA?' winner':'')+'"><img class="sw-logo'+(tao&&tao.white?' logo-w':'')+'" src="'+(tao?tao.logo:'')+'" alt="" onerror="this.style.display=\'none\'" />'
+          +'<span class="sw-name'+(m.a?'':' tbd')+'">'+(tao?tao.code:(m.a||'TBD'))+'</span></div>'
+          +'<div class="sw-sc">'+(m.sc?m.sc.a+'–'+m.sc.b:'vs')+'</div>'
+          +'<div class="sw-side right'+(winB?' winner':'')+'"><img class="sw-logo'+(tbo&&tbo.white?' logo-w':'')+'" src="'+(tbo?tbo.logo:'')+'" alt="" onerror="this.style.display=\'none\'" />'
+          +'<span class="sw-name'+(m.b?'':' tbd')+'">'+(tbo?tbo.code:(m.b||'TBD'))+'</span></div>'
+          +'</div>';
+      }
+
+      function renderSW(sw) {
+        var wrap=document.getElementById('sw-rounds');
+        wrap.innerHTML=SW_ROUNDS.map(function(r){
+          return '<div class="sw-round"><div class="sw-round-hdr">'+r.label+'</div>'
+            +'<div class="sw-round-grid">'+r.mids.map(function(mid){return swCard(mid,sw);}).join('')+'</div></div>';
+        }).join('');
+        if(isAdmin()){
+          wrap.querySelectorAll('[data-sw-mid]').forEach(function(el){
+            el.addEventListener('click',function(){openModal({type:'sw',mid:parseInt(el.dataset.swMid)});});
+          });
+        }
+        var seeds=[
+          {label:'#1 Seed · 2-0',name:sw[5].winner},
+          {label:'#2 Seed · 2-0',name:sw[6].winner},
+          {label:'#3 Seed · 2-1',name:sw[9].winner},
+          {label:'#4 Seed · 2-1',name:sw[10].winner},
+        ];
+        document.getElementById('sw-qualified').innerHTML=seeds.map(function(s){
+          var t=getTeamByName(s.name);
+          return '<div class="sw-slot"><span class="sw-slot-label">'+s.label+'</span>'
+            +'<div class="sw-slot-team'+(s.name?'':' tbd')+'">'
+            +(t&&t.logo?'<img src="'+t.logo+'" class="sw-slot-logo'+(t.white?' logo-w':'')+'" alt="" />':'')
+            +(t?t.code:(s.name||'TBD'))+'</div></div>';
+        }).join('');
+      }
+
+      function brCard(mid, po) {
+        var m=po[mid];
+        var winA=m.sc&&m.sc.a>m.sc.b, winB=m.sc&&m.sc.b>m.sc.a;
+        var isLB=!!PO_LB[mid];
+        var cls='bracket-match'+(mid===6?' finals-match':isLB?' lb-match':'');
+        return '<article class="'+cls+'" data-po-mid="'+mid+'">'
+          +'<div class="m-row">'+logoHTML(m.a,'m-logo')
+          +'<span class="m-name'+(winA?' win':'')+(m.a?'':' tbd')+'">'+(m.a||'TBD')+'</span>'
+          +'<span class="m-score'+(winA?' win':'')+'">'+(m.sc!==null?m.sc.a:'–')+'</span>'
+          +'</div><div class="m-divider"></div><div class="m-row">'+logoHTML(m.b,'m-logo')
+          +'<span class="m-name'+(winB?' win':'')+(m.b?'':' tbd')+'">'+(m.b||'TBD')+'</span>'
+          +'<span class="m-score'+(winB?' win':'')+'">'+(m.sc!==null?m.sc.b:'–')+'</span>'
+          +'</div></article>';
+      }
+
+      function renderPO(po) {
+        var map={
+          'po-ubr1':[1,2],'po-uf':[3],'po-gf':[6],
+          'po-lbr1':[4],'po-lbf':[5],
+        };
+        Object.keys(map).forEach(function(id){
+          var el=document.getElementById(id);
+          if(el) el.innerHTML=map[id].map(function(mid){return brCard(mid,po);}).join('');
+        });
+        var champ=po[6].winner; var t=getTeamByName(champ);
+        var ch=document.getElementById('qt-champ');
+        ch.innerHTML=champ?((t&&t.logo?'<img src="'+t.logo+'" class="qs-logo'+(t.white?' logo-w':'')+'" alt="" />':'')+'<span>'+(t?t.code:champ)+'</span>'):'TBD';
+        ch.className='qs-team'+(champ?'':' tbd');
+        if(isAdmin()){
+          document.querySelectorAll('[data-po-mid]').forEach(function(el){
+            el.addEventListener('click',function(){openModal({type:'po',mid:parseInt(el.dataset.poMid)});});
+          });
+        }
+      }
+
+      function render() {
+        if(isAdmin()) document.body.classList.add('is-admin');
+        document.getElementById('pool-grid').innerHTML=TEAM_POOL.map(function(t){
+          return '<div class="pool-tile"><img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="'+t.name+'" onerror="this.style.display=\'none\'" />'
+            +'<span class="pt-code">'+t.code+'</span><span class="pt-name">'+t.name+'</span></div>';
+        }).join('');
+        renderSW(resolveSW());
+        renderPO(resolvePO());
+      }
+
+      /* ---- Modal ---- */
+      var _ctx=null, _selA='', _selB='';
+
+      function makeTP(elId, current, onPick) {
+        var el=document.getElementById(elId); el.innerHTML='';
+        TEAM_POOL.forEach(function(t){
+          var btn=document.createElement('button');
+          btn.className='tp-btn'+(current===t.name?' selected':'');
+          btn.innerHTML='<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" onerror="this.style.display=\'none\'" />'
+            +'<span class="tp-code">'+t.code+'</span>';
+          btn.addEventListener('click',function(){
+            current=t.name; onPick(t.name);
+            el.querySelectorAll('.tp-btn').forEach(function(b){b.classList.remove('selected');});
+            btn.classList.add('selected');
+          });
+          el.appendChild(btn);
+        });
+      }
+
+      function teamSlot(name) {
+        var t=getTeamByName(name);
+        return '<div class="modal-team">'+(t&&t.logo?'<img src="'+t.logo+'"'+(t.white?' class="logo-w"':'')+' alt="" />':'')
+          +'<span class="modal-team-name">'+(name||'TBD')+'</span></div>';
+      }
+
+      function openModal(ctx) {
+        _ctx=ctx;
+        var pwA=document.getElementById('picker-wrap-a');
+        var pwB=document.getElementById('picker-wrap-b');
+        var mLabel=document.getElementById('matchup-label');
+        var mDiv=document.getElementById('modal-matchup');
+        var isBo5=false;
+
+        if(ctx.type==='sw'){
+          document.getElementById('modal-title').textContent='Swiss · Match '+ctx.mid;
+          _selA=getSwTeam(ctx.mid,'a'); _selB=getSwTeam(ctx.mid,'b');
+          pwA.hidden=false; pwB.hidden=false; mLabel.hidden=true; mDiv.hidden=true;
+          makeTP('tp-a',_selA,function(n){_selA=n;});
+          makeTP('tp-b',_selB,function(n){_selB=n;});
+          var sc=getSwSc(ctx.mid);
+          document.getElementById('modal-score-a').value=sc?sc.a:0;
+          document.getElementById('modal-score-b').value=sc?sc.b:0;
+        } else {
+          isBo5=!!PO_BO5[ctx.mid];
+          document.getElementById('modal-title').textContent=PO_LABELS[ctx.mid]||'Match '+ctx.mid;
+          if(PO_PICKER_FULL[ctx.mid]){
+            _selA=getPoTeam(ctx.mid,'a'); _selB=getPoTeam(ctx.mid,'b');
+            pwA.hidden=false; pwB.hidden=false; mLabel.hidden=true; mDiv.hidden=true;
+            makeTP('tp-a',_selA,function(n){_selA=n;});
+            makeTP('tp-b',_selB,function(n){_selB=n;});
+          } else {
+            pwA.hidden=true; pwB.hidden=true; mLabel.hidden=false; mDiv.hidden=false;
+            var po=resolvePO(); var m=po[ctx.mid];
+            mDiv.innerHTML=teamSlot(m.a)+teamSlot(m.b);
+          }
+          var sc=getPoSc(ctx.mid);
+          document.getElementById('modal-score-a').value=sc?sc.a:0;
+          document.getElementById('modal-score-b').value=sc?sc.b:0;
+        }
+
+        document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
+        document.getElementById('modal-score-a').max=isBo5?3:2;
+        document.getElementById('modal-score-b').max=isBo5?3:2;
+        document.getElementById('modal-backdrop').hidden=false;
+        document.getElementById('score-modal').hidden=false;
+      }
+
+      function closeModal() {
+        document.getElementById('modal-backdrop').hidden=true;
+        document.getElementById('score-modal').hidden=true;
+        _ctx=null; _selA=''; _selB='';
+      }
+
+      document.getElementById('modal-save').addEventListener('click',function(){
+        if(!_ctx) return;
+        var a=parseInt(document.getElementById('modal-score-a').value)||0;
+        var b=parseInt(document.getElementById('modal-score-b').value)||0;
+        if(_ctx.type==='sw'){
+          if(_selA) setSwTeam(_ctx.mid,'a',_selA);
+          if(_selB) setSwTeam(_ctx.mid,'b',_selB);
+          setSwSc(_ctx.mid,a,b);
+        } else {
+          if(PO_PICKER_FULL[_ctx.mid]){
+            if(_selA) setPoTeam(_ctx.mid,'a',_selA); if(_selB) setPoTeam(_ctx.mid,'b',_selB);
+          }
+          setPoSc(_ctx.mid,a,b);
+        }
+        closeModal(); render();
+      });
+
+      document.getElementById('modal-clear').addEventListener('click',function(){
+        if(!_ctx) return;
+        if(_ctx.type==='sw'){
+          setSwTeam(_ctx.mid,'a',null); setSwTeam(_ctx.mid,'b',null);
+          setSwSc(_ctx.mid,null,null);
+        } else {
+          if(PO_PICKER_FULL[_ctx.mid]){setPoTeam(_ctx.mid,'a',null);setPoTeam(_ctx.mid,'b',null);}
+          setPoSc(_ctx.mid,null,null);
+        }
+        closeModal(); render();
+      });
+
+      document.getElementById('modal-cancel').addEventListener('click',closeModal);
+      document.getElementById('modal-backdrop').addEventListener('click',closeModal);
+      document.addEventListener('keydown',function(e){
+        if(e.key==='Escape'&&!document.getElementById('score-modal').hidden) closeModal();
+      });
+
+      window.storageReady.then(function(){ render(); });
+    })();
+    </script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
