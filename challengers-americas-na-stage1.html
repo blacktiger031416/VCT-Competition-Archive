@@ -243,7 +243,7 @@
           <div class="pr-card">
             <p class="pr-card-title">Promotion</p>
             <div class="pr-slots" id="promo-slots"></div>
-            <p class="pr-match-sep">Bo3</p>
+            <p class="pr-match-sep">Bo5</p>
             <div class="pr-matches" id="promo-matches"></div>
             <div class="qualified-wrap">
               <span class="qualified-label">2 Winners → Qualified</span>
@@ -667,7 +667,7 @@
       var _ctx=null;
       function openScoreModal(ctx){
         _ctx=ctx;
-        var isBo5=ctx.type==='po'&&PO_BO5[ctx.mid];
+        var isBo5=(ctx.type==='po'&&PO_BO5[ctx.mid])||ctx.type==='promo';
         var needPicker=ctx.type==='po'&&PO_PICKER[ctx.mid];
         document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
         document.getElementById('modal-score-a').max=isBo5?3:2;
