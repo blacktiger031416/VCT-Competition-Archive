@@ -78,7 +78,7 @@
       .po-gf-conn-b { flex:2; border-left:1px solid rgba(255,87,12,.2); border-top:1px solid rgba(255,87,12,.2); }
       .po-gf-section { width:180px; flex-shrink:0; display:flex; flex-direction:column; justify-content:center; padding-left:8px; }
       .po-gf-label { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,87,12,.85); margin-bottom:6px; flex-shrink:0; }
-      .de-ub { display:flex; gap:8px; height:310px; margin-bottom:10px; }
+      .de-ub { display:flex; gap:8px; height:400px; margin-bottom:10px; }
       .de-col { display:flex; flex-direction:column; flex:1; }
       .de-col-label { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,87,12,.45); margin-bottom:6px; flex-shrink:0; }
       .de-col-label.lb-col { color:rgba(255,150,30,.4); }
@@ -86,10 +86,10 @@
       .de-col-matches.center { justify-content:center; }
       .de-col-matches.spaced { justify-content:space-evenly; }
       .de-lb-sep { height:1px; background:rgba(255,255,255,.07); margin:2px 0 10px; }
-      .de-lb { display:flex; gap:8px; height:200px; }
+      .de-lb { display:flex; gap:8px; height:250px; }
 
       /* Match card */
-      .de-card { background:var(--bg-card); border:1px solid rgba(255,87,12,.1); border-radius:3px; padding:8px 10px; transition:border-color .15s; }
+      .de-card { background:var(--bg-card); border:1px solid rgba(255,87,12,.1); border-radius:3px; padding:10px 14px; transition:border-color .15s; }
       body.is-admin .de-card { cursor:pointer; }
       body.is-admin .de-card:hover { border-color:rgba(255,87,12,.4); background:var(--bg-card2); }
       .de-card.lb { border-color:rgba(255,150,30,.15); }
@@ -97,15 +97,15 @@
       .de-card.ub-final { border-color:rgba(255,87,12,.28); background:rgba(255,87,12,.03); }
       .de-card.lb-final { border-color:rgba(255,150,30,.28); background:rgba(255,100,0,.03); }
       .de-card.gf { border-color:rgba(255,87,12,.4); background:rgba(255,87,12,.04); }
-      .dm-row { display:flex; align-items:center; gap:6px; padding:3px 0; }
-      .dm-logo { width:16px; height:16px; object-fit:contain; flex-shrink:0; }
-      .dm-name { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; color:rgba(255,255,255,.75); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .dm-row { display:flex; align-items:center; gap:8px; padding:5px 0; }
+      .dm-logo { width:22px; height:22px; object-fit:contain; flex-shrink:0; }
+      .dm-name { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; color:rgba(255,255,255,.75); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .dm-name.tbd { color:rgba(255,255,255,.22); font-style:italic; }
       .dm-name.win { color:var(--accent); }
       .de-card.lb-final .dm-name.win, .de-card.lb-final .dm-score.win { color:rgba(255,180,60,.9); }
-      .dm-score { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900; color:rgba(255,255,255,.3); min-width:14px; text-align:right; flex-shrink:0; }
+      .dm-score { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; color:rgba(255,255,255,.3); min-width:18px; text-align:right; flex-shrink:0; }
       .dm-score.win { color:var(--accent); }
-      .dm-divider { height:1px; background:rgba(255,255,255,.06); margin:1px 0; }
+      .dm-divider { height:1px; background:rgba(255,255,255,.06); margin:2px 0; }
 
       /* Advancement */
       .adv-dest { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,87,12,.55); margin-bottom:10px; }
@@ -214,13 +214,6 @@
         <div class="section-heading">
           <p class="eyebrow">Phase 2 · Double Elimination</p>
           <h2>Playoff</h2>
-        </div>
-
-        <p class="adv-dest">Champion &rarr; NA ACE Stage 1 결승</p>
-        <div class="adv-wrap">
-          <div class="adv-slot"><span class="adv-label">Champion</span><div class="adv-team tbd" id="adv-po-1">TBD</div></div>
-          <div class="adv-slot"><span class="adv-label">Runner-up</span><div class="adv-team tbd" id="adv-po-2">TBD</div></div>
-          <div class="adv-slot" style="border-color:rgba(255,150,30,.22);background:rgba(255,150,30,.04);"><span class="adv-label" style="color:rgba(255,150,30,.6);">3rd Place</span><div class="adv-team tbd" id="adv-po-3">TBD</div></div>
         </div>
 
         <div style="overflow-x:auto;">
@@ -527,18 +520,6 @@
           +'<div class="po-gf-conn"><div class="po-gf-conn-t"></div><div class="po-gf-conn-b"></div></div>'
           +'<div class="po-gf-section"><p class="po-gf-label">Grand Final · Bo5 ★</p>'+pc(14,false,'gf')+'</div>'
           +'</div>';
-
-        /* adv */
-        function advH(name){
-          if(!name) return 'TBD';
-          var t=getTeam(name);
-          return (t&&t.logo?'<img src="'+t.logo+'" class="adv-logo'+(t.white?' logo-w':'')+'" alt="" />':'')+'<span>'+codeOf(name)+'</span>';
-        }
-        var a1=document.getElementById('adv-po-1'),a2=document.getElementById('adv-po-2'),a3=document.getElementById('adv-po-3');
-        a1.innerHTML=advH(po[14].winner); a1.className='adv-team'+(po[14].winner?'':' tbd');
-        a2.innerHTML=advH(po[14].loser);  a2.className='adv-team'+(po[14].loser?'':' tbd');
-        a3.innerHTML=advH(po[13].loser);  a3.className='adv-team'+(po[13].loser?'':' tbd');
-        if(po[13].loser) a3.style.color='rgba(255,180,60,.9)'; else a3.style.color='';
 
         if(isAdmin()){
           el.querySelectorAll('[data-po-mid]').forEach(function(c){
