@@ -333,13 +333,13 @@
         document.getElementById('de-bracket').innerHTML=
           '<div class="de-ub-row">'
           +'<div class="de-col"><p class="de-col-label">UB R1 · Bo3</p><div class="de-col-matches">'+card(ms[1],1,'')+card(ms[2],2,'')+'</div></div>'
-          +'<div class="de-col"><p class="de-col-label">UB Final · Bo3</p><div class="de-col-matches center">'+card(ms[3],3,'ub-final')+'</div></div>'
+          +'<div class="de-col"><p class="de-col-label">UB Final · Bo5</p><div class="de-col-matches center">'+card(ms[3],3,'ub-final')+'</div></div>'
           +'<div class="de-adv-col">'+miniAdv(br.ubAdv,false)+'</div>'
           +'</div>'
           +'<div class="de-lb-sep"></div>'
           +'<div class="de-lb-row">'
           +'<div class="de-col"><p class="de-col-label lb-col">LB R1 · Bo3</p><div class="de-col-matches center">'+card(ms[4],4,'lb')+'</div></div>'
-          +'<div class="de-col"><p class="de-col-label lb-col">LB Final · Bo3</p><div class="de-col-matches center">'+card(ms[5],5,'lb lb-final')+'</div></div>'
+          +'<div class="de-col"><p class="de-col-label lb-col">LB Final · Bo5</p><div class="de-col-matches center">'+card(ms[5],5,'lb lb-final')+'</div></div>'
           +'<div class="de-adv-col">'+miniAdv(br.lbAdv,true)+'</div>'
           +'</div>';
 
@@ -395,11 +395,16 @@
 
       /* ── Score Modal ── */
       var _ctx=null;
-      var LBLS={1:'UB R1 · M1',2:'UB R1 · M2',3:'UB Final',4:'LB R1',5:'LB Final'};
+      var LBLS={1:'UB R1 · M1',2:'UB R1 · M2',3:'UB Final · Bo5',4:'LB R1',5:'LB Final · Bo5'};
+      var BO5={3:1,5:1};
       function openScoreModal(mid){
         _ctx=mid;
+        var isBo5=BO5[mid];
         var br=resolve(); var m=br.ms[mid]; var sc=getMatchSc(mid);
         document.getElementById('modal-title').textContent=LBLS[mid]||'M'+mid;
+        document.getElementById('score-label').textContent='Score ('+(isBo5?'Bo5':'Bo3')+')';
+        document.getElementById('modal-score-a').max=isBo5?3:2;
+        document.getElementById('modal-score-b').max=isBo5?3:2;
         document.getElementById('modal-score-a').value=sc?sc.a:0;
         document.getElementById('modal-score-b').value=sc?sc.b:0;
         function slotHTML(nm){
