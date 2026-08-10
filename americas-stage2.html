@@ -1068,7 +1068,25 @@
         { id: "ch-sa-slot", key: "sa", label: "Challengers" },
       ];
       function loadChInvite() { try { return JSON.parse(localStorage.getItem(CH_KEY) || "{}"); } catch(e) { return {}; } }
-      function saveChInvite(d) { localStorage.setItem(CH_KEY, JSON.stringify(d)); }
+      function saveChInvite(d) {
+        localStorage.setItem(CH_KEY, JSON.stringify(d));
+        fetch('/api/data/' + encodeURIComponent(CH_KEY), {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value: JSON.stringify(d) }),
+        }).catch(function(){});
+      }
+      (function migrateChInvite() {
+        var d = loadChInvite(); var changed = false;
+        Object.keys(d).forEach(function(k) {
+          if (d[k] && d[k].name === 'LA MASIA') {
+            d[k].name = 'Fluxo W7M';
+            d[k].logo = './assets/teams/Challengers Americas/FXW.png';
+            changed = true;
+          }
+        });
+        if (changed) saveChInvite(d);
+      })();
       function renderChInvite() {
         const data = loadChInvite();
         CH_SLOTS.forEach(function(s) {
