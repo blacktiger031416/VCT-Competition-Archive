@@ -246,27 +246,6 @@
     </section>
   </main>
 
-  <!-- Score Modal -->
-  <div class="sc-modal" id="sc-modal" hidden>
-    <div class="sc-backdrop" id="sc-backdrop"></div>
-    <div class="sc-panel" role="dialog" aria-modal="true">
-      <h2 id="sc-title">경기 결과 입력</h2>
-      <p class="sc-sub" id="sc-sub"></p>
-      <div class="sc-row">
-        <span class="sc-team" id="sc-team-a">-</span>
-        <input class="sc-input" id="sc-score-a" type="number" min="0" max="3" value="0">
-        <span class="sc-vs">:</span>
-        <input class="sc-input" id="sc-score-b" type="number" min="0" max="3" value="0">
-        <span class="sc-team" id="sc-team-b">-</span>
-      </div>
-      <div class="sc-actions">
-        <button class="sc-btn sc-btn-clear" id="sc-clear">초기화</button>
-        <button class="sc-btn sc-btn-cancel" id="sc-cancel">취소</button>
-        <button class="sc-btn sc-btn-save" id="sc-save">저장</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Seed Picker Modal -->
   <div class="sd-modal" id="sd-modal" hidden>
     <div class="sd-backdrop" id="sd-backdrop"></div>
@@ -284,8 +263,8 @@
   <script src="./storage.js"></script>
   <script>
   window.storageReady.then(function () {
-    var SEEDS_KEY  = 'sea_s1_id_seeds';
-    var SCORES_KEY = 'sea_s1_id_scores';
+    var SEEDS_KEY   = 'sea_s1_id_seeds';
+    var RESULT_PFX  = 'result:sea_s1_idn|sea_s1_idn|M';
 
     var TEAMS = [
       {name:'BOOM Esports',code:'BME',logo:'./assets/teams/BME.png',white:false},
@@ -317,8 +296,7 @@
     function sj(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
     function isAdmin(){ return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
 
-    var seeds  = lj(SEEDS_KEY,{});
-    var scores = lj(SCORES_KEY,{});
+    var seeds = lj(SEEDS_KEY,{});
     function resolveState(){
       var st={};
       for(var mid=1;mid<=14;mid++){
@@ -327,7 +305,8 @@
           if(lk[i]===null) return seeds[mid+'_'+i]||'';
           var src=st[lk[i].m]; return src?(src[lk[i].r]||''):'';
         });
-        var sc=scores[mid]||{a:0,b:0};
+        var raw=lj(RESULT_PFX+mid,null);
+        var sc=raw?{a:Number(raw.scoreA)||0,b:Number(raw.scoreB)||0}:{a:0,b:0};
         var t=thr(mid);
         var hw=teams[0]&&teams[1]&&(sc.a>=t||sc.b>=t)&&sc.a!==sc.b;
         st[mid]={teams:teams,score:sc,
@@ -358,41 +337,14 @@
         var isGF=mid===14, w=s.winner;
         renderRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]&&!isGF,isGF&&w===s.teams[0]);
         renderRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]&&!isGF,isGF&&w===s.teams[1]);
-        card.classList.toggle('clickable',isAdmin());
+        var hasBoth=s.teams[0]&&s.teams[1];
+        card.classList.toggle('clickable',Boolean(hasBoth||isAdmin()));
         if(isAdmin()) rows.forEach(function(row,i){
           if(LINKS[mid][i]===null) row.dataset.seedSlot=mid+'_'+i;
           else delete row.dataset.seedSlot;
         });
       });
     }
-
-    /* Score modal */
-    var _scMid=null;
-    function openScore(mid){
-      var st=resolveState(), s=st[mid];
-      if(!s||!s.teams[0]||!s.teams[1]) return;
-      _scMid=mid;
-      document.getElementById('sc-title').textContent='Match '+mid+' 결과 입력';
-      document.getElementById('sc-sub').textContent=s.teams[0]+' vs '+s.teams[1];
-      document.getElementById('sc-team-a').textContent=s.teams[0];
-      document.getElementById('sc-team-b').textContent=s.teams[1];
-      var mx=String(thr(mid));
-      var ia=document.getElementById('sc-score-a'), ib=document.getElementById('sc-score-b');
-      ia.max=ib.max=mx; ia.value=String(s.score.a); ib.value=String(s.score.b);
-      document.getElementById('sc-modal').hidden=false; ia.focus();
-    }
-    function closeScore(){ document.getElementById('sc-modal').hidden=true; _scMid=null; }
-    document.getElementById('sc-backdrop').addEventListener('click',closeScore);
-    document.getElementById('sc-cancel').addEventListener('click',closeScore);
-    document.getElementById('sc-clear').addEventListener('click',function(){
-      if(_scMid==null) return; delete scores[_scMid]; sj(SCORES_KEY,scores); closeScore(); renderBracket();
-    });
-    document.getElementById('sc-save').addEventListener('click',function(){
-      if(_scMid==null) return;
-      var a=Math.max(0,Number(document.getElementById('sc-score-a').value)||0);
-      var b=Math.max(0,Number(document.getElementById('sc-score-b').value)||0);
-      scores[_scMid]={a:a,b:b}; sj(SCORES_KEY,scores); closeScore(); renderBracket();
-    });
 
     /* Seed picker modal */
     var _sdSlot=null;
@@ -424,16 +376,26 @@
 
     document.addEventListener('keydown',function(e){
       if(e.key!=='Escape') return;
-      if(!document.getElementById('sc-modal').hidden) closeScore();
       if(!document.getElementById('sd-modal').hidden) closeSd();
     });
 
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
-        if(!isAdmin()) return;
+        var mid=Number(card.dataset.mid);
         var row=e.target.closest('.bt-row[data-seed-slot]');
-        if(row){ openSd(row.dataset.seedSlot); return; }
-        openScore(Number(card.dataset.mid));
+        if(isAdmin()&&row){ openSd(row.dataset.seedSlot); return; }
+        var st=resolveState(), s=st[mid];
+        if(!s||!s.teams[0]||!s.teams[1]) return;
+        var qObj={
+          date:'sea_s1_idn_m'+mid,
+          teamA:s.teams[0],teamB:s.teams[1],
+          score:s.score.a+' : '+s.score.b,
+          from:'sea_s1_idn',tournament:'sea_s1_idn',
+          match:'M'+mid
+        };
+        if(mid===13||mid===14) qObj.bo5='1';
+        if(mid===14) qObj.gf='1';
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(qObj).toString();
       });
     });
 
