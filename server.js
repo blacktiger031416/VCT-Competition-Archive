@@ -1514,16 +1514,16 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
         const STEP_TYPES_BO3 = ['ban','ban','pick','pick','ban','ban','decider'];
         const STEP_TYPES_BO5 = ['ban','ban','pick','pick','pick','pick','decider'];
         // rawVeto 타입 필드로 픽 수 감지 → BO 포맷 결정
+        const getRt = (sv) => String(sv?.type ?? sv?.action ?? sv?.kind ?? '').toLowerCase();
         let detectedPickCount = 0;
         for (const sv of rawVeto) {
-          const rt = (sv?.type || sv?.action || sv?.kind || '').toLowerCase();
-          if (rt.includes('pick')) detectedPickCount++;
+          if (getRt(sv).includes('pick')) detectedPickCount++;
         }
         const stdTypes = detectedPickCount >= 4 ? STEP_TYPES_BO5 : STEP_TYPES_BO3;
 
         let playedMapIdx = 0;
         for (let si = 0; si < rawVeto.length; si++) {
-          const rt = (rawVeto[si]?.type || rawVeto[si]?.action || rawVeto[si]?.kind || '').toLowerCase();
+          const rt = getRt(rawVeto[si]);
           const stype = rt.includes('pick') ? 'pick'
                       : (rt.includes('remain') || rt.includes('decider')) ? 'decider'
                       : (stdTypes[si] || 'ban');
@@ -1546,7 +1546,7 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
                   // chooser 'A'=team1='a', 'B'=team2='b' in stats
                   const chooserStat = chooserCode === 'A' ? 'a' : 'b';
                   sides[si] = firstAtk === chooserStat ? 'attack' : 'defense';
-                  choosers_obj[si] = chooserCode === 'A' ? (team1 || '') : (team2 || '');
+                  choosers_obj[si] = chooserCode; // 'A' or 'B' (match-dark.html 기대값)
                 }
               }
             } catch (e) { console.error(`[apply-now] sides step${si}:`, e.message); }
