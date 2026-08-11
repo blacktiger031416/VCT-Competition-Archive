@@ -1477,18 +1477,19 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
     let vetoDebug = null;
     try {
       /* 1) /stats 엔드포인트에 이미 veto 필드가 있을 수 있음 */
-      const rawVetoFromStats = statsData.mapVeto || statsData.veto || statsData.mapBanPick || null;
+      const rawVetoFromStats = statsData.mapsVeto || statsData.mapVeto || statsData.veto || statsData.mapBanPick || null;
       /* 2) 없으면 /match/:id 따로 호출 */
       let rawVeto = rawVetoFromStats;
       if (!rawVeto || rawVeto.length === 0) {
         const mvRes = await fetch(`https://api.thespike.gg/match/${thespikeMatchId}`);
         if (mvRes.ok) {
           const mvData = await mvRes.json();
-          rawVeto = mvData.mapVeto || mvData.veto || mvData.mapBanPick || null;
+          rawVeto = mvData.mapsVeto || mvData.mapVeto || mvData.veto || mvData.mapBanPick || null;
           /* 디버그용: 응답 최상위 키 + 첫 번째 요소 샘플 */
           vetoDebug = {
             topKeys: Object.keys(mvData || {}),
             rawVeto: rawVeto ? JSON.stringify(rawVeto).slice(0, 500) : null,
+            firstItem: rawVeto?.[0] ? JSON.stringify(rawVeto[0]) : null,
             statsTopKeys: Object.keys(statsData || {}),
           };
           console.log('[apply-now] /match/:id 응답 키:', vetoDebug.topKeys);
@@ -1500,10 +1501,10 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
       if (rawVeto && rawVeto.length > 0) {
         const mapsArr = rawVeto.map(step => {
           const en = step.map?.name || step.map?.title || step.mapName || step.mapTitle
-                  || (typeof step.map === 'string' ? step.map : '') || step.title || '';
+                  || (typeof step.map === 'string' ? step.map : '') || step.title || step.name || '';
           return MAP_EN_TO_KO[en] || en;
         });
-        const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
+        const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.team?.name || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
         const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
         const vKey = `veto:${matchKey}`;
         const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides: {}, choosers: {} });
