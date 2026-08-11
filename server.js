@@ -1504,8 +1504,11 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
                   || (typeof step.map === 'string' ? step.map : '') || step.title || step.name || '';
           return MAP_EN_TO_KO[en] || en;
         });
-        const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.team?.name || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
-        const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
+        // team 필드가 문자열("AURA") 또는 객체({title:...}) 둘 다 처리
+        const firstTeam = (typeof rawVeto[0]?.team === 'string' ? rawVeto[0].team : null)
+          || rawVeto[0]?.team?.title || rawVeto[0]?.team?.name
+          || rawVeto[0]?.teamTitle  || rawVeto[0]?.teamName || '';
+        const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, am.team2 || team2)) ? 'B' : 'A';
 
         /* ── 공수 선택 자동 감지 ── */
         const sides = {};
@@ -1513,11 +1516,15 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
         // BO3: ban,ban,pick,pick,ban,ban,decider / BO5: ban,ban,pick,pick,pick,pick,decider
         const STEP_TYPES_BO3 = ['ban','ban','pick','pick','ban','ban','decider'];
         const STEP_TYPES_BO5 = ['ban','ban','pick','pick','pick','pick','decider'];
-        // rawVeto 타입 필드로 픽 수 감지 → BO 포맷 결정
-        const getRt = (sv) => String(sv?.type ?? sv?.action ?? sv?.kind ?? '').toLowerCase();
+        // action이 숫자인 경우(thespike: 1=pick,2=ban,3=decider) 직접 변환
+        const getRt = (sv) => {
+          const raw = sv?.type ?? sv?.action ?? sv?.kind ?? '';
+          if (typeof raw === 'number') return raw === 1 ? 'pick' : raw === 3 ? 'decider' : 'ban';
+          return String(raw).toLowerCase();
+        };
         let detectedPickCount = 0;
         for (const sv of rawVeto) {
-          if (getRt(sv).includes('pick')) detectedPickCount++;
+          if (getRt(sv) === 'pick') detectedPickCount++;
         }
         const stdTypes = detectedPickCount >= 4 ? STEP_TYPES_BO5 : STEP_TYPES_BO3;
 
