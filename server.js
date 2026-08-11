@@ -1506,12 +1506,60 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
         });
         const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.team?.name || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
         const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
+
+        /* ── 공수 선택 자동 감지 ── */
+        const sides = {};
+        const choosers_obj = {};
+        // BO3: ban,ban,pick,pick,ban,ban,decider / BO5: ban,ban,pick,pick,pick,pick,decider
+        const STEP_TYPES_BO3 = ['ban','ban','pick','pick','ban','ban','decider'];
+        const STEP_TYPES_BO5 = ['ban','ban','pick','pick','pick','pick','decider'];
+        // rawVeto 타입 필드로 픽 수 감지 → BO 포맷 결정
+        let detectedPickCount = 0;
+        for (const sv of rawVeto) {
+          const rt = (sv?.type || sv?.action || sv?.kind || '').toLowerCase();
+          if (rt.includes('pick')) detectedPickCount++;
+        }
+        const stdTypes = detectedPickCount >= 4 ? STEP_TYPES_BO5 : STEP_TYPES_BO3;
+
+        let playedMapIdx = 0;
+        for (let si = 0; si < rawVeto.length; si++) {
+          const rt = (rawVeto[si]?.type || rawVeto[si]?.action || rawVeto[si]?.kind || '').toLowerCase();
+          const stype = rt.includes('pick') ? 'pick'
+                      : (rt.includes('remain') || rt.includes('decider')) ? 'decider'
+                      : (stdTypes[si] || 'ban');
+          if (stype === 'pick' || stype === 'decider') {
+            try {
+              const sr = await pool.query("SELECT value FROM app_data WHERE key=$1", [`stats:${matchKey}:${playedMapIdx}`]);
+              if (sr.rows[0]) {
+                const s = JSON.parse(sr.rows[0].value);
+                const firstAtk = s.firstAttacker; // 'a'=team1 공격 선택, 'b'=team2 공격 선택
+                if (firstAtk) {
+                  // 픽: picker = si%2===0 ? firstBan : other; chooser = picker의 상대
+                  // 디사이더: chooser = vetoSideChooser(3,firstBan) = firstBan (step3 picker=other → chooser=firstBan)
+                  let chooserCode;
+                  if (stype === 'pick') {
+                    const pickerCode = si % 2 === 0 ? firstBan : (firstBan === 'A' ? 'B' : 'A');
+                    chooserCode = pickerCode === 'A' ? 'B' : 'A';
+                  } else {
+                    chooserCode = firstBan; // decider chooser = firstBan (step 3 기준)
+                  }
+                  // chooser 'A'=team1='a', 'B'=team2='b' in stats
+                  const chooserStat = chooserCode === 'A' ? 'a' : 'b';
+                  sides[si] = firstAtk === chooserStat ? 'attack' : 'defense';
+                  choosers_obj[si] = chooserCode === 'A' ? (team1 || '') : (team2 || '');
+                }
+              }
+            } catch (e) { console.error(`[apply-now] sides step${si}:`, e.message); }
+            playedMapIdx++;
+          }
+        }
+
         const vKey = `veto:${matchKey}`;
-        const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides: {}, choosers: {} });
+        const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides, choosers: choosers_obj });
         await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [vKey, vVal]);
         broadcast({ type: 'set', key: vKey, value: vVal });
-        console.log(`[apply-now] veto 저장: firstBan=${firstBan} maps=[${mapsArr.join(',')}]`);
-        vetoDebug = { ...vetoDebug, saved: true, firstBan, maps: mapsArr };
+        console.log(`[apply-now] veto 저장: firstBan=${firstBan} maps=[${mapsArr.join(',')}] sides=${JSON.stringify(sides)}`);
+        vetoDebug = { ...vetoDebug, saved: true, firstBan, maps: mapsArr, sides, choosers: choosers_obj };
       } else {
         console.log('[apply-now] veto 데이터 없음 — debug:', JSON.stringify(vetoDebug).slice(0, 300));
       }
