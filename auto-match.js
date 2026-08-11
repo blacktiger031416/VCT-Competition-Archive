@@ -194,6 +194,25 @@
         if (d.ok) {
           setStatus('✅ ' + (d.applied || 0) + '/' + (d.totalMaps || '?') + '맵 적용 완료');
           setTimeout(function () { syncFromServer(true); }, 400);
+
+          /* apply-now 응답에서 result/veto 직접 적용 (304 우회) */
+          var key = mk();
+          if (d.result) {
+            try { localStorage.setItem('result:' + key, JSON.stringify(d.result)); } catch (_) {}
+            if (typeof window.applySharedResult === 'function') window.applySharedResult();
+            if (typeof window.updateDiamonds    === 'function') window.updateDiamonds();
+          }
+          if (d.veto) {
+            try { localStorage.setItem('veto:' + key, JSON.stringify(d.veto)); } catch (_) {}
+            if (window.vetoState && d.veto.maps) {
+              if (d.veto.firstBan) window.vetoState.firstBan = d.veto.firstBan;
+              if (Array.isArray(d.veto.maps)) window.vetoState.maps = d.veto.maps.slice();
+              window.vetoState.sides    = (d.veto.sides    && typeof d.veto.sides    === 'object') ? d.veto.sides    : {};
+              window.vetoState.choosers = (d.veto.choosers && typeof d.veto.choosers === 'object') ? d.veto.choosers : {};
+            }
+            if (typeof window.renderVeto   === 'function') window.renderVeto();
+            if (typeof window.syncVetoMaps === 'function') window.syncVetoMaps();
+          }
         } else {
           setStatus('❌ ' + (d.error || '알 수 없는 오류'));
         }

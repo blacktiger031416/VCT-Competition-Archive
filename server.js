@@ -1519,7 +1519,18 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
       vetoDebug = { error: vErr.message };
     }
 
-    res.json({ ok: true, applied, totalMaps: maps.length, vetoDebug });
+    /* apply-now 응답에 result/veto 데이터 포함 (클라이언트 직접 적용용) */
+    let resultPayload = null, vetoPayload = null;
+    try {
+      const rr = await pool.query("SELECT value FROM app_data WHERE key=$1", [`result:${matchKey}`]);
+      if (rr.rows[0]) resultPayload = JSON.parse(rr.rows[0].value);
+    } catch {}
+    try {
+      const vr = await pool.query("SELECT value FROM app_data WHERE key=$1", [`veto:${matchKey}`]);
+      if (vr.rows[0]) vetoPayload = JSON.parse(vr.rows[0].value);
+    } catch {}
+
+    res.json({ ok: true, applied, totalMaps: maps.length, result: resultPayload, veto: vetoPayload, vetoDebug });
   } catch (e) {
     console.error("[apply-now] 오류:", e.message);
     res.status(500).json({ error: e.message });
