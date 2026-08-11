@@ -1449,6 +1449,56 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
         );
       }
     }
+    /* ── result: 저장 (전체 스코어 + 맵별 O/X) ── */
+    try {
+      let totalA = 0, totalB = 0;
+      const marksA = [], marksB = [];
+      for (let i = 0; i < maps.length; i++) {
+        const sr = await pool.query("SELECT value FROM app_data WHERE key=$1", [`stats:${matchKey}:${i}`]);
+        if (!sr.rows[0]) continue;
+        const s = JSON.parse(sr.rows[0].value);
+        const a = s.aScore || 0, b = s.bScore || 0;
+        if (a > 0 || b > 0) {
+          if (a > b) { totalA++; marksA.push('O'); marksB.push('X'); }
+          else if (b > a) { totalB++; marksA.push('X'); marksB.push('O'); }
+          else { marksA.push(''); marksB.push(''); }
+        }
+      }
+      if (marksA.length > 0) {
+        const rKey = `result:${matchKey}`;
+        const rVal = JSON.stringify({ scoreA: String(totalA), scoreB: String(totalB), marksA, marksB });
+        await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [rKey, rVal]);
+        broadcast({ type: 'set', key: rKey, value: rVal });
+        console.log(`[apply-now] result 저장: ${totalA}:${totalB} marks=[${marksA.join('/')}]`);
+      }
+    } catch (rErr) { console.error('[apply-now] result 저장 오류:', rErr.message); }
+
+    /* ── veto: 저장 (맵 밴픽 순서, 공수 선택 제외) ── */
+    try {
+      const mvRes = await fetch(`https://api.thespike.gg/match/${thespikeMatchId}`);
+      if (mvRes.ok) {
+        const mvData = await mvRes.json();
+        /* 가능한 여러 필드명 시도 */
+        const rawVeto = mvData.mapVeto || mvData.veto || mvData.mapBanPick || [];
+        if (rawVeto.length > 0) {
+          const mapsArr = rawVeto.map(step => {
+            const en = step.map?.name || step.map?.title || step.mapName || step.mapTitle
+                    || (typeof step.map === 'string' ? step.map : '') || step.title || '';
+            return MAP_EN_TO_KO[en] || en;
+          });
+          const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
+          const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
+          const vKey = `veto:${matchKey}`;
+          const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides: {}, choosers: {} });
+          await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [vKey, vVal]);
+          broadcast({ type: 'set', key: vKey, value: vVal });
+          console.log(`[apply-now] veto 저장: firstBan=${firstBan} maps=[${mapsArr.join(',')}]`);
+        } else {
+          console.log('[apply-now] veto 데이터 없음, 응답 키:', Object.keys(mvData || {}));
+        }
+      }
+    } catch (vErr) { console.error('[apply-now] veto 처리 오류:', vErr.message); }
+
     res.json({ ok: true, applied, totalMaps: maps.length });
   } catch (e) {
     console.error("[apply-now] 오류:", e.message);

@@ -247,6 +247,8 @@
       'rounds:'  + key + ':',
       'stats:'   + key + ':',
       'vct_bo:'  + key,
+      'result:'  + key,
+      'veto:'    + key,
     ];
 
     Promise.all(prefixes.map(function (pfx) {
@@ -270,6 +272,21 @@
       if (idxs.length === 0 && !force) return;
       if (force || changed[-1]) {
         refreshAllMaps();
+        /* result: / veto: 키 변경 시 추가 렌더 */
+        if (typeof window.applySharedResult === 'function') window.applySharedResult();
+        if (typeof window.updateDiamonds    === 'function') window.updateDiamonds();
+        /* veto: 키 → in-memory vetoState 갱신 후 렌더 */
+        try {
+          var rawVeto = JSON.parse(localStorage.getItem('veto:' + key) || '{}');
+          if (window.vetoState && rawVeto.maps) {
+            if (rawVeto.firstBan) window.vetoState.firstBan = rawVeto.firstBan;
+            if (Array.isArray(rawVeto.maps)) window.vetoState.maps = rawVeto.maps.slice();
+            if (rawVeto.sides  && typeof rawVeto.sides  === 'object') window.vetoState.sides  = rawVeto.sides;
+            if (rawVeto.choosers && typeof rawVeto.choosers === 'object') window.vetoState.choosers = rawVeto.choosers;
+          }
+        } catch (_) {}
+        if (typeof window.renderVeto   === 'function') window.renderVeto();
+        if (typeof window.syncVetoMaps === 'function') window.syncVetoMaps();
       } else {
         idxs.forEach(function (i) { if (i >= 0) refreshMap(i); });
       }
