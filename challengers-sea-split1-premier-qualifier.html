@@ -461,6 +461,20 @@
                 openMatchScoreModal(dv, mc);
               });
             }
+            card.addEventListener("click", function() {
+              var mt = loadMT(dv, mc);
+              if (!mt.teamA || !mt.teamB) return;
+              var sc = loadSc(dv, mc, mt.teamA, mt.teamB);
+              var qObj = {
+                date: 'sea_pq_s1_D' + dv + 'M' + mc,
+                teamA: mt.teamA, teamB: mt.teamB,
+                score: sc ? sc.a + ' : ' + sc.b : '0 : 0',
+                tournament: 'SEAPQS1D' + dv + 'M' + mc,
+                from: mt.teamA,
+                match: mt.teamB
+              };
+              window.location.href = './challengers-sea-match-dark.html?' + new URLSearchParams(qObj).toString();
+            });
           })(day.d, m);
           grid.appendChild(card);
         }
