@@ -1474,32 +1474,52 @@ app.post("/api/auto-match/apply-now", requireAdmin, async (req, res) => {
     } catch (rErr) { console.error('[apply-now] result 저장 오류:', rErr.message); }
 
     /* ── veto: 저장 (맵 밴픽 순서, 공수 선택 제외) ── */
+    let vetoDebug = null;
     try {
-      const mvRes = await fetch(`https://api.thespike.gg/match/${thespikeMatchId}`);
-      if (mvRes.ok) {
-        const mvData = await mvRes.json();
-        /* 가능한 여러 필드명 시도 */
-        const rawVeto = mvData.mapVeto || mvData.veto || mvData.mapBanPick || [];
-        if (rawVeto.length > 0) {
-          const mapsArr = rawVeto.map(step => {
-            const en = step.map?.name || step.map?.title || step.mapName || step.mapTitle
-                    || (typeof step.map === 'string' ? step.map : '') || step.title || '';
-            return MAP_EN_TO_KO[en] || en;
-          });
-          const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
-          const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
-          const vKey = `veto:${matchKey}`;
-          const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides: {}, choosers: {} });
-          await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [vKey, vVal]);
-          broadcast({ type: 'set', key: vKey, value: vVal });
-          console.log(`[apply-now] veto 저장: firstBan=${firstBan} maps=[${mapsArr.join(',')}]`);
-        } else {
-          console.log('[apply-now] veto 데이터 없음, 응답 키:', Object.keys(mvData || {}));
+      /* 1) /stats 엔드포인트에 이미 veto 필드가 있을 수 있음 */
+      const rawVetoFromStats = statsData.mapVeto || statsData.veto || statsData.mapBanPick || null;
+      /* 2) 없으면 /match/:id 따로 호출 */
+      let rawVeto = rawVetoFromStats;
+      if (!rawVeto || rawVeto.length === 0) {
+        const mvRes = await fetch(`https://api.thespike.gg/match/${thespikeMatchId}`);
+        if (mvRes.ok) {
+          const mvData = await mvRes.json();
+          rawVeto = mvData.mapVeto || mvData.veto || mvData.mapBanPick || null;
+          /* 디버그용: 응답 최상위 키 + 첫 번째 요소 샘플 */
+          vetoDebug = {
+            topKeys: Object.keys(mvData || {}),
+            rawVeto: rawVeto ? JSON.stringify(rawVeto).slice(0, 500) : null,
+            statsTopKeys: Object.keys(statsData || {}),
+          };
+          console.log('[apply-now] /match/:id 응답 키:', vetoDebug.topKeys);
         }
+      } else {
+        vetoDebug = { source: '/stats', rawVeto: JSON.stringify(rawVeto).slice(0, 500) };
       }
-    } catch (vErr) { console.error('[apply-now] veto 처리 오류:', vErr.message); }
 
-    res.json({ ok: true, applied, totalMaps: maps.length });
+      if (rawVeto && rawVeto.length > 0) {
+        const mapsArr = rawVeto.map(step => {
+          const en = step.map?.name || step.map?.title || step.mapName || step.mapTitle
+                  || (typeof step.map === 'string' ? step.map : '') || step.title || '';
+          return MAP_EN_TO_KO[en] || en;
+        });
+        const firstTeam = rawVeto[0]?.team?.title || rawVeto[0]?.teamTitle || rawVeto[0]?.teamName || '';
+        const firstBan = (firstTeam && teamFuzzyMatch(firstTeam, team2)) ? 'B' : 'A';
+        const vKey = `veto:${matchKey}`;
+        const vVal = JSON.stringify({ firstBan, maps: mapsArr, sides: {}, choosers: {} });
+        await pool.query(`INSERT INTO app_data (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [vKey, vVal]);
+        broadcast({ type: 'set', key: vKey, value: vVal });
+        console.log(`[apply-now] veto 저장: firstBan=${firstBan} maps=[${mapsArr.join(',')}]`);
+        vetoDebug = { ...vetoDebug, saved: true, firstBan, maps: mapsArr };
+      } else {
+        console.log('[apply-now] veto 데이터 없음 — debug:', JSON.stringify(vetoDebug).slice(0, 300));
+      }
+    } catch (vErr) {
+      console.error('[apply-now] veto 처리 오류:', vErr.message);
+      vetoDebug = { error: vErr.message };
+    }
+
+    res.json({ ok: true, applied, totalMaps: maps.length, vetoDebug });
   } catch (e) {
     console.error("[apply-now] 오류:", e.message);
     res.status(500).json({ error: e.message });
