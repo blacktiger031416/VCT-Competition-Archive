@@ -305,7 +305,7 @@
   <script>
   window.storageReady.then(function () {
     var SEEDS_KEY  = 'sea_s2_pq_seeds';
-    var SCORES_KEY = 'sea_s2_pq_scores';
+    var RESULT_PFX  = 'result:sea_s2_pq|sea_s2_pq|M';
 
     var TEAMS = [
       {name:'AURA',             code:'AURA', logo:'./assets/teams/AURA.png',  white:false},
@@ -338,7 +338,6 @@
     function isAdmin(){ return typeof window.vctIsAdmin==='function'&&window.vctIsAdmin(); }
 
     var seeds  = lj(SEEDS_KEY,{});
-    var scores = lj(SCORES_KEY,{});
 
     function resolveState(){
       var st={};
@@ -348,7 +347,8 @@
           if(lk[i]===null) return seeds[mid+'_'+i]||'';
           var src=st[lk[i].m]; return src?(src[lk[i].r]||''):'';
         });
-        var sc=scores[mid]||{a:0,b:0};
+        var raw=lj(RESULT_PFX+mid,null);
+        var sc=raw?{a:Number(raw.scoreA)||0,b:Number(raw.scoreB)||0}:{a:0,b:0};
         var t=thr();
         var hw=teams[0]&&teams[1]&&(sc.a>=t||sc.b>=t)&&sc.a!==sc.b;
         st[mid]={teams:teams,score:sc,
@@ -386,7 +386,8 @@
         var w=s.winner;
         renderRow(rows[0],s.teams[0],s.score.a,w&&w===s.teams[0]);
         renderRow(rows[1],s.teams[1],s.score.b,w&&w===s.teams[1]);
-        card.classList.toggle('clickable',isAdmin());
+        var hasBoth=s.teams[0]&&s.teams[1];
+        card.classList.toggle('clickable',Boolean(hasBoth||isAdmin()));
         if(isAdmin()) rows.forEach(function(row,i){
           if(LINKS[mid][i]===null) row.dataset.seedSlot=mid+'_'+i;
           else delete row.dataset.seedSlot;
@@ -406,32 +407,6 @@
       );
     }
 
-    /* Score modal */
-    var _scMid=null;
-    function openScore(mid){
-      var st=resolveState(), s=st[mid];
-      if(!s||!s.teams[0]||!s.teams[1]) return;
-      _scMid=mid;
-      document.getElementById('sc-title').textContent='Match '+mid+' 결과 입력';
-      document.getElementById('sc-sub').textContent=s.teams[0]+' vs '+s.teams[1];
-      document.getElementById('sc-team-a').textContent=s.teams[0];
-      document.getElementById('sc-team-b').textContent=s.teams[1];
-      var ia=document.getElementById('sc-score-a'), ib=document.getElementById('sc-score-b');
-      ia.max=ib.max='3'; ia.value=String(s.score.a); ib.value=String(s.score.b);
-      document.getElementById('sc-modal').hidden=false; ia.focus();
-    }
-    function closeScore(){ document.getElementById('sc-modal').hidden=true; _scMid=null; }
-    document.getElementById('sc-backdrop').addEventListener('click',closeScore);
-    document.getElementById('sc-cancel').addEventListener('click',closeScore);
-    document.getElementById('sc-clear').addEventListener('click',function(){
-      if(_scMid==null) return; delete scores[_scMid]; sj(SCORES_KEY,scores); closeScore(); renderBracket();
-    });
-    document.getElementById('sc-save').addEventListener('click',function(){
-      if(_scMid==null) return;
-      var a=Math.max(0,Number(document.getElementById('sc-score-a').value)||0);
-      var b=Math.max(0,Number(document.getElementById('sc-score-b').value)||0);
-      scores[_scMid]={a:a,b:b}; sj(SCORES_KEY,scores); closeScore(); renderBracket();
-    });
 
     /* Seed picker modal */
     var _sdSlot=null;
@@ -462,16 +437,24 @@
 
     document.addEventListener('keydown',function(e){
       if(e.key!=='Escape') return;
-      if(!document.getElementById('sc-modal').hidden) closeScore();
       if(!document.getElementById('sd-modal').hidden) closeSd();
     });
 
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
-        if(!isAdmin()) return;
+        var mid=Number(card.dataset.mid);
         var row=e.target.closest('.bt-row[data-seed-slot]');
-        if(row){ openSd(row.dataset.seedSlot); return; }
-        openScore(Number(card.dataset.mid));
+        if(isAdmin()&&row){ openSd(row.dataset.seedSlot); return; }
+        var st=resolveState(), s=st[mid];
+        if(!s||!s.teams[0]||!s.teams[1]) return;
+        var qObj={
+          date:'sea_s2_pq_m'+mid,
+          teamA:s.teams[0],teamB:s.teams[1],
+          score:s.score.a+' : '+s.score.b,
+          from:'sea_s2_pq',tournament:'sea_s2_pq',
+          match:'M'+mid
+        };
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(qObj).toString();
       });
     });
 
