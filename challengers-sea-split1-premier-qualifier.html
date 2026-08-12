@@ -520,9 +520,9 @@
 
       var sorted = Object.values(stats).sort(function(a, b) {
         if (b.w !== a.w) return b.w - a.w;
-        var md = (b.mw - b.ml) - (a.mw - a.ml);
-        if (md !== 0) return md;
-        return h2h(b.name, a.name);
+        var hh = h2h(a.name, b.name); // 1=a이김, -1=b이김
+        if (hh !== 0) return -hh;
+        return (b.mw - b.ml) - (a.mw - a.ml);
       });
 
       var wrap = document.getElementById("standings-wrap");
