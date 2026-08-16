@@ -1005,7 +1005,7 @@
 
     // 인식된 맵만 (기타 제외)
     var recognizedMaps = allMaps.filter(function(m) {
-      return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
+      return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage)];
     });
 
     // 어드민 경고: 실제 데이터가 없으면 표시 (league 미태그 포함)
@@ -1027,7 +1027,7 @@
       var currentLabel, currentCount;
       if (_activeFilter === 'all') {
         currentLabel = '전체';
-        currentCount = allMaps.length;
+        currentCount = recognizedMaps.length;
       } else {
         var activeGroup = null;
         for (var gi = 0; gi < knownGroups.length; gi++) {
@@ -1051,7 +1051,7 @@
 
     /* ── 필터 적용 ── */
     var maps = _activeFilter === 'all'
-      ? allMaps  // league 미태그 맵 포함 전체 표시
+      ? recognizedMaps
       : allMaps.filter(function(m) {
           var key = (m.league || '') + '|' + (m.tournament || '') + '|' + normalizeStage(m.stage);
           return key === _activeFilter;
