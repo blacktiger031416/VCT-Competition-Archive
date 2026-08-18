@@ -3958,6 +3958,7 @@ function saveFieldSync(mapIdx, pIdx, field, value) {
   var pKey = getPlayerSideKey(mapIdx, pIdx);
   if (!data[pKey]) data[pKey] = {};
   data[pKey][field] = value;
+  data._league = LEAGUE; data._stage = MATCH_FROM;
   try { localStorage.setItem(PKEY, JSON.stringify(data)); } catch(e) {}
   // vct_p: 구조에도 동기화 (player-modal.js 없이 직접 처리)
   try {

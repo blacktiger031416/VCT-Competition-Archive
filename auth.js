@@ -483,6 +483,9 @@
     rebuildBtn.disabled = true;
     rebuildBtn.innerHTML = "⏳ 처리중...";
 
+    /* ── storageReady 이후 데이터 수집 보장 (_mem 완전 로드 후 진행) ── */
+    (window.storageReady || Promise.resolve()).then(function() {
+
     /* ── 로컬 players:* / vct_roster:* / match-meta:* / vct_p:* 전부 수집 (_mem 포함) ── */
     var localData = {};
     var localCount = 0;
@@ -497,6 +500,23 @@
         var lv = localStorage.getItem(lk);
         if (lv) { localData[lk] = lv; localCount++; }
       }
+    }
+
+    /* ── vct_p에서 league/stage 정보가 있는 match-meta 합성 (match-meta 누락 보완) ── */
+    for (var _vki = 0; _vki < _allKeys.length; _vki++) {
+      var _vk = _allKeys[_vki];
+      if (!_vk || _vk.indexOf("vct_p:") !== 0) continue;
+      try {
+        var _vd = JSON.parse(localStorage.getItem(_vk) || "{}");
+        (_vd.maps || []).forEach(function(_vm) {
+          if (!_vm.matchKey || !_vm.league) return;
+          var _mmk = "match-meta:" + _vm.matchKey;
+          if (!localData[_mmk]) {
+            localData[_mmk] = JSON.stringify({ league: _vm.league, stage: _vm.stage || "", tournament: _vm.tournament || "" });
+            localCount++;
+          }
+        });
+      } catch(_e) {}
     }
 
     /* ── 서버에 전송: localData 포함 → 서버가 DB 저장 후 vct_p 재구성 ── */
@@ -529,6 +549,8 @@
         rebuildBtn.disabled = false;
         rebuildBtn.innerHTML = "🔄 기록 재처리";
       });
+
+    }); /* storageReady.then end */
   });
 
   /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn + rebuildBtn 상태 동기화 */

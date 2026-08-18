@@ -2755,10 +2755,13 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       const amRec      = amMap[`auto-match:${matchKey}`];
       const metaRec    = metaMap[matchKey];
       const mlRec      = matchKeyLeagueMap[matchKey];
-      /* league 우선순위: auto-match > match-meta > vct_p 역매핑 > matchKey 추론 */
-      const league     = (amRec?.league) || (metaRec?.league) || (mlRec?.league) || inferLeague(mkParts);
-      /* stage도 match-meta/vct_p 역매핑에서 보완 (matchKey에 stage 명시 없을 경우) */
-      const stageVal   = stage || (metaRec?.stage) || (mlRec?.stage) || "";
+      /* players 데이터에 직접 저장된 league/stage (_league/_stage 필드) */
+      const pdLeague   = (typeof playersData._league === "string" && playersData._league) ? playersData._league : "";
+      const pdStage    = (typeof playersData._stage  === "string" && playersData._stage)  ? playersData._stage  : "";
+      /* league 우선순위: auto-match > match-meta > vct_p 역매핑 > players 직접저장 > matchKey 추론 */
+      const league     = (amRec?.league) || (metaRec?.league) || (mlRec?.league) || pdLeague || inferLeague(mkParts);
+      /* stage도 같은 우선순위로 보완 */
+      const stageVal   = stage || (metaRec?.stage) || (mlRec?.stage) || pdStage || "";
 
       /* vct_roster 보완용 팀→선수 수집 (auto-match 또는 match-meta에서 팀 정보 획득) */
       const t1 = amRec?.team1 || metaRec?.teamA;
