@@ -2720,6 +2720,21 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     let updated = 0, skipped = 0;
     const processedMatchKeys = new Set();
 
+    /* vct_p 기존 데이터에서 matchKey → {league, stage, tournament} 역매핑 구성
+       date|teamA|teamB 형식처럼 matchKey 자체에 league가 없는 경우를 커버 */
+    const matchKeyLeagueMap = {};
+    for (const [, vEntry] of Object.entries(vctpMap)) {
+      for (const m of (vEntry.data.maps || [])) {
+        if (m.matchKey && m.league && !matchKeyLeagueMap[m.matchKey]) {
+          matchKeyLeagueMap[m.matchKey] = {
+            league: m.league,
+            stage: m.stage || "",
+            tournament: m.tournament || "",
+          };
+        }
+      }
+    }
+
     for (const row of playersRows.rows) {
       const keyParts = row.key.split(":");
       if (keyParts.length < 3) { skipped++; continue; }
@@ -2739,10 +2754,11 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
       })?.toLowerCase() || "";
       const amRec      = amMap[`auto-match:${matchKey}`];
       const metaRec    = metaMap[matchKey];
-      /* league 우선순위: auto-match > match-meta > matchKey 추론 */
-      const league     = (amRec?.league) || (metaRec?.league) || inferLeague(mkParts);
-      /* stage도 match-meta에서 보완 (matchKey에 stage 명시 없을 경우) */
-      const stageVal   = stage || (metaRec?.stage) || "";
+      const mlRec      = matchKeyLeagueMap[matchKey];
+      /* league 우선순위: auto-match > match-meta > vct_p 역매핑 > matchKey 추론 */
+      const league     = (amRec?.league) || (metaRec?.league) || (mlRec?.league) || inferLeague(mkParts);
+      /* stage도 match-meta/vct_p 역매핑에서 보완 (matchKey에 stage 명시 없을 경우) */
+      const stageVal   = stage || (metaRec?.stage) || (mlRec?.stage) || "";
 
       /* vct_roster 보완용 팀→선수 수집 (auto-match 또는 match-meta에서 팀 정보 획득) */
       const t1 = amRec?.team1 || metaRec?.teamA;
