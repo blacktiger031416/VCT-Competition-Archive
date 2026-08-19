@@ -2639,11 +2639,11 @@ app.get("/api/records/team-detail", async (req, res) => {
   }
 });
 
-/* ── vct_p 일괄 재처리 (갈아엎기 버전) ────────────────────────────────────────
-   클라이언트가 보낸 localData(admin localStorage의 players:/vct_roster: 키들)를
-   DB에 먼저 UPSERT한 뒤, DB 전체를 스캔해서 vct_p를 완전히 재구성한다.
-   이렇게 하면 Render 슬립 중 저장 실패로 DB에 없는 경기도 복구된다.           */
+/* ── (제거됨) vct_p 일괄 재처리 엔드포인트 ── */
 app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
+  return res.status(410).json({ error: "기록 재처리 기능이 제거되었습니다." });
+  /* 아래 코드는 비활성화 */
+  if (false) {
   try {
     const MK_TOURNAMENTS = new Set(["london", "santiago"]);
     const MK_STAGES      = new Set(["swiss", "playoffs", "groupstage", "stage1", "stage2",
@@ -2854,6 +2854,7 @@ app.post("/api/admin/rebuild-vct-p", requireAdmin, async (req, res) => {
     console.error("[rebuild-vct-p]", e);
     res.status(500).json({ error: e.message });
   }
+  } /* if(false) end */
 });
 
 /* ── auto-match 폴링 메인 함수 ───────────────────────── */

@@ -377,188 +377,12 @@
   rewardBtn.style.display = "none";
   rewardBtn.addEventListener("click", openRewardModal);
 
-  /* ── 클라이언트 사이드 vct_p 재처리 ── */
-  var MK_TOURNAMENTS_CL = { "london": 1, "santiago": 1 };
-  var MK_STAGES_CL      = { "swiss":1,"playoffs":1,"groupstage":1,"stage1":1,"stage2":1,
-                             "stage1playoffs":1,"stage2playoffs":1,"kickoff":1 };
-  var MK_LEAGUES_CL     = { "pacific":"pacific","emea":"emea","americas":"americas",
-                             "cn":"cn","masters":"masters","champions":"champions",
-                             "challengers-korea":"challengers-korea","challengers-japan":"challengers-japan","challengers-sea":"challengers-sea" };
 
-  function inferLeagueCl(parts) {
-    for (var i = 0; i < parts.length; i++) {
-      var p = parts[i].toLowerCase();
-      if (MK_TOURNAMENTS_CL[p]) return "masters";
-      if (MK_LEAGUES_CL[p])     return MK_LEAGUES_CL[p];
-      if (p.indexOf("ck_") === 0) return "challengers-korea";
-      if (p.indexOf("cj_") === 0) return "challengers-japan";
-      if (p.indexOf("sea_") === 0 || p.indexOf("pacific_lcq_") === 0) return "challengers-sea";
-    }
-    return "";
-  }
-
-  function rebuildVctpFromLocal() {
-    var updated = 0, skipped = 0;
-    /* localStorage에서 players: 키 전부 수집 (_mem 포함) */
-    var playerKeys = [];
-    var allKeys = window.storageKeys ? window.storageKeys() : [];
-    for (var i = 0; i < allKeys.length; i++) {
-      var k = allKeys[i];
-      if (k && k.indexOf("players:") === 0) playerKeys.push(k);
-    }
-
-    playerKeys.forEach(function(key) {
-      /* key: players:MATCH_KEY:mapIdx */
-      var parts    = key.split(":");
-      if (parts.length < 3) { skipped++; return; }
-      var mapIdx   = parseInt(parts[parts.length - 1]);
-      if (isNaN(mapIdx)) { skipped++; return; }
-      var matchKey = parts.slice(1, -1).join(":");
-
-      var playersData;
-      try { playersData = JSON.parse(localStorage.getItem(key) || "null"); } catch(e) { skipped++; return; }
-      if (!playersData || Array.isArray(playersData)) { skipped++; return; }
-
-      var mkParts    = matchKey.split("|");
-      var tournament = "";
-      var stage      = "";
-      var league     = inferLeagueCl(mkParts);
-      mkParts.forEach(function(p) {
-        var pl = p.toLowerCase();
-        if (MK_TOURNAMENTS_CL[pl]) tournament = pl;
-        if (MK_STAGES_CL[pl] || pl.indexOf("ck_") === 0 || pl.indexOf("cj_") === 0 ||
-            pl.indexOf("sea_") === 0 || pl.indexOf("pacific_lcq_") === 0) stage = pl;
-      });
-
-      /* 각 선수 슬롯 처리 */
-      var slots = ["a0","a1","a2","a3","a4","b0","b1","b2","b3","b4"];
-      slots.forEach(function(slotKey) {
-        var slot = playersData[slotKey];
-        if (!slot || !slot.name || slot.name === "-") return;
-        var pName = slot.name.trim();
-        var vk    = "vct_p:" + pName;
-
-        var vData = {};
-        try { vData = JSON.parse(localStorage.getItem(vk) || "{}"); } catch(e) {}
-        if (!vData.maps) vData.maps = [];
-
-        var existIdx = -1;
-        for (var ei = 0; ei < vData.maps.length; ei++) {
-          if (vData.maps[ei].matchKey === matchKey && vData.maps[ei].mapIdx === mapIdx) {
-            existIdx = ei; break;
-          }
-        }
-        var entry = existIdx >= 0 ? Object.assign({}, vData.maps[existIdx]) : { matchKey: matchKey, mapIdx: mapIdx };
-
-        if (league)     entry.league     = league;
-        if (tournament) entry.tournament = tournament;
-        if (stage)      entry.stage      = stage;
-        if (slot.acs != null) entry.acs  = slot.acs;
-        if (slot.kda && slot.kda.indexOf("/") !== -1) entry.kda = slot.kda;
-        if (slot.agent) entry.agent = slot.agent;
-
-        if (!("acs" in entry) && !("kda" in entry)) { skipped++; return; }
-
-        if (existIdx >= 0) vData.maps[existIdx] = entry;
-        else vData.maps.push(entry);
-
-        /* setItem override가 DB에도 push함 */
-        localStorage.setItem(vk, JSON.stringify(vData));
-        updated++;
-      });
-    });
-
-    return { updated: updated, skipped: skipped, total: playerKeys.length };
-  }
-
-  /* 기록 재처리 버튼 (Admin 전용) */
-  var rebuildBtn = document.createElement("button");
-  rebuildBtn.type = "button";
-  rebuildBtn.className = "suggest-trigger-btn";
-  rebuildBtn.innerHTML = "🔄 기록 재처리";
-  rebuildBtn.title = "로컬 players: 데이터를 서버에 전송 후 vct_p 완전 재구성";
-  rebuildBtn.style.display = "none";
-  rebuildBtn.addEventListener("click", function() {
-    if (!confirm("경기 기록(vct_p)을 완전히 재처리합니다.\n로컬 데이터를 서버에 올리고 DB 기반으로 재구성해요.")) return;
-    rebuildBtn.disabled = true;
-    rebuildBtn.innerHTML = "⏳ 처리중...";
-
-    /* ── storageReady 이후 데이터 수집 보장 (_mem 완전 로드 후 진행) ── */
-    (window.storageReady || Promise.resolve()).then(function() {
-
-    /* ── 로컬 players:* / vct_roster:* / match-meta:* / vct_p:* 전부 수집 (_mem 포함) ── */
-    var localData = {};
-    var localCount = 0;
-    var _allKeys = window.storageKeys ? window.storageKeys() : [];
-    for (var i = 0; i < _allKeys.length; i++) {
-      var lk = _allKeys[i];
-      if (!lk) continue;
-      if (lk.indexOf("players:")    === 0 ||
-          lk.indexOf("vct_roster:") === 0 ||
-          lk.indexOf("match-meta:") === 0 ||
-          lk.indexOf("vct_p:")      === 0) {
-        var lv = localStorage.getItem(lk);
-        if (lv) { localData[lk] = lv; localCount++; }
-      }
-    }
-
-    /* ── vct_p에서 league/stage 정보가 있는 match-meta 합성 (match-meta 누락 보완) ── */
-    for (var _vki = 0; _vki < _allKeys.length; _vki++) {
-      var _vk = _allKeys[_vki];
-      if (!_vk || _vk.indexOf("vct_p:") !== 0) continue;
-      try {
-        var _vd = JSON.parse(localStorage.getItem(_vk) || "{}");
-        (_vd.maps || []).forEach(function(_vm) {
-          if (!_vm.matchKey || !_vm.league) return;
-          var _mmk = "match-meta:" + _vm.matchKey;
-          if (!localData[_mmk]) {
-            localData[_mmk] = JSON.stringify({ league: _vm.league, stage: _vm.stage || "", tournament: _vm.tournament || "" });
-            localCount++;
-          }
-        });
-      } catch(_e) {}
-    }
-
-    /* ── 서버에 전송: localData 포함 → 서버가 DB 저장 후 vct_p 재구성 ── */
-    var tok = localStorage.getItem("vct_auth_token") || "";
-    fetch("/api/admin/rebuild-vct-p", {
-      method: "POST",
-      credentials: "include",
-      headers: Object.assign(
-        { "Content-Type": "application/json" },
-        tok ? { "Authorization": "Bearer " + tok } : {}
-      ),
-      body: JSON.stringify({ localData: localData })
-    })
-      .then(function(r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-      })
-      .then(function(j) {
-        var msg = "✅ 기록 재처리 완료\n"
-          + "로컬→DB: " + (j.localSaved || localCount) + "건 저장\n"
-          + "vct_p 갱신: " + (j.updated || 0) + "건\n"
-          + "vct_roster 생성: " + (j.rosterCreated || 0) + "건\n"
-          + "처리 경기: " + (j.matchKeys ? j.matchKeys.length : 0) + "경기\n"
-          + "확인을 누르면 페이지가 새로고침됩니다.";
-        alert(msg);
-        window.location.reload();
-      })
-      .catch(function(err) {
-        alert("❌ 재처리 오류: " + (err.message || err) + "\n잠시 후 다시 시도해주세요.");
-        rebuildBtn.disabled = false;
-        rebuildBtn.innerHTML = "🔄 기록 재처리";
-      });
-
-    }); /* storageReady.then end */
-  });
-
-  /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn + rebuildBtn 상태 동기화 */
+  /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn 상태 동기화 */
   function refreshAuthButtons() {
     var user = getCachedUser();
     /* admin 전용 버튼 */
     rewardBtn.style.display   = (user && user.role === "admin") ? "" : "none";
-    rebuildBtn.style.display  = (user && user.role === "admin") ? "" : "none";
     if (!user) {
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
@@ -584,7 +408,6 @@
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(refreshBtn);
-    rightGroup.appendChild(rebuildBtn);
     rightGroup.appendChild(rewardBtn);
     if (noticeBtn) rightGroup.appendChild(noticeBtn);
     if (suggestBtn) rightGroup.appendChild(suggestBtn);
@@ -604,7 +427,6 @@
       "gap:8px",
     ].join(";");
     floatWrap.appendChild(refreshBtn);
-    floatWrap.appendChild(rebuildBtn);
     floatWrap.appendChild(rewardBtn);
     if (noticeBtn) floatWrap.appendChild(noticeBtn);
     if (suggestBtn) floatWrap.appendChild(suggestBtn);
