@@ -391,9 +391,8 @@
     }
     .pm-player-meta {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 600; letter-spacing: 0.1em;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.05em;
       color: rgba(255,255,255,0.4); margin-top: 5px;
-      text-transform: uppercase;
     }
     .pm-close {
       position: relative;
