@@ -398,7 +398,10 @@
           if(hasTeams){ openScModal(mid,tA,tB,a,b); }
           return;
         }
-        return;
+        if(!hasTeams) return;
+        var p={date:'pacific_lcq_sa_s1_gs_m'+mid, teamA:tA, teamB:tB, from:'pacific_lcq_sa_s1_gs'};
+        if(sc&&(sc.a||sc.b)) p.score=sc.a+' : '+sc.b;
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
       });
       return card;
     }
