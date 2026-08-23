@@ -465,7 +465,9 @@
         }
         var st2=resolveState(), s2=st2[mid];
         if(!s2||!s2.teams[0]||!s2.teams[1]) return;
-        openScore(mid);
+        var p={date:'pacific_lcq_sa_s2_pr_m'+mid, teamA:s2.teams[0], teamB:s2.teams[1], from:'pacific_lcq_sa_s2_pr'};
+        if(s2.score&&(s2.score.a||s2.score.b)) p.score=s2.score.a+' : '+s2.score.b;
+        window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
       });
     });
 

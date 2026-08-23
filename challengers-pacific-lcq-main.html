@@ -337,6 +337,15 @@
             el.onclick=(function(m,nA,nB){ return function(){ openScore(m,nA,nB); }; })(mid,
               tA?tA.code:st.a, tB?tB.code:st.b);
           }
+        } else if(bothSet){
+          el.classList.add('clickable');
+          el.onclick=(function(m,nA,nB,bo5){ return function(){
+            var s2=resolveState()[m]; if(!s2) return;
+            var p={date:'pacific_lcq_main_m'+m, teamA:nA, teamB:nB, from:'pacific_lcq_main'};
+            if(s2.sc) p.score=s2.sc.a+' : '+s2.sc.b;
+            if(bo5) p.bo5='1';
+            window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
+          };})(mid, tA?tA.name:st.a, tB?tB.name:st.b, !!BO5_MIDS[mid]);
         }
       }
     }
