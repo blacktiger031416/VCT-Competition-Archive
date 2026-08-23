@@ -1533,7 +1533,7 @@
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
-        <div class="sb-center" onclick="if(typeof MATCH_BO1!=='undefined'&&MATCH_BO1) openVetoPicker(0)">
+        <div class="sb-center" id="m1-sb-center">
           <img class="sb-map-img" id="m1-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="m1-sb-map-name">브리즈</div>
         </div>
@@ -1702,6 +1702,15 @@ var LEAGUE      = 'challengers-sea';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_BO1   = _params.get('bo1') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
+
+/* Bo1: 맵 이미지 클릭 → 맵 선택 팝업 (document 이벤트 위임) */
+if (MATCH_BO1) {
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#m1-sb-center')) {
+      openVetoPicker(0);
+    }
+  });
+}
 var MATCH_SCORE = _params.get('score')  || '- : -';
 var _MATCH_TOURNAMENT = _params.get('tournament') || '';
 var _MATCH_GROUP      = _params.get('group')      || '';
