@@ -1385,6 +1385,7 @@
     /* ts.svg white filter removed — handled dynamically via TEAM_B_LOGO_WHITE */
     body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
     body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
+    body.bo1-mode .mo-veto { display: none !important; }
     body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
     body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
     body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
@@ -1697,6 +1698,7 @@ var MATCH_TEAM_B = _params.get('teamB') || 'Fancy United';
 var MATCH_FROM  = _params.get('from')   || 'sea_s1_me';
 var LEAGUE      = 'challengers-sea';
 var MATCH_BO5   = _params.get('bo5') === '1';
+var MATCH_BO1   = _params.get('bo1') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
 var _MATCH_TOURNAMENT = _params.get('tournament') || '';
@@ -1957,7 +1959,8 @@ var _navKey = _params.get('nav') || MATCH_FROM;
 var _fromInfo = _fromMap[_navKey] || _fromMap[MATCH_FROM] || _fromDefault;
 
 // ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
-var currentBo = MATCH_BO5 ? 5 : 3;
+var currentBo = MATCH_BO1 ? 1 : (MATCH_BO5 ? 5 : 3);
+if (MATCH_BO1) document.body.classList.add('bo1-mode');
 var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
 var initializedMaps = (function() {
   var m = {};
@@ -1997,7 +2000,7 @@ function buildMapCardHtml(n) {
   var mid = "m" + n;
   var rtId = "rt-" + (n - 1);
   var tsId = "ts-" + (n - 1);
-  var diagCount = currentBo === 5 ? 3 : 2;
+  var diagCount = currentBo === 5 ? 3 : (currentBo === 1 ? 1 : 2);
   var diag = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>'.repeat(diagCount);
   return `
     <div class="map-scoreboard">
@@ -2085,7 +2088,7 @@ function changeMapCount(delta) {
 }
 
 function updateDiamonds() {
-  var count = currentBo === 5 ? 3 : 2;
+  var count = currentBo === 5 ? 3 : (currentBo === 1 ? 1 : 2);
   var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
   var html = diamond.repeat(count);
   ["m1-diamonds-l","m1-diamonds-r","m2-diamonds-l","m2-diamonds-r","m3-diamonds-l","m3-diamonds-r"].forEach(function(id) {
@@ -2893,7 +2896,7 @@ function applyMatchUI() {
   if (moNameA) { moNameA.textContent = MATCH_TEAM_A; var _la = MATCH_TEAM_A.length; moNameA.style.fontSize = _la > 25 ? '13px' : _la > 18 ? '17px' : ''; }
   if (moLogoB) { moLogoB.src = TEAM_B_LOGO; moLogoB.alt = TEAM_B_CODE; if (TEAM_B_LOGO_WHITE) moLogoB.classList.add('mo-logo-white'); }
   if (moNameB) { moNameB.textContent = MATCH_TEAM_B; var _lb = MATCH_TEAM_B.length; moNameB.style.fontSize = _lb > 25 ? '13px' : _lb > 18 ? '17px' : ''; }
-  if (moSub)   moSub.textContent   = MATCH_SCORE + (MATCH_BO5 ? '  ·  BO5' : '  ·  BO3');
+  if (moSub)   moSub.textContent   = MATCH_SCORE + (MATCH_BO1 ? '  ·  BO1' : MATCH_BO5 ? '  ·  BO5' : '  ·  BO3');
 
   // 스코어보드 로고·이름·테이블 헤더 (정적 map 1~3 + 동적으로 추가된 카드 포함)
   document.querySelectorAll('.sb-logo-a').forEach(function(el) {
