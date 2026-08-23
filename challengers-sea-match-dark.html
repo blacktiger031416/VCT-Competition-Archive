@@ -3775,6 +3775,7 @@ function vetoSideChooser(idx, firstBan) {
     return picker === "A" ? "B" : "A";
   }
   if (step.type === "decider") {
+    if (VETO_STEPS.length <= 1) return "A"; // Bo1: 사이드 선택자 없음
     return vetoSideChooser(3, firstBan);
   }
   return "";
