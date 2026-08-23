@@ -1385,9 +1385,7 @@
     /* ts.svg white filter removed — handled dynamically via TEAM_B_LOGO_WHITE */
     body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
     body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
-    body.bo1-mode .mo-veto { display: none !important; }
-    body.bo1-mode .sb-center { cursor: pointer; }
-    body.bo1-mode .sb-center:hover .sb-map-img { opacity: 0.75; }
+    body.bo1-mode .mo-veto-grid { grid-template-columns: 220px !important; }
     body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
     body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
     body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
@@ -1508,7 +1506,7 @@
 
     <!-- 맵 밴픽 -->
     <div class="mo-veto">
-      <div class="mo-veto-title">맵 밴픽</div>
+      <div class="mo-veto-title" id="veto-title">맵 밴픽</div>
       <div class="mo-veto-grid" id="veto-grid"></div>
     </div>
 
@@ -1973,7 +1971,12 @@ var _fromInfo = _fromMap[_navKey] || _fromMap[MATCH_FROM] || _fromDefault;
 var currentBo = MATCH_BO1 ? 1 : (MATCH_BO5 ? 5 : 3);
 if (MATCH_BO1) {
   document.body.classList.add('bo1-mode');
-  /* firstBanOptions 제거: Bo1엔 선밴팀 개념 없음 */
+  /* 타이틀 변경 + 맵 카드 즉시 렌더 (storageReady 이전에도 보이도록) */
+  document.addEventListener('DOMContentLoaded', function() {
+    var t = document.getElementById('veto-title');
+    if (t) t.textContent = '맵 선택';
+    if (typeof renderVeto === 'function') renderVeto();
+  });
 }
 var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
 var initializedMaps = (function() {
