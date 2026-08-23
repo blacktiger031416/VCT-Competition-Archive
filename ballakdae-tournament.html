@@ -478,9 +478,11 @@
       requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
     }
 
-    renderBracket();
-    window.addEventListener('load', function(){ renderBracket(); });
     window.addEventListener('resize', drawLines);
+
+    (window.storageReady || Promise.resolve()).then(function(){
+      renderBracket();
+    });
   })();
   </script>
 </body>
