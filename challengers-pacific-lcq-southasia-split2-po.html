@@ -417,10 +417,9 @@
         var mid=Number(card.dataset.mid);
         var st=resolveState(), s=st[mid];
         if(_isAdmin){
-          if(s&&s.teams[0]&&s.teams[1]){ openScore(mid); return; }
           var seedRow=e.target.closest('.bt-row[data-seed-slot]');
           if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
-          return;
+          if(s&&s.teams[0]&&s.teams[1]&&e.target.closest('.bt-score')){ openScore(mid); return; }
         }
         if(!s||!s.teams[0]||!s.teams[1]) return;
         var p={

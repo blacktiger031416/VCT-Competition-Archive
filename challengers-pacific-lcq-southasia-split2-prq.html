@@ -501,15 +501,11 @@
     document.querySelectorAll('.bracket-match').forEach(function(card){
       card.addEventListener('click',function(e){
         var mid=Number(card.dataset.mid);
-        var btRow=e.target.closest('.bt-row');
-
-        if(_isAdmin&&btRow){
+        if(_isAdmin){
           var seedRow=e.target.closest('.bt-row[data-seed-slot]');
           if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
           var st=resolveState(), s=st[mid];
-          var bothSet=!!(s&&s.teams[0]&&s.teams[1]);
-          if(bothSet){ openScore(mid); return; }
-          return;
+          if(s&&s.teams[0]&&s.teams[1]&&e.target.closest('.bt-score')){ openScore(mid); return; }
         }
 
         var st2=resolveState(), s2=st2[mid];

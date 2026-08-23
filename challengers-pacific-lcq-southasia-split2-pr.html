@@ -457,11 +457,10 @@
       card.addEventListener('click',function(e){
         var mid=Number(card.dataset.mid);
         if(_isAdmin){
-          var st=resolveState(), s=st[mid];
-          if(s&&s.teams[0]&&s.teams[1]){ openScore(mid); return; }
           var seedRow=e.target.closest('.bt-row[data-seed-slot]');
           if(seedRow){ openSd(seedRow.dataset.seedSlot); return; }
-          return;
+          var st=resolveState(), s=st[mid];
+          if(s&&s.teams[0]&&s.teams[1]&&e.target.closest('.bt-score')){ openScore(mid); return; }
         }
         var st2=resolveState(), s2=st2[mid];
         if(!s2||!s2.teams[0]||!s2.teams[1]) return;
