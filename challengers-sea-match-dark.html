@@ -1385,8 +1385,9 @@
     /* ts.svg white filter removed — handled dynamically via TEAM_B_LOGO_WHITE */
     body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
     body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
-    body.bo1-mode .mo-veto-title { display: none !important; }
-    body.bo1-mode .mo-veto-grid { grid-template-columns: 220px !important; }
+    body.bo1-mode .mo-veto { display: none !important; }
+    body.bo1-mode .sb-center { cursor: pointer; }
+    body.bo1-mode .sb-center:hover .sb-map-img { opacity: 0.75; }
     body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
     body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
     body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
@@ -2989,6 +2990,14 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   renderPredBar();
   renderVeto();
   syncVetoMaps();
+
+  /* Bo1: 스코어보드 맵 이미지 클릭 → 맵 선택 팝업 */
+  if (MATCH_BO1) {
+    var sbCenter = document.querySelector('#map-1 .sb-center');
+    if (sbCenter) {
+      sbCenter.addEventListener('click', function() { openVetoPicker(0); });
+    }
+  }
   applyScoreClasses('m1');
   applyScoreClasses('m2');
   applyScoreClasses('m3');
