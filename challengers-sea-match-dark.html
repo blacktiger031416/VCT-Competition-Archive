@@ -1385,7 +1385,7 @@
     /* ts.svg white filter removed — handled dynamically via TEAM_B_LOGO_WHITE */
     body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
     body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
-    body.bo1-mode .mo-veto { display: none !important; }
+    body.bo1-mode .mo-veto-title { display: none !important; }
     body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
     body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
     body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
@@ -2111,7 +2111,7 @@ function renderSlots() {
 function setBo(n) {
   currentBo = n;
   activeMapCount = Math.min(activeMapCount, n);
-  VETO_STEPS    = n === 5 ? (MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO5) : VETO_STEPS_BO3;
+  VETO_STEPS    = n === 1 ? VETO_STEPS_BO1 : n === 5 ? (MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO5) : VETO_STEPS_BO3;
   VETO_MAP_SLOT = n === 5 ? [2, 3, 4, 5, 6] : [2, 3, 6];
   renderSlots();
   renderVeto();
@@ -3738,7 +3738,10 @@ const VETO_STEPS_GF = [
   { type: "pick",    label: "PICK",    team: "B", mapIndex: 3 },
   { type: "decider", label: "DECIDER", mapIndex: 4 },
 ];
-var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO3;
+const VETO_STEPS_BO1 = [
+  { type: "decider", label: "MAP", mapIndex: 0 },
+];
+var VETO_STEPS = MATCH_BO1 ? VETO_STEPS_BO1 : (MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO3);
 
 /* 각 스텝에서 행동하는 팀 (A=상위조/선팀, B=상대팀) */
 function vetoStepTeam(idx, firstBan) {
