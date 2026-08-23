@@ -310,10 +310,11 @@
     function makeNode(tagLabel, tagClass, slotA, slotB, matchId) {
       var el=document.createElement('div');
       el.className='match-node';
-      if(isAdmin()&&slotA!==null&&slotA!==undefined&&slotB!==null&&slotB!==undefined){
-        el.classList.add('admin-clickable');
+      if(slotA!==null&&slotA!==undefined&&slotB!==null&&slotB!==undefined){
         el.addEventListener('click',function(e){
+          if(!isAdmin()) return;
           if(e.target.closest('a')) return;
+          el.classList.add('admin-clickable');
           openScoreModal(matchId, slotA, slotB);
         });
       }
@@ -480,8 +481,22 @@
 
     window.addEventListener('resize', drawLines);
 
-    (window.storageReady || Promise.resolve()).then(function(){
+    function initBracket() {
       renderBracket();
+      if(isAdmin()){
+        document.querySelectorAll('.match-node').forEach(function(el){
+          el.classList.add('admin-clickable');
+        });
+      }
+    }
+
+    (window.storageReady || Promise.resolve()).then(function(){
+      if(typeof window.vctIsAdmin === 'function'){
+        initBracket();
+      } else {
+        /* auth.js가 아직 안 로드됐으면 로드 후 실행 */
+        window.addEventListener('load', initBracket);
+      }
     });
   })();
   </script>
