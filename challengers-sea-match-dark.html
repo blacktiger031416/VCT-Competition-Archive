@@ -1533,7 +1533,7 @@
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
         </div>
-        <div class="sb-center">
+        <div class="sb-center" onclick="if(typeof MATCH_BO1!=='undefined'&&MATCH_BO1) openVetoPicker(0)">
           <img class="sb-map-img" id="m1-sb-map-img" src="images/Map.png" alt="" />
           <div class="sb-map-name" id="m1-sb-map-name">브리즈</div>
         </div>
@@ -2991,13 +2991,6 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
   renderVeto();
   syncVetoMaps();
 
-  /* Bo1: 스코어보드 맵 이미지 클릭 → 맵 선택 팝업 */
-  if (MATCH_BO1) {
-    var sbCenter = document.querySelector('#map-1 .sb-center');
-    if (sbCenter) {
-      sbCenter.addEventListener('click', function() { openVetoPicker(0); });
-    }
-  }
   applyScoreClasses('m1');
   applyScoreClasses('m2');
   applyScoreClasses('m3');
