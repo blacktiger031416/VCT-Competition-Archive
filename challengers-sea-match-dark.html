@@ -1386,6 +1386,7 @@
     body.white-mode .mo-score-sep { color: rgba(0,0,0,0.2); }
     body.white-mode .mo-record { color: rgba(0,0,0,0.3); }
     body.bo1-mode .mo-veto-title { display: none !important; }
+    body.bo1-mode .mo-veto-grid { grid-template-columns: 220px !important; }
     body.white-mode .mo-veto { border-top-color: rgba(0,0,0,0.06); }
     body.white-mode .mo-veto-title { color: rgba(0,0,0,0.25); }
     body.white-mode .mo-veto-cell { border-color: rgba(0,0,0,0.07); }
@@ -1960,7 +1961,10 @@ var _fromInfo = _fromMap[_navKey] || _fromMap[MATCH_FROM] || _fromDefault;
 
 // ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
 var currentBo = MATCH_BO1 ? 1 : (MATCH_BO5 ? 5 : 3);
-if (MATCH_BO1) document.body.classList.add('bo1-mode');
+if (MATCH_BO1) {
+  document.body.classList.add('bo1-mode');
+  /* firstBanOptions 제거: Bo1엔 선밴팀 개념 없음 */
+}
 var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
 var initializedMaps = (function() {
   var m = {};
@@ -3965,7 +3969,7 @@ function openVetoPicker(idx) {
   const curSide    = vetoState.sides[idx] || "defense";
   const curMap     = vetoState.maps[idx] || "";
 
-  const firstBanOptions = idx === 0
+  const firstBanOptions = (!MATCH_BO1 && idx === 0)
     ? `<div class="veto-popup-row">
         <label>선 밴 팀</label>
         <select id="vp-firstban">
@@ -4055,7 +4059,7 @@ function openVetoPicker(idx) {
 
 /* 밴픽 → 스코어보드 맵 이미지 자동 연동 */
 /* Bo3: 픽은 index 2, 3 / 디사이더 index 6 */
-var VETO_MAP_SLOT = [2, 3, 6]; /* Bo3: map-1, map-2, map-3 / Bo5: [2,3,4,5,6] */
+var VETO_MAP_SLOT = MATCH_BO1 ? [0] : [2, 3, 6]; /* Bo1: [0] / Bo3: map-1, map-2, map-3 / Bo5: [2,3,4,5,6] */
 
 function syncVetoMaps() {
   VETO_MAP_SLOT.forEach(function(stepIdx, i) {
