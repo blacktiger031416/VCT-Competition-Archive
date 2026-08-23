@@ -101,6 +101,8 @@
     .mc-score-zone { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:38px; padding:0 2px; }
     body:not(.view-only) .mc-score-zone.clickable { cursor:pointer; border-radius:3px; transition:background .12s; }
     body:not(.view-only) .mc-score-zone.clickable:hover { background:rgba(255,255,255,.06); }
+    .match-card.clickable { cursor:pointer; }
+    .match-card.clickable:hover { border-color:rgba(1,210,215,.3); }
     .mc-score { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:900; color:rgba(255,255,255,.22); white-space:nowrap; user-select:none; }
     .mc-score.has { color:rgba(255,255,255,.9); }
 
@@ -523,6 +525,15 @@
           if(isAdmin) sideB.addEventListener('click',function(e){ e.stopPropagation(); openPicker('matchteam',{letter:grp.letter,mi:mi,side:'b'}); });
           mc.appendChild(sideB);
 
+          if(hasA&&hasB){
+            mc.classList.add('clickable');
+            mc.addEventListener('click',(function(L,m,nA,nB){return function(){
+              var p={date:'pacific_lcq_fortress_syd_g'+L+'_m'+(m+1), teamA:nA, teamB:nB, from:'pacific_lcq_fortress_syd'};
+              var scc=getMatchScore(L,m); if(scc) p.score=scc.a+' : '+scc.b;
+              window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
+            };})(grp.letter, mi, teamA?teamA.name:codeA, teamB?teamB.name:codeB));
+          }
+
           matchGrid.appendChild(mc);
         });
         card.appendChild(matchGrid);
@@ -583,24 +594,18 @@
         });
 
         el.classList.remove('clickable'); el.onclick=null;
-        if(isAdmin){
-          var isSeeded=mid<=4, isSeedSlot=isSeeded&&!bothSet;
-          if(isSeedSlot){
-            el.classList.add('clickable');
-            el.onclick=(function(m,a,b){ return function(){ openPicker('brslot',{mid:m,side:a?'b':'a'}); }; })(mid,st.a,st.b);
-          } else if(bothSet){
-            el.classList.add('clickable');
-            el.onclick=(function(m,nA,nB){ return function(){ openScore('br',m,0,nA,nB); }; })(mid,
-              tA?tA.code:st.a, tB?tB.code:st.b);
-          }
+        if(isAdmin&&mid<=4&&!bothSet){
+          el.classList.add('clickable');
+          el.onclick=(function(m,a,b){ return function(){ openPicker('brslot',{mid:m,side:a?'b':'a'}); }; })(mid,st.a,st.b);
         } else if(bothSet){
           el.classList.add('clickable');
-          el.onclick=(function(m,nA,nB){ return function(){
+          el.onclick=(function(m,nA,nB,cA,cB){ return function(e2){
+            if(isAdmin&&e2.target.closest('.bt-score')){ openScore('br',m,0,cA,cB); return; }
             var s2=resolveState()[m]; if(!s2) return;
             var p={date:'pacific_lcq_fortress_syd_m'+m, teamA:nA, teamB:nB, from:'pacific_lcq_fortress_syd'};
             if(s2.sc) p.score=s2.sc.a+' : '+s2.sc.b;
             window.location.href='./challengers-sea-match-dark.html?'+new URLSearchParams(p).toString();
-          };})(mid, tA?tA.name:st.a, tB?tB.name:st.b);
+          };})(mid, tA?tA.name:st.a, tB?tB.name:st.b, tA?tA.code:st.a, tB?tB.code:st.b);
         }
       }
     }
