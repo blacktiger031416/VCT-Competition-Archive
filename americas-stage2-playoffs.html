@@ -474,14 +474,17 @@
         const n = Number(String(v ?? "0").trim());
         return Number.isFinite(n) ? n : 0;
       }
+      const TOURNAMENT_PREFIX = "s2po";
       function resultKey(matchId, teams) {
-        return `result:Match ${matchId}|${teams[0]||"미정"}|${teams[1]||"미정"}`;
+        return `result:${TOURNAMENT_PREFIX}|Match ${matchId}|${teams[0]||"미정"}|${teams[1]||"미정"}`;
       }
       function readStoredResult(matchId, teams) {
         try {
           const norm = teams.map(t => t || "미정");
           const code = norm.map(t => teamCode(t) || t);
           const candidates = [
+            // 신규 키: from|matchId (stage 간 충돌 방지)
+            `result:stage2playoffs|${matchId}`,
             resultKey(matchId, norm),
             resultKey(matchId, code),
             resultKey(matchId, [norm[0], code[1]]),
@@ -656,7 +659,7 @@
         const isGrandFinal = matchId === "Grand Finals";
         const query = new URLSearchParams({
           date: `Match ${matchId}`, teamA, teamB,
-          score: `${scoreA} : ${scoreB}`, from: "stage2playoffs",
+          score: `${scoreA} : ${scoreB}`, from: "stage2playoffs", match: matchId,
           ...(isBo5 ? { bo5: "1" } : {}),
           ...(isGrandFinal ? { gf: "1" } : {}),
         });
