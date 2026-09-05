@@ -260,17 +260,25 @@
     }
     /* 스캔라인 */
     .slot::after {
-      content: ''; position: absolute; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--slot-color, #ff3c5a), transparent);
+      content: ''; position: absolute; left: -5%; right: -5%; height: 4px;
+      background: linear-gradient(90deg,
+        transparent,
+        color-mix(in srgb, var(--slot-color, #ff3c5a) 50%, transparent),
+        var(--slot-color, #ff3c5a),
+        color-mix(in srgb, var(--slot-color, #ff3c5a) 50%, transparent),
+        transparent);
+      box-shadow: 0 0 14px 3px var(--slot-color, #ff3c5a),
+                  0 0 4px rgba(255,255,255,.9);
       opacity: 0; z-index: 4; pointer-events: none;
       top: -10%;
     }
     .slot.scanning::after {
-      animation: scanSlot .55s ease-in forwards;
+      animation: scanSlot .45s cubic-bezier(.4,0,.6,1) forwards;
     }
     @keyframes scanSlot {
-      0%   { top: -10%; opacity: .9; }
-      80%  { top: 110%; opacity: .7; }
+      0%   { top: -10%; opacity: 1; }
+      70%  { top: 110%; opacity: .95; }
+      88%  { top: 110%; opacity: .5; }
       100% { top: 110%; opacity: 0; }
     }
 
@@ -279,61 +287,88 @@
       background: rgba(255,255,255,.05);
     }
     .slot.filled {
-      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 60%, transparent);
-      background: color-mix(in srgb, var(--slot-color, #ff3c5a) 8%, transparent);
-      box-shadow: 0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 15%, transparent),
-                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 25%, transparent);
+      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 65%, transparent);
+      background: color-mix(in srgb, var(--slot-color, #ff3c5a) 10%, transparent);
+      animation: slotIdleGlow 2.8s ease-in-out infinite;
     }
     .slot.filled:hover {
-      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 90%, transparent);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px color-mix(in srgb, var(--slot-color, #ff3c5a) 28%, transparent),
-                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 45%, transparent);
+      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 95%, transparent);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 40px color-mix(in srgb, var(--slot-color, #ff3c5a) 35%, transparent),
+                  0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 20%, transparent),
+                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 55%, transparent);
+      animation: none;
     }
 
     /* 슬롯 등장 애니메이션 */
     @keyframes slotAppear {
-      0%   { transform: scale(.7) translateY(12px); opacity: 0;
-             box-shadow: 0 0 60px color-mix(in srgb, var(--slot-color, #ff3c5a) 80%, transparent); }
-      55%  { transform: scale(1.06) translateY(-3px); opacity: 1;
-             box-shadow: 0 0 40px color-mix(in srgb, var(--slot-color, #ff3c5a) 50%, transparent); }
-      78%  { transform: scale(.97) translateY(1px); }
-      100% { transform: scale(1) translateY(0); opacity: 1;
-             box-shadow: 0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 15%, transparent); }
+      0%   { transform: scale(.45) translateY(22px) rotate(-10deg); opacity: 0;
+             filter: brightness(5) saturate(2);
+             box-shadow: 0 0 100px color-mix(in srgb, var(--slot-color, #ff3c5a) 100%, transparent),
+                         0 0 50px color-mix(in srgb, var(--slot-color, #ff3c5a) 80%, transparent); }
+      35%  { transform: scale(1.14) translateY(-6px) rotate(3deg); opacity: 1;
+             filter: brightness(2.2) saturate(1.5);
+             box-shadow: 0 0 70px color-mix(in srgb, var(--slot-color, #ff3c5a) 75%, transparent),
+                         inset 0 0 40px color-mix(in srgb, var(--slot-color, #ff3c5a) 35%, transparent); }
+      58%  { transform: scale(.94) translateY(3px) rotate(-1.5deg);
+             filter: brightness(1.4); }
+      78%  { transform: scale(1.04) translateY(-1px);
+             filter: brightness(1.1); }
+      92%  { transform: scale(.99); }
+      100% { transform: scale(1) translateY(0) rotate(0); opacity: 1;
+             filter: brightness(1);
+             box-shadow: 0 0 24px color-mix(in srgb, var(--slot-color, #ff3c5a) 18%, transparent),
+                         inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 25%, transparent); }
     }
     .slot.appear {
-      animation: slotAppear .45s cubic-bezier(.22,1,.36,1) forwards;
+      animation: slotAppear .6s cubic-bezier(.22,1,.36,1) forwards !important;
     }
 
     /* 슬롯 제거 애니메이션 */
     @keyframes slotRemove {
       0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
-      30%  { transform: scale(1.05); filter: brightness(1.8); }
-      100% { transform: scale(.5) translateY(10px); opacity: 0; filter: brightness(0); }
+      18%  { transform: scale(1.12); filter: brightness(4) saturate(2); opacity: 1; }
+      38%  { transform: scale(.85); filter: brightness(.8); }
+      65%  { transform: scale(.35) translateY(18px); opacity: .25; filter: brightness(0); }
+      100% { transform: scale(0) translateY(24px); opacity: 0; filter: brightness(0); }
     }
     .slot.removing {
-      animation: slotRemove .3s ease-in forwards;
+      animation: slotRemove .42s cubic-bezier(.6,0,.8,.5) forwards;
       pointer-events: none;
     }
 
     /* 카드 선택 flash */
     @keyframes cardFlash {
-      0%   { transform: scale(1); box-shadow: none; }
-      25%  { transform: scale(1.04); box-shadow: 0 0 0 2px var(--tc, #ff3c5a), 0 0 20px var(--tc, #ff3c5a); }
-      60%  { transform: scale(.97); box-shadow: 0 0 0 1px var(--tc, #ff3c5a); }
-      100% { transform: scale(1); box-shadow: none; }
+      0%   { transform: scale(1); box-shadow: none; filter: brightness(1); }
+      18%  { transform: scale(1.1); filter: brightness(2.8);
+             box-shadow: 0 0 0 3px var(--tc, #ff3c5a),
+                         0 0 28px var(--tc, #ff3c5a),
+                         0 0 60px color-mix(in srgb, var(--tc, #ff3c5a) 45%, transparent); }
+      50%  { transform: scale(.95); filter: brightness(1.4);
+             box-shadow: 0 0 0 1px var(--tc, #ff3c5a), 0 0 14px var(--tc, #ff3c5a); }
+      78%  { transform: scale(1.03); filter: brightness(1.1); }
+      100% { transform: scale(1); box-shadow: none; filter: brightness(1); }
     }
     .team-card.picking {
-      animation: cardFlash .35s ease forwards;
+      animation: cardFlash .5s ease forwards;
       pointer-events: none;
     }
 
     /* 빈 슬롯 pulse (선택 대기 중) */
     @keyframes slotPulse {
-      0%, 100% { border-color: rgba(255,255,255,.1); }
-      50%       { border-color: rgba(255,255,255,.28); }
+      0%, 100% { border-color: rgba(255,255,255,.1); box-shadow: none; }
+      50%       { border-color: rgba(255,255,255,.38); box-shadow: 0 0 12px rgba(255,255,255,.08), inset 0 0 12px rgba(255,255,255,.04); }
     }
-    .slot.pulse { animation: slotPulse .7s ease-in-out 3; }
+    .slot.pulse { animation: slotPulse .65s ease-in-out 4; }
+
+    /* 채워진 슬롯 idle glow breath */
+    @keyframes slotIdleGlow {
+      0%, 100% { box-shadow: 0 0 18px color-mix(in srgb, var(--slot-color, #ff3c5a) 14%, transparent),
+                              inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 22%, transparent); }
+      50%      { box-shadow: 0 0 40px color-mix(in srgb, var(--slot-color, #ff3c5a) 35%, transparent),
+                              0 0 10px color-mix(in srgb, var(--slot-color, #ff3c5a) 18%, transparent),
+                              inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 45%, transparent); }
+    }
 
     /* empty slot content */
     .slot-empty-num {
@@ -353,31 +388,36 @@
       filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
     }
     @keyframes logoIn {
-      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
-      55%  { transform: scale(1.18) rotate(3deg); opacity: 1; }
-      80%  { transform: scale(.94) rotate(-1deg); }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
+      0%   { transform: scale(0) rotate(-28deg); opacity: 0; filter: brightness(8) saturate(3); }
+      40%  { transform: scale(1.3) rotate(6deg); opacity: 1; filter: brightness(3) saturate(2); }
+      65%  { transform: scale(.88) rotate(-2.5deg); filter: brightness(1.5); }
+      82%  { transform: scale(1.08) rotate(1deg); filter: brightness(1.2); }
+      94%  { transform: scale(.97); }
+      100% { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
     }
     /* 일반 로고 brightness 플래시 (흰 로고는 적용 안 함) */
     @keyframes logoBrightFlash {
-      0%   { filter: brightness(3); }
-      50%  { filter: brightness(1.5); }
-      100% { filter: brightness(1); }
+      0%   { filter: drop-shadow(0 0 18px var(--slot-color, #ff3c5a)) brightness(6); }
+      35%  { filter: drop-shadow(0 0 12px var(--slot-color, #ff3c5a)) brightness(2.5); }
+      70%  { filter: drop-shadow(0 0 6px var(--slot-color, #ff3c5a)) brightness(1.4); }
+      100% { filter: drop-shadow(0 4px 16px rgba(0,0,0,.7)) brightness(1); }
     }
-    .slot.appear .slot-logo { animation: logoIn .5s .05s cubic-bezier(.22,1,.36,1) both; }
-    .slot.appear .slot-logo.logo-bright { animation: logoIn .5s .05s cubic-bezier(.22,1,.36,1) both, logoBrightFlash .5s .05s ease both; }
+    .slot.appear .slot-logo { animation: logoIn .65s .05s cubic-bezier(.22,1,.36,1) both; }
+    .slot.appear .slot-logo.logo-bright { animation: logoIn .65s .05s cubic-bezier(.22,1,.36,1) both, logoBrightFlash .65s .05s ease both; }
 
     @keyframes codeIn {
-      0%   { opacity: 0; letter-spacing: .4em; }
-      100% { opacity: 1; letter-spacing: .08em; }
+      0%   { opacity: 0; letter-spacing: .7em; filter: blur(4px); }
+      60%  { opacity: 1; letter-spacing: .12em; filter: blur(.5px); }
+      100% { opacity: 1; letter-spacing: .08em; filter: blur(0); }
     }
-    .slot.appear .slot-code { animation: codeIn .3s .25s ease both; }
+    .slot.appear .slot-code { animation: codeIn .4s .28s cubic-bezier(.22,1,.36,1) both; }
 
     @keyframes recordIn {
-      0%   { opacity: 0; transform: translateY(6px); }
-      100% { opacity: 1; transform: translateY(0); }
+      0%   { opacity: 0; transform: translateY(10px) scale(.8); }
+      65%  { opacity: 1; transform: translateY(-2px) scale(1.05); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .slot.appear .slot-record { animation: recordIn .25s .35s ease both; }
+    .slot.appear .slot-record { animation: recordIn .32s .4s cubic-bezier(.22,1,.36,1) both; }
 
     .slot-code {
       font-family: 'Barlow Condensed', sans-serif;
@@ -513,9 +553,7 @@
     /* 잠금 시 슬롯/풀 dim */
     .gs-wrap.locked .slot-remove { display: none !important; }
     .gs-wrap.locked .slot-record-btn { pointer-events: none; }
-    .gs-wrap.locked .slot.filled:hover { transform: none !important;
-      box-shadow: 0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 15%, transparent),
-                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 25%, transparent) !important; }
+    .gs-wrap.locked .slot.filled:hover { transform: none !important; animation: slotIdleGlow 2.8s ease-in-out infinite !important; }
     .gs-wrap.locked .pool-area { opacity: .35; pointer-events: none; filter: grayscale(.4); transition: opacity .4s, filter .4s; }
     .gs-wrap.locked .team-card { cursor: default; }
 
