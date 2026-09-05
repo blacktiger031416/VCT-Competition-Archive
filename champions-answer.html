@@ -36,6 +36,24 @@
     .header-sep { color:rgba(255,255,255,.12);font-size:14px;flex-shrink:0; }
     .header-title { font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;color:#ffc840;letter-spacing:.08em;text-transform:uppercase;flex-shrink:0; }
 
+    /* ── 탭 바 ── */
+    .tab-bar {
+      display:flex;align-items:flex-end;
+      padding:0 24px;border-bottom:1px solid rgba(255,255,255,.07);
+      background:rgba(6,10,14,.85);
+    }
+    .tab-btn {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(255,255,255,.35);background:none;border:none;
+      padding:0 20px;height:44px;cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color .15s,border-color .15s;text-decoration:none;
+      display:inline-flex;align-items:center;
+    }
+    .tab-btn:hover { color:rgba(255,255,255,.7); }
+    .tab-btn.active { color:#fff; border-bottom-color:var(--accent); }
+
     /* ── 레이아웃 ── */
     .page-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
     .page-title {
@@ -275,10 +293,15 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="back-link" href="./champions-prediction.html">← 예측 페이지</a>
+    <a class="back-link" href="./index.html">← 홈</a>
     <span class="header-sep">/</span>
-    <span class="header-title" id="header-title">챔피언스 정답</span>
+    <span class="header-title" id="header-title">CHAMPIONS 승부 예측</span>
   </header>
+  <nav class="tab-bar">
+    <a class="tab-btn" href="./champions-prediction.html">그룹 스테이지 예측</a>
+    <a class="tab-btn" href="./champions-prediction.html#po">플레이오프 예측</a>
+    <span class="tab-btn active">정답 확인</span>
+  </nav>
 
   <div class="page-wrap">
     <div class="page-title">

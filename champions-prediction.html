@@ -91,6 +91,8 @@
     }
     .tab-btn:hover { color: rgba(255,255,255,.7); }
     .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+    a.tab-btn.tab-link { text-decoration: none; display: inline-flex; align-items: center; }
+    a.tab-btn.tab-link:hover { color: rgba(255,255,255,.7); }
 
     /* ── Tab panels ── */
     .tab-panel { display: none; }
@@ -613,6 +615,7 @@
     <nav class="tab-bar">
       <button class="tab-btn active" data-tab="gs">그룹 스테이지 예측</button>
       <button class="tab-btn" data-tab="po">플레이오프 예측</button>
+      <a class="tab-btn tab-link" href="./champions-answer.html">정답 확인</a>
     </nav>
 
     <!-- Group Stage Tab -->
@@ -696,6 +699,25 @@
     var slots = new Array(8).fill(null);
     var lastFilledIdx = -1;
     var gsLocked = false;
+
+    /* ── 예측 저장/불러오기 ── */
+    function saveGsPred() {
+      try {
+        var data = slots.map(function(s) {
+          return s ? { code: s.code, name: s.name, logo: s.logo,
+                       color: s.color, white: !!s.white, record: s.record } : null;
+        });
+        localStorage.setItem('vct_gs_pred', JSON.stringify(data));
+      } catch(e) {}
+    }
+    function loadGsPred() {
+      try {
+        var raw = localStorage.getItem('vct_gs_pred');
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (Array.isArray(data)) slots = data.map(function(d){ return d || null; });
+      } catch(e) {}
+    }
 
     /* ── 리플 효과 ── */
     function spawnRipple(x, y, color) {
@@ -966,6 +988,7 @@
         };
         renderSlots(emptyIdx);
         renderPool();
+        saveGsPred();
         popCount();
 
         /* 대상 슬롯 pulse */
@@ -994,6 +1017,7 @@
           slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
           renderSlots(-1);
           renderPool();
+          saveGsPred();
           popCount();
         }, 290);
       } else {
@@ -1001,6 +1025,7 @@
         slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
         renderSlots(-1);
         renderPool();
+        saveGsPred();
       }
     }
 
@@ -1012,6 +1037,7 @@
       if (!slots[idx] || slots[idx].record === rec) return;
 
       slots[idx].record = rec;
+      saveGsPred();
 
       /* 같은 슬롯의 버튼들을 직접 찾아서 애니메이션 */
       var slotEl = document.querySelector('#slots-grid .slot[data-idx="' + idx + '"]');
@@ -1367,6 +1393,7 @@
         document.getElementById('main-content').style.display = 'block';
         /* 잠금 상태 복원 */
         try { if (localStorage.getItem('vct_gs_locked') === '1') gsLocked = true; } catch(e) {}
+        loadGsPred();
         renderSlots(-1);
         renderPool();
         setPoSeeds();
