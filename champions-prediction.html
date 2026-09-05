@@ -490,8 +490,23 @@
     .team-card.selected .team-card-check { opacity: 1; }
 
     /* ── 플레이오프 DE 브래킷 ── */
+    /* ── DE 브래킷 레이아웃 ── */
     .po-wrap { padding: 16px 0 40px; overflow-x: auto; }
-    .po-section { margin-bottom: 22px; }
+    /* UB + LB 왼쪽, GF 오른쪽 세로 컬럼 */
+    .de-outer { display: flex; align-items: stretch; gap: 0; }
+    .de-brackets { flex: 1; min-width: 0; }
+    .de-gf {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 0 4px 0 0; gap: 12px;
+      border-left: 1px solid rgba(255,215,0,.12);
+      min-width: 220px;
+    }
+    .gf-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase;
+      color: rgba(255,215,0,.55); text-align: center; padding: 0 16px;
+    }
+    .po-section { margin-bottom: 20px; }
     .po-section-title {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
@@ -499,77 +514,75 @@
       display: flex; align-items: center; gap: 8px;
     }
     .po-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.06); }
-    .gf-title { color: rgba(255,215,0,.6); font-size: 11px; }
+    .ub-drop-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(252,129,74,.4); text-align: right; padding: 0 14px 2px;
+    }
     .bracket-rounds { display: flex; align-items: stretch; }
     .bracket-round-col { display: flex; flex-direction: column; }
     .bracket-round-header {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
       color: rgba(255,255,255,.2); text-align: center;
-      padding-bottom: 8px; white-space: nowrap; min-width: 158px;
+      padding-bottom: 10px; white-space: nowrap; min-width: 198px;
     }
     .bracket-slots { display: flex; flex-direction: column; flex: 1; }
     .bracket-slot {
       display: flex; align-items: center; justify-content: center;
-      padding: 5px 6px;
+      padding: 7px 8px;
     }
-    /* match card */
+    /* ── 매치 카드 ── */
     .bm {
-      width: 148px; border-radius: 6px; overflow: hidden;
+      width: 178px; border-radius: 7px; overflow: hidden;
       border: 1px solid rgba(255,255,255,.1);
       background: rgba(255,255,255,.03); flex-shrink: 0;
     }
-    .bm.ub-match { border-left: 2px solid rgba(99,179,237,.35); }
-    .bm.lb-match { border-left: 2px solid rgba(252,129,74,.35); }
-    .bm.gf-match { border-left: 2px solid rgba(255,215,0,.55); width: 178px; }
+    .bm.ub-match { border-left: 2.5px solid rgba(99,179,237,.4); }
+    .bm.lb-match { border-left: 2.5px solid rgba(252,129,74,.4); }
+    .bm.gf-match {
+      border-left: 2.5px solid rgba(255,215,0,.6);
+      width: 200px;
+      box-shadow: 0 0 24px rgba(255,215,0,.08);
+    }
     .bm-team {
-      display: flex; align-items: center; gap: 5px;
-      padding: 7px 8px; cursor: default;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 10px; cursor: default;
       transition: background .12s, opacity .15s;
-      min-height: 34px;
+      min-height: 42px;
     }
     .bm-team.clickable { cursor: pointer; }
     .bm-team.clickable:hover { background: rgba(255,255,255,.08); }
     .bm-team.winner-row { background: rgba(61,220,132,.1); }
-    .bm-team.loser-row { opacity: .28; }
+    .bm-team.loser-row { opacity: .25; }
     .gf-match .bm-team.winner-row { background: rgba(255,215,0,.1); }
     .bm-divider { height: 1px; background: rgba(255,255,255,.06); }
     .bm-seed {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 9px; font-weight: 700; color: rgba(255,255,255,.22);
-      width: 10px; text-align: right; flex-shrink: 0;
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,.22);
+      width: 12px; text-align: right; flex-shrink: 0;
     }
-    .bm-logo { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+    .bm-logo { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
     .bm-logo-ph {
-      width: 20px; height: 20px; border-radius: 3px;
+      width: 26px; height: 26px; border-radius: 4px;
       background: rgba(255,255,255,.07);
       display: flex; align-items: center; justify-content: center;
-      font-size: 7px; font-weight: 800; color: rgba(255,255,255,.25); flex-shrink: 0;
+      font-size: 8px; font-weight: 800; color: rgba(255,255,255,.25); flex-shrink: 0;
     }
     .bm-code {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 800; color: #fff; flex: 1;
+      font-size: 15px; font-weight: 800; color: #fff; flex: 1;
     }
-    .bm-tbd .bm-code { color: rgba(255,255,255,.22); }
-    .bm-win-mark { font-size: 9px; color: #3ddc84; opacity: 0; flex-shrink: 0; }
+    .bm-tbd .bm-code { color: rgba(255,255,255,.2); }
+    .bm-win-mark { font-size: 10px; color: #3ddc84; opacity: 0; flex-shrink: 0; }
     .bm-team.winner-row .bm-win-mark { opacity: 1; }
     .gf-match .bm-team.winner-row .bm-win-mark { color: gold; }
-    /* winner flash */
     @keyframes bmWinFlash {
-      0%   { background: rgba(61,220,132,.45); }
+      0%   { background: rgba(61,220,132,.5); }
       100% { background: rgba(61,220,132,.1); }
     }
     .bm-team.winner-row.flash { animation: bmWinFlash .45s ease both; }
-    .gf-match .bm-team.winner-row.flash { animation: none; background: rgba(255,215,0,.1); }
-    /* drop label between UB and LB */
-    .ub-drop-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-      color: rgba(252,129,74,.45); text-align: right; padding: 0 14px 4px;
-    }
-    /* GF section */
-    .gf-section { align-items: flex-start; }
-    .gf-slot { padding: 5px 6px; }
+    .gf-match .bm-team.winner-row.flash { animation: none; }
   </style>
   <script src="./storage.js"></script>
   <script src="./auth.js" defer></script>
@@ -1264,14 +1277,21 @@
       if (!container) return;
       container.innerHTML = '';
 
-      /* UB Section */
+      /* de-outer: 왼쪽(UB+LB) + 오른쪽(GF) */
+      var outer = document.createElement('div');
+      outer.className = 'de-outer';
+
+      /* ── 왼쪽: UB + LB ── */
+      var brackets = document.createElement('div');
+      brackets.className = 'de-brackets';
+
+      /* UB */
       var ubSec = document.createElement('div');
       ubSec.className = 'po-section';
       var ubTitle = document.createElement('div');
       ubTitle.className = 'po-section-title';
       ubTitle.innerHTML = '<span style="color:rgba(99,179,237,.65)">▲</span>&nbsp;Upper Bracket';
       ubSec.appendChild(ubTitle);
-
       var ubRounds = document.createElement('div');
       ubRounds.className = 'bracket-rounds';
       ubRounds.appendChild(makeRoundCol('Quarterfinals', [
@@ -1285,22 +1305,19 @@
         {id:7,flex:4,type:'ub'},
       ]));
       ubSec.appendChild(ubRounds);
-
-      /* UB→LB 낙하 표시 */
       var dropLbl = document.createElement('div');
       dropLbl.className = 'ub-drop-label';
-      dropLbl.textContent = '↓ Lower Bracket로 낙하';
+      dropLbl.textContent = '↓ 패자 Lower Bracket 진출';
       ubSec.appendChild(dropLbl);
-      container.appendChild(ubSec);
+      brackets.appendChild(ubSec);
 
-      /* LB Section */
+      /* LB */
       var lbSec = document.createElement('div');
       lbSec.className = 'po-section';
       var lbTitle = document.createElement('div');
       lbTitle.className = 'po-section-title';
       lbTitle.innerHTML = '<span style="color:rgba(252,129,74,.65)">▼</span>&nbsp;Lower Bracket';
       lbSec.appendChild(lbTitle);
-
       var lbRounds = document.createElement('div');
       lbRounds.className = 'bracket-rounds';
       lbRounds.appendChild(makeRoundCol('Round 1', [
@@ -1316,21 +1333,21 @@
         {id:13,flex:2,type:'lb'},
       ]));
       lbSec.appendChild(lbRounds);
-      container.appendChild(lbSec);
+      brackets.appendChild(lbSec);
 
-      /* Grand Final */
-      var gfSec = document.createElement('div');
-      gfSec.className = 'po-section gf-section';
-      var gfTitle = document.createElement('div');
-      gfTitle.className = 'po-section-title gf-title';
-      gfTitle.innerHTML = '🏆&nbsp;Grand Final';
-      gfSec.appendChild(gfTitle);
+      outer.appendChild(brackets);
 
-      var gfSlot = document.createElement('div');
-      gfSlot.className = 'bracket-slot gf-slot';
-      gfSlot.appendChild(makeBmCard(14, 'gf'));
-      gfSec.appendChild(gfSlot);
-      container.appendChild(gfSec);
+      /* ── 오른쪽: Grand Final ── */
+      var gfCol = document.createElement('div');
+      gfCol.className = 'de-gf';
+      var gfLbl = document.createElement('div');
+      gfLbl.className = 'gf-label';
+      gfLbl.innerHTML = '🏆<br>Grand Final';
+      gfCol.appendChild(gfLbl);
+      gfCol.appendChild(makeBmCard(14, 'gf'));
+      outer.appendChild(gfCol);
+
+      container.appendChild(outer);
     }
 
     /* ── 탭 전환 ── */
