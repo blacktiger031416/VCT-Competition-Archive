@@ -895,8 +895,8 @@
     /* ── PO 브래킷 렌더 ── */
     function makePoBmCard(mid, type) {
       var d    = PO_ANS[mid] || {};
-      var isGF = (mid === 14);
-      var scores = isGF ? ['3-0','3-1','3-2'] : ['2-0','2-1'];
+      var isBo5 = (mid === 13 || mid === 14);
+      var scores = isBo5 ? ['3-0','3-1','3-2'] : ['2-0','2-1'];
 
       var card = document.createElement('div');
       card.className = 'bm ' + (type || '') + '-match';
@@ -1109,9 +1109,9 @@
       if (!d.a || !d.b) return;
       if (d.winner === teamCode) { delete d.winner; delete d.score; }
       else {
-        var isGF = (mid === 14);
+        var isBo5 = (mid === 13 || mid === 14);
         d.winner = teamCode;
-        d.score  = d.score || (isGF ? '3-0' : '2-0');
+        d.score  = d.score || (isBo5 ? '3-0' : '2-0');
       }
       savePoAns(); renderPoAns();
     }
