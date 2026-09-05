@@ -132,6 +132,7 @@
       .slots-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
     }
 
+    /* ── 슬롯 ── */
     .slot {
       aspect-ratio: 3/4;
       background: rgba(255,255,255,.03);
@@ -139,30 +140,90 @@
       border-radius: 8px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer; position: relative; overflow: hidden;
-      transition: border-color .18s, background .18s, transform .12s;
+      transition: border-color .2s, background .2s, transform .15s, box-shadow .2s;
       user-select: none;
     }
     .slot::before {
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.5) 100%);
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.55) 100%);
       z-index: 1; pointer-events: none;
     }
-    .slot:hover:not(.filled) {
+    /* 스캔라인 */
+    .slot::after {
+      content: ''; position: absolute; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--slot-color, #ff3c5a), transparent);
+      opacity: 0; z-index: 4; pointer-events: none;
+      top: -10%;
+    }
+    .slot.scanning::after {
+      animation: scanSlot .55s ease-in forwards;
+    }
+    @keyframes scanSlot {
+      0%   { top: -10%; opacity: .9; }
+      80%  { top: 110%; opacity: .7; }
+      100% { top: 110%; opacity: 0; }
+    }
+
+    .slot:hover:not(.filled):not(.removing) {
       border-color: rgba(255,255,255,.22);
       background: rgba(255,255,255,.05);
     }
     .slot.filled {
-      border-color: var(--slot-color, rgba(255,60,90,.5));
+      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 60%, transparent);
       background: color-mix(in srgb, var(--slot-color, #ff3c5a) 8%, transparent);
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 30%, transparent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 15%, transparent),
+                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 25%, transparent);
     }
     .slot.filled:hover {
-      border-color: var(--slot-color, rgba(255,60,90,.8));
-      background: color-mix(in srgb, var(--slot-color, #ff3c5a) 14%, transparent);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px color-mix(in srgb, var(--slot-color, #ff3c5a) 20%, transparent),
-                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 40%, transparent);
+      border-color: color-mix(in srgb, var(--slot-color, #ff3c5a) 90%, transparent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px color-mix(in srgb, var(--slot-color, #ff3c5a) 28%, transparent),
+                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 45%, transparent);
     }
+
+    /* 슬롯 등장 애니메이션 */
+    @keyframes slotAppear {
+      0%   { transform: scale(.7) translateY(12px); opacity: 0;
+             box-shadow: 0 0 60px color-mix(in srgb, var(--slot-color, #ff3c5a) 80%, transparent); }
+      55%  { transform: scale(1.06) translateY(-3px); opacity: 1;
+             box-shadow: 0 0 40px color-mix(in srgb, var(--slot-color, #ff3c5a) 50%, transparent); }
+      78%  { transform: scale(.97) translateY(1px); }
+      100% { transform: scale(1) translateY(0); opacity: 1;
+             box-shadow: 0 0 20px color-mix(in srgb, var(--slot-color, #ff3c5a) 15%, transparent); }
+    }
+    .slot.appear {
+      animation: slotAppear .45s cubic-bezier(.22,1,.36,1) forwards;
+    }
+
+    /* 슬롯 제거 애니메이션 */
+    @keyframes slotRemove {
+      0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
+      30%  { transform: scale(1.05); filter: brightness(1.8); }
+      100% { transform: scale(.5) translateY(10px); opacity: 0; filter: brightness(0); }
+    }
+    .slot.removing {
+      animation: slotRemove .3s ease-in forwards;
+      pointer-events: none;
+    }
+
+    /* 카드 선택 flash */
+    @keyframes cardFlash {
+      0%   { transform: scale(1); box-shadow: none; }
+      25%  { transform: scale(1.04); box-shadow: 0 0 0 2px var(--tc, #ff3c5a), 0 0 20px var(--tc, #ff3c5a); }
+      60%  { transform: scale(.97); box-shadow: 0 0 0 1px var(--tc, #ff3c5a); }
+      100% { transform: scale(1); box-shadow: none; }
+    }
+    .team-card.picking {
+      animation: cardFlash .35s ease forwards;
+      pointer-events: none;
+    }
+
+    /* 빈 슬롯 pulse (선택 대기 중) */
+    @keyframes slotPulse {
+      0%, 100% { border-color: rgba(255,255,255,.1); }
+      50%       { border-color: rgba(255,255,255,.28); }
+    }
+    .slot.pulse { animation: slotPulse .7s ease-in-out 3; }
 
     /* empty slot content */
     .slot-empty-num {
@@ -179,13 +240,34 @@
     .slot-logo {
       width: 52%; aspect-ratio: 1;
       object-fit: contain; z-index: 2;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,.6));
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
     }
+    @keyframes logoIn {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; filter: brightness(3); }
+      55%  { transform: scale(1.18) rotate(3deg); opacity: 1; filter: brightness(1.4); }
+      80%  { transform: scale(.94) rotate(-1deg); filter: brightness(1); }
+      100% { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
+    }
+    .slot.appear .slot-logo { animation: logoIn .5s .05s cubic-bezier(.22,1,.36,1) both; }
+
+    @keyframes codeIn {
+      0%   { opacity: 0; letter-spacing: .4em; }
+      100% { opacity: 1; letter-spacing: .08em; }
+    }
+    .slot.appear .slot-code { animation: codeIn .3s .25s ease both; }
+
+    @keyframes recordIn {
+      0%   { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .slot.appear .slot-record { animation: recordIn .25s .35s ease both; }
+
     .slot-code {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; font-weight: 900; letter-spacing: .08em;
       color: #fff; z-index: 2; margin-top: 6px;
     }
+
     /* 2-0 / 2-1 toggle */
     .slot-record {
       z-index: 2; margin-top: 4px;
@@ -203,16 +285,35 @@
 
     /* remove button */
     .slot-remove {
-      position: absolute; top: 5px; right: 5px; z-index: 3;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: rgba(255,255,255,.1); border: none;
+      position: absolute; top: 5px; right: 5px; z-index: 5;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.15);
       color: rgba(255,255,255,.5); font-size: 10px; font-weight: 700;
       cursor: pointer; display: none; align-items: center; justify-content: center;
-      transition: background .13s;
-      line-height: 1;
+      transition: background .13s, border-color .13s, color .13s;
+      line-height: 1; backdrop-filter: blur(4px);
     }
     .slot.filled .slot-remove { display: flex; }
-    .slot-remove:hover { background: rgba(255,60,90,.5); color: #fff; }
+    .slot-remove:hover { background: rgba(255,60,90,.6); border-color: rgba(255,60,90,.8); color: #fff; }
+
+    /* 카운터 팝 */
+    @keyframes countPop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.5); color: #ffc840; }
+      65%  { transform: scale(.9); }
+      100% { transform: scale(1); }
+    }
+    #sel-count.pop { animation: countPop .35s ease both; }
+
+    /* 클릭 리플 */
+    .ripple {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: scale(0); opacity: .7;
+      animation: rippleOut .5s ease-out forwards;
+    }
+    @keyframes rippleOut {
+      to { transform: scale(1); opacity: 0; }
+    }
 
     /* ── Team Pool ── */
     .pool-area {}
@@ -391,9 +492,33 @@
 
     /* state: slots[0..7] = null | { code, name, logo, record:'2-0'|'2-1' } */
     var slots = new Array(8).fill(null);
+    var lastFilledIdx = -1;
+
+    /* ── 리플 효과 ── */
+    function spawnRipple(x, y, color) {
+      var rip = document.createElement('div');
+      rip.className = 'ripple';
+      var sz = 120;
+      rip.style.cssText = [
+        'width:'+sz+'px','height:'+sz+'px',
+        'left:'+(x-sz/2)+'px','top:'+(y-sz/2)+'px',
+        'background:'+color,'border:2px solid '+color
+      ].join(';');
+      document.body.appendChild(rip);
+      setTimeout(function(){ rip.remove(); }, 520);
+    }
+
+    /* ── 카운터 팝 ── */
+    function popCount() {
+      var el = document.getElementById('sel-count');
+      el.classList.remove('pop');
+      void el.offsetWidth; // reflow
+      el.classList.add('pop');
+      el.addEventListener('animationend', function(){ el.classList.remove('pop'); }, { once: true });
+    }
 
     /* ── 슬롯 렌더 ── */
-    function renderSlots() {
+    function renderSlots(animIdx) {
       var grid = document.getElementById('slots-grid');
       grid.innerHTML = '';
       var filled = slots.filter(Boolean).length;
@@ -403,6 +528,7 @@
         var s = slots[i];
         var el = document.createElement('div');
         el.className = 'slot' + (s ? ' filled' : '');
+        if (s && i === animIdx) el.classList.add('appear');
         el.dataset.idx = i;
 
         if (s) {
@@ -454,6 +580,21 @@
           el.appendChild(line);
         }
         grid.appendChild(el);
+
+        /* appear 슬롯: 스캔라인 타이밍 맞춰 실행 */
+        if (s && i === animIdx) {
+          (function(slotEl) {
+            setTimeout(function() {
+              slotEl.classList.add('scanning');
+              slotEl.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'scanSlot') {
+                  slotEl.classList.remove('scanning');
+                  slotEl.removeEventListener('animationend', handler);
+                }
+              });
+            }, 160);
+          })(el);
+        }
       }
     }
 
@@ -530,7 +671,9 @@
           card.appendChild(check);
 
           if (!isSelected && !isDisabled) {
-            card.addEventListener('click', function(){ onTeamClick(team); });
+            card.addEventListener('click', (function(t) {
+              return function(ev) { onTeamClick(t, ev); };
+            })(team));
           }
           teamsEl.appendChild(card);
         });
@@ -540,22 +683,61 @@
     }
 
     /* ── 이벤트 핸들러 ── */
-    function onTeamClick(team) {
+    function onTeamClick(team, ev) {
       var emptyIdx = slots.indexOf(null);
       if (emptyIdx === -1) return;
-      slots[emptyIdx] = { code: team.code, name: team.name, logo: team.logo, record: '2-0' };
-      renderSlots();
-      renderPool();
+
+      /* 리플 */
+      if (ev) spawnRipple(ev.clientX, ev.clientY, team.color || '#fff');
+
+      /* 카드 picking flash */
+      if (ev && ev.currentTarget) {
+        ev.currentTarget.classList.add('picking');
+      }
+
+      /* 약간 딜레이 후 슬롯 채우기 */
+      setTimeout(function() {
+        slots[emptyIdx] = {
+          code: team.code, name: team.name, logo: team.logo,
+          color: team.color, white: team.white, record: '2-0'
+        };
+        renderSlots(emptyIdx);
+        renderPool();
+        popCount();
+
+        /* 대상 슬롯 pulse */
+        var grid = document.getElementById('slots-grid');
+        var slotEl = grid.children[emptyIdx];
+        if (slotEl) {
+          slotEl.classList.add('pulse');
+          slotEl.addEventListener('animationend', function() {
+            slotEl.classList.remove('pulse');
+          }, { once: true });
+        }
+      }, 130);
     }
 
     function onRemove(e) {
       e.stopPropagation();
       var idx = parseInt(e.currentTarget.dataset.idx);
-      slots[idx] = null;
-      /* 앞으로 당기기 */
-      slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
-      renderSlots();
-      renderPool();
+      /* 해당 슬롯 removing 애니메이션 */
+      var grid = document.getElementById('slots-grid');
+      var slotEl = grid.children[idx];
+      if (slotEl) {
+        slotEl.classList.add('removing');
+        setTimeout(function() {
+          slots[idx] = null;
+          slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
+          renderSlots(-1);
+          renderPool();
+          popCount();
+        }, 290);
+      } else {
+        slots[idx] = null;
+        slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
+        renderSlots(-1);
+        renderPool();
+      }
     }
 
     function onRecordToggle(e) {
@@ -564,7 +746,7 @@
       var rec = e.currentTarget.dataset.rec;
       if (slots[idx]) {
         slots[idx].record = rec;
-        renderSlots();
+        renderSlots(-1);
       }
     }
 
@@ -583,7 +765,7 @@
       var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
       if (isAdmin) {
         document.getElementById('main-content').style.display = 'block';
-        renderSlots();
+        renderSlots(-1);
         renderPool();
       } else {
         document.getElementById('coming-soon').style.display = 'block';
