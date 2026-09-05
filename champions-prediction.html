@@ -6,26 +6,29 @@
   <title>챔피언스 승부 예측 · VCT Archive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,900;1,900&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #ff3c5a;
+      --accent2: #ffc840;
+      --bg: #060a0e;
+      --bg-card: #0d1318;
+      --bg-card2: #121a22;
+    }
 
     body {
       font-family: "Noto Sans KR", system-ui, sans-serif;
       color: #f0f0f0;
-      background:
-        linear-gradient(130deg, rgba(255,30,60,0.08), transparent 38%),
-        linear-gradient(250deg, rgba(255,160,0,0.07), transparent 34%),
-        #080808;
+      background: var(--bg);
       min-height: 100vh;
     }
     body::before {
       position: fixed; inset: 0; z-index: -1; pointer-events: none; content: "";
-      background-image:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), transparent 80%);
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 0%, rgba(255,40,70,.07), transparent),
+        radial-gradient(ellipse 50% 60% at 85% 100%, rgba(255,200,60,.05), transparent);
     }
 
     /* ── Header ── */
@@ -33,62 +36,253 @@
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; gap: 10px;
       padding: 0 24px; height: 52px;
-      background: rgba(8,8,8,.88);
+      background: rgba(6,10,14,.9);
       backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.07);
     }
     .site-header .auth-header-btn { margin-left: auto !important; }
-    .back-link { color:rgba(255,255,255,.38); font-size:13px; font-weight:500; text-decoration:none; transition:color .15s; flex-shrink:0; }
+    .back-link { color:rgba(255,255,255,.35); font-size:13px; font-weight:500; text-decoration:none; transition:color .15s; flex-shrink:0; }
     .back-link:hover { color:rgba(255,255,255,.8); }
-    .header-sep { color:rgba(255,255,255,.13); font-size:14px; flex-shrink:0; }
-    .header-title { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:900; color:#ff3c5a; letter-spacing:.06em; text-transform:uppercase; flex-shrink:0; }
+    .header-sep { color:rgba(255,255,255,.12); font-size:14px; flex-shrink:0; }
+    .header-title { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:900; color:var(--accent); letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
 
-    /* ── Hero ── */
-    .hero {
-      text-align: center;
-      padding: 72px 20px 56px;
+    /* ── Coming Soon (non-admin) ── */
+    #coming-soon { display:none; }
+    .cs-wrap {
+      max-width: 520px; margin: 80px auto 0;
+      padding: 0 20px; text-align: center;
     }
-    .hero-eyebrow {
+    .cs-icon { font-size: 56px; margin-bottom: 20px; }
+    .cs-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
-      color: #ff3c5a; margin-bottom: 14px;
-    }
-    .hero-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: clamp(42px, 8vw, 86px); font-weight: 900;
+      font-size: clamp(36px, 7vw, 72px); font-weight: 900;
       text-transform: uppercase; letter-spacing: .04em; line-height: .95;
-      color: #fff; margin-bottom: 20px;
+      color: #fff; margin-bottom: 18px;
     }
-    .hero-title span { color: #ff3c5a; }
-    .hero-desc {
-      font-size: 14px; line-height: 1.75; color: rgba(255,255,255,.42);
-      max-width: 420px; margin: 0 auto; word-break: keep-all;
+    .cs-title em { color: var(--accent); font-style: normal; }
+    .cs-sub { font-size: 14px; color: rgba(255,255,255,.38); line-height: 1.75; word-break: keep-all; }
+    .cs-card {
+      margin-top: 36px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,60,90,.15);
+      border-radius: 12px; padding: 36px 28px;
+    }
+    .cs-card-icon { font-size: 40px; margin-bottom: 12px; }
+    .cs-card-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:#fff; margin-bottom:8px; }
+    .cs-card-sub { font-size:13px; color:rgba(255,255,255,.35); line-height:1.7; word-break:keep-all; }
+
+    /* ── Main (admin) ── */
+    #main-content { display:none; }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 0 32px; background: rgba(6,10,14,.7);
+      position: sticky; top: 52px; z-index: 90;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .tab-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.35); background: none; border: none;
+      padding: 0 20px; height: 44px; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,.7); }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Group Stage layout ── */
+    .gs-wrap { max-width: 1100px; margin: 0 auto; padding: 36px 24px 96px; }
+
+    .gs-section-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(255,255,255,.3); margin-bottom: 14px;
     }
 
-    /* ── Coming soon ── */
-    .coming-wrap {
-      max-width: 560px; margin: 0 auto 96px;
-      display: flex; flex-direction: column; align-items: center; gap: 24px;
-      padding: 0 20px;
+    /* ── 8 Selection Slots ── */
+    .slots-area { margin-bottom: 48px; }
+    .slots-header {
+      display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px;
     }
-    .coming-card {
-      width: 100%;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,60,90,.18);
-      border-radius: 12px;
-      padding: 40px 32px;
-      text-align: center;
-    }
-    .coming-icon { font-size: 48px; margin-bottom: 16px; }
-    .coming-title {
+    .slots-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
-      color: #fff; margin-bottom: 10px;
+      font-size: 20px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+      color: #fff;
     }
-    .coming-sub {
-      font-size: 13px; color: rgba(255,255,255,.38); line-height: 1.7; word-break: keep-all;
+    .slots-count {
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,.3);
+    }
+    .slots-count span { color: var(--accent2); }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 800px) {
+      .slots-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .slots-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    }
+
+    .slot {
+      aspect-ratio: 3/4;
+      background: rgba(255,255,255,.03);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: border-color .18s, background .18s, transform .12s;
+      user-select: none;
+    }
+    .slot::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.5) 100%);
+      z-index: 1; pointer-events: none;
+    }
+    .slot:hover:not(.filled) {
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.05);
+    }
+    .slot.filled {
+      border-color: rgba(255,60,90,.5);
+      background: rgba(255,40,60,.07);
+    }
+    .slot.filled:hover {
+      border-color: rgba(255,60,90,.8);
+      background: rgba(255,40,60,.12);
+      transform: translateY(-2px);
+    }
+
+    /* empty slot content */
+    .slot-empty-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px; font-weight: 900; color: rgba(255,255,255,.08);
+      z-index: 2;
+    }
+    .slot-empty-line {
+      font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: rgba(255,255,255,.12); z-index: 2; margin-top: 4px;
+    }
+
+    /* filled slot content */
+    .slot-logo {
+      width: 52%; aspect-ratio: 1;
+      object-fit: contain; z-index: 2;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,.6));
+    }
+    .slot-code {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 900; letter-spacing: .08em;
+      color: #fff; z-index: 2; margin-top: 6px;
+    }
+    /* 2-0 / 2-1 toggle */
+    .slot-record {
+      z-index: 2; margin-top: 4px;
+      display: flex; gap: 2px;
+    }
+    .slot-record-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.4);
+      cursor: pointer; transition: all .14s; line-height: 1.4;
+    }
+    .slot-record-btn.active-20 { background: rgba(61,220,132,.2); border-color: rgba(61,220,132,.45); color: #3ddc84; }
+    .slot-record-btn.active-21 { background: rgba(255,200,60,.18); border-color: rgba(255,200,60,.4); color: #ffc840; }
+
+    /* remove button */
+    .slot-remove {
+      position: absolute; top: 5px; right: 5px; z-index: 3;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: rgba(255,255,255,.1); border: none;
+      color: rgba(255,255,255,.5); font-size: 10px; font-weight: 700;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
+      transition: background .13s;
+      line-height: 1;
+    }
+    .slot.filled .slot-remove { display: flex; }
+    .slot-remove:hover { background: rgba(255,60,90,.5); color: #fff; }
+
+    /* ── Team Pool ── */
+    .pool-area {}
+    .regions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 700px) { .regions-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 400px) { .regions-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
+    .region-col {}
+    .region-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+      color: rgba(255,255,255,.28); margin-bottom: 10px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .region-teams { display: flex; flex-direction: column; gap: 6px; }
+
+    .team-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, opacity .15s, transform .1s;
+      user-select: none;
+    }
+    .team-card:hover:not(.selected):not(.disabled) {
+      border-color: rgba(255,60,90,.35);
+      background: var(--bg-card2);
+      transform: translateX(2px);
+    }
+    .team-card.selected {
+      opacity: .38;
+      cursor: default;
+      border-color: rgba(255,255,255,.04);
+    }
+    .team-card.disabled {
+      opacity: .3;
+      cursor: default;
+    }
+    .team-card-logo {
+      width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.4));
+    }
+    .team-card-info { flex: 1; min-width: 0; }
+    .team-card-code {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 900; letter-spacing: .06em;
+      color: #fff; line-height: 1;
+    }
+    .team-card-name {
+      font-size: 10px; color: rgba(255,255,255,.3); margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .team-card-check {
+      font-size: 14px; flex-shrink: 0;
+      opacity: 0; transition: opacity .15s;
+    }
+    .team-card.selected .team-card-check { opacity: 1; }
+
+    /* ── Placeholder (PlayOff tab) ── */
+    .po-placeholder {
+      text-align: center; padding: 96px 20px;
+      color: rgba(255,255,255,.25);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
     }
   </style>
+  <script src="./storage.js"></script>
   <script src="./auth.js" defer></script>
 </head>
 <body>
@@ -98,18 +292,283 @@
     <span class="header-title">Champions 승부 예측</span>
   </header>
 
-  <div class="hero">
-    <p class="hero-eyebrow">VCT Champions 2026</p>
-    <h1 class="hero-title">챔피언스<br><span>승부 예측</span></h1>
-    <p class="hero-desc">VCT Champions 2026의 경기 결과를 예측하고 코인을 획득하세요. 페이지 준비 중입니다.</p>
-  </div>
-
-  <div class="coming-wrap">
-    <div class="coming-card">
-      <div class="coming-icon">🏆</div>
-      <div class="coming-title">Coming Soon</div>
-      <div class="coming-sub">챔피언스 승부 예측 페이지가 곧 오픈됩니다.<br>조금만 기다려주세요!</div>
+  <!-- Non-admin: Coming Soon -->
+  <div id="coming-soon">
+    <div class="cs-wrap">
+      <div class="cs-icon">🏆</div>
+      <h1 class="cs-title">챔피언스<br><em>승부 예측</em></h1>
+      <p class="cs-sub">VCT Champions 2026 승부 예측 페이지가 곧 오픈됩니다.<br>조금만 기다려주세요!</p>
+      <div class="cs-card">
+        <div class="cs-card-icon">🔒</div>
+        <div class="cs-card-title">준비 중</div>
+        <div class="cs-card-sub">현재 관리자만 미리 볼 수 있습니다.<br>오픈 일정이 확정되면 공지됩니다.</div>
+      </div>
     </div>
   </div>
+
+  <!-- Admin: Main Content -->
+  <div id="main-content">
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="gs">그룹 스테이지 예측</button>
+      <button class="tab-btn" data-tab="po">플레이오프 예측</button>
+    </nav>
+
+    <!-- Group Stage Tab -->
+    <div class="tab-panel active" id="tab-gs">
+      <div class="gs-wrap">
+
+        <!-- 8 Slots -->
+        <div class="slots-area">
+          <div class="slots-header">
+            <span class="slots-title">플레이오프 진출팀 예측</span>
+            <span class="slots-count"><span id="sel-count">0</span> / 8</span>
+          </div>
+          <div class="slots-grid" id="slots-grid">
+            <!-- JS로 생성 -->
+          </div>
+        </div>
+
+        <!-- Team Pool -->
+        <div class="pool-area">
+          <div class="gs-section-label">팀 선택 — 총 16개 팀</div>
+          <div class="regions-grid" id="regions-grid">
+            <!-- JS로 생성 -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Playoff Tab -->
+    <div class="tab-panel" id="tab-po">
+      <div class="po-placeholder">플레이오프 예측 — Coming Soon</div>
+    </div>
+  </div>
+
+  <script>
+    /* ── 팀 데이터 (추후 업데이트 가능) ── */
+    var REGIONS = [
+      {
+        label: 'Pacific',
+        teams: [
+          { code: 'T1',   name: 'T1',             logo: './assets/teams/T1.png'   },
+          { code: 'GEN',  name: 'Gen.G Esports',  logo: './assets/teams/GEN.png'  },
+          { code: 'DRX',  name: 'DRX',            logo: './assets/teams/DRX.png'  },
+          { code: 'TLN',  name: 'Talon Esports',  logo: './assets/teams/TLN.png'  },
+        ]
+      },
+      {
+        label: 'Americas',
+        teams: [
+          { code: 'SEN',  name: 'Sentinels',      logo: './assets/teams/SEN.png'  },
+          { code: 'NRG',  name: 'NRG Esports',    logo: './assets/teams/NRG.png'  },
+          { code: 'LEV',  name: 'Leviatán',        logo: './assets/teams/LEV.png'  },
+          { code: '100T', name: '100 Thieves',     logo: './assets/teams/100T.png' },
+        ]
+      },
+      {
+        label: 'EMEA',
+        teams: [
+          { code: 'FNC',  name: 'Fnatic',          logo: './assets/teams/FNC.png'  },
+          { code: 'TH',   name: 'Team Heretics',   logo: './assets/teams/TH.png'   },
+          { code: 'NV',   name: 'NAVI',            logo: './assets/teams/NV.png'   },
+          { code: 'KOI',  name: 'KOI',             logo: './assets/teams/KOI.png'  },
+        ]
+      },
+      {
+        label: 'CN',
+        teams: [
+          { code: 'EDG',  name: 'EDward Gaming',  logo: './assets/teams/EDG.png'  },
+          { code: 'FPX',  name: 'FunPlus Phoenix',logo: './assets/teams/FPX.png'  },
+          { code: 'BLG',  name: 'Bilibili Gaming',logo: './assets/teams/BLG.png'  },
+          { code: 'NIP',  name: 'NIP',            logo: './assets/teams/NIP.png'  },
+        ]
+      },
+    ];
+
+    /* state: slots[0..7] = null | { code, name, logo, record:'2-0'|'2-1' } */
+    var slots = new Array(8).fill(null);
+
+    /* ── 슬롯 렌더 ── */
+    function renderSlots() {
+      var grid = document.getElementById('slots-grid');
+      grid.innerHTML = '';
+      var filled = slots.filter(Boolean).length;
+      document.getElementById('sel-count').textContent = filled;
+
+      for (var i = 0; i < 8; i++) {
+        var s = slots[i];
+        var el = document.createElement('div');
+        el.className = 'slot' + (s ? ' filled' : '');
+        el.dataset.idx = i;
+
+        if (s) {
+          /* remove btn */
+          var rem = document.createElement('button');
+          rem.className = 'slot-remove';
+          rem.textContent = '✕';
+          rem.dataset.idx = i;
+          rem.addEventListener('click', onRemove);
+          el.appendChild(rem);
+
+          /* logo */
+          var img = document.createElement('img');
+          img.className = 'slot-logo';
+          img.src = s.logo; img.alt = s.code;
+          img.onerror = function(){ this.style.display='none'; };
+          el.appendChild(img);
+
+          /* code */
+          var codeEl = document.createElement('div');
+          codeEl.className = 'slot-code';
+          codeEl.textContent = s.code;
+          el.appendChild(codeEl);
+
+          /* record toggle */
+          var rec = document.createElement('div');
+          rec.className = 'slot-record';
+          ['2-0','2-1'].forEach(function(r) {
+            var btn = document.createElement('button');
+            btn.className = 'slot-record-btn' + (s.record === r ? (r==='2-0' ? ' active-20' : ' active-21') : '');
+            btn.textContent = r;
+            btn.dataset.idx = i;
+            btn.dataset.rec = r;
+            btn.addEventListener('click', onRecordToggle);
+            rec.appendChild(btn);
+          });
+          el.appendChild(rec);
+        } else {
+          var num = document.createElement('div');
+          num.className = 'slot-empty-num';
+          num.textContent = i + 1;
+          el.appendChild(num);
+          var line = document.createElement('div');
+          line.className = 'slot-empty-line';
+          line.textContent = 'Pick';
+          el.appendChild(line);
+        }
+        grid.appendChild(el);
+      }
+    }
+
+    /* ── 팀 풀 렌더 ── */
+    function renderPool() {
+      var selectedCodes = slots.filter(Boolean).map(function(s){ return s.code; });
+      var grid = document.getElementById('regions-grid');
+      grid.innerHTML = '';
+      var allFull = selectedCodes.length >= 8;
+
+      REGIONS.forEach(function(region) {
+        var col = document.createElement('div');
+        col.className = 'region-col';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'region-label';
+        lbl.textContent = region.label;
+        col.appendChild(lbl);
+
+        var teamsEl = document.createElement('div');
+        teamsEl.className = 'region-teams';
+
+        region.teams.forEach(function(team) {
+          var isSelected = selectedCodes.indexOf(team.code) !== -1;
+          var isDisabled = !isSelected && allFull;
+
+          var card = document.createElement('div');
+          card.className = 'team-card' + (isSelected ? ' selected' : '') + (isDisabled ? ' disabled' : '');
+          card.dataset.code = team.code;
+
+          var logo = document.createElement('img');
+          logo.className = 'team-card-logo';
+          logo.src = team.logo; logo.alt = team.code;
+          logo.onerror = function(){ this.style.display='none'; };
+          card.appendChild(logo);
+
+          var info = document.createElement('div');
+          info.className = 'team-card-info';
+          var codeEl = document.createElement('div');
+          codeEl.className = 'team-card-code';
+          codeEl.textContent = team.code;
+          var nameEl = document.createElement('div');
+          nameEl.className = 'team-card-name';
+          nameEl.textContent = team.name;
+          info.appendChild(codeEl);
+          info.appendChild(nameEl);
+          card.appendChild(info);
+
+          var check = document.createElement('div');
+          check.className = 'team-card-check';
+          check.textContent = '✓';
+          card.appendChild(check);
+
+          if (!isSelected && !isDisabled) {
+            card.addEventListener('click', function(){ onTeamClick(team); });
+          }
+          teamsEl.appendChild(card);
+        });
+        col.appendChild(teamsEl);
+        grid.appendChild(col);
+      });
+    }
+
+    /* ── 이벤트 핸들러 ── */
+    function onTeamClick(team) {
+      var emptyIdx = slots.indexOf(null);
+      if (emptyIdx === -1) return;
+      slots[emptyIdx] = { code: team.code, name: team.name, logo: team.logo, record: '2-0' };
+      renderSlots();
+      renderPool();
+    }
+
+    function onRemove(e) {
+      e.stopPropagation();
+      var idx = parseInt(e.currentTarget.dataset.idx);
+      slots[idx] = null;
+      /* 앞으로 당기기 */
+      slots = slots.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
+      renderSlots();
+      renderPool();
+    }
+
+    function onRecordToggle(e) {
+      e.stopPropagation();
+      var idx = parseInt(e.currentTarget.dataset.idx);
+      var rec = e.currentTarget.dataset.rec;
+      if (slots[idx]) {
+        slots[idx].record = rec;
+        renderSlots();
+      }
+    }
+
+    /* ── 탭 전환 ── */
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    /* ── Auth gate ── */
+    function initPage() {
+      var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
+      if (isAdmin) {
+        document.getElementById('main-content').style.display = 'block';
+        renderSlots();
+        renderPool();
+      } else {
+        document.getElementById('coming-soon').style.display = 'block';
+      }
+    }
+
+    (window.storageReady || Promise.resolve()).then(function() {
+      if (typeof window.vctIsAdmin === 'function') {
+        initPage();
+      } else {
+        window.addEventListener('load', initPage);
+      }
+    });
+  </script>
 </body>
 </html>
