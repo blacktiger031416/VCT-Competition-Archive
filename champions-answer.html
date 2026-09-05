@@ -493,17 +493,11 @@
         </div>
       </div>
 
-      <div class="section" id="scoring-section">
-        <div class="section-head">
-          <span class="section-label">예측 채점 결과</span>
-        </div>
-        <div id="score-area"></div>
-      </div>
     </div>
 
     <!-- ─ 플레이오프 탭 ─ -->
     <div class="inner-tab-panel" id="itab-po">
-      <div class="page-subtitle" style="margin-bottom:16px">실제 대진을 입력하고 결과를 확정하세요 &mdash; 예측과 자동 채점됩니다</div>
+      <div class="page-subtitle" style="margin-bottom:16px">실제 대진을 입력하고 결과를 확정하세요</div>
       <div class="po-wrap">
         <div id="po-ans-bracket"></div>
       </div>
@@ -514,13 +508,6 @@
           팀 선택 &mdash; <span id="po-picker-slot-label"></span>
         </div>
         <div class="po-picker-grid" id="po-picker-grid"></div>
-      </div>
-      <!-- PO 채점 -->
-      <div class="po-score-wrap">
-        <div class="section-head" style="margin-top:24px">
-          <span class="section-label">플레이오프 예측 채점</span>
-        </div>
-        <div id="po-score-area"></div>
       </div>
     </div>
   </div>
@@ -575,35 +562,6 @@
         if (Array.isArray(data)) answers = data.map(function(d){ return d || null; });
       } catch(e) {}
     }
-    function loadPred() {
-      try {
-        var raw = localStorage.getItem('vct_gs_pred');
-        if (!raw) return null;
-        var data = JSON.parse(raw);
-        return Array.isArray(data) ? data.map(function(d){ return d || null; }) : null;
-      } catch(e) { return null; }
-    }
-
-    /* ── 채점 ── */
-    /* 점수 규칙: 팀 맞춤 +2점, 기록(2-0/2-1)도 맞추면 +1점 추가 (팀당 최대 3점) */
-    function computeScore(pred, ans) {
-      var confirmedAns = ans.filter(Boolean);
-      var total = 0, maxPossible = confirmedAns.length * 3;
-      var breakdown = confirmedAns.map(function(a) {
-        var matched = null;
-        for (var i = 0; i < pred.length; i++) {
-          if (pred[i] && pred[i].code === a.code) { matched = pred[i]; break; }
-        }
-        if (!matched) return { ans: a, pred: null, pts: 0 };
-        var pts = 2;
-        var recBonus = (matched.record === a.record);
-        if (recBonus) pts += 1;
-        total += pts;
-        return { ans: a, pred: matched, pts: pts, recBonus: recBonus };
-      });
-      return { total: total, maxPossible: maxPossible, breakdown: breakdown };
-    }
-
     /* ── 정답 슬롯 렌더 ── */
     function renderAnswers() {
       var grid = document.getElementById('ans-grid');
@@ -667,7 +625,6 @@
         grid.appendChild(el);
       }
 
-      renderScoring();
     }
 
     /* ── 팀 풀 렌더 (Admin) ── */
@@ -717,117 +674,6 @@
         col.appendChild(teamsEl);
         container.appendChild(col);
       });
-    }
-
-    /* ── 채점 렌더 ── */
-    function renderScoring() {
-      var area = document.getElementById('score-area');
-      area.innerHTML = '';
-
-      var pred = loadPred();
-      var confirmedAns = answers.filter(Boolean);
-
-      if (!pred || pred.filter(Boolean).length === 0) {
-        var notice = document.createElement('div');
-        notice.className = 'no-pred';
-        notice.textContent = confirmedAns.length === 0
-          ? '정답이 아직 입력되지 않았습니다.'
-          : '예측 데이터가 없습니다. 예측 페이지에서 팀을 선택해주세요.';
-        area.appendChild(notice);
-        return;
-      }
-
-      if (confirmedAns.length === 0) {
-        var notice2 = document.createElement('div');
-        notice2.className = 'no-pred';
-        notice2.textContent = '정답을 입력하면 실시간으로 채점됩니다.';
-        area.appendChild(notice2);
-        return;
-      }
-
-      var result = computeScore(pred, answers);
-
-      /* 총점 헤더 */
-      var wrap = document.createElement('div');
-      wrap.className = 'score-wrap';
-
-      var summary = document.createElement('div');
-      summary.className = 'score-summary';
-
-      var ptsEl = document.createElement('span');
-      ptsEl.className = 'score-pts';
-      ptsEl.textContent = result.total;
-      summary.appendChild(ptsEl);
-
-      var maxEl = document.createElement('span');
-      maxEl.className = 'score-max';
-      maxEl.innerHTML = '/ ' + result.maxPossible + '<span class="score-label">(확정 ' + confirmedAns.length + '/8팀 기준)</span>';
-      summary.appendChild(maxEl);
-      wrap.appendChild(summary);
-
-      /* 진행 바 */
-      var track = document.createElement('div');
-      track.className = 'score-bar-track';
-      var fill = document.createElement('div');
-      fill.className = 'score-bar-fill';
-      var pct = result.maxPossible > 0 ? Math.round(result.total / result.maxPossible * 100) : 0;
-      fill.style.width = '0%';
-      track.appendChild(fill);
-      wrap.appendChild(track);
-      setTimeout(function(){ fill.style.width = pct + '%'; }, 80);
-
-      /* 항목별 */
-      var items = document.createElement('div');
-      items.className = 'score-items';
-      result.breakdown.forEach(function(row) {
-        var item = document.createElement('div');
-        var cls = 'score-item';
-        if (row.pts === 3) cls += ' hit';
-        else if (row.pts === 2) cls += ' partial';
-        else cls += ' miss';
-        item.className = cls;
-
-        /* 로고 */
-        if (row.ans.logo) {
-          var img = document.createElement('img');
-          img.className = 'score-item-logo'; img.src = row.ans.logo; img.alt = row.ans.code;
-          if (row.ans.white) img.style.filter = 'brightness(0) invert(1)';
-          img.onerror = function(){ this.style.display='none'; };
-          item.appendChild(img);
-        } else {
-          var ph = document.createElement('div'); ph.className = 'score-item-logo-ph'; ph.textContent = row.ans.code.slice(0,2);
-          item.appendChild(ph);
-        }
-
-        /* 코드 */
-        var code = document.createElement('span'); code.className = 'score-item-code'; code.textContent = row.ans.code;
-        item.appendChild(code);
-
-        /* 정답 기록 */
-        var recEl = document.createElement('span'); recEl.className = 'score-item-ans-rec'; recEl.textContent = row.ans.record;
-        item.appendChild(recEl);
-
-        /* 배지 */
-        var badge = document.createElement('span'); badge.className = 'score-item-badge';
-        if (!row.pred) {
-          badge.textContent = '미예측'; badge.className += ' badge-miss';
-        } else if (row.pts === 3) {
-          badge.textContent = '팀+기록 ✓'; badge.className += ' badge-hit';
-        } else {
-          badge.textContent = '팀만 ✓'; badge.className += ' badge-rec';
-        }
-        item.appendChild(badge);
-
-        /* 점수 */
-        var pts = document.createElement('span'); pts.className = 'score-item-pts';
-        pts.textContent = '+' + row.pts;
-        if (row.pts === 0) pts.style.color = 'rgba(255,255,255,.15)';
-        item.appendChild(pts);
-
-        items.appendChild(item);
-      });
-      wrap.appendChild(items);
-      area.appendChild(wrap);
     }
 
     /* ── 이벤트 핸들러 ── */
@@ -882,13 +728,6 @@
         PO_ANS = raw ? (JSON.parse(raw) || {}) : {};
       } catch(e) { PO_ANS = {}; }
     }
-    function loadPoPred() {
-      try {
-        var raw = localStorage.getItem('vct_po_pred');
-        return raw ? (JSON.parse(raw) || {}) : {};
-      } catch(e) { return {}; }
-    }
-
     /* ── PO 브래킷 렌더 ── */
     function makePoBmCard(mid, type) {
       var d    = PO_ANS[mid] || {};
@@ -1049,8 +888,6 @@
       gfCol.appendChild(makePoBmCard(14, 'gf'));
       outer.appendChild(gfCol);
       container.appendChild(outer);
-
-      renderPoScore();
     }
 
     /* ── Admin: 팀 선택 ── */
@@ -1134,100 +971,6 @@
         var n = loserRow.querySelector('.bm-score-num');
         if (n) n.textContent = nextL;
       }
-    }
-
-    /* ── PO 채점 ── */
-    var PO_MATCH_LABELS = {
-      1:'UB QF 1', 2:'UB QF 2', 3:'UB QF 3', 4:'UB QF 4',
-      5:'UB SF 1', 6:'UB SF 2', 7:'UB Final',
-      8:'LB R1 1', 9:'LB R1 2', 10:'LB R2 1', 11:'LB R2 2',
-      12:'LB SF', 13:'LB Final', 14:'Grand Final',
-    };
-
-    function renderPoScore() {
-      var area = document.getElementById('po-score-area');
-      if (!area) return;
-      area.innerHTML = '';
-      var pred = loadPoPred();
-      var results = Object.keys(PO_ANS).filter(function(mid){ return PO_ANS[mid].winner; });
-      if (results.length === 0) {
-        var n = document.createElement('div'); n.className = 'po-no-matchup';
-        n.textContent = '결과가 확정된 경기가 없습니다.';
-        area.appendChild(n); return;
-      }
-      var total = 0, maxPossible = results.length * 3;
-      var breakdown = [];
-      results.forEach(function(midStr) {
-        var mid = parseInt(midStr);
-        var d = PO_ANS[mid];
-        var p = pred[mid] || null;
-        var pts = 0;
-        var winnerTeam = (d.a && d.a.code === d.winner) ? d.a : (d.b && d.b.code === d.winner) ? d.b : null;
-        if (p && p.winner === d.winner) {
-          pts = 2;
-          if (p.score === d.score) pts = 3;
-        }
-        total += pts;
-        breakdown.push({ mid:mid, d:d, p:p, winnerTeam:winnerTeam, pts:pts });
-      });
-
-      /* 총점 */
-      var wrap = document.createElement('div'); wrap.className = 'score-wrap';
-      var summary = document.createElement('div'); summary.className = 'score-summary';
-      var ptsEl = document.createElement('span'); ptsEl.className = 'score-pts'; ptsEl.textContent = total; summary.appendChild(ptsEl);
-      var maxEl = document.createElement('span'); maxEl.className = 'score-max';
-      maxEl.innerHTML = '/ ' + maxPossible + '<span class="score-label">(확정 ' + results.length + '/14경기 기준)</span>';
-      summary.appendChild(maxEl); wrap.appendChild(summary);
-      var track = document.createElement('div'); track.className = 'score-bar-track';
-      var fill = document.createElement('div'); fill.className = 'score-bar-fill';
-      var pct = maxPossible > 0 ? Math.round(total / maxPossible * 100) : 0;
-      fill.style.width = '0%'; track.appendChild(fill); wrap.appendChild(track);
-      setTimeout(function(){ fill.style.width = pct + '%'; }, 80);
-
-      /* 항목별 */
-      var items = document.createElement('div'); items.className = 'po-match-score-list';
-      breakdown.sort(function(a,b){ return a.mid - b.mid; }).forEach(function(row) {
-        var item = document.createElement('div');
-        var cls = 'po-match-score-item';
-        if (row.pts === 3) cls += ' hit';
-        else if (row.pts === 2) cls += ' partial';
-        else cls += ' miss';
-        item.className = cls;
-
-        var lbl = document.createElement('span'); lbl.className = 'po-match-label';
-        lbl.textContent = PO_MATCH_LABELS[row.mid] || 'M' + row.mid;
-        item.appendChild(lbl);
-
-        /* 정답 결과 */
-        var vsEl = document.createElement('span'); vsEl.className = 'po-match-vs';
-        var aCode = row.d.a ? row.d.a.code : '?';
-        var bCode = row.d.b ? row.d.b.code : '?';
-        vsEl.innerHTML = '<b style="color:#ffc840">' + row.d.winner + '</b> ' + row.d.score + ' def. ' + (row.d.winner === aCode ? bCode : aCode);
-        item.appendChild(vsEl);
-
-        /* 예측 */
-        if (row.p) {
-          var predEl = document.createElement('span'); predEl.className = 'po-pred-val';
-          predEl.textContent = '예측: ' + row.p.winner + ' ' + row.p.score;
-          item.appendChild(predEl);
-        }
-
-        /* 배지 */
-        var badge = document.createElement('span'); badge.className = 'score-item-badge';
-        if (row.pts === 3)      { badge.textContent = '승자+스코어 ✓'; badge.className += ' badge-hit'; }
-        else if (row.pts === 2) { badge.textContent = '승자만 ✓'; badge.className += ' badge-rec'; }
-        else if (!row.p)        { badge.textContent = '미예측'; badge.className += ' badge-miss'; }
-        else                    { badge.textContent = '틀림'; badge.className += ' badge-miss'; }
-        item.appendChild(badge);
-
-        var pts = document.createElement('span'); pts.className = 'score-item-pts';
-        pts.textContent = '+' + row.pts;
-        if (row.pts === 0) pts.style.color = 'rgba(255,255,255,.15)';
-        item.appendChild(pts);
-        items.appendChild(item);
-      });
-      wrap.appendChild(items);
-      area.appendChild(wrap);
     }
 
     /* ── 내부 탭 전환 ── */

@@ -597,6 +597,40 @@
     .gf-match .bm-team.winner-row .bm-score-num { color: gold; }
     .bm-score-num.cycle-score { cursor: pointer; transition: color .12s, transform .1s; }
     .bm-score-num.cycle-score:hover { color: rgba(255,255,255,.8) !important; transform: scale(1.2); }
+    /* 탭 우상단 총점 배지 */
+    .tab-score-badge {
+      float: right; margin-top: 2px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: .06em;
+      color: rgba(255,255,255,.35);
+    }
+    .tab-score-badge .score-val {
+      font-size: 22px; font-weight: 900; color: #ffc840; margin-right: 2px;
+    }
+    .tab-score-badge.hidden { display: none; }
+
+    /* GS 슬롯 점수 배지 */
+    .slot-pts {
+      position: absolute; top: 6px; right: 6px; z-index: 4;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 900; letter-spacing: .06em;
+      padding: 2px 6px; border-radius: 3px;
+    }
+    .slot-pts-3 { background: rgba(61,220,132,.25); color: #3ddc84; border: 1px solid rgba(61,220,132,.35); }
+    .slot-pts-2 { background: rgba(255,200,60,.2); color: #ffc840; border: 1px solid rgba(255,200,60,.3); }
+    .slot-pts-0 { background: rgba(255,60,90,.12); color: rgba(255,80,80,.7); border: 1px solid rgba(255,60,90,.2); }
+
+    /* PO 카드 점수 스트립 */
+    .bm-pts-strip {
+      display: flex; align-items: center; justify-content: center;
+      height: 20px; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 900; letter-spacing: .06em;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .bm-pts-strip.pts-3 { background: rgba(61,220,132,.12); color: #3ddc84; }
+    .bm-pts-strip.pts-2 { background: rgba(255,200,60,.1); color: #ffc840; }
+    .bm-pts-strip.pts-0 { background: rgba(255,60,90,.08); color: rgba(255,80,80,.55); }
+
     /* 예측 없음 안내 */
     .po-no-matchup {
       padding: 40px 24px; text-align: center;
@@ -646,6 +680,7 @@
           <div class="slots-header">
             <span class="slots-title">플레이오프 진출팀 예측</span>
             <span class="slots-count"><span id="sel-count">0</span> / 8</span>
+            <span class="tab-score-badge hidden" id="gs-score-badge"></span>
           </div>
           <div class="slots-grid" id="slots-grid">
             <!-- JS로 생성 -->
@@ -668,6 +703,9 @@
     <!-- Playoff Tab -->
     <div class="tab-panel" id="tab-po">
       <div class="po-wrap">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;padding:0 4px;">
+          <span class="tab-score-badge hidden" id="po-score-badge"></span>
+        </div>
         <div id="po-bracket"></div>
       </div>
     </div>
@@ -1009,6 +1047,7 @@
         renderPool();
         saveGsPred();
         popCount();
+        updateScores();
 
         /* 대상 슬롯 pulse */
         var grid = document.getElementById('slots-grid');
@@ -1038,6 +1077,7 @@
           renderPool();
           saveGsPred();
           popCount();
+          updateScores();
         }, 290);
       } else {
         slots[idx] = null;
@@ -1045,6 +1085,7 @@
         renderSlots(-1);
         renderPool();
         saveGsPred();
+        updateScores();
       }
     }
 
@@ -1057,6 +1098,7 @@
 
       slots[idx].record = rec;
       saveGsPred();
+      updateScores();
 
       /* 같은 슬롯의 버튼들을 직접 찾아서 애니메이션 */
       var slotEl = document.querySelector('#slots-grid .slot[data-idx="' + idx + '"]');
@@ -1126,6 +1168,7 @@
       }
       savePoP();
       renderPo();
+      updateScores();
       setTimeout(function() {
         var card = document.querySelector('.bm[data-match="' + mid + '"]');
         if (!card) return;
@@ -1156,6 +1199,7 @@
         var n = loserRow.querySelector('.bm-score-num');
         if (n) { n.textContent = nextL; }
       }
+      updateScores();
     }
 
     /* ── 카드 생성 ── */
@@ -1352,6 +1396,114 @@
       container.appendChild(outer);
     }
 
+    /* ══════════════════════════════════════════════
+       채점 시스템
+       ══════════════════════════════════════════════ */
+
+    function loadGsAnswers() {
+      try {
+        var raw = localStorage.getItem('vct_gs_answers');
+        if (!raw) return null;
+        var d = JSON.parse(raw);
+        return Array.isArray(d) ? d : null;
+      } catch(e) { return null; }
+    }
+    function loadPoAnswers() {
+      try {
+        var raw = localStorage.getItem('vct_po_answers');
+        return raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { return {}; }
+    }
+
+    /* GS 슬롯 하나의 점수 */
+    function getGsSlotPts(team) {
+      if (!team) return null;
+      var ans = loadGsAnswers();
+      if (!ans) return null;
+      var confirmed = ans.filter(Boolean);
+      if (!confirmed.length) return null;
+      for (var i = 0; i < confirmed.length; i++) {
+        if (confirmed[i].code === team.code) {
+          return (team.record === confirmed[i].record) ? 3 : 2;
+        }
+      }
+      return 0; /* 정답에 없는 팀 */
+    }
+
+    /* PO 카드 하나의 점수 */
+    function getPoMatchPts(mid) {
+      var poAns = loadPoAnswers();
+      var a = poAns[mid];
+      if (!a || !a.winner) return null; /* 정답 미확정 */
+      var p = PO_PRED[mid];
+      if (!p) return null; /* 예측 없음 */
+      if (p.winner !== a.winner) return 0;
+      return (p.score === a.score) ? 3 : 2;
+    }
+
+    /* GS 총점 업데이트 */
+    function updateGsScore() {
+      var badge = document.getElementById('gs-score-badge');
+      if (!badge) return;
+      var ans = loadGsAnswers();
+      if (!ans) { badge.classList.add('hidden'); return; }
+      var confirmed = ans.filter(Boolean);
+      if (!confirmed.length) { badge.classList.add('hidden'); return; }
+      var total = 0;
+      slots.forEach(function(s) {
+        var pts = getGsSlotPts(s);
+        if (pts !== null) total += pts;
+      });
+      badge.innerHTML = '<span class="score-val">' + total + '</span> / ' + (confirmed.length * 3) + 'pt';
+      badge.classList.remove('hidden');
+      /* 슬롯 배지 갱신 */
+      document.querySelectorAll('.slots-grid .slot[data-idx]').forEach(function(el) {
+        var idx = parseInt(el.dataset.idx);
+        el.querySelectorAll('.slot-pts').forEach(function(b){ b.remove(); });
+        var pts = getGsSlotPts(slots[idx]);
+        if (pts === null) return;
+        var b = document.createElement('span');
+        b.className = 'slot-pts slot-pts-' + pts;
+        b.textContent = pts > 0 ? '+' + pts : '✕';
+        el.appendChild(b);
+      });
+    }
+
+    /* PO 총점 업데이트 */
+    function updatePoScore() {
+      var badge = document.getElementById('po-score-badge');
+      if (!badge) return;
+      var poAns = loadPoAnswers();
+      var hasAny = Object.keys(poAns).some(function(k){ return poAns[k] && poAns[k].winner; });
+      if (!hasAny) { badge.classList.add('hidden'); return; }
+      var total = 0, max = 0;
+      for (var mid = 1; mid <= 14; mid++) {
+        if (poAns[mid] && poAns[mid].winner) {
+          max += 3;
+          var pts = getPoMatchPts(mid);
+          if (pts !== null) total += pts;
+        }
+      }
+      badge.innerHTML = '<span class="score-val">' + total + '</span> / ' + max + 'pt';
+      badge.classList.remove('hidden');
+      /* 카드 스트립 갱신 */
+      document.querySelectorAll('#po-bracket .bm[data-match]').forEach(function(card) {
+        var mid = parseInt(card.dataset.match);
+        card.querySelectorAll('.bm-pts-strip').forEach(function(s){ s.remove(); });
+        var pts = getPoMatchPts(mid);
+        if (pts === null) return;
+        var strip = document.createElement('div');
+        strip.className = 'bm-pts-strip pts-' + pts;
+        strip.textContent = pts > 0 ? '+' + pts : '✕';
+        card.appendChild(strip);
+      });
+    }
+
+    function updateScores() {
+      updateGsScore();
+      updatePoScore();
+    }
+
     /* ── 탭 전환 ── */
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -1375,6 +1527,7 @@
         loadPoMatchups();
         loadPoP();
         renderPo();
+        updateScores();
       } else {
         document.getElementById('coming-soon').style.display = 'block';
       }
