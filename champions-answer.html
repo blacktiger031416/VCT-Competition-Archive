@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>챔피언스 정답 · VCT Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,900;1,900&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --accent:#ff3c5a; --bg:#060a0e; --bg-card:#0d1318; }
+    body {
+      font-family: "Noto Sans KR", system-ui, sans-serif;
+      color: #f0f0f0; background: var(--bg); min-height: 100vh;
+    }
+    body::before {
+      position:fixed;inset:0;z-index:-1;pointer-events:none;content:'';
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 0%, rgba(255,40,70,.06), transparent),
+        radial-gradient(ellipse 50% 60% at 85% 100%, rgba(255,200,60,.04), transparent);
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;gap:10px;
+      padding:0 24px;height:52px;
+      background:rgba(6,10,14,.9);
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .site-header .auth-header-btn { margin-left:auto!important; }
+    .back-link { color:rgba(255,255,255,.35);font-size:13px;font-weight:500;text-decoration:none;transition:color .15s;flex-shrink:0; }
+    .back-link:hover { color:rgba(255,255,255,.8); }
+    .header-sep { color:rgba(255,255,255,.12);font-size:14px;flex-shrink:0; }
+    .header-title { font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;color:#ffc840;letter-spacing:.08em;text-transform:uppercase;flex-shrink:0; }
+
+    /* ── 레이아웃 ── */
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+    .page-title {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:28px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+      color:#ffc840; margin-bottom:6px;
+    }
+    .page-subtitle { font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px; }
+
+    /* ── 섹션 ── */
+    .section { margin-bottom: 40px; }
+    .section-head {
+      display:flex;align-items:center;gap:10px;margin-bottom:16px;
+    }
+    .section-label {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(255,255,255,.3);
+    }
+    .section-head::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.06); }
+    .count-badge {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px;font-weight:700;letter-spacing:.08em;
+      color:#ffc840;
+    }
+
+    /* ── 정답 슬롯 그리드 ── */
+    .ans-grid {
+      display:grid;
+      grid-template-columns:repeat(8,1fr);
+      gap:10px;
+    }
+    @media(max-width:900px){ .ans-grid { grid-template-columns:repeat(4,1fr); } }
+    @media(max-width:500px){ .ans-grid { grid-template-columns:repeat(2,1fr); } }
+
+    .ans-slot {
+      aspect-ratio:3/4;
+      background:rgba(255,255,255,.03);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:8px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;user-select:none;
+      transition:border-color .2s,background .2s;
+    }
+    .ans-slot.filled {
+      border-color:color-mix(in srgb,var(--slot-color,#ffc840) 55%,transparent);
+      background:color-mix(in srgb,var(--slot-color,#ffc840) 7%,transparent);
+      box-shadow:0 0 18px color-mix(in srgb,var(--slot-color,#ffc840) 12%,transparent);
+    }
+    /* 정답 확정 슬롯 테두리 골드 강조 */
+    .ans-slot.confirmed {
+      border-color: rgba(255,200,60,.6);
+      box-shadow: 0 0 24px rgba(255,200,60,.15), inset 0 0 0 1px rgba(255,200,60,.2);
+    }
+
+    .ans-slot::before {
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.5) 100%);
+      z-index:1;pointer-events:none;
+    }
+    .ans-empty-num {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:28px;font-weight:900;color:rgba(255,255,255,.08);z-index:2;
+    }
+    .ans-empty-line {
+      font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+      color:rgba(255,255,255,.1);z-index:2;margin-top:4px;
+    }
+    .ans-logo {
+      width:52%;aspect-ratio:1;object-fit:contain;z-index:2;
+      filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));
+    }
+    .ans-code {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px;font-weight:900;letter-spacing:.08em;
+      color:#fff;z-index:2;margin-top:6px;
+    }
+    .ans-record-wrap {
+      z-index:2;margin-top:4px;display:flex;gap:2px;
+    }
+    .ans-record-btn {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:10px;font-weight:700;letter-spacing:.06em;
+      padding:2px 6px;border-radius:3px;border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);
+      line-height:1.4;
+    }
+    .ans-record-btn.active-20 { background:rgba(61,220,132,.2);border-color:rgba(61,220,132,.45);color:#3ddc84; }
+    .ans-record-btn.active-21 { background:rgba(255,200,60,.18);border-color:rgba(255,200,60,.4);color:#ffc840; }
+    /* admin 전용 인터랙션 */
+    .admin-mode .ans-record-btn { cursor:pointer; transition:all .14s; }
+    .admin-mode .ans-record-btn:not(.active-20):not(.active-21):hover { background:rgba(255,255,255,.1); }
+    .ans-remove {
+      position:absolute;top:5px;right:5px;z-index:5;
+      width:20px;height:20px;border-radius:50%;
+      background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);
+      color:rgba(255,255,255,.5);font-size:10px;font-weight:700;
+      cursor:pointer;display:none;align-items:center;justify-content:center;
+      transition:background .13s;line-height:1;backdrop-filter:blur(4px);
+    }
+    .admin-mode .ans-slot.filled .ans-remove { display:flex; }
+    .ans-remove:hover { background:rgba(255,60,90,.6);color:#fff; }
+
+    /* ── 팀 풀 (Admin) ── */
+    #ans-pool { display:none; }
+    .admin-mode #ans-pool { display:block; }
+    .pool-section-label {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+      color:rgba(255,255,255,.25);margin-bottom:10px;margin-top:20px;
+    }
+    .regions-grid {
+      display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+    }
+    @media(max-width:700px){ .regions-grid { grid-template-columns:repeat(2,1fr); } }
+    .region-col { display:flex;flex-direction:column;gap:2px; }
+    .region-label {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+      color:rgba(255,255,255,.25);padding:0 4px 5px;
+    }
+    .region-teams { display:flex;flex-direction:column;gap:3px; }
+    .team-card {
+      display:flex;align-items:center;gap:8px;
+      padding:6px 8px;border-radius:6px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      cursor:pointer;transition:background .12s,border-color .12s,transform .1s;
+      position:relative;
+    }
+    .team-card:hover:not(.selected):not(.disabled) {
+      background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);transform:translateY(-1px);
+    }
+    .team-card.selected {
+      background:color-mix(in srgb,var(--tc,#ffc840) 12%,transparent);
+      border-color:color-mix(in srgb,var(--tc,#ffc840) 40%,transparent);
+      pointer-events:none;
+    }
+    .team-card.disabled { opacity:.3;cursor:default; }
+    .team-card-logo { width:24px;height:24px;object-fit:contain;flex-shrink:0; }
+    .team-card-info { display:flex;flex-direction:column;min-width:0; }
+    .team-card-code { font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;color:#fff;line-height:1; }
+    .team-card-name { font-size:10px;color:rgba(255,255,255,.3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .team-card-check { position:absolute;right:8px;font-size:12px;color:#ffc840;opacity:0;transition:opacity .15s; }
+    .team-card.selected .team-card-check { opacity:1; }
+
+    /* ── 점수 표시 ── */
+    .score-wrap {
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:12px;padding:20px 24px;
+    }
+    .score-summary {
+      display:flex;align-items:baseline;gap:10px;margin-bottom:18px;
+    }
+    .score-pts {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:48px;font-weight:900;letter-spacing:.02em;color:#ffc840;
+      line-height:1;
+    }
+    .score-max {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:20px;font-weight:700;color:rgba(255,255,255,.25);
+    }
+    .score-label {
+      font-size:12px;color:rgba(255,255,255,.35);margin-left:4px;
+    }
+    .score-bar-track {
+      height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:20px;
+    }
+    .score-bar-fill {
+      height:100%;background:linear-gradient(90deg,#3ddc84,#ffc840);border-radius:3px;
+      transition:width .5s cubic-bezier(.22,1,.36,1);
+    }
+
+    /* 항목별 점수 표 */
+    .score-items { display:flex;flex-direction:column;gap:6px; }
+    .score-item {
+      display:flex;align-items:center;gap:10px;
+      padding:8px 10px;border-radius:6px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.05);
+      font-size:13px;
+    }
+    .score-item.hit { border-color:rgba(61,220,132,.25);background:rgba(61,220,132,.05); }
+    .score-item.partial { border-color:rgba(255,200,60,.2);background:rgba(255,200,60,.04); }
+    .score-item.miss { opacity:.4; }
+    .score-item-logo { width:22px;height:22px;object-fit:contain;flex-shrink:0; }
+    .score-item-logo-ph {
+      width:22px;height:22px;border-radius:3px;background:rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.3);
+    }
+    .score-item-code { font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;flex:1; }
+    .score-item-ans-rec {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:11px;font-weight:700;letter-spacing:.06em;
+      color:rgba(255,255,255,.3);margin-right:4px;
+    }
+    .score-item-badge {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:2px 7px;border-radius:3px;flex-shrink:0;
+    }
+    .badge-hit   { background:rgba(61,220,132,.2);color:#3ddc84; }
+    .badge-rec   { background:rgba(255,200,60,.18);color:#ffc840; }
+    .badge-miss  { background:rgba(255,255,255,.05);color:rgba(255,255,255,.2); }
+    .badge-tbd   { background:rgba(255,255,255,.04);color:rgba(255,255,255,.2); }
+    .score-item-pts {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:14px;font-weight:900;color:#ffc840;width:32px;text-align:right;flex-shrink:0;
+    }
+
+    /* 예측 없음 안내 */
+    .no-pred {
+      padding:24px;text-align:center;
+      color:rgba(255,255,255,.2);font-size:13px;
+      border:1px dashed rgba(255,255,255,.08);border-radius:8px;
+    }
+
+    /* Admin 배지 */
+    .admin-badge {
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 10px;border-radius:20px;
+      background:rgba(255,200,60,.12);border:1px solid rgba(255,200,60,.3);
+      font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;
+      color:#ffc840;text-transform:uppercase;margin-left:10px;vertical-align:middle;
+    }
+    .readonly-notice {
+      display:inline-flex;align-items:center;gap:5px;
+      padding:3px 10px;border-radius:20px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      font-size:11px;font-weight:600;color:rgba(255,255,255,.3);margin-left:10px;
+    }
+  </style>
+  <script src="./storage.js"></script>
+  <script src="./auth.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="back-link" href="./champions-prediction.html">← 예측 페이지</a>
+    <span class="header-sep">/</span>
+    <span class="header-title" id="header-title">챔피언스 정답</span>
+  </header>
+
+  <div class="page-wrap">
+    <div class="page-title">
+      그룹 스테이지 <span style="color:#fff">정답</span>
+      <span class="admin-badge" id="admin-badge" style="display:none">✎ 관리자</span>
+      <span class="readonly-notice" id="readonly-badge" style="display:none">🔒 읽기 전용</span>
+    </div>
+    <div class="page-subtitle">플레이오프 진출팀 정답 &mdash; 팀이 확정될수록 바로 채점됩니다</div>
+
+    <!-- 정답 슬롯 -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-label">정답 슬롯</span>
+        <span class="count-badge"><span id="ans-count">0</span> / 8 확정</span>
+      </div>
+      <div class="ans-grid" id="ans-grid"></div>
+
+      <!-- Admin 전용 팀 풀 -->
+      <div id="ans-pool">
+        <div class="pool-section-label">팀 선택</div>
+        <div class="regions-grid" id="ans-regions"></div>
+      </div>
+    </div>
+
+    <!-- 채점 결과 -->
+    <div class="section" id="scoring-section">
+      <div class="section-head">
+        <span class="section-label">예측 채점 결과</span>
+      </div>
+      <div id="score-area"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ── 팀 데이터 ── */
+    var REGIONS = [
+      { label: 'Pacific', teams: [
+        { code:'NS',  name:'Nongshim RedForce', logo:'./assets/teams/ns.svg',  color:'#e2012d', white:false },
+        { code:'T1',  name:'T1',                logo:'./assets/teams/t1.png',  color:'#ec1b24', white:false },
+        { code:'PRX', name:'Paper Rex',          logo:'./assets/teams/prx.svg', color:'#8c52ff', white:true  },
+        { code:'GE',  name:'Global Esports',     logo:'./assets/teams/ge.webp', color:'#e12c30', white:false },
+      ]},
+      { label: 'Americas', teams: [
+        { code:'NRG', name:'NRG Esports', logo:'https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg', color:'#F63D0A', white:false },
+        { code:'G2',  name:'G2 Esports',  logo:'https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg', color:'#8400CB', white:false },
+        { code:'?', name:'TBD', logo:'', color:'#555', white:false, tbd:true },
+        { code:'?', name:'TBD', logo:'', color:'#555', white:false, tbd:true },
+      ]},
+      { label: 'EMEA', teams: [
+        { code:'KC',  name:'Karmine Corp',  logo:'./assets/teams/kc.png',                                                                                                  color:'#01ccff', white:false },
+        { code:'TL',  name:'Team Liquid',   logo:'https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp', color:'#142e60', white:true  },
+        { code:'FUT', name:'FUT Esports',   logo:'https://specs.gg/assets/img/teams/fut-esports.webp',                                                                     color:'#21efc4', white:false },
+        { code:'VIT', name:'Team Vitality', logo:'https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png',                                                   color:'#f8ff04', white:false },
+      ]},
+      { label: 'CN', teams: [
+        { code:'TYL', name:'TYLOO',           logo:'https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg',  color:'#cc3a32', white:false },
+        { code:'JDG', name:'JD Mall JDG',     logo:'https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg',  color:'#da202d', white:false },
+        { code:'EDG', name:'EDward Gaming',   logo:'https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png',                                              color:'#442a1e', white:false },
+        { code:'XLG', name:'Xi Lai Gaming',   logo:'https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg',  color:'#206189', white:false },
+      ]},
+    ];
+
+    /* ── 상태 ── */
+    var answers = new Array(8).fill(null); // 정답 슬롯 (admin)
+    var isAdmin = false;
+
+    /* ── 저장/불러오기 ── */
+    function saveAnswers() {
+      try {
+        var data = answers.map(function(s) {
+          return s ? { code:s.code, name:s.name, logo:s.logo, color:s.color, white:!!s.white, record:s.record } : null;
+        });
+        localStorage.setItem('vct_gs_answers', JSON.stringify(data));
+      } catch(e) {}
+    }
+    function loadAnswers() {
+      try {
+        var raw = localStorage.getItem('vct_gs_answers');
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (Array.isArray(data)) answers = data.map(function(d){ return d || null; });
+      } catch(e) {}
+    }
+    function loadPred() {
+      try {
+        var raw = localStorage.getItem('vct_gs_pred');
+        if (!raw) return null;
+        var data = JSON.parse(raw);
+        return Array.isArray(data) ? data.map(function(d){ return d || null; }) : null;
+      } catch(e) { return null; }
+    }
+
+    /* ── 채점 ── */
+    /* 점수 규칙: 팀 맞춤 +2점, 기록(2-0/2-1)도 맞추면 +1점 추가 (팀당 최대 3점) */
+    function computeScore(pred, ans) {
+      var confirmedAns = ans.filter(Boolean);
+      var total = 0, maxPossible = confirmedAns.length * 3;
+      var breakdown = confirmedAns.map(function(a) {
+        var matched = null;
+        for (var i = 0; i < pred.length; i++) {
+          if (pred[i] && pred[i].code === a.code) { matched = pred[i]; break; }
+        }
+        if (!matched) return { ans: a, pred: null, pts: 0 };
+        var pts = 2;
+        var recBonus = (matched.record === a.record);
+        if (recBonus) pts += 1;
+        total += pts;
+        return { ans: a, pred: matched, pts: pts, recBonus: recBonus };
+      });
+      return { total: total, maxPossible: maxPossible, breakdown: breakdown };
+    }
+
+    /* ── 정답 슬롯 렌더 ── */
+    function renderAnswers() {
+      var grid = document.getElementById('ans-grid');
+      grid.innerHTML = '';
+      var filled = answers.filter(Boolean).length;
+      document.getElementById('ans-count').textContent = filled;
+
+      for (var i = 0; i < 8; i++) {
+        var s = answers[i];
+        var el = document.createElement('div');
+        el.className = 'ans-slot' + (s ? ' filled confirmed' : '');
+        el.dataset.idx = i;
+        if (s && s.color) el.style.setProperty('--slot-color', s.color);
+
+        if (s) {
+          /* X 버튼 */
+          var rem = document.createElement('button');
+          rem.className = 'ans-remove';
+          rem.textContent = '✕';
+          rem.dataset.idx = i;
+          rem.addEventListener('click', onAnsRemove);
+          el.appendChild(rem);
+
+          /* 로고 */
+          var img = document.createElement('img');
+          img.className = 'ans-logo';
+          img.src = s.logo; img.alt = s.code;
+          if (s.white) img.style.filter = 'brightness(0) invert(1)';
+          img.onerror = function(){ this.style.display='none'; };
+          el.appendChild(img);
+
+          /* 코드 */
+          var codeEl = document.createElement('div');
+          codeEl.className = 'ans-code';
+          codeEl.textContent = s.code;
+          el.appendChild(codeEl);
+
+          /* 2-0 / 2-1 */
+          var recWrap = document.createElement('div');
+          recWrap.className = 'ans-record-wrap';
+          ['2-0','2-1'].forEach(function(r) {
+            var btn = document.createElement('button');
+            btn.className = 'ans-record-btn' + (s.record === r ? (r==='2-0' ? ' active-20' : ' active-21') : '');
+            btn.textContent = r;
+            btn.dataset.idx = i; btn.dataset.rec = r;
+            if (isAdmin) btn.addEventListener('click', onAnsRecord);
+            el.appendChild; // will be done via recWrap
+            recWrap.appendChild(btn);
+          });
+          el.appendChild(recWrap);
+        } else {
+          var num = document.createElement('div');
+          num.className = 'ans-empty-num';
+          num.textContent = i + 1;
+          el.appendChild(num);
+          var line = document.createElement('div');
+          line.className = 'ans-empty-line';
+          line.textContent = 'TBD';
+          el.appendChild(line);
+        }
+        grid.appendChild(el);
+      }
+
+      renderScoring();
+    }
+
+    /* ── 팀 풀 렌더 (Admin) ── */
+    function renderPool() {
+      var selectedCodes = answers.filter(Boolean).map(function(s){ return s.code; });
+      var allFull = selectedCodes.length >= 8;
+      var container = document.getElementById('ans-regions');
+      container.innerHTML = '';
+
+      REGIONS.forEach(function(region) {
+        var col = document.createElement('div');
+        col.className = 'region-col';
+        var lbl = document.createElement('div');
+        lbl.className = 'region-label'; lbl.textContent = region.label;
+        col.appendChild(lbl);
+
+        var teamsEl = document.createElement('div');
+        teamsEl.className = 'region-teams';
+        region.teams.forEach(function(team) {
+          if (team.tbd) return;
+          var isSelected = selectedCodes.indexOf(team.code) !== -1;
+          var isDisabled = !isSelected && allFull;
+          var card = document.createElement('div');
+          card.className = 'team-card' + (isSelected ? ' selected' : '') + (isDisabled ? ' disabled' : '');
+          if (team.color) card.style.setProperty('--tc', team.color);
+
+          var logo = document.createElement('img');
+          logo.className = 'team-card-logo'; logo.src = team.logo; logo.alt = team.code;
+          if (team.white) logo.style.filter = 'brightness(0) invert(1)';
+          logo.onerror = function(){ this.style.display='none'; };
+          card.appendChild(logo);
+
+          var info = document.createElement('div'); info.className = 'team-card-info';
+          var codeEl = document.createElement('div'); codeEl.className = 'team-card-code'; codeEl.textContent = team.code;
+          var nameEl = document.createElement('div'); nameEl.className = 'team-card-name'; nameEl.textContent = team.name;
+          info.appendChild(codeEl); info.appendChild(nameEl);
+          card.appendChild(info);
+
+          var check = document.createElement('div'); check.className = 'team-card-check'; check.textContent = '✓';
+          card.appendChild(check);
+
+          if (!isSelected && !isDisabled) {
+            card.addEventListener('click', (function(t){ return function(){ onAnsTeamClick(t); }; })(team));
+          }
+          teamsEl.appendChild(card);
+        });
+        col.appendChild(teamsEl);
+        container.appendChild(col);
+      });
+    }
+
+    /* ── 채점 렌더 ── */
+    function renderScoring() {
+      var area = document.getElementById('score-area');
+      area.innerHTML = '';
+
+      var pred = loadPred();
+      var confirmedAns = answers.filter(Boolean);
+
+      if (!pred || pred.filter(Boolean).length === 0) {
+        var notice = document.createElement('div');
+        notice.className = 'no-pred';
+        notice.textContent = confirmedAns.length === 0
+          ? '정답이 아직 입력되지 않았습니다.'
+          : '예측 데이터가 없습니다. 예측 페이지에서 팀을 선택해주세요.';
+        area.appendChild(notice);
+        return;
+      }
+
+      if (confirmedAns.length === 0) {
+        var notice2 = document.createElement('div');
+        notice2.className = 'no-pred';
+        notice2.textContent = '정답을 입력하면 실시간으로 채점됩니다.';
+        area.appendChild(notice2);
+        return;
+      }
+
+      var result = computeScore(pred, answers);
+
+      /* 총점 헤더 */
+      var wrap = document.createElement('div');
+      wrap.className = 'score-wrap';
+
+      var summary = document.createElement('div');
+      summary.className = 'score-summary';
+
+      var ptsEl = document.createElement('span');
+      ptsEl.className = 'score-pts';
+      ptsEl.textContent = result.total;
+      summary.appendChild(ptsEl);
+
+      var maxEl = document.createElement('span');
+      maxEl.className = 'score-max';
+      maxEl.innerHTML = '/ ' + result.maxPossible + '<span class="score-label">(확정 ' + confirmedAns.length + '/8팀 기준)</span>';
+      summary.appendChild(maxEl);
+      wrap.appendChild(summary);
+
+      /* 진행 바 */
+      var track = document.createElement('div');
+      track.className = 'score-bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'score-bar-fill';
+      var pct = result.maxPossible > 0 ? Math.round(result.total / result.maxPossible * 100) : 0;
+      fill.style.width = '0%';
+      track.appendChild(fill);
+      wrap.appendChild(track);
+      setTimeout(function(){ fill.style.width = pct + '%'; }, 80);
+
+      /* 항목별 */
+      var items = document.createElement('div');
+      items.className = 'score-items';
+      result.breakdown.forEach(function(row) {
+        var item = document.createElement('div');
+        var cls = 'score-item';
+        if (row.pts === 3) cls += ' hit';
+        else if (row.pts === 2) cls += ' partial';
+        else cls += ' miss';
+        item.className = cls;
+
+        /* 로고 */
+        if (row.ans.logo) {
+          var img = document.createElement('img');
+          img.className = 'score-item-logo'; img.src = row.ans.logo; img.alt = row.ans.code;
+          if (row.ans.white) img.style.filter = 'brightness(0) invert(1)';
+          img.onerror = function(){ this.style.display='none'; };
+          item.appendChild(img);
+        } else {
+          var ph = document.createElement('div'); ph.className = 'score-item-logo-ph'; ph.textContent = row.ans.code.slice(0,2);
+          item.appendChild(ph);
+        }
+
+        /* 코드 */
+        var code = document.createElement('span'); code.className = 'score-item-code'; code.textContent = row.ans.code;
+        item.appendChild(code);
+
+        /* 정답 기록 */
+        var recEl = document.createElement('span'); recEl.className = 'score-item-ans-rec'; recEl.textContent = row.ans.record;
+        item.appendChild(recEl);
+
+        /* 배지 */
+        var badge = document.createElement('span'); badge.className = 'score-item-badge';
+        if (!row.pred) {
+          badge.textContent = '미예측'; badge.className += ' badge-miss';
+        } else if (row.pts === 3) {
+          badge.textContent = '팀+기록 ✓'; badge.className += ' badge-hit';
+        } else {
+          badge.textContent = '팀만 ✓'; badge.className += ' badge-rec';
+        }
+        item.appendChild(badge);
+
+        /* 점수 */
+        var pts = document.createElement('span'); pts.className = 'score-item-pts';
+        pts.textContent = '+' + row.pts;
+        if (row.pts === 0) pts.style.color = 'rgba(255,255,255,.15)';
+        item.appendChild(pts);
+
+        items.appendChild(item);
+      });
+      wrap.appendChild(items);
+      area.appendChild(wrap);
+    }
+
+    /* ── 이벤트 핸들러 ── */
+    function onAnsTeamClick(team) {
+      var emptyIdx = answers.indexOf(null);
+      if (emptyIdx === -1) return;
+      answers[emptyIdx] = { code:team.code, name:team.name, logo:team.logo, color:team.color, white:team.white, record:'2-0' };
+      saveAnswers();
+      renderAnswers();
+      renderPool();
+    }
+
+    function onAnsRemove(e) {
+      e.stopPropagation();
+      var idx = parseInt(e.currentTarget.dataset.idx);
+      answers[idx] = null;
+      answers = answers.filter(Boolean).concat(new Array(8).fill(null)).slice(0, 8);
+      saveAnswers();
+      renderAnswers();
+      renderPool();
+    }
+
+    function onAnsRecord(e) {
+      e.stopPropagation();
+      var idx = parseInt(e.currentTarget.dataset.idx);
+      var rec = e.currentTarget.dataset.rec;
+      if (!answers[idx] || answers[idx].record === rec) return;
+      answers[idx].record = rec;
+      saveAnswers();
+      renderAnswers();
+    }
+
+    /* ── 초기화 ── */
+    function initPage() {
+      isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
+
+      if (isAdmin) {
+        document.getElementById('admin-badge').style.display = '';
+        document.body.classList.add('admin-mode');
+        document.getElementById('ans-pool').style.display = 'block';
+      } else {
+        document.getElementById('readonly-badge').style.display = '';
+      }
+
+      loadAnswers();
+      renderAnswers();
+      if (isAdmin) renderPool();
+    }
+
+    (window.storageReady || Promise.resolve()).then(function() {
+      if (typeof window.vctIsAdmin === 'function') { initPage(); }
+      else { window.addEventListener('load', initPage); }
+    });
+  </script>
+</body>
+</html>
