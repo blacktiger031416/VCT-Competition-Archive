@@ -364,18 +364,15 @@
       100% { background:rgba(61,220,132,.1); }
     }
     .bm-team.winner-row.flash { animation:bmWinFlash .45s ease both; }
-    /* 스코어 버튼 */
-    .bm-score-wrap { display:flex;gap:3px;flex-shrink:0; }
-    .bm-score-btn {
-      font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
-      padding:2px 5px;border-radius:3px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.06);color:rgba(255,255,255,.35);
-      cursor:pointer;transition:all .12s;line-height:1.4;
+    /* 스코어 숫자 */
+    .bm-score-num {
+      font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
+      width:22px;text-align:center;flex-shrink:0;color:rgba(255,255,255,.2);line-height:1;
     }
-    .bm-score-btn.active-20 { background:rgba(61,220,132,.2);border-color:rgba(61,220,132,.5);color:#3ddc84; }
-    .bm-score-btn.active-21 { background:rgba(255,200,60,.18);border-color:rgba(255,200,60,.45);color:#ffc840; }
-    .bm-score-btn.active-gf { background:rgba(255,215,0,.18);border-color:rgba(255,215,0,.45);color:gold; }
-    .bm-score-btn:not(.active-20):not(.active-21):not(.active-gf):hover { background:rgba(255,255,255,.1); }
+    .bm-team.winner-row .bm-score-num { color:#3ddc84; }
+    .gf-match .bm-team.winner-row .bm-score-num { color:gold; }
+    .bm-score-num.cycle-score { cursor:pointer;transition:color .12s,transform .1s; }
+    .bm-score-num.cycle-score:hover { color:rgba(255,255,255,.8)!important;transform:scale(1.2); }
     /* TBD 슬롯 (admin) */
     .bm-tbd-row {
       display:flex;align-items:center;justify-content:center;gap:6px;
@@ -896,7 +893,8 @@
     function makePoBmCard(mid, type) {
       var d    = PO_ANS[mid] || {};
       var isBo5 = (mid === 13 || mid === 14);
-      var scores = isBo5 ? ['3-0','3-1','3-2'] : ['2-0','2-1'];
+      var winN  = isBo5 ? 3 : 2;
+      var maxL  = isBo5 ? 2 : 1;
 
       var card = document.createElement('div');
       card.className = 'bm ' + (type || '') + '-match';
@@ -949,22 +947,24 @@
           var codeEl = document.createElement('span'); codeEl.className = 'bm-code';
           codeEl.textContent = team.code; row.appendChild(codeEl);
 
+          /* 스코어 숫자 */
+          var sn = document.createElement('span'); sn.className = 'bm-score-num';
           if (isWin) {
-            var sw = document.createElement('div'); sw.className = 'bm-score-wrap';
-            scores.forEach(function(sc) {
-              var ac = sc === '2-0' ? 'active-20' : sc === '2-1' ? 'active-21' : 'active-gf';
-              var btn = document.createElement('button');
-              btn.className = 'bm-score-btn' + (d.score === sc ? ' ' + ac : '');
-              btn.textContent = sc; btn.dataset.score = sc;
-              if (isAdmin) {
-                btn.addEventListener('click', (function(m_, s_){
-                  return function(e){ e.stopPropagation(); pickPoAnsScore(m_, s_); };
-                })(mid, sc));
-              }
-              sw.appendChild(btn);
-            });
-            row.appendChild(sw);
-          } else {
+            sn.textContent = winN;
+            row.appendChild(sn);
+          } else if (isLose) {
+            var curL2 = d.score ? parseInt(d.score.split('-')[1]) : 0;
+            sn.textContent = curL2;
+            if (isAdmin) {
+              sn.classList.add('cycle-score');
+              sn.addEventListener('click', (function(m_){
+                return function(e){ e.stopPropagation(); cyclePoAnsScore(m_); };
+              })(mid));
+            }
+            row.appendChild(sn);
+          }
+
+          if (false) { /* 하단 else 블록 유지용 더미 */ } else {
             /* Admin: X 제거 버튼 */
             if (isAdmin) {
               var rmBtn = document.createElement('button');
@@ -1116,19 +1116,24 @@
       savePoAns(); renderPoAns();
     }
 
-    function pickPoAnsScore(mid, score) {
+    function cyclePoAnsScore(mid) {
       if (!PO_ANS[mid] || !PO_ANS[mid].winner) return;
-      PO_ANS[mid].score = score;
+      var isBo5 = (mid === 13 || mid === 14);
+      var winN  = isBo5 ? 3 : 2;
+      var maxL  = isBo5 ? 2 : 1;
+      var cur   = PO_ANS[mid].score || (winN + '-0');
+      var curL  = parseInt(cur.split('-')[1]) || 0;
+      var nextL = (curL + 1) % (maxL + 1);
+      PO_ANS[mid].score = winN + '-' + nextL;
       savePoAns();
       /* in-place */
       var card = document.querySelector('#po-ans-bracket .bm[data-match="' + mid + '"]');
       if (!card) return;
-      card.querySelectorAll('.bm-score-btn').forEach(function(b) {
-        b.classList.remove('active-20','active-21','active-gf');
-        if (b.dataset.score === score) {
-          b.classList.add(score === '2-0' ? 'active-20' : score === '2-1' ? 'active-21' : 'active-gf');
-        }
-      });
+      var loserRow = card.querySelector('.bm-team.loser-row');
+      if (loserRow) {
+        var n = loserRow.querySelector('.bm-score-num');
+        if (n) n.textContent = nextL;
+      }
     }
 
     /* ── PO 채점 ── */
