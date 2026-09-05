@@ -1755,39 +1755,32 @@
       });
     });
 
-    /* ── Auth gate ── */
+    /* ── Init ── */
     function initPage() {
       var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
-      var user = currentUser();
-      var loggedIn = !!user;
 
-      if (loggedIn) {
-        document.getElementById('main-content').style.display = 'block';
-        /* 순위 탭: Admin만 표시 */
-        var rankTab = document.querySelector('.tab-btn[data-tab="rank"]');
-        if (rankTab) rankTab.style.display = isAdmin ? '' : 'none';
-        /* 닉네임 바 */
-        renderNicknameBar();
-        /* 잠금 상태 복원 */
-        try { if (localStorage.getItem('vct_gs_locked') === '1') gsLocked = true; } catch(e) {}
-        loadGsPred();
-        renderSlots(-1);
-        renderPool();
-        loadPoMatchups();
-        loadPoP();
-        renderPo();
-        updateScores();
-      } else {
-        document.getElementById('coming-soon').style.display = 'block';
-      }
+      document.getElementById('main-content').style.display = 'block';
+
+      /* 순위 탭: Admin만 표시 */
+      var rankTab = document.querySelector('.tab-btn[data-tab="rank"]');
+      if (rankTab) rankTab.style.display = isAdmin ? '' : 'none';
+
+      /* 닉네임 바 */
+      renderNicknameBar();
+
+      /* 잠금 상태 복원 */
+      try { if (localStorage.getItem('vct_gs_locked') === '1') gsLocked = true; } catch(e) {}
+      loadGsPred();
+      renderSlots(-1);
+      renderPool();
+      loadPoMatchups();
+      loadPoP();
+      renderPo();
+      updateScores();
     }
 
     (window.storageReady || Promise.resolve()).then(function() {
-      if (typeof window.vctGetUser === 'function' || typeof window.vctIsAdmin === 'function') {
-        initPage();
-      } else {
-        window.addEventListener('load', initPage);
-      }
+      initPage();
     });
   </script>
 </body>
