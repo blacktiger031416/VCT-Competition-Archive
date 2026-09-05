@@ -158,6 +158,29 @@
     .rank-unlock-all:hover { background:rgba(61,220,132,.22); }
     .rank-action-btn:disabled { opacity:.4; cursor:default; }
 
+    /* PO 카드 확정/잠금 스트립 */
+    .bm-lock-strip {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      height: 26px; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .bm-lock-strip.locked { color: rgba(255,255,255,.3); background: rgba(255,255,255,.03); }
+    .bm-confirm-btn {
+      background: rgba(61,220,132,.15); border: 1px solid rgba(61,220,132,.3);
+      color: #3ddc84; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      border-radius: 4px; padding: 3px 12px; cursor: pointer; transition: background .12s;
+    }
+    .bm-confirm-btn:hover { background: rgba(61,220,132,.28); }
+    .bm-unlock-btn {
+      background: rgba(255,80,80,.12); border: 1px solid rgba(255,80,80,.25);
+      color: rgba(255,100,100,.7); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      border-radius: 3px; padding: 2px 8px; cursor: pointer; transition: background .12s;
+    }
+    .bm-unlock-btn:hover { background: rgba(255,80,80,.22); color: #ff6060; }
+
     /* ── Tab bar ── */
     .tab-bar {
       display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.08);
@@ -801,7 +824,6 @@
           <span class="tab-score-badge hidden" id="po-score-badge"></span>
         </div>
         <div id="po-bracket"></div>
-        <div id="po-confirm-area" style="margin-top:24px;display:flex;align-items:center;justify-content:center;gap:12px;"></div>
       </div>
     </div>
 
@@ -885,7 +907,17 @@
       return u ? 'vct_po_locked:' + u.username : 'vct_po_locked';
     }
 
-    var poLocked = false;
+    var PO_LOCKED = {}; /* {mid: true} 경기별 잠금 */
+
+    function savePoLocked() {
+      try { localStorage.setItem(poLockKey(), JSON.stringify(PO_LOCKED)); } catch(e) {}
+    }
+    function loadPoLocked() {
+      try {
+        var raw = localStorage.getItem(poLockKey());
+        PO_LOCKED = raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { PO_LOCKED = {}; }
+    }
     function nickKey() {
       var u = currentUser();
       return u ? 'vct_nickname:' + u.username : null;
@@ -1346,7 +1378,7 @@
     }
 
     function pickPoPred(mid, teamCode) {
-      if (poLocked) return;
+      if (PO_LOCKED[mid]) return;
       if (!PO_MATCHUPS[mid]) return;
       var prev = PO_PRED[mid];
       if (prev && prev.winner === teamCode) {
@@ -1371,7 +1403,7 @@
     }
 
     function cyclePoLoserScore(mid) {
-      if (poLocked) return;
+      if (PO_LOCKED[mid]) return;
       if (!PO_PRED[mid]) return;
       var isBo5 = (mid === 13 || mid === 14);
       var winN   = isBo5 ? 3 : 2;
@@ -1471,6 +1503,50 @@
           card.appendChild(dv);
         }
       });
+
+      /* ── 확정/잠금 스트립 ── */
+      var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
+      if (PO_LOCKED[mid]) {
+        /* 잠금 상태 */
+        var lockStrip = document.createElement('div');
+        lockStrip.className = 'bm-lock-strip locked';
+        lockStrip.innerHTML = '🔒 확정';
+        if (isAdmin) {
+          var ulBtn = document.createElement('button');
+          ulBtn.className = 'bm-unlock-btn';
+          ulBtn.textContent = '해제';
+          ulBtn.addEventListener('click', (function(m_) {
+            return function(e) {
+              e.stopPropagation();
+              delete PO_LOCKED[m_];
+              savePoLocked();
+              renderPo();
+              updateScores();
+            };
+          })(mid));
+          lockStrip.appendChild(ulBtn);
+        }
+        card.appendChild(lockStrip);
+      } else if (pred && mu.a && mu.b) {
+        /* 예측됨 → 확정 버튼 */
+        var confirmStrip = document.createElement('div');
+        confirmStrip.className = 'bm-lock-strip';
+        var cfBtn = document.createElement('button');
+        cfBtn.className = 'bm-confirm-btn';
+        cfBtn.textContent = '✓ 확정';
+        cfBtn.addEventListener('click', (function(m_) {
+          return function(e) {
+            e.stopPropagation();
+            PO_LOCKED[m_] = true;
+            savePoLocked();
+            renderPo();
+            updateScores();
+          };
+        })(mid));
+        confirmStrip.appendChild(cfBtn);
+        card.appendChild(confirmStrip);
+      }
+
       return card;
     }
 
@@ -1584,54 +1660,6 @@
       outer.appendChild(gfCol);
 
       container.appendChild(outer);
-      renderPoConfirmArea();
-    }
-
-    /* ── PO 확정 영역 ── */
-    function renderPoConfirmArea() {
-      var area = document.getElementById('po-confirm-area');
-      if (!area) return;
-      area.innerHTML = '';
-
-      /* 대진 미설정 상태면 표시 안 함 */
-      if (!Object.keys(PO_MATCHUPS).length) return;
-
-      if (poLocked) {
-        var badge = document.createElement('div');
-        badge.className = 'locked-badge';
-        badge.innerHTML = '<span class="locked-badge-icon">🔒</span>'
-          + '<div><div class="locked-badge-text">예측 확정 완료</div>'
-          + '<div class="locked-badge-sub">더 이상 수정할 수 없습니다.</div></div>';
-        area.appendChild(badge);
-
-        /* 잠금 해제 — Admin 전용 */
-        if (typeof window.vctIsAdmin === 'function' && window.vctIsAdmin()) {
-          var unlockBtn = document.createElement('button');
-          unlockBtn.textContent = '잠금 해제';
-          unlockBtn.style.cssText = 'margin-left:12px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;';
-          unlockBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,80,80,.15)'; this.style.borderColor='rgba(255,80,80,.4)'; this.style.color='#ff6060'; });
-          unlockBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,255,255,.06)'; this.style.borderColor='rgba(255,255,255,.18)'; this.style.color='rgba(255,255,255,.45)'; });
-          unlockBtn.addEventListener('click', function() {
-            poLocked = false;
-            try { localStorage.removeItem(poLockKey()); } catch(e) {}
-            renderPo();
-            updateScores();
-          });
-          area.appendChild(unlockBtn);
-        }
-        return;
-      }
-
-      var btn = document.createElement('button');
-      btn.className = 'confirm-btn';
-      btn.textContent = '✓  플레이오프 예측 확정';
-      btn.addEventListener('click', function() {
-        poLocked = true;
-        try { localStorage.setItem(poLockKey(), '1'); } catch(e) {}
-        renderPoConfirmArea();
-        updateScores();
-      });
-      area.appendChild(btn);
     }
 
     /* ══════════════════════════════════════════════
@@ -1671,7 +1699,7 @@
 
     /* PO 카드 하나의 점수 */
     function getPoMatchPts(mid) {
-      if (!poLocked) return null; /* 미확정 → 채점 안 함 */
+      if (!PO_LOCKED[mid]) return null; /* 미확정 → 채점 안 함 */
       var poAns = loadPoAnswers();
       var a = poAns[mid];
       if (!a || !a.winner) return null; /* 정답 미확정 */
@@ -1786,8 +1814,12 @@
         var poRaw = localStorage.getItem('vct_po_pred:' + username);
         var poPred = {};
         try { poPred = poRaw ? (JSON.parse(poRaw) || {}) : {}; } catch(e) {}
+        var poLockedRaw = localStorage.getItem('vct_po_locked:' + username);
+        var poLockedData = {};
+        try { poLockedData = poLockedRaw ? (JSON.parse(poLockedRaw) || {}) : {}; } catch(e) {}
         var poTotal = 0;
         for (var mid = 1; mid <= 14; mid++) {
+          if (!poLockedData[mid]) continue; /* 잠기지 않은 경기는 점수 없음 */
           var a = poAns[mid];
           if (!a || !a.winner) continue;
           var p = poPred[mid];
@@ -1853,8 +1885,27 @@
 
       var b = document.getElementById('btn-gs-lock-all');   if (b) b.addEventListener('click', makeHandler('vct_gs_locked', 'lock'));
       var c = document.getElementById('btn-gs-unlock-all'); if (c) c.addEventListener('click', makeHandler('vct_gs_locked', 'unlock'));
-      var d = document.getElementById('btn-po-lock-all');   if (d) d.addEventListener('click', makeHandler('vct_po_locked', 'lock'));
-      var e = document.getElementById('btn-po-unlock-all'); if (e) e.addEventListener('click', makeHandler('vct_po_locked', 'unlock'));
+
+      /* PO 전체 고정: 각 유저의 vct_po_locked:{u} 를 {1:true,...14:true} 로 설정 */
+      var d = document.getElementById('btn-po-lock-all');
+      if (d) d.addEventListener('click', function() {
+        var names = getAllUsernames();
+        if (!names.length) { alert('닉네임을 등록한 참가자가 없습니다.'); return; }
+        if (!confirm(names.length + '명의 PO 예측을 전부 고정하시겠습니까?')) return;
+        var allLocked = {};
+        for (var m = 1; m <= 14; m++) allLocked[m] = true;
+        names.forEach(function(u) { localStorage.setItem('vct_po_locked:' + u, JSON.stringify(allLocked)); });
+        alert('PO 전체 고정 완료 (' + names.length + '명)');
+      });
+
+      var e2 = document.getElementById('btn-po-unlock-all');
+      if (e2) e2.addEventListener('click', function() {
+        var names = getAllUsernames();
+        if (!names.length) { alert('닉네임을 등록한 참가자가 없습니다.'); return; }
+        if (!confirm(names.length + '명의 PO 예측 고정을 전부 해제하시겠습니까?')) return;
+        names.forEach(function(u) { localStorage.removeItem('vct_po_locked:' + u); });
+        alert('PO 전체 고정 해제 완료 (' + names.length + '명)');
+      });
     })();
 
     /* ── 탭 전환 ── */
@@ -1884,7 +1935,7 @@
 
       /* 잠금 상태 복원 */
       try { if (localStorage.getItem(lockKey()) === '1') gsLocked = true; } catch(e) {}
-      try { if (localStorage.getItem(poLockKey()) === '1') poLocked = true; } catch(e) {}
+      loadPoLocked();
       loadGsPred();
       renderSlots(-1);
       renderPool();
