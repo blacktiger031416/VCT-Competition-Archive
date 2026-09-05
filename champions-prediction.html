@@ -290,6 +290,30 @@
     .slot-record-btn.active-20 { background: rgba(61,220,132,.2); border-color: rgba(61,220,132,.45); color: #3ddc84; }
     .slot-record-btn.active-21 { background: rgba(255,200,60,.18); border-color: rgba(255,200,60,.4); color: #ffc840; }
 
+    /* 2-0 선택 플래시 */
+    @keyframes recordFlash20 {
+      0%   { transform: scale(1);    background: rgba(61,220,132,.7);  box-shadow: 0 0 0 0   rgba(61,220,132,.9),  0 0 14px rgba(61,220,132,.8); }
+      35%  { transform: scale(1.22); background: rgba(61,220,132,.9);  box-shadow: 0 0 0 4px rgba(61,220,132,.5),  0 0 22px rgba(61,220,132,.7); }
+      65%  { transform: scale(.95);  background: rgba(61,220,132,.35); box-shadow: 0 0 0 2px rgba(61,220,132,.3),  0 0 10px rgba(61,220,132,.4); }
+      100% { transform: scale(1);    background: rgba(61,220,132,.2);  box-shadow: none; }
+    }
+    /* 2-1 선택 플래시 */
+    @keyframes recordFlash21 {
+      0%   { transform: scale(1);    background: rgba(255,200,60,.7);  box-shadow: 0 0 0 0   rgba(255,200,60,.9),  0 0 14px rgba(255,200,60,.8); }
+      35%  { transform: scale(1.22); background: rgba(255,200,60,.9);  box-shadow: 0 0 0 4px rgba(255,200,60,.5),  0 0 22px rgba(255,200,60,.7); }
+      65%  { transform: scale(.95);  background: rgba(255,200,60,.35); box-shadow: 0 0 0 2px rgba(255,200,60,.3),  0 0 10px rgba(255,200,60,.4); }
+      100% { transform: scale(1);    background: rgba(255,200,60,.18); box-shadow: none; }
+    }
+    /* 비활성 버튼 shrink */
+    @keyframes recordDeselect {
+      0%   { transform: scale(1); opacity: 1; }
+      40%  { transform: scale(.88); opacity: .5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .slot-record-btn.flash-20 { animation: recordFlash20 .38s cubic-bezier(.22,1,.36,1) forwards; }
+    .slot-record-btn.flash-21 { animation: recordFlash21 .38s cubic-bezier(.22,1,.36,1) forwards; }
+    .slot-record-btn.deselect  { animation: recordDeselect .25s ease forwards; }
+
     /* remove button */
     .slot-remove {
       position: absolute; top: 5px; right: 5px; z-index: 5;
@@ -749,12 +773,37 @@
 
     function onRecordToggle(e) {
       e.stopPropagation();
-      var idx = parseInt(e.currentTarget.dataset.idx);
-      var rec = e.currentTarget.dataset.rec;
-      if (slots[idx]) {
-        slots[idx].record = rec;
-        renderSlots(-1);
-      }
+      var btn = e.currentTarget;
+      var idx = parseInt(btn.dataset.idx);
+      var rec = btn.dataset.rec;
+      if (!slots[idx] || slots[idx].record === rec) return;
+
+      slots[idx].record = rec;
+
+      /* 같은 슬롯의 버튼들을 직접 찾아서 애니메이션 */
+      var slotEl = document.querySelector('#slots-grid .slot[data-idx="' + idx + '"]');
+      if (!slotEl) { renderSlots(-1); return; }
+
+      var btns = slotEl.querySelectorAll('.slot-record-btn');
+      btns.forEach(function(b) {
+        b.classList.remove('active-20','active-21','flash-20','flash-21','deselect');
+        void b.offsetWidth; // reflow
+
+        if (b.dataset.rec === rec) {
+          /* 선택된 버튼: active 클래스 + 플래시 */
+          b.classList.add(rec === '2-0' ? 'active-20' : 'active-21');
+          b.classList.add(rec === '2-0' ? 'flash-20' : 'flash-21');
+          b.addEventListener('animationend', function() {
+            b.classList.remove('flash-20','flash-21');
+          }, { once: true });
+        } else {
+          /* 해제된 버튼: shrink */
+          b.classList.add('deselect');
+          b.addEventListener('animationend', function() {
+            b.classList.remove('deselect');
+          }, { once: true });
+        }
+      });
     }
 
     /* ── 탭 전환 ── */
