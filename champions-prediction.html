@@ -857,6 +857,10 @@
       var u = currentUser();
       return u ? base + ':' + u.username : base;
     }
+    function lockKey() {
+      var u = currentUser();
+      return u ? 'vct_gs_locked:' + u.username : 'vct_gs_locked';
+    }
     function nickKey() {
       var u = currentUser();
       return u ? 'vct_nickname:' + u.username : null;
@@ -1057,21 +1061,24 @@
           + '<div class="locked-badge-sub">더 이상 수정할 수 없습니다.</div></div>';
         area.appendChild(badge);
 
-        /* 잠금 해제 버튼 (테스트용) */
-        var unlockBtn = document.createElement('button');
-        unlockBtn.textContent = '잠금 해제';
-        unlockBtn.style.cssText = 'margin-left:12px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;';
-        unlockBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,80,80,.15)'; this.style.borderColor='rgba(255,80,80,.4)'; this.style.color='#ff6060'; });
-        unlockBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,255,255,.06)'; this.style.borderColor='rgba(255,255,255,.18)'; this.style.color='rgba(255,255,255,.45)'; });
-        unlockBtn.addEventListener('click', function() {
-          gsLocked = false;
-          try { localStorage.removeItem('vct_gs_locked'); } catch(e) {}
-          var wrap = document.querySelector('.gs-wrap');
-          if (wrap) wrap.classList.remove('locked');
-          renderSlots(-1);
-          renderPool();
-        });
-        area.appendChild(unlockBtn);
+        /* 잠금 해제 버튼 — Admin 전용 */
+        if (typeof window.vctIsAdmin === 'function' && window.vctIsAdmin()) {
+          var unlockBtn = document.createElement('button');
+          unlockBtn.textContent = '잠금 해제';
+          unlockBtn.style.cssText = 'margin-left:12px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;';
+          unlockBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,80,80,.15)'; this.style.borderColor='rgba(255,80,80,.4)'; this.style.color='#ff6060'; });
+          unlockBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,255,255,.06)'; this.style.borderColor='rgba(255,255,255,.18)'; this.style.color='rgba(255,255,255,.45)'; });
+          unlockBtn.addEventListener('click', function() {
+            gsLocked = false;
+            try { localStorage.removeItem(lockKey()); } catch(e) {}
+            var wrap = document.querySelector('.gs-wrap');
+            if (wrap) wrap.classList.remove('locked');
+            renderSlots(-1);
+            renderPool();
+          });
+          area.appendChild(unlockBtn);
+        }
+
         /* wrap에 locked 클래스 */
         var wrap = document.querySelector('.gs-wrap');
         if (wrap) wrap.classList.add('locked');
@@ -1091,7 +1098,7 @@
     /* ── 확정 ── */
     function onConfirm() {
       gsLocked = true;
-      try { localStorage.setItem('vct_gs_locked', '1'); } catch(e) {}
+      try { localStorage.setItem(lockKey(), '1'); } catch(e) {}
       renderConfirmArea();
     }
 
@@ -1769,7 +1776,7 @@
       renderNicknameBar();
 
       /* 잠금 상태 복원 */
-      try { if (localStorage.getItem('vct_gs_locked') === '1') gsLocked = true; } catch(e) {}
+      try { if (localStorage.getItem(lockKey()) === '1') gsLocked = true; } catch(e) {}
       loadGsPred();
       renderSlots(-1);
       renderPool();
