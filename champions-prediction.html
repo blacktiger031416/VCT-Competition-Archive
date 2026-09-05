@@ -243,12 +243,19 @@
       filter: drop-shadow(0 4px 16px rgba(0,0,0,.7));
     }
     @keyframes logoIn {
-      0%   { transform: scale(0) rotate(-15deg); opacity: 0; filter: brightness(3); }
-      55%  { transform: scale(1.18) rotate(3deg); opacity: 1; filter: brightness(1.4); }
-      80%  { transform: scale(.94) rotate(-1deg); filter: brightness(1); }
-      100% { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      55%  { transform: scale(1.18) rotate(3deg); opacity: 1; }
+      80%  { transform: scale(.94) rotate(-1deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    /* 일반 로고 brightness 플래시 (흰 로고는 적용 안 함) */
+    @keyframes logoBrightFlash {
+      0%   { filter: brightness(3); }
+      50%  { filter: brightness(1.5); }
+      100% { filter: brightness(1); }
     }
     .slot.appear .slot-logo { animation: logoIn .5s .05s cubic-bezier(.22,1,.36,1) both; }
+    .slot.appear .slot-logo.logo-bright { animation: logoIn .5s .05s cubic-bezier(.22,1,.36,1) both, logoBrightFlash .5s .05s ease both; }
 
     @keyframes codeIn {
       0%   { opacity: 0; letter-spacing: .4em; }
@@ -544,7 +551,7 @@
 
           /* logo */
           var img = document.createElement('img');
-          img.className = 'slot-logo';
+          img.className = 'slot-logo' + (s.white ? '' : ' logo-bright');
           img.src = s.logo; img.alt = s.code;
           if (s.white) img.style.filter = 'brightness(0) invert(1)';
           img.onerror = function(){ this.style.display='none'; };
