@@ -732,6 +732,22 @@
           + '<div><div class="locked-badge-text">예측 확정 완료</div>'
           + '<div class="locked-badge-sub">더 이상 수정할 수 없습니다.</div></div>';
         area.appendChild(badge);
+
+        /* 잠금 해제 버튼 (테스트용) */
+        var unlockBtn = document.createElement('button');
+        unlockBtn.textContent = '잠금 해제';
+        unlockBtn.style.cssText = 'margin-left:12px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;';
+        unlockBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,80,80,.15)'; this.style.borderColor='rgba(255,80,80,.4)'; this.style.color='#ff6060'; });
+        unlockBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,255,255,.06)'; this.style.borderColor='rgba(255,255,255,.18)'; this.style.color='rgba(255,255,255,.45)'; });
+        unlockBtn.addEventListener('click', function() {
+          gsLocked = false;
+          try { localStorage.removeItem('vct_gs_locked'); } catch(e) {}
+          var wrap = document.querySelector('.gs-wrap');
+          if (wrap) wrap.classList.remove('locked');
+          renderSlots(-1);
+          renderPool();
+        });
+        area.appendChild(unlockBtn);
         /* wrap에 locked 클래스 */
         var wrap = document.querySelector('.gs-wrap');
         if (wrap) wrap.classList.add('locked');
