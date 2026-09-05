@@ -585,6 +585,28 @@
     }
     .bm-team.winner-row.flash { animation: bmWinFlash .45s ease both; }
     .gf-match .bm-team.winner-row.flash { animation: none; }
+    .bm-team.loser-row { opacity: .35; }
+    /* 스코어 버튼 */
+    .bm-score-wrap { display: flex; gap: 3px; flex-shrink: 0; }
+    .bm-score-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      padding: 2px 5px; border-radius: 3px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.06); color: rgba(255,255,255,.35);
+      cursor: pointer; transition: all .12s; line-height: 1.4;
+    }
+    .bm-score-btn.active-20 { background: rgba(61,220,132,.2); border-color: rgba(61,220,132,.5); color: #3ddc84; }
+    .bm-score-btn.active-21 { background: rgba(255,200,60,.18); border-color: rgba(255,200,60,.45); color: #ffc840; }
+    .bm-score-btn.active-gf { background: rgba(255,215,0,.18); border-color: rgba(255,215,0,.45); color: gold; }
+    .bm-score-btn:not(.active-20):not(.active-21):not(.active-gf):hover { background: rgba(255,255,255,.1); }
+    /* 예측 없음 안내 */
+    .po-no-matchup {
+      padding: 40px 24px; text-align: center;
+      color: rgba(255,255,255,.2); font-size: 13px;
+      border: 1px dashed rgba(255,255,255,.08); border-radius: 10px;
+      margin: 20px 0;
+    }
   </style>
   <script src="./storage.js"></script>
   <script src="./auth.js" defer></script>
@@ -1066,104 +1088,47 @@
     }
 
     /* ══════════════════════════════════════════════
-       플레이오프 더블 엘리미네이션 브래킷
+       플레이오프 예측 — Admin 실제 대진 기반
        ══════════════════════════════════════════════ */
 
-    /* 전체 14경기 상태 */
-    var PO_STATE = {};
-    for (var _pi = 1; _pi <= 14; _pi++) {
-      PO_STATE[_pi] = { a: null, b: null, winner: null, seedA: null, seedB: null };
-    }
+    var PO_MATCHUPS = {}; /* Admin 설정 대진 {mid: {a: team, b: team}} */
+    var PO_PRED     = {}; /* 유저 예측 {mid: {winner: code, score: '2-0'|'2-1'|'3-x'}} */
 
-    /* UB R1 시드 배치: [시드A, 시드B] for M1~M4 */
-    var UB_SEEDS = [[1,8],[4,5],[2,7],[3,6]];
-
-    /* 승자/패자 라우팅 */
-    var PO_ROUTING = {
-      1:  { win:{m:5, s:'a'}, lose:{m:8, s:'a'}  },
-      2:  { win:{m:5, s:'b'}, lose:{m:9, s:'a'}  },
-      3:  { win:{m:6, s:'a'}, lose:{m:9, s:'b'}  },
-      4:  { win:{m:6, s:'b'}, lose:{m:8, s:'b'}  },
-      5:  { win:{m:7, s:'a'}, lose:{m:11,s:'b'}  },
-      6:  { win:{m:7, s:'b'}, lose:{m:10,s:'b'}  },
-      7:  { win:{m:14,s:'a'}, lose:{m:13,s:'b'}  },
-      8:  { win:{m:10,s:'a'} },
-      9:  { win:{m:11,s:'a'} },
-      10: { win:{m:12,s:'a'} },
-      11: { win:{m:12,s:'b'} },
-      12: { win:{m:13,s:'a'} },
-      13: { win:{m:14,s:'b'} },
-    };
-
-    function getPoSlotTeam(seedNum) {
-      var idx = seedNum - 1;
-      return (idx >= 0 && idx < 8 && slots[idx]) ? slots[idx] : null;
-    }
-
-    function setPoSeeds() {
-      UB_SEEDS.forEach(function(pair, i) {
-        var mid = i + 1;
-        PO_STATE[mid].a    = getPoSlotTeam(pair[0]);
-        PO_STATE[mid].b    = getPoSlotTeam(pair[1]);
-        PO_STATE[mid].seedA = pair[0];
-        PO_STATE[mid].seedB = pair[1];
-      });
-    }
-
-    function propagatePo() {
-      for (var mid = 1; mid <= 13; mid++) {
-        var m = PO_STATE[mid];
-        if (!m.winner) continue;
-        var route = PO_ROUTING[mid];
-        if (!route) continue;
-        if (route.win) {
-          PO_STATE[route.win.m][route.win.s] = m.winner;
+    function loadPoMatchups() {
+      PO_MATCHUPS = {};
+      try {
+        var raw = localStorage.getItem('vct_po_answers');
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        for (var mid = 1; mid <= 14; mid++) {
+          var d = data[mid];
+          if (d && d.a && d.b) PO_MATCHUPS[mid] = { a: d.a, b: d.b };
         }
-        if (route.lose && m.a && m.b) {
-          var loser = (m.winner.code === m.a.code) ? m.b : m.a;
-          if (loser) PO_STATE[route.lose.m][route.lose.s] = loser;
-        }
-      }
+      } catch(e) {}
     }
 
-    function clearPoDownstream(mid) {
-      var m = PO_STATE[mid];
-      var route = PO_ROUTING[mid];
-      if (!route || !m.winner) return;
-      var oldWin  = m.winner;
-      var oldLose = (m.a && m.b) ? (oldWin.code === m.a.code ? m.b : m.a) : null;
-
-      function wipe(destMid, destSide, team) {
-        if (!team) return;
-        var dm = PO_STATE[destMid];
-        if (dm[destSide] && dm[destSide].code === team.code) {
-          dm[destSide] = null;
-          if (dm.winner && dm.winner.code === team.code) {
-            dm.winner = null;
-            clearPoDownstream(destMid);
-          }
-        }
-      }
-      if (route.win)  wipe(route.win.m,  route.win.s,  oldWin);
-      if (route.lose) wipe(route.lose.m, route.lose.s, oldLose);
+    function savePoP() {
+      try { localStorage.setItem('vct_po_pred', JSON.stringify(PO_PRED)); } catch(e) {}
     }
 
-    function pickPoWinner(mid, side) {
-      var m = PO_STATE[mid];
-      var team = m[side];
-      if (!team) return;
+    function loadPoP() {
+      try {
+        var raw = localStorage.getItem('vct_po_pred');
+        PO_PRED = raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { PO_PRED = {}; }
+    }
 
-      if (m.winner && m.winner.code === team.code) {
-        clearPoDownstream(mid);
-        m.winner = null;
+    function pickPoPred(mid, teamCode) {
+      if (!PO_MATCHUPS[mid]) return;
+      var prev = PO_PRED[mid];
+      if (prev && prev.winner === teamCode) {
+        delete PO_PRED[mid];
       } else {
-        if (m.winner) clearPoDownstream(mid);
-        m.winner = team;
-        propagatePo();
+        var defScore = (mid === 14) ? '3-0' : '2-0';
+        PO_PRED[mid] = { winner: teamCode, score: (prev && prev.score) ? prev.score : defScore };
       }
-      savePo();
+      savePoP();
       renderPo();
-      /* winner row flash */
       setTimeout(function() {
         var card = document.querySelector('.bm[data-match="' + mid + '"]');
         if (!card) return;
@@ -1176,45 +1141,37 @@
       }, 10);
     }
 
-    function savePo() {
-      try {
-        var d = {};
-        for (var i = 1; i <= 14; i++) {
-          d[i] = { winner: PO_STATE[i].winner ? PO_STATE[i].winner.code : null };
+    function pickPoScore(mid, score) {
+      if (!PO_PRED[mid]) return;
+      if (PO_PRED[mid].score === score) return;
+      PO_PRED[mid].score = score;
+      savePoP();
+      /* in-place 업데이트 */
+      var card = document.querySelector('.bm[data-match="' + mid + '"]');
+      if (!card) return;
+      card.querySelectorAll('.bm-score-btn').forEach(function(b) {
+        b.classList.remove('active-20','active-21','active-gf');
+        if (b.dataset.score === score) {
+          b.classList.add(score === '2-0' ? 'active-20' : score === '2-1' ? 'active-21' : 'active-gf');
         }
-        localStorage.setItem('vct_po_v2', JSON.stringify(d));
-      } catch(e) {}
-    }
-
-    function loadPo() {
-      try {
-        var raw = localStorage.getItem('vct_po_v2');
-        if (!raw) return;
-        var d = JSON.parse(raw);
-        for (var mid = 1; mid <= 13; mid++) {
-          if (!d[mid] || !d[mid].winner) continue;
-          var m = PO_STATE[mid];
-          if (m.winner) continue;
-          var wCode = d[mid].winner;
-          var team  = (m.a && m.a.code === wCode) ? m.a
-                    : (m.b && m.b.code === wCode) ? m.b : null;
-          if (team) { m.winner = team; propagatePo(); }
-        }
-      } catch(e) {}
+      });
     }
 
     /* ── 카드 생성 ── */
     function makeBmCard(mid, type) {
-      var m = PO_STATE[mid];
+      var mu   = PO_MATCHUPS[mid] || { a: null, b: null };
+      var pred = PO_PRED[mid] || null;
+      var isGF = (mid === 14);
+      var scores = isGF ? ['3-0','3-1','3-2'] : ['2-0','2-1'];
+
       var card = document.createElement('div');
       card.className = 'bm ' + (type || '') + '-match';
       card.dataset.match = mid;
 
       ['a','b'].forEach(function(side, idx) {
-        var team = m[side];
-        var seed = (side === 'a') ? m.seedA : m.seedB;
-        var isWin  = !!(m.winner && team && m.winner.code === team.code);
-        var isLose = !!(m.winner && team && m.winner.code !== team.code);
+        var team   = mu[side];
+        var isWin  = !!(pred && team && pred.winner === team.code);
+        var isLose = !!(pred && team && pred.winner !== team.code);
         var isTbd  = !team;
 
         var row = document.createElement('div');
@@ -1222,32 +1179,25 @@
           + (isWin  ? ' winner-row' : '')
           + (isLose ? ' loser-row'  : '')
           + (isTbd  ? ' bm-tbd'     : '')
-          + (!isTbd && !m.winner ? ' clickable' : '');
+          + (!isTbd ? ' clickable'  : '');
 
-        if (!isTbd && !m.winner) {
-          row.addEventListener('click', (function(m_, s_){
-            return function(){ pickPoWinner(m_, s_); };
-          })(mid, side));
+        if (!isTbd) {
+          row.addEventListener('click', (function(m_, code_){
+            return function(){ pickPoPred(m_, code_); };
+          })(mid, team.code));
         }
-
-        /* 시드 번호 */
-        var seedEl = document.createElement('span');
-        seedEl.className = 'bm-seed';
-        seedEl.textContent = seed || '';
-        row.appendChild(seedEl);
 
         /* 로고 */
         if (team && team.logo) {
           var img = document.createElement('img');
-          img.className = 'bm-logo';
-          img.src = team.logo; img.alt = team.code || '';
+          img.className = 'bm-logo'; img.src = team.logo; img.alt = team.code || '';
           if (team.white) img.style.filter = 'brightness(0) invert(1)';
           img.onerror = function(){ this.style.display='none'; };
           row.appendChild(img);
         } else {
           var ph = document.createElement('div');
           ph.className = 'bm-logo-ph';
-          ph.textContent = isTbd ? '?' : (team ? team.code.slice(0,2) : '?');
+          ph.textContent = '?';
           row.appendChild(ph);
         }
 
@@ -1257,11 +1207,26 @@
         codeEl.textContent = team ? team.code : 'TBD';
         row.appendChild(codeEl);
 
-        /* 승자 마크 */
-        var mark = document.createElement('span');
-        mark.className = 'bm-win-mark';
-        mark.textContent = '●';
-        row.appendChild(mark);
+        /* 예측 승자 → 스코어 버튼 / 그 외 → win-mark */
+        if (isWin) {
+          var sw = document.createElement('div');
+          sw.className = 'bm-score-wrap';
+          scores.forEach(function(sc) {
+            var btn = document.createElement('button');
+            var activeCls = sc === '2-0' ? 'active-20' : sc === '2-1' ? 'active-21' : 'active-gf';
+            btn.className = 'bm-score-btn' + (pred.score === sc ? ' ' + activeCls : '');
+            btn.textContent = sc; btn.dataset.score = sc;
+            btn.addEventListener('click', (function(m_, s_){
+              return function(e){ e.stopPropagation(); pickPoScore(m_, s_); };
+            })(mid, sc));
+            sw.appendChild(btn);
+          });
+          row.appendChild(sw);
+        } else {
+          var mark = document.createElement('span');
+          mark.className = 'bm-win-mark'; mark.textContent = '●';
+          row.appendChild(mark);
+        }
 
         card.appendChild(row);
         if (idx === 0) {
@@ -1302,6 +1267,15 @@
       var container = document.getElementById('po-bracket');
       if (!container) return;
       container.innerHTML = '';
+
+      var anyMatchup = Object.keys(PO_MATCHUPS).length > 0;
+      if (!anyMatchup) {
+        var notice = document.createElement('div');
+        notice.className = 'po-no-matchup';
+        notice.innerHTML = '🏆 플레이오프 대진이 아직 설정되지 않았습니다.<br><span style="font-size:11px;opacity:.6">관리자가 정답 페이지에서 대진을 입력하면 여기에 표시됩니다.</span>';
+        container.appendChild(notice);
+        return;
+      }
 
       /* de-outer: 왼쪽(UB+LB) + 오른쪽(GF) */
       var outer = document.createElement('div');
@@ -1396,8 +1370,8 @@
         loadGsPred();
         renderSlots(-1);
         renderPool();
-        setPoSeeds();
-        loadPo();
+        loadPoMatchups();
+        loadPoP();
         renderPo();
       } else {
         document.getElementById('coming-soon').style.display = 'block';

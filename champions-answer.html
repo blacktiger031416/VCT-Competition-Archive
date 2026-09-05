@@ -273,6 +273,171 @@
       border:1px dashed rgba(255,255,255,.08);border-radius:8px;
     }
 
+    /* ── 내부 탭 ── */
+    .inner-tabs {
+      display:flex;align-items:flex-end;gap:0;margin-bottom:24px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .inner-tab-btn {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(255,255,255,.35);background:none;border:none;
+      padding:0 20px;height:40px;cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      transition:color .15s,border-color .15s;
+    }
+    .inner-tab-btn:hover { color:rgba(255,255,255,.7); }
+    .inner-tab-btn.active { color:#fff;border-bottom-color:var(--accent); }
+    .inner-tab-panel { display:none; }
+    .inner-tab-panel.active { display:block; }
+
+    /* ── PO 브래킷 (공유) ── */
+    .po-wrap { padding:8px 0 40px;overflow-x:auto; }
+    .de-outer { display:flex;align-items:stretch;gap:0; }
+    .de-brackets { flex:1;min-width:0; }
+    .de-gf {
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:0 16px;min-width:220px;gap:10px;
+    }
+    .gf-label {
+      font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+      letter-spacing:.12em;text-transform:uppercase;color:rgba(255,200,60,.55);
+      text-align:center;line-height:1.4;
+    }
+    .po-section { margin-bottom:20px; }
+    .po-section-title {
+      display:flex;align-items:center;gap:10px;
+      font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);
+      margin-bottom:10px;
+    }
+    .po-section-title::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.06); }
+    .ub-drop-label {
+      font-size:10px;color:rgba(99,179,237,.4);margin-top:6px;
+      font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;
+    }
+    .bracket-rounds { display:flex;align-items:stretch; }
+    .bracket-round-col { display:flex;flex-direction:column; }
+    .bracket-round-header {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+      color:rgba(255,255,255,.2);padding:0 12px 8px;
+    }
+    .bracket-slots { display:flex;flex-direction:column;flex:1; }
+    .bracket-slot { display:flex;flex-direction:column;justify-content:center;padding:6px 12px;flex:1; }
+
+    .bm {
+      width:190px;border-radius:7px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.03);flex-shrink:0;
+    }
+    .bm.ub-match { border-left:2.5px solid rgba(99,179,237,.4); }
+    .bm.lb-match { border-left:2.5px solid rgba(252,129,74,.4); }
+    .bm.gf-match {
+      border-left:2.5px solid rgba(255,215,0,.6);width:210px;
+      box-shadow:0 0 24px rgba(255,215,0,.08);
+    }
+    .bm-team {
+      display:flex;align-items:center;gap:8px;padding:10px 10px;
+      transition:background .12s,opacity .15s;min-height:42px;
+    }
+    .bm-team.clickable { cursor:pointer; }
+    .bm-team.clickable:hover { background:rgba(255,255,255,.08); }
+    .bm-team.winner-row { background:rgba(61,220,132,.1); }
+    .bm-team.loser-row { opacity:.35; }
+    .gf-match .bm-team.winner-row { background:rgba(255,215,0,.1); }
+    .bm-divider { height:1px;background:rgba(255,255,255,.06); }
+    .bm-logo { width:26px;height:26px;object-fit:contain;flex-shrink:0; }
+    .bm-logo-ph {
+      width:26px;height:26px;border-radius:4px;
+      background:rgba(255,255,255,.07);
+      display:flex;align-items:center;justify-content:center;
+      font-size:8px;font-weight:800;color:rgba(255,255,255,.25);flex-shrink:0;
+    }
+    .bm-code { font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:#fff;flex:1; }
+    .bm-tbd .bm-code { color:rgba(255,255,255,.2); }
+    .bm-win-mark { font-size:10px;color:#3ddc84;opacity:0;flex-shrink:0; }
+    .bm-team.winner-row .bm-win-mark { opacity:1; }
+    .gf-match .bm-team.winner-row .bm-win-mark { color:gold; }
+    @keyframes bmWinFlash {
+      0% { background:rgba(61,220,132,.5); }
+      100% { background:rgba(61,220,132,.1); }
+    }
+    .bm-team.winner-row.flash { animation:bmWinFlash .45s ease both; }
+    /* 스코어 버튼 */
+    .bm-score-wrap { display:flex;gap:3px;flex-shrink:0; }
+    .bm-score-btn {
+      font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+      padding:2px 5px;border-radius:3px;border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.35);
+      cursor:pointer;transition:all .12s;line-height:1.4;
+    }
+    .bm-score-btn.active-20 { background:rgba(61,220,132,.2);border-color:rgba(61,220,132,.5);color:#3ddc84; }
+    .bm-score-btn.active-21 { background:rgba(255,200,60,.18);border-color:rgba(255,200,60,.45);color:#ffc840; }
+    .bm-score-btn.active-gf { background:rgba(255,215,0,.18);border-color:rgba(255,215,0,.45);color:gold; }
+    .bm-score-btn:not(.active-20):not(.active-21):not(.active-gf):hover { background:rgba(255,255,255,.1); }
+    /* TBD 슬롯 (admin) */
+    .bm-tbd-row {
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      min-height:42px;padding:10px;cursor:pointer;
+      background:rgba(255,255,255,.02);transition:background .12s;
+    }
+    .bm-tbd-row:hover { background:rgba(255,255,255,.06); }
+    .bm-tbd-row span { font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.08em; }
+    .bm-tbd-row.active-pick { background:rgba(255,200,60,.08);border:1px solid rgba(255,200,60,.25); }
+    .bm-remove-team {
+      margin-left:auto;flex-shrink:0;width:16px;height:16px;border-radius:50%;
+      background:rgba(255,60,90,.2);border:none;color:rgba(255,255,255,.4);
+      font-size:8px;font-weight:800;cursor:pointer;display:none;
+      align-items:center;justify-content:center;line-height:1;
+    }
+    .admin-mode .bm-team .bm-remove-team { display:flex; }
+
+    /* 팀 피커 패널 */
+    .po-team-picker {
+      background:rgba(13,19,24,.97);border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;padding:16px;margin:12px 0;
+      backdrop-filter:blur(12px);
+    }
+    .po-picker-header {
+      font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.15em;text-transform:uppercase;color:rgba(255,200,60,.7);
+      margin-bottom:12px;
+    }
+    .po-picker-cancel {
+      float:right;background:none;border:none;color:rgba(255,255,255,.3);
+      cursor:pointer;font-size:14px;line-height:1;
+    }
+    .po-picker-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px; }
+    .po-picker-team {
+      display:flex;align-items:center;gap:8px;padding:7px 10px;
+      border-radius:6px;border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);cursor:pointer;transition:all .12s;
+    }
+    .po-picker-team:hover { background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15); }
+    .po-picker-team img { width:22px;height:22px;object-fit:contain;flex-shrink:0; }
+    .po-picker-team span { font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:#fff; }
+
+    /* PO 채점 */
+    .po-score-wrap { margin-top:28px; }
+    .po-no-matchup {
+      padding:40px 24px;text-align:center;
+      color:rgba(255,255,255,.2);font-size:13px;
+      border:1px dashed rgba(255,255,255,.08);border-radius:10px;margin:20px 0;
+    }
+    .po-match-score-list { display:flex;flex-direction:column;gap:6px; }
+    .po-match-score-item {
+      display:flex;align-items:center;gap:10px;padding:8px 10px;
+      border-radius:6px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);
+      font-size:13px;
+    }
+    .po-match-score-item.hit { border-color:rgba(61,220,132,.25);background:rgba(61,220,132,.05); }
+    .po-match-score-item.partial { border-color:rgba(255,200,60,.2);background:rgba(255,200,60,.04); }
+    .po-match-score-item.miss { opacity:.4; }
+    .po-match-label { font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.25);width:60px;flex-shrink:0; }
+    .po-match-vs { font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;flex:1; }
+    .po-pred-val { font-family:'Barlow Condensed',sans-serif;font-size:11px;color:rgba(255,255,255,.3);margin-right:4px; }
+
     /* Admin 배지 */
     .admin-badge {
       display:inline-flex;align-items:center;gap:5px;
@@ -304,34 +469,62 @@
   </nav>
 
   <div class="page-wrap">
-    <div class="page-title">
-      그룹 스테이지 <span style="color:#fff">정답</span>
+    <div class="page-title" style="margin-bottom:4px">
+      챔피언스 <span style="color:#fff">정답</span>
       <span class="admin-badge" id="admin-badge" style="display:none">✎ 관리자</span>
       <span class="readonly-notice" id="readonly-badge" style="display:none">🔒 읽기 전용</span>
     </div>
-    <div class="page-subtitle">플레이오프 진출팀 정답 &mdash; 팀이 확정될수록 바로 채점됩니다</div>
 
-    <!-- 정답 슬롯 -->
-    <div class="section">
-      <div class="section-head">
-        <span class="section-label">정답 슬롯</span>
-        <span class="count-badge"><span id="ans-count">0</span> / 8 확정</span>
+    <nav class="inner-tabs">
+      <button class="inner-tab-btn active" data-itab="gs">그룹 스테이지</button>
+      <button class="inner-tab-btn" data-itab="po">플레이오프</button>
+    </nav>
+
+    <!-- ─ 그룹 스테이지 탭 ─ -->
+    <div class="inner-tab-panel active" id="itab-gs">
+      <div class="page-subtitle" style="margin-bottom:20px">플레이오프 진출팀 정답 &mdash; 팀이 확정될수록 바로 채점됩니다</div>
+
+      <div class="section">
+        <div class="section-head">
+          <span class="section-label">정답 슬롯</span>
+          <span class="count-badge"><span id="ans-count">0</span> / 8 확정</span>
+        </div>
+        <div class="ans-grid" id="ans-grid"></div>
+        <div id="ans-pool">
+          <div class="pool-section-label">팀 선택</div>
+          <div class="regions-grid" id="ans-regions"></div>
+        </div>
       </div>
-      <div class="ans-grid" id="ans-grid"></div>
 
-      <!-- Admin 전용 팀 풀 -->
-      <div id="ans-pool">
-        <div class="pool-section-label">팀 선택</div>
-        <div class="regions-grid" id="ans-regions"></div>
+      <div class="section" id="scoring-section">
+        <div class="section-head">
+          <span class="section-label">예측 채점 결과</span>
+        </div>
+        <div id="score-area"></div>
       </div>
     </div>
 
-    <!-- 채점 결과 -->
-    <div class="section" id="scoring-section">
-      <div class="section-head">
-        <span class="section-label">예측 채점 결과</span>
+    <!-- ─ 플레이오프 탭 ─ -->
+    <div class="inner-tab-panel" id="itab-po">
+      <div class="page-subtitle" style="margin-bottom:16px">실제 대진을 입력하고 결과를 확정하세요 &mdash; 예측과 자동 채점됩니다</div>
+      <div class="po-wrap">
+        <div id="po-ans-bracket"></div>
       </div>
-      <div id="score-area"></div>
+      <!-- Admin 팀 피커 -->
+      <div id="po-team-picker" class="po-team-picker" style="display:none">
+        <div class="po-picker-header">
+          <button class="po-picker-cancel" id="po-picker-cancel">✕</button>
+          팀 선택 &mdash; <span id="po-picker-slot-label"></span>
+        </div>
+        <div class="po-picker-grid" id="po-picker-grid"></div>
+      </div>
+      <!-- PO 채점 -->
+      <div class="po-score-wrap">
+        <div class="section-head" style="margin-top:24px">
+          <span class="section-label">플레이오프 예측 채점</span>
+        </div>
+        <div id="po-score-area"></div>
+      </div>
     </div>
   </div>
 
@@ -670,6 +863,378 @@
       renderAnswers();
     }
 
+    /* ══════════════════════════════════════════════
+       플레이오프 정답 관리
+       ══════════════════════════════════════════════ */
+
+    var PO_ANS = {}; /* {mid: {a: team, b: team, winner: code, score: '2-0'|...}} */
+    var activePickSlot = null; /* {mid, side} — Admin 팀 피커 활성 슬롯 */
+
+    var ALL_TEAMS = (function(){
+      var t = [];
+      REGIONS.forEach(function(r){ r.teams.forEach(function(tm){ if (!tm.tbd) t.push(tm); }); });
+      return t;
+    })();
+
+    function savePoAns() {
+      try { localStorage.setItem('vct_po_answers', JSON.stringify(PO_ANS)); } catch(e) {}
+    }
+    function loadPoAns() {
+      try {
+        var raw = localStorage.getItem('vct_po_answers');
+        PO_ANS = raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { PO_ANS = {}; }
+    }
+    function loadPoPred() {
+      try {
+        var raw = localStorage.getItem('vct_po_pred');
+        return raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { return {}; }
+    }
+
+    /* ── PO 브래킷 렌더 ── */
+    function makePoBmCard(mid, type) {
+      var d    = PO_ANS[mid] || {};
+      var isGF = (mid === 14);
+      var scores = isGF ? ['3-0','3-1','3-2'] : ['2-0','2-1'];
+
+      var card = document.createElement('div');
+      card.className = 'bm ' + (type || '') + '-match';
+      card.dataset.match = mid;
+
+      ['a','b'].forEach(function(side, idx) {
+        var team    = d[side] || null;
+        var winner  = d.winner || null;
+        var isWin   = !!(winner && team && winner === team.code);
+        var isLose  = !!(winner && team && winner !== team.code);
+
+        var row;
+        if (!team) {
+          /* TBD → Admin 클릭 가능 */
+          row = document.createElement('div');
+          row.className = 'bm-tbd-row' + (isAdmin ? ' clickable' : '');
+          var pickKey = mid + ':' + side;
+          if (activePickSlot && activePickSlot.mid === mid && activePickSlot.side === side) {
+            row.classList.add('active-pick');
+          }
+          var ph = document.createElement('div'); ph.className = 'bm-logo-ph'; ph.textContent = '?';
+          var lbl = document.createElement('span');
+          lbl.textContent = isAdmin ? '+ 팀 선택' : 'TBD';
+          row.appendChild(ph); row.appendChild(lbl);
+          if (isAdmin) {
+            row.addEventListener('click', (function(m_, s_){
+              return function(){ openPoPicker(m_, s_); };
+            })(mid, side));
+          }
+        } else {
+          row = document.createElement('div');
+          row.className = 'bm-team'
+            + (isWin  ? ' winner-row' : '')
+            + (isLose ? ' loser-row'  : '')
+            + (isAdmin && !winner ? ' clickable' : '')
+            + (isAdmin && isWin  ? ' clickable' : '');
+
+          if (isAdmin) {
+            row.addEventListener('click', (function(m_, code_){
+              return function(){ pickPoAnsWinner(m_, code_); };
+            })(mid, team.code));
+          }
+
+          var img = document.createElement('img');
+          img.className = 'bm-logo'; img.src = team.logo; img.alt = team.code;
+          if (team.white) img.style.filter = 'brightness(0) invert(1)';
+          img.onerror = function(){ this.style.display='none'; };
+          row.appendChild(img);
+
+          var codeEl = document.createElement('span'); codeEl.className = 'bm-code';
+          codeEl.textContent = team.code; row.appendChild(codeEl);
+
+          if (isWin) {
+            var sw = document.createElement('div'); sw.className = 'bm-score-wrap';
+            scores.forEach(function(sc) {
+              var ac = sc === '2-0' ? 'active-20' : sc === '2-1' ? 'active-21' : 'active-gf';
+              var btn = document.createElement('button');
+              btn.className = 'bm-score-btn' + (d.score === sc ? ' ' + ac : '');
+              btn.textContent = sc; btn.dataset.score = sc;
+              if (isAdmin) {
+                btn.addEventListener('click', (function(m_, s_){
+                  return function(e){ e.stopPropagation(); pickPoAnsScore(m_, s_); };
+                })(mid, sc));
+              }
+              sw.appendChild(btn);
+            });
+            row.appendChild(sw);
+          } else {
+            /* Admin: X 제거 버튼 */
+            if (isAdmin) {
+              var rmBtn = document.createElement('button');
+              rmBtn.className = 'bm-remove-team'; rmBtn.textContent = '✕';
+              rmBtn.style.display = 'flex';
+              rmBtn.addEventListener('click', (function(m_, s_){
+                return function(e){ e.stopPropagation(); removePoAnsTeam(m_, s_); };
+              })(mid, side));
+              row.appendChild(rmBtn);
+            } else {
+              var mark = document.createElement('span'); mark.className = 'bm-win-mark'; mark.textContent = '●';
+              row.appendChild(mark);
+            }
+          }
+        }
+
+        card.appendChild(row);
+        if (idx === 0) {
+          var dv = document.createElement('div'); dv.className = 'bm-divider';
+          card.appendChild(dv);
+        }
+      });
+      return card;
+    }
+
+    function makePoRoundCol(label, matchDefs) {
+      var col = document.createElement('div'); col.className = 'bracket-round-col';
+      var hdr = document.createElement('div'); hdr.className = 'bracket-round-header'; hdr.textContent = label;
+      col.appendChild(hdr);
+      var slotsEl = document.createElement('div'); slotsEl.className = 'bracket-slots';
+      matchDefs.forEach(function(def) {
+        var slot = document.createElement('div'); slot.className = 'bracket-slot';
+        slot.style.flex = def.flex || 1;
+        slot.appendChild(makePoBmCard(def.id, def.type));
+        slotsEl.appendChild(slot);
+      });
+      col.appendChild(slotsEl); return col;
+    }
+
+    function renderPoAns() {
+      var container = document.getElementById('po-ans-bracket');
+      if (!container) return;
+      container.innerHTML = '';
+
+      var outer = document.createElement('div'); outer.className = 'de-outer';
+      var brackets = document.createElement('div'); brackets.className = 'de-brackets';
+
+      /* UB */
+      var ubSec = document.createElement('div'); ubSec.className = 'po-section';
+      var ubTitle = document.createElement('div'); ubTitle.className = 'po-section-title';
+      ubTitle.innerHTML = '<span style="color:rgba(99,179,237,.65)">▲</span>&nbsp;Upper Bracket';
+      ubSec.appendChild(ubTitle);
+      var ubR = document.createElement('div'); ubR.className = 'bracket-rounds';
+      ubR.appendChild(makePoRoundCol('Quarterfinals', [{id:1,flex:1,type:'ub'},{id:2,flex:1,type:'ub'},{id:3,flex:1,type:'ub'},{id:4,flex:1,type:'ub'}]));
+      ubR.appendChild(makePoRoundCol('Semifinals', [{id:5,flex:2,type:'ub'},{id:6,flex:2,type:'ub'}]));
+      ubR.appendChild(makePoRoundCol('Upper Final', [{id:7,flex:4,type:'ub'}]));
+      ubSec.appendChild(ubR);
+      var dropLbl = document.createElement('div'); dropLbl.className = 'ub-drop-label';
+      dropLbl.textContent = '↓ 패자 Lower Bracket 진출';
+      ubSec.appendChild(dropLbl);
+      brackets.appendChild(ubSec);
+
+      /* LB */
+      var lbSec = document.createElement('div'); lbSec.className = 'po-section';
+      var lbTitle = document.createElement('div'); lbTitle.className = 'po-section-title';
+      lbTitle.innerHTML = '<span style="color:rgba(252,129,74,.65)">▼</span>&nbsp;Lower Bracket';
+      lbSec.appendChild(lbTitle);
+      var lbR = document.createElement('div'); lbR.className = 'bracket-rounds';
+      lbR.appendChild(makePoRoundCol('Round 1', [{id:8,flex:1,type:'lb'},{id:9,flex:1,type:'lb'}]));
+      lbR.appendChild(makePoRoundCol('Round 2', [{id:10,flex:1,type:'lb'},{id:11,flex:1,type:'lb'}]));
+      lbR.appendChild(makePoRoundCol('Semifinal', [{id:12,flex:2,type:'lb'}]));
+      lbR.appendChild(makePoRoundCol('Final', [{id:13,flex:2,type:'lb'}]));
+      lbSec.appendChild(lbR);
+      brackets.appendChild(lbSec);
+      outer.appendChild(brackets);
+
+      /* GF */
+      var gfCol = document.createElement('div'); gfCol.className = 'de-gf';
+      var gfLbl = document.createElement('div'); gfLbl.className = 'gf-label';
+      gfLbl.innerHTML = '🏆<br>Grand Final';
+      gfCol.appendChild(gfLbl);
+      gfCol.appendChild(makePoBmCard(14, 'gf'));
+      outer.appendChild(gfCol);
+      container.appendChild(outer);
+
+      renderPoScore();
+    }
+
+    /* ── Admin: 팀 선택 ── */
+    function openPoPicker(mid, side) {
+      activePickSlot = { mid: mid, side: side };
+      var picker = document.getElementById('po-team-picker');
+      var lbl = document.getElementById('po-picker-slot-label');
+      lbl.textContent = 'M' + mid + ' — ' + (side === 'a' ? '위' : '아래') + ' 슬롯';
+      /* 피커 그리드 */
+      var grid = document.getElementById('po-picker-grid');
+      grid.innerHTML = '';
+      ALL_TEAMS.forEach(function(team) {
+        var el = document.createElement('div'); el.className = 'po-picker-team';
+        var img = document.createElement('img'); img.src = team.logo; img.alt = team.code;
+        if (team.white) img.style.filter = 'brightness(0) invert(1)';
+        img.onerror = function(){ this.style.display='none'; };
+        var nameEl = document.createElement('span'); nameEl.textContent = team.code;
+        el.appendChild(img); el.appendChild(nameEl);
+        el.addEventListener('click', function(){ assignPoTeam(team); });
+        grid.appendChild(el);
+      });
+      picker.style.display = 'block';
+      renderPoAns();
+    }
+
+    function closePoPicker() {
+      activePickSlot = null;
+      document.getElementById('po-team-picker').style.display = 'none';
+      renderPoAns();
+    }
+
+    function assignPoTeam(team) {
+      if (!activePickSlot) return;
+      var mid = activePickSlot.mid; var side = activePickSlot.side;
+      if (!PO_ANS[mid]) PO_ANS[mid] = {};
+      PO_ANS[mid][side] = { code:team.code, name:team.name, logo:team.logo, color:team.color, white:!!team.white };
+      if (PO_ANS[mid].winner) {
+        /* 이미 세팅된 winner가 이 슬롯이면 리셋 */
+        /* (새 팀으로 교체했으므로) */
+        delete PO_ANS[mid].winner; delete PO_ANS[mid].score;
+      }
+      savePoAns();
+      closePoPicker();
+    }
+
+    function removePoAnsTeam(mid, side) {
+      if (!PO_ANS[mid]) return;
+      delete PO_ANS[mid][side];
+      delete PO_ANS[mid].winner; delete PO_ANS[mid].score;
+      savePoAns(); renderPoAns();
+    }
+
+    function pickPoAnsWinner(mid, teamCode) {
+      if (!PO_ANS[mid]) return;
+      var d = PO_ANS[mid];
+      if (!d.a || !d.b) return;
+      if (d.winner === teamCode) { delete d.winner; delete d.score; }
+      else {
+        var isGF = (mid === 14);
+        d.winner = teamCode;
+        d.score  = d.score || (isGF ? '3-0' : '2-0');
+      }
+      savePoAns(); renderPoAns();
+    }
+
+    function pickPoAnsScore(mid, score) {
+      if (!PO_ANS[mid] || !PO_ANS[mid].winner) return;
+      PO_ANS[mid].score = score;
+      savePoAns();
+      /* in-place */
+      var card = document.querySelector('#po-ans-bracket .bm[data-match="' + mid + '"]');
+      if (!card) return;
+      card.querySelectorAll('.bm-score-btn').forEach(function(b) {
+        b.classList.remove('active-20','active-21','active-gf');
+        if (b.dataset.score === score) {
+          b.classList.add(score === '2-0' ? 'active-20' : score === '2-1' ? 'active-21' : 'active-gf');
+        }
+      });
+    }
+
+    /* ── PO 채점 ── */
+    var PO_MATCH_LABELS = {
+      1:'UB QF 1', 2:'UB QF 2', 3:'UB QF 3', 4:'UB QF 4',
+      5:'UB SF 1', 6:'UB SF 2', 7:'UB Final',
+      8:'LB R1 1', 9:'LB R1 2', 10:'LB R2 1', 11:'LB R2 2',
+      12:'LB SF', 13:'LB Final', 14:'Grand Final',
+    };
+
+    function renderPoScore() {
+      var area = document.getElementById('po-score-area');
+      if (!area) return;
+      area.innerHTML = '';
+      var pred = loadPoPred();
+      var results = Object.keys(PO_ANS).filter(function(mid){ return PO_ANS[mid].winner; });
+      if (results.length === 0) {
+        var n = document.createElement('div'); n.className = 'po-no-matchup';
+        n.textContent = '결과가 확정된 경기가 없습니다.';
+        area.appendChild(n); return;
+      }
+      var total = 0, maxPossible = results.length * 3;
+      var breakdown = [];
+      results.forEach(function(midStr) {
+        var mid = parseInt(midStr);
+        var d = PO_ANS[mid];
+        var p = pred[mid] || null;
+        var pts = 0;
+        var winnerTeam = (d.a && d.a.code === d.winner) ? d.a : (d.b && d.b.code === d.winner) ? d.b : null;
+        if (p && p.winner === d.winner) {
+          pts = 2;
+          if (p.score === d.score) pts = 3;
+        }
+        total += pts;
+        breakdown.push({ mid:mid, d:d, p:p, winnerTeam:winnerTeam, pts:pts });
+      });
+
+      /* 총점 */
+      var wrap = document.createElement('div'); wrap.className = 'score-wrap';
+      var summary = document.createElement('div'); summary.className = 'score-summary';
+      var ptsEl = document.createElement('span'); ptsEl.className = 'score-pts'; ptsEl.textContent = total; summary.appendChild(ptsEl);
+      var maxEl = document.createElement('span'); maxEl.className = 'score-max';
+      maxEl.innerHTML = '/ ' + maxPossible + '<span class="score-label">(확정 ' + results.length + '/14경기 기준)</span>';
+      summary.appendChild(maxEl); wrap.appendChild(summary);
+      var track = document.createElement('div'); track.className = 'score-bar-track';
+      var fill = document.createElement('div'); fill.className = 'score-bar-fill';
+      var pct = maxPossible > 0 ? Math.round(total / maxPossible * 100) : 0;
+      fill.style.width = '0%'; track.appendChild(fill); wrap.appendChild(track);
+      setTimeout(function(){ fill.style.width = pct + '%'; }, 80);
+
+      /* 항목별 */
+      var items = document.createElement('div'); items.className = 'po-match-score-list';
+      breakdown.sort(function(a,b){ return a.mid - b.mid; }).forEach(function(row) {
+        var item = document.createElement('div');
+        var cls = 'po-match-score-item';
+        if (row.pts === 3) cls += ' hit';
+        else if (row.pts === 2) cls += ' partial';
+        else cls += ' miss';
+        item.className = cls;
+
+        var lbl = document.createElement('span'); lbl.className = 'po-match-label';
+        lbl.textContent = PO_MATCH_LABELS[row.mid] || 'M' + row.mid;
+        item.appendChild(lbl);
+
+        /* 정답 결과 */
+        var vsEl = document.createElement('span'); vsEl.className = 'po-match-vs';
+        var aCode = row.d.a ? row.d.a.code : '?';
+        var bCode = row.d.b ? row.d.b.code : '?';
+        vsEl.innerHTML = '<b style="color:#ffc840">' + row.d.winner + '</b> ' + row.d.score + ' def. ' + (row.d.winner === aCode ? bCode : aCode);
+        item.appendChild(vsEl);
+
+        /* 예측 */
+        if (row.p) {
+          var predEl = document.createElement('span'); predEl.className = 'po-pred-val';
+          predEl.textContent = '예측: ' + row.p.winner + ' ' + row.p.score;
+          item.appendChild(predEl);
+        }
+
+        /* 배지 */
+        var badge = document.createElement('span'); badge.className = 'score-item-badge';
+        if (row.pts === 3)      { badge.textContent = '승자+스코어 ✓'; badge.className += ' badge-hit'; }
+        else if (row.pts === 2) { badge.textContent = '승자만 ✓'; badge.className += ' badge-rec'; }
+        else if (!row.p)        { badge.textContent = '미예측'; badge.className += ' badge-miss'; }
+        else                    { badge.textContent = '틀림'; badge.className += ' badge-miss'; }
+        item.appendChild(badge);
+
+        var pts = document.createElement('span'); pts.className = 'score-item-pts';
+        pts.textContent = '+' + row.pts;
+        if (row.pts === 0) pts.style.color = 'rgba(255,255,255,.15)';
+        item.appendChild(pts);
+        items.appendChild(item);
+      });
+      wrap.appendChild(items);
+      area.appendChild(wrap);
+    }
+
+    /* ── 내부 탭 전환 ── */
+    document.querySelectorAll('.inner-tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.inner-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+        document.querySelectorAll('.inner-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('itab-' + btn.dataset.itab).classList.add('active');
+      });
+    });
+
     /* ── 초기화 ── */
     function initPage() {
       isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
@@ -682,9 +1247,18 @@
         document.getElementById('readonly-badge').style.display = '';
       }
 
+      /* GS */
       loadAnswers();
       renderAnswers();
       if (isAdmin) renderPool();
+
+      /* PO */
+      loadPoAns();
+      renderPoAns();
+
+      /* 피커 닫기 버튼 */
+      var cancelBtn = document.getElementById('po-picker-cancel');
+      if (cancelBtn) cancelBtn.addEventListener('click', closePoPicker);
     }
 
     (window.storageReady || Promise.resolve()).then(function() {
