@@ -111,6 +111,7 @@
     .slots-area { margin-bottom: 48px; }
     .slots-header {
       display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px;
+      justify-content: space-between;
     }
     .slots-title {
       font-family: 'Barlow Condensed', sans-serif;
@@ -599,13 +600,16 @@
     .bm-score-num.cycle-score:hover { color: rgba(255,255,255,.8) !important; transform: scale(1.2); }
     /* 탭 우상단 총점 배지 */
     .tab-score-badge {
-      float: right; margin-top: 2px;
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; font-weight: 700; letter-spacing: .06em;
       color: rgba(255,255,255,.35);
+      white-space: nowrap;
     }
     .tab-score-badge .score-val {
       font-size: 22px; font-weight: 900; color: #ffc840; margin-right: 2px;
+    }
+    .tab-score-badge .score-unit {
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,.35);
     }
     .tab-score-badge.hidden { display: none; }
 
@@ -678,8 +682,10 @@
         <!-- 8 Slots -->
         <div class="slots-area">
           <div class="slots-header">
-            <span class="slots-title">플레이오프 진출팀 예측</span>
-            <span class="slots-count"><span id="sel-count">0</span> / 8</span>
+            <div style="display:flex;align-items:baseline;gap:12px;">
+              <span class="slots-title">플레이오프 진출팀 예측</span>
+              <span class="slots-count"><span id="sel-count">0</span> / 8</span>
+            </div>
             <span class="tab-score-badge hidden" id="gs-score-badge"></span>
           </div>
           <div class="slots-grid" id="slots-grid">
@@ -1454,7 +1460,7 @@
         var pts = getGsSlotPts(s);
         if (pts !== null) total += pts;
       });
-      badge.innerHTML = '<span class="score-val">' + total + '</span> / ' + (confirmed.length * 3) + 'pt';
+      badge.innerHTML = '<span class="score-val">' + total + '</span><span class="score-unit">pt</span>';
       badge.classList.remove('hidden');
       /* 슬롯 배지 갱신 */
       document.querySelectorAll('.slots-grid .slot[data-idx]').forEach(function(el) {
@@ -1484,7 +1490,7 @@
           if (pts !== null) total += pts;
         }
       }
-      badge.innerHTML = '<span class="score-val">' + total + '</span> / ' + max + 'pt';
+      badge.innerHTML = '<span class="score-val">' + total + '</span><span class="score-unit">pt</span>';
       badge.classList.remove('hidden');
       /* 카드 스트립 갱신 */
       document.querySelectorAll('#po-bracket .bm[data-match]').forEach(function(card) {
