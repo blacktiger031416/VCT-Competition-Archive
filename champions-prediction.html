@@ -147,6 +147,16 @@
     .rank-score { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; color:#ffc840; text-align:right; }
     .rank-detail { font-size:11px; color:rgba(255,255,255,.3); }
     .rank-empty { text-align:center; padding:48px 0; color:rgba(255,255,255,.25); font-size:14px; }
+    .rank-action-btn {
+      font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; border-radius:5px;
+      padding:7px 14px; cursor:pointer; transition:background .15s, opacity .15s; border:1px solid;
+    }
+    .rank-lock-all { background:rgba(255,60,90,.18); border-color:rgba(255,60,90,.35); color:#ff6b6b; }
+    .rank-lock-all:hover { background:rgba(255,60,90,.3); }
+    .rank-unlock-all { background:rgba(61,220,132,.12); border-color:rgba(61,220,132,.3); color:#3ddc84; }
+    .rank-unlock-all:hover { background:rgba(61,220,132,.22); }
+    .rank-action-btn:disabled { opacity:.4; cursor:default; }
 
     /* ── Tab bar ── */
     .tab-bar {
@@ -797,7 +807,13 @@
     <!-- 순위 탭 (Admin only) -->
     <div class="tab-panel" id="tab-rank">
       <div class="rank-wrap">
-        <div class="rank-title">참가자 순위</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div class="rank-title" style="margin-bottom:0">참가자 순위</div>
+          <div style="display:flex;gap:8px;">
+            <button class="rank-action-btn rank-lock-all" id="btn-lock-all">전체 고정</button>
+            <button class="rank-action-btn rank-unlock-all" id="btn-unlock-all">전체 고정 풀기</button>
+          </div>
+        </div>
         <div id="rank-content"><div class="rank-empty">불러오는 중…</div></div>
       </div>
     </div>
@@ -1749,6 +1765,44 @@
       html += '</tbody></table>';
       content.innerHTML = html;
     }
+
+    /* ── 전체 고정 / 전체 풀기 ── */
+    function getAllUsernames() {
+      var keys = (typeof window.storageKeys === 'function') ? window.storageKeys() : [];
+      return keys
+        .filter(function(k){ return k && k.indexOf('vct_nickname:') === 0; })
+        .map(function(k){ return k.replace('vct_nickname:', ''); });
+    }
+
+    (function wireAdminLockBtns() {
+      var lockBtn   = document.getElementById('btn-lock-all');
+      var unlockBtn = document.getElementById('btn-unlock-all');
+      if (!lockBtn || !unlockBtn) return;
+
+      lockBtn.addEventListener('click', function() {
+        var names = getAllUsernames();
+        if (!names.length) { alert('닉네임을 등록한 참가자가 없습니다.'); return; }
+        if (!confirm(names.length + '명의 예측을 전부 고정하시겠습니까?')) return;
+        lockBtn.disabled = true;
+        names.forEach(function(u) {
+          localStorage.setItem('vct_gs_locked:' + u, '1');
+        });
+        lockBtn.disabled = false;
+        alert('전체 고정 완료 (' + names.length + '명)');
+      });
+
+      unlockBtn.addEventListener('click', function() {
+        var names = getAllUsernames();
+        if (!names.length) { alert('닉네임을 등록한 참가자가 없습니다.'); return; }
+        if (!confirm(names.length + '명의 예측 고정을 전부 해제하시겠습니까?')) return;
+        unlockBtn.disabled = true;
+        names.forEach(function(u) {
+          localStorage.removeItem('vct_gs_locked:' + u);
+        });
+        unlockBtn.disabled = false;
+        alert('전체 고정 해제 완료 (' + names.length + '명)');
+      });
+    })();
 
     /* ── 탭 전환 ── */
     document.querySelectorAll('.tab-btn[data-tab]').forEach(function(btn) {
