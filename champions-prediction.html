@@ -152,13 +152,16 @@
       background: rgba(255,255,255,.05);
     }
     .slot.filled {
-      border-color: rgba(255,60,90,.5);
-      background: rgba(255,40,60,.07);
+      border-color: var(--slot-color, rgba(255,60,90,.5));
+      background: color-mix(in srgb, var(--slot-color, #ff3c5a) 8%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 30%, transparent);
     }
     .slot.filled:hover {
-      border-color: rgba(255,60,90,.8);
-      background: rgba(255,40,60,.12);
+      border-color: var(--slot-color, rgba(255,60,90,.8));
+      background: color-mix(in srgb, var(--slot-color, #ff3c5a) 14%, transparent);
       transform: translateY(-2px);
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--slot-color, #ff3c5a) 20%, transparent),
+                  inset 0 0 0 1px color-mix(in srgb, var(--slot-color, #ff3c5a) 40%, transparent);
     }
 
     /* empty slot content */
@@ -241,8 +244,8 @@
       user-select: none;
     }
     .team-card:hover:not(.selected):not(.disabled) {
-      border-color: rgba(255,60,90,.35);
-      background: var(--bg-card2);
+      border-color: color-mix(in srgb, var(--tc, #ff3c5a) 50%, transparent);
+      background: color-mix(in srgb, var(--tc, #ff3c5a) 6%, var(--bg-card2));
       transform: translateX(2px);
     }
     .team-card.selected {
@@ -346,42 +349,46 @@
   </div>
 
   <script>
-    /* ── 팀 데이터 (추후 업데이트 가능) ── */
+    /* ── 팀 데이터 ── */
     var REGIONS = [
       {
         label: 'Pacific',
+        color: '#00c0ff',
         teams: [
-          { code: 'T1',   name: 'T1',             logo: './assets/teams/T1.png'   },
-          { code: 'GEN',  name: 'Gen.G Esports',  logo: './assets/teams/GEN.png'  },
-          { code: 'DRX',  name: 'DRX',            logo: './assets/teams/DRX.png'  },
-          { code: 'TLN',  name: 'Talon Esports',  logo: './assets/teams/TLN.png'  },
+          { code: 'NS',  name: 'Nongshim RedForce', logo: './assets/teams/ns.svg',  color: '#c8102e', white: false },
+          { code: 'T1',  name: 'T1',                logo: './assets/teams/t1.png',  color: '#c8102e', white: false },
+          { code: 'PRX', name: 'Paper Rex',          logo: './assets/teams/prx.svg', color: '#ff6b00', white: true  },
+          { code: 'GE',  name: 'Global Esports',     logo: './assets/teams/ge.webp', color: '#ff3c3c', white: false },
         ]
       },
       {
         label: 'Americas',
+        color: '#ff4655',
         teams: [
-          { code: 'SEN',  name: 'Sentinels',      logo: './assets/teams/SEN.png'  },
-          { code: 'NRG',  name: 'NRG Esports',    logo: './assets/teams/NRG.png'  },
-          { code: 'LEV',  name: 'Leviatán',        logo: './assets/teams/LEV.png'  },
-          { code: '100T', name: '100 Thieves',     logo: './assets/teams/100T.png' },
+          { code: 'NRG', name: 'NRG Esports',  logo: 'https://i.namu.wiki/i/b5ns627KGg4zEIzK90XQi_FFDbBFY4VrEpOG0MDdLK_KJVx3y6AZczbN0kuwfv5bXqmtfSFWly2NgFrcMcLnvg.svg', color: '#f4c542', white: false },
+          { code: 'G2',  name: 'G2 Esports',   logo: 'https://i.namu.wiki/i/lx4lTUZuQJuG0lI7k1odIWttiaiDx9gbB6rAybzzna-UZR57F_Vwr_LMKF6OlHaepuw9UiVJbYoQ_B_IA4QnrA.svg',  color: '#6a0dad', white: false },
+          { code: '?',   name: 'TBD',           logo: '', color: '#555', white: false, tbd: true },
+          { code: '?',   name: 'TBD',           logo: '', color: '#555', white: false, tbd: true },
         ]
       },
       {
         label: 'EMEA',
+        color: '#9b59b6',
         teams: [
-          { code: 'FNC',  name: 'Fnatic',          logo: './assets/teams/FNC.png'  },
-          { code: 'TH',   name: 'Team Heretics',   logo: './assets/teams/TH.png'   },
-          { code: 'NV',   name: 'NAVI',            logo: './assets/teams/NV.png'   },
-          { code: 'KOI',  name: 'KOI',             logo: './assets/teams/KOI.png'  },
+          { code: 'KC',  name: 'Karmine Corp',   logo: './assets/teams/kc.png',                                                                                               color: '#0066ff', white: false },
+          { code: 'TL',  name: 'Team Liquid',    logo: 'https://i.namu.wiki/i/f_CgQqphVfEK8ZpEdvOwbGpar5zO-_FVVRi39YwZGPPXdUwewYA58qHLO9BMsDue-XXXYWNXJANDwuBBkPdncg.webp', color: '#009ac7', white: true  },
+          { code: 'FUT', name: 'FUT Esports',    logo: 'https://specs.gg/assets/img/teams/fut-esports.webp',                                                                   color: '#e63946', white: false },
+          { code: 'VIT', name: 'Team Vitality',  logo: 'https://images.secretlab.co/theme/common/vitality_25_spacer_logo.png',                                                 color: '#f5d800', white: false },
         ]
       },
       {
         label: 'CN',
+        color: '#e74c3c',
         teams: [
-          { code: 'EDG',  name: 'EDward Gaming',  logo: './assets/teams/EDG.png'  },
-          { code: 'FPX',  name: 'FunPlus Phoenix',logo: './assets/teams/FPX.png'  },
-          { code: 'BLG',  name: 'Bilibili Gaming',logo: './assets/teams/BLG.png'  },
-          { code: 'NIP',  name: 'NIP',            logo: './assets/teams/NIP.png'  },
+          { code: 'TYL', name: 'TYLOO',            logo: 'https://i.namu.wiki/i/ygjpeHG-y9CYpiLp-E8wiEsNDU6j9aRNcwVvPJsOlvcSV1Ey_NCmMAjMarHe3bhjm6EDK-qgXl_hEmhQdz__ag.svg', color: '#e63946', white: false },
+          { code: 'JDG', name: 'Jingdong Gaming',  logo: 'https://i.namu.wiki/i/YyWlT49EP4lbp3xXGQr4QdzyrHYb3xwHo50oXrrAPOE7T6hXJsSJ5GNGWsB65RT1N5Ceh1lVwzhmE9HgoaV3yw.svg', color: '#0099cc', white: false },
+          { code: 'EDG', name: 'EDward Gaming',    logo: 'https://upload.wikimedia.org/wikipedia/commons/3/33/Edward_Gaming_logo.png',                                           color: '#1a3c8f', white: false },
+          { code: 'XLG', name: 'Xi Lai Gaming',   logo: 'https://i.namu.wiki/i/Yywbu40Korgue4azcIZrrlnlCSyI6vdM7imxW_Qt7dA8JzhkIbIJuIeAMVuG-KOms30fAAwz12iuyETD7pCGvw.svg', color: '#ff6600', white: false },
         ]
       },
     ];
@@ -403,6 +410,8 @@
         el.dataset.idx = i;
 
         if (s) {
+          if (s.color) el.style.setProperty('--slot-color', s.color);
+
           /* remove btn */
           var rem = document.createElement('button');
           rem.className = 'slot-remove';
@@ -415,6 +424,7 @@
           var img = document.createElement('img');
           img.className = 'slot-logo';
           img.src = s.logo; img.alt = s.code;
+          if (s.white) img.style.filter = 'brightness(0) invert(1)';
           img.onerror = function(){ this.style.display='none'; };
           el.appendChild(img);
 
@@ -471,16 +481,38 @@
         teamsEl.className = 'region-teams';
 
         region.teams.forEach(function(team) {
-          var isSelected = selectedCodes.indexOf(team.code) !== -1;
-          var isDisabled = !isSelected && allFull;
+          var isTbd = !!team.tbd;
+          var isSelected = !isTbd && selectedCodes.indexOf(team.code) !== -1;
+          var isDisabled = (!isSelected && allFull) || isTbd;
 
           var card = document.createElement('div');
           card.className = 'team-card' + (isSelected ? ' selected' : '') + (isDisabled ? ' disabled' : '');
           card.dataset.code = team.code;
+          if (team.color && !isTbd) {
+            card.style.setProperty('--tc', team.color);
+          }
+
+          if (isTbd) {
+            var tbdEl = document.createElement('div');
+            tbdEl.style.cssText = 'width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,.2);flex-shrink:0;';
+            tbdEl.textContent = '?';
+            card.appendChild(tbdEl);
+            var info = document.createElement('div');
+            info.className = 'team-card-info';
+            var codeEl = document.createElement('div');
+            codeEl.className = 'team-card-code';
+            codeEl.style.color = 'rgba(255,255,255,.2)';
+            codeEl.textContent = 'TBD';
+            info.appendChild(codeEl);
+            card.appendChild(info);
+            teamsEl.appendChild(card);
+            return;
+          }
 
           var logo = document.createElement('img');
           logo.className = 'team-card-logo';
           logo.src = team.logo; logo.alt = team.code;
+          if (team.white) logo.style.filter = 'brightness(0) invert(1)';
           logo.onerror = function(){ this.style.display='none'; };
           card.appendChild(logo);
 
