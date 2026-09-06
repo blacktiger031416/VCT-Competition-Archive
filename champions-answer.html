@@ -331,6 +331,18 @@
       border:1px solid rgba(255,255,255,.1);
       background:rgba(255,255,255,.03);flex-shrink:0;
     }
+    .bm-force-strip {
+      display:flex;align-items:center;justify-content:center;
+      height:28px;border-top:1px solid rgba(255,255,255,.06);
+    }
+    .bm-force-btn {
+      font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.07em;padding:3px 10px;border-radius:4px;cursor:pointer;
+      background:rgba(255,160,0,.12);border:1px solid rgba(255,160,0,.3);
+      color:#ffaa00;transition:all .14s;
+    }
+    .bm-force-btn:hover { background:rgba(255,160,0,.25);border-color:rgba(255,160,0,.55);color:#ffc040; }
+    .bm-force-btn.locked-all { background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.25);cursor:default; }
     .bm.ub-match { border-left:2.5px solid rgba(99,179,237,.4); }
     .bm.lb-match { border-left:2.5px solid rgba(252,129,74,.4); }
     .bm.gf-match {
@@ -826,6 +838,21 @@
           card.appendChild(dv);
         }
       });
+
+      /* Admin 전용 강제 확정 버튼 */
+      if (isAdmin && d.a && d.b) {
+        var forceStrip = document.createElement('div');
+        forceStrip.className = 'bm-force-strip';
+        var forceBtn = document.createElement('button');
+        forceBtn.className = 'bm-force-btn';
+        forceBtn.textContent = '전체 강제 확정';
+        forceBtn.addEventListener('click', (function(m_, b_) {
+          return function(e) { e.stopPropagation(); forcePoLockAll(m_, b_); };
+        })(mid, forceBtn));
+        forceStrip.appendChild(forceBtn);
+        card.appendChild(forceStrip);
+      }
+
       return card;
     }
 
@@ -971,6 +998,26 @@
         var n = loserRow.querySelector('.bm-score-num');
         if (n) n.textContent = nextL;
       }
+    }
+
+    /* ── M경기 전체 강제 확정 ── */
+    function forcePoLockAll(mid, btn) {
+      if (!confirm('M' + mid + ' 경기를 모든 참가자에 강제 확정하시겠습니까?\n확정 후에는 유저들이 예측을 변경할 수 없습니다.')) return;
+      var keys = typeof window.storageKeys === 'function' ? window.storageKeys() : [];
+      var names = [];
+      keys.forEach(function(k) {
+        if (k.indexOf('vct_nickname:') === 0) names.push(k.slice('vct_nickname:'.length));
+      });
+      names.forEach(function(username) {
+        var lockKey = 'vct_po_locked:' + username;
+        var raw = localStorage.getItem(lockKey);
+        var locked = {};
+        try { locked = raw ? (JSON.parse(raw) || {}) : {}; } catch(e) {}
+        locked[mid] = true;
+        localStorage.setItem(lockKey, JSON.stringify(locked));
+      });
+      if (btn) { btn.textContent = '🔒 확정 완료'; btn.classList.add('locked-all'); btn.disabled = true; }
+      alert('M' + mid + ' 강제 확정 완료 — ' + names.length + '명 적용');
     }
 
     /* ── 내부 탭 전환 ── */
