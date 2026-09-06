@@ -699,8 +699,8 @@
       transition: background .12s, opacity .15s;
       min-height: 42px;
     }
-    .bm-team.clickable { cursor: pointer; }
-    .bm-team.clickable:hover { background: rgba(255,255,255,.08); }
+    .bm-team.clickable { cursor: pointer; transition: background .1s, transform .1s; }
+    .bm-team.clickable:hover { background: rgba(255,255,255,.1); transform: translateX(3px); }
     .bm-team.winner-row { background: rgba(61,220,132,.1); }
     .bm-team.loser-row { opacity: .25; }
     .gf-match .bm-team.winner-row { background: rgba(255,215,0,.1); }
@@ -710,7 +710,7 @@
       font-size: 10px; font-weight: 700; color: rgba(255,255,255,.22);
       width: 12px; text-align: right; flex-shrink: 0;
     }
-    .bm-logo { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
+    .bm-logo { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; transition: transform .1s; }
     .bm-logo-ph {
       width: 26px; height: 26px; border-radius: 4px;
       background: rgba(255,255,255,.07);
@@ -725,13 +725,39 @@
     .bm-win-mark { font-size: 10px; color: #3ddc84; opacity: 0; flex-shrink: 0; }
     .bm-team.winner-row .bm-win-mark { opacity: 1; }
     .gf-match .bm-team.winner-row .bm-win-mark { color: gold; }
+
+    /* 팀 선택 flash */
     @keyframes bmWinFlash {
-      0%   { background: rgba(61,220,132,.5); }
-      100% { background: rgba(61,220,132,.1); }
+      0%   { background: rgba(61,220,132,.65);
+             box-shadow: inset 0 0 0 1px rgba(61,220,132,.7), 0 0 18px rgba(61,220,132,.35); }
+      50%  { background: rgba(61,220,132,.2);
+             box-shadow: inset 0 0 0 1px rgba(61,220,132,.3), 0 0 6px rgba(61,220,132,.15); }
+      100% { background: rgba(61,220,132,.1); box-shadow: none; }
     }
-    .bm-team.winner-row.flash { animation: bmWinFlash .45s ease both; }
+    .bm-team.winner-row.flash { animation: bmWinFlash .5s cubic-bezier(.22,1,.36,1) both; }
     .gf-match .bm-team.winner-row.flash { animation: none; }
+
+    /* 선택 시 로고 팝 */
+    @keyframes bmLogoWin {
+      0%   { transform: scale(1) rotate(0); }
+      28%  { transform: scale(1.55) rotate(10deg); }
+      58%  { transform: scale(.88) rotate(-4deg); }
+      80%  { transform: scale(1.12) rotate(1deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    .bm-team.winner-row.flash .bm-logo { animation: bmLogoWin .5s cubic-bezier(.22,1,.36,1) both; }
+
+    /* 선택 시 win-mark 팡 */
+    @keyframes winMarkPop {
+      0%   { transform: scale(0) rotate(-25deg); opacity: 0; }
+      55%  { transform: scale(1.5) rotate(8deg);  opacity: 1; }
+      80%  { transform: scale(.85) rotate(-3deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    .bm-team.winner-row.flash .bm-win-mark { animation: winMarkPop .45s .05s cubic-bezier(.22,1,.36,1) both; }
+
     .bm-team.loser-row { opacity: .35; }
+
     /* 스코어 숫자 */
     .bm-score-num {
       font-family: 'Barlow Condensed', sans-serif;
@@ -741,8 +767,17 @@
     }
     .bm-team.winner-row .bm-score-num { color: #3ddc84; }
     .gf-match .bm-team.winner-row .bm-score-num { color: gold; }
-    .bm-score-num.cycle-score { cursor: pointer; transition: color .12s, transform .1s; }
-    .bm-score-num.cycle-score:hover { color: rgba(255,255,255,.8) !important; transform: scale(1.2); }
+    .bm-score-num.cycle-score { cursor: pointer; transition: color .12s; }
+    .bm-score-num.cycle-score:hover { color: rgba(255,255,255,.85) !important; }
+
+    /* 스코어 숫자 flip */
+    @keyframes scoreFlip {
+      0%   { transform: translateY(0)   scale(1);   opacity: 1; }
+      35%  { transform: translateY(-9px) scale(1.4); opacity: 0; }
+      36%  { transform: translateY(9px)  scale(1.4); opacity: 0; }
+      100% { transform: translateY(0)   scale(1);   opacity: 1; }
+    }
+    .bm-score-num.score-flip { animation: scoreFlip .28s cubic-bezier(.22,1,.36,1) forwards; }
     /* 탭 우상단 총점 배지 */
     .tab-score-badge {
       font-family: 'Barlow Condensed', sans-serif;
@@ -1457,7 +1492,12 @@
       var loserRow = card.querySelector('.bm-team.loser-row');
       if (loserRow) {
         var n = loserRow.querySelector('.bm-score-num');
-        if (n) { n.textContent = nextL; }
+        if (n) {
+          n.classList.remove('score-flip'); void n.offsetWidth;
+          n.textContent = nextL;
+          n.classList.add('score-flip');
+          n.addEventListener('animationend', function(){ n.classList.remove('score-flip'); }, {once:true});
+        }
       }
       updateScores();
     }
