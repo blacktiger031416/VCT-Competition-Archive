@@ -1998,7 +1998,12 @@
 
       /* 순위 탭: Admin만 표시 */
       var rankTab = document.querySelector('.tab-btn[data-tab="rank"]');
-      if (rankTab) rankTab.style.display = isAdmin ? '' : 'none';
+      if (rankTab) rankTab.style.display = '';
+      /* 전체 고정/풀기 버튼은 Admin만 노출 */
+      ['btn-gs-lock-all','btn-gs-unlock-all','btn-po-lock-all','btn-po-unlock-all'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = isAdmin ? '' : 'none';
+      });
 
       /* 닉네임 바 */
       renderNicknameBar();
