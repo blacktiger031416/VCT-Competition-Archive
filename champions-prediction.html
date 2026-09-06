@@ -967,6 +967,8 @@
     var slots = new Array(8).fill(null);
     var lastFilledIdx = -1;
     var gsLocked = false;
+    var gsAdminLocked = false;  /* Admin 전체 고정 시 true → 유저 취소 불가 */
+    var PO_FORCE_LOCKED = {};   /* {mid: true} Admin 강제 확정 시 */
 
     /* ── 유저 식별 헬퍼 ── */
     function currentUser() {
@@ -995,6 +997,12 @@
         var raw = localStorage.getItem(poLockKey());
         PO_LOCKED = raw ? (JSON.parse(raw) || {}) : {};
       } catch(e) { PO_LOCKED = {}; }
+    }
+    function loadPoForceLocked() {
+      try {
+        var raw = localStorage.getItem('vct_po_force_locked');
+        PO_FORCE_LOCKED = raw ? (JSON.parse(raw) || {}) : {};
+      } catch(e) { PO_FORCE_LOCKED = {}; }
     }
     function nickKey() {
       var u = currentUser();
@@ -1189,22 +1197,38 @@
       area.innerHTML = '';
 
       if (gsLocked) {
-        /* 잠금 해제 버튼 — Admin 전용 */
-        if (typeof window.vctIsAdmin === 'function' && window.vctIsAdmin()) {
+        var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
+
+        if (isAdmin) {
+          /* Admin: 잠금 해제 버튼 */
           var unlockBtn = document.createElement('button');
           unlockBtn.textContent = '잠금 해제';
           unlockBtn.style.cssText = 'font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;';
           unlockBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,80,80,.15)'; this.style.borderColor='rgba(255,80,80,.4)'; this.style.color='#ff6060'; });
           unlockBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,255,255,.06)'; this.style.borderColor='rgba(255,255,255,.18)'; this.style.color='rgba(255,255,255,.45)'; });
           unlockBtn.addEventListener('click', function() {
+            gsLocked = false; gsAdminLocked = false;
+            try { localStorage.removeItem(lockKey()); localStorage.removeItem('vct_gs_admin_locked'); } catch(e) {}
+            var wrap = document.querySelector('.gs-wrap');
+            if (wrap) wrap.classList.remove('locked');
+            renderSlots(-1); renderPool(); renderConfirmArea();
+          });
+          area.appendChild(unlockBtn);
+        } else if (!gsAdminLocked) {
+          /* 일반 유저: Admin 전체 고정 전이면 본인이 취소 가능 */
+          var cancelBtn = document.createElement('button');
+          cancelBtn.textContent = '확정 취소';
+          cancelBtn.style.cssText = 'font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,60,90,.25);background:rgba(255,60,90,.08);color:rgba(255,80,100,.7);cursor:pointer;transition:all .14s;';
+          cancelBtn.addEventListener('mouseenter', function(){ this.style.background='rgba(255,60,90,.18)'; this.style.borderColor='rgba(255,60,90,.5)'; this.style.color='#ff5060'; });
+          cancelBtn.addEventListener('mouseleave', function(){ this.style.background='rgba(255,60,90,.08)'; this.style.borderColor='rgba(255,60,90,.25)'; this.style.color='rgba(255,80,100,.7)'; });
+          cancelBtn.addEventListener('click', function() {
             gsLocked = false;
             try { localStorage.removeItem(lockKey()); } catch(e) {}
             var wrap = document.querySelector('.gs-wrap');
             if (wrap) wrap.classList.remove('locked');
-            renderSlots(-1);
-            renderPool();
+            renderSlots(-1); renderPool(); renderConfirmArea();
           });
-          area.appendChild(unlockBtn);
+          area.appendChild(cancelBtn);
         }
 
         /* wrap에 locked 클래스 */
@@ -1583,8 +1607,8 @@
       /* ── 확정/잠금 스트립 ── */
       var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
       if (PO_LOCKED[mid]) {
-        /* 잠금 상태 — Admin만 해제 버튼 표시 */
         if (isAdmin) {
+          /* Admin: 해제 버튼 */
           var lockStrip = document.createElement('div');
           lockStrip.className = 'bm-lock-strip locked';
           var ulBtn = document.createElement('button');
@@ -1601,6 +1625,25 @@
           })(mid));
           lockStrip.appendChild(ulBtn);
           card.appendChild(lockStrip);
+        } else if (!PO_FORCE_LOCKED[mid]) {
+          /* 일반 유저: Admin 강제 확정 전이면 본인이 취소 가능 */
+          var cancelStrip = document.createElement('div');
+          cancelStrip.className = 'bm-lock-strip';
+          var ulCancelBtn = document.createElement('button');
+          ulCancelBtn.className = 'bm-cancel-btn';
+          ulCancelBtn.textContent = '확정 취소';
+          ulCancelBtn.style.fontSize = '11px';
+          ulCancelBtn.addEventListener('click', (function(m_) {
+            return function(e) {
+              e.stopPropagation();
+              delete PO_LOCKED[m_];
+              savePoLocked();
+              renderPo();
+              updateScores();
+            };
+          })(mid));
+          cancelStrip.appendChild(ulCancelBtn);
+          card.appendChild(cancelStrip);
         }
       } else if (pred && mu.a && mu.b) {
         /* 예측됨 → 취소 + 확정 버튼 */
@@ -1973,8 +2016,18 @@
         };
       }
 
-      var b = document.getElementById('btn-gs-lock-all');   if (b) b.addEventListener('click', makeHandler('vct_gs_locked', 'lock'));
-      var c = document.getElementById('btn-gs-unlock-all'); if (c) c.addEventListener('click', makeHandler('vct_gs_locked', 'unlock'));
+      var b = document.getElementById('btn-gs-lock-all');
+      if (b) b.addEventListener('click', function() {
+        makeHandler('vct_gs_locked', 'lock')();
+        try { localStorage.setItem('vct_gs_admin_locked', '1'); } catch(e) {}
+        gsAdminLocked = true;
+      });
+      var c = document.getElementById('btn-gs-unlock-all');
+      if (c) c.addEventListener('click', function() {
+        makeHandler('vct_gs_locked', 'unlock')();
+        try { localStorage.removeItem('vct_gs_admin_locked'); } catch(e) {}
+        gsAdminLocked = false;
+      });
 
       /* PO 전체 고정: 각 유저의 vct_po_locked:{u} 를 {1:true,...14:true} 로 설정 */
       var d = document.getElementById('btn-po-lock-all');
@@ -2030,7 +2083,9 @@
 
       /* 잠금 상태 복원 */
       try { if (localStorage.getItem(lockKey()) === '1') gsLocked = true; } catch(e) {}
+      try { if (localStorage.getItem('vct_gs_admin_locked') === '1') gsAdminLocked = true; } catch(e) {}
       loadPoLocked();
+      loadPoForceLocked();
       loadGsPred();
       renderSlots(-1);
       renderPool();
@@ -2042,6 +2097,19 @@
 
     (window.storageReady || Promise.resolve()).then(function() {
       initPage();
+    });
+
+    /* Admin이 force-lock을 설정하면 SSE로 수신 → 상태 갱신 */
+    window.addEventListener('storage', function() {
+      try {
+        var newGsAdmin = localStorage.getItem('vct_gs_admin_locked') === '1';
+        if (newGsAdmin !== gsAdminLocked) {
+          gsAdminLocked = newGsAdmin;
+          renderConfirmArea();
+        }
+        loadPoForceLocked();
+        if (Object.keys(PO_FORCE_LOCKED).length) renderPo();
+      } catch(e) {}
     });
   </script>
 </body>

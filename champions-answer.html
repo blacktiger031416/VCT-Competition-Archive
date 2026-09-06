@@ -1016,6 +1016,14 @@
         locked[mid] = true;
         localStorage.setItem(lockKey, JSON.stringify(locked));
       });
+      /* 글로벌 강제 확정 플래그 — prediction 페이지에서 취소 버튼 숨김용 */
+      try {
+        var globalRaw = localStorage.getItem('vct_po_force_locked');
+        var globalLocked = {};
+        try { globalLocked = globalRaw ? (JSON.parse(globalRaw) || {}) : {}; } catch(e) {}
+        globalLocked[mid] = true;
+        localStorage.setItem('vct_po_force_locked', JSON.stringify(globalLocked));
+      } catch(e) {}
       if (btn) { btn.textContent = '🔒 확정 완료'; btn.classList.add('locked-all'); btn.disabled = true; }
       alert('M' + mid + ' 강제 확정 완료 — ' + names.length + '명 적용');
     }
