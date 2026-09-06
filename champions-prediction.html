@@ -1585,11 +1585,10 @@
       /* ── 확정/잠금 스트립 ── */
       var isAdmin = typeof window.vctIsAdmin === 'function' && window.vctIsAdmin();
       if (PO_LOCKED[mid]) {
-        /* 잠금 상태 */
-        var lockStrip = document.createElement('div');
-        lockStrip.className = 'bm-lock-strip locked';
-        lockStrip.innerHTML = '🔒 확정';
+        /* 잠금 상태 — Admin만 해제 버튼 표시 */
         if (isAdmin) {
+          var lockStrip = document.createElement('div');
+          lockStrip.className = 'bm-lock-strip locked';
           var ulBtn = document.createElement('button');
           ulBtn.className = 'bm-unlock-btn';
           ulBtn.textContent = '해제';
@@ -1603,8 +1602,8 @@
             };
           })(mid));
           lockStrip.appendChild(ulBtn);
+          card.appendChild(lockStrip);
         }
-        card.appendChild(lockStrip);
       } else if (pred && mu.a && mu.b) {
         /* 예측됨 → 확정 버튼 */
         var confirmStrip = document.createElement('div');
