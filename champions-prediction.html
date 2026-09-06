@@ -173,6 +173,13 @@
       border-radius: 4px; padding: 3px 12px; cursor: pointer; transition: background .12s;
     }
     .bm-confirm-btn:hover { background: rgba(61,220,132,.28); }
+    .bm-cancel-btn {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800;
+      padding: 2px 8px; border-radius: 4px; cursor: pointer; line-height: 1.5;
+      background: rgba(255,60,90,.1); border: 1px solid rgba(255,60,90,.25);
+      color: rgba(255,80,100,.6); transition: all .14s;
+    }
+    .bm-cancel-btn:hover { background: rgba(255,60,90,.22); border-color: rgba(255,60,90,.5); color: #ff5060; }
     .bm-unlock-btn {
       background: rgba(255,80,80,.12); border: 1px solid rgba(255,80,80,.25);
       color: rgba(255,100,100,.7); font-family: 'Barlow Condensed', sans-serif;
@@ -1596,9 +1603,24 @@
           card.appendChild(lockStrip);
         }
       } else if (pred && mu.a && mu.b) {
-        /* 예측됨 → 확정 버튼 */
+        /* 예측됨 → 취소 + 확정 버튼 */
         var confirmStrip = document.createElement('div');
         confirmStrip.className = 'bm-lock-strip';
+        /* 취소 버튼 */
+        var cancelBtn = document.createElement('button');
+        cancelBtn.className = 'bm-cancel-btn';
+        cancelBtn.textContent = '✕';
+        cancelBtn.addEventListener('click', (function(m_) {
+          return function(e) {
+            e.stopPropagation();
+            delete PO_PRED[m_];
+            savePoP();
+            renderPo();
+            updateScores();
+          };
+        })(mid));
+        confirmStrip.appendChild(cancelBtn);
+        /* 확정 버튼 */
         var cfBtn = document.createElement('button');
         cfBtn.className = 'bm-confirm-btn';
         cfBtn.textContent = '✓ 확정';
