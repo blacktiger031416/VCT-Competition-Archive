@@ -146,6 +146,43 @@
         color: #fff;
       }
 
+      /* ── TOURNAMENT GRID ─────────────────────── */
+      .tournament-section { margin-bottom: 56px; }
+      .tournament-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      .tournament-card {
+        display: flex; flex-direction: column; gap: 6px;
+        padding: 24px 22px;
+        background: #111a28; border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 4px; text-decoration: none; color: #e8e4e0;
+        position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        cursor: pointer;
+      }
+      .tournament-card::before {
+        content: ''; position: absolute; inset: 0 0 0 0;
+        border-bottom: 2px solid #da9103;
+        transform: scaleX(0); transform-origin: left;
+        transition: transform 0.25s ease;
+      }
+      .tournament-card:hover { border-color: rgba(218,145,3,0.35); background: #15200a; transform: translateY(-2px); }
+      .tournament-card:hover::before { transform: scaleX(1); }
+      .tournament-kicker {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: 0.2em; text-transform: uppercase; color: rgba(218,145,3,0.75);
+      }
+      .tournament-card strong {
+        font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900;
+        letter-spacing: 0.04em; text-transform: uppercase; color: #fff; line-height: 1;
+      }
+      .tournament-card > span:last-child {
+        font-size: 12px; color: rgba(255,255,255,0.35);
+        font-family: 'Barlow', sans-serif; margin-top: 4px;
+      }
+
       /* ── TEAM GRID ───────────────────────────── */
       .teams-section { margin-bottom: 0; }
       .team-grid {
@@ -370,6 +407,20 @@
 
     <main class="league-shell">
       <div class="section-divider"></div>
+
+      <section class="tournament-section" aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <p class="eyebrow">Tournament</p>
+          <h2 id="tournament-title">Game Changers 2026 Pacific</h2>
+        </div>
+        <div class="tournament-grid">
+          <a class="tournament-card" href="./gc-pacific-playoffs.html">
+            <span class="tournament-kicker">GC Pacific 2026</span>
+            <strong>더블 엘리미네이션</strong>
+            <span>8개 팀 참가</span>
+          </a>
+        </div>
+      </section>
 
       <section class="teams-section" aria-labelledby="teams-title">
         <div class="section-heading">
