@@ -228,6 +228,14 @@
       }
       .challengers-card::before { display: none; }
 
+      /* ── Game Changers 카드 ── */
+      .gc-card {
+        background:
+          linear-gradient(145deg, rgba(218,145,3,.38), rgba(218,145,3,.10)),
+          #100c00;
+      }
+      .gc-card::before { display: none; }
+
       /* ── Challengers lock badge ── */
       .challengers-grid .league-card { cursor: pointer; }
       .lock-badge {
@@ -272,7 +280,8 @@
       .admin-unlock-btn.is-unlocked:hover { background: rgba(220,50,50,0.15); border-color: rgba(220,50,50,0.35); color: #ff6b6b; }
 
       /* 잠금 해제된 카드: 업데이트 예정 배지 숨김 */
-      .challengers-card.unlocked .lock-badge { display: none; }
+      .challengers-card.unlocked .lock-badge,
+      .gc-card.unlocked .lock-badge { display: none; }
 
       /* ── 공지사항 배너 ── */
       .notice-banner {
@@ -526,7 +535,8 @@
           <div class="grid-slider-tabs">
             <button class="gst-tab active" data-slide="0">VCT</button>
             <button class="gst-tab" data-slide="1">Challengers</button>
-            <button class="gst-tab" data-slide="2">이벤트 경기</button>
+            <button class="gst-tab" data-slide="2">Game Changers</button>
+            <button class="gst-tab" data-slide="3">이벤트 경기</button>
           </div>
 
           <div class="grid-slider-row">
@@ -602,7 +612,22 @@
                   </nav>
                 </div>
 
-                <!-- Slide 2: 이벤트 경기 -->
+                <!-- Slide 2: Game Changers -->
+                <div class="grid-slide">
+                  <nav class="league-grid challengers-grid" aria-label="Game Changers 지역 선택">
+                    <a class="league-card gc-card" style="--accent:#da9103" href="./gc-pacific.html" aria-label="Game Changers Pacific" data-slug="gc-pacific">
+                      <span class="lock-badge">업데이트 예정</span>
+                      <span class="league-logo-wrap"><img src="./assets/Game Changers.png" alt="" /></span>
+                      <span class="league-name">Pacific</span>
+                      <div class="card-action-row">
+                        <span class="league-action">GC 보기</span>
+                        <button class="admin-unlock-btn" type="button">🔓 공개하기</button>
+                      </div>
+                    </a>
+                  </nav>
+                </div>
+
+                <!-- Slide 3: 이벤트 경기 -->
                 <div class="grid-slide">
                   <nav class="league-grid" aria-label="이벤트 경기 선택">
                     <a class="league-card event-card" style="--accent:#ffffff" href="./ballakdae.html" aria-label="발락대 보기">
@@ -712,6 +737,16 @@
               btn.classList.toggle("is-unlocked", unlocked);
             }
           });
+          document.querySelectorAll(".gc-card").forEach(function (card) {
+            var slug = card.dataset.slug;
+            var unlocked = localStorage.getItem("challengers-unlocked:" + slug) === "1";
+            card.classList.toggle("unlocked", unlocked);
+            var btn = card.querySelector(".admin-unlock-btn");
+            if (btn) {
+              btn.textContent = unlocked ? "🔒 비공개로" : "🔓 공개하기";
+              btn.classList.toggle("is-unlocked", unlocked);
+            }
+          });
         }
 
         /* storageReady 후 상태 적용 */
@@ -726,7 +761,7 @@
           btn.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
-            var card = btn.closest(".challengers-card");
+            var card = btn.closest(".challengers-card, .gc-card");
             var slug = card.dataset.slug;
             var key = "challengers-unlocked:" + slug;
             if (localStorage.getItem(key) === "1") {
@@ -739,7 +774,7 @@
         });
 
         /* 카드 클릭: 잠금 여부 체크 */
-        document.querySelectorAll(".challengers-card").forEach(function (card) {
+        document.querySelectorAll(".challengers-card, .gc-card").forEach(function (card) {
           card.addEventListener("click", function (e) {
             var isAdmin = window.vctIsAdmin && window.vctIsAdmin();
             if (!isAdmin && !card.classList.contains("unlocked")) {
