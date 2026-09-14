@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCT Game Changers Pacific 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #0d1520;
+        color: #e8e4e0;
+        font-family: 'Barlow', 'Noto Sans KR', sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ─────────────────────────────── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 0 32px;
+        height: 56px;
+        background: rgba(13,21,32,0.9);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .home-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .home-link:hover { color: #fff; }
+      .back-link {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .site-header .home-link::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
+      .back-link:hover { color: rgba(255,255,255,0.8); }
+
+      /* ── HERO ───────────────────────────────── */
+      .league-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        padding: 72px 48px 80px;
+        max-width: 1080px;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+      .league-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(218,145,3,0.14) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hero-text { position: relative; z-index: 1; }
+      .eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #da9103;
+        margin-bottom: 10px;
+      }
+      .league-hero h1 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(42px, 7vw, 80px);
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        line-height: 0.95;
+        color: #fff;
+        margin-bottom: 20px;
+      }
+      .league-hero .intro {
+        font-size: 14px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.45);
+        max-width: 420px;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 500;
+        word-break: keep-all;
+      }
+      .league-mark {
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        padding: 16px;
+      }
+      .league-mark img {
+        width: clamp(120px, 18vw, 200px);
+        height: clamp(120px, 18vw, 200px);
+        object-fit: contain;
+        opacity: 0.85;
+      }
+
+      /* ── SECTIONS ───────────────────────────── */
+      .league-shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 32px 80px;
+      }
+      .section-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+        margin-bottom: 56px;
+      }
+      .section-heading {
+        margin-bottom: 24px;
+        border-left: 3px solid #da9103;
+        padding-left: 16px;
+      }
+      .section-heading .eyebrow { margin-bottom: 4px; }
+      .section-heading h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #fff;
+      }
+
+      /* ── TEAM GRID ───────────────────────────── */
+      .teams-section { margin-bottom: 0; }
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+      }
+      @media (max-width: 480px) {
+        .team-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      .team-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 28px 16px 20px;
+        background: #111a28;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: border-color 0.2s, transform 0.18s, background 0.2s;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .team-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 2px;
+        background: #da9103;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.25s ease;
+      }
+      .team-card:hover {
+        border-color: rgba(218,145,3,0.35);
+        background: #15200f;
+        transform: translateY(-2px);
+      }
+      .team-card:hover::after { transform: scaleX(1); }
+      .team-logo-placeholder {
+        width: 80px; height: 80px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .team-logo-placeholder img {
+        max-width: 100%; max-height: 100%;
+        object-fit: contain;
+        transition: transform 0.2s;
+      }
+      .team-card:hover .team-logo-placeholder img { transform: scale(1.08); }
+      .team-card h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1.2;
+      }
+      .team-card p {
+        font-size: 11px;
+        color: rgba(255,255,255,0.35);
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 500;
+      }
+
+      /* ── ROSTER MODAL ────────────────────────── */
+      .roster-modal {
+        position: fixed; inset: 0; z-index: 9000;
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+      }
+      .roster-modal[hidden] { display: none; }
+      .roster-modal-backdrop {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+      .roster-modal-panel {
+        position: relative; z-index: 1;
+        background: #111a28;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        width: 100%; max-width: 540px;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding-bottom: 12px;
+      }
+      .roster-modal-header {
+        display: flex; align-items: center; gap: 16px;
+        padding: 20px 22px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        position: sticky; top: 0;
+        background: #111a28; z-index: 2;
+      }
+      .roster-modal-logo {
+        width: 52px; height: 52px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .roster-modal-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+      .roster-modal-header-text { flex: 1; }
+      .roster-modal-header-text .eyebrow { margin-bottom: 2px; font-size: 11px; }
+      #roster-modal-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 22px; font-weight: 900;
+        letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+      }
+      .roster-modal-close {
+        background: none; border: none;
+        color: rgba(255,255,255,0.4); font-size: 22px;
+        cursor: pointer; padding: 4px 8px; line-height: 1;
+        transition: color 0.15s; flex-shrink: 0;
+      }
+      .roster-modal-close:hover { color: #fff; }
+      .roster-section-label {
+        display: block;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        padding: 14px 22px 6px;
+      }
+      .roster-player-list {
+        list-style: none;
+        border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      .roster-player-list li {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 22px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 16px; font-weight: 600; letter-spacing: 0.04em;
+        color: rgba(255,255,255,0.82);
+        transition: background 0.12s;
+      }
+      .roster-player-list li:hover { background: rgba(255,255,255,0.04); }
+      .roster-player-list li:last-child { border-bottom: none; }
+      .roster-empty-msg {
+        font-size: 13px !important; font-weight: 400 !important;
+        color: rgba(255,255,255,0.22) !important;
+        font-family: 'Noto Sans KR', sans-serif !important;
+        padding: 12px 22px !important;
+      }
+      .roster-player-list li > span:not(.player-index) { flex: 1; }
+      .roster-player-remove {
+        background: none; border: none;
+        color: rgba(255,255,255,0.2); font-size: 16px;
+        cursor: pointer; padding: 0 4px; line-height: 1;
+        transition: color 0.12s; flex-shrink: 0;
+      }
+      .roster-player-remove:hover { color: rgba(232,67,45,0.85); }
+      .roster-add-row {
+        display: flex; gap: 8px;
+        padding: 12px 22px 4px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      #roster-add-input {
+        flex: 1; background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px; padding: 8px 12px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 15px; font-weight: 600; color: #fff; outline: none;
+        transition: border-color 0.15s;
+      }
+      #roster-add-input:focus { border-color: rgba(218,145,3,0.5); }
+      #roster-add-input::placeholder { color: rgba(255,255,255,0.2); }
+      .roster-add-btn {
+        padding: 0 20px; height: 38px; border-radius: 6px;
+        background: rgba(218,145,3,0.15);
+        border: 1px solid rgba(218,145,3,0.3);
+        color: #da9103; font-family: 'Barlow Condensed', sans-serif;
+        font-size: 14px; font-weight: 800; letter-spacing: 0.08em;
+        cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      }
+      .roster-add-btn:hover { background: rgba(218,145,3,0.28); }
+      .roster-main-item { display:flex; align-items:center; gap:8px; padding:8px 20px !important; }
+      .roster-main-input {
+        flex:1; background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.08); border-radius:4px;
+        padding:6px 10px; font-family:'Barlow Condensed',sans-serif;
+        font-size:15px; font-weight:600; letter-spacing:.04em;
+        color:#fff; outline:none;
+      }
+      .roster-main-input:focus { border-color:rgba(218,145,3,0.5); background:rgba(218,145,3,0.05); }
+      .roster-main-input::placeholder { color:rgba(255,255,255,0.18); }
+
+      body.roster-open { overflow: hidden; }
+
+      /* ── CARD TRANSITION ─────────────────────── */
+      .card-transition-overlay {
+        position: fixed; inset: 0; z-index: 9999;
+        background: #0d1520; opacity: 0; pointer-events: none;
+        transition: opacity 0.35s ease;
+      }
+      body.card-transitioning .card-transition-overlay { opacity: 1; pointer-events: all; }
+
+      @media (max-width: 640px) {
+        .league-hero { padding: 48px 24px 56px; flex-direction: column-reverse; align-items: flex-start; gap: 16px; }
+        .league-shell { padding: 0 16px 60px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="home-link" href="./index.html">VCT Archive</a>
+      <a class="back-link" href="./index.html">홈으로</a>
+    </header>
+
+    <div class="league-hero">
+      <div class="hero-text">
+        <p class="eyebrow">Game Changers</p>
+        <h1>GC Pacific</h1>
+        <p class="intro">VCT Game Changers Pacific 2026에 참가하는 8개 팀의 명단과 선수 정보를 확인하세요.</p>
+      </div>
+      <div class="league-mark">
+        <img src="./assets/Game_Changers.webp" alt="Game Changers" />
+      </div>
+    </div>
+
+    <main class="league-shell">
+      <div class="section-divider"></div>
+
+      <section class="teams-section" aria-labelledby="teams-title">
+        <div class="section-heading">
+          <p class="eyebrow">Teams</p>
+          <h2 id="teams-title">GC Pacific 참가 팀</h2>
+        </div>
+
+        <div class="team-grid">
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/GEN.GC.png" alt="Gen.G GC" /></div>
+            <h3>Gen.G GC</h3>
+            <p>대한민국</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/FL.GC.png" alt="FENNEL GC" /></div>
+            <h3>FENNEL GC</h3>
+            <p>일본 1시드</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/SSQ.png" alt="Sasanqua" /></div>
+            <h3>Sasanqua</h3>
+            <p>일본 2시드</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/FLCV.png" alt="Team Falcons Vega" /></div>
+            <h3>Team Falcons Vega</h3>
+            <p>동남아시아 1시드</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/FSU.png" alt="FULL SENSE SISU" /></div>
+            <h3>FULL SENSE SISU</h3>
+            <p>동남아시아 2시드</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/WIWI.png" alt="wiwiwi" /></div>
+            <h3>wiwiwi</h3>
+            <p>동남아시아 3시드</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/RIE.png" alt="Rising Esports GC" /></div>
+            <h3>Rising Esports GC</h3>
+            <p>인도</p>
+          </article>
+          <article class="team-card">
+            <div class="team-logo-placeholder"><img src="./assets/teams/GC/SL9.png" alt="swaglord9000" /></div>
+            <h3>swaglord9000</h3>
+            <p>오세아니아</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="card-transition-overlay" aria-hidden="true"></div>
+
+    <!-- Roster Modal -->
+    <div id="roster-modal" class="roster-modal" role="dialog" aria-modal="true" aria-labelledby="roster-modal-title" hidden>
+      <div class="roster-modal-backdrop"></div>
+      <div class="roster-modal-panel">
+        <div class="roster-modal-header">
+          <div class="roster-modal-logo" id="roster-modal-logo"></div>
+          <div class="roster-modal-header-text">
+            <p class="eyebrow">선수 명단</p>
+            <h2 id="roster-modal-title">팀</h2>
+          </div>
+          <button class="roster-modal-close" id="roster-modal-close" aria-label="닫기">×</button>
+        </div>
+        <span class="roster-section-label">메인 선수 <span style="opacity:0.5;font-size:10px">(5명)</span></span>
+        <ul class="roster-player-list" id="roster-main-list"></ul>
+        <span class="roster-section-label" style="margin-top:2px">서브 선수</span>
+        <ul class="roster-player-list" id="roster-sub-list"></ul>
+        <div class="roster-add-row" id="roster-add-row">
+          <input type="text" id="roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
+          <button class="roster-add-btn" id="roster-add-btn">추가</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./storage.js"></script>
+    <script>
+    window.storageReady.then(function () {
+      (function () {
+        const LEAGUE = "gc-pacific";
+        const defaultRosters = {
+          "Gen.G GC":           [],
+          "FENNEL GC":          [],
+          "Sasanqua":           [],
+          "Team Falcons Vega":  [],
+          "FULL SENSE SISU":    [],
+          "wiwiwi":             [],
+          "Rising Esports GC":  [],
+          "swaglord9000":       [],
+        };
+
+        const key = (team) => "vct_roster:" + LEAGUE + ":" + team;
+
+        function load(team) {
+          try {
+            const s = localStorage.getItem(key(team));
+            if (s) {
+              const p = JSON.parse(s);
+              if (p && !Array.isArray(p) && p.main) return p;
+              if (Array.isArray(p)) return { main: p.slice(0, 5), subs: p.slice(5) };
+            }
+          } catch (e) {}
+          const def = defaultRosters[team] || [];
+          return { main: def.slice(0, 5), subs: def.slice(5) };
+        }
+
+        function save(team, data) {
+          var k = key(team);
+          var v = JSON.stringify(data);
+          try { localStorage.setItem(k, v); } catch (e) {}
+          fetch('/api/data/' + encodeURIComponent(k), {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: v }),
+          }).catch(function(){});
+        }
+
+        const modal   = document.getElementById("roster-modal");
+        const logoEl  = document.getElementById("roster-modal-logo");
+        const titleEl = document.getElementById("roster-modal-title");
+        const mainEl  = document.getElementById("roster-main-list");
+        const subEl   = document.getElementById("roster-sub-list");
+        const input   = document.getElementById("roster-add-input");
+        let current   = null;
+
+        function open(teamName, logoHTML) {
+          current = teamName;
+          titleEl.textContent = teamName;
+          logoEl.innerHTML = logoHTML || "";
+          render();
+          modal.removeAttribute("hidden");
+          document.body.classList.add("roster-open");
+          var addRow = document.getElementById("roster-add-row");
+          if (addRow) addRow.style.display = (window.vctIsAdmin && window.vctIsAdmin()) ? "flex" : "none";
+          input.value = "";
+          if (window.vctIsAdmin && window.vctIsAdmin()) setTimeout(() => input.focus(), 260);
+        }
+
+        function close() {
+          modal.setAttribute("hidden", "");
+          document.body.classList.remove("roster-open");
+          current = null;
+        }
+
+        function saveMain() {
+          if (!current) return;
+          var d = load(current);
+          d.main = Array.from(mainEl.querySelectorAll(".roster-main-input")).map(function(i) { return i.value.trim(); });
+          save(current, d);
+        }
+
+        function demoteToSub(idx) {
+          if (!current) return;
+          var d = load(current);
+          var name = (d.main[idx] || '').trim();
+          if (!name) return;
+          d.main[idx] = '';
+          if (!d.subs) d.subs = [];
+          d.subs.push(name);
+          save(current, d);
+          render();
+        }
+
+        function promoteToMain(subIdx) {
+          if (!current) return;
+          var d = load(current);
+          var name = (d.subs[subIdx] || '').trim();
+          if (!name) return;
+          var emptySlot = -1;
+          for (var i = 0; i < 5; i++) {
+            if (!d.main[i] || !d.main[i].trim()) { emptySlot = i; break; }
+          }
+          if (emptySlot === -1) { alert('메인 슬롯이 모두 찼습니다. 먼저 한 명을 서브로 내리세요.'); return; }
+          d.main[emptySlot] = name;
+          d.subs.splice(subIdx, 1);
+          save(current, d);
+          render();
+        }
+
+        function saveSub(idx, newName) {
+          if (!current) return;
+          var d = load(current);
+          newName = (newName || '').trim();
+          d.subs[idx] = newName;
+          save(current, d);
+        }
+
+        function render() {
+          if (!current) return;
+          var d = load(current);
+          var admin = window.vctIsAdmin && window.vctIsAdmin();
+
+          mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
+            var nameVal = d.main[i] || '';
+            if (admin) {
+              return '<li class="roster-main-item">' +
+                '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal.replace(/"/g,'&quot;') + '" placeholder="선수 이름" />' +
+                (nameVal ? '<button class="roster-demote-btn" data-main="' + i + '" title="서브로 내리기" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↓</button>' : '') +
+                '</li>';
+            } else {
+              return '<li class="roster-main-item"><span style="opacity:0.85">' + (nameVal || '—') + '</span></li>';
+            }
+          }).join("");
+
+          if (admin) {
+            mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
+              inp.addEventListener("blur", saveMain);
+              inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
+            });
+            mainEl.querySelectorAll(".roster-demote-btn").forEach(function(btn) {
+              btn.addEventListener("click", function() { demoteToSub(Number(btn.dataset.main)); });
+            });
+          }
+
+          if (!d.subs || !d.subs.length) {
+            subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
+          } else {
+            subEl.innerHTML = d.subs.map(function(p, i) {
+              if (admin) {
+                return '<li class="roster-main-item">' +
+                  '<button class="roster-promote-btn" data-sub="' + i + '" title="메인으로 올리기" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↑</button>' +
+                  '<input class="roster-main-input roster-sub-input" data-sub="' + i + '" value="' + p.replace(/"/g,'&quot;') + '" placeholder="서브 선수 이름" />' +
+                  '<button class="roster-player-remove" data-sub="' + i + '" style="flex-shrink:0">×</button>' +
+                  '</li>';
+              }
+              return '<li><span style="flex:1;opacity:0.85">' + p + '</span></li>';
+            }).join("");
+            if (admin) {
+              subEl.querySelectorAll(".roster-sub-input").forEach(function(inp) {
+                inp.addEventListener("blur", function() { saveSub(Number(inp.dataset.sub), inp.value); });
+                inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveSub(Number(inp.dataset.sub), inp.value); inp.blur(); } });
+              });
+              subEl.querySelectorAll(".roster-promote-btn").forEach(function(btn) {
+                btn.addEventListener("click", function() { promoteToMain(Number(btn.dataset.sub)); });
+              });
+              subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                  var d = load(current);
+                  d.subs.splice(Number(btn.dataset.sub), 1);
+                  save(current, d);
+                  render();
+                });
+              });
+            }
+          }
+        }
+
+        function add() {
+          var name = input.value.trim();
+          if (!name || !current) return;
+          var d = load(current);
+          if (!d.subs) d.subs = [];
+          d.subs.push(name);
+          save(current, d);
+          input.value = "";
+          render();
+        }
+
+        document.querySelector(".roster-modal-backdrop").addEventListener("click", close);
+        document.getElementById("roster-modal-close").addEventListener("click", close);
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+        document.getElementById("roster-add-btn").addEventListener("click", add);
+        input.addEventListener("keydown", function (e) { if (e.key === "Enter") add(); });
+
+        document.querySelectorAll(".teams-section .team-card").forEach(function (card) {
+          var nameEl = card.querySelector("h3");
+          if (!nameEl) return;
+          var teamName = nameEl.textContent.trim();
+          var logoPlaceholder = card.querySelector(".team-logo-placeholder");
+          var logoHTML = logoPlaceholder ? logoPlaceholder.innerHTML : "";
+          card.addEventListener("click", function () { open(teamName, logoHTML); });
+        });
+      })();
+    });
+    </script>
+    <script src="./auth.js"></script>
+    <script src="./help.js" defer></script>
+  </body>
+</html>
