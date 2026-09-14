@@ -2319,9 +2319,10 @@ var _ALL_ROSTERS = {
   "T1":                 ["stax", "BuZz", "Munchkin", "Meteor", "iZu"],
 };
 var TEAM_ROSTERS = {};
+var _rosterLeaguePrefix = MATCH_FROM === 'gc-pacific-playoffs' ? 'gc-pacific:' : '';
 function _loadRoster(teamFullName, code) {
   try {
-    var s = localStorage.getItem("vct_roster:" + teamFullName);
+    var s = localStorage.getItem("vct_roster:" + _rosterLeaguePrefix + teamFullName);
     if (s) {
       var p = JSON.parse(s);
       if (p && !Array.isArray(p) && p.main) return p.main.filter(Boolean).concat(p.subs || []);
