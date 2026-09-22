@@ -384,7 +384,7 @@
   userCountBadge.style.display = "none";
   userCountBadge.title = "총 가입 계정 수";
   function fetchUserCount() {
-    var tok = localStorage.getItem("vct_token");
+    var tok = localStorage.getItem(TOKEN_KEY);
     if (!tok) return;
     fetch("/api/admin/user-count", { headers: { Authorization: "Bearer " + tok } })
       .then(function(r) { return r.ok ? r.json() : null; })
