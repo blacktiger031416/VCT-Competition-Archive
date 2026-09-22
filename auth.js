@@ -149,6 +149,7 @@
     ".auth-refresh-btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.22); color: rgba(255,255,255,0.85); }",
     ".auth-refresh-btn:active { transform: rotate(180deg); }",
     ".auth-refresh-btn .refresh-icon { font-size: 13px; line-height: 1; }",
+    ".admin-user-count-badge { display:inline-flex; align-items:center; height:28px; padding:0 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.65); font-size:12px; font-weight:600; white-space:nowrap; }",
 
     /* ── Modal overlay ── */
     ".login-modal { position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center; }",
@@ -377,6 +378,20 @@
   rewardBtn.style.display = "none";
   rewardBtn.addEventListener("click", openRewardModal);
 
+  /* 총 계정수 뱃지 (admin만) */
+  var userCountBadge = document.createElement("span");
+  userCountBadge.className = "admin-user-count-badge";
+  userCountBadge.style.display = "none";
+  userCountBadge.title = "총 가입 계정 수";
+  function fetchUserCount() {
+    var tok = localStorage.getItem("vct_token");
+    if (!tok) return;
+    fetch("/api/admin/user-count", { headers: { Authorization: "Bearer " + tok } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) { if (d && d.count != null) userCountBadge.textContent = "👤 " + d.count + "명"; })
+      .catch(function() {});
+  }
+
 
   /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn 상태 동기화 */
   function refreshAuthButtons() {
@@ -387,11 +402,14 @@
       authBtn.textContent = "로그인";
       authBtn.className = "auth-header-btn";
       refreshBtn.style.display = "none";
+      userCountBadge.style.display = "none";
       authBtn.onclick = openLoginModal;
     } else if (user.role === "admin") {
       authBtn.textContent = "Admin";
       authBtn.className = "auth-header-btn auth-header-btn--on";
       refreshBtn.style.display = "";
+      userCountBadge.style.display = "";
+      fetchUserCount();
       authBtn.onclick = openLogoutConfirm;
     } else {
       authBtn.textContent = user.username;
@@ -407,6 +425,7 @@
     /* 우측 버튼 그룹 wrapper */
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
+    rightGroup.appendChild(userCountBadge);
     rightGroup.appendChild(refreshBtn);
     rightGroup.appendChild(rewardBtn);
     if (noticeBtn) rightGroup.appendChild(noticeBtn);

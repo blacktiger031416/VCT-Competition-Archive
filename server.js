@@ -684,6 +684,15 @@ app.post("/api/admin/trim-vct-p", requireAdmin, async (req, res) => {
 });
 
 /* ── API: DB 저장 현황 (admin 전용) ─────────────── */
+app.get("/api/admin/user-count", requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT COUNT(*) AS cnt FROM users");
+    res.json({ count: parseInt(rows[0].cnt) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/api/admin/storage-info", requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query(
