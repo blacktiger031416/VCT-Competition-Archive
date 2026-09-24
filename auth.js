@@ -393,6 +393,57 @@
   }
 
 
+  /* 전체 경기 일괄 재적용 버튼 (admin만) */
+  var bulkApplyBtn = document.createElement("button");
+  bulkApplyBtn.type = "button";
+  bulkApplyBtn.className = "auth-refresh-btn";
+  bulkApplyBtn.innerHTML = "🔄 전체 재적용";
+  bulkApplyBtn.title = "저장된 모든 경기의 선수 데이터를 일괄 재적용합니다";
+  bulkApplyBtn.style.display = "none";
+  bulkApplyBtn.addEventListener("click", function () {
+    var tok = localStorage.getItem(TOKEN_KEY);
+    if (!tok) return;
+    bulkApplyBtn.disabled = true;
+    bulkApplyBtn.innerHTML = "⏳ 로딩 중...";
+    fetch("/api/auto-match", { headers: { Authorization: "Bearer " + tok } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (records) {
+        var targets = records.filter(function (r) { return r.thespikeMatchId; });
+        if (!targets.length) {
+          bulkApplyBtn.disabled = false;
+          bulkApplyBtn.innerHTML = "🔄 전체 재적용";
+          alert("재적용할 경기가 없습니다.");
+          return;
+        }
+        var done = 0, failed = 0, total = targets.length;
+        function next(idx) {
+          if (idx >= targets.length) {
+            bulkApplyBtn.disabled = false;
+            bulkApplyBtn.innerHTML = "🔄 전체 재적용";
+            alert("완료: " + done + "/" + total + "경기 적용, 실패 " + failed + "건");
+            return;
+          }
+          var rec = targets[idx];
+          bulkApplyBtn.innerHTML = "⏳ " + (idx + 1) + "/" + total + "...";
+          fetch("/api/auto-match/apply-now", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+            body: JSON.stringify({ matchKey: rec.matchKey, thespikeMatchId: rec.thespikeMatchId, team1: rec.team1 || "", team2: rec.team2 || "", league: rec.league || "" }),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { if (d.ok) done++; else failed++; })
+            .catch(function () { failed++; })
+            .finally(function () { next(idx + 1); });
+        }
+        next(0);
+      })
+      .catch(function () {
+        bulkApplyBtn.disabled = false;
+        bulkApplyBtn.innerHTML = "🔄 전체 재적용";
+        alert("경기 목록을 불러오지 못했습니다.");
+      });
+  });
+
   /* refreshAuthButtons: authBtn + refreshBtn + rewardBtn 상태 동기화 */
   function refreshAuthButtons() {
     var user = getCachedUser();
@@ -403,18 +454,21 @@
       authBtn.className = "auth-header-btn";
       refreshBtn.style.display = "none";
       userCountBadge.style.display = "none";
+      bulkApplyBtn.style.display = "none";
       authBtn.onclick = openLoginModal;
     } else if (user.role === "admin") {
       authBtn.textContent = "Admin";
       authBtn.className = "auth-header-btn auth-header-btn--on";
       refreshBtn.style.display = "";
       userCountBadge.style.display = "";
+      bulkApplyBtn.style.display = "";
       fetchUserCount();
       authBtn.onclick = openLogoutConfirm;
     } else {
       authBtn.textContent = user.username;
       authBtn.className = "auth-header-btn auth-header-btn--user";
       refreshBtn.style.display = "none";
+      bulkApplyBtn.style.display = "none";
       authBtn.onclick = openLogoutConfirm;
     }
   }
@@ -426,6 +480,7 @@
     var rightGroup = document.createElement("div");
     rightGroup.className = "header-right-group";
     rightGroup.appendChild(userCountBadge);
+    rightGroup.appendChild(bulkApplyBtn);
     rightGroup.appendChild(refreshBtn);
     rightGroup.appendChild(rewardBtn);
     if (noticeBtn) rightGroup.appendChild(noticeBtn);
