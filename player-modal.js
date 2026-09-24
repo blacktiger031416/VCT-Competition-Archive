@@ -212,16 +212,20 @@
   var TOURNAMENT_LABELS = {
     santiago: 'Santiago',
     london:   'London',
+    shanghai: 'Shanghai',
+    bangkok:  'Bangkok',
   };
   var STAGE_LABELS = {
     kickoff:        'KickOff',
-    stage1:         'Stage 1',        /* Stage 1 + Stage 1 Playoffs 통합 */
-    stage1playoffs: 'Stage 1',        /* → stage1과 같은 라벨로 병합 */
-    stage2:         'Stage 2',        /* Stage 2 + Stage 2 Playoffs 통합 */
-    stage2playoffs: 'Stage 2',        /* → stage2와 같은 라벨로 병합 */
+    stage1:         'Stage 1 Group',
+    stage1playoffs: 'Stage 1 Playoffs',
+    stage2:         'Stage 2 Group',
+    s2playin:       'Stage 2 Play-In',
+    stage2playoffs: 'Stage 2 Playoffs',
     swiss:          'Swiss',
     playoffs:       'Playoffs',
-    groupstage:     'Group Stage',
+    groupstage:     'Group',
+    group:          'Group',
     ck_split:              'Split 1',
     ck_split2:             'Split 2',
     ck_split1_po:          'Split 1 Playoff',
@@ -232,32 +236,78 @@
     cj_split2:             'Split 2',
   };
 
-  /* stage 정규화: Playoffs/PlayIn을 부모 Stage로 묶음 */
+  /* 복합 stage key → 라벨 suffix */
+  var COMBO_SUFFIX = {
+    'stage1+stage1playoffs':          'Stage 1 (Group + Playoffs)',
+    'stage2+s2playin+stage2playoffs': 'Stage 2 (Group + Play-In + Playoffs)',
+    'swiss+playoffs':                 '(Swiss + Playoffs)',
+    'groupstage+playoffs':            '(Group + Playoffs)',
+    'group+playoffs':                 '(Group + Playoffs)',
+  };
+
+  /* 복합 필터 정의 */
+  var COMBO_DEFS = [
+    { leagues: ['pacific','americas','emea','cn'],
+      stages: ['stage1','stage1playoffs'],
+      minStages: ['stage1','stage1playoffs'],
+      comboStage: 'stage1+stage1playoffs' },
+    { leagues: ['pacific','americas','emea','cn'],
+      stages: ['stage2','s2playin','stage2playoffs'],
+      minStages: ['stage2','stage2playoffs'],
+      comboStage: 'stage2+s2playin+stage2playoffs' },
+    { leagues: ['masters'],
+      stages: ['swiss','playoffs'],
+      minStages: ['swiss','playoffs'],
+      comboStage: 'swiss+playoffs' },
+    { leagues: ['champions'],
+      stages: ['swiss','playoffs'],
+      minStages: ['swiss','playoffs'],
+      comboStage: 'swiss+playoffs' },
+    { leagues: ['champions'],
+      stages: ['groupstage','playoffs'],
+      minStages: ['groupstage','playoffs'],
+      comboStage: 'groupstage+playoffs' },
+    { leagues: ['ewc'],
+      stages: ['group','playoffs'],
+      minStages: ['group','playoffs'],
+      comboStage: 'group+playoffs' },
+  ];
+
+  /* stage 정규화: 더 이상 병합하지 않음 (하위호환용 - 필터 매칭에서 사용 안 함) */
   function normalizeStage(s) {
-    if (s === 'stage1playoffs') return 'stage1';
-    if (s === 'stage2playoffs') return 'stage2';
-    if (s === 's2playin')       return 'stage2';
     return s || '';
   }
 
   /* league + tournament + stage → 표시용 라벨 */
   function buildGroupLabel(league, tournament, stage) {
-    var leagueName     = LEAGUE_LABELS[league]          || league      || '';
-    var tournamentName = TOURNAMENT_LABELS[tournament]  || tournament  || '';
-
-    // Champions의 Swiss는 Group Stage로 표시
-    var stageName;
-    if (league === 'champions' && stage === 'swiss') {
-      stageName = 'Group Stage';
-    } else {
-      stageName = STAGE_LABELS[stage] || stage || '';
-    }
+    var leagueName     = LEAGUE_LABELS[league]         || league      || '';
+    var tournamentName = TOURNAMENT_LABELS[tournament] || tournament  || '';
 
     var prefix = '';
     if ((league === 'masters' || league === 'champions') && tournamentName) {
       prefix = leagueName + ' ' + tournamentName;
     } else {
       prefix = leagueName;
+    }
+
+    /* 복합 stage */
+    var comboSuffix = COMBO_SUFFIX[stage];
+    if (comboSuffix) {
+      if (!prefix) return comboSuffix;
+      /* masters/champions/ewc: "Masters Santiago (Swiss + Playoffs)" */
+      if (league === 'masters' || league === 'champions' || league === 'ewc') {
+        return prefix + ' ' + comboSuffix;
+      }
+      /* 권역: "Pacific · Stage 1 (Group + Playoffs)" */
+      return prefix + ' · ' + comboSuffix;
+    }
+
+    /* 단일 stage */
+    var stageName;
+    if ((league === 'champions' || league === 'ewc') && (stage === 'swiss' || stage === 'groupstage')) {
+      stageName = 'Group';
+    } else {
+      stageName = STAGE_LABELS[stage] || stage || '';
     }
 
     var parts = [];
@@ -269,20 +319,36 @@
   /* 그룹 정렬 키 (VCT 시즌 진행 순서) */
   function getGroupSortKey(g) {
     var l = g.league, t = g.tournament, s = g.stage;
-    if (s === 'kickoff')                                        return  10;
-    if (l === 'masters' && t === 'santiago' && s === 'swiss')   return  20;
-    if (l === 'masters' && t === 'santiago' && s === 'playoffs') return 30;
-    if (l === 'masters' && !t && s === 'swiss')                 return  25; // 토너먼트 미기재
-    if (l === 'masters' && !t && s === 'playoffs')              return  35;
-    if (s === 'stage1')                                         return  40;
-    if (s === 'stage1playoffs')                                 return  50;
-    if (l === 'masters' && t === 'london' && s === 'swiss')     return  60;
-    if (l === 'masters' && t === 'london' && s === 'playoffs')  return  70;
-    if (s === 'stage2')                                         return  80;
-    if (s === 'stage2playoffs')                                 return  90;
-    if (l === 'ewc')                                                return  95;
-    if (l === 'champions' && (s === 'swiss' || s === 'groupstage')) return 100;
-    if (l === 'champions' && s === 'playoffs')                  return 110;
+    if (s === 'kickoff')                                                               return  10;
+    /* Masters Santiago */
+    if (l === 'masters' && t === 'santiago' && s === 'swiss+playoffs')                return  20;
+    if (l === 'masters' && t === 'santiago' && s === 'swiss')                         return  21;
+    if (l === 'masters' && t === 'santiago' && s === 'playoffs')                      return  22;
+    if (l === 'masters' && !t && s === 'swiss+playoffs')                              return  25;
+    if (l === 'masters' && !t && s === 'swiss')                                       return  26;
+    if (l === 'masters' && !t && s === 'playoffs')                                    return  27;
+    /* Stage 1 */
+    if (s === 'stage1+stage1playoffs')                                                return  40;
+    if (s === 'stage1')                                                               return  41;
+    if (s === 'stage1playoffs')                                                       return  42;
+    /* Masters London */
+    if (l === 'masters' && t === 'london' && s === 'swiss+playoffs')                  return  60;
+    if (l === 'masters' && t === 'london' && s === 'swiss')                           return  61;
+    if (l === 'masters' && t === 'london' && s === 'playoffs')                        return  62;
+    /* Stage 2 */
+    if (s === 'stage2+s2playin+stage2playoffs')                                       return  80;
+    if (s === 'stage2')                                                               return  81;
+    if (s === 's2playin')                                                             return  82;
+    if (s === 'stage2playoffs')                                                       return  83;
+    /* EWC */
+    if (l === 'ewc' && s === 'group+playoffs')                                        return  94;
+    if (l === 'ewc' && s === 'group')                                                 return  95;
+    if (l === 'ewc' && s === 'playoffs')                                              return  96;
+    if (l === 'ewc')                                                                  return  95;
+    /* Champions */
+    if (l === 'champions' && (s === 'swiss+playoffs' || s === 'groupstage+playoffs')) return 100;
+    if (l === 'champions' && (s === 'swiss' || s === 'groupstage'))                   return 101;
+    if (l === 'champions' && s === 'playoffs')                                        return 102;
     /* Challengers Korea */
     if (l === 'challengers-korea' && s === 'ck_split')         return 200;
     if (l === 'challengers-korea' && s === 'ck_split1_po')     return 210;
@@ -290,36 +356,78 @@
     if (l === 'challengers-korea' && s === 'ck_split2_po')     return 230;
     if (l === 'challengers-korea')                             return 205;
     /* Challengers Japan */
-    if (l === 'challengers-japan' && s === 'cj_split1')             return 300;
-    if (l === 'challengers-japan' && s === 'cj_japan_ph2_bracket')  return 310;
-    if (l === 'challengers-japan' && s === 'cj_japan_po_bracket')   return 320;
-    if (l === 'challengers-japan' && s === 'cj_split2')             return 325;
-    if (l === 'challengers-japan')                                   return 305;
-    return 999; // 알 수 없는 조합 → 숨김
+    if (l === 'challengers-japan' && s === 'cj_split1')            return 300;
+    if (l === 'challengers-japan' && s === 'cj_japan_ph2_bracket') return 310;
+    if (l === 'challengers-japan' && s === 'cj_japan_po_bracket')  return 320;
+    if (l === 'challengers-japan' && s === 'cj_split2')            return 325;
+    if (l === 'challengers-japan')                                  return 305;
+    return 999;
   }
 
-  /* maps 배열 → 그룹 목록 [{key, label, count}] (출현 순서 유지) */
+  /* maps 배열 → 그룹 목록 (개별 + 복합 조합 포함) */
   function buildFilterGroups(allMaps) {
     var order  = [];
     var groups = {};
+
+    /* Step 1: 개별 stage 그룹 */
     allMaps.forEach(function(m) {
-      /* stage1playoffs → stage1, stage2playoffs → stage2 로 병합 */
-      var ns = normalizeStage(m.stage);
-      var key = (m.league || '') + '|' + (m.tournament || '') + '|' + ns;
+      var stage = m.stage || '';
+      var key   = (m.league || '') + '|' + (m.tournament || '') + '|' + stage;
       if (!groups[key]) {
         groups[key] = {
           key:        key,
           league:     m.league      || '',
           tournament: m.tournament  || '',
-          stage:      ns,
-          label:      buildGroupLabel(m.league, m.tournament, ns),
+          stage:      stage,
+          stages:     [stage],
+          label:      buildGroupLabel(m.league, m.tournament, stage),
           count:      0,
+          isCombo:    false,
         };
         order.push(key);
       }
       groups[key].count++;
     });
-    return order.map(function(k) { return groups[k]; });
+
+    /* Step 2: 리그별 보유 stage 목록 수집 */
+    var ltMap = {};
+    order.forEach(function(k) {
+      var g   = groups[k];
+      var ltk = g.league + '|' + g.tournament;
+      if (!ltMap[ltk]) ltMap[ltk] = { league: g.league, tournament: g.tournament, stages: [] };
+      ltMap[ltk].stages.push(g.stage);
+    });
+
+    /* Step 3: 복합 필터 추가 */
+    var extraOrder = [];
+    Object.keys(ltMap).forEach(function(ltk) {
+      var lt = ltMap[ltk];
+      COMBO_DEFS.forEach(function(def) {
+        if (def.leagues.indexOf(lt.league) === -1) return;
+        var hasMin = def.minStages.every(function(s) { return lt.stages.indexOf(s) !== -1; });
+        if (!hasMin) return;
+        var comboKey = lt.league + '|' + lt.tournament + '|' + def.comboStage;
+        if (groups[comboKey]) return;
+        var count = allMaps.filter(function(m) {
+          return (m.league||'') === lt.league &&
+                 (m.tournament||'') === lt.tournament &&
+                 def.stages.indexOf(m.stage||'') !== -1;
+        }).length;
+        groups[comboKey] = {
+          key:        comboKey,
+          league:     lt.league,
+          tournament: lt.tournament,
+          stage:      def.comboStage,
+          stages:     def.stages,
+          label:      buildGroupLabel(lt.league, lt.tournament, def.comboStage),
+          count:      count,
+          isCombo:    true,
+        };
+        extraOrder.push(comboKey);
+      });
+    });
+
+    return order.concat(extraOrder).map(function(k) { return groups[k]; });
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -838,11 +946,11 @@
       .filter(function(g) { return getGroupSortKey(g) !== 999 && buildGroupLabel(g.league, g.tournament, g.stage) !== ''; })
       .sort(function(a, b) { return getGroupSortKey(a) - getGroupSortKey(b); });
 
-    // '전체' 카운트 = 인식된 그룹 맵 합산 (기타 제외)
+    // '전체' 카운트 = 인식된 개별 그룹 맵 합산 (복합 키 제외)
     var knownKeySet = {};
-    groups.forEach(function(g) { knownKeySet[g.key] = true; });
+    groups.forEach(function(g) { if (!g.isCombo) knownKeySet[g.key] = true; });
     var recognizedCount = allMaps.filter(function(m) {
-      return knownKeySet[(m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage)];
+      return knownKeySet[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
     }).length;
 
     var items = [{ key: 'all', label: '전체', count: recognizedCount }].concat(groups);
@@ -857,7 +965,7 @@
       if (needsTag) {
         var opts = g.league === 'masters'
           ? [['santiago','Santiago'],['london','London']]
-          : [['bangkok','Bangkok']];  // Champions 토너먼트 이름
+          : [['shanghai','Shanghai'],['bangkok','Bangkok']];
         tagRow = '<div class="pm-tag-row">' +
           '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:0.1em;text-transform:uppercase;align-self:center;">토너먼트 지정:</span>' +
           opts.map(function(o) {
@@ -865,7 +973,7 @@
           }).join('') +
         '</div>';
       }
-      var delBtn = (admin && g.key !== 'all')
+      var delBtn = (admin && g.key !== 'all' && !g.isCombo)
         ? '<button class="pm-del-group-btn" data-del-key="' + g.key + '" title="이 기간 데이터 삭제 (Admin)">🗑</button>'
         : '';
       return '<div class="pm-filter-item' + (isSel ? ' pm-fi-selected' : '') + '" data-key="' + g.key + '">' +
@@ -895,7 +1003,7 @@
         var pd = loadVctp(_current.name);
         var before = pd.maps.length;
         pd.maps = pd.maps.filter(function(m) {
-          var k = (m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage);
+          var k = (m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'');
           return k !== groupKey;
         });
         if (pd.maps.length !== before) {
@@ -998,13 +1106,13 @@
       .filter(function(g) { return getGroupSortKey(g) !== 999 && buildGroupLabel(g.league, g.tournament, g.stage) !== ''; })
       .sort(function(a, b) { return getGroupSortKey(a) - getGroupSortKey(b); });
 
-    // 인식된 그룹 키 집합
+    // 인식된 개별 그룹 키 집합 (복합 키 제외 — 맵 단위 매핑은 개별 stage만)
     var knownKeySet2 = {};
-    knownGroups.forEach(function(g) { knownKeySet2[g.key] = true; });
+    knownGroups.forEach(function(g) { if (!g.isCombo) knownKeySet2[g.key] = true; });
 
     // 인식된 맵만 (기타 제외)
     var recognizedMaps = allMaps.filter(function(m) {
-      return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + normalizeStage(m.stage)];
+      return knownKeySet2[(m.league||'') + '|' + (m.tournament||'') + '|' + (m.stage||'')];
     });
 
     // 어드민 경고: 실제 데이터가 없으면 표시 (league 미태그 포함)
@@ -1051,10 +1159,19 @@
     /* ── 필터 적용 ── */
     var maps = _activeFilter === 'all'
       ? recognizedMaps
-      : allMaps.filter(function(m) {
-          var key = (m.league || '') + '|' + (m.tournament || '') + '|' + normalizeStage(m.stage);
-          return key === _activeFilter;
-        });
+      : (function() {
+          var ag = null;
+          for (var gi = 0; gi < knownGroups.length; gi++) {
+            if (knownGroups[gi].key === _activeFilter) { ag = knownGroups[gi]; break; }
+          }
+          if (!ag) return [];
+          var stages = ag.stages || [ag.stage];
+          return allMaps.filter(function(m) {
+            return (m.league||'') === ag.league &&
+                   (m.tournament||'') === ag.tournament &&
+                   stages.indexOf(m.stage||'') !== -1;
+          });
+        })();
 
     /* ── 스탯 계산 ── */
     var cardsEl    = document.getElementById('pm-stat-cards');
