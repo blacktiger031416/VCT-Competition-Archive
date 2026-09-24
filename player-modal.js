@@ -240,6 +240,9 @@
   var COMBO_SUFFIX = {
     'stage1+stage1playoffs':          'Stage 1 (Group + Playoffs)',
     'stage2+s2playin+stage2playoffs': 'Stage 2 (Group + Play-In + Playoffs)',
+    'stage2+s2playin':                'Stage 2 (Group + Play-In)',
+    'stage2+stage2playoffs':          'Stage 2 (Group + Playoffs)',
+    's2playin+stage2playoffs':        'Stage 2 (Play-In + Playoffs)',
     'swiss+playoffs':                 '(Swiss + Playoffs)',
     'groupstage+playoffs':            '(Group + Playoffs)',
     'group+playoffs':                 '(Group + Playoffs)',
@@ -251,10 +254,26 @@
       stages: ['stage1','stage1playoffs'],
       minStages: ['stage1','stage1playoffs'],
       comboStage: 'stage1+stage1playoffs' },
+    /* Stage 2: 보유 스테이지 조합에 따라 딱 맞는 통합 하나만 생성 */
     { leagues: ['pacific','americas','emea','cn'],
       stages: ['stage2','s2playin','stage2playoffs'],
-      minStages: ['stage2','stage2playoffs'],
+      minStages: ['stage2','s2playin','stage2playoffs'],
       comboStage: 'stage2+s2playin+stage2playoffs' },
+    { leagues: ['pacific','americas','emea','cn'],
+      stages: ['stage2','s2playin'],
+      minStages: ['stage2','s2playin'],
+      excludeStages: ['stage2playoffs'],
+      comboStage: 'stage2+s2playin' },
+    { leagues: ['pacific','americas','emea','cn'],
+      stages: ['stage2','stage2playoffs'],
+      minStages: ['stage2','stage2playoffs'],
+      excludeStages: ['s2playin'],
+      comboStage: 'stage2+stage2playoffs' },
+    { leagues: ['pacific','americas','emea','cn'],
+      stages: ['s2playin','stage2playoffs'],
+      minStages: ['s2playin','stage2playoffs'],
+      excludeStages: ['stage2'],
+      comboStage: 's2playin+stage2playoffs' },
     { leagues: ['masters'],
       stages: ['swiss','playoffs'],
       minStages: ['swiss','playoffs'],
@@ -337,6 +356,9 @@
     if (l === 'masters' && t === 'london' && s === 'playoffs')                        return  62;
     /* Stage 2 */
     if (s === 'stage2+s2playin+stage2playoffs')                                       return  80;
+    if (s === 'stage2+s2playin')                                                      return  80;
+    if (s === 'stage2+stage2playoffs')                                                return  80;
+    if (s === 's2playin+stage2playoffs')                                              return  80;
     if (s === 'stage2')                                                               return  81;
     if (s === 's2playin')                                                             return  82;
     if (s === 'stage2playoffs')                                                       return  83;
@@ -406,6 +428,8 @@
         if (def.leagues.indexOf(lt.league) === -1) return;
         var hasMin = def.minStages.every(function(s) { return lt.stages.indexOf(s) !== -1; });
         if (!hasMin) return;
+        var hasExcluded = def.excludeStages && def.excludeStages.some(function(s) { return lt.stages.indexOf(s) !== -1; });
+        if (hasExcluded) return;
         var comboKey = lt.league + '|' + lt.tournament + '|' + def.comboStage;
         if (groups[comboKey]) return;
         var count = allMaps.filter(function(m) {
