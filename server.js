@@ -684,6 +684,98 @@ app.post("/api/admin/trim-vct-p", requireAdmin, async (req, res) => {
 });
 
 /* ── API: DB 저장 현황 (admin 전용) ─────────────── */
+/* ── 선수 스탯 전체 재빌드: players:* → vct_p:* ── */
+app.post("/api/admin/rebuild-player-stats", requireAdmin, async (req, res) => {
+  try {
+    /* 1. match-meta 읽기 (league/stage/tournament 참조용) */
+    const metaRows = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'match-meta:%'");
+    const metaMap = {};
+    for (const row of metaRows.rows) {
+      const mk = row.key.slice('match-meta:'.length);
+      try { metaMap[mk] = JSON.parse(row.value); } catch {}
+    }
+
+    /* 2. 기존 vct_p:* 읽기 (메타/우승기록 보존용) */
+    const vctpRows = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'vct_p:%'");
+    const vctp = {};
+    for (const row of vctpRows.rows) {
+      const pName = row.key.slice('vct_p:'.length);
+      try {
+        const pd = JSON.parse(row.value);
+        vctp[pName] = { meta: pd.meta || {}, wins: pd.wins || [], maps: [] };
+      } catch { vctp[pName] = { maps: [] }; }
+    }
+
+    /* 3. players:* 전체 처리 */
+    const playersRows = await pool.query("SELECT key, value FROM app_data WHERE key LIKE 'players:%'");
+    let mapCount = 0;
+    for (const row of playersRows.rows) {
+      // key: players:matchKey:mapIdx
+      const withoutPrefix = row.key.slice('players:'.length);
+      const lastColon = withoutPrefix.lastIndexOf(':');
+      if (lastColon === -1) continue;
+      const matchKey = withoutPrefix.slice(0, lastColon);
+      const mapIdx   = parseInt(withoutPrefix.slice(lastColon + 1));
+      if (isNaN(mapIdx)) continue;
+
+      let data;
+      try { data = JSON.parse(row.value); } catch { continue; }
+      if (!data || Array.isArray(data)) continue;
+
+      const meta  = metaMap[matchKey] || {};
+      const league     = data._league     || meta.league     || '';
+      const stage      = data._stage      || meta.stage      || '';
+      const tournament = data._tournament || meta.tournament || '';
+
+      for (const [pKey, slot] of Object.entries(data)) {
+        if (pKey.startsWith('_') || !slot || typeof slot !== 'object') continue;
+        const pName = (slot.name || '').trim();
+        if (!pName || pName === '-') continue;
+
+        if (!vctp[pName]) vctp[pName] = { maps: [] };
+        if (!vctp[pName].maps) vctp[pName].maps = [];
+
+        // 기존 entry 찾기 또는 생성
+        let entry = vctp[pName].maps.find(e => e.matchKey === matchKey && e.mapIdx === mapIdx);
+        if (!entry) { entry = { matchKey, mapIdx }; vctp[pName].maps.push(entry); }
+
+        if (league)     entry.league     = league;
+        if (stage)      entry.stage      = stage;
+        if (tournament) entry.tournament = tournament;
+
+        if (slot.agent && slot.agent.trim()) entry.agent = slot.agent.trim(); else delete entry.agent;
+        if (slot.acs != null && slot.acs !== '') entry.acs = slot.acs; else delete entry.acs;
+        if (slot.kda && String(slot.kda).includes('/')) entry.kda = slot.kda; else delete entry.kda;
+
+        const hasStats = 'acs' in entry || 'kda' in entry;
+        if (!hasStats) {
+          vctp[pName].maps = vctp[pName].maps.filter(e => !(e.matchKey === matchKey && e.mapIdx === mapIdx));
+        } else {
+          mapCount++;
+        }
+      }
+    }
+
+    /* 4. 재빌드된 vct_p:* 저장 */
+    let saved = 0;
+    for (const [pName, pd] of Object.entries(vctp)) {
+      if (!pd.maps || pd.maps.length === 0) continue;
+      const key = `vct_p:${pName}`;
+      const value = JSON.stringify(pd);
+      await pool.query(
+        "INSERT INTO app_data (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2",
+        [key, value]
+      );
+      saved++;
+    }
+
+    res.json({ ok: true, players: saved, entries: mapCount });
+  } catch (e) {
+    console.error('[rebuild-player-stats]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get("/api/admin/user-count", requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT COUNT(*) AS cnt FROM users");

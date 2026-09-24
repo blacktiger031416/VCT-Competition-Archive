@@ -403,44 +403,27 @@
   bulkApplyBtn.addEventListener("click", function () {
     var tok = localStorage.getItem(TOKEN_KEY);
     if (!tok) return;
+    if (!confirm("DB에 저장된 모든 경기 데이터를 기반으로 선수 스탯을 전체 재적용합니다.\n계속하시겠습니까?")) return;
     bulkApplyBtn.disabled = true;
-    bulkApplyBtn.innerHTML = "⏳ 로딩 중...";
-    fetch("/api/auto-match", { headers: { Authorization: "Bearer " + tok } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (records) {
-        var targets = records.filter(function (r) { return r.thespikeMatchId; });
-        if (!targets.length) {
-          bulkApplyBtn.disabled = false;
-          bulkApplyBtn.innerHTML = "🔄 전체 재적용";
-          alert("재적용할 경기가 없습니다.");
-          return;
+    bulkApplyBtn.innerHTML = "⏳ 재빌드 중...";
+    fetch("/api/admin/rebuild-player-stats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        bulkApplyBtn.disabled = false;
+        bulkApplyBtn.innerHTML = "🔄 전체 재적용";
+        if (d.ok) {
+          alert("완료: " + d.players + "명 선수 / " + d.entries + "개 맵 항목 재적용");
+        } else {
+          alert("오류: " + (d.error || "알 수 없는 오류"));
         }
-        var done = 0, failed = 0, total = targets.length;
-        function next(idx) {
-          if (idx >= targets.length) {
-            bulkApplyBtn.disabled = false;
-            bulkApplyBtn.innerHTML = "🔄 전체 재적용";
-            alert("완료: " + done + "/" + total + "경기 적용, 실패 " + failed + "건");
-            return;
-          }
-          var rec = targets[idx];
-          bulkApplyBtn.innerHTML = "⏳ " + (idx + 1) + "/" + total + "...";
-          fetch("/api/auto-match/apply-now", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
-            body: JSON.stringify({ matchKey: rec.matchKey, thespikeMatchId: rec.thespikeMatchId, team1: rec.team1 || "", team2: rec.team2 || "", league: rec.league || "" }),
-          })
-            .then(function (r) { return r.json(); })
-            .then(function (d) { if (d.ok) done++; else failed++; })
-            .catch(function () { failed++; })
-            .finally(function () { next(idx + 1); });
-        }
-        next(0);
       })
       .catch(function () {
         bulkApplyBtn.disabled = false;
         bulkApplyBtn.innerHTML = "🔄 전체 재적용";
-        alert("경기 목록을 불러오지 못했습니다.");
+        alert("서버 연결 실패");
       });
   });
 
