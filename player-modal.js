@@ -303,8 +303,9 @@
 
   /* league + tournament + stage → 표시용 라벨 */
   function buildGroupLabel(league, tournament, stage) {
-    var leagueName     = LEAGUE_LABELS[league]         || league      || '';
-    var tournamentName = TOURNAMENT_LABELS[tournament] || tournament  || '';
+    var leagueName     = LEAGUE_LABELS[league]  || league || '';
+    // tournament가 league와 동일하거나 TOURNAMENT_LABELS에 없으면 빈 문자열 처리
+    var tournamentName = (tournament && tournament !== league) ? (TOURNAMENT_LABELS[tournament] || '') : '';
 
     var prefix = '';
     if ((league === 'masters' || league === 'champions') && tournamentName) {
