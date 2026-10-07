@@ -286,6 +286,10 @@
       stages: ['groupstage','playoffs'],
       minStages: ['groupstage','playoffs'],
       comboStage: 'groupstage+playoffs' },
+    { leagues: ['champions'],
+      stages: ['group','playoffs'],
+      minStages: ['group','playoffs'],
+      comboStage: 'group+playoffs' },
     { leagues: ['ewc'],
       stages: ['group','playoffs'],
       minStages: ['group','playoffs'],
@@ -323,7 +327,7 @@
 
     /* 단일 stage */
     var stageName;
-    if ((league === 'champions' || league === 'ewc') && (stage === 'swiss' || stage === 'groupstage')) {
+    if ((league === 'champions' || league === 'ewc') && (stage === 'swiss' || stage === 'groupstage' || stage === 'group')) {
       stageName = 'Group';
     } else {
       stageName = STAGE_LABELS[stage] || stage || '';
@@ -368,8 +372,8 @@
     if (l === 'ewc' && s === 'playoffs')                                              return  96;
     if (l === 'ewc')                                                                  return  95;
     /* Champions */
-    if (l === 'champions' && (s === 'swiss+playoffs' || s === 'groupstage+playoffs')) return 100;
-    if (l === 'champions' && (s === 'swiss' || s === 'groupstage'))                   return 101;
+    if (l === 'champions' && (s === 'swiss+playoffs' || s === 'groupstage+playoffs' || s === 'group+playoffs')) return 100;
+    if (l === 'champions' && (s === 'swiss' || s === 'groupstage' || s === 'group'))  return 101;
     if (l === 'champions' && s === 'playoffs')                                        return 102;
     /* Challengers Korea */
     if (l === 'challengers-korea' && s === 'ck_split')         return 200;
