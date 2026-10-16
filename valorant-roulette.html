@@ -1279,39 +1279,49 @@ function triggerFlash() {
   el.classList.add('pop');
 }
 
-function spinRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, onResult }) {
+function spinRoulette({ trackEl, outerEl, items, cardClass, buildCard, onResult }) {
   if (!items || items.length === 0) return;
   const winnerName = items[Math.floor(Math.random() * items.length)];
   const winnerPos  = 45;
-  const gap        = 8; // CSS gap on .roulette-track
-  const stride     = cardW + gap;
-  const outerW     = outerEl.offsetWidth;
-  const center     = Math.floor(outerW / 2) - Math.floor(cardW / 2);
-  const total      = winnerPos * stride - center;
   const dur        = 4500;
 
   buildTrack(trackEl, items, winnerPos, winnerName, buildCard);
   trackEl.style.transform = 'translateX(0px)';
   outerEl.classList.add('spinning');
 
-  let start = null;
-  (function step(ts) {
-    if (!start) start = ts;
-    const t   = Math.min((ts - start) / dur, 1);
-    const cur = easeOut(t) * total;
-    trackEl.style.transform = `translateX(-${cur}px)`;
-    const idx = Math.round((cur + center) / stride);
-    trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
-      c.classList.toggle('hl', i === idx)
-    );
-    if (t < 1) {
-      requestAnimationFrame(step);
-    } else {
-      outerEl.classList.remove('spinning');
-      triggerFlash();
-      onResult(winnerName);
-    }
-  })(performance.now());
+  // rAF: measure actual rendered sizes after layout
+  requestAnimationFrame(() => {
+    const cards     = trackEl.querySelectorAll('.' + cardClass);
+    const outerRect = outerEl.getBoundingClientRect();
+    const c0Rect    = cards[0].getBoundingClientRect();
+    const c1Rect    = cards[1] ? cards[1].getBoundingClientRect() : null;
+
+    const stride    = c1Rect ? (c1Rect.left - c0Rect.left) : (c0Rect.width + 8);
+    const cardW     = c0Rect.width;
+    const outerW    = outerRect.width;
+    // card0's left edge position relative to outer container at translateX(0)
+    const card0Left = c0Rect.left - outerRect.left;
+    // translate needed to center winnerPos card under pointer (outerW/2)
+    const total     = card0Left + winnerPos * stride + cardW / 2 - outerW / 2;
+
+    let start = null;
+    (function step(ts) {
+      if (!start) start = ts;
+      const t   = Math.min((ts - start) / dur, 1);
+      const cur = easeOut(t) * total;
+      trackEl.style.transform = `translateX(-${cur}px)`;
+      // highlight card whose center is closest to pointer
+      const idx = Math.round((cur - card0Left + outerW / 2 - cardW / 2) / stride);
+      cards.forEach((c, i) => c.classList.toggle('hl', i === idx));
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        outerEl.classList.remove('spinning');
+        triggerFlash();
+        onResult(winnerName);
+      }
+    })(performance.now());
+  });
 }
 
 /* ═══════════════════════════════
@@ -1341,7 +1351,6 @@ document.getElementById('agentSpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('agentOuter'),
     items:     pool,
     cardClass: 'face-card',
-    cardW:     116,
     buildCard: faceCard,
     onResult(name) {
       players[curPlayer].results.agent = name;
@@ -1374,7 +1383,6 @@ document.getElementById('pistolSpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('pistolOuter'),
     items:     PISTOLS,
     cardClass: 'weapon-card',
-    cardW:     175,
     buildCard: weaponCard,
     onResult(name) {
       players[curPlayer].results.pistol = name;
@@ -1403,7 +1411,6 @@ document.getElementById('primarySpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('primaryOuter'),
     items:     PRIMARIES,
     cardClass: 'weapon-card',
-    cardW:     175,
     buildCard: weaponCard,
     onResult(name) {
       players[curPlayer].results.primary = name;
