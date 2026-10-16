@@ -1043,15 +1043,25 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
     const card0Left = c0Rect.left - outerRect.left;
     const total     = card0Left + winnerPos * stride + cardW / 2 - outerW / 2;
 
-    let start = null;
-    let lastHlIdx = -1;
-    (function step(ts) {
-      if (!start) start = ts;
-      const t   = Math.min((ts - start) / dur, 1);
-      const cur = spinEase(t) * total;
-      trackEl.style.transform = `translateX(-${cur}px)`;
+    // ── 랜딩 타입 랜덤 결정 ──
+    const roll = Math.random();
+    let finaleExtra, finaleDur;
+    if (roll < 0.3) {
+      // short: 살짝 못 미치고 기어서 정착
+      finaleExtra = -stride * (0.3 + Math.random() * 0.5);
+      finaleDur   = 350 + Math.random() * 250;
+    } else if (roll < 0.65) {
+      // long: 조금 지나쳐서 돌아옴
+      finaleExtra = stride * (0.5 + Math.random() * 1.0);
+      finaleDur   = 600 + Math.random() * 400;
+    } else {
+      // reverse: 크게 지나쳐서 반대 방향으로 되돌아옴
+      finaleExtra = stride * (1.8 + Math.random() * 1.6);
+      finaleDur   = 950 + Math.random() * 500;
+    }
+    const mainStop = total + finaleExtra; // 1페이즈 종착점
 
-      // card scale perspective
+    function updateCards(cur) {
       const pointerX = outerW / 2;
       const idx = Math.round((cur - card0Left + pointerX - cardW / 2) / stride);
       cards.forEach((c, i) => {
@@ -1063,21 +1073,49 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
         c.style.opacity   = op.toFixed(3);
         c.classList.toggle('hl', i === idx);
       });
+      return Math.round((cur - card0Left + outerW / 2 - cardW / 2) / stride);
+    }
 
-      // 카드 넘어갈 때마다 틱 소리 (속도 비례)
-      if (idx !== lastHlIdx) {
-        lastHlIdx = idx;
-        playTick(t); // t=0 빠름, t=1 느림
-      }
+    let start = null, lastHlIdx = -1;
+
+    // ── 1페이즈: mainStop까지 메인 스핀 ──
+    (function step(ts) {
+      if (!start) start = ts;
+      const t   = Math.min((ts - start) / dur, 1);
+      const cur = spinEase(t) * mainStop;
+      trackEl.style.transform = `translateX(-${cur}px)`;
+
+      const idx = updateCards(cur);
+      if (idx !== lastHlIdx) { lastHlIdx = idx; playTick(t); }
 
       if (t < 1) {
         requestAnimationFrame(step);
       } else {
-        rowEl.classList.remove('spinning-row');
-        rowEl.classList.add('landed-row');
-        spawnParticles(outerEl);
-        playLand();
-        onResult(winnerName);
+        // ── 2페이즈: total로 settle ──
+        let start2 = null, lastHlIdx2 = -1;
+        (function settle(ts2) {
+          if (!start2) start2 = ts2;
+          const s    = Math.min((ts2 - start2) / finaleDur, 1);
+          const ease = 1 - Math.pow(1 - s, 3.5);
+          const cur2 = mainStop + (total - mainStop) * ease;
+          trackEl.style.transform = `translateX(-${cur2}px)`;
+
+          const idx2 = updateCards(cur2);
+          if (idx2 !== lastHlIdx2) {
+            lastHlIdx2 = idx2;
+            playTick(0.85 + s * 0.15); // settle 구간은 느린 소리
+          }
+
+          if (s < 1) {
+            requestAnimationFrame(settle);
+          } else {
+            rowEl.classList.remove('spinning-row');
+            rowEl.classList.add('landed-row');
+            spawnParticles(outerEl);
+            playLand();
+            onResult(winnerName);
+          }
+        })(performance.now());
       }
     })(performance.now());
   });
