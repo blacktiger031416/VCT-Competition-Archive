@@ -775,6 +775,13 @@ function switchPlayer(idx) {
   document.querySelectorAll('.player-tab').forEach((t, i) =>
     t.classList.toggle('active', i === idx)
   );
+  // 요원 룰렛 탭으로 초기화
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.type-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.type-btn[data-type="agent"]').classList.add('active');
+  document.getElementById('panel-agent').classList.add('active');
+  curType = 'agent';
+
   resetAllResults();
   updateSlots();
 }
