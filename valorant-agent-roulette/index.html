@@ -15,175 +15,274 @@
       --card:   #1a2535;
       --border: #2a3a4a;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--darker);
       color: #fff;
-      font-family: 'Noto Sans KR', 'Rajdhani', sans-serif;
+      font-family: 'Noto Sans KR', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: hidden;
     }
 
-    /* ─── Header ─── */
-    header {
+    /* ── shared header ── */
+    .site-header {
       width: 100%;
-      padding: 24px 0 16px;
+      padding: 22px 0 14px;
       text-align: center;
+      flex-shrink: 0;
     }
-    header::after {
+    .site-header::after {
       content: '';
       display: block;
-      width: 120px; height: 3px;
+      width: 100px; height: 3px;
       background: linear-gradient(90deg, transparent, var(--red), transparent);
       margin: 8px auto 0;
     }
     .logo-text {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 2.4rem;
-      font-weight: 700;
-      letter-spacing: 6px;
-      text-transform: uppercase;
+      font-size: 2.2rem; font-weight: 700;
+      letter-spacing: 6px; text-transform: uppercase;
     }
     .logo-text span { color: var(--red); }
     .sub-text {
-      font-size: .85rem;
-      letter-spacing: 3px;
-      color: #8899aa;
-      text-transform: uppercase;
-      margin-top: 2px;
+      font-size: .8rem; letter-spacing: 3px;
+      color: #8899aa; text-transform: uppercase; margin-top: 2px;
     }
 
-    /* ─── Main layout ─── */
-    .layout {
+    /* ════════════════════════════════════
+       SETUP SCREEN
+    ════════════════════════════════════ */
+    #setup-screen {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+    .setup-card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 32px 28px;
+    }
+    .setup-card h2 {
+      font-size: 1.2rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #ccd; margin-bottom: 22px;
+      text-align: center;
+    }
+    .input-row {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .input-row input {
+      flex: 1;
+      background: var(--darker);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .input-row input:focus { border-color: var(--red); }
+    .input-row input::placeholder { color: #445566; }
+
+    .btn-add {
+      background: var(--red);
+      color: #fff; border: none;
+      padding: 0 22px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      cursor: pointer; border-radius: 6px;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: #e03040; }
+
+    .player-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      min-height: 38px; margin-bottom: 28px;
+    }
+    .chip {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 10px 5px 14px;
+      font-size: .9rem; color: #dde;
+    }
+    .chip-remove {
+      background: none; border: none;
+      color: #667788; cursor: pointer;
+      font-size: 1rem; line-height: 1;
+      padding: 0; transition: color .15s;
+    }
+    .chip-remove:hover { color: var(--red); }
+
+    .btn-done {
+      width: 100%;
+      background: var(--red); color: #fff; border: none;
+      padding: 13px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      letter-spacing: 3px;
+      cursor: pointer; border-radius: 6px;
+      clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+      transition: background .2s, opacity .2s;
+    }
+    .btn-done:disabled { background: #333; color: #556; cursor: not-allowed; }
+    .btn-done:not(:disabled):hover { background: #e03040; }
+
+    /* ════════════════════════════════════
+       MAIN SCREEN
+    ════════════════════════════════════ */
+    #main-screen {
+      width: 100%;
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+    }
+
+    /* player tab bar */
+    .player-tabbar {
+      width: 100%;
+      background: var(--dark);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .player-tabbar::-webkit-scrollbar { display: none; }
+    .player-tab {
+      flex-shrink: 0;
+      padding: 12px 24px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      color: #667788;
+      background: none; border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: color .2s, border-color .2s;
+      margin-bottom: -2px;
+    }
+    .player-tab:hover { color: #aabbcc; }
+    .player-tab.active { color: #fff; border-bottom-color: var(--red); }
+
+    /* layout */
+    .main-layout {
       width: 100%;
       max-width: 1080px;
       display: flex;
       align-items: flex-start;
-      padding: 28px 24px 60px;
-      gap: 24px;
+      padding: 24px 24px 0;
+      gap: 20px;
     }
 
-    /* ─── Tab sidebar ─── */
-    .tab-sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-shrink: 0;
-      width: 140px;
+    /* type sidebar */
+    .type-sidebar {
+      display: flex; flex-direction: column;
+      gap: 8px; flex-shrink: 0; width: 130px;
     }
-    .tab-btn {
-      background: var(--dark);
-      color: #8899aa;
-      border: 2px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 10px;
+    .type-btn {
+      background: var(--dark); color: #8899aa;
+      border: 2px solid var(--border); border-radius: 6px;
+      padding: 11px 8px;
       font-family: 'Noto Sans KR', sans-serif;
-      font-size: .9rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
+      font-size: .88rem; font-weight: 700;
+      cursor: pointer; text-align: center;
       transition: background .2s, color .2s, border-color .2s;
-      line-height: 1.3;
+      line-height: 1.4;
     }
-    .tab-btn:hover { border-color: #445566; color: #ccd; }
-    .tab-btn.active {
-      background: var(--red);
-      border-color: var(--red);
-      color: #fff;
-      box-shadow: 0 0 16px rgba(255,70,85,.35);
+    .type-btn:hover { border-color: #445566; color: #ccd; }
+    .type-btn.active {
+      background: var(--red); border-color: var(--red);
+      color: #fff; box-shadow: 0 0 14px rgba(255,70,85,.3);
     }
 
-    /* ─── Content area ─── */
-    .content {
-      flex: 1;
-      min-width: 0;
+    /* content */
+    .main-content { flex: 1; min-width: 0; }
+
+    .type-panel { display: none; }
+    .type-panel.active { display: block; }
+
+    /* agent panel top row */
+    .agent-panel-header {
+      display: flex; align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 10px;
     }
+    .btn-adjust {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: #aabbcc;
+      padding: 7px 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      border-radius: 5px; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-adjust:hover { border-color: var(--teal); color: var(--teal); }
 
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* ─── Roulette strip ─── */
+    /* roulette strip */
     .roulette-outer {
-      position: relative;
-      width: 100%;
+      position: relative; width: 100%;
       overflow: hidden;
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      border: 2px solid var(--border); border-radius: 8px;
       background: var(--dark);
     }
     .roulette-outer.agent-h  { height: 140px; }
     .roulette-outer.weapon-h { height: 110px; }
 
     .pointer {
-      position: absolute;
-      top: 0; bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 3px;
-      background: var(--red);
-      z-index: 10;
-      box-shadow: 0 0 12px var(--red);
+      position: absolute; top: 0; bottom: 0;
+      left: 50%; transform: translateX(-50%);
+      width: 3px; background: var(--red);
+      z-index: 10; box-shadow: 0 0 12px var(--red);
     }
-    .pointer::before,
-    .pointer::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+    .pointer::before, .pointer::after {
+      content: ''; position: absolute;
+      left: 50%; transform: translateX(-50%);
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
     }
     .pointer::before { top: 0;    border-top:    14px solid var(--red); }
     .pointer::after  { bottom: 0; border-bottom: 14px solid var(--red); }
 
-    .roulette-outer::before,
-    .roulette-outer::after {
-      content: '';
-      position: absolute;
-      top: 0; bottom: 0;
-      width: 100px;
-      z-index: 5;
-      pointer-events: none;
+    .roulette-outer::before, .roulette-outer::after {
+      content: ''; position: absolute;
+      top: 0; bottom: 0; width: 90px; z-index: 5; pointer-events: none;
     }
     .roulette-outer::before { left:  0; background: linear-gradient(to right, var(--darker), transparent); }
     .roulette-outer::after  { right: 0; background: linear-gradient(to left,  var(--darker), transparent); }
 
     .roulette-track {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      will-change: transform;
-      gap: 8px;
-      padding: 0 4px;
+      display: flex; align-items: center;
+      height: 100%; will-change: transform;
+      gap: 8px; padding: 0 4px;
     }
 
-    /* cards */
     .face-card {
-      flex-shrink: 0;
-      width: 110px; height: 110px;
-      border-radius: 6px;
-      overflow: hidden;
+      flex-shrink: 0; width: 110px; height: 110px;
+      border-radius: 6px; overflow: hidden;
       border: 2px solid var(--border);
-      background: var(--card);
-      margin: auto 0;
+      background: var(--card); margin: auto 0;
     }
     .face-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .weapon-card {
-      flex-shrink: 0;
-      width: 170px; height: 86px;
-      border-radius: 6px;
-      border: 2px solid var(--border);
-      background: var(--card);
-      margin: auto 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-shrink: 0; width: 170px; height: 86px;
+      border-radius: 6px; border: 2px solid var(--border);
+      background: var(--card); margin: auto 0;
+      display: flex; align-items: center; justify-content: center;
       padding: 6px 10px;
     }
     .weapon-card img {
@@ -191,200 +290,303 @@
       object-fit: contain;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,.6));
     }
-
-    .face-card.highlighted,
-    .weapon-card.highlighted {
+    .face-card.hl, .weapon-card.hl {
       border-color: var(--red);
-      box-shadow: 0 0 18px rgba(255,70,85,.55);
+      box-shadow: 0 0 18px rgba(255,70,85,.5);
     }
 
-    /* ─── Spin button ─── */
-    .btn-wrap {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0 0;
-    }
+    /* spin button */
+    .btn-wrap { display: flex; justify-content: center; margin: 18px 0 0; }
     .spin-btn {
-      background: var(--red);
-      color: #fff;
-      border: none;
-      padding: 12px 56px;
+      background: var(--red); color: #fff; border: none;
+      padding: 11px 52px;
       font-family: 'Noto Sans KR', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 3px;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: 3px;
       cursor: pointer;
       clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
       transition: background .2s, transform .1s;
     }
     .spin-btn:hover   { background: #e03040; transform: scale(1.04); }
     .spin-btn:active  { transform: scale(.97); }
-    .spin-btn:disabled { background: #444; cursor: not-allowed; transform: none; }
+    .spin-btn:disabled { background: #333; color: #556; cursor: not-allowed; transform: none; }
 
-    /* ─── Results ─── */
-    .result-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 0 0;
-    }
+    /* result */
+    .result-area { display: flex; flex-direction: column; align-items: center; padding: 20px 0 0; }
 
-    /* agent result */
     .result-agent-name {
-      font-size: 2.6rem;
-      font-weight: 700;
-      letter-spacing: 4px;
-      color: var(--red);
+      font-size: 2.4rem; font-weight: 700;
+      letter-spacing: 3px; color: var(--red);
       text-shadow: 0 0 20px rgba(255,70,85,.45);
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity .5s, transform .5s;
-      margin-bottom: 14px;
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .5s, transform .5s; margin-bottom: 12px;
     }
-    .result-agent-name.visible { opacity: 1; transform: translateY(0); }
+    .result-agent-name.vis { opacity: 1; transform: translateY(0); }
 
     .agent-full-wrap {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      width: 100%;
-      max-width: 360px;
-      height: 360px;
-      opacity: 0;
-      transform: scale(.88) translateY(24px);
+      position: relative; display: flex;
+      justify-content: center; align-items: flex-end;
+      max-width: 340px; width: 100%; height: 340px;
+      opacity: 0; transform: scale(.88) translateY(20px);
       transition: opacity .6s .15s, transform .6s .15s;
     }
-    .agent-full-wrap.visible { opacity: 1; transform: scale(1) translateY(0); }
+    .agent-full-wrap.vis { opacity: 1; transform: scale(1) translateY(0); }
     .agent-full-wrap img {
-      max-height: 100%; max-width: 100%;
-      object-fit: contain;
+      max-height: 100%; max-width: 100%; object-fit: contain;
       filter: drop-shadow(0 8px 28px rgba(255,70,85,.35));
     }
     .glow-line {
-      position: absolute;
-      bottom: 0; left: 50%;
+      position: absolute; bottom: 0; left: 50%;
       transform: translateX(-50%);
       width: 60%; height: 3px;
       background: linear-gradient(90deg, transparent, var(--red), transparent);
-      filter: blur(2px);
-      opacity: 0;
-      transition: opacity .4s .6s;
+      filter: blur(2px); opacity: 0; transition: opacity .4s .6s;
     }
-    .glow-line.visible { opacity: 1; }
+    .glow-line.vis { opacity: 1; }
 
-    /* weapon result */
     .result-weapon-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      opacity: 0;
-      transform: scale(.9) translateY(14px);
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      opacity: 0; transform: scale(.9) translateY(12px);
       transition: opacity .5s, transform .5s;
     }
-    .result-weapon-wrap.visible { opacity: 1; transform: scale(1) translateY(0); }
-
+    .result-weapon-wrap.vis { opacity: 1; transform: scale(1) translateY(0); }
     .result-weapon-name {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 4px;
-      color: var(--teal);
-      text-shadow: 0 0 16px rgba(0,209,217,.4);
+      font-size: 1.9rem; font-weight: 700;
+      letter-spacing: 4px; color: var(--teal);
+      text-shadow: 0 0 14px rgba(0,209,217,.35);
     }
     .result-weapon-img {
-      max-width: 480px;
-      width: 90%;
+      max-width: 460px; width: 90%;
       filter: drop-shadow(0 6px 24px rgba(0,209,217,.3));
     }
-
     .placeholder-msg {
-      color: #445566;
-      font-size: .95rem;
-      letter-spacing: 2px;
-      padding: 24px 0;
+      color: #445566; font-size: .9rem; letter-spacing: 2px; padding: 22px 0;
     }
+
+    /* ════════════════════════════════════
+       AGENT ADJUST MODAL
+    ════════════════════════════════════ */
+    #agent-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    #agent-modal.open { display: flex; }
+
+    .modal-box {
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      width: 100%; max-width: 760px;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal-head h3 {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 2px; color: #dde;
+    }
+    .modal-head-actions { display: flex; gap: 8px; }
+    .btn-select-all, .btn-deselect-all {
+      background: var(--card); border: 1px solid var(--border);
+      color: #aabbcc; padding: 5px 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .78rem; font-weight: 700;
+      border-radius: 4px; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-select-all:hover   { border-color: var(--teal); color: var(--teal); }
+    .btn-deselect-all:hover { border-color: var(--red);  color: var(--red); }
+
+    .modal-grid {
+      flex: 1; overflow-y: auto; padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+      gap: 10px;
+    }
+    .modal-grid::-webkit-scrollbar { width: 6px; }
+    .modal-grid::-webkit-scrollbar-track { background: var(--darker); }
+    .modal-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .agent-toggle {
+      position: relative; cursor: pointer;
+      border-radius: 8px; overflow: hidden;
+      border: 2px solid var(--border);
+      transition: border-color .2s;
+      aspect-ratio: 1;
+      background: var(--card);
+    }
+    .agent-toggle img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .agent-toggle .ag-name {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,.65);
+      font-size: .72rem; font-weight: 700;
+      text-align: center; padding: 4px 2px;
+      letter-spacing: 1px;
+    }
+    .agent-toggle .ag-off {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.65);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: var(--red);
+      opacity: 0; transition: opacity .2s;
+    }
+    .agent-toggle.off { border-color: #3a1a1e; }
+    .agent-toggle.off img { filter: grayscale(1) brightness(.4); }
+    .agent-toggle.off .ag-off { opacity: 1; }
+    .agent-toggle:not(.off):hover { border-color: var(--teal); }
+    .agent-toggle.off:hover .ag-off { background: rgba(0,0,0,.5); }
+
+    .modal-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .btn-modal-done {
+      background: var(--red); color: #fff; border: none;
+      padding: 10px 32px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700; letter-spacing: 2px;
+      border-radius: 6px; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-modal-done:hover { background: #e03040; }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-text">VALO<span>RANT</span></div>
-  <div class="sub-text">랜덤 룰렛</div>
-</header>
+<!-- ══════════════ SETUP SCREEN ══════════════ -->
+<div id="setup-screen">
+  <div class="site-header">
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">랜덤 룰렛</div>
+  </div>
+  <div class="setup-card">
+    <h2>플레이어 추가</h2>
+    <div class="input-row">
+      <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" maxlength="20" />
+      <button class="btn-add" id="addPlayerBtn">추가</button>
+    </div>
+    <div class="player-chips" id="playerChips"></div>
+    <button class="btn-done" id="doneBtn" disabled>완 료</button>
+  </div>
+</div>
 
-<div class="layout">
-
-  <!-- ─── Tab sidebar ─── -->
-  <div class="tab-sidebar">
-    <button class="tab-btn active" data-tab="agent">요원<br>룰렛</button>
-    <button class="tab-btn" data-tab="pistol">피스톨<br>룰렛</button>
-    <button class="tab-btn" data-tab="primary">주총기<br>룰렛</button>
+<!-- ══════════════ MAIN SCREEN ══════════════ -->
+<div id="main-screen">
+  <div class="site-header">
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">랜덤 룰렛</div>
   </div>
 
-  <!-- ─── Content ─── -->
-  <div class="content">
+  <!-- player tabs -->
+  <div class="player-tabbar" id="playerTabbar"></div>
 
-    <!-- AGENT panel -->
-    <div class="panel active" id="panel-agent">
-      <div class="roulette-outer agent-h" id="agentOuter">
-        <div class="pointer"></div>
-        <div class="roulette-track" id="agentTrack"></div>
-      </div>
-      <div class="btn-wrap">
-        <button class="spin-btn" id="agentSpinBtn">돌리기</button>
-      </div>
-      <div class="result-area">
-        <div class="result-agent-name" id="agentName"></div>
-        <div class="agent-full-wrap" id="agentFullWrap">
-          <img id="agentFullImg" src="" alt="" />
-          <div class="glow-line" id="agentGlow"></div>
-        </div>
-        <p class="placeholder-msg" id="agentPlaceholder">버튼을 눌러 요원을 뽑아보세요</p>
-      </div>
+  <div class="main-layout">
+    <!-- type sidebar -->
+    <div class="type-sidebar">
+      <button class="type-btn active" data-type="agent">요원<br>룰렛</button>
+      <button class="type-btn" data-type="pistol">피스톨<br>룰렛</button>
+      <button class="type-btn" data-type="primary">주총기<br>룰렛</button>
     </div>
 
-    <!-- PISTOL panel -->
-    <div class="panel" id="panel-pistol">
-      <div class="roulette-outer weapon-h" id="pistolOuter">
-        <div class="pointer"></div>
-        <div class="roulette-track" id="pistolTrack"></div>
-      </div>
-      <div class="btn-wrap">
-        <button class="spin-btn" id="pistolSpinBtn">돌리기</button>
-      </div>
-      <div class="result-area">
-        <div class="result-weapon-wrap" id="pistolWrap">
-          <div class="result-weapon-name" id="pistolName"></div>
-          <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+    <!-- content -->
+    <div class="main-content">
+
+      <!-- AGENT -->
+      <div class="type-panel active" id="panel-agent">
+        <div class="agent-panel-header">
+          <button class="btn-adjust" id="adjustBtn">⚙ 요원 룰렛 조정</button>
         </div>
-        <p class="placeholder-msg" id="pistolPlaceholder">버튼을 눌러 피스톨을 뽑아보세요</p>
+        <div class="roulette-outer agent-h" id="agentOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="agentTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="agentSpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-agent-name" id="agentName"></div>
+          <div class="agent-full-wrap" id="agentFullWrap">
+            <img id="agentFullImg" src="" alt="" />
+            <div class="glow-line" id="agentGlow"></div>
+          </div>
+          <p class="placeholder-msg" id="agentPh">버튼을 눌러 요원을 뽑아보세요</p>
+        </div>
+      </div>
+
+      <!-- PISTOL -->
+      <div class="type-panel" id="panel-pistol">
+        <div class="roulette-outer weapon-h" id="pistolOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="pistolTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="pistolSpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-weapon-wrap" id="pistolWrap">
+            <div class="result-weapon-name" id="pistolName"></div>
+            <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+          </div>
+          <p class="placeholder-msg" id="pistolPh">버튼을 눌러 피스톨을 뽑아보세요</p>
+        </div>
+      </div>
+
+      <!-- PRIMARY -->
+      <div class="type-panel" id="panel-primary">
+        <div class="roulette-outer weapon-h" id="primaryOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="primaryTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="primarySpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-weapon-wrap" id="primaryWrap">
+            <div class="result-weapon-name" id="primaryName"></div>
+            <img class="result-weapon-img" id="primaryImg" src="" alt="" />
+          </div>
+          <p class="placeholder-msg" id="primaryPh">버튼을 눌러 주총기를 뽑아보세요</p>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /main-layout -->
+</div>
+
+<!-- ══════════════ AGENT ADJUST MODAL ══════════════ -->
+<div id="agent-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">요원 선택</h3>
+      <div class="modal-head-actions">
+        <button class="btn-select-all" id="btnSelectAll">전체 선택</button>
+        <button class="btn-deselect-all" id="btnDeselectAll">전체 해제</button>
       </div>
     </div>
-
-    <!-- PRIMARY panel -->
-    <div class="panel" id="panel-primary">
-      <div class="roulette-outer weapon-h" id="primaryOuter">
-        <div class="pointer"></div>
-        <div class="roulette-track" id="primaryTrack"></div>
-      </div>
-      <div class="btn-wrap">
-        <button class="spin-btn" id="primarySpinBtn">돌리기</button>
-      </div>
-      <div class="result-area">
-        <div class="result-weapon-wrap" id="primaryWrap">
-          <div class="result-weapon-name" id="primaryName"></div>
-          <img class="result-weapon-img" id="primaryImg" src="" alt="" />
-        </div>
-        <p class="placeholder-msg" id="primaryPlaceholder">버튼을 눌러 주총기를 뽑아보세요</p>
-      </div>
+    <div class="modal-grid" id="modalGrid"></div>
+    <div class="modal-foot">
+      <button class="btn-modal-done" id="modalDoneBtn">완료</button>
     </div>
-
-  </div><!-- /content -->
-</div><!-- /layout -->
+  </div>
+</div>
 
 <script>
-/* ─── Korean name maps ─── */
+/* ═══════════════════════════════
+   Data
+═══════════════════════════════ */
 const AGENT_KO = {
   astra:'아스트라', breach:'브리치', brimstone:'브림스톤', chamber:'체임버',
   clove:'클로브', cypher:'사이퍼', deadlock:'데드록', fade:'페이드',
@@ -394,7 +596,6 @@ const AGENT_KO = {
   sage:'세이지', skye:'스카이', sova:'소바', tejo:'테호',
   veto:'비토', viper:'바이퍼', vyse:'바이스', waylay:'웨이레이', yoru:'요루'
 };
-
 const WEAPON_KO = {
   ares:'아레스', bandit:'벤딧', bucky:'버키', bulldog:'불독',
   classic:'클래식', frenzy:'프렌지', ghost:'고스트', guardian:'가디언',
@@ -402,157 +603,313 @@ const WEAPON_KO = {
   outlaw:'아웃로', phantom:'팬텀', sheriff:'셰리프', shorty:'쇼티',
   spectre:'스펙터', stinger:'스팅어', vandal:'벤달', warden:'워든'
 };
+const AGENTS    = Object.keys(AGENT_KO);
+const PISTOLS   = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
+const PRIMARIES = ['ares','bucky','bulldog','guardian','judge','marshall',
+                   'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
 
-const AGENTS   = Object.keys(AGENT_KO);
-const PISTOLS  = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
-const PRIMARIES= ['ares','bucky','bulldog','guardian','judge','marshall',
-                  'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
+/* ═══════════════════════════════
+   State
+═══════════════════════════════ */
+let players      = []; // [{name, agentPool: Set}]
+let curPlayer    = 0;
+let curType      = 'agent';
+let spinLocks    = { agent: false, pistol: false, primary: false };
 
-/* ─── Tab switching ─── */
-document.querySelectorAll('.tab-btn').forEach(btn => {
+/* ═══════════════════════════════
+   Setup screen
+═══════════════════════════════ */
+const nicknameInput = document.getElementById('nicknameInput');
+const addPlayerBtn  = document.getElementById('addPlayerBtn');
+const playerChips   = document.getElementById('playerChips');
+const doneBtn       = document.getElementById('doneBtn');
+
+function renderChips() {
+  playerChips.innerHTML = '';
+  players.forEach((p, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span>${p.name}</span>
+      <button class="chip-remove" data-i="${i}" title="제거">×</button>`;
+    playerChips.appendChild(chip);
+  });
+  doneBtn.disabled = players.length === 0;
+}
+
+function addPlayer() {
+  const name = nicknameInput.value.trim();
+  if (!name) return;
+  if (players.some(p => p.name === name)) {
+    nicknameInput.style.borderColor = 'var(--red)';
+    setTimeout(() => nicknameInput.style.borderColor = '', 800);
+    return;
+  }
+  players.push({ name, agentPool: new Set(AGENTS) });
+  nicknameInput.value = '';
+  renderChips();
+}
+
+addPlayerBtn.addEventListener('click', addPlayer);
+nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+playerChips.addEventListener('click', e => {
+  const btn = e.target.closest('.chip-remove');
+  if (!btn) return;
+  players.splice(+btn.dataset.i, 1);
+  renderChips();
+});
+doneBtn.addEventListener('click', () => {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'flex';
+  buildPlayerTabs();
+  switchPlayer(0);
+});
+
+/* ═══════════════════════════════
+   Player tabs
+═══════════════════════════════ */
+function buildPlayerTabs() {
+  const bar = document.getElementById('playerTabbar');
+  bar.innerHTML = '';
+  players.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'player-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = p.name;
+    btn.addEventListener('click', () => switchPlayer(i));
+    bar.appendChild(btn);
+  });
+}
+
+function switchPlayer(idx) {
+  curPlayer = idx;
+  document.querySelectorAll('.player-tab').forEach((t, i) =>
+    t.classList.toggle('active', i === idx)
+  );
+  resetAllResults();
+}
+
+/* ═══════════════════════════════
+   Type tabs
+═══════════════════════════════ */
+document.querySelectorAll('.type-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.type-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    document.getElementById('panel-' + btn.dataset.type).classList.add('active');
+    curType = btn.dataset.type;
   });
 });
 
-/* ─── easeOut ─── */
+/* ═══════════════════════════════
+   Reset results
+═══════════════════════════════ */
+function resetAllResults() {
+  // agent
+  document.getElementById('agentName').classList.remove('vis');
+  document.getElementById('agentFullWrap').classList.remove('vis');
+  document.getElementById('agentGlow').classList.remove('vis');
+  document.getElementById('agentPh').style.display = '';
+  // pistol
+  document.getElementById('pistolWrap').classList.remove('vis');
+  document.getElementById('pistolPh').style.display = '';
+  // primary
+  document.getElementById('primaryWrap').classList.remove('vis');
+  document.getElementById('primaryPh').style.display = '';
+}
+
+/* ═══════════════════════════════
+   Agent adjust modal
+═══════════════════════════════ */
+const agentModal  = document.getElementById('agent-modal');
+const modalGrid   = document.getElementById('modalGrid');
+const modalTitle  = document.getElementById('modalTitle');
+
+document.getElementById('adjustBtn').addEventListener('click', openModal);
+document.getElementById('modalDoneBtn').addEventListener('click', closeModal);
+document.getElementById('btnSelectAll').addEventListener('click', () => {
+  players[curPlayer].agentPool = new Set(AGENTS);
+  renderModal();
+});
+document.getElementById('btnDeselectAll').addEventListener('click', () => {
+  players[curPlayer].agentPool = new Set();
+  renderModal();
+});
+agentModal.addEventListener('click', e => { if (e.target === agentModal) closeModal(); });
+
+function openModal() {
+  modalTitle.textContent = `${players[curPlayer].name} — 요원 선택`;
+  renderModal();
+  agentModal.classList.add('open');
+}
+function closeModal() {
+  agentModal.classList.remove('open');
+}
+function renderModal() {
+  const pool = players[curPlayer].agentPool;
+  modalGrid.innerHTML = '';
+  AGENTS.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'agent-toggle' + (pool.has(name) ? '' : ' off');
+    div.innerHTML = `
+      <img src="Agent_face/${name}_face.webp" alt="${AGENT_KO[name]}" />
+      <div class="ag-name">${AGENT_KO[name]}</div>
+      <div class="ag-off">✕</div>`;
+    div.addEventListener('click', () => {
+      if (pool.has(name)) pool.delete(name);
+      else pool.add(name);
+      div.classList.toggle('off', !pool.has(name));
+    });
+    modalGrid.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════
+   Roulette engine
+═══════════════════════════════ */
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
-/* ─── Generic roulette ─── */
-function makeRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, spinBtn, onResult }) {
-  let spinning = false;
-  const COUNT  = 60;
-  let winner   = 0;
-
-  function buildTrack(winPos) {
-    trackEl.innerHTML = '';
-    for (let i = 0; i < COUNT; i++) {
-      const name = (i === winPos) ? items[winner] : items[Math.floor(Math.random() * items.length)];
-      const card = buildCard(name);
-      card.dataset.i = i;
-      trackEl.appendChild(card);
-    }
+function buildTrack(trackEl, items, winnerPos, winnerName, buildCard) {
+  trackEl.innerHTML = '';
+  for (let i = 0; i < 60; i++) {
+    const name = (i === winnerPos) ? winnerName : items[Math.floor(Math.random() * items.length)];
+    trackEl.appendChild(buildCard(name));
   }
-
-  spinBtn.addEventListener('click', () => {
-    if (spinning) return;
-    spinning = true;
-    spinBtn.disabled = true;
-    onResult(null);
-
-    winner = Math.floor(Math.random() * items.length);
-    const outerW = outerEl.offsetWidth;
-    const center = Math.floor(outerW / 2) - Math.floor(cardW / 2);
-    const winPos = 45;
-    buildTrack(winPos);
-
-    const total = winPos * cardW - center;
-    const dur   = 4200;
-    let start   = null;
-    trackEl.style.transform = 'translateX(0px)';
-
-    (function step(ts) {
-      if (!start) start = ts;
-      const t   = Math.min((ts - start) / dur, 1);
-      const cur = easeOut(t) * total;
-      trackEl.style.transform = `translateX(-${cur}px)`;
-
-      const idx = Math.round((cur + center) / cardW);
-      trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
-        c.classList.toggle('highlighted', i === idx)
-      );
-
-      if (t < 1) { requestAnimationFrame(step); }
-      else {
-        onResult(items[winner]);
-        setTimeout(() => { spinning = false; spinBtn.disabled = false; }, 600);
-      }
-    })(performance.now());
-  });
 }
 
-/* ─── Card builders ─── */
-function agentCard(name) {
-  const d = document.createElement('div');
-  d.className = 'face-card';
+function faceCard(name) {
+  const d = document.createElement('div'); d.className = 'face-card';
   const img = document.createElement('img');
-  img.src = `Agent_face/${name}_face.webp`;
-  img.alt = name;
-  d.appendChild(img);
-  return d;
+  img.src = `Agent_face/${name}_face.webp`; img.alt = name;
+  d.appendChild(img); return d;
 }
 function weaponCard(name) {
-  const d = document.createElement('div');
-  d.className = 'weapon-card';
+  const d = document.createElement('div'); d.className = 'weapon-card';
   const img = document.createElement('img');
-  img.src = `weapon/${name}.webp`;
-  img.alt = name;
-  d.appendChild(img);
-  return d;
+  img.src = `weapon/${name}.webp`; img.alt = name;
+  d.appendChild(img); return d;
 }
 
-/* ─── Wire: Agent ─── */
-makeRoulette({
-  trackEl:   document.getElementById('agentTrack'),
-  outerEl:   document.getElementById('agentOuter'),
-  items: AGENTS, cardClass: 'face-card', cardW: 118, buildCard: agentCard,
-  spinBtn: document.getElementById('agentSpinBtn'),
-  onResult(name) {
-    const nameEl  = document.getElementById('agentName');
-    const wrap    = document.getElementById('agentFullWrap');
-    const img     = document.getElementById('agentFullImg');
-    const glow    = document.getElementById('agentGlow');
-    const ph      = document.getElementById('agentPlaceholder');
-    if (!name) {
-      nameEl.classList.remove('visible');
-      wrap.classList.remove('visible');
-      glow.classList.remove('visible');
-      ph.style.display = '';
-      return;
+function spinRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, onResult }) {
+  if (!items || items.length === 0) return;
+  const winnerName = items[Math.floor(Math.random() * items.length)];
+  const winnerPos  = 45;
+  const outerW     = outerEl.offsetWidth;
+  const center     = Math.floor(outerW / 2) - Math.floor(cardW / 2);
+  const total      = winnerPos * cardW - center;
+  const dur        = 4200;
+
+  buildTrack(trackEl, items, winnerPos, winnerName, buildCard);
+  trackEl.style.transform = 'translateX(0px)';
+
+  let start = null;
+  (function step(ts) {
+    if (!start) start = ts;
+    const t   = Math.min((ts - start) / dur, 1);
+    const cur = easeOut(t) * total;
+    trackEl.style.transform = `translateX(-${cur}px)`;
+    const idx = Math.round((cur + center) / cardW);
+    trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
+      c.classList.toggle('hl', i === idx)
+    );
+    if (t < 1) requestAnimationFrame(step);
+    else onResult(winnerName);
+  })(performance.now());
+}
+
+/* ═══════════════════════════════
+   Agent spin
+═══════════════════════════════ */
+document.getElementById('agentSpinBtn').addEventListener('click', () => {
+  if (spinLocks.agent) return;
+  spinLocks.agent = true;
+  const btn = document.getElementById('agentSpinBtn');
+  btn.disabled = true;
+
+  // reset result
+  document.getElementById('agentName').classList.remove('vis');
+  document.getElementById('agentFullWrap').classList.remove('vis');
+  document.getElementById('agentGlow').classList.remove('vis');
+  document.getElementById('agentPh').style.display = 'none';
+
+  const pool = [...players[curPlayer].agentPool];
+  if (pool.length === 0) {
+    document.getElementById('agentPh').textContent = '선택된 요원이 없습니다';
+    document.getElementById('agentPh').style.display = '';
+    spinLocks.agent = false; btn.disabled = false; return;
+  }
+
+  spinRoulette({
+    trackEl:   document.getElementById('agentTrack'),
+    outerEl:   document.getElementById('agentOuter'),
+    items:     pool,
+    cardClass: 'face-card',
+    cardW:     118,
+    buildCard: faceCard,
+    onResult(name) {
+      const nameEl = document.getElementById('agentName');
+      const wrap   = document.getElementById('agentFullWrap');
+      const glow   = document.getElementById('agentGlow');
+      nameEl.textContent = AGENT_KO[name];
+      nameEl.classList.add('vis');
+      document.getElementById('agentFullImg').src = `Agent/${name}.webp`;
+      setTimeout(() => { wrap.classList.add('vis'); glow.classList.add('vis'); }, 80);
+      setTimeout(() => { spinLocks.agent = false; btn.disabled = false; }, 650);
     }
-    ph.style.display = 'none';
-    nameEl.textContent = AGENT_KO[name];
-    nameEl.classList.add('visible');
-    img.src = `Agent/${name}.webp`;
-    setTimeout(() => { wrap.classList.add('visible'); glow.classList.add('visible'); }, 80);
-  }
+  });
 });
 
-/* ─── Wire: Pistol ─── */
-makeRoulette({
-  trackEl:   document.getElementById('pistolTrack'),
-  outerEl:   document.getElementById('pistolOuter'),
-  items: PISTOLS, cardClass: 'weapon-card', cardW: 178, buildCard: weaponCard,
-  spinBtn: document.getElementById('pistolSpinBtn'),
-  onResult(name) {
-    const wrap = document.getElementById('pistolWrap');
-    const ph   = document.getElementById('pistolPlaceholder');
-    if (!name) { wrap.classList.remove('visible'); ph.style.display = ''; return; }
-    ph.style.display = 'none';
-    document.getElementById('pistolName').textContent = WEAPON_KO[name];
-    document.getElementById('pistolImg').src = `weapon/${name}.webp`;
-    setTimeout(() => wrap.classList.add('visible'), 80);
-  }
+/* ═══════════════════════════════
+   Pistol spin
+═══════════════════════════════ */
+document.getElementById('pistolSpinBtn').addEventListener('click', () => {
+  if (spinLocks.pistol) return;
+  spinLocks.pistol = true;
+  const btn = document.getElementById('pistolSpinBtn');
+  btn.disabled = true;
+  document.getElementById('pistolWrap').classList.remove('vis');
+  document.getElementById('pistolPh').style.display = 'none';
+
+  spinRoulette({
+    trackEl:   document.getElementById('pistolTrack'),
+    outerEl:   document.getElementById('pistolOuter'),
+    items:     PISTOLS,
+    cardClass: 'weapon-card',
+    cardW:     178,
+    buildCard: weaponCard,
+    onResult(name) {
+      document.getElementById('pistolName').textContent = WEAPON_KO[name];
+      document.getElementById('pistolImg').src = `weapon/${name}.webp`;
+      setTimeout(() => document.getElementById('pistolWrap').classList.add('vis'), 80);
+      setTimeout(() => { spinLocks.pistol = false; btn.disabled = false; }, 650);
+    }
+  });
 });
 
-/* ─── Wire: Primary ─── */
-makeRoulette({
-  trackEl:   document.getElementById('primaryTrack'),
-  outerEl:   document.getElementById('primaryOuter'),
-  items: PRIMARIES, cardClass: 'weapon-card', cardW: 178, buildCard: weaponCard,
-  spinBtn: document.getElementById('primarySpinBtn'),
-  onResult(name) {
-    const wrap = document.getElementById('primaryWrap');
-    const ph   = document.getElementById('primaryPlaceholder');
-    if (!name) { wrap.classList.remove('visible'); ph.style.display = ''; return; }
-    ph.style.display = 'none';
-    document.getElementById('primaryName').textContent = WEAPON_KO[name];
-    document.getElementById('primaryImg').src = `weapon/${name}.webp`;
-    setTimeout(() => wrap.classList.add('visible'), 80);
-  }
+/* ═══════════════════════════════
+   Primary spin
+═══════════════════════════════ */
+document.getElementById('primarySpinBtn').addEventListener('click', () => {
+  if (spinLocks.primary) return;
+  spinLocks.primary = true;
+  const btn = document.getElementById('primarySpinBtn');
+  btn.disabled = true;
+  document.getElementById('primaryWrap').classList.remove('vis');
+  document.getElementById('primaryPh').style.display = 'none';
+
+  spinRoulette({
+    trackEl:   document.getElementById('primaryTrack'),
+    outerEl:   document.getElementById('primaryOuter'),
+    items:     PRIMARIES,
+    cardClass: 'weapon-card',
+    cardW:     178,
+    buildCard: weaponCard,
+    onResult(name) {
+      document.getElementById('primaryName').textContent = WEAPON_KO[name];
+      document.getElementById('primaryImg').src = `weapon/${name}.webp`;
+      setTimeout(() => document.getElementById('primaryWrap').classList.add('vis'), 80);
+      setTimeout(() => { spinLocks.primary = false; btn.disabled = false; }, 650);
+    }
+  });
 });
 </script>
 </body>
