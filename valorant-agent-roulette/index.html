@@ -650,7 +650,10 @@ function addPlayer() {
 }
 
 addPlayerBtn.addEventListener('click', addPlayer);
-nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+let composing = false;
+nicknameInput.addEventListener('compositionstart', () => { composing = true; });
+nicknameInput.addEventListener('compositionend',   () => { composing = false; });
+nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !composing) addPlayer(); });
 playerChips.addEventListener('click', e => {
   const btn = e.target.closest('.chip-remove');
   if (!btn) return;
