@@ -757,6 +757,78 @@ const PISTOLS   = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
 const PRIMARIES = ['ares','bucky','bulldog','guardian','judge','marshall',
                    'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
 
+/* ═══════════════════ Audio ═══════════════════ */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTick(speed) {
+  // speed: 0(fast)~1(slow) — pitch and volume adjust
+  try {
+    const ctx  = getAudioCtx();
+    const buf  = ctx.createBuffer(1, ctx.sampleRate * 0.018, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 8);
+    }
+    const src  = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    // 빠를수록 작게, 느릴수록 크게
+    gain.gain.value = 0.06 + speed * 0.28;
+    src.playbackRate.value = 2.8 - speed * 1.4;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function playLand() {
+  try {
+    const ctx  = getAudioCtx();
+    // 둔탁한 임팩트 + 짧은 톤
+    const dur  = 0.35;
+    const buf  = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / data.length;
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3) * 0.9
+              + Math.sin(2 * Math.PI * 80 * (i / ctx.sampleRate)) * Math.pow(1 - t, 6) * 0.5;
+    }
+    const src  = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    gain.gain.value = 1.0;
+    src.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function playWin() {
+  try {
+    const ctx = getAudioCtx();
+    // 짧은 상승 아르페지오
+    const freqs = [440, 554, 659, 880];
+    freqs.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.1;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.22, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    });
+  } catch(e) {}
+}
+
 /* ═══════════════════ State ═══════════════════ */
 let players   = [];
 let curPlayer = 0;
@@ -966,6 +1038,7 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
     const total     = card0Left + winnerPos * stride + cardW / 2 - outerW / 2;
 
     let start = null;
+    let lastHlIdx = -1;
     (function step(ts) {
       if (!start) start = ts;
       const t   = Math.min((ts - start) / dur, 1);
@@ -974,6 +1047,7 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
 
       // card scale perspective
       const pointerX = outerW / 2;
+      const idx = Math.round((cur - card0Left + pointerX - cardW / 2) / stride);
       cards.forEach((c, i) => {
         const cx = card0Left + i * stride + cardW / 2 - cur;
         const dist = Math.abs(cx - pointerX);
@@ -981,9 +1055,14 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
         const op = Math.max(0.35, 1 - dist / outerW * 0.9);
         c.style.transform = `scale(${sc.toFixed(3)})`;
         c.style.opacity   = op.toFixed(3);
-        const idx = Math.round((cur - card0Left + pointerX - cardW / 2) / stride);
         c.classList.toggle('hl', i === idx);
       });
+
+      // 카드 넘어갈 때마다 틱 소리 (속도 비례)
+      if (idx !== lastHlIdx) {
+        lastHlIdx = idx;
+        playTick(t); // t=0 빠름, t=1 느림
+      }
 
       if (t < 1) {
         requestAnimationFrame(step);
@@ -991,6 +1070,7 @@ function spinReel({ trackEl, outerEl, rowEl, items, cardClass, buildCard, dur, o
         rowEl.classList.remove('spinning-row');
         rowEl.classList.add('landed-row');
         spawnParticles(outerEl);
+        playLand();
         onResult(winnerName);
       }
     })(performance.now());
@@ -1018,6 +1098,7 @@ function rollAll() {
     document.body.classList.add('shake');
     document.body.addEventListener('animationend', () => document.body.classList.remove('shake'), { once: true });
     triggerFlash();
+    playWin();
     const agent = players[curPlayer].results.agent;
     if (agent) showAgentReveal(agent);
     setTimeout(() => {
