@@ -1009,30 +1009,25 @@ function rollAll() {
   players[curPlayer].results = { agent: null, pistol: null, primary: null };
   resetAllDisplays();
 
-  const totalReels = gameMode === 'agent' ? 1 : 3;
-  let doneCount = 0;
-  function checkDone() {
-    doneCount++;
-    if (doneCount === totalReels) {
-      document.body.classList.add('shake');
-      document.body.addEventListener('animationend', () => document.body.classList.remove('shake'), { once: true });
-      triggerFlash();
-      const agent = players[curPlayer].results.agent;
-      if (agent) showAgentReveal(agent);
-      setTimeout(() => {
-        isRolling = false;
-        rollBtn.disabled = false;
-        rollBtn.textContent = 'ROLL';
-      }, 600);
-    }
-  }
-
   const pool = [...players[curPlayer].agentPool];
   if (pool.length === 0) {
     isRolling = false; rollBtn.disabled = false; rollBtn.textContent = 'ROLL'; return;
   }
 
-  // agent: starts immediately, 5500ms
+  function allDone() {
+    document.body.classList.add('shake');
+    document.body.addEventListener('animationend', () => document.body.classList.remove('shake'), { once: true });
+    triggerFlash();
+    const agent = players[curPlayer].results.agent;
+    if (agent) showAgentReveal(agent);
+    setTimeout(() => {
+      isRolling = false;
+      rollBtn.disabled = false;
+      rollBtn.textContent = 'ROLL';
+    }, 600);
+  }
+
+  // 1. Agent
   spinReel({
     trackEl: document.getElementById('agentTrack'),
     outerEl: document.getElementById('agentOuter'),
@@ -1042,43 +1037,44 @@ function rollAll() {
     onResult(name) {
       players[curPlayer].results.agent = name;
       showInlineAgent(name);
-      checkDone();
+
+      if (gameMode === 'agent') {
+        allDone();
+        return;
+      }
+
+      // 2. Pistol (600ms 후 시작)
+      setTimeout(() => {
+        spinReel({
+          trackEl: document.getElementById('pistolTrack'),
+          outerEl: document.getElementById('pistolOuter'),
+          rowEl:   document.getElementById('rowPistol'),
+          items: PISTOLS, cardClass: 'weapon-card', buildCard: weaponCard,
+          dur: 5000,
+          onResult(pName) {
+            players[curPlayer].results.pistol = pName;
+            showInlineWeapon('Pistol', pName);
+
+            // 3. Primary (600ms 후 시작)
+            setTimeout(() => {
+              spinReel({
+                trackEl: document.getElementById('primaryTrack'),
+                outerEl: document.getElementById('primaryOuter'),
+                rowEl:   document.getElementById('rowPrimary'),
+                items: PRIMARIES, cardClass: 'weapon-card', buildCard: weaponCard,
+                dur: 5000,
+                onResult(rName) {
+                  players[curPlayer].results.primary = rName;
+                  showInlineWeapon('Primary', rName);
+                  allDone();
+                }
+              });
+            }, 600);
+          }
+        });
+      }, 600);
     }
   });
-
-  if (gameMode === 'full') {
-    // pistol: starts 350ms later
-    setTimeout(() => {
-      spinReel({
-        trackEl: document.getElementById('pistolTrack'),
-        outerEl: document.getElementById('pistolOuter'),
-        rowEl:   document.getElementById('rowPistol'),
-        items: PISTOLS, cardClass: 'weapon-card', buildCard: weaponCard,
-        dur: 5500,
-        onResult(name) {
-          players[curPlayer].results.pistol = name;
-          showInlineWeapon('Pistol', name);
-          checkDone();
-        }
-      });
-    }, 350);
-
-    // primary: starts 700ms later
-    setTimeout(() => {
-      spinReel({
-        trackEl: document.getElementById('primaryTrack'),
-        outerEl: document.getElementById('primaryOuter'),
-        rowEl:   document.getElementById('rowPrimary'),
-        items: PRIMARIES, cardClass: 'weapon-card', buildCard: weaponCard,
-        dur: 5500,
-        onResult(name) {
-          players[curPlayer].results.primary = name;
-          showInlineWeapon('Primary', name);
-          checkDone();
-        }
-      });
-    }, 700);
-  }
 }
 
 rollBtn.addEventListener('click', rollAll);
