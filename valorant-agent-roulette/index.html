@@ -362,6 +362,70 @@
       color: #445566; font-size: .9rem; letter-spacing: 2px; padding: 22px 0;
     }
 
+    /* ─── 상단 결과 슬롯 ─── */
+    .result-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .result-slot {
+      background: var(--dark);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 90px;
+      transition: border-color .3s;
+    }
+    .result-slot.filled {
+      border-style: solid;
+      border-color: #3a4a5a;
+    }
+    .slot-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #556677;
+      text-transform: uppercase;
+    }
+    .slot-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slot-empty-msg {
+      color: #334455;
+      font-size: .85rem;
+      letter-spacing: 1px;
+      margin: auto;
+    }
+    .slot-face {
+      width: 52px; height: 52px;
+      border-radius: 5px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .slot-weapon-img {
+      max-width: 120px; max-height: 44px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+      flex-shrink: 0;
+    }
+    .slot-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ddeeff;
+      letter-spacing: 1px;
+    }
+    #slot-agent.filled   { border-color: rgba(255,70,85,.5); }
+    #slot-pistol.filled  { border-color: rgba(0,209,217,.35); }
+    #slot-primary.filled { border-color: rgba(0,209,217,.35); }
+
     /* ════════════════════════════════════
        AGENT ADJUST MODAL
     ════════════════════════════════════ */
@@ -506,6 +570,28 @@
     <!-- content -->
     <div class="main-content">
 
+      <!-- 상단 결과 슬롯 -->
+      <div class="result-slots">
+        <div class="result-slot" id="slot-agent">
+          <div class="slot-label">요원</div>
+          <div class="slot-body" id="slot-agent-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+        <div class="result-slot" id="slot-pistol">
+          <div class="slot-label">피스톨</div>
+          <div class="slot-body" id="slot-pistol-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+        <div class="result-slot" id="slot-primary">
+          <div class="slot-label">주총기</div>
+          <div class="slot-body" id="slot-primary-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+      </div>
+
       <!-- AGENT -->
       <div class="type-panel active" id="panel-agent">
         <div class="agent-panel-header">
@@ -646,7 +732,7 @@ function addPlayer() {
     setTimeout(() => nicknameInput.style.borderColor = '', 800);
     return;
   }
-  players.push({ name, agentPool: new Set(AGENTS) });
+  players.push({ name, agentPool: new Set(AGENTS), results: { agent: null, pistol: null, primary: null } });
   nicknameInput.value = '';
   renderChips();
 }
@@ -690,6 +776,51 @@ function switchPlayer(idx) {
     t.classList.toggle('active', i === idx)
   );
   resetAllResults();
+  updateSlots();
+}
+
+/* ─── 상단 슬롯 업데이트 ─── */
+function updateSlots() {
+  const r = players[curPlayer].results;
+
+  // agent slot
+  const agentSlot = document.getElementById('slot-agent');
+  const agentBody = document.getElementById('slot-agent-body');
+  if (r.agent) {
+    agentBody.innerHTML = `
+      <img class="slot-face" src="Agent_face/${r.agent}_face.webp" alt="" />
+      <span class="slot-name">${AGENT_KO[r.agent]}</span>`;
+    agentSlot.classList.add('filled');
+  } else {
+    agentBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    agentSlot.classList.remove('filled');
+  }
+
+  // pistol slot
+  const pistolSlot = document.getElementById('slot-pistol');
+  const pistolBody = document.getElementById('slot-pistol-body');
+  if (r.pistol) {
+    pistolBody.innerHTML = `
+      <img class="slot-weapon-img" src="weapon/${r.pistol}.webp" alt="" />
+      <span class="slot-name">${WEAPON_KO[r.pistol]}</span>`;
+    pistolSlot.classList.add('filled');
+  } else {
+    pistolBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    pistolSlot.classList.remove('filled');
+  }
+
+  // primary slot
+  const primarySlot = document.getElementById('slot-primary');
+  const primaryBody = document.getElementById('slot-primary-body');
+  if (r.primary) {
+    primaryBody.innerHTML = `
+      <img class="slot-weapon-img" src="weapon/${r.primary}.webp" alt="" />
+      <span class="slot-name">${WEAPON_KO[r.primary]}</span>`;
+    primarySlot.classList.add('filled');
+  } else {
+    primaryBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    primarySlot.classList.remove('filled');
+  }
 }
 
 /* ═══════════════════════════════
@@ -851,6 +982,8 @@ document.getElementById('agentSpinBtn').addEventListener('click', () => {
     cardW:     118,
     buildCard: faceCard,
     onResult(name) {
+      players[curPlayer].results.agent = name;
+      updateSlots();
       const nameEl = document.getElementById('agentName');
       const wrap   = document.getElementById('agentFullWrap');
       const glow   = document.getElementById('agentGlow');
@@ -882,6 +1015,8 @@ document.getElementById('pistolSpinBtn').addEventListener('click', () => {
     cardW:     178,
     buildCard: weaponCard,
     onResult(name) {
+      players[curPlayer].results.pistol = name;
+      updateSlots();
       document.getElementById('pistolName').textContent = WEAPON_KO[name];
       document.getElementById('pistolImg').src = `weapon/${name}.webp`;
       setTimeout(() => document.getElementById('pistolWrap').classList.add('vis'), 80);
@@ -909,6 +1044,8 @@ document.getElementById('primarySpinBtn').addEventListener('click', () => {
     cardW:     178,
     buildCard: weaponCard,
     onResult(name) {
+      players[curPlayer].results.primary = name;
+      updateSlots();
       document.getElementById('primaryName').textContent = WEAPON_KO[name];
       document.getElementById('primaryImg').src = `weapon/${name}.webp`;
       setTimeout(() => document.getElementById('primaryWrap').classList.add('vis'), 80);
