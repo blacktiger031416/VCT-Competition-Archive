@@ -362,6 +362,116 @@
       color: #445566; font-size: .9rem; letter-spacing: 2px; padding: 22px 0;
     }
 
+    /* ─── 전체 보기 버튼 ─── */
+    .btn-overview {
+      flex-shrink: 0;
+      margin-left: auto;
+      padding: 0 22px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #8899aa;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .9rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: color .2s;
+      margin-bottom: -2px;
+      letter-spacing: 1px;
+    }
+    .btn-overview:hover { color: var(--teal); }
+
+    /* ─── 전체 보기 모달 ─── */
+    #overview-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.88);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    #overview-modal.open { display: flex; }
+
+    .ov-box {
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      width: 100%; max-width: 860px;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .ov-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .ov-head h3 {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 3px; color: #dde;
+      text-transform: uppercase;
+    }
+    .btn-ov-close {
+      background: none; border: 1px solid var(--border);
+      color: #8899aa; padding: 5px 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      border-radius: 4px; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-ov-close:hover { border-color: var(--red); color: var(--red); }
+
+    .ov-body {
+      flex: 1; min-height: 0;
+      overflow-y: auto; padding: 20px;
+    }
+    .ov-body::-webkit-scrollbar { width: 6px; }
+    .ov-body::-webkit-scrollbar-track { background: var(--darker); }
+    .ov-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* 테이블 */
+    .ov-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .ov-table th {
+      font-size: .75rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #556677; text-align: left;
+      padding: 0 14px 12px;
+    }
+    .ov-table th:first-child { width: 130px; }
+    .ov-table tr + tr td { border-top: 1px solid var(--border); }
+    .ov-table td {
+      padding: 12px 14px;
+      vertical-align: middle;
+    }
+    .ov-player-name {
+      font-size: 1rem; font-weight: 700;
+      color: #ccdde; letter-spacing: 1px;
+    }
+    .ov-cell {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ov-face {
+      width: 44px; height: 44px;
+      border-radius: 5px; object-fit: cover;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .ov-weapon-img {
+      max-width: 100px; max-height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,.5));
+      flex-shrink: 0;
+    }
+    .ov-item-name {
+      font-size: .9rem; font-weight: 700;
+      color: #ddeeff; letter-spacing: 1px;
+    }
+    .ov-empty {
+      color: #334455; font-size: .85rem; letter-spacing: 1px;
+    }
+
     /* ─── 상단 결과 슬롯 ─── */
     .result-slots {
       display: grid;
@@ -445,9 +555,8 @@
       border: 2px solid var(--border);
       border-radius: 10px;
       width: 100%; max-width: 760px;
-      max-height: 90vh;
+      height: 88vh;
       display: flex; flex-direction: column;
-      overflow: hidden;
     }
     .modal-head {
       padding: 18px 22px;
@@ -472,10 +581,11 @@
     .btn-deselect-all:hover { border-color: var(--red);  color: var(--red); }
 
     .modal-grid {
-      flex: 1; min-height: 0; overflow-y: auto; padding: 18px;
+      flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+      padding: 16px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
       align-content: start;
     }
     .modal-grid::-webkit-scrollbar { width: 6px; }
@@ -487,8 +597,10 @@
       border-radius: 8px; overflow: hidden;
       border: 2px solid var(--border);
       transition: border-color .2s;
-      aspect-ratio: 1;
+      aspect-ratio: 1 / 1;
+      width: 100%;
       background: var(--card);
+      display: block;
     }
     .agent-toggle img {
       width: 100%; height: 100%; object-fit: cover; display: block;
@@ -655,6 +767,29 @@
 </div>
 
 <!-- ══════════════ AGENT ADJUST MODAL ══════════════ -->
+<!-- ══════════════ 전체 보기 모달 ══════════════ -->
+<div id="overview-modal">
+  <div class="ov-box">
+    <div class="ov-head">
+      <h3>전체 결과</h3>
+      <button class="btn-ov-close" id="ovCloseBtn">닫기</button>
+    </div>
+    <div class="ov-body">
+      <table class="ov-table" id="ovTable">
+        <thead>
+          <tr>
+            <th>플레이어</th>
+            <th>요원</th>
+            <th>피스톨</th>
+            <th>주총기</th>
+          </tr>
+        </thead>
+        <tbody id="ovTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div id="agent-modal">
   <div class="modal-box">
     <div class="modal-head">
@@ -768,6 +903,13 @@ function buildPlayerTabs() {
     btn.addEventListener('click', () => switchPlayer(i));
     bar.appendChild(btn);
   });
+  // 전체 보기 버튼은 항상 오른쪽 끝
+  const ovBtn = document.createElement('button');
+  ovBtn.className = 'btn-overview';
+  ovBtn.id = 'overviewBtn';
+  ovBtn.textContent = '📋 전체 보기';
+  ovBtn.addEventListener('click', openOverview);
+  bar.appendChild(ovBtn);
 }
 
 function switchPlayer(idx) {
@@ -863,6 +1005,65 @@ function resetAllResults() {
 /* ═══════════════════════════════
    Agent adjust modal
 ═══════════════════════════════ */
+/* ═══════════════════════════════
+   전체 보기 모달
+═══════════════════════════════ */
+const overviewModal = document.getElementById('overview-modal');
+// overviewBtn은 buildPlayerTabs()에서 동적 생성 후 바인딩
+document.getElementById('ovCloseBtn').addEventListener('click', () => overviewModal.classList.remove('open'));
+overviewModal.addEventListener('click', e => { if (e.target === overviewModal) overviewModal.classList.remove('open'); });
+
+function openOverview() {
+  const tbody = document.getElementById('ovTbody');
+  tbody.innerHTML = '';
+  players.forEach(p => {
+    const r = p.results;
+    const tr = document.createElement('tr');
+
+    // 플레이어명
+    tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
+
+    // 요원
+    const agentTd = document.createElement('td');
+    if (r.agent) {
+      agentTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-face" src="Agent_face/${r.agent}_face.webp" alt="" />
+        <span class="ov-item-name">${AGENT_KO[r.agent]}</span>
+      </div>`;
+    } else {
+      agentTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(agentTd);
+
+    // 피스톨
+    const pistolTd = document.createElement('td');
+    if (r.pistol) {
+      pistolTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-weapon-img" src="weapon/${r.pistol}.webp" alt="" />
+        <span class="ov-item-name">${WEAPON_KO[r.pistol]}</span>
+      </div>`;
+    } else {
+      pistolTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(pistolTd);
+
+    // 주총기
+    const primaryTd = document.createElement('td');
+    if (r.primary) {
+      primaryTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-weapon-img" src="weapon/${r.primary}.webp" alt="" />
+        <span class="ov-item-name">${WEAPON_KO[r.primary]}</span>
+      </div>`;
+    } else {
+      primaryTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(primaryTd);
+
+    tbody.appendChild(tr);
+  });
+  overviewModal.classList.add('open');
+}
+
 const agentModal  = document.getElementById('agent-modal');
 const modalGrid   = document.getElementById('modalGrid');
 const modalTitle  = document.getElementById('modalTitle');
