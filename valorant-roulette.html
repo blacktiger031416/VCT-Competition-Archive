@@ -1283,9 +1283,11 @@ function spinRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, on
   if (!items || items.length === 0) return;
   const winnerName = items[Math.floor(Math.random() * items.length)];
   const winnerPos  = 45;
+  const gap        = 8; // CSS gap on .roulette-track
+  const stride     = cardW + gap;
   const outerW     = outerEl.offsetWidth;
   const center     = Math.floor(outerW / 2) - Math.floor(cardW / 2);
-  const total      = winnerPos * cardW - center;
+  const total      = winnerPos * stride - center;
   const dur        = 4500;
 
   buildTrack(trackEl, items, winnerPos, winnerName, buildCard);
@@ -1298,7 +1300,7 @@ function spinRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, on
     const t   = Math.min((ts - start) / dur, 1);
     const cur = easeOut(t) * total;
     trackEl.style.transform = `translateX(-${cur}px)`;
-    const idx = Math.round((cur + center) / cardW);
+    const idx = Math.round((cur + center) / stride);
     trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
       c.classList.toggle('hl', i === idx)
     );
@@ -1339,7 +1341,7 @@ document.getElementById('agentSpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('agentOuter'),
     items:     pool,
     cardClass: 'face-card',
-    cardW:     118,
+    cardW:     116,
     buildCard: faceCard,
     onResult(name) {
       players[curPlayer].results.agent = name;
@@ -1372,7 +1374,7 @@ document.getElementById('pistolSpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('pistolOuter'),
     items:     PISTOLS,
     cardClass: 'weapon-card',
-    cardW:     178,
+    cardW:     175,
     buildCard: weaponCard,
     onResult(name) {
       players[curPlayer].results.pistol = name;
@@ -1401,7 +1403,7 @@ document.getElementById('primarySpinBtn').addEventListener('click', () => {
     outerEl:   document.getElementById('primaryOuter'),
     items:     PRIMARIES,
     cardClass: 'weapon-card',
-    cardW:     178,
+    cardW:     175,
     buildCard: weaponCard,
     onResult(name) {
       players[curPlayer].results.primary = name;
