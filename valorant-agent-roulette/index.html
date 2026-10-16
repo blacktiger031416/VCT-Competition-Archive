@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VALORANT Roulette</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Noto+Sans+KR:wght@400;700&display=swap');
 
     :root {
       --red:    #ff4655;
@@ -21,71 +21,93 @@
     body {
       background: var(--darker);
       color: #fff;
-      font-family: 'Rajdhani', sans-serif;
+      font-family: 'Noto Sans KR', 'Rajdhani', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow-x: hidden;
-      padding-bottom: 80px;
     }
 
     /* ─── Header ─── */
     header {
       width: 100%;
-      padding: 28px 0 18px;
+      padding: 24px 0 16px;
       text-align: center;
     }
     header::after {
       content: '';
       display: block;
-      width: 120px;
-      height: 3px;
+      width: 120px; height: 3px;
       background: linear-gradient(90deg, transparent, var(--red), transparent);
-      margin: 10px auto 0;
+      margin: 8px auto 0;
     }
     .logo-text {
-      font-size: 2.6rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.4rem;
       font-weight: 700;
       letter-spacing: 6px;
       text-transform: uppercase;
     }
     .logo-text span { color: var(--red); }
     .sub-text {
-      font-size: 1rem;
-      letter-spacing: 4px;
+      font-size: .85rem;
+      letter-spacing: 3px;
       color: #8899aa;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
-    /* ─── Section titles ─── */
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      color: #ccd8e0;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .section-title::before,
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ─── Roulette block ─── */
-    .roulette-block {
+    /* ─── Main layout ─── */
+    .layout {
       width: 100%;
-      max-width: 960px;
-      padding: 36px 24px 0;
+      max-width: 1080px;
+      display: flex;
+      align-items: flex-start;
+      padding: 28px 24px 60px;
+      gap: 24px;
     }
 
+    /* ─── Tab sidebar ─── */
+    .tab-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+      width: 140px;
+    }
+    .tab-btn {
+      background: var(--dark);
+      color: #8899aa;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: background .2s, color .2s, border-color .2s;
+      line-height: 1.3;
+    }
+    .tab-btn:hover { border-color: #445566; color: #ccd; }
+    .tab-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(255,70,85,.35);
+    }
+
+    /* ─── Content area ─── */
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ─── Roulette strip ─── */
     .roulette-outer {
       position: relative;
       width: 100%;
@@ -94,8 +116,8 @@
       border-radius: 8px;
       background: var(--dark);
     }
-    .roulette-outer.agent-strip  { height: 140px; }
-    .roulette-outer.weapon-strip { height: 110px; }
+    .roulette-outer.agent-h  { height: 140px; }
+    .roulette-outer.weapon-h { height: 110px; }
 
     .pointer {
       position: absolute;
@@ -140,30 +162,22 @@
       padding: 0 4px;
     }
 
-    /* agent face card */
+    /* cards */
     .face-card {
       flex-shrink: 0;
-      width: 110px;
-      height: 110px;
+      width: 110px; height: 110px;
       border-radius: 6px;
       overflow: hidden;
       border: 2px solid var(--border);
       background: var(--card);
       margin: auto 0;
     }
-    .face-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .face-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    /* weapon card */
     .weapon-card {
       flex-shrink: 0;
-      width: 170px;
-      height: 86px;
+      width: 170px; height: 86px;
       border-radius: 6px;
-      overflow: hidden;
       border: 2px solid var(--border);
       background: var(--card);
       margin: auto 0;
@@ -175,61 +189,57 @@
     .weapon-card img {
       max-width: 100%; max-height: 100%;
       object-fit: contain;
-      display: block;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.6));
     }
 
     .face-card.highlighted,
     .weapon-card.highlighted {
       border-color: var(--red);
-      box-shadow: 0 0 18px rgba(255,70,85,0.55);
+      box-shadow: 0 0 18px rgba(255,70,85,.55);
     }
 
     /* ─── Spin button ─── */
     .btn-wrap {
       display: flex;
       justify-content: center;
-      margin: 22px 0 0;
+      margin: 20px 0 0;
     }
     .spin-btn {
       background: var(--red);
       color: #fff;
       border: none;
       padding: 12px 56px;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1.2rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.1rem;
       font-weight: 700;
-      letter-spacing: 4px;
-      text-transform: uppercase;
+      letter-spacing: 3px;
       cursor: pointer;
       clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
       transition: background .2s, transform .1s;
     }
     .spin-btn:hover   { background: #e03040; transform: scale(1.04); }
-    .spin-btn:active  { transform: scale(0.97); }
+    .spin-btn:active  { transform: scale(.97); }
     .spin-btn:disabled { background: #444; cursor: not-allowed; transform: none; }
 
-    /* ─── Result area ─── */
+    /* ─── Results ─── */
     .result-area {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 60px;
-      padding: 20px 0 0;
+      padding: 24px 0 0;
     }
 
     /* agent result */
     .result-agent-name {
       font-size: 2.6rem;
       font-weight: 700;
-      letter-spacing: 8px;
-      text-transform: uppercase;
+      letter-spacing: 4px;
       color: var(--red);
       text-shadow: 0 0 20px rgba(255,70,85,.45);
       opacity: 0;
       transform: translateY(16px);
       transition: opacity .5s, transform .5s;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .result-agent-name.visible { opacity: 1; transform: translateY(0); }
 
@@ -239,8 +249,8 @@
       justify-content: center;
       align-items: flex-end;
       width: 100%;
-      max-width: 380px;
-      height: 380px;
+      max-width: 360px;
+      height: 360px;
       opacity: 0;
       transform: scale(.88) translateY(24px);
       transition: opacity .6s .15s, transform .6s .15s;
@@ -268,9 +278,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       opacity: 0;
-      transform: scale(.9) translateY(16px);
+      transform: scale(.9) translateY(14px);
       transition: opacity .5s, transform .5s;
     }
     .result-weapon-wrap.visible { opacity: 1; transform: scale(1) translateY(0); }
@@ -278,8 +288,7 @@
     .result-weapon-name {
       font-size: 2rem;
       font-weight: 700;
-      letter-spacing: 6px;
-      text-transform: uppercase;
+      letter-spacing: 4px;
       color: var(--teal);
       text-shadow: 0 0 16px rgba(0,209,217,.4);
     }
@@ -291,19 +300,9 @@
 
     .placeholder-msg {
       color: #445566;
-      font-size: 1rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      padding: 20px 0;
-    }
-
-    /* divider */
-    .divider {
-      width: 100%;
-      max-width: 960px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      margin: 48px 0 0;
+      font-size: .95rem;
+      letter-spacing: 2px;
+      padding: 24px 0;
     }
   </style>
 </head>
@@ -311,250 +310,247 @@
 
 <header>
   <div class="logo-text">VALO<span>RANT</span></div>
-  <div class="sub-text">Random Roulette</div>
+  <div class="sub-text">랜덤 룰렛</div>
 </header>
 
-<!-- ══════════════ AGENT ══════════════ -->
-<div class="roulette-block">
-  <div class="section-title">Agent</div>
-  <div class="roulette-outer agent-strip" id="agentOuter">
-    <div class="pointer"></div>
-    <div class="roulette-track" id="agentTrack"></div>
+<div class="layout">
+
+  <!-- ─── Tab sidebar ─── -->
+  <div class="tab-sidebar">
+    <button class="tab-btn active" data-tab="agent">요원<br>룰렛</button>
+    <button class="tab-btn" data-tab="pistol">피스톨<br>룰렛</button>
+    <button class="tab-btn" data-tab="primary">주총기<br>룰렛</button>
   </div>
-  <div class="btn-wrap">
-    <button class="spin-btn" id="agentSpinBtn">SPIN</button>
-  </div>
-  <div class="result-area" id="agentResult">
-    <div class="result-agent-name" id="agentName"></div>
-    <div class="agent-full-wrap" id="agentFullWrap">
-      <img id="agentFullImg" src="" alt="" />
-      <div class="glow-line" id="agentGlow"></div>
+
+  <!-- ─── Content ─── -->
+  <div class="content">
+
+    <!-- AGENT panel -->
+    <div class="panel active" id="panel-agent">
+      <div class="roulette-outer agent-h" id="agentOuter">
+        <div class="pointer"></div>
+        <div class="roulette-track" id="agentTrack"></div>
+      </div>
+      <div class="btn-wrap">
+        <button class="spin-btn" id="agentSpinBtn">돌리기</button>
+      </div>
+      <div class="result-area">
+        <div class="result-agent-name" id="agentName"></div>
+        <div class="agent-full-wrap" id="agentFullWrap">
+          <img id="agentFullImg" src="" alt="" />
+          <div class="glow-line" id="agentGlow"></div>
+        </div>
+        <p class="placeholder-msg" id="agentPlaceholder">버튼을 눌러 요원을 뽑아보세요</p>
+      </div>
     </div>
-    <p class="placeholder-msg" id="agentPlaceholder">SPIN TO REVEAL YOUR AGENT</p>
-  </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- ══════════════ PISTOL ══════════════ -->
-<div class="roulette-block">
-  <div class="section-title">Sidearm</div>
-  <div class="roulette-outer weapon-strip" id="pistolOuter">
-    <div class="pointer"></div>
-    <div class="roulette-track" id="pistolTrack"></div>
-  </div>
-  <div class="btn-wrap">
-    <button class="spin-btn" id="pistolSpinBtn">SPIN</button>
-  </div>
-  <div class="result-area" id="pistolResult">
-    <div class="result-weapon-wrap" id="pistolWrap">
-      <div class="result-weapon-name" id="pistolName"></div>
-      <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+    <!-- PISTOL panel -->
+    <div class="panel" id="panel-pistol">
+      <div class="roulette-outer weapon-h" id="pistolOuter">
+        <div class="pointer"></div>
+        <div class="roulette-track" id="pistolTrack"></div>
+      </div>
+      <div class="btn-wrap">
+        <button class="spin-btn" id="pistolSpinBtn">돌리기</button>
+      </div>
+      <div class="result-area">
+        <div class="result-weapon-wrap" id="pistolWrap">
+          <div class="result-weapon-name" id="pistolName"></div>
+          <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+        </div>
+        <p class="placeholder-msg" id="pistolPlaceholder">버튼을 눌러 피스톨을 뽑아보세요</p>
+      </div>
     </div>
-    <p class="placeholder-msg" id="pistolPlaceholder">SPIN TO REVEAL YOUR SIDEARM</p>
-  </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- ══════════════ PRIMARY ══════════════ -->
-<div class="roulette-block">
-  <div class="section-title">Primary</div>
-  <div class="roulette-outer weapon-strip" id="primaryOuter">
-    <div class="pointer"></div>
-    <div class="roulette-track" id="primaryTrack"></div>
-  </div>
-  <div class="btn-wrap">
-    <button class="spin-btn" id="primarySpinBtn">SPIN</button>
-  </div>
-  <div class="result-area" id="primaryResult">
-    <div class="result-weapon-wrap" id="primaryWrap">
-      <div class="result-weapon-name" id="primaryName"></div>
-      <img class="result-weapon-img" id="primaryImg" src="" alt="" />
+    <!-- PRIMARY panel -->
+    <div class="panel" id="panel-primary">
+      <div class="roulette-outer weapon-h" id="primaryOuter">
+        <div class="pointer"></div>
+        <div class="roulette-track" id="primaryTrack"></div>
+      </div>
+      <div class="btn-wrap">
+        <button class="spin-btn" id="primarySpinBtn">돌리기</button>
+      </div>
+      <div class="result-area">
+        <div class="result-weapon-wrap" id="primaryWrap">
+          <div class="result-weapon-name" id="primaryName"></div>
+          <img class="result-weapon-img" id="primaryImg" src="" alt="" />
+        </div>
+        <p class="placeholder-msg" id="primaryPlaceholder">버튼을 눌러 주총기를 뽑아보세요</p>
+      </div>
     </div>
-    <p class="placeholder-msg" id="primaryPlaceholder">SPIN TO REVEAL YOUR PRIMARY</p>
-  </div>
-</div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
 
 <script>
-/* ─── Data ─── */
-const AGENTS = [
-  'astra','breach','brimstone','chamber','clove','cypher','deadlock',
-  'fade','gekko','harbor','iso','jett','kayo','killjoy','miks',
-  'neon','omen','phoenix','raze','reyna','sage','skye','sova',
-  'tejo','veto','viper','vyse','waylay','yoru'
-];
+/* ─── Korean name maps ─── */
+const AGENT_KO = {
+  astra:'아스트라', breach:'브리치', brimstone:'브림스톤', chamber:'체임버',
+  clove:'클로브', cypher:'사이퍼', deadlock:'데드록', fade:'페이드',
+  gekko:'게코', harbor:'하버', iso:'아이소', jett:'제트',
+  kayo:'케이/오', killjoy:'킬조이', miks:'믹스', neon:'네온',
+  omen:'오멘', phoenix:'피닉스', raze:'레이즈', reyna:'레이나',
+  sage:'세이지', skye:'스카이', sova:'소바', tejo:'테호',
+  veto:'비토', viper:'바이퍼', vyse:'바이스', waylay:'웨이레이', yoru:'요루'
+};
 
+const WEAPON_KO = {
+  ares:'아레스', bandit:'벤딧', bucky:'버키', bulldog:'불독',
+  classic:'클래식', frenzy:'프렌지', ghost:'고스트', guardian:'가디언',
+  judge:'저지', marshall:'마샬', odin:'오딘', operator:'오퍼레이터',
+  outlaw:'아웃로', phantom:'팬텀', sheriff:'셰리프', shorty:'쇼티',
+  spectre:'스펙터', stinger:'스팅어', vandal:'벤달', warden:'워든'
+};
+
+const AGENTS   = Object.keys(AGENT_KO);
 const PISTOLS  = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
-const PRIMARIES = [
-  'ares','bucky','bulldog','guardian','judge','marshall',
-  'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'
-];
+const PRIMARIES= ['ares','bucky','bulldog','guardian','judge','marshall',
+                  'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
+
+/* ─── Tab switching ─── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
 
 /* ─── easeOut ─── */
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
-/* ─── Generic roulette builder ─── */
+/* ─── Generic roulette ─── */
 function makeRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, spinBtn, onResult }) {
-  let isSpinning = false;
-  const SPIN_COUNT = 60;
+  let spinning = false;
+  const COUNT  = 60;
+  let winner   = 0;
 
-  function buildTrack(winnerPos) {
+  function buildTrack(winPos) {
     trackEl.innerHTML = '';
-    for (let i = 0; i < SPIN_COUNT; i++) {
-      const name = (i === winnerPos) ? items[currentWinner] : items[Math.floor(Math.random() * items.length)];
+    for (let i = 0; i < COUNT; i++) {
+      const name = (i === winPos) ? items[winner] : items[Math.floor(Math.random() * items.length)];
       const card = buildCard(name);
-      card.dataset.index = i;
+      card.dataset.i = i;
       trackEl.appendChild(card);
     }
   }
 
-  let currentWinner = 0;
-
   spinBtn.addEventListener('click', () => {
-    if (isSpinning) return;
-    isSpinning = true;
+    if (spinning) return;
+    spinning = true;
     spinBtn.disabled = true;
-    onResult(null); // hide result
+    onResult(null);
 
-    currentWinner = Math.floor(Math.random() * items.length);
-    const outerWidth = outerEl.offsetWidth;
-    const centerOffset = Math.floor(outerWidth / 2) - Math.floor(cardW / 2);
-    const winnerPos = 45;
-    buildTrack(winnerPos);
+    winner = Math.floor(Math.random() * items.length);
+    const outerW = outerEl.offsetWidth;
+    const center = Math.floor(outerW / 2) - Math.floor(cardW / 2);
+    const winPos = 45;
+    buildTrack(winPos);
 
-    const totalScroll = winnerPos * cardW - centerOffset;
-    const duration = 4200;
-    let start = null;
+    const total = winPos * cardW - center;
+    const dur   = 4200;
+    let start   = null;
     trackEl.style.transform = 'translateX(0px)';
 
-    function step(ts) {
+    (function step(ts) {
       if (!start) start = ts;
-      const elapsed = ts - start;
-      const t = Math.min(elapsed / duration, 1);
-      const current = easeOut(t) * totalScroll;
-      trackEl.style.transform = `translateX(-${current}px)`;
+      const t   = Math.min((ts - start) / dur, 1);
+      const cur = easeOut(t) * total;
+      trackEl.style.transform = `translateX(-${cur}px)`;
 
-      const centerPx = current + centerOffset;
-      const idx = Math.round(centerPx / cardW);
-      trackEl.querySelectorAll(`.${cardClass}`).forEach((c, i) => {
-        c.classList.toggle('highlighted', i === idx);
-      });
+      const idx = Math.round((cur + center) / cardW);
+      trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
+        c.classList.toggle('highlighted', i === idx)
+      );
 
-      if (t < 1) {
-        requestAnimationFrame(step);
-      } else {
-        onResult(items[currentWinner]);
-        setTimeout(() => { isSpinning = false; spinBtn.disabled = false; }, 600);
+      if (t < 1) { requestAnimationFrame(step); }
+      else {
+        onResult(items[winner]);
+        setTimeout(() => { spinning = false; spinBtn.disabled = false; }, 600);
       }
-    }
-    requestAnimationFrame(step);
+    })(performance.now());
   });
 }
 
-/* ─── Agent card builder ─── */
-function buildAgentCard(name) {
-  const card = document.createElement('div');
-  card.className = 'face-card';
+/* ─── Card builders ─── */
+function agentCard(name) {
+  const d = document.createElement('div');
+  d.className = 'face-card';
   const img = document.createElement('img');
   img.src = `Agent_face/${name}_face.webp`;
   img.alt = name;
-  card.appendChild(img);
-  return card;
+  d.appendChild(img);
+  return d;
 }
-
-/* ─── Weapon card builder ─── */
-function buildWeaponCard(name) {
-  const card = document.createElement('div');
-  card.className = 'weapon-card';
+function weaponCard(name) {
+  const d = document.createElement('div');
+  d.className = 'weapon-card';
   const img = document.createElement('img');
   img.src = `weapon/${name}.webp`;
   img.alt = name;
-  card.appendChild(img);
-  return card;
+  d.appendChild(img);
+  return d;
 }
 
-/* ─── Display name ─── */
-function displayName(name) { return name.charAt(0).toUpperCase() + name.slice(1); }
-
-/* ─── Wire up Agent ─── */
+/* ─── Wire: Agent ─── */
 makeRoulette({
   trackEl:   document.getElementById('agentTrack'),
   outerEl:   document.getElementById('agentOuter'),
-  items:     AGENTS,
-  cardClass: 'face-card',
-  cardW:     118,
-  buildCard: buildAgentCard,
-  spinBtn:   document.getElementById('agentSpinBtn'),
+  items: AGENTS, cardClass: 'face-card', cardW: 118, buildCard: agentCard,
+  spinBtn: document.getElementById('agentSpinBtn'),
   onResult(name) {
-    const nameEl     = document.getElementById('agentName');
-    const fullWrap   = document.getElementById('agentFullWrap');
-    const fullImg    = document.getElementById('agentFullImg');
-    const glow       = document.getElementById('agentGlow');
-    const placeholder= document.getElementById('agentPlaceholder');
+    const nameEl  = document.getElementById('agentName');
+    const wrap    = document.getElementById('agentFullWrap');
+    const img     = document.getElementById('agentFullImg');
+    const glow    = document.getElementById('agentGlow');
+    const ph      = document.getElementById('agentPlaceholder');
     if (!name) {
       nameEl.classList.remove('visible');
-      fullWrap.classList.remove('visible');
+      wrap.classList.remove('visible');
       glow.classList.remove('visible');
-      placeholder.style.display = '';
+      ph.style.display = '';
       return;
     }
-    placeholder.style.display = 'none';
-    nameEl.textContent = displayName(name);
+    ph.style.display = 'none';
+    nameEl.textContent = AGENT_KO[name];
     nameEl.classList.add('visible');
-    fullImg.src = `Agent/${name}.webp`;
-    setTimeout(() => { fullWrap.classList.add('visible'); glow.classList.add('visible'); }, 80);
+    img.src = `Agent/${name}.webp`;
+    setTimeout(() => { wrap.classList.add('visible'); glow.classList.add('visible'); }, 80);
   }
 });
 
-/* ─── Wire up Pistol ─── */
+/* ─── Wire: Pistol ─── */
 makeRoulette({
   trackEl:   document.getElementById('pistolTrack'),
   outerEl:   document.getElementById('pistolOuter'),
-  items:     PISTOLS,
-  cardClass: 'weapon-card',
-  cardW:     178,
-  buildCard: buildWeaponCard,
-  spinBtn:   document.getElementById('pistolSpinBtn'),
+  items: PISTOLS, cardClass: 'weapon-card', cardW: 178, buildCard: weaponCard,
+  spinBtn: document.getElementById('pistolSpinBtn'),
   onResult(name) {
-    const wrap        = document.getElementById('pistolWrap');
-    const nameEl      = document.getElementById('pistolName');
-    const img         = document.getElementById('pistolImg');
-    const placeholder = document.getElementById('pistolPlaceholder');
-    if (!name) {
-      wrap.classList.remove('visible');
-      placeholder.style.display = '';
-      return;
-    }
-    placeholder.style.display = 'none';
-    nameEl.textContent = displayName(name);
-    img.src = `weapon/${name}.webp`;
+    const wrap = document.getElementById('pistolWrap');
+    const ph   = document.getElementById('pistolPlaceholder');
+    if (!name) { wrap.classList.remove('visible'); ph.style.display = ''; return; }
+    ph.style.display = 'none';
+    document.getElementById('pistolName').textContent = WEAPON_KO[name];
+    document.getElementById('pistolImg').src = `weapon/${name}.webp`;
     setTimeout(() => wrap.classList.add('visible'), 80);
   }
 });
 
-/* ─── Wire up Primary ─── */
+/* ─── Wire: Primary ─── */
 makeRoulette({
   trackEl:   document.getElementById('primaryTrack'),
   outerEl:   document.getElementById('primaryOuter'),
-  items:     PRIMARIES,
-  cardClass: 'weapon-card',
-  cardW:     178,
-  buildCard: buildWeaponCard,
-  spinBtn:   document.getElementById('primarySpinBtn'),
+  items: PRIMARIES, cardClass: 'weapon-card', cardW: 178, buildCard: weaponCard,
+  spinBtn: document.getElementById('primarySpinBtn'),
   onResult(name) {
-    const wrap        = document.getElementById('primaryWrap');
-    const nameEl      = document.getElementById('primaryName');
-    const img         = document.getElementById('primaryImg');
-    const placeholder = document.getElementById('primaryPlaceholder');
-    if (!name) {
-      wrap.classList.remove('visible');
-      placeholder.style.display = '';
-      return;
-    }
-    placeholder.style.display = 'none';
-    nameEl.textContent = displayName(name);
-    img.src = `weapon/${name}.webp`;
+    const wrap = document.getElementById('primaryWrap');
+    const ph   = document.getElementById('primaryPlaceholder');
+    if (!name) { wrap.classList.remove('visible'); ph.style.display = ''; return; }
+    ph.style.display = 'none';
+    document.getElementById('primaryName').textContent = WEAPON_KO[name];
+    document.getElementById('primaryImg').src = `weapon/${name}.webp`;
     setTimeout(() => wrap.classList.add('visible'), 80);
   }
 });
