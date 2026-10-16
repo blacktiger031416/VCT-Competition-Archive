@@ -765,45 +765,51 @@ function getAudioCtx() {
 }
 
 function playTick(speed) {
-  // speed: 0(fast)~1(slow) — pitch and volume adjust
+  // speed: 0(fast)~1(slow) — 순수 사인파 클릭, 노이즈 없음
   try {
     const ctx  = getAudioCtx();
-    const buf  = ctx.createBuffer(1, ctx.sampleRate * 0.018, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 8);
-    }
-    const src  = ctx.createBufferSource();
-    src.buffer = buf;
+    const now  = ctx.currentTime;
+    const freq = 900 - speed * 400; // 빠를수록 고음
+    const vol  = 0.05 + speed * 0.18;
+
+    const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
-    // 빠를수록 작게, 느릴수록 크게
-    gain.gain.value = 0.06 + speed * 0.28;
-    src.playbackRate.value = 2.8 - speed * 1.4;
-    src.connect(gain);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+    osc.connect(gain);
     gain.connect(ctx.destination);
-    src.start();
+    osc.start(now);
+    osc.stop(now + 0.045);
   } catch(e) {}
 }
 
 function playLand() {
   try {
-    const ctx  = getAudioCtx();
-    // 둔탁한 임팩트 + 짧은 톤
-    const dur  = 0.35;
-    const buf  = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      const t = i / data.length;
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3) * 0.9
-              + Math.sin(2 * Math.PI * 80 * (i / ctx.sampleRate)) * Math.pow(1 - t, 6) * 0.5;
-    }
-    const src  = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    gain.gain.value = 1.0;
-    src.connect(gain);
-    gain.connect(ctx.destination);
-    src.start();
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+
+    // 낮은 펀치 톤 (80hz)
+    const osc1 = ctx.createOscillator();
+    const g1   = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(120, now);
+    osc1.frequency.exponentialRampToValueAtTime(55, now + 0.25);
+    g1.gain.setValueAtTime(0.7, now);
+    g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    osc1.connect(g1); g1.connect(ctx.destination);
+    osc1.start(now); osc1.stop(now + 0.38);
+
+    // 살짝 높은 어택 톤 (300hz)
+    const osc2 = ctx.createOscillator();
+    const g2   = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.value = 300;
+    g2.gain.setValueAtTime(0.25, now);
+    g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    osc2.connect(g2); g2.connect(ctx.destination);
+    osc2.start(now); osc2.stop(now + 0.14);
   } catch(e) {}
 }
 
