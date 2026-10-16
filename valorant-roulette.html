@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VALORANT Roulette</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+    :root {
+      --red:    #ff4655;
+      --teal:   #00d1d9;
+      --dark:   #0f1923;
+      --darker: #090e14;
+      --card:   #1a2535;
+      --border: #2a3a4a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--darker);
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── shared header ── */
+    .site-header {
+      width: 100%;
+      padding: 22px 0 14px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .site-header::after {
+      content: '';
+      display: block;
+      width: 100px; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 8px auto 0;
+    }
+    .logo-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.2rem; font-weight: 700;
+      letter-spacing: 6px; text-transform: uppercase;
+    }
+    .logo-text span { color: var(--red); }
+    .sub-text {
+      font-size: .8rem; letter-spacing: 3px;
+      color: #8899aa; text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ════════════════════════════════════
+       SETUP SCREEN
+    ════════════════════════════════════ */
+    #setup-screen {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+    .setup-card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 32px 28px;
+    }
+    .setup-card h2 {
+      font-size: 1.2rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #ccd; margin-bottom: 22px;
+      text-align: center;
+    }
+    .input-row {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .input-row input {
+      flex: 1;
+      background: var(--darker);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .input-row input:focus { border-color: var(--red); }
+    .input-row input::placeholder { color: #445566; }
+
+    .btn-add {
+      background: var(--red);
+      color: #fff; border: none;
+      padding: 0 22px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      cursor: pointer; border-radius: 6px;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: #e03040; }
+
+    .player-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      min-height: 38px; margin-bottom: 28px;
+    }
+    .chip {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 10px 5px 14px;
+      font-size: .9rem; color: #dde;
+    }
+    .chip-remove {
+      background: none; border: none;
+      color: #667788; cursor: pointer;
+      font-size: 1rem; line-height: 1;
+      padding: 0; transition: color .15s;
+    }
+    .chip-remove:hover { color: var(--red); }
+
+    .btn-done {
+      width: 100%;
+      background: var(--red); color: #fff; border: none;
+      padding: 13px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      letter-spacing: 3px;
+      cursor: pointer; border-radius: 6px;
+      clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+      transition: background .2s, opacity .2s;
+    }
+    .btn-done:disabled { background: #333; color: #556; cursor: not-allowed; }
+    .btn-done:not(:disabled):hover { background: #e03040; }
+
+    /* ════════════════════════════════════
+       MAIN SCREEN
+    ════════════════════════════════════ */
+    #main-screen {
+      width: 100%;
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+    }
+
+    /* player tab bar */
+    .player-tabbar {
+      width: 100%;
+      background: var(--dark);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .player-tabbar::-webkit-scrollbar { display: none; }
+    .player-tab {
+      flex-shrink: 0;
+      padding: 12px 24px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      color: #667788;
+      background: none; border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: color .2s, border-color .2s;
+      margin-bottom: -2px;
+    }
+    .player-tab:hover { color: #aabbcc; }
+    .player-tab.active { color: #fff; border-bottom-color: var(--red); }
+
+    /* layout */
+    .main-layout {
+      width: 100%;
+      max-width: 1080px;
+      display: flex;
+      align-items: flex-start;
+      padding: 24px 24px 0;
+      gap: 20px;
+    }
+
+    /* type sidebar */
+    .type-sidebar {
+      display: flex; flex-direction: column;
+      gap: 8px; flex-shrink: 0; width: 130px;
+    }
+    .type-btn {
+      background: var(--dark); color: #8899aa;
+      border: 2px solid var(--border); border-radius: 6px;
+      padding: 11px 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .88rem; font-weight: 700;
+      cursor: pointer; text-align: center;
+      transition: background .2s, color .2s, border-color .2s;
+      line-height: 1.4;
+    }
+    .type-btn:hover { border-color: #445566; color: #ccd; }
+    .type-btn.active {
+      background: var(--red); border-color: var(--red);
+      color: #fff; box-shadow: 0 0 14px rgba(255,70,85,.3);
+    }
+
+    /* content */
+    .main-content { flex: 1; min-width: 0; }
+
+    .type-panel { display: none; }
+    .type-panel.active { display: block; }
+
+    /* agent panel top row */
+    .agent-panel-header {
+      display: flex; align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .btn-adjust {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: #aabbcc;
+      padding: 7px 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      border-radius: 5px; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-adjust:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* roulette strip */
+    .roulette-outer {
+      position: relative; width: 100%;
+      overflow: hidden;
+      border: 2px solid var(--border); border-radius: 8px;
+      background: var(--dark);
+    }
+    .roulette-outer.agent-h  { height: 140px; }
+    .roulette-outer.weapon-h { height: 110px; }
+
+    .pointer {
+      position: absolute; top: 0; bottom: 0;
+      left: 50%; transform: translateX(-50%);
+      width: 3px; background: var(--red);
+      z-index: 10; box-shadow: 0 0 12px var(--red);
+    }
+    .pointer::before, .pointer::after {
+      content: ''; position: absolute;
+      left: 50%; transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+    }
+    .pointer::before { top: 0;    border-top:    14px solid var(--red); }
+    .pointer::after  { bottom: 0; border-bottom: 14px solid var(--red); }
+
+    .roulette-outer::before, .roulette-outer::after {
+      content: ''; position: absolute;
+      top: 0; bottom: 0; width: 90px; z-index: 5; pointer-events: none;
+    }
+    .roulette-outer::before { left:  0; background: linear-gradient(to right, var(--darker), transparent); }
+    .roulette-outer::after  { right: 0; background: linear-gradient(to left,  var(--darker), transparent); }
+
+    .roulette-track {
+      display: flex; align-items: center;
+      height: 100%; will-change: transform;
+      gap: 8px; padding: 0 4px;
+    }
+
+    .face-card {
+      flex-shrink: 0; width: 110px; height: 110px;
+      border-radius: 6px; overflow: hidden;
+      border: 2px solid var(--border);
+      background: var(--card); margin: auto 0;
+    }
+    .face-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .weapon-card {
+      flex-shrink: 0; width: 170px; height: 86px;
+      border-radius: 6px; border: 2px solid var(--border);
+      background: var(--card); margin: auto 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6px 10px;
+    }
+    .weapon-card img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.6));
+    }
+    .face-card.hl, .weapon-card.hl {
+      border-color: var(--red);
+      box-shadow: 0 0 18px rgba(255,70,85,.5);
+    }
+
+    /* spin button */
+    .btn-wrap { display: flex; justify-content: center; margin: 18px 0 0; }
+    .spin-btn {
+      background: var(--red); color: #fff; border: none;
+      padding: 11px 52px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: 3px;
+      cursor: pointer;
+      clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+      transition: background .2s, transform .1s;
+    }
+    .spin-btn:hover   { background: #e03040; transform: scale(1.04); }
+    .spin-btn:active  { transform: scale(.97); }
+    .spin-btn:disabled { background: #333; color: #556; cursor: not-allowed; transform: none; }
+
+    /* result */
+    .result-area { display: flex; flex-direction: column; align-items: center; padding: 20px 0 0; }
+
+    .result-agent-name {
+      font-size: 2.4rem; font-weight: 700;
+      letter-spacing: 3px; color: var(--red);
+      text-shadow: 0 0 20px rgba(255,70,85,.45);
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .5s, transform .5s; margin-bottom: 12px;
+    }
+    .result-agent-name.vis { opacity: 1; transform: translateY(0); }
+
+    .agent-full-wrap {
+      position: relative; display: flex;
+      justify-content: center; align-items: flex-end;
+      max-width: 340px; width: 100%; height: 340px;
+      opacity: 0; transform: scale(.88) translateY(20px);
+      transition: opacity .6s .15s, transform .6s .15s;
+    }
+    .agent-full-wrap.vis { opacity: 1; transform: scale(1) translateY(0); }
+    .agent-full-wrap img {
+      max-height: 100%; max-width: 100%; object-fit: contain;
+      filter: drop-shadow(0 8px 28px rgba(255,70,85,.35));
+    }
+    .glow-line {
+      position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 60%; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      filter: blur(2px); opacity: 0; transition: opacity .4s .6s;
+    }
+    .glow-line.vis { opacity: 1; }
+
+    .result-weapon-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      opacity: 0; transform: scale(.9) translateY(12px);
+      transition: opacity .5s, transform .5s;
+    }
+    .result-weapon-wrap.vis { opacity: 1; transform: scale(1) translateY(0); }
+    .result-weapon-name {
+      font-size: 1.9rem; font-weight: 700;
+      letter-spacing: 4px; color: var(--teal);
+      text-shadow: 0 0 14px rgba(0,209,217,.35);
+    }
+    .result-weapon-img {
+      max-width: 460px; width: 90%;
+      filter: drop-shadow(0 6px 24px rgba(0,209,217,.3));
+    }
+    .placeholder-msg {
+      color: #445566; font-size: .9rem; letter-spacing: 2px; padding: 22px 0;
+    }
+
+    /* ─── 전체 보기 버튼 ─── */
+    .btn-overview {
+      flex-shrink: 0;
+      margin-left: auto;
+      padding: 0 22px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #8899aa;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .9rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: color .2s;
+      margin-bottom: -2px;
+      letter-spacing: 1px;
+    }
+    .btn-overview:hover { color: var(--teal); }
+
+    /* ─── 전체 보기 모달 ─── */
+    #overview-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.88);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    #overview-modal.open { display: flex; }
+
+    .ov-box {
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      width: 100%; max-width: 860px;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .ov-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .ov-head h3 {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 3px; color: #dde;
+      text-transform: uppercase;
+    }
+    .btn-ov-close {
+      background: none; border: 1px solid var(--border);
+      color: #8899aa; padding: 5px 14px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      border-radius: 4px; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-ov-close:hover { border-color: var(--red); color: var(--red); }
+
+    .ov-body {
+      flex: 1; min-height: 0;
+      overflow-y: auto; padding: 20px;
+    }
+    .ov-body::-webkit-scrollbar { width: 6px; }
+    .ov-body::-webkit-scrollbar-track { background: var(--darker); }
+    .ov-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* 테이블 */
+    .ov-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .ov-table th {
+      font-size: .75rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #556677; text-align: left;
+      padding: 0 14px 12px;
+    }
+    .ov-table th:first-child { width: 130px; }
+    .ov-table tr + tr td { border-top: 1px solid var(--border); }
+    .ov-table td {
+      padding: 12px 14px;
+      vertical-align: middle;
+    }
+    .ov-player-name {
+      font-size: 1rem; font-weight: 700;
+      color: #ccdde; letter-spacing: 1px;
+    }
+    .ov-cell {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ov-face {
+      width: 44px; height: 44px;
+      border-radius: 5px; object-fit: cover;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .ov-weapon-img {
+      max-width: 100px; max-height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,.5));
+      flex-shrink: 0;
+    }
+    .ov-item-name {
+      font-size: .9rem; font-weight: 700;
+      color: #ddeeff; letter-spacing: 1px;
+    }
+    .ov-empty {
+      color: #334455; font-size: .85rem; letter-spacing: 1px;
+    }
+
+    /* ─── 상단 결과 슬롯 ─── */
+    .result-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .result-slot {
+      background: var(--dark);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 90px;
+      transition: border-color .3s;
+    }
+    .result-slot.filled {
+      border-style: solid;
+      border-color: #3a4a5a;
+    }
+    .slot-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #556677;
+      text-transform: uppercase;
+    }
+    .slot-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slot-empty-msg {
+      color: #334455;
+      font-size: .85rem;
+      letter-spacing: 1px;
+      margin: auto;
+    }
+    .slot-face {
+      width: 52px; height: 52px;
+      border-radius: 5px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .slot-weapon-img {
+      max-width: 120px; max-height: 44px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+      flex-shrink: 0;
+    }
+    .slot-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ddeeff;
+      letter-spacing: 1px;
+    }
+    #slot-agent.filled   { border-color: rgba(255,70,85,.5); }
+    #slot-pistol.filled  { border-color: rgba(0,209,217,.35); }
+    #slot-primary.filled { border-color: rgba(0,209,217,.35); }
+
+    /* ════════════════════════════════════
+       AGENT ADJUST MODAL
+    ════════════════════════════════════ */
+    #agent-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.88);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    #agent-modal.open { display: flex; }
+
+    .modal-box {
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      width: 100%; max-width: 760px;
+      max-height: 88vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal-head h3 {
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 2px; color: #dde;
+    }
+    .modal-head-actions { display: flex; gap: 8px; }
+    .btn-select-all, .btn-deselect-all {
+      background: var(--card); border: 1px solid var(--border);
+      color: #aabbcc; padding: 5px 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .78rem; font-weight: 700;
+      border-radius: 4px; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-select-all:hover   { border-color: var(--teal); color: var(--teal); }
+    .btn-deselect-all:hover { border-color: var(--red);  color: var(--red); }
+
+    .modal-grid {
+      flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      align-content: start;
+    }
+    .modal-grid::-webkit-scrollbar { width: 6px; }
+    .modal-grid::-webkit-scrollbar-track { background: var(--darker); }
+    .modal-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .agent-toggle {
+      position: relative; cursor: pointer;
+      border-radius: 8px; overflow: hidden;
+      border: 2px solid var(--border);
+      transition: border-color .2s;
+      aspect-ratio: 1;
+      background: var(--card);
+    }
+    .agent-toggle img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .agent-toggle .ag-name {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,.72);
+      font-size: .62rem; font-weight: 700;
+      text-align: center; padding: 3px 1px;
+      letter-spacing: 0px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .agent-toggle .ag-off {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.65);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: var(--red);
+      opacity: 0; transition: opacity .2s;
+    }
+    .agent-toggle.off { border-color: #3a1a1e; }
+    .agent-toggle.off img { filter: grayscale(1) brightness(.4); }
+    .agent-toggle.off .ag-off { opacity: 1; }
+    .agent-toggle:not(.off):hover { border-color: var(--teal); }
+    .agent-toggle.off:hover .ag-off { background: rgba(0,0,0,.5); }
+
+    .modal-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .btn-modal-done {
+      background: var(--red); color: #fff; border: none;
+      padding: 10px 32px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: .95rem; font-weight: 700; letter-spacing: 2px;
+      border-radius: 6px; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-modal-done:hover { background: #e03040; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ SETUP SCREEN ══════════════ -->
+<div id="setup-screen">
+  <div class="site-header">
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">랜덤 룰렛</div>
+  </div>
+  <div class="setup-card">
+    <h2>플레이어 추가</h2>
+    <div class="input-row">
+      <input type="text" id="nicknameInput" placeholder="닉네임을 입력하세요" maxlength="20" />
+      <button class="btn-add" id="addPlayerBtn">추가</button>
+    </div>
+    <div class="player-chips" id="playerChips"></div>
+    <button class="btn-done" id="doneBtn" disabled>완 료</button>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN SCREEN ══════════════ -->
+<div id="main-screen">
+  <div class="site-header">
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">랜덤 룰렛</div>
+  </div>
+
+  <!-- player tabs -->
+  <div class="player-tabbar" id="playerTabbar"></div>
+
+  <div class="main-layout">
+    <!-- type sidebar -->
+    <div class="type-sidebar">
+      <button class="type-btn active" data-type="agent">요원<br>룰렛</button>
+      <button class="type-btn" data-type="pistol">피스톨<br>룰렛</button>
+      <button class="type-btn" data-type="primary">주총기<br>룰렛</button>
+    </div>
+
+    <!-- content -->
+    <div class="main-content">
+
+      <!-- 상단 결과 슬롯 -->
+      <div class="result-slots">
+        <div class="result-slot" id="slot-agent">
+          <div class="slot-label">요원</div>
+          <div class="slot-body" id="slot-agent-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+        <div class="result-slot" id="slot-pistol">
+          <div class="slot-label">피스톨</div>
+          <div class="slot-body" id="slot-pistol-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+        <div class="result-slot" id="slot-primary">
+          <div class="slot-label">주총기</div>
+          <div class="slot-body" id="slot-primary-body">
+            <span class="slot-empty-msg">미정</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="type-panel active" id="panel-agent">
+        <div class="agent-panel-header">
+          <button class="btn-adjust" id="adjustBtn">⚙ 요원 룰렛 조정</button>
+        </div>
+        <div class="roulette-outer agent-h" id="agentOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="agentTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="agentSpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-agent-name" id="agentName"></div>
+          <div class="agent-full-wrap" id="agentFullWrap">
+            <img id="agentFullImg" src="" alt="" />
+            <div class="glow-line" id="agentGlow"></div>
+          </div>
+          <p class="placeholder-msg" id="agentPh">버튼을 눌러 요원을 뽑아보세요</p>
+        </div>
+      </div>
+
+      <!-- PISTOL -->
+      <div class="type-panel" id="panel-pistol">
+        <div class="roulette-outer weapon-h" id="pistolOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="pistolTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="pistolSpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-weapon-wrap" id="pistolWrap">
+            <div class="result-weapon-name" id="pistolName"></div>
+            <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+          </div>
+          <p class="placeholder-msg" id="pistolPh">버튼을 눌러 피스톨을 뽑아보세요</p>
+        </div>
+      </div>
+
+      <!-- PRIMARY -->
+      <div class="type-panel" id="panel-primary">
+        <div class="roulette-outer weapon-h" id="primaryOuter">
+          <div class="pointer"></div>
+          <div class="roulette-track" id="primaryTrack"></div>
+        </div>
+        <div class="btn-wrap">
+          <button class="spin-btn" id="primarySpinBtn">돌리기</button>
+        </div>
+        <div class="result-area">
+          <div class="result-weapon-wrap" id="primaryWrap">
+            <div class="result-weapon-name" id="primaryName"></div>
+            <img class="result-weapon-img" id="primaryImg" src="" alt="" />
+          </div>
+          <p class="placeholder-msg" id="primaryPh">버튼을 눌러 주총기를 뽑아보세요</p>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /main-layout -->
+</div>
+
+<!-- ══════════════ AGENT ADJUST MODAL ══════════════ -->
+<!-- ══════════════ 전체 보기 모달 ══════════════ -->
+<div id="overview-modal">
+  <div class="ov-box">
+    <div class="ov-head">
+      <h3>전체 결과</h3>
+      <button class="btn-ov-close" id="ovCloseBtn">닫기</button>
+    </div>
+    <div class="ov-body">
+      <table class="ov-table" id="ovTable">
+        <thead>
+          <tr>
+            <th>플레이어</th>
+            <th>요원</th>
+            <th>피스톨</th>
+            <th>주총기</th>
+          </tr>
+        </thead>
+        <tbody id="ovTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="agent-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">요원 선택</h3>
+      <div class="modal-head-actions">
+        <button class="btn-select-all" id="btnSelectAll">전체 선택</button>
+        <button class="btn-deselect-all" id="btnDeselectAll">전체 해제</button>
+      </div>
+    </div>
+    <div class="modal-grid" id="modalGrid"></div>
+    <div class="modal-foot">
+      <button class="btn-modal-done" id="modalDoneBtn">완료</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   Data
+═══════════════════════════════ */
+const AGENT_KO = {
+  astra:'아스트라', breach:'브리치', brimstone:'브림스톤', chamber:'체임버',
+  clove:'클로브', cypher:'사이퍼', deadlock:'데드록', fade:'페이드',
+  gekko:'게코', harbor:'하버', iso:'아이소', jett:'제트',
+  kayo:'케이/오', killjoy:'킬조이', miks:'믹스', neon:'네온',
+  omen:'오멘', phoenix:'피닉스', raze:'레이즈', reyna:'레이나',
+  sage:'세이지', skye:'스카이', sova:'소바', tejo:'테호',
+  veto:'비토', viper:'바이퍼', vyse:'바이스', waylay:'웨이레이', yoru:'요루'
+};
+const WEAPON_KO = {
+  ares:'아레스', bandit:'벤딧', bucky:'버키', bulldog:'불독',
+  classic:'클래식', frenzy:'프렌지', ghost:'고스트', guardian:'가디언',
+  judge:'저지', marshall:'마샬', odin:'오딘', operator:'오퍼레이터',
+  outlaw:'아웃로', phantom:'팬텀', sheriff:'셰리프', shorty:'쇼티',
+  spectre:'스펙터', stinger:'스팅어', vandal:'벤달', warden:'워든'
+};
+const AGENTS    = Object.keys(AGENT_KO);
+const PISTOLS   = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
+const PRIMARIES = ['ares','bucky','bulldog','guardian','judge','marshall',
+                   'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
+
+/* ═══════════════════════════════
+   State
+═══════════════════════════════ */
+let players      = []; // [{name, agentPool: Set}]
+let curPlayer    = 0;
+let curType      = 'agent';
+let spinLocks    = { agent: false, pistol: false, primary: false };
+
+/* ═══════════════════════════════
+   Setup screen
+═══════════════════════════════ */
+const nicknameInput = document.getElementById('nicknameInput');
+const addPlayerBtn  = document.getElementById('addPlayerBtn');
+const playerChips   = document.getElementById('playerChips');
+const doneBtn       = document.getElementById('doneBtn');
+
+function renderChips() {
+  playerChips.innerHTML = '';
+  players.forEach((p, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span>${p.name}</span>
+      <button class="chip-remove" data-i="${i}" title="제거">×</button>`;
+    playerChips.appendChild(chip);
+  });
+  doneBtn.disabled = players.length === 0;
+}
+
+function addPlayer() {
+  const name = nicknameInput.value.trim();
+  if (!name) return;
+  if (players.some(p => p.name === name)) {
+    nicknameInput.style.borderColor = 'var(--red)';
+    setTimeout(() => nicknameInput.style.borderColor = '', 800);
+    return;
+  }
+  players.push({ name, agentPool: new Set(AGENTS), results: { agent: null, pistol: null, primary: null } });
+  nicknameInput.value = '';
+  renderChips();
+}
+
+addPlayerBtn.addEventListener('click', addPlayer);
+let composing = false;
+nicknameInput.addEventListener('compositionstart', () => { composing = true; });
+nicknameInput.addEventListener('compositionend',   () => { composing = false; });
+nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !composing) addPlayer(); });
+playerChips.addEventListener('click', e => {
+  const btn = e.target.closest('.chip-remove');
+  if (!btn) return;
+  players.splice(+btn.dataset.i, 1);
+  renderChips();
+});
+doneBtn.addEventListener('click', () => {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'flex';
+  buildPlayerTabs();
+  switchPlayer(0);
+});
+
+/* ═══════════════════════════════
+   Player tabs
+═══════════════════════════════ */
+function buildPlayerTabs() {
+  const bar = document.getElementById('playerTabbar');
+  bar.innerHTML = '';
+  players.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'player-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = p.name;
+    btn.addEventListener('click', () => switchPlayer(i));
+    bar.appendChild(btn);
+  });
+  // 전체 보기 버튼은 항상 오른쪽 끝
+  const ovBtn = document.createElement('button');
+  ovBtn.className = 'btn-overview';
+  ovBtn.id = 'overviewBtn';
+  ovBtn.textContent = '📋 전체 보기';
+  ovBtn.addEventListener('click', openOverview);
+  bar.appendChild(ovBtn);
+}
+
+function switchPlayer(idx) {
+  curPlayer = idx;
+  document.querySelectorAll('.player-tab').forEach((t, i) =>
+    t.classList.toggle('active', i === idx)
+  );
+  // 요원 룰렛 탭으로 초기화
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.type-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.type-btn[data-type="agent"]').classList.add('active');
+  document.getElementById('panel-agent').classList.add('active');
+  curType = 'agent';
+
+  resetAllResults();
+  updateSlots();
+}
+
+/* ─── 상단 슬롯 업데이트 ─── */
+function updateSlots() {
+  const r = players[curPlayer].results;
+
+  // agent slot
+  const agentSlot = document.getElementById('slot-agent');
+  const agentBody = document.getElementById('slot-agent-body');
+  if (r.agent) {
+    agentBody.innerHTML = `
+      <img class="slot-face" src="assets/valorant-roulette-agent-face/${r.agent}_face.webp" alt="" />
+      <span class="slot-name">${AGENT_KO[r.agent]}</span>`;
+    agentSlot.classList.add('filled');
+  } else {
+    agentBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    agentSlot.classList.remove('filled');
+  }
+
+  // pistol slot
+  const pistolSlot = document.getElementById('slot-pistol');
+  const pistolBody = document.getElementById('slot-pistol-body');
+  if (r.pistol) {
+    pistolBody.innerHTML = `
+      <img class="slot-weapon-img" src="assets/valorant-roulette-weapon/${r.pistol}.webp" alt="" />
+      <span class="slot-name">${WEAPON_KO[r.pistol]}</span>`;
+    pistolSlot.classList.add('filled');
+  } else {
+    pistolBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    pistolSlot.classList.remove('filled');
+  }
+
+  // primary slot
+  const primarySlot = document.getElementById('slot-primary');
+  const primaryBody = document.getElementById('slot-primary-body');
+  if (r.primary) {
+    primaryBody.innerHTML = `
+      <img class="slot-weapon-img" src="assets/valorant-roulette-weapon/${r.primary}.webp" alt="" />
+      <span class="slot-name">${WEAPON_KO[r.primary]}</span>`;
+    primarySlot.classList.add('filled');
+  } else {
+    primaryBody.innerHTML = '<span class="slot-empty-msg">미정</span>';
+    primarySlot.classList.remove('filled');
+  }
+}
+
+/* ═══════════════════════════════
+   Type tabs
+═══════════════════════════════ */
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.type-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.type).classList.add('active');
+    curType = btn.dataset.type;
+  });
+});
+
+/* ═══════════════════════════════
+   Reset results
+═══════════════════════════════ */
+function resetAllResults() {
+  // agent
+  document.getElementById('agentName').classList.remove('vis');
+  document.getElementById('agentFullWrap').classList.remove('vis');
+  document.getElementById('agentGlow').classList.remove('vis');
+  document.getElementById('agentPh').style.display = '';
+  // pistol
+  document.getElementById('pistolWrap').classList.remove('vis');
+  document.getElementById('pistolPh').style.display = '';
+  // primary
+  document.getElementById('primaryWrap').classList.remove('vis');
+  document.getElementById('primaryPh').style.display = '';
+}
+
+/* ═══════════════════════════════
+   Agent adjust modal
+═══════════════════════════════ */
+/* ═══════════════════════════════
+   전체 보기 모달
+═══════════════════════════════ */
+const overviewModal = document.getElementById('overview-modal');
+// overviewBtn은 buildPlayerTabs()에서 동적 생성 후 바인딩
+document.getElementById('ovCloseBtn').addEventListener('click', () => overviewModal.classList.remove('open'));
+overviewModal.addEventListener('click', e => { if (e.target === overviewModal) overviewModal.classList.remove('open'); });
+
+function openOverview() {
+  const tbody = document.getElementById('ovTbody');
+  tbody.innerHTML = '';
+  players.forEach(p => {
+    const r = p.results;
+    const tr = document.createElement('tr');
+
+    // 플레이어명
+    tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
+
+    // 요원
+    const agentTd = document.createElement('td');
+    if (r.agent) {
+      agentTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-face" src="assets/valorant-roulette-agent-face/${r.agent}_face.webp" alt="" />
+        <span class="ov-item-name">${AGENT_KO[r.agent]}</span>
+      </div>`;
+    } else {
+      agentTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(agentTd);
+
+    // 피스톨
+    const pistolTd = document.createElement('td');
+    if (r.pistol) {
+      pistolTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.pistol}.webp" alt="" />
+        <span class="ov-item-name">${WEAPON_KO[r.pistol]}</span>
+      </div>`;
+    } else {
+      pistolTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(pistolTd);
+
+    // 주총기
+    const primaryTd = document.createElement('td');
+    if (r.primary) {
+      primaryTd.innerHTML = `<div class="ov-cell">
+        <img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.primary}.webp" alt="" />
+        <span class="ov-item-name">${WEAPON_KO[r.primary]}</span>
+      </div>`;
+    } else {
+      primaryTd.innerHTML = '<span class="ov-empty">미정</span>';
+    }
+    tr.appendChild(primaryTd);
+
+    tbody.appendChild(tr);
+  });
+  overviewModal.classList.add('open');
+}
+
+const agentModal  = document.getElementById('agent-modal');
+const modalGrid   = document.getElementById('modalGrid');
+const modalTitle  = document.getElementById('modalTitle');
+
+document.getElementById('adjustBtn').addEventListener('click', openModal);
+document.getElementById('modalDoneBtn').addEventListener('click', closeModal);
+document.getElementById('btnSelectAll').addEventListener('click', () => {
+  players[curPlayer].agentPool = new Set(AGENTS);
+  renderModal();
+});
+document.getElementById('btnDeselectAll').addEventListener('click', () => {
+  players[curPlayer].agentPool = new Set();
+  renderModal();
+});
+agentModal.addEventListener('click', e => { if (e.target === agentModal) closeModal(); });
+
+function openModal() {
+  modalTitle.textContent = `${players[curPlayer].name} — 요원 선택`;
+  renderModal();
+  agentModal.classList.add('open');
+}
+function closeModal() {
+  agentModal.classList.remove('open');
+}
+function renderModal() {
+  const pool = players[curPlayer].agentPool;
+  modalGrid.innerHTML = '';
+  AGENTS.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'agent-toggle' + (pool.has(name) ? '' : ' off');
+    div.innerHTML = `
+      <img src="assets/valorant-roulette-agent-face/${name}_face.webp" alt="${AGENT_KO[name]}" />
+      <div class="ag-name">${AGENT_KO[name]}</div>
+      <div class="ag-off">✕</div>`;
+    div.addEventListener('click', () => {
+      if (pool.has(name)) pool.delete(name);
+      else pool.add(name);
+      div.classList.toggle('off', !pool.has(name));
+    });
+    modalGrid.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════
+   Roulette engine
+═══════════════════════════════ */
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+function buildTrack(trackEl, items, winnerPos, winnerName, buildCard) {
+  trackEl.innerHTML = '';
+  for (let i = 0; i < 60; i++) {
+    const name = (i === winnerPos) ? winnerName : items[Math.floor(Math.random() * items.length)];
+    trackEl.appendChild(buildCard(name));
+  }
+}
+
+function faceCard(name) {
+  const d = document.createElement('div'); d.className = 'face-card';
+  const img = document.createElement('img');
+  img.src = `assets/valorant-roulette-agent-face/${name}_face.webp`; img.alt = name;
+  d.appendChild(img); return d;
+}
+function weaponCard(name) {
+  const d = document.createElement('div'); d.className = 'weapon-card';
+  const img = document.createElement('img');
+  img.src = `assets/valorant-roulette-weapon/${name}.webp`; img.alt = name;
+  d.appendChild(img); return d;
+}
+
+function spinRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, onResult }) {
+  if (!items || items.length === 0) return;
+  const winnerName = items[Math.floor(Math.random() * items.length)];
+  const winnerPos  = 45;
+  const outerW     = outerEl.offsetWidth;
+  const center     = Math.floor(outerW / 2) - Math.floor(cardW / 2);
+  const total      = winnerPos * cardW - center;
+  const dur        = 4200;
+
+  buildTrack(trackEl, items, winnerPos, winnerName, buildCard);
+  trackEl.style.transform = 'translateX(0px)';
+
+  let start = null;
+  (function step(ts) {
+    if (!start) start = ts;
+    const t   = Math.min((ts - start) / dur, 1);
+    const cur = easeOut(t) * total;
+    trackEl.style.transform = `translateX(-${cur}px)`;
+    const idx = Math.round((cur + center) / cardW);
+    trackEl.querySelectorAll('.' + cardClass).forEach((c, i) =>
+      c.classList.toggle('hl', i === idx)
+    );
+    if (t < 1) requestAnimationFrame(step);
+    else onResult(winnerName);
+  })(performance.now());
+}
+
+/* ═══════════════════════════════
+   Agent spin
+═══════════════════════════════ */
+document.getElementById('agentSpinBtn').addEventListener('click', () => {
+  if (spinLocks.agent) return;
+  spinLocks.agent = true;
+  const btn = document.getElementById('agentSpinBtn');
+  btn.disabled = true;
+
+  // reset result
+  document.getElementById('agentName').classList.remove('vis');
+  document.getElementById('agentFullWrap').classList.remove('vis');
+  document.getElementById('agentGlow').classList.remove('vis');
+  document.getElementById('agentPh').style.display = 'none';
+
+  const pool = [...players[curPlayer].agentPool];
+  if (pool.length === 0) {
+    document.getElementById('agentPh').textContent = '선택된 요원이 없습니다';
+    document.getElementById('agentPh').style.display = '';
+    spinLocks.agent = false; btn.disabled = false; return;
+  }
+
+  spinRoulette({
+    trackEl:   document.getElementById('agentTrack'),
+    outerEl:   document.getElementById('agentOuter'),
+    items:     pool,
+    cardClass: 'face-card',
+    cardW:     118,
+    buildCard: faceCard,
+    onResult(name) {
+      players[curPlayer].results.agent = name;
+      updateSlots();
+      const nameEl = document.getElementById('agentName');
+      const wrap   = document.getElementById('agentFullWrap');
+      const glow   = document.getElementById('agentGlow');
+      nameEl.textContent = AGENT_KO[name];
+      nameEl.classList.add('vis');
+      document.getElementById('agentFullImg').src = `assets/valorant-roulette-agent/${name}.webp`;
+      setTimeout(() => { wrap.classList.add('vis'); glow.classList.add('vis'); }, 80);
+      setTimeout(() => { spinLocks.agent = false; btn.disabled = false; }, 650);
+    }
+  });
+});
+
+/* ═══════════════════════════════
+   Pistol spin
+═══════════════════════════════ */
+document.getElementById('pistolSpinBtn').addEventListener('click', () => {
+  if (spinLocks.pistol) return;
+  spinLocks.pistol = true;
+  const btn = document.getElementById('pistolSpinBtn');
+  btn.disabled = true;
+  document.getElementById('pistolWrap').classList.remove('vis');
+  document.getElementById('pistolPh').style.display = 'none';
+
+  spinRoulette({
+    trackEl:   document.getElementById('pistolTrack'),
+    outerEl:   document.getElementById('pistolOuter'),
+    items:     PISTOLS,
+    cardClass: 'weapon-card',
+    cardW:     178,
+    buildCard: weaponCard,
+    onResult(name) {
+      players[curPlayer].results.pistol = name;
+      updateSlots();
+      document.getElementById('pistolName').textContent = WEAPON_KO[name];
+      document.getElementById('pistolImg').src = `assets/valorant-roulette-weapon/${name}.webp`;
+      setTimeout(() => document.getElementById('pistolWrap').classList.add('vis'), 80);
+      setTimeout(() => { spinLocks.pistol = false; btn.disabled = false; }, 650);
+    }
+  });
+});
+
+/* ═══════════════════════════════
+   Primary spin
+═══════════════════════════════ */
+document.getElementById('primarySpinBtn').addEventListener('click', () => {
+  if (spinLocks.primary) return;
+  spinLocks.primary = true;
+  const btn = document.getElementById('primarySpinBtn');
+  btn.disabled = true;
+  document.getElementById('primaryWrap').classList.remove('vis');
+  document.getElementById('primaryPh').style.display = 'none';
+
+  spinRoulette({
+    trackEl:   document.getElementById('primaryTrack'),
+    outerEl:   document.getElementById('primaryOuter'),
+    items:     PRIMARIES,
+    cardClass: 'weapon-card',
+    cardW:     178,
+    buildCard: weaponCard,
+    onResult(name) {
+      players[curPlayer].results.primary = name;
+      updateSlots();
+      document.getElementById('primaryName').textContent = WEAPON_KO[name];
+      document.getElementById('primaryImg').src = `assets/valorant-roulette-weapon/${name}.webp`;
+      setTimeout(() => document.getElementById('primaryWrap').classList.add('vis'), 80);
+      setTimeout(() => { spinLocks.primary = false; btn.disabled = false; }, 650);
+    }
+  });
+});
+</script>
+</body>
+</html>
