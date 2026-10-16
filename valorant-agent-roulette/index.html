@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VALORANT Agent Roulette</title>
+  <title>VALORANT Roulette</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
 
     :root {
-      --red: #ff4655;
-      --teal: #00d1d9;
-      --dark: #0f1923;
+      --red:    #ff4655;
+      --teal:   #00d1d9;
+      --dark:   #0f1923;
       --darker: #090e14;
-      --card: #1a2535;
+      --card:   #1a2535;
       --border: #2a3a4a;
     }
 
@@ -27,6 +27,7 @@
       flex-direction: column;
       align-items: center;
       overflow-x: hidden;
+      padding-bottom: 80px;
     }
 
     /* ─── Header ─── */
@@ -34,7 +35,6 @@
       width: 100%;
       padding: 28px 0 18px;
       text-align: center;
-      position: relative;
     }
     header::after {
       content: '';
@@ -49,7 +49,6 @@
       font-weight: 700;
       letter-spacing: 6px;
       text-transform: uppercase;
-      color: #fff;
     }
     .logo-text span { color: var(--red); }
     .sub-text {
@@ -60,11 +59,31 @@
       margin-top: 4px;
     }
 
-    /* ─── Roulette wrapper ─── */
-    .roulette-section {
+    /* ─── Section titles ─── */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: #ccd8e0;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-title::before,
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── Roulette block ─── */
+    .roulette-block {
       width: 100%;
-      max-width: 900px;
-      padding: 32px 20px 0;
+      max-width: 960px;
+      padding: 36px 24px 0;
     }
 
     .roulette-outer {
@@ -74,9 +93,10 @@
       border: 2px solid var(--border);
       border-radius: 8px;
       background: var(--dark);
-      height: 140px;
     }
-    /* center pointer */
+    .roulette-outer.agent-strip  { height: 140px; }
+    .roulette-outer.weapon-strip { height: 110px; }
+
     .pointer {
       position: absolute;
       top: 0; bottom: 0;
@@ -96,33 +116,20 @@
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
     }
-    .pointer::before {
-      top: 0;
-      border-top: 14px solid var(--red);
-    }
-    .pointer::after {
-      bottom: 0;
-      border-bottom: 14px solid var(--red);
-    }
+    .pointer::before { top: 0;    border-top:    14px solid var(--red); }
+    .pointer::after  { bottom: 0; border-bottom: 14px solid var(--red); }
 
-    /* gradient edges */
     .roulette-outer::before,
     .roulette-outer::after {
       content: '';
       position: absolute;
       top: 0; bottom: 0;
-      width: 120px;
+      width: 100px;
       z-index: 5;
       pointer-events: none;
     }
-    .roulette-outer::before {
-      left: 0;
-      background: linear-gradient(to right, var(--darker), transparent);
-    }
-    .roulette-outer::after {
-      right: 0;
-      background: linear-gradient(to left, var(--darker), transparent);
-    }
+    .roulette-outer::before { left:  0; background: linear-gradient(to right, var(--darker), transparent); }
+    .roulette-outer::after  { right: 0; background: linear-gradient(to left,  var(--darker), transparent); }
 
     .roulette-track {
       display: flex;
@@ -133,6 +140,7 @@
       padding: 0 4px;
     }
 
+    /* agent face card */
     .face-card {
       flex-shrink: 0;
       width: 110px;
@@ -140,72 +148,90 @@
       border-radius: 6px;
       overflow: hidden;
       border: 2px solid var(--border);
-      transition: border-color 0.2s;
       background: var(--card);
       margin: auto 0;
     }
     .face-card img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
       display: block;
     }
-    .face-card.highlighted {
+
+    /* weapon card */
+    .weapon-card {
+      flex-shrink: 0;
+      width: 170px;
+      height: 86px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      background: var(--card);
+      margin: auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+    }
+    .weapon-card img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+    }
+
+    .face-card.highlighted,
+    .weapon-card.highlighted {
       border-color: var(--red);
-      box-shadow: 0 0 20px rgba(255,70,85,0.6);
+      box-shadow: 0 0 18px rgba(255,70,85,0.55);
     }
 
     /* ─── Spin button ─── */
     .btn-wrap {
       display: flex;
       justify-content: center;
-      margin: 28px 0;
+      margin: 22px 0 0;
     }
-    #spinBtn {
+    .spin-btn {
       background: var(--red);
       color: #fff;
       border: none;
-      padding: 14px 64px;
+      padding: 12px 56px;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: 4px;
       text-transform: uppercase;
       cursor: pointer;
       clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
-      transition: background 0.2s, transform 0.1s;
+      transition: background .2s, transform .1s;
     }
-    #spinBtn:hover { background: #e03040; transform: scale(1.04); }
-    #spinBtn:active { transform: scale(0.97); }
-    #spinBtn:disabled { background: #444; cursor: not-allowed; transform: none; }
+    .spin-btn:hover   { background: #e03040; transform: scale(1.04); }
+    .spin-btn:active  { transform: scale(0.97); }
+    .spin-btn:disabled { background: #444; cursor: not-allowed; transform: none; }
 
-    /* ─── Result section ─── */
-    .result-section {
-      width: 100%;
-      max-width: 900px;
-      padding: 0 20px 60px;
+    /* ─── Result area ─── */
+    .result-area {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 420px;
+      min-height: 60px;
+      padding: 20px 0 0;
     }
 
-    .result-name {
-      font-size: 3rem;
+    /* agent result */
+    .result-agent-name {
+      font-size: 2.6rem;
       font-weight: 700;
       letter-spacing: 8px;
       text-transform: uppercase;
       color: var(--red);
-      text-shadow: 0 0 20px rgba(255,70,85,0.5);
+      text-shadow: 0 0 20px rgba(255,70,85,.45);
       opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s, transform 0.5s;
-      margin-bottom: 20px;
+      transform: translateY(16px);
+      transition: opacity .5s, transform .5s;
+      margin-bottom: 16px;
     }
-    .result-name.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .result-agent-name.visible { opacity: 1; transform: translateY(0); }
 
     .agent-full-wrap {
       position: relative;
@@ -213,76 +239,145 @@
       justify-content: center;
       align-items: flex-end;
       width: 100%;
-      max-width: 420px;
-      height: 400px;
+      max-width: 380px;
+      height: 380px;
       opacity: 0;
-      transform: scale(0.88) translateY(30px);
-      transition: opacity 0.6s 0.15s, transform 0.6s 0.15s;
+      transform: scale(.88) translateY(24px);
+      transition: opacity .6s .15s, transform .6s .15s;
     }
-    .agent-full-wrap.visible {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-
+    .agent-full-wrap.visible { opacity: 1; transform: scale(1) translateY(0); }
     .agent-full-wrap img {
-      max-height: 100%;
-      max-width: 100%;
+      max-height: 100%; max-width: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 8px 32px rgba(255,70,85,0.35));
+      filter: drop-shadow(0 8px 28px rgba(255,70,85,.35));
     }
-
-    /* glow line under agent */
     .glow-line {
       position: absolute;
-      bottom: 0;
-      left: 50%;
+      bottom: 0; left: 50%;
       transform: translateX(-50%);
-      width: 60%;
-      height: 3px;
+      width: 60%; height: 3px;
       background: linear-gradient(90deg, transparent, var(--red), transparent);
       filter: blur(2px);
       opacity: 0;
-      transition: opacity 0.4s 0.6s;
+      transition: opacity .4s .6s;
     }
     .glow-line.visible { opacity: 1; }
 
+    /* weapon result */
+    .result-weapon-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      transform: scale(.9) translateY(16px);
+      transition: opacity .5s, transform .5s;
+    }
+    .result-weapon-wrap.visible { opacity: 1; transform: scale(1) translateY(0); }
+
+    .result-weapon-name {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--teal);
+      text-shadow: 0 0 16px rgba(0,209,217,.4);
+    }
+    .result-weapon-img {
+      max-width: 480px;
+      width: 90%;
+      filter: drop-shadow(0 6px 24px rgba(0,209,217,.3));
+    }
+
     .placeholder-msg {
       color: #445566;
-      font-size: 1.1rem;
+      font-size: 1rem;
       letter-spacing: 3px;
       text-transform: uppercase;
-      margin-top: 60px;
+      padding: 20px 0;
+    }
+
+    /* divider */
+    .divider {
+      width: 100%;
+      max-width: 960px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 48px 0 0;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo-text">VALO<span>RANT</span></div>
-    <div class="sub-text">Agent Roulette</div>
-  </header>
+<header>
+  <div class="logo-text">VALO<span>RANT</span></div>
+  <div class="sub-text">Random Roulette</div>
+</header>
 
-  <div class="roulette-section">
-    <div class="roulette-outer" id="rouletteOuter">
-      <div class="pointer"></div>
-      <div class="roulette-track" id="rouletteTrack"></div>
-    </div>
+<!-- ══════════════ AGENT ══════════════ -->
+<div class="roulette-block">
+  <div class="section-title">Agent</div>
+  <div class="roulette-outer agent-strip" id="agentOuter">
+    <div class="pointer"></div>
+    <div class="roulette-track" id="agentTrack"></div>
   </div>
-
   <div class="btn-wrap">
-    <button id="spinBtn">SPIN</button>
+    <button class="spin-btn" id="agentSpinBtn">SPIN</button>
   </div>
-
-  <div class="result-section" id="resultSection">
-    <div class="result-name" id="resultName"></div>
+  <div class="result-area" id="agentResult">
+    <div class="result-agent-name" id="agentName"></div>
     <div class="agent-full-wrap" id="agentFullWrap">
       <img id="agentFullImg" src="" alt="" />
-      <div class="glow-line" id="glowLine"></div>
+      <div class="glow-line" id="agentGlow"></div>
     </div>
-    <p class="placeholder-msg" id="placeholderMsg">SPIN TO REVEAL YOUR AGENT</p>
+    <p class="placeholder-msg" id="agentPlaceholder">SPIN TO REVEAL YOUR AGENT</p>
   </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════ PISTOL ══════════════ -->
+<div class="roulette-block">
+  <div class="section-title">Sidearm</div>
+  <div class="roulette-outer weapon-strip" id="pistolOuter">
+    <div class="pointer"></div>
+    <div class="roulette-track" id="pistolTrack"></div>
+  </div>
+  <div class="btn-wrap">
+    <button class="spin-btn" id="pistolSpinBtn">SPIN</button>
+  </div>
+  <div class="result-area" id="pistolResult">
+    <div class="result-weapon-wrap" id="pistolWrap">
+      <div class="result-weapon-name" id="pistolName"></div>
+      <img class="result-weapon-img" id="pistolImg" src="" alt="" />
+    </div>
+    <p class="placeholder-msg" id="pistolPlaceholder">SPIN TO REVEAL YOUR SIDEARM</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════ PRIMARY ══════════════ -->
+<div class="roulette-block">
+  <div class="section-title">Primary</div>
+  <div class="roulette-outer weapon-strip" id="primaryOuter">
+    <div class="pointer"></div>
+    <div class="roulette-track" id="primaryTrack"></div>
+  </div>
+  <div class="btn-wrap">
+    <button class="spin-btn" id="primarySpinBtn">SPIN</button>
+  </div>
+  <div class="result-area" id="primaryResult">
+    <div class="result-weapon-wrap" id="primaryWrap">
+      <div class="result-weapon-name" id="primaryName"></div>
+      <img class="result-weapon-img" id="primaryImg" src="" alt="" />
+    </div>
+    <p class="placeholder-msg" id="primaryPlaceholder">SPIN TO REVEAL YOUR PRIMARY</p>
+  </div>
+</div>
 
 <script>
+/* ─── Data ─── */
 const AGENTS = [
   'astra','breach','brimstone','chamber','clove','cypher','deadlock',
   'fade','gekko','harbor','iso','jett','kayo','killjoy','miks',
@@ -290,125 +385,179 @@ const AGENTS = [
   'tejo','veto','viper','vyse','waylay','yoru'
 ];
 
-const FACE_DIR  = 'Agent_face/';
-const AGENT_DIR = 'Agent/';
-const CARD_W    = 118; // width + gap
-const SPIN_CARDS = 60; // total items in the strip
+const PISTOLS  = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
+const PRIMARIES = [
+  'ares','bucky','bulldog','guardian','judge','marshall',
+  'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'
+];
 
-const track    = document.getElementById('rouletteTrack');
-const spinBtn  = document.getElementById('spinBtn');
-const nameEl   = document.getElementById('resultName');
-const fullWrap = document.getElementById('agentFullWrap');
-const fullImg  = document.getElementById('agentFullImg');
-const glowLine = document.getElementById('glowLine');
-const placeholder = document.getElementById('placeholderMsg');
+/* ─── easeOut ─── */
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
-// Build a long list of random face cards
-function buildTrack(winnerIndex) {
-  track.innerHTML = '';
-  const items = [];
-  // fill with random agents, guarantee winner at the landing position
-  for (let i = 0; i < SPIN_CARDS; i++) {
-    if (i === winnerIndex) {
-      items.push(AGENTS[currentWinner]);
-    } else {
-      items.push(AGENTS[Math.floor(Math.random() * AGENTS.length)]);
+/* ─── Generic roulette builder ─── */
+function makeRoulette({ trackEl, outerEl, items, cardClass, cardW, buildCard, spinBtn, onResult }) {
+  let isSpinning = false;
+  const SPIN_COUNT = 60;
+
+  function buildTrack(winnerPos) {
+    trackEl.innerHTML = '';
+    for (let i = 0; i < SPIN_COUNT; i++) {
+      const name = (i === winnerPos) ? items[currentWinner] : items[Math.floor(Math.random() * items.length)];
+      const card = buildCard(name);
+      card.dataset.index = i;
+      trackEl.appendChild(card);
     }
   }
-  items.forEach((name, i) => {
-    const card = document.createElement('div');
-    card.className = 'face-card';
-    card.dataset.index = i;
-    const img = document.createElement('img');
-    img.src = `${FACE_DIR}${name}_face.webp`;
-    img.alt = name;
-    card.appendChild(img);
-    track.appendChild(card);
+
+  let currentWinner = 0;
+
+  spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+    onResult(null); // hide result
+
+    currentWinner = Math.floor(Math.random() * items.length);
+    const outerWidth = outerEl.offsetWidth;
+    const centerOffset = Math.floor(outerWidth / 2) - Math.floor(cardW / 2);
+    const winnerPos = 45;
+    buildTrack(winnerPos);
+
+    const totalScroll = winnerPos * cardW - centerOffset;
+    const duration = 4200;
+    let start = null;
+    trackEl.style.transform = 'translateX(0px)';
+
+    function step(ts) {
+      if (!start) start = ts;
+      const elapsed = ts - start;
+      const t = Math.min(elapsed / duration, 1);
+      const current = easeOut(t) * totalScroll;
+      trackEl.style.transform = `translateX(-${current}px)`;
+
+      const centerPx = current + centerOffset;
+      const idx = Math.round(centerPx / cardW);
+      trackEl.querySelectorAll(`.${cardClass}`).forEach((c, i) => {
+        c.classList.toggle('highlighted', i === idx);
+      });
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        onResult(items[currentWinner]);
+        setTimeout(() => { isSpinning = false; spinBtn.disabled = false; }, 600);
+      }
+    }
+    requestAnimationFrame(step);
   });
 }
 
-let currentWinner = 0;
-let isSpinning = false;
+/* ─── Agent card builder ─── */
+function buildAgentCard(name) {
+  const card = document.createElement('div');
+  card.className = 'face-card';
+  const img = document.createElement('img');
+  img.src = `Agent_face/${name}_face.webp`;
+  img.alt = name;
+  card.appendChild(img);
+  return card;
+}
 
-// easeOutCubic
-function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+/* ─── Weapon card builder ─── */
+function buildWeaponCard(name) {
+  const card = document.createElement('div');
+  card.className = 'weapon-card';
+  const img = document.createElement('img');
+  img.src = `weapon/${name}.webp`;
+  img.alt = name;
+  card.appendChild(img);
+  return card;
+}
 
-function spin() {
-  if (isSpinning) return;
-  isSpinning = true;
-  spinBtn.disabled = true;
+/* ─── Display name ─── */
+function displayName(name) { return name.charAt(0).toUpperCase() + name.slice(1); }
 
-  // hide previous result
-  nameEl.classList.remove('visible');
-  fullWrap.classList.remove('visible');
-  glowLine.classList.remove('visible');
-  placeholder.style.display = '';
-
-  currentWinner = Math.floor(Math.random() * AGENTS.length);
-
-  const outerWidth = document.getElementById('rouletteOuter').offsetWidth;
-  const centerOffset = Math.floor(outerWidth / 2) - Math.floor(CARD_W / 2);
-
-  // winner card will be at position winnerPos in the track
-  const winnerPos = 45; // near the end so there's plenty of spinning
-  buildTrack(winnerPos);
-
-  // total pixels to move so winner lands at center
-  const totalScroll = winnerPos * CARD_W - centerOffset;
-
-  const duration = 4200; // ms
-  let start = null;
-  track.style.transform = 'translateX(0px)';
-
-  function step(ts) {
-    if (!start) start = ts;
-    const elapsed = ts - start;
-    const t = Math.min(elapsed / duration, 1);
-    const eased = easeOut(t);
-    const current = eased * totalScroll;
-
-    track.style.transform = `translateX(-${current}px)`;
-
-    // highlight the card under center
-    const centerPx = current + centerOffset;
-    const idx = Math.round(centerPx / CARD_W);
-    document.querySelectorAll('.face-card').forEach((c, i) => {
-      c.classList.toggle('highlighted', i === idx);
-    });
-
-    if (t < 1) {
-      requestAnimationFrame(step);
-    } else {
-      // done
-      onSpinComplete();
+/* ─── Wire up Agent ─── */
+makeRoulette({
+  trackEl:   document.getElementById('agentTrack'),
+  outerEl:   document.getElementById('agentOuter'),
+  items:     AGENTS,
+  cardClass: 'face-card',
+  cardW:     118,
+  buildCard: buildAgentCard,
+  spinBtn:   document.getElementById('agentSpinBtn'),
+  onResult(name) {
+    const nameEl     = document.getElementById('agentName');
+    const fullWrap   = document.getElementById('agentFullWrap');
+    const fullImg    = document.getElementById('agentFullImg');
+    const glow       = document.getElementById('agentGlow');
+    const placeholder= document.getElementById('agentPlaceholder');
+    if (!name) {
+      nameEl.classList.remove('visible');
+      fullWrap.classList.remove('visible');
+      glow.classList.remove('visible');
+      placeholder.style.display = '';
+      return;
     }
+    placeholder.style.display = 'none';
+    nameEl.textContent = displayName(name);
+    nameEl.classList.add('visible');
+    fullImg.src = `Agent/${name}.webp`;
+    setTimeout(() => { fullWrap.classList.add('visible'); glow.classList.add('visible'); }, 80);
   }
+});
 
-  requestAnimationFrame(step);
-}
+/* ─── Wire up Pistol ─── */
+makeRoulette({
+  trackEl:   document.getElementById('pistolTrack'),
+  outerEl:   document.getElementById('pistolOuter'),
+  items:     PISTOLS,
+  cardClass: 'weapon-card',
+  cardW:     178,
+  buildCard: buildWeaponCard,
+  spinBtn:   document.getElementById('pistolSpinBtn'),
+  onResult(name) {
+    const wrap        = document.getElementById('pistolWrap');
+    const nameEl      = document.getElementById('pistolName');
+    const img         = document.getElementById('pistolImg');
+    const placeholder = document.getElementById('pistolPlaceholder');
+    if (!name) {
+      wrap.classList.remove('visible');
+      placeholder.style.display = '';
+      return;
+    }
+    placeholder.style.display = 'none';
+    nameEl.textContent = displayName(name);
+    img.src = `weapon/${name}.webp`;
+    setTimeout(() => wrap.classList.add('visible'), 80);
+  }
+});
 
-function onSpinComplete() {
-  const agent = AGENTS[currentWinner];
-  const displayName = agent.charAt(0).toUpperCase() + agent.slice(1);
-
-  placeholder.style.display = 'none';
-  nameEl.textContent = displayName;
-  nameEl.classList.add('visible');
-
-  fullImg.src = `${AGENT_DIR}${agent}.webp`;
-  fullImg.alt = agent;
-  setTimeout(() => {
-    fullWrap.classList.add('visible');
-    glowLine.classList.add('visible');
-  }, 100);
-
-  setTimeout(() => {
-    isSpinning = false;
-    spinBtn.disabled = false;
-  }, 700);
-}
-
-spinBtn.addEventListener('click', spin);
+/* ─── Wire up Primary ─── */
+makeRoulette({
+  trackEl:   document.getElementById('primaryTrack'),
+  outerEl:   document.getElementById('primaryOuter'),
+  items:     PRIMARIES,
+  cardClass: 'weapon-card',
+  cardW:     178,
+  buildCard: buildWeaponCard,
+  spinBtn:   document.getElementById('primarySpinBtn'),
+  onResult(name) {
+    const wrap        = document.getElementById('primaryWrap');
+    const nameEl      = document.getElementById('primaryName');
+    const img         = document.getElementById('primaryImg');
+    const placeholder = document.getElementById('primaryPlaceholder');
+    if (!name) {
+      wrap.classList.remove('visible');
+      placeholder.style.display = '';
+      return;
+    }
+    placeholder.style.display = 'none';
+    nameEl.textContent = displayName(name);
+    img.src = `weapon/${name}.webp`;
+    setTimeout(() => wrap.classList.add('visible'), 80);
+  }
+});
 </script>
 </body>
 </html>
