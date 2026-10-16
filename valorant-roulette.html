@@ -259,17 +259,15 @@
     }
 
     .reel-label {
-      flex-shrink:0; width:76px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:4px;
+      flex-shrink:0; width:72px;
+      display:flex; align-items:center; justify-content:center;
       padding:0 8px;
       border-right:1px solid rgba(255,255,255,.06);
       background:rgba(0,0,0,.2);
     }
-    .reel-label-icon { font-size:1.5rem; line-height:1; }
     .reel-label-text {
-      font-size:.65rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
-      color:#445566;
+      font-size:.7rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+      color:#556677; writing-mode:horizontal-tb;
     }
 
     /* strip area */
@@ -526,6 +524,58 @@
       border-radius:6px; cursor:pointer; transition:background .2s;
     }
     .btn-modal-done:hover { background:#e03040; }
+
+    /* ════════ MODE SELECT SCREEN ════════ */
+    #mode-screen {
+      flex:1; display:none; flex-direction:column; align-items:center;
+      padding:40px 20px 60px;
+    }
+    .mode-card {
+      width:100%; max-width:560px;
+      background:linear-gradient(135deg,rgba(15,25,35,.97),rgba(10,18,28,.97));
+      border:1px solid rgba(255,70,85,.22); border-radius:12px;
+      padding:40px 36px;
+      box-shadow:0 0 50px rgba(255,70,85,.1),inset 0 1px 0 rgba(255,255,255,.04);
+      position:relative; overflow:hidden;
+    }
+    .mode-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,70,85,.6),transparent);
+    }
+    .mode-card h2 {
+      font-size:1.05rem; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+      color:rgba(255,255,255,.55); margin-bottom:32px; text-align:center;
+    }
+    .mode-options { display:flex; gap:16px; }
+    .mode-btn {
+      flex:1; background:linear-gradient(135deg,rgba(12,22,32,.9),rgba(8,16,26,.9));
+      border:1px solid rgba(255,70,85,.2); border-radius:10px;
+      padding:28px 20px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:12px;
+      transition:all .25s; position:relative; overflow:hidden;
+    }
+    .mode-btn::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,70,85,.3),transparent);
+      transition:background .25s;
+    }
+    .mode-btn:hover {
+      border-color:rgba(255,70,85,.65);
+      box-shadow:0 0 30px rgba(255,70,85,.25);
+      transform:translateY(-3px);
+    }
+    .mode-btn:hover::before { background:linear-gradient(90deg,transparent,rgba(255,70,85,.7),transparent); }
+    .mode-btn-title {
+      font-family:'Rajdhani',sans-serif;
+      font-size:1.5rem; font-weight:700; letter-spacing:4px; color:#fff;
+      text-transform:uppercase;
+    }
+    .mode-btn-desc {
+      font-size:.8rem; letter-spacing:1px; color:#6a8899; text-align:center; line-height:1.6;
+    }
+    .mode-btn-icon {
+      font-size:2.4rem; line-height:1;
+    }
   </style>
 </head>
 <body>
@@ -544,6 +594,29 @@
     </div>
     <div class="player-chips" id="playerChips"></div>
     <button class="btn-done" id="doneBtn" disabled>완 료</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODE SELECT SCREEN ══════════════ -->
+<div id="mode-screen">
+  <div class="site-header">
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">랜덤 룰렛</div>
+  </div>
+  <div class="mode-card">
+    <h2>모드 선택</h2>
+    <div class="mode-options">
+      <button class="mode-btn" id="modeAgentBtn">
+        <span class="mode-btn-icon">⚡</span>
+        <span class="mode-btn-title">요원</span>
+        <span class="mode-btn-desc">요원만 랜덤으로<br>뽑습니다</span>
+      </button>
+      <button class="mode-btn" id="modeFullBtn">
+        <span class="mode-btn-icon">🎮</span>
+        <span class="mode-btn-title">풀 세팅</span>
+        <span class="mode-btn-desc">요원 + 피스톨 + 주총기<br>전부 뽑습니다</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -568,7 +641,6 @@
       <!-- AGENT -->
       <div class="reel-row" id="rowAgent">
         <div class="reel-label">
-          <span class="reel-label-icon">⚡</span>
           <span class="reel-label-text">요원</span>
         </div>
         <div class="reel-strip-wrap">
@@ -585,7 +657,6 @@
       <!-- PISTOL -->
       <div class="reel-row" id="rowPistol">
         <div class="reel-label">
-          <span class="reel-label-icon">🔫</span>
           <span class="reel-label-text">피스톨</span>
         </div>
         <div class="reel-strip-wrap">
@@ -602,7 +673,6 @@
       <!-- PRIMARY -->
       <div class="reel-row" id="rowPrimary">
         <div class="reel-label">
-          <span class="reel-label-icon">🎯</span>
           <span class="reel-label-text">주총기</span>
         </div>
         <div class="reel-strip-wrap">
@@ -691,6 +761,7 @@ const PRIMARIES = ['ares','bucky','bulldog','guardian','judge','marshall',
 let players   = [];
 let curPlayer = 0;
 let isRolling = false;
+let gameMode  = 'full'; // 'agent' | 'full'
 
 /* ═══════════════════ Setup ═══════════════════ */
 const nicknameInput = document.getElementById('nicknameInput');
@@ -730,10 +801,21 @@ playerChips.addEventListener('click', e => {
 });
 doneBtn.addEventListener('click', () => {
   document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('main-screen').style.display  = 'flex';
+  document.getElementById('mode-screen').style.display  = 'flex';
+});
+
+function startGame(mode) {
+  gameMode = mode;
+  document.getElementById('mode-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'flex';
+  // 요원 모드면 피스톨/주총기 행 숨김
+  document.getElementById('rowPistol').style.display  = mode === 'agent' ? 'none' : '';
+  document.getElementById('rowPrimary').style.display = mode === 'agent' ? 'none' : '';
   buildPlayerTabs();
   switchPlayer(0);
-});
+}
+document.getElementById('modeAgentBtn').addEventListener('click', () => startGame('agent'));
+document.getElementById('modeFullBtn').addEventListener('click',  () => startGame('full'));
 
 /* ═══════════════════ Player tabs ═══════════════════ */
 function buildPlayerTabs() {
@@ -927,11 +1009,11 @@ function rollAll() {
   players[curPlayer].results = { agent: null, pistol: null, primary: null };
   resetAllDisplays();
 
+  const totalReels = gameMode === 'agent' ? 1 : 3;
   let doneCount = 0;
   function checkDone() {
     doneCount++;
-    if (doneCount === 3) {
-      // all done — screen shake + big flash + agent reveal
+    if (doneCount === totalReels) {
       document.body.classList.add('shake');
       document.body.addEventListener('animationend', () => document.body.classList.remove('shake'), { once: true });
       triggerFlash();
@@ -964,37 +1046,39 @@ function rollAll() {
     }
   });
 
-  // pistol: starts 350ms later → stops ~5850ms total
-  setTimeout(() => {
-    spinReel({
-      trackEl: document.getElementById('pistolTrack'),
-      outerEl: document.getElementById('pistolOuter'),
-      rowEl:   document.getElementById('rowPistol'),
-      items: PISTOLS, cardClass: 'weapon-card', buildCard: weaponCard,
-      dur: 5500,
-      onResult(name) {
-        players[curPlayer].results.pistol = name;
-        showInlineWeapon('Pistol', name);
-        checkDone();
-      }
-    });
-  }, 350);
+  if (gameMode === 'full') {
+    // pistol: starts 350ms later
+    setTimeout(() => {
+      spinReel({
+        trackEl: document.getElementById('pistolTrack'),
+        outerEl: document.getElementById('pistolOuter'),
+        rowEl:   document.getElementById('rowPistol'),
+        items: PISTOLS, cardClass: 'weapon-card', buildCard: weaponCard,
+        dur: 5500,
+        onResult(name) {
+          players[curPlayer].results.pistol = name;
+          showInlineWeapon('Pistol', name);
+          checkDone();
+        }
+      });
+    }, 350);
 
-  // primary: starts 700ms later → stops ~6200ms total
-  setTimeout(() => {
-    spinReel({
-      trackEl: document.getElementById('primaryTrack'),
-      outerEl: document.getElementById('primaryOuter'),
-      rowEl:   document.getElementById('rowPrimary'),
-      items: PRIMARIES, cardClass: 'weapon-card', buildCard: weaponCard,
-      dur: 5500,
-      onResult(name) {
-        players[curPlayer].results.primary = name;
-        showInlineWeapon('Primary', name);
-        checkDone();
-      }
-    });
-  }, 700);
+    // primary: starts 700ms later
+    setTimeout(() => {
+      spinReel({
+        trackEl: document.getElementById('primaryTrack'),
+        outerEl: document.getElementById('primaryOuter'),
+        rowEl:   document.getElementById('rowPrimary'),
+        items: PRIMARIES, cardClass: 'weapon-card', buildCard: weaponCard,
+        dur: 5500,
+        onResult(name) {
+          players[curPlayer].results.primary = name;
+          showInlineWeapon('Primary', name);
+          checkDone();
+        }
+      });
+    }, 700);
+  }
 }
 
 rollBtn.addEventListener('click', rollAll);
