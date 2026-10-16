@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VALORANT Agent Roulette</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+    :root {
+      --red: #ff4655;
+      --teal: #00d1d9;
+      --dark: #0f1923;
+      --darker: #090e14;
+      --card: #1a2535;
+      --border: #2a3a4a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--darker);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* ─── Header ─── */
+    header {
+      width: 100%;
+      padding: 28px 0 18px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 10px auto 0;
+    }
+    .logo-text {
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .logo-text span { color: var(--red); }
+    .sub-text {
+      font-size: 1rem;
+      letter-spacing: 4px;
+      color: #8899aa;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ─── Roulette wrapper ─── */
+    .roulette-section {
+      width: 100%;
+      max-width: 900px;
+      padding: 32px 20px 0;
+    }
+
+    .roulette-outer {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--dark);
+      height: 140px;
+    }
+    /* center pointer */
+    .pointer {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      background: var(--red);
+      z-index: 10;
+      box-shadow: 0 0 12px var(--red);
+    }
+    .pointer::before,
+    .pointer::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+    }
+    .pointer::before {
+      top: 0;
+      border-top: 14px solid var(--red);
+    }
+    .pointer::after {
+      bottom: 0;
+      border-bottom: 14px solid var(--red);
+    }
+
+    /* gradient edges */
+    .roulette-outer::before,
+    .roulette-outer::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 120px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .roulette-outer::before {
+      left: 0;
+      background: linear-gradient(to right, var(--darker), transparent);
+    }
+    .roulette-outer::after {
+      right: 0;
+      background: linear-gradient(to left, var(--darker), transparent);
+    }
+
+    .roulette-track {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      will-change: transform;
+      gap: 8px;
+      padding: 0 4px;
+    }
+
+    .face-card {
+      flex-shrink: 0;
+      width: 110px;
+      height: 110px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      transition: border-color 0.2s;
+      background: var(--card);
+      margin: auto 0;
+    }
+    .face-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .face-card.highlighted {
+      border-color: var(--red);
+      box-shadow: 0 0 20px rgba(255,70,85,0.6);
+    }
+
+    /* ─── Spin button ─── */
+    .btn-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 28px 0;
+    }
+    #spinBtn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 14px 64px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+      transition: background 0.2s, transform 0.1s;
+    }
+    #spinBtn:hover { background: #e03040; transform: scale(1.04); }
+    #spinBtn:active { transform: scale(0.97); }
+    #spinBtn:disabled { background: #444; cursor: not-allowed; transform: none; }
+
+    /* ─── Result section ─── */
+    .result-section {
+      width: 100%;
+      max-width: 900px;
+      padding: 0 20px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 420px;
+    }
+
+    .result-name {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: var(--red);
+      text-shadow: 0 0 20px rgba(255,70,85,0.5);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s, transform 0.5s;
+      margin-bottom: 20px;
+    }
+    .result-name.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .agent-full-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      width: 100%;
+      max-width: 420px;
+      height: 400px;
+      opacity: 0;
+      transform: scale(0.88) translateY(30px);
+      transition: opacity 0.6s 0.15s, transform 0.6s 0.15s;
+    }
+    .agent-full-wrap.visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .agent-full-wrap img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 32px rgba(255,70,85,0.35));
+    }
+
+    /* glow line under agent */
+    .glow-line {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      filter: blur(2px);
+      opacity: 0;
+      transition: opacity 0.4s 0.6s;
+    }
+    .glow-line.visible { opacity: 1; }
+
+    .placeholder-msg {
+      color: #445566;
+      font-size: 1.1rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-text">VALO<span>RANT</span></div>
+    <div class="sub-text">Agent Roulette</div>
+  </header>
+
+  <div class="roulette-section">
+    <div class="roulette-outer" id="rouletteOuter">
+      <div class="pointer"></div>
+      <div class="roulette-track" id="rouletteTrack"></div>
+    </div>
+  </div>
+
+  <div class="btn-wrap">
+    <button id="spinBtn">SPIN</button>
+  </div>
+
+  <div class="result-section" id="resultSection">
+    <div class="result-name" id="resultName"></div>
+    <div class="agent-full-wrap" id="agentFullWrap">
+      <img id="agentFullImg" src="" alt="" />
+      <div class="glow-line" id="glowLine"></div>
+    </div>
+    <p class="placeholder-msg" id="placeholderMsg">SPIN TO REVEAL YOUR AGENT</p>
+  </div>
+
+<script>
+const AGENTS = [
+  'astra','breach','brimstone','chamber','clove','cypher','deadlock',
+  'fade','gekko','harbor','iso','jett','kayo','killjoy','miks',
+  'neon','omen','phoenix','raze','reyna','sage','skye','sova',
+  'tejo','veto','viper','vyse','waylay','yoru'
+];
+
+const FACE_DIR  = 'Agent_face/';
+const AGENT_DIR = 'Agent/';
+const CARD_W    = 118; // width + gap
+const SPIN_CARDS = 60; // total items in the strip
+
+const track    = document.getElementById('rouletteTrack');
+const spinBtn  = document.getElementById('spinBtn');
+const nameEl   = document.getElementById('resultName');
+const fullWrap = document.getElementById('agentFullWrap');
+const fullImg  = document.getElementById('agentFullImg');
+const glowLine = document.getElementById('glowLine');
+const placeholder = document.getElementById('placeholderMsg');
+
+// Build a long list of random face cards
+function buildTrack(winnerIndex) {
+  track.innerHTML = '';
+  const items = [];
+  // fill with random agents, guarantee winner at the landing position
+  for (let i = 0; i < SPIN_CARDS; i++) {
+    if (i === winnerIndex) {
+      items.push(AGENTS[currentWinner]);
+    } else {
+      items.push(AGENTS[Math.floor(Math.random() * AGENTS.length)]);
+    }
+  }
+  items.forEach((name, i) => {
+    const card = document.createElement('div');
+    card.className = 'face-card';
+    card.dataset.index = i;
+    const img = document.createElement('img');
+    img.src = `${FACE_DIR}${name}_face.webp`;
+    img.alt = name;
+    card.appendChild(img);
+    track.appendChild(card);
+  });
+}
+
+let currentWinner = 0;
+let isSpinning = false;
+
+// easeOutCubic
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+function spin() {
+  if (isSpinning) return;
+  isSpinning = true;
+  spinBtn.disabled = true;
+
+  // hide previous result
+  nameEl.classList.remove('visible');
+  fullWrap.classList.remove('visible');
+  glowLine.classList.remove('visible');
+  placeholder.style.display = '';
+
+  currentWinner = Math.floor(Math.random() * AGENTS.length);
+
+  const outerWidth = document.getElementById('rouletteOuter').offsetWidth;
+  const centerOffset = Math.floor(outerWidth / 2) - Math.floor(CARD_W / 2);
+
+  // winner card will be at position winnerPos in the track
+  const winnerPos = 45; // near the end so there's plenty of spinning
+  buildTrack(winnerPos);
+
+  // total pixels to move so winner lands at center
+  const totalScroll = winnerPos * CARD_W - centerOffset;
+
+  const duration = 4200; // ms
+  let start = null;
+  track.style.transform = 'translateX(0px)';
+
+  function step(ts) {
+    if (!start) start = ts;
+    const elapsed = ts - start;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = easeOut(t);
+    const current = eased * totalScroll;
+
+    track.style.transform = `translateX(-${current}px)`;
+
+    // highlight the card under center
+    const centerPx = current + centerOffset;
+    const idx = Math.round(centerPx / CARD_W);
+    document.querySelectorAll('.face-card').forEach((c, i) => {
+      c.classList.toggle('highlighted', i === idx);
+    });
+
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      // done
+      onSpinComplete();
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function onSpinComplete() {
+  const agent = AGENTS[currentWinner];
+  const displayName = agent.charAt(0).toUpperCase() + agent.slice(1);
+
+  placeholder.style.display = 'none';
+  nameEl.textContent = displayName;
+  nameEl.classList.add('visible');
+
+  fullImg.src = `${AGENT_DIR}${agent}.webp`;
+  fullImg.alt = agent;
+  setTimeout(() => {
+    fullWrap.classList.add('visible');
+    glowLine.classList.add('visible');
+  }, 100);
+
+  setTimeout(() => {
+    isSpinning = false;
+    spinBtn.disabled = false;
+  }, 700);
+}
+
+spinBtn.addEventListener('click', spin);
+</script>
+</body>
+</html>
