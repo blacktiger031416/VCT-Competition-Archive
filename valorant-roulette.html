@@ -546,7 +546,7 @@
       font-size:1.05rem; font-weight:700; letter-spacing:4px; text-transform:uppercase;
       color:rgba(255,255,255,.55); margin-bottom:32px; text-align:center;
     }
-    .mode-options { display:flex; gap:16px; }
+    .mode-options { display:flex; gap:14px; flex-wrap:wrap; }
     .mode-btn {
       flex:1; background:linear-gradient(135deg,rgba(12,22,32,.9),rgba(8,16,26,.9));
       border:1px solid rgba(255,70,85,.2); border-radius:10px;
@@ -774,6 +774,114 @@
       border-radius:6px; cursor:pointer; transition:background .2s;
     }
     .btn-map-modal-done:hover { background:#e03040; }
+
+    /* ════════ CROSSHAIR ════════ */
+    .crosshair-card {
+      flex-shrink:0; width:110px; height:110px;
+      border-radius:8px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.07); background:#0a1018;
+      margin:auto 0; transform-origin:center center;
+      transition:border-color .1s, box-shadow .1s;
+      display:flex; align-items:center; justify-content:center;
+      padding:8px;
+    }
+    .crosshair-card img {
+      max-width:100%; max-height:100%; object-fit:contain;
+      image-rendering:pixelated;
+    }
+    .crosshair-card.hl {
+      border-color:rgba(255,70,85,.8);
+      box-shadow:0 0 30px rgba(255,70,85,.7),0 0 60px rgba(255,70,85,.3);
+    }
+    .roulette-outer.ch-h { height:128px; }
+
+    /* 조준점 결과 인라인 */
+    .ch-reel-result {
+      flex-shrink:0; width:200px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px; padding:12px 16px;
+      border-left:1px solid rgba(255,255,255,.05);
+      background:rgba(0,0,0,.15);
+    }
+    .ch-reel-img {
+      width:72px; height:72px; object-fit:contain;
+      background:#0a1018; border-radius:6px; padding:6px;
+      border:2px solid rgba(255,70,85,.35);
+      opacity:0; transform:scale(.7);
+      transition:opacity .4s, transform .4s cubic-bezier(.22,.68,0,1.3);
+    }
+    .ch-reel-img.vis { opacity:1; transform:scale(1); }
+    .ch-reel-name {
+      font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:700;
+      letter-spacing:2px; color:#ddeeff; text-align:center;
+      opacity:0; transform:translateY(6px);
+      transition:opacity .35s .1s, transform .35s .1s;
+    }
+    .ch-reel-name.vis { opacity:1; transform:translateY(0); }
+
+    /* 조준점 풀아트 결과 (하단) */
+    .ch-reveal {
+      display:flex; flex-direction:column; align-items:center; gap:20px;
+      padding:40px 0 0;
+      opacity:0; transform:translateY(28px) scale(.92);
+      transition:opacity .7s, transform .7s cubic-bezier(.22,.68,0,1.2);
+      pointer-events:none;
+    }
+    .ch-reveal.vis { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+    .ch-reveal-name {
+      font-family:'Rajdhani',sans-serif;
+      font-size:2.6rem; font-weight:700; letter-spacing:8px;
+      color:#fff;
+      text-shadow:0 0 30px rgba(255,70,85,.8),0 0 60px rgba(255,70,85,.35);
+    }
+    .ch-reveal-img-wrap {
+      position:relative; width:280px; height:280px;
+      display:flex; align-items:center; justify-content:center;
+      background:radial-gradient(circle, rgba(255,70,85,.08) 0%, transparent 65%);
+      border-radius:50%;
+    }
+    .ch-reveal-img-wrap img {
+      max-width:220px; max-height:220px; object-fit:contain;
+      image-rendering:pixelated;
+      filter:drop-shadow(0 0 30px rgba(255,70,85,.5));
+    }
+    /* 코드 복사 영역 */
+    .ch-code-wrap {
+      display:flex; align-items:stretch; gap:0;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,70,85,.2); border-radius:8px;
+      overflow:hidden; max-width:700px; width:100%;
+    }
+    .ch-code-label {
+      flex-shrink:0; padding:0 14px;
+      display:flex; align-items:center;
+      background:rgba(255,70,85,.1);
+      border-right:1px solid rgba(255,70,85,.2);
+      font-size:.7rem; font-weight:700; letter-spacing:3px;
+      color:rgba(255,70,85,.8); text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .ch-code-text {
+      flex:1; padding:12px 16px;
+      font-family:'Courier New', monospace; font-size:.82rem;
+      color:#aaccdd; letter-spacing:.5px;
+      word-break:break-all; line-height:1.5;
+      overflow-x:auto; white-space:nowrap;
+    }
+    .ch-code-text::-webkit-scrollbar { height:4px; }
+    .ch-code-text::-webkit-scrollbar-track { background:transparent; }
+    .ch-code-text::-webkit-scrollbar-thumb { background:rgba(255,70,85,.3); border-radius:2px; }
+    .ch-copy-btn {
+      flex-shrink:0; padding:0 18px;
+      background:rgba(255,70,85,.15); border:none;
+      border-left:1px solid rgba(255,70,85,.2);
+      color:rgba(255,70,85,.9); cursor:pointer;
+      font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;
+      letter-spacing:2px; transition:background .2s, color .2s;
+      white-space:nowrap;
+    }
+    .ch-copy-btn:hover { background:rgba(255,70,85,.3); color:#fff; }
+    .ch-copy-btn.copied { background:rgba(0,209,217,.2); color:var(--teal); }
   </style>
 </head>
 <body>
@@ -813,6 +921,11 @@
         <span class="mode-btn-icon">🎮</span>
         <span class="mode-btn-title">풀 세팅</span>
         <span class="mode-btn-desc">요원 + 피스톨 + 주총기<br>전부 뽑습니다</span>
+      </button>
+      <button class="mode-btn" id="modeCrosshairBtn">
+        <span class="mode-btn-icon">🎯</span>
+        <span class="mode-btn-title">조준점</span>
+        <span class="mode-btn-desc">조준점 랜덤 뽑기 +<br>코드 복사</span>
       </button>
     </div>
   </div>
@@ -885,6 +998,23 @@
       </div>
     </div>
 
+      <!-- CROSSHAIR (조준점 모드용) -->
+      <div class="reel-row" id="rowCrosshair" style="display:none">
+        <div class="reel-label">
+          <span class="reel-label-text">조준점</span>
+        </div>
+        <div class="reel-strip-wrap">
+          <div class="roulette-outer ch-h" id="crosshairOuter">
+            <div class="pointer"></div>
+            <div class="roulette-track" id="crosshairTrack"></div>
+          </div>
+        </div>
+        <div class="ch-reel-result" id="rrCrosshair">
+          <span class="rr-empty">대기 중...</span>
+        </div>
+      </div>
+    </div>
+
     <!-- big agent reveal -->
     <div class="agent-reveal" id="agentReveal">
       <div class="agent-reveal-name" id="agentRevealName"></div>
@@ -892,6 +1022,19 @@
         <img id="agentRevealImg" src="" alt="" />
       </div>
       <div class="reveal-glow-line"></div>
+    </div>
+
+    <!-- crosshair reveal (조준점 모드) -->
+    <div class="ch-reveal" id="chReveal">
+      <div class="ch-reveal-name" id="chRevealName"></div>
+      <div class="ch-reveal-img-wrap">
+        <img id="chRevealImg" src="" alt="" />
+      </div>
+      <div class="ch-code-wrap">
+        <div class="ch-code-label">CODE</div>
+        <div class="ch-code-text" id="chCodeText"></div>
+        <button class="ch-copy-btn" id="chCopyBtn">복사</button>
+      </div>
     </div>
   </div>
 </div>
@@ -999,6 +1142,20 @@ const AGENTS    = Object.keys(AGENT_KO);
 const PISTOLS   = ['classic','shorty','frenzy','ghost','bandit','sheriff'];
 const PRIMARIES = ['ares','bucky','bulldog','guardian','judge','marshall',
                    'odin','operator','outlaw','phantom','spectre','stinger','vandal','warden'];
+const CROSSHAIR_DATA = {
+  big:           { ko:'거대한 조준점', code:'0;s;1;P;c;6;t;6;o;1;d;1;z;6;f;0;0t;10;0l;20;0v;20;0g;1;0o;20;0a;1;0m;1;0s;3;0e;3;1t;6;1l;10;1v;10;1o;11;1a;1;1e;2.028;S;s;4;o;1' },
+  bird:          { ko:'병아리',       code:'0;p;0;P;c;4;u;FFC0CBFF;o;1;d;1;z;6;a;0;f;0;m;1;0t;1;0l;1;0v;0;0g;1;0o;11;0a;0;0f;0;1t;6;1l;0;1v;3;1g;1;1o;0;1a;1;1s;0.053;1e;0.149' },
+  chamber_clock: { ko:'체임버 시계',  code:'0;p;0;s;1;P;c;8;u;FF9F00FF;o;1;d;1;b;1;f;0;0t;6;0l;1;0v;20;0g;1;0o;7;0a;0.32;0f;0;1t;8;1l;6;1g;1;1o;0;1a;0.994;1m;0;1f;0;A;c;8;u;FF9F00FF;o;1;b;1;0t;6;0v;20;0g;1;0o;6;0a;0.345;0f;0;1t;10;1l;3;1v;4;1g;1;1o;6;1a;0.575;1m;0;1f;0;S;b;1;c;8;t;FF9F00FF;s;1.862;o;1' },
+  eyeglasses:    { ko:'안경',         code:'0;s;1;P;c;8;t;2;o;1;d;1;b;1;a;0.46;f;0;0t;10;0l;14;0v;0;0g;1;0o;5;0a;0.308;0f;0;1t;1;1l;6;1v;0;1g;1;1o;18;1a;0;1m;0;1f;0' },
+  instagram:     { ko:'인스타그램',   code:'0;c;1;s;1;P;c;6;o;0;d;1;z;1;f;0;0t;4;0l;1;0o;2;0a;0.987;0f;0;1t;10;1l;1;1o;5;1a;1;1m;0;1f;0;S;c;5;s;1.5;o;0.5' },
+  nobounding:    { ko:'무반동 조준점',code:'0;s;1;P;o;1;d;1;z;3;f;0;0t;3;0l;0;0v;3;0g;1;0o;20;0a;1;0f;0;1t;3;1l;0;1v;3;1g;1;1o;40;1a;1;1m;0;1f;0;S;c;0;s;0.628;o;1' },
+  pink_circle:   { ko:'분홍 점',      code:'0;P;c;6;h;0;d;1;z;5;m;1;0t;4;0o;2;0a;1;0f;0;1t;10;1o;5;1a;1;1m;0;1f;0' },
+  eye:           { ko:'눈',           code:'0;c;1;s;1;P;t;4;o;1;d;1;z;5;a;0.556;0t;10;0l;20;0v;0;0g;1;0o;13;0a;1;0f;0;1t;1;1l;1;1v;0;1g;1;1o;14;1a;1;1s;0.064;1e;0.375;S;c;3;s;0.628;o;1' },
+  reyna_eye:     { ko:'레이나 삥',    code:'0;P;c;6;t;6;o;0.3;f;0;0t;1;0l;5;0o;5;0a;1;0f;0;1t;10;1l;4;1o;5;1a;0.5;1m;0;1f;0' },
+  poppy:         { ko:'움직이는 꽃',  code:'0;P;c;7;o;1;0t;10;0l;5;0o;0;0a;1;0m;1;0s;0.052;0e;0.052;1l;1;1o;1;1a;1;1s;0.052;1e;0.052' }
+};
+const CROSSHAIRS = Object.keys(CROSSHAIR_DATA);
+
 const MAP_KO = {
   abyss:'어비스', ascent:'어센트', bind:'바인드', breeze:'브리즈',
   corrode:'코로드', fracture:'프랙처', haven:'헤이븐', icebox:'아이스박스',
@@ -1135,14 +1292,20 @@ function startGame(mode) {
   gameMode = mode;
   document.getElementById('mode-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'flex';
-  // 요원 모드면 피스톨/주총기 행 숨김
-  document.getElementById('rowPistol').style.display  = mode === 'agent' ? 'none' : '';
-  document.getElementById('rowPrimary').style.display = mode === 'agent' ? 'none' : '';
+  // 모드별 행 표시/숨김
+  document.getElementById('rowPistol').style.display     = mode === 'full'       ? '' : 'none';
+  document.getElementById('rowPrimary').style.display    = mode === 'full'       ? '' : 'none';
+  document.getElementById('rowCrosshair').style.display  = mode === 'crosshair'  ? '' : 'none';
+  document.getElementById('agentReveal').style.display   = mode === 'crosshair'  ? 'none' : '';
+  document.getElementById('chReveal').style.display      = mode === 'crosshair'  ? '' : 'none';
+  // 조준점 모드면 요원 행도 숨김
+  document.getElementById('rowAgent').style.display      = mode === 'crosshair'  ? 'none' : '';
   buildPlayerTabs();
   switchPlayer(0);
 }
-document.getElementById('modeAgentBtn').addEventListener('click', () => startGame('agent'));
-document.getElementById('modeFullBtn').addEventListener('click',  () => startGame('full'));
+document.getElementById('modeAgentBtn').addEventListener('click',     () => startGame('agent'));
+document.getElementById('modeFullBtn').addEventListener('click',      () => startGame('full'));
+document.getElementById('modeCrosshairBtn').addEventListener('click', () => startGame('crosshair'));
 
 /* ═══════════════════ Player tabs ═══════════════════ */
 function buildPlayerTabs() {
@@ -1177,12 +1340,17 @@ function switchPlayer(idx) {
 /* ═══════════════════ Reset / update displays ═══════════════════ */
 function resetAllDisplays() {
   ['agent','pistol','primary'].forEach(t => {
-    document.getElementById(`rr${t.charAt(0).toUpperCase()+t.slice(1)}`).innerHTML =
-      '<span class="rr-empty">대기 중...</span>';
-    document.getElementById(`row${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.remove('spinning-row','landed-row');
+    const el = document.getElementById(`rr${t.charAt(0).toUpperCase()+t.slice(1)}`);
+    if (el) el.innerHTML = '<span class="rr-empty">대기 중...</span>';
+    const row = document.getElementById(`row${t.charAt(0).toUpperCase()+t.slice(1)}`);
+    if (row) row.classList.remove('spinning-row','landed-row');
   });
-  const rev = document.getElementById('agentReveal');
-  rev.classList.remove('vis');
+  document.getElementById('agentReveal').classList.remove('vis');
+  // crosshair
+  const rrCh = document.getElementById('rrCrosshair');
+  if (rrCh) rrCh.innerHTML = '<span class="rr-empty">대기 중...</span>';
+  document.getElementById('rowCrosshair').classList.remove('spinning-row','landed-row');
+  document.getElementById('chReveal').classList.remove('vis');
 }
 
 function updateInlineResults() {
@@ -1388,6 +1556,31 @@ function rollAll() {
   players[curPlayer].results = { agent: null, pistol: null, primary: null };
   resetAllDisplays();
 
+  // 조준점 모드 전용
+  if (gameMode === 'crosshair') {
+    document.getElementById('chReveal').classList.remove('vis');
+    document.getElementById('rrCrosshair').innerHTML = '<span class="rr-empty">뽑는 중...</span>';
+    document.getElementById('rowCrosshair').classList.remove('landed-row','spinning-row');
+    spinReel({
+      trackEl:   document.getElementById('crosshairTrack'),
+      outerEl:   document.getElementById('crosshairOuter'),
+      rowEl:     document.getElementById('rowCrosshair'),
+      items:     CROSSHAIRS,
+      cardClass: 'crosshair-card',
+      buildCard: crosshairCard,
+      dur:       5500,
+      onResult(name) {
+        players[curPlayer].results.crosshair = name;
+        showInlineCrosshair(name);
+        showCrosshairReveal(name);
+        triggerFlash();
+        playWin();
+        setTimeout(() => { isRolling = false; rollBtn.disabled = false; rollBtn.textContent = 'ROLL'; }, 600);
+      }
+    });
+    return;
+  }
+
   const pool = [...players[curPlayer].agentPool];
   if (pool.length === 0) {
     isRolling = false; rollBtn.disabled = false; rollBtn.textContent = 'ROLL'; return;
@@ -1550,6 +1743,48 @@ function renderModal() {
     grid.appendChild(div);
   });
 }
+
+/* ═══════════════════ Crosshair Roulette ═══════════════════ */
+function crosshairCard(name) {
+  const d = document.createElement('div'); d.className = 'crosshair-card';
+  const img = document.createElement('img');
+  img.src = `assets/valorant-roulette-crosshair/${name}.png`; img.alt = name;
+  d.appendChild(img); return d;
+}
+
+function showInlineCrosshair(name) {
+  const rr = document.getElementById('rrCrosshair');
+  const data = CROSSHAIR_DATA[name];
+  rr.innerHTML = `
+    <img class="ch-reel-img" src="assets/valorant-roulette-crosshair/${name}.png" alt="" />
+    <div class="ch-reel-name">${data.ko}</div>`;
+  requestAnimationFrame(() => {
+    rr.querySelector('.ch-reel-img').classList.add('vis');
+    rr.querySelector('.ch-reel-name').classList.add('vis');
+  });
+}
+
+function showCrosshairReveal(name) {
+  const data = CROSSHAIR_DATA[name];
+  document.getElementById('chRevealName').textContent = data.ko;
+  document.getElementById('chRevealImg').src = `assets/valorant-roulette-crosshair/${name}.png`;
+  document.getElementById('chCodeText').textContent = data.code;
+  const rev = document.getElementById('chReveal');
+  rev.classList.remove('vis');
+  requestAnimationFrame(() => setTimeout(() => rev.classList.add('vis'), 80));
+}
+
+// 복사 버튼
+document.getElementById('chCopyBtn').addEventListener('click', () => {
+  const code = document.getElementById('chCodeText').textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('chCopyBtn');
+    btn.textContent = '복사됨!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+  });
+});
 
 /* ═══════════════════ Map Roulette ═══════════════════ */
 let mapPool     = new Set(MAPS);
