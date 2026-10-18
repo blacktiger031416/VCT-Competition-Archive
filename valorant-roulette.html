@@ -1005,6 +1005,11 @@
       color:#e0b0ff;
     }
     .extreme-roll-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .extreme-warn {
+      font-family:'Rajdhani',sans-serif; font-size:.8rem; font-weight:600;
+      color:rgba(200,100,255,.65); letter-spacing:.5px;
+      white-space:nowrap;
+    }
 
     /* DPI 팝업 */
     .dpi-popup-overlay {
@@ -1120,6 +1125,7 @@
       <button class="btn-adjust" id="adjustBtn">⚙ 요원 조정</button>
       <button class="roll-btn" id="rollBtn">ROLL</button>
       <button class="extreme-roll-btn" id="extremeRollBtn" style="display:none">극단적 모드 ROLL</button>
+      <span class="extreme-warn" id="extremeWarn" style="display:none">⚠ 주의사항: 극단적 모드에서 가장 괜찮은 감도가 1입니다.</span>
     </div>
 
     <!-- 3 reel rows -->
@@ -1558,6 +1564,7 @@ function startGame(mode) {
   document.getElementById('sensReveal').style.display    = isSens           ? '' : 'none';
   document.getElementById('adjustBtn').style.display        = noAgent ? 'none' : '';
   document.getElementById('extremeRollBtn').style.display   = isSens  ? ''     : 'none';
+  document.getElementById('extremeWarn').style.display      = isSens  ? ''     : 'none';
   buildPlayerTabs();
   switchPlayer(0);
 }
