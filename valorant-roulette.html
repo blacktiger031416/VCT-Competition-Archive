@@ -1230,7 +1230,7 @@
     </div>
     <div class="ov-body">
       <table class="ov-table">
-        <thead><tr><th>플레이어</th><th>요원</th><th>피스톨</th><th>주총기</th></tr></thead>
+        <thead id="ovThead"><tr><th>플레이어</th><th>요원</th><th>피스톨</th><th>주총기</th></tr></thead>
         <tbody id="ovTbody"></tbody>
       </table>
     </div>
@@ -1934,27 +1934,51 @@ document.getElementById('ovCloseBtn').addEventListener('click', () => overviewMo
 overviewModal.addEventListener('click', e => { if (e.target === overviewModal) overviewModal.classList.remove('open'); });
 
 function openOverview() {
+  const thead = document.getElementById('ovThead');
   const tbody = document.getElementById('ovTbody');
   tbody.innerHTML = '';
-  players.forEach(p => {
-    const r = p.results;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
-    const agTd = document.createElement('td');
-    agTd.innerHTML = r.agent
-      ? `<div class="ov-cell"><img class="ov-face" src="assets/valorant-roulette-agent-face/${r.agent}_face.webp" /><span class="ov-item-name">${AGENT_KO[r.agent]}</span></div>`
-      : '<span class="ov-empty">미정</span>';
-    const piTd = document.createElement('td');
-    piTd.innerHTML = r.pistol
-      ? `<div class="ov-cell"><img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.pistol}.webp" /><span class="ov-item-name">${WEAPON_KO[r.pistol]}</span></div>`
-      : '<span class="ov-empty">미정</span>';
-    const prTd = document.createElement('td');
-    prTd.innerHTML = r.primary
-      ? `<div class="ov-cell"><img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.primary}.webp" /><span class="ov-item-name">${WEAPON_KO[r.primary]}</span></div>`
-      : '<span class="ov-empty">미정</span>';
-    tr.appendChild(agTd); tr.appendChild(piTd); tr.appendChild(prTd);
-    tbody.appendChild(tr);
-  });
+
+  if (gameMode === 'sensitivity') {
+    thead.innerHTML = '<tr><th>플레이어</th><th>감도</th></tr>';
+    players.forEach(p => {
+      const r   = p.results;
+      const tr  = document.createElement('tr');
+      tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
+      const sensTd = document.createElement('td');
+      if (r.sensitivity) {
+        const d = SENSITIVITY_DATA[r.sensitivity];
+        const imgHTML = d.hasImg
+          ? `<img class="ov-face" src="assets/valorant-roulette-sensitivity/${r.sensitivity}.webp" />`
+          : '';
+        sensTd.innerHTML = `<div class="ov-cell">${imgHTML}<span class="ov-item-name">${d.ko} · ${d.dpi} DPI · ${d.sens}</span></div>`;
+      } else {
+        sensTd.innerHTML = '<span class="ov-empty">미정</span>';
+      }
+      tr.appendChild(sensTd);
+      tbody.appendChild(tr);
+    });
+  } else {
+    thead.innerHTML = '<tr><th>플레이어</th><th>요원</th><th>피스톨</th><th>주총기</th></tr>';
+    players.forEach(p => {
+      const r = p.results;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
+      const agTd = document.createElement('td');
+      agTd.innerHTML = r.agent
+        ? `<div class="ov-cell"><img class="ov-face" src="assets/valorant-roulette-agent-face/${r.agent}_face.webp" /><span class="ov-item-name">${AGENT_KO[r.agent]}</span></div>`
+        : '<span class="ov-empty">미정</span>';
+      const piTd = document.createElement('td');
+      piTd.innerHTML = r.pistol
+        ? `<div class="ov-cell"><img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.pistol}.webp" /><span class="ov-item-name">${WEAPON_KO[r.pistol]}</span></div>`
+        : '<span class="ov-empty">미정</span>';
+      const prTd = document.createElement('td');
+      prTd.innerHTML = r.primary
+        ? `<div class="ov-cell"><img class="ov-weapon-img" src="assets/valorant-roulette-weapon/${r.primary}.webp" /><span class="ov-item-name">${WEAPON_KO[r.primary]}</span></div>`
+        : '<span class="ov-empty">미정</span>';
+      tr.appendChild(agTd); tr.appendChild(piTd); tr.appendChild(prTd);
+      tbody.appendChild(tr);
+    });
+  }
   overviewModal.classList.add('open');
 }
 
