@@ -458,6 +458,16 @@
     .ov-player-name { font-size:1rem; font-weight:700; color:#ccdde; letter-spacing:1px; }
     .ov-cell { display:flex; align-items:center; gap:10px; }
     .ov-face { width:44px; height:44px; border-radius:5px; object-fit:cover; border:1px solid var(--border); flex-shrink:0; }
+    .ov-ch-img { width:44px; height:44px; object-fit:contain; background:#0a1018; border-radius:5px; border:1px solid rgba(255,70,85,.25); padding:4px; flex-shrink:0; image-rendering:pixelated; }
+    .ov-copy-btn {
+      padding:6px 16px; background:rgba(255,70,85,.12);
+      border:1px solid rgba(255,70,85,.3); border-radius:5px;
+      color:rgba(255,70,85,.9); cursor:pointer;
+      font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; letter-spacing:2px;
+      transition:background .2s, color .2s; white-space:nowrap;
+    }
+    .ov-copy-btn:hover { background:rgba(255,70,85,.25); color:#fff; }
+    .ov-copy-btn.copied { background:rgba(0,209,217,.15); color:var(--teal); border-color:rgba(0,209,217,.3); }
     .ov-weapon-img { max-width:100px; max-height:38px; object-fit:contain; filter:drop-shadow(0 2px 5px rgba(0,0,0,.5)); flex-shrink:0; }
     .ov-item-name { font-size:.9rem; font-weight:700; color:#ddeeff; letter-spacing:1px; }
     .ov-empty { color:#2a3a4a; font-size:.85rem; letter-spacing:1px; }
@@ -1938,7 +1948,38 @@ function openOverview() {
   const tbody = document.getElementById('ovTbody');
   tbody.innerHTML = '';
 
-  if (gameMode === 'sensitivity') {
+  if (gameMode === 'crosshair') {
+    thead.innerHTML = '<tr><th>플레이어</th><th>조준점</th><th></th></tr>';
+    players.forEach(p => {
+      const r  = p.results;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><span class="ov-player-name">${p.name}</span></td>`;
+      const chTd = document.createElement('td');
+      if (r.crosshair) {
+        const d = CROSSHAIR_DATA[r.crosshair];
+        chTd.innerHTML = `<div class="ov-cell"><img class="ov-ch-img" src="assets/valorant-roulette-crosshair/${r.crosshair}.png" /><span class="ov-item-name">${d.ko}</span></div>`;
+      } else {
+        chTd.innerHTML = '<span class="ov-empty">미정</span>';
+      }
+      const cpTd = document.createElement('td');
+      if (r.crosshair) {
+        const btn = document.createElement('button');
+        btn.className = 'ov-copy-btn';
+        btn.textContent = '복사';
+        btn.dataset.code = CROSSHAIR_DATA[r.crosshair].code;
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.code).then(() => {
+            btn.textContent = '복사됨!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+          });
+        });
+        cpTd.appendChild(btn);
+      }
+      tr.appendChild(chTd); tr.appendChild(cpTd);
+      tbody.appendChild(tr);
+    });
+  } else if (gameMode === 'sensitivity') {
     thead.innerHTML = '<tr><th>플레이어</th><th>감도</th></tr>';
     players.forEach(p => {
       const r   = p.results;
