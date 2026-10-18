@@ -882,6 +882,147 @@
     }
     .ch-copy-btn:hover { background:rgba(255,70,85,.3); color:#fff; }
     .ch-copy-btn.copied { background:rgba(0,209,217,.2); color:var(--teal); }
+
+    /* ── 감도 카드 ── */
+    .sens-card {
+      flex-shrink:0; width:110px; height:110px;
+      border-radius:8px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.07); background:#0a1018;
+      margin:auto 0; transform-origin:center center;
+      transition:border-color .1s, box-shadow .1s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .sens-card img { width:100%; height:100%; object-fit:cover; }
+    .sens-card-text {
+      font-family:'Rajdhani',sans-serif; font-size:.8rem; font-weight:700;
+      letter-spacing:1px; color:rgba(255,70,85,.85); text-align:center; padding:10px;
+      line-height:1.3;
+    }
+    .sens-card.hl {
+      border-color:rgba(255,70,85,.8);
+      box-shadow:0 0 30px rgba(255,70,85,.7),0 0 60px rgba(255,70,85,.3);
+    }
+    .roulette-outer.sens-h { height:128px; }
+
+    /* 감도 결과 인라인 */
+    .sens-reel-result {
+      flex-shrink:0; width:220px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:5px; padding:10px 16px;
+      border-left:1px solid rgba(255,255,255,.05);
+      background:rgba(0,0,0,.15);
+    }
+    .sens-reel-img {
+      width:60px; height:60px; object-fit:cover; border-radius:50%;
+      border:2px solid rgba(255,70,85,.35);
+      opacity:0; transform:scale(.7);
+      transition:opacity .4s, transform .4s cubic-bezier(.22,.68,0,1.3);
+    }
+    .sens-reel-img.vis { opacity:1; transform:scale(1); }
+    .sens-reel-name {
+      font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;
+      letter-spacing:1px; color:#fff; text-align:center;
+      opacity:0; transform:translateY(6px);
+      transition:opacity .35s .05s, transform .35s .05s;
+    }
+    .sens-reel-name.vis { opacity:1; transform:translateY(0); }
+    .sens-reel-info {
+      font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:600;
+      letter-spacing:1px; color:rgba(255,70,85,.9); text-align:center;
+      opacity:0; transform:translateY(6px);
+      transition:opacity .35s .1s, transform .35s .1s;
+    }
+    .sens-reel-info.vis { opacity:1; transform:translateY(0); }
+
+    /* 감도 풀아트 결과 (하단) */
+    .sens-reveal {
+      display:flex; flex-direction:column; align-items:center; gap:20px;
+      padding:40px 0 0;
+      opacity:0; transform:translateY(28px) scale(.92);
+      transition:opacity .7s, transform .7s cubic-bezier(.22,.68,0,1.2);
+      pointer-events:none;
+    }
+    .sens-reveal.vis { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+    .sens-reveal-title {
+      font-family:'Rajdhani',sans-serif;
+      font-size:2rem; font-weight:700; letter-spacing:6px;
+      color:#fff;
+      text-shadow:0 0 30px rgba(255,70,85,.8),0 0 60px rgba(255,70,85,.35);
+    }
+    .sens-reveal-img-wrap {
+      width:200px; height:200px;
+      display:flex; align-items:center; justify-content:center;
+      background:radial-gradient(circle, rgba(255,70,85,.1) 0%, transparent 65%);
+      border-radius:50%; overflow:hidden;
+    }
+    .sens-reveal-img-wrap img {
+      width:100%; height:100%; object-fit:cover; border-radius:50%;
+      filter:drop-shadow(0 0 20px rgba(255,70,85,.4));
+    }
+    .sens-reveal-noimg {
+      font-family:'Rajdhani',sans-serif; font-size:1.6rem; font-weight:700;
+      color:rgba(255,70,85,.85); letter-spacing:3px; text-align:center;
+    }
+    .sens-reveal-info {
+      font-family:'Rajdhani',sans-serif; font-size:1.7rem; font-weight:700;
+      letter-spacing:3px; color:rgba(255,70,85,.95);
+      text-shadow:0 0 20px rgba(255,70,85,.4);
+    }
+    .sens-detail-btn {
+      padding:10px 28px;
+      background:rgba(255,70,85,.12);
+      border:1px solid rgba(255,70,85,.3); border-radius:6px;
+      color:rgba(255,70,85,.9); cursor:pointer;
+      font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700;
+      letter-spacing:2px; transition:background .2s, color .2s;
+    }
+    .sens-detail-btn:hover { background:rgba(255,70,85,.25); color:#fff; }
+
+    /* DPI 팝업 */
+    .dpi-popup-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:300;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .2s;
+    }
+    .dpi-popup-overlay.open { opacity:1; pointer-events:auto; }
+    .dpi-popup-box {
+      background:#0e1820; border:1px solid rgba(255,70,85,.25); border-radius:14px;
+      padding:32px 40px; min-width:320px;
+      display:flex; flex-direction:column; gap:20px;
+      box-shadow:0 0 60px rgba(255,70,85,.15);
+    }
+    .dpi-popup-title {
+      font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700;
+      letter-spacing:4px; color:#fff; text-align:center;
+    }
+    .dpi-popup-rows { display:flex; flex-direction:column; gap:10px; }
+    .dpi-popup-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 18px;
+      background:rgba(255,255,255,.04); border-radius:8px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .dpi-popup-row.active-dpi {
+      background:rgba(255,70,85,.08); border-color:rgba(255,70,85,.3);
+    }
+    .dpi-popup-dpi {
+      font-family:'Rajdhani',sans-serif; font-size:.9rem; font-weight:700;
+      letter-spacing:2px; color:rgba(255,255,255,.45);
+    }
+    .dpi-popup-row.active-dpi .dpi-popup-dpi { color:rgba(255,70,85,.85); }
+    .dpi-popup-sens {
+      font-family:'Rajdhani',sans-serif; font-size:1.5rem; font-weight:700;
+      letter-spacing:2px; color:#e8f4ff;
+    }
+    .dpi-popup-row.active-dpi .dpi-popup-sens { color:#fff; font-size:1.8rem; }
+    .dpi-popup-close {
+      align-self:center; padding:8px 32px;
+      background:rgba(255,70,85,.1); border:1px solid rgba(255,70,85,.25); border-radius:6px;
+      color:rgba(255,70,85,.8); cursor:pointer;
+      font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px;
+      transition:background .2s, color .2s;
+    }
+    .dpi-popup-close:hover { background:rgba(255,70,85,.25); color:#fff; }
   </style>
 </head>
 <body>
@@ -926,6 +1067,11 @@
         <span class="mode-btn-icon">🎯</span>
         <span class="mode-btn-title">조준점</span>
         <span class="mode-btn-desc">조준점 랜덤 뽑기 +<br>코드 복사</span>
+      </button>
+      <button class="mode-btn" id="modeSensBtn">
+        <span class="mode-btn-icon">🖱</span>
+        <span class="mode-btn-title">감도</span>
+        <span class="mode-btn-desc">프로 선수 감도 랜덤 +<br>DPI 변환 보기</span>
       </button>
     </div>
   </div>
@@ -1024,6 +1170,22 @@
       <div class="reveal-glow-line"></div>
     </div>
 
+      <!-- SENSITIVITY (감도 모드용) -->
+      <div class="reel-row" id="rowSens" style="display:none">
+        <div class="reel-label">
+          <span class="reel-label-text">감도</span>
+        </div>
+        <div class="reel-strip-wrap">
+          <div class="roulette-outer sens-h" id="sensOuter">
+            <div class="pointer"></div>
+            <div class="roulette-track" id="sensTrack"></div>
+          </div>
+        </div>
+        <div class="sens-reel-result" id="rrSens">
+          <span class="rr-empty">대기 중...</span>
+        </div>
+      </div>
+
     <!-- crosshair reveal (조준점 모드) -->
     <div class="ch-reveal" id="chReveal">
       <div class="ch-reveal-name" id="chRevealName"></div>
@@ -1036,6 +1198,23 @@
         <button class="ch-copy-btn" id="chCopyBtn">복사</button>
       </div>
     </div>
+
+    <!-- sensitivity reveal (감도 모드) -->
+    <div class="sens-reveal" id="sensReveal">
+      <div class="sens-reveal-title" id="sensRevealTitle"></div>
+      <div id="sensRevealImgWrap"></div>
+      <div class="sens-reveal-info" id="sensRevealInfo"></div>
+      <button class="sens-detail-btn" id="sensDetailBtn">감도 상세 보기</button>
+    </div>
+  </div>
+</div>
+
+<!-- DPI 팝업 -->
+<div class="dpi-popup-overlay" id="dpiPopup">
+  <div class="dpi-popup-box">
+    <div class="dpi-popup-title" id="dpiPopupTitle"></div>
+    <div class="dpi-popup-rows" id="dpiPopupRows"></div>
+    <button class="dpi-popup-close" id="dpiPopupClose">닫기</button>
   </div>
 </div>
 
@@ -1157,6 +1336,38 @@ const CROSSHAIR_DATA = {
   circle:        { ko:'점',           code:'0;P;o;1;d;1;0b;0;1b;0' }
 };
 const CROSSHAIRS = Object.keys(CROSSHAIR_DATA);
+
+const SENSITIVITY_DATA = {
+  Alfajer:    { ko:'Alfajer',    dpi:400,  sens:0.45,   hasImg:true },
+  aspas:      { ko:'aspas',      dpi:800,  sens:0.4,    hasImg:true },
+  benjyfishy: { ko:'benjyfishy', dpi:800,  sens:0.27,   hasImg:true },
+  BuZz:       { ko:'BuZz',       dpi:400,  sens:0.57,   hasImg:true },
+  Chronicle:  { ko:'Chronicle',  dpi:1600, sens:0.175,  hasImg:true },
+  Cryo:       { ko:'Cryo',       dpi:1600, sens:0.087,  hasImg:true },
+  Dambi:      { ko:'Dambi',      dpi:1600, sens:0.175,  hasImg:true },
+  Demon1:     { ko:'Demon1',     dpi:1600, sens:0.1,    hasImg:true },
+  f0rsakeN:   { ko:'f0rsakeN',   dpi:800,  sens:0.712,  hasImg:true },
+  iZu:        { ko:'iZu',        dpi:800,  sens:0.326,  hasImg:true },
+  kaajak:     { ko:'kaajak',     dpi:800,  sens:0.17,   hasImg:true },
+  Lukxo:      { ko:'lukxo',      dpi:1600, sens:0.1,    hasImg:true },
+  Meiy:       { ko:'Meiy',       dpi:800,  sens:0.13,   hasImg:true },
+  Meteor:     { ko:'Meteor',     dpi:800,  sens:0.35,   hasImg:true },
+  Munchkin:   { ko:'Munchkin',   dpi:1600, sens:0.1,    hasImg:true },
+  nAts:       { ko:'nAts',       dpi:800,  sens:0.49,   hasImg:true },
+  Primmie:    { ko:'Primmie',    dpi:800,  sens:0.34,   hasImg:true },
+  s0pp:       { ko:'s0pp',       dpi:1600, sens:0.175,  hasImg:true },
+  something:  { ko:'something',  dpi:800,  sens:0.5,    hasImg:true },
+  t3xture:    { ko:'t3xture',    dpi:800,  sens:0.45,   hasImg:true },
+  TenZ:       { ko:'TenZ',       dpi:1600, sens:0.14,   hasImg:true },
+  Tkzin:      { ko:'tkzin',      dpi:1600, sens:0.1,    hasImg:true },
+  Udotan:     { ko:'UdoTan',     dpi:1600, sens:0.101,  hasImg:true },
+  xeus:       { ko:'xeus',       dpi:800,  sens:0.25,   hasImg:true },
+  yay:        { ko:'yay',        dpi:800,  sens:0.38,   hasImg:true },
+  ZmjjKK:     { ko:'ZmjjKK',    dpi:800,  sens:0.395,  hasImg:true },
+  fun_high:   { ko:'예능 감도',   dpi:800,  sens:1,      hasImg:false },
+  fun_low:    { ko:'예능 감도',   dpi:800,  sens:0.01,   hasImg:false },
+};
+const SENSITIVITIES = Object.keys(SENSITIVITY_DATA);
 
 const MAP_KO = {
   abyss:'어비스', ascent:'어센트', bind:'바인드', breeze:'브리즈',
@@ -1294,22 +1505,26 @@ function startGame(mode) {
   gameMode = mode;
   document.getElementById('mode-screen').style.display = 'none';
   document.getElementById('main-screen').style.display = 'flex';
+  const isCH   = mode === 'crosshair';
+  const isSens = mode === 'sensitivity';
+  const noAgent = isCH || isSens;
   // 모드별 행 표시/숨김
-  document.getElementById('rowPistol').style.display     = mode === 'full'       ? '' : 'none';
-  document.getElementById('rowPrimary').style.display    = mode === 'full'       ? '' : 'none';
-  document.getElementById('rowCrosshair').style.display  = mode === 'crosshair'  ? '' : 'none';
-  document.getElementById('agentReveal').style.display   = mode === 'crosshair'  ? 'none' : '';
-  document.getElementById('chReveal').style.display      = mode === 'crosshair'  ? '' : 'none';
-  // 조준점 모드면 요원 행도 숨김
-  document.getElementById('rowAgent').style.display      = mode === 'crosshair'  ? 'none' : '';
-  // 조준점 모드면 요원 조정 버튼 숨김
-  document.getElementById('adjustBtn').style.display     = mode === 'crosshair'  ? 'none' : '';
+  document.getElementById('rowPistol').style.display     = mode === 'full'  ? '' : 'none';
+  document.getElementById('rowPrimary').style.display    = mode === 'full'  ? '' : 'none';
+  document.getElementById('rowCrosshair').style.display  = isCH             ? '' : 'none';
+  document.getElementById('rowAgent').style.display      = noAgent          ? 'none' : '';
+  document.getElementById('rowSens').style.display       = isSens           ? '' : 'none';
+  document.getElementById('agentReveal').style.display   = noAgent          ? 'none' : '';
+  document.getElementById('chReveal').style.display      = isCH             ? '' : 'none';
+  document.getElementById('sensReveal').style.display    = isSens           ? '' : 'none';
+  document.getElementById('adjustBtn').style.display     = noAgent          ? 'none' : '';
   buildPlayerTabs();
   switchPlayer(0);
 }
 document.getElementById('modeAgentBtn').addEventListener('click',     () => startGame('agent'));
 document.getElementById('modeFullBtn').addEventListener('click',      () => startGame('full'));
 document.getElementById('modeCrosshairBtn').addEventListener('click', () => startGame('crosshair'));
+document.getElementById('modeSensBtn').addEventListener('click',      () => startGame('sensitivity'));
 
 /* ═══════════════════ Player tabs ═══════════════════ */
 function buildPlayerTabs() {
@@ -1355,6 +1570,11 @@ function resetAllDisplays() {
   if (rrCh) rrCh.innerHTML = '<span class="rr-empty">대기 중...</span>';
   document.getElementById('rowCrosshair').classList.remove('spinning-row','landed-row');
   document.getElementById('chReveal').classList.remove('vis');
+  // sensitivity
+  const rrSens = document.getElementById('rrSens');
+  if (rrSens) rrSens.innerHTML = '<span class="rr-empty">대기 중...</span>';
+  document.getElementById('rowSens').classList.remove('spinning-row','landed-row');
+  document.getElementById('sensReveal').classList.remove('vis');
 }
 
 function updateInlineResults() {
@@ -1559,6 +1779,31 @@ function rollAll() {
 
   players[curPlayer].results = { agent: null, pistol: null, primary: null };
   resetAllDisplays();
+
+  // 감도 모드 전용
+  if (gameMode === 'sensitivity') {
+    document.getElementById('sensReveal').classList.remove('vis');
+    document.getElementById('rrSens').innerHTML = '<span class="rr-empty">뽑는 중...</span>';
+    document.getElementById('rowSens').classList.remove('landed-row','spinning-row');
+    spinReel({
+      trackEl:   document.getElementById('sensTrack'),
+      outerEl:   document.getElementById('sensOuter'),
+      rowEl:     document.getElementById('rowSens'),
+      items:     SENSITIVITIES,
+      cardClass: 'sens-card',
+      buildCard: sensitivityCard,
+      dur:       5500,
+      onResult(key) {
+        players[curPlayer].results.sensitivity = key;
+        showInlineSensitivity(key);
+        showSensitivityReveal(key);
+        triggerFlash();
+        playWin();
+        setTimeout(() => { isRolling = false; rollBtn.disabled = false; rollBtn.textContent = 'ROLL'; }, 600);
+      }
+    });
+    return;
+  }
 
   // 조준점 모드 전용
   if (gameMode === 'crosshair') {
@@ -1789,6 +2034,89 @@ document.getElementById('chCopyBtn').addEventListener('click', () => {
     setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
   });
 });
+
+/* ═══════════════════ Sensitivity Roulette ═══════════════════ */
+function sensitivityCard(key) {
+  const d = document.createElement('div'); d.className = 'sens-card';
+  const data = SENSITIVITY_DATA[key];
+  if (data.hasImg) {
+    const img = document.createElement('img');
+    img.src = `assets/valorant-roulette-sensitivity/${key}.webp`; img.alt = key;
+    d.appendChild(img);
+  } else {
+    const t = document.createElement('div'); t.className = 'sens-card-text';
+    t.innerHTML = data.ko + '<br>' + data.dpi + ' DPI<br>' + data.sens;
+    d.appendChild(t);
+  }
+  return d;
+}
+
+function showInlineSensitivity(key) {
+  const rr   = document.getElementById('rrSens');
+  const data = SENSITIVITY_DATA[key];
+  if (data.hasImg) {
+    rr.innerHTML = `
+      <img class="sens-reel-img" src="assets/valorant-roulette-sensitivity/${key}.webp" alt="" />
+      <div class="sens-reel-name">${data.ko}</div>
+      <div class="sens-reel-info">${data.dpi} DPI · ${data.sens}</div>`;
+  } else {
+    rr.innerHTML = `
+      <div class="sens-reel-name">${data.ko}</div>
+      <div class="sens-reel-info">${data.dpi} DPI · ${data.sens}</div>`;
+  }
+  requestAnimationFrame(() => {
+    rr.querySelectorAll('.sens-reel-img,.sens-reel-name,.sens-reel-info').forEach(el => el.classList.add('vis'));
+  });
+}
+
+function showSensitivityReveal(key) {
+  _sensPopupKey = key;
+  const data = SENSITIVITY_DATA[key];
+  document.getElementById('sensRevealTitle').textContent = data.ko + ' 감도';
+  const wrap = document.getElementById('sensRevealImgWrap');
+  if (data.hasImg) {
+    wrap.className = 'sens-reveal-img-wrap';
+    wrap.innerHTML = `<img src="assets/valorant-roulette-sensitivity/${key}.webp" alt="${data.ko}" />`;
+  } else {
+    wrap.className = 'sens-reveal-noimg';
+    wrap.textContent = data.ko;
+  }
+  document.getElementById('sensRevealInfo').textContent = `${data.dpi} DPI  ·  ${data.sens}`;
+  const rev = document.getElementById('sensReveal');
+  rev.classList.remove('vis');
+  requestAnimationFrame(() => setTimeout(() => rev.classList.add('vis'), 80));
+}
+
+// DPI 팝업
+let _sensPopupKey = null;
+document.getElementById('sensDetailBtn').addEventListener('click', () => {
+  if (!_sensPopupKey) return;
+  openDpiPopup(_sensPopupKey);
+});
+document.getElementById('dpiPopupClose').addEventListener('click', () => {
+  document.getElementById('dpiPopup').classList.remove('open');
+});
+document.getElementById('dpiPopup').addEventListener('click', e => {
+  if (e.target === document.getElementById('dpiPopup'))
+    document.getElementById('dpiPopup').classList.remove('open');
+});
+
+function openDpiPopup(key) {
+  const data  = SENSITIVITY_DATA[key];
+  const eDPI  = data.dpi * data.sens;
+  const dpis  = [400, 800, 1600];
+  document.getElementById('dpiPopupTitle').textContent = data.ko + ' 감도';
+  const rows  = document.getElementById('dpiPopupRows');
+  rows.innerHTML = '';
+  dpis.forEach(d => {
+    const sens = parseFloat((eDPI / d).toFixed(4));
+    const row  = document.createElement('div');
+    row.className = 'dpi-popup-row' + (d === data.dpi ? ' active-dpi' : '');
+    row.innerHTML = `<span class="dpi-popup-dpi">${d} DPI</span><span class="dpi-popup-sens">${sens}</span>`;
+    rows.appendChild(row);
+  });
+  document.getElementById('dpiPopup').classList.add('open');
+}
 
 /* ═══════════════════ Map Roulette ═══════════════════ */
 let mapPool     = new Set(MAPS);
