@@ -2209,7 +2209,7 @@ function showInlineSensitivity(key) {
 function showSensitivityReveal(key) {
   _sensPopupKey = key;
   const data = SENSITIVITY_DATA[key];
-  document.getElementById('sensRevealTitle').textContent = data.ko + ' 감도';
+  document.getElementById('sensRevealTitle').textContent = data.ko.endsWith('감도') ? data.ko : data.ko + ' 감도';
   const wrap = document.getElementById('sensRevealImgWrap');
   if (data.hasImg) {
     wrap.className = 'sens-reveal-img-wrap';
