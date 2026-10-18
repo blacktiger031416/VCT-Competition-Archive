@@ -1159,16 +1159,6 @@
           <span class="rr-empty">대기 중...</span>
         </div>
       </div>
-    </div>
-
-    <!-- big agent reveal -->
-    <div class="agent-reveal" id="agentReveal">
-      <div class="agent-reveal-name" id="agentRevealName"></div>
-      <div class="agent-reveal-img-wrap">
-        <img id="agentRevealImg" src="" alt="" />
-      </div>
-      <div class="reveal-glow-line"></div>
-    </div>
 
       <!-- SENSITIVITY (감도 모드용) -->
       <div class="reel-row" id="rowSens" style="display:none">
@@ -1185,6 +1175,16 @@
           <span class="rr-empty">대기 중...</span>
         </div>
       </div>
+    </div>
+
+    <!-- big agent reveal -->
+    <div class="agent-reveal" id="agentReveal">
+      <div class="agent-reveal-name" id="agentRevealName"></div>
+      <div class="agent-reveal-img-wrap">
+        <img id="agentRevealImg" src="" alt="" />
+      </div>
+      <div class="reveal-glow-line"></div>
+    </div>
 
     <!-- crosshair reveal (조준점 모드) -->
     <div class="ch-reveal" id="chReveal">
@@ -2109,7 +2109,7 @@ function openDpiPopup(key) {
   const rows  = document.getElementById('dpiPopupRows');
   rows.innerHTML = '';
   dpis.forEach(d => {
-    const sens = parseFloat((eDPI / d).toFixed(4));
+    const sens = parseFloat((eDPI / d).toFixed(3));
     const row  = document.createElement('div');
     row.className = 'dpi-popup-row' + (d === data.dpi ? ' active-dpi' : '');
     row.innerHTML = `<span class="dpi-popup-dpi">${d} DPI</span><span class="dpi-popup-sens">${sens}</span>`;
