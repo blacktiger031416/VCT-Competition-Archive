@@ -988,6 +988,24 @@
     }
     .sens-detail-btn:hover { background:rgba(255,70,85,.25); color:#fff; }
 
+    /* 극단적 모드 버튼 */
+    .extreme-roll-btn {
+      padding:0 28px; height:56px;
+      background:linear-gradient(135deg, rgba(160,0,255,.25), rgba(100,0,180,.15));
+      border:1px solid rgba(160,0,255,.5); border-radius:6px;
+      color:rgba(200,100,255,.95); cursor:pointer;
+      font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:800;
+      letter-spacing:3px; text-transform:uppercase;
+      transition:background .2s, box-shadow .2s, color .2s;
+      white-space:nowrap;
+    }
+    .extreme-roll-btn:hover {
+      background:linear-gradient(135deg, rgba(160,0,255,.4), rgba(100,0,180,.3));
+      box-shadow:0 0 24px rgba(160,0,255,.35);
+      color:#e0b0ff;
+    }
+    .extreme-roll-btn:disabled { opacity:.4; cursor:not-allowed; }
+
     /* DPI 팝업 */
     .dpi-popup-overlay {
       position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:300;
@@ -1101,6 +1119,7 @@
     <div class="roll-row">
       <button class="btn-adjust" id="adjustBtn">⚙ 요원 조정</button>
       <button class="roll-btn" id="rollBtn">ROLL</button>
+      <button class="extreme-roll-btn" id="extremeRollBtn" style="display:none">극단적 모드 ROLL</button>
     </div>
 
     <!-- 3 reel rows -->
@@ -1376,8 +1395,18 @@ const SENSITIVITY_DATA = {
   ZmjjKK:     { ko:'ZmjjKK',    dpi:800,  sens:0.395,  hasImg:true },
   fun_high:   { ko:'예능 감도',   dpi:800,  sens:1,      hasImg:false },
   fun_low:    { ko:'예능 감도',   dpi:800,  sens:0.01,   hasImg:false },
+  ext_10:     { ko:'극단적 감도', dpi:800,  sens:10,     hasImg:false },
+  ext_5:      { ko:'극단적 감도', dpi:800,  sens:5,      hasImg:false },
+  ext_3:      { ko:'극단적 감도', dpi:800,  sens:3,      hasImg:false },
+  ext_2:      { ko:'극단적 감도', dpi:800,  sens:2,      hasImg:false },
+  ext_1:      { ko:'극단적 감도', dpi:800,  sens:1,      hasImg:false },
+  ext_0001:   { ko:'극단적 감도', dpi:800,  sens:0.001,  hasImg:false },
+  ext_0002:   { ko:'극단적 감도', dpi:800,  sens:0.002,  hasImg:false },
+  ext_0004:   { ko:'극단적 감도', dpi:800,  sens:0.004,  hasImg:false },
+  ext_0005:   { ko:'극단적 감도', dpi:800,  sens:0.005,  hasImg:false },
 };
-const SENSITIVITIES = Object.keys(SENSITIVITY_DATA);
+const SENSITIVITIES = Object.keys(SENSITIVITY_DATA).filter(k => !k.startsWith('ext_'));
+const EXTREME_SENSITIVITIES = Object.keys(SENSITIVITY_DATA).filter(k => k.startsWith('ext_'));
 
 const MAP_KO = {
   abyss:'어비스', ascent:'어센트', bind:'바인드', breeze:'브리즈',
@@ -1527,7 +1556,8 @@ function startGame(mode) {
   document.getElementById('agentReveal').style.display   = noAgent          ? 'none' : '';
   document.getElementById('chReveal').style.display      = isCH             ? '' : 'none';
   document.getElementById('sensReveal').style.display    = isSens           ? '' : 'none';
-  document.getElementById('adjustBtn').style.display     = noAgent          ? 'none' : '';
+  document.getElementById('adjustBtn').style.display        = noAgent ? 'none' : '';
+  document.getElementById('extremeRollBtn').style.display   = isSens  ? ''     : 'none';
   buildPlayerTabs();
   switchPlayer(0);
 }
@@ -1910,6 +1940,41 @@ function rollAll() {
 }
 
 rollBtn.addEventListener('click', rollAll);
+
+document.getElementById('extremeRollBtn').addEventListener('click', () => {
+  if (isRolling) return;
+  isRolling = true;
+  const rollBtn2 = document.getElementById('rollBtn');
+  const extBtn   = document.getElementById('extremeRollBtn');
+  rollBtn2.disabled = true; extBtn.disabled = true;
+  extBtn.textContent = 'ROLLING...';
+  players[curPlayer].results = { agent:null, pistol:null, primary:null };
+  resetAllDisplays();
+  document.getElementById('sensReveal').classList.remove('vis');
+  document.getElementById('rrSens').innerHTML = '<span class="rr-empty">뽑는 중...</span>';
+  document.getElementById('rowSens').classList.remove('landed-row','spinning-row');
+  spinReel({
+    trackEl:   document.getElementById('sensTrack'),
+    outerEl:   document.getElementById('sensOuter'),
+    rowEl:     document.getElementById('rowSens'),
+    items:     EXTREME_SENSITIVITIES,
+    cardClass: 'sens-card',
+    buildCard: sensitivityCard,
+    dur:       5500,
+    onResult(key) {
+      players[curPlayer].results.sensitivity = key;
+      showInlineSensitivity(key);
+      showSensitivityReveal(key);
+      triggerFlash();
+      playWin();
+      setTimeout(() => {
+        isRolling = false;
+        rollBtn2.disabled = false; extBtn.disabled = false;
+        extBtn.textContent = '극단적 모드 ROLL';
+      }, 600);
+    }
+  });
+});
 
 /* ═══════════════════ Inline result reveals ═══════════════════ */
 function showInlineAgent(name) {
