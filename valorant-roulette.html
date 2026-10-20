@@ -1225,19 +1225,24 @@
     .tf-team-preview-player.is-captain { color:#ff7080; font-weight:700; }
 
     /* Random Yabawei */
-    .tf-random-cards { display:flex; gap:24px; justify-content:center; margin:16px 0 24px; }
-    .tf-flip-card { width:130px; height:170px; perspective:800px; }
-    .tf-flip-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.4,0,.2,1); }
-    .tf-flip-inner.flipped { transform:rotateY(180deg); }
-    .tf-flip-front,.tf-flip-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; }
-    .tf-flip-front { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
-    .tf-flip-front-tier { font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.35); }
-    .tf-flip-front-name { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:800; letter-spacing:1px; color:#fff; text-align:center; word-break:break-word; }
-    .tf-flip-front-team { font-family:'Rajdhani',sans-serif; font-size:.78rem; font-weight:800; letter-spacing:3px; padding:3px 10px; border-radius:3px; display:none; margin-top:4px; }
-    .tf-flip-front-team.show { display:block; }
-    .tf-flip-front-team.ta { background:rgba(255,70,85,.2); color:#ff7080; border:1px solid rgba(255,70,85,.35); }
-    .tf-flip-front-team.tb { background:rgba(100,150,255,.2); color:#6496ff; border:1px solid rgba(100,150,255,.35); }
-    .tf-flip-back { background:linear-gradient(135deg,#1a0c10,#0f1923); border:1px solid rgba(255,70,85,.25); transform:rotateY(180deg); font-size:2.5rem; opacity:.4; }
+    .tf-yabawi-stage { position:relative; width:300px; margin:12px auto 20px; }
+    .tf-yabawi-cards { position:relative; height:165px; margin-bottom:12px; }
+    .tf-yabawi-card {
+      position:absolute; top:0; width:140px; height:165px;
+      background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.14); border-radius:6px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px; padding:14px; user-select:none; will-change:left, transform;
+    }
+    .tf-yabawi-card.card-done-a { border-color:rgba(255,70,85,.7); background:rgba(255,70,85,.1); box-shadow:0 0 24px rgba(255,70,85,.2); }
+    .tf-yabawi-card.card-done-b { border-color:rgba(100,150,255,.7); background:rgba(100,150,255,.1); box-shadow:0 0 24px rgba(100,150,255,.2); }
+    .tf-yc-tier { font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.35); }
+    .tf-yc-name { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:800; letter-spacing:2px; color:#fff; text-align:center; word-break:break-word; }
+    .tf-yabawi-slots { display:flex; justify-content:space-between; gap:20px; }
+    .tf-yabawi-slot { flex:1; padding:10px 0; border:2px dashed rgba(255,255,255,.12); border-radius:5px; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-size:.9rem; font-weight:800; letter-spacing:3px; transition:border-color .4s, color .4s, background .4s; }
+    .tf-yabawi-slot.slot-a { border-color:rgba(255,70,85,.3); color:rgba(255,100,115,.6); }
+    .tf-yabawi-slot.slot-b { border-color:rgba(100,150,255,.3); color:rgba(100,150,255,.6); }
+    .tf-yabawi-slot.lit-a { border-color:rgba(255,70,85,.8); color:#ff7080; background:rgba(255,70,85,.07); }
+    .tf-yabawi-slot.lit-b { border-color:rgba(100,150,255,.8); color:#6496ff; background:rgba(100,150,255,.07); }
     .tf-random-progress { font-family:'Rajdhani',sans-serif; font-size:.8rem; letter-spacing:3px; color:rgba(255,255,255,.3); text-align:center; margin-top:8px; }
     .tf-random-btn-row { display:flex; flex-direction:column; align-items:center; gap:10px; }
 
@@ -2995,8 +3000,11 @@ function tfRenderTeamPreview(idA, idB) {
 }
 
 /* ─── Screen 6: 야바위 랜덤 ─── */
+const YB_LEFT  = 0;
+const YB_RIGHT = 160;
+
 function tfStartRandom() {
-  tfRandomState = { tier: 1, shuffled: false };
+  tfRandomState = { tier: 1 };
   tfShowSub('ts-random');
   tfRenderRandomTier();
 }
@@ -3005,85 +3013,96 @@ function tfRenderRandomTier() {
   const [pA, pB] = tfPlayers[tier];
   document.getElementById('tfRandomTitle').textContent = `${TIER_NAMES[tier]} 배정`;
   document.getElementById('tfRandomProgress').textContent = `${tier} / 5`;
-  document.getElementById('tfShuffleBtn').style.display = 'block';
-  document.getElementById('tfShuffleBtn').disabled = false;
-  document.getElementById('tfNextTierBtn').style.display = 'none';
+  const shuffleBtn = document.getElementById('tfShuffleBtn');
+  const nextBtn    = document.getElementById('tfNextTierBtn');
+  shuffleBtn.style.display = 'block';
+  shuffleBtn.disabled = false;
+  nextBtn.style.display = 'none';
   tfRenderRandomPreview();
 
-  const cardsEl = document.getElementById('tfRandomCards');
-  cardsEl.innerHTML = '';
-  [pA, pB].forEach((name, i) => {
-    const card = document.createElement('div');
-    card.className = 'tf-flip-card'; card.id = `tfc${i}`;
-    card.innerHTML = `
-      <div class="tf-flip-inner" id="tffi${i}">
-        <div class="tf-flip-front">
-          <div class="tf-flip-front-tier">${TIER_NAMES[tier]}</div>
-          <div class="tf-flip-front-name">${name}</div>
-          <div class="tf-flip-front-team" id="tfft${i}"></div>
+  document.getElementById('tfRandomCards').innerHTML = `
+    <div class="tf-yabawi-stage">
+      <div class="tf-yabawi-cards" id="tfYCards">
+        <div class="tf-yabawi-card" id="tfYC0" style="left:${YB_LEFT}px;">
+          <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
+          <div class="tf-yc-name">${pA}</div>
         </div>
-        <div class="tf-flip-back">⧫</div>
-      </div>`;
-    cardsEl.appendChild(card);
-  });
+        <div class="tf-yabawi-card" id="tfYC1" style="left:${YB_RIGHT}px;">
+          <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
+          <div class="tf-yc-name">${pB}</div>
+        </div>
+      </div>
+      <div class="tf-yabawi-slots">
+        <div class="tf-yabawi-slot slot-a" id="tfSlotA">팀 A</div>
+        <div class="tf-yabawi-slot slot-b" id="tfSlotB">팀 B</div>
+      </div>
+    </div>`;
 
-  document.getElementById('tfShuffleBtn').onclick = () => tfDoShuffle(tier, [pA, pB]);
+  shuffleBtn.onclick = () => tfDoShuffle(tier, [pA, pB]);
 }
 
 function tfDoShuffle(tier, players) {
   document.getElementById('tfShuffleBtn').disabled = true;
-  const toA = Math.random() < 0.5; // player[0] goes to A?
-  const teams = toA ? ['A','B'] : ['B','A'];
+  const pAtoA = Math.random() < 0.5;
+  let numSwaps = Math.floor(Math.random() * 4) + 5;
+  if (pAtoA  && numSwaps % 2 !== 0) numSwaps++;
+  if (!pAtoA && numSwaps % 2 !== 1) numSwaps++;
 
-  // Step 1: flip to back
-  document.getElementById('tffi0').classList.add('flipped');
-  document.getElementById('tffi1').classList.add('flipped');
+  let pos0 = YB_LEFT, pos1 = YB_RIGHT;
+  let swapIdx = 0, topCard = 0;
 
-  // Step 2: shuffle wiggle
-  setTimeout(() => {
-    const c0 = document.getElementById('tfc0'), c1 = document.getElementById('tfc1');
-    c0.style.transition = c1.style.transition = 'transform .25s ease';
-    c0.style.transform = 'translateX(55px)'; c1.style.transform = 'translateX(-55px)';
-    setTimeout(() => {
-      c0.style.transform = ''; c1.style.transform = '';
-      setTimeout(() => {
-        c0.style.transform = 'translateX(30px)'; c1.style.transform = 'translateX(-30px)';
-        setTimeout(() => {
-          c0.style.transform = ''; c1.style.transform = '';
-          // Step 3: update front faces with team labels (while face-down)
-          setTimeout(() => {
-            [0,1].forEach(i => {
-              const teamLbl = document.getElementById(`tfft${i}`);
-              const tm = teams[i];
-              teamLbl.textContent = `팀 ${tm}`;
-              teamLbl.className = `tf-flip-front-team show t${tm.toLowerCase()}`;
-            });
-            // Step 4: flip back to front (reveal)
-            document.getElementById('tffi0').classList.remove('flipped');
-            document.getElementById('tffi1').classList.remove('flipped');
-            // Record results
-            setTimeout(() => {
-              players.forEach((name, i) => {
-                const entry = { tier, name, isCaptain: false };
-                if (teams[i] === 'A') tfTeamA.push(entry);
-                else tfTeamB.push(entry);
-              });
-              tfRenderRandomPreview();
-              document.getElementById('tfShuffleBtn').style.display = 'none';
-              if (tfRandomState.tier < 5) {
-                const nb = document.getElementById('tfNextTierBtn');
-                nb.style.display = 'block';
-                nb.onclick = () => { tfRandomState.tier++; tfRenderRandomTier(); };
-              } else {
-                setTimeout(tfShowResult, 900);
-              }
-            }, 700);
-          }, 200);
-        }, 260);
-      }, 260);
-    }, 260);
-  }, 700);
+  function doNextSwap() {
+    if (swapIdx >= numSwaps) {
+      const nameAtLeft  = pos0 === YB_LEFT ? players[0] : players[1];
+      const nameAtRight = pos0 === YB_RIGHT ? players[0] : players[1];
+      tfTeamA.push({ tier, name: nameAtLeft,  isCaptain: false });
+      tfTeamB.push({ tier, name: nameAtRight, isCaptain: false });
+      const c0 = document.getElementById('tfYC0');
+      const c1 = document.getElementById('tfYC1');
+      if (c0) c0.classList.add(pos0 === YB_LEFT ? 'card-done-a' : 'card-done-b');
+      if (c1) c1.classList.add(pos1 === YB_LEFT ? 'card-done-a' : 'card-done-b');
+      const slotA = document.getElementById('tfSlotA');
+      const slotB = document.getElementById('tfSlotB');
+      if (slotA) slotA.classList.add('lit-a');
+      if (slotB) slotB.classList.add('lit-b');
+      tfRenderRandomPreview();
+      document.getElementById('tfShuffleBtn').style.display = 'none';
+      if (tfRandomState.tier < 5) {
+        const nb = document.getElementById('tfNextTierBtn');
+        nb.style.display = 'block';
+        nb.onclick = () => { tfRandomState.tier++; tfRenderRandomTier(); };
+      } else {
+        setTimeout(tfShowResult, 1000);
+      }
+      return;
+    }
+
+    let dur;
+    if (swapIdx < 2)                  dur = 400;
+    else if (swapIdx >= numSwaps - 2) dur = 460;
+    else                              dur = 200;
+
+    const c0 = document.getElementById('tfYC0');
+    const c1 = document.getElementById('tfYC1');
+    if (!c0 || !c1) return;
+
+    [pos0, pos1] = [pos1, pos0];
+    topCard = 1 - topCard;
+
+    c0.style.transition = `left ${dur}ms ease-in-out`;
+    c1.style.transition = `left ${dur}ms ease-in-out`;
+    c0.style.left = pos0 + 'px';
+    c1.style.left = pos1 + 'px';
+    c0.style.zIndex = topCard === 0 ? '2' : '1';
+    c1.style.zIndex = topCard === 1 ? '2' : '1';
+
+    swapIdx++;
+    setTimeout(doNextSwap, dur + 30);
+  }
+
+  setTimeout(doNextSwap, 150);
 }
+
 
 function tfRenderRandomPreview() {
   tfRenderTeamPreview('tfRandomPreviewA','tfRandomPreviewB');
