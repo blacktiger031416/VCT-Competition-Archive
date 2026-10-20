@@ -1229,12 +1229,33 @@
     .tf-yabawi-cards { position:relative; height:165px; margin-bottom:12px; }
     .tf-yabawi-card {
       position:absolute; top:0; width:140px; height:165px;
-      background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.14); border-radius:6px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:8px; padding:14px; user-select:none; will-change:left, transform;
+      perspective:600px; user-select:none; will-change:left;
     }
-    .tf-yabawi-card.card-done-a { border-color:rgba(255,70,85,.7); background:rgba(255,70,85,.1); box-shadow:0 0 24px rgba(255,70,85,.2); }
-    .tf-yabawi-card.card-done-b { border-color:rgba(100,150,255,.7); background:rgba(100,150,255,.1); box-shadow:0 0 24px rgba(100,150,255,.2); }
+    .tf-yc-inner {
+      position:relative; width:100%; height:100%;
+      transform-style:preserve-3d;
+      transition:transform .55s ease;
+    }
+    /* flipped = face-down (back visible, name hidden) */
+    .tf-yabawi-card.flipped .tf-yc-inner { transform:rotateY(180deg); }
+    .tf-yc-back, .tf-yc-front {
+      position:absolute; inset:0; border-radius:6px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px; padding:14px;
+      backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    }
+    /* front (player name) = default visible */
+    .tf-yc-front {
+      background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.14);
+    }
+    /* back (?) = shown when flipped 180deg */
+    .tf-yc-back {
+      background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.12);
+      transform:rotateY(180deg);
+    }
+    .tf-yc-back-symbol { font-size:2.4rem; opacity:.25; }
+    .tf-yabawi-card.card-done-a .tf-yc-front { border-color:rgba(255,70,85,.7); background:rgba(255,70,85,.1); box-shadow:0 0 24px rgba(255,70,85,.2); }
+    .tf-yabawi-card.card-done-b .tf-yc-front { border-color:rgba(100,150,255,.7); background:rgba(100,150,255,.1); box-shadow:0 0 24px rgba(100,150,255,.2); }
     .tf-yc-tier { font-family:'Rajdhani',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.35); }
     .tf-yc-name { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:800; letter-spacing:2px; color:#fff; text-align:center; word-break:break-word; }
     .tf-yabawi-slots { display:flex; justify-content:space-between; gap:20px; }
@@ -3024,12 +3045,22 @@ function tfRenderRandomTier() {
     <div class="tf-yabawi-stage">
       <div class="tf-yabawi-cards" id="tfYCards">
         <div class="tf-yabawi-card" id="tfYC0" style="left:${YB_LEFT}px;">
-          <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
-          <div class="tf-yc-name">${pA}</div>
+          <div class="tf-yc-inner">
+            <div class="tf-yc-back"><div class="tf-yc-back-symbol">?</div></div>
+            <div class="tf-yc-front">
+              <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
+              <div class="tf-yc-name">${pA}</div>
+            </div>
+          </div>
         </div>
         <div class="tf-yabawi-card" id="tfYC1" style="left:${YB_RIGHT}px;">
-          <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
-          <div class="tf-yc-name">${pB}</div>
+          <div class="tf-yc-inner">
+            <div class="tf-yc-back"><div class="tf-yc-back-symbol">?</div></div>
+            <div class="tf-yc-front">
+              <div class="tf-yc-tier">${TIER_NAMES[tier]}</div>
+              <div class="tf-yc-name">${pB}</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="tf-yabawi-slots">
@@ -3038,11 +3069,19 @@ function tfRenderRandomTier() {
       </div>
     </div>`;
 
-  shuffleBtn.onclick = () => tfDoShuffle(tier, [pA, pB]);
+  shuffleBtn.onclick = () => {
+    shuffleBtn.disabled = true;
+    const c0 = document.getElementById('tfYC0');
+    const c1 = document.getElementById('tfYC1');
+    // 1단계: 뒤집어서 face-down (이름 숨기기)
+    if (c0) c0.classList.add('flipped');
+    if (c1) c1.classList.add('flipped');
+    // 2단계: 0.65s 후 셔플 시작 (face-down 상태에서 슬라이딩)
+    setTimeout(() => tfDoShuffle(tier, [pA, pB]), 650);
+  };
 }
 
 function tfDoShuffle(tier, players) {
-  document.getElementById('tfShuffleBtn').disabled = true;
   const pAtoA = Math.random() < 0.5;
   let numSwaps = Math.floor(Math.random() * 4) + 5;
   if (pAtoA  && numSwaps % 2 !== 0) numSwaps++;
@@ -3059,20 +3098,28 @@ function tfDoShuffle(tier, players) {
       tfTeamB.push({ tier, name: nameAtRight, isCaptain: false });
       const c0 = document.getElementById('tfYC0');
       const c1 = document.getElementById('tfYC1');
+      // 결과 색상 클래스 먼저 설정 (face-down 상태에서)
       if (c0) c0.classList.add(pos0 === YB_LEFT ? 'card-done-a' : 'card-done-b');
       if (c1) c1.classList.add(pos1 === YB_LEFT ? 'card-done-a' : 'card-done-b');
+      // 3단계: 카드 뒤집어서 공개 (flipped 제거 → face-up)
+      setTimeout(() => {
+        if (c0) c0.classList.remove('flipped');
+        if (c1) c1.classList.remove('flipped');
+      }, 120);
       const slotA = document.getElementById('tfSlotA');
       const slotB = document.getElementById('tfSlotB');
-      if (slotA) slotA.classList.add('lit-a');
-      if (slotB) slotB.classList.add('lit-b');
+      if (slotA) setTimeout(() => slotA.classList.add('lit-a'), 500);
+      if (slotB) setTimeout(() => slotB.classList.add('lit-b'), 500);
       tfRenderRandomPreview();
       document.getElementById('tfShuffleBtn').style.display = 'none';
       if (tfRandomState.tier < 5) {
         const nb = document.getElementById('tfNextTierBtn');
-        nb.style.display = 'block';
-        nb.onclick = () => { tfRandomState.tier++; tfRenderRandomTier(); };
+        setTimeout(() => {
+          nb.style.display = 'block';
+          nb.onclick = () => { tfRandomState.tier++; tfRenderRandomTier(); };
+        }, 750);
       } else {
-        setTimeout(tfShowResult, 1000);
+        setTimeout(tfShowResult, 1750);
       }
       return;
     }
