@@ -1298,6 +1298,53 @@
     .tf-chal-value { font-family:'Rajdhani',sans-serif; font-size:.95rem; font-weight:700; letter-spacing:1px; color:#fff; }
     .tf-chal-value-sub { font-size:.68rem; color:rgba(255,255,255,.4); margin-top:1px; }
 
+    /* ── 챌린지 순차 연출 ── */
+    .chal-seq { display:flex; flex-direction:column; align-items:center; width:100%; padding:4px 0; }
+    .chal-seq-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .chal-seq-badge { font-family:'Rajdhani',sans-serif; font-size:.72rem; font-weight:800; letter-spacing:3px; padding:3px 12px; border-radius:3px; }
+    .chal-seq-badge.a { background:rgba(255,70,85,.15); color:rgba(255,100,110,.85); }
+    .chal-seq-badge.b { background:rgba(100,150,255,.15); color:rgba(130,170,255,.85); }
+    .chal-seq-player { font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    /* 슬롯 영역 */
+    .chal-slot-wrap { position:relative; width:180px; margin:4px auto 8px; text-align:center; }
+    .chal-slot-face { width:160px; height:160px; object-fit:contain; border-radius:10px; display:block; margin:0 auto; transition:opacity .1s; }
+    .chal-slot-name { font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:800; color:#fff; margin-top:6px; letter-spacing:1px; }
+    @keyframes chalFlash { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.15; transform:scale(.88);} }
+    .chal-slot-wrap.spinning .chal-slot-face,
+    .chal-slot-wrap.spinning .chal-slot-name { animation:chalFlash .11s infinite; }
+    /* 총기 */
+    .chal-weapons { display:flex; gap:16px; justify-content:center; margin-top:4px; }
+    .chal-weapon-item { text-align:center; }
+    .chal-weapon-img { height:36px; object-fit:contain; opacity:.85; }
+    .chal-weapon-label { font-family:'Rajdhani',sans-serif; font-size:.6rem; letter-spacing:1px; color:rgba(255,255,255,.4); margin-top:3px; }
+    /* 조준선/감도 카드 */
+    .chal-info-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:16px 18px; width:100%; max-width:320px; text-align:center; }
+    .chal-info-big { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:4px; }
+    .chal-info-sub { font-family:'Rajdhani',sans-serif; font-size:.82rem; color:rgba(255,255,255,.45); }
+    .chal-cross-img { height:80px; object-fit:contain; margin-bottom:10px; }
+    .chal-cross-code { font-size:.55rem; color:rgba(255,255,255,.28); word-break:break-all; margin:6px 0 10px; line-height:1.5; }
+    .chal-copy-btn { padding:7px 18px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:3px; color:rgba(255,255,255,.6); font-family:'Rajdhani',sans-serif; font-size:.75rem; letter-spacing:1px; cursor:pointer; transition:background .2s; }
+    .chal-copy-btn:hover { background:rgba(255,255,255,.14); }
+    .chal-sens-name { font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:4px; }
+    .chal-sens-dpi { font-family:'Rajdhani',sans-serif; font-size:.9rem; color:rgba(255,255,255,.45); }
+    /* 버튼 행 */
+    .chal-seq-btns { display:flex; gap:10px; margin-top:16px; }
+    .chal-adj-btn { padding:10px 18px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14); border-radius:4px; color:rgba(255,255,255,.6); font-family:'Rajdhani',sans-serif; font-size:.82rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:background .2s; }
+    .chal-adj-btn:hover { background:rgba(255,255,255,.12); }
+    .chal-adj-btn:disabled { opacity:.3; cursor:default; }
+    .chal-next-btn { padding:10px 26px; background:rgba(255,70,85,.18); border:1px solid rgba(255,70,85,.45); border-radius:4px; color:#ff7080; font-family:'Rajdhani',sans-serif; font-size:.82rem; font-weight:800; letter-spacing:2px; cursor:pointer; transition:background .2s; }
+    .chal-next-btn:hover { background:rgba(255,70,85,.32); }
+    .chal-next-btn:disabled { opacity:.3; cursor:default; }
+    /* 조정 모달 */
+    .chal-adj-overlay { position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:600; display:flex; align-items:center; justify-content:center; }
+    .chal-adj-panel { background:#1c1c24; border:1px solid rgba(255,255,255,.11); border-radius:8px; padding:20px 18px; width:290px; max-height:72vh; overflow-y:auto; }
+    .chal-adj-title { font-family:'Rajdhani',sans-serif; font-size:.75rem; font-weight:800; letter-spacing:3px; color:rgba(255,255,255,.35); margin-bottom:12px; text-align:center; }
+    .chal-adj-item { display:flex; align-items:center; gap:10px; padding:9px 11px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:4px; cursor:pointer; margin-bottom:5px; font-family:'Rajdhani',sans-serif; font-size:.88rem; font-weight:700; color:#fff; transition:background .15s; }
+    .chal-adj-item:hover { background:rgba(255,70,85,.1); border-color:rgba(255,70,85,.35); }
+    .chal-adj-item img { width:30px; height:30px; object-fit:contain; border-radius:3px; }
+    .chal-adj-item.current { border-color:rgba(255,70,85,.5); background:rgba(255,70,85,.08); }
+    .chal-adj-cancel { width:100%; margin-top:8px; padding:9px; background:transparent; border:1px solid rgba(255,255,255,.09); border-radius:4px; color:rgba(255,255,255,.35); font-family:'Rajdhani',sans-serif; font-size:.78rem; cursor:pointer; }
+
     /* ── 테스트 서버 모드 ── */
     .tf-ts-count-row { display:flex; gap:12px; justify-content:center; margin:16px 0; }
     .tf-ts-count-btn { width:100px; padding:14px; background:rgba(255,255,255,.04); border:2px solid rgba(255,255,255,.12); border-radius:4px; font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:800; letter-spacing:2px; color:rgba(255,255,255,.5); cursor:pointer; transition:all .2s; }
@@ -3397,59 +3444,256 @@ document.getElementById('tfChalModeBtn').addEventListener('click', () => {
 });
 document.getElementById('tsChalBackBtn').addEventListener('click', () => tfShowSub('ts-result'));
 
-function tfRollUniq(pool, usedSet) {
-  const avail = pool.filter(x => !usedSet.has(x));
-  const pick = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)]
-                                 : pool[Math.floor(Math.random() * pool.length)];
-  usedSet.add(pick);
-  return pick;
+/* ── 챌린지 모드 순차 연출 ── */
+const chalState = { type:'', queue:[], idx:0, usedA:new Set(), usedB:new Set() };
+
+function chalPickUniq(pool, usedSet, excludeKey) {
+  const avail = pool.filter(k => !usedSet.has(k) && k !== excludeKey);
+  if (!avail.length) return pool[Math.floor(Math.random() * pool.length)];
+  return avail[Math.floor(Math.random() * avail.length)];
 }
 
-function tfRollChallenge(type) {
-  const usedA = new Set(), usedB = new Set();
-  const rollTeam = (team, usedSet) => team.slice().sort((a,b) => a.tier - b.tier).map(p => {
-    const r = { name: p.name, tier: p.tier, isCaptain: p.isCaptain };
+function buildChalQueue(type) {
+  const usedA = new Set(), usedB = new Set(), shared = new Set();
+  const isShared = type === 'crosshair' || type === 'sensitivity';
+  chalState.usedA = isShared ? shared : usedA;
+  chalState.usedB = isShared ? shared : usedB;
+
+  const makeItem = (p, team) => {
+    const used = isShared ? shared : (team === 'A' ? usedA : usedB);
+    const item = { team, name:p.name, tier:p.tier, isCaptain:p.isCaptain };
     if (type === 'agent' || type === 'full') {
-      r.agent = AGENT_KO[tfRollUniq(AGENTS, usedSet)];
+      item.agentKey = chalPickUniq(AGENTS, used);
+      used.add(item.agentKey);
+      item.agent = AGENT_KO[item.agentKey];
     }
     if (type === 'full') {
-      r.pistol = WEAPON_KO[PISTOLS[Math.floor(Math.random() * PISTOLS.length)]];
-      r.primary = WEAPON_KO[PRIMARIES[Math.floor(Math.random() * PRIMARIES.length)]];
+      item.pistolKey  = PISTOLS [Math.floor(Math.random() * PISTOLS .length)];
+      item.primaryKey = PRIMARIES[Math.floor(Math.random() * PRIMARIES.length)];
+      item.pistol  = WEAPON_KO[item.pistolKey];
+      item.primary = WEAPON_KO[item.primaryKey];
     }
     if (type === 'crosshair') {
-      const key = tfRollUniq(CROSSHAIRS, usedSet);
-      r.crosshairName = CROSSHAIR_DATA[key].ko;
-      r.crosshairCode = CROSSHAIR_DATA[key].code;
+      item.crosshairKey  = chalPickUniq(CROSSHAIRS, used);
+      used.add(item.crosshairKey);
+      const d = CROSSHAIR_DATA[item.crosshairKey];
+      item.crosshairName = d.ko; item.crosshairCode = d.code;
     }
     if (type === 'sensitivity') {
-      const key = tfRollUniq(SENSITIVITIES, usedSet);
-      const d = SENSITIVITY_DATA[key];
-      r.sensName = d.ko;
-      r.sensDpi = d.dpi;
-      r.sensSens = d.sens;
+      item.sensitivityKey = chalPickUniq(SENSITIVITIES, used);
+      used.add(item.sensitivityKey);
+      const d = SENSITIVITY_DATA[item.sensitivityKey];
+      item.sensName = d.ko; item.sensDpi = d.dpi; item.sensSens = d.sens;
     }
-    return r;
+    return item;
+  };
+
+  const sA = [...tfSnapA].sort((a,b) => a.tier - b.tier);
+  const sB = [...tfSnapB].sort((a,b) => a.tier - b.tier);
+  return [...sA.map(p => makeItem(p,'A')), ...sB.map(p => makeItem(p,'B'))];
+}
+
+function startChalSequence(type) {
+  chalState.type  = type;
+  chalState.queue = buildChalQueue(type);
+  chalState.idx   = 0;
+  renderChalStep();
+}
+
+function renderChalStep() {
+  const el   = document.getElementById('tsChalResult');
+  el.style.display = 'block';
+  const { type, queue, idx } = chalState;
+  const item  = queue[idx];
+  const total = queue.length;
+  const isLast = idx === total - 1;
+
+  const teamItems = queue.filter(q => q.team === item.team);
+  const teamIdx   = teamItems.indexOf(item) + 1;
+  const badge     = `<span class="chal-seq-badge ${item.team.toLowerCase()}">팀 ${item.team} &nbsp;${teamIdx} / ${teamItems.length}</span>`;
+
+  /* ── 콘텐츠 빌드 ── */
+  let middle = '';
+  if (type === 'agent' || type === 'full') {
+    const weps = type === 'full' ? `
+      <div class="chal-weapons">
+        <div class="chal-weapon-item">
+          <img class="chal-weapon-img" src="assets/valorant-roulette-weapon/${item.pistolKey}.webp" onerror="this.style.opacity=0">
+          <div class="chal-weapon-label">${item.pistol}</div>
+        </div>
+        <div class="chal-weapon-item">
+          <img class="chal-weapon-img" src="assets/valorant-roulette-weapon/${item.primaryKey}.webp" onerror="this.style.opacity=0">
+          <div class="chal-weapon-label">${item.primary}</div>
+        </div>
+      </div>` : '';
+    middle = `
+      <div class="chal-slot-wrap" id="chalSlot">
+        <img class="chal-slot-face" id="chalFace" src="assets/valorant-roulette-agent-face/${item.agentKey}_face.webp" onerror="this.style.opacity=0">
+        <div class="chal-slot-name" id="chalName">${item.agent}</div>
+      </div>${weps}`;
+  } else if (type === 'crosshair') {
+    middle = `
+      <div class="chal-info-card">
+        <img class="chal-cross-img" src="assets/valorant-roulette-crosshair/${item.crosshairKey}.png" onerror="this.style.display='none'">
+        <div class="chal-info-big">${item.crosshairName}</div>
+        <div class="chal-cross-code">${item.crosshairCode}</div>
+        <button class="chal-copy-btn" id="chalCopyBtn">코드 복사</button>
+      </div>`;
+  } else {
+    middle = `
+      <div class="chal-info-card">
+        <div class="chal-sens-name">${item.sensName}</div>
+        <div class="chal-sens-dpi">${item.sensDpi} DPI &nbsp;·&nbsp; ${item.sensSens}</div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="chal-seq">
+      <div class="chal-seq-header">${badge}</div>
+      <div class="chal-seq-player">
+        <span class="tf-result-ptier ${TIER_CLASSES[item.tier]}">${TIER_NAMES[item.tier]}</span>
+        ${item.name}${item.isCaptain ? ' ★' : ''}
+      </div>
+      ${middle}
+      <div class="chal-seq-btns">
+        <button class="chal-adj-btn" id="chalAdjBtn">조정</button>
+        <button class="chal-next-btn" id="chalNextBtn" disabled>${isLast ? '결과 보기' : '다음 →'}</button>
+      </div>
+    </div>`;
+
+  /* 복사 버튼 */
+  const copyBtn = document.getElementById('chalCopyBtn');
+  if (copyBtn) copyBtn.onclick = () => {
+    navigator.clipboard.writeText(item.crosshairCode).then(() => {
+      copyBtn.textContent = '복사됨!';
+      setTimeout(() => copyBtn.textContent = '코드 복사', 1500);
+    });
+  };
+
+  /* 다음/완료 버튼 */
+  document.getElementById('chalNextBtn').onclick = () => {
+    chalState.idx++;
+    if (chalState.idx >= total) showChalFinalResult();
+    else renderChalStep();
+  };
+
+  /* 조정 버튼 */
+  document.getElementById('chalAdjBtn').onclick = () => openChalAdjust(item);
+
+  /* 요원 스핀 */
+  if (type === 'agent' || type === 'full') spinChalSlot(item);
+  else document.getElementById('chalNextBtn').disabled = false;
+}
+
+function spinChalSlot(item) {
+  const wrap = document.getElementById('chalSlot');
+  const face = document.getElementById('chalFace');
+  const name = document.getElementById('chalName');
+  const next = document.getElementById('chalNextBtn');
+  const adj  = document.getElementById('chalAdjBtn');
+  if (!wrap) return;
+  wrap.classList.add('spinning');
+  if (next) next.disabled = true;
+  if (adj)  adj.disabled  = true;
+
+  const delays = [70,70,80,80,90,100,110,120,140,160,180,210,250,300,370,450,550,650];
+  let i = 0;
+  const tick = () => {
+    if (i >= delays.length) {
+      wrap.classList.remove('spinning');
+      face.src = `assets/valorant-roulette-agent-face/${item.agentKey}_face.webp`;
+      name.textContent = item.agent;
+      if (next) next.disabled = false;
+      if (adj)  adj.disabled  = false;
+      return;
+    }
+    const rnd = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+    face.src = `assets/valorant-roulette-agent-face/${rnd}_face.webp`;
+    name.textContent = AGENT_KO[rnd];
+    setTimeout(tick, delays[i++]);
+  };
+  tick();
+}
+
+function openChalAdjust(item) {
+  const type     = chalState.type;
+  const usedSet  = item.team === 'A' ? chalState.usedA : chalState.usedB;
+  const curKey   = item.agentKey || item.crosshairKey || item.sensitivityKey;
+
+  let pool, label, img;
+  if (type === 'agent' || type === 'full') {
+    const othersUsed = new Set([...usedSet].filter(k => k !== item.agentKey));
+    pool  = AGENTS.filter(k => !othersUsed.has(k));
+    label = k => AGENT_KO[k];
+    img   = k => `assets/valorant-roulette-agent-face/${k}_face.webp`;
+  } else if (type === 'crosshair') {
+    const othersUsed = new Set([...usedSet].filter(k => k !== item.crosshairKey));
+    pool  = CROSSHAIRS.filter(k => !othersUsed.has(k));
+    label = k => CROSSHAIR_DATA[k].ko;
+    img   = k => `assets/valorant-roulette-crosshair/${k}.png`;
+  } else {
+    const othersUsed = new Set([...usedSet].filter(k => k !== item.sensitivityKey));
+    pool  = SENSITIVITIES.filter(k => !othersUsed.has(k));
+    label = k => { const d = SENSITIVITY_DATA[k]; return `${d.ko} (${d.dpi} DPI)`; };
+    img   = null;
+  }
+
+  const ov = document.createElement('div');
+  ov.className = 'chal-adj-overlay';
+  ov.innerHTML = `
+    <div class="chal-adj-panel">
+      <div class="chal-adj-title">다른 항목 선택</div>
+      ${pool.map(k => `
+        <div class="chal-adj-item${k === curKey ? ' current' : ''}" data-key="${k}">
+          ${img ? `<img src="${img(k)}" onerror="this.style.display='none'">` : ''}
+          <span>${label(k)}</span>
+        </div>`).join('')}
+      <button class="chal-adj-cancel">취소</button>
+    </div>`;
+  document.body.appendChild(ov);
+
+  ov.querySelectorAll('.chal-adj-item').forEach(el => {
+    el.onclick = () => {
+      const newKey = el.dataset.key;
+      usedSet.delete(curKey); usedSet.add(newKey);
+      if (type === 'agent' || type === 'full') {
+        item.agentKey = newKey; item.agent = AGENT_KO[newKey];
+      } else if (type === 'crosshair') {
+        item.crosshairKey  = newKey;
+        item.crosshairName = CROSSHAIR_DATA[newKey].ko;
+        item.crosshairCode = CROSSHAIR_DATA[newKey].code;
+      } else {
+        item.sensitivityKey = newKey;
+        const d = SENSITIVITY_DATA[newKey];
+        item.sensName = d.ko; item.sensDpi = d.dpi; item.sensSens = d.sens;
+      }
+      document.body.removeChild(ov);
+      renderChalStep();
+    };
   });
-  return { A: rollTeam(tfSnapA, usedA), B: rollTeam(tfSnapB, usedB) };
+  ov.querySelector('.chal-adj-cancel').onclick = () => document.body.removeChild(ov);
 }
 
 function tfFormatChalValue(type, p) {
   if (!p) return '';
-  if (type === 'agent')    return `<div class="tf-chal-value">${p.agent}</div>`;
-  if (type === 'full')     return `<div class="tf-chal-value">${p.agent}</div><div class="tf-chal-value-sub">${p.pistol} / ${p.primary}</div>`;
-  if (type === 'crosshair')return `<div class="tf-chal-value">${p.crosshairName}</div><div class="tf-chal-value-sub" style="font-size:.55rem;word-break:break-all;opacity:.5">${p.crosshairCode}</div>`;
+  if (type === 'agent')       return `<div class="tf-chal-value">${p.agent}</div>`;
+  if (type === 'full')        return `<div class="tf-chal-value">${p.agent}</div><div class="tf-chal-value-sub">${p.pistol} / ${p.primary}</div>`;
+  if (type === 'crosshair')   return `<div class="tf-chal-value">${p.crosshairName}</div><div class="tf-chal-value-sub" style="font-size:.55rem;word-break:break-all;opacity:.5">${p.crosshairCode}</div>`;
   if (type === 'sensitivity') return `<div class="tf-chal-value">${p.sensName}</div><div class="tf-chal-value-sub">${p.sensDpi}DPI · ${p.sensSens}</div>`;
   return '';
 }
 
-function tfRenderChallengeResult(type, results) {
-  const el = document.getElementById('tsChalResult');
-  el.style.display = 'block';
+function showChalFinalResult() {
+  const el    = document.getElementById('tsChalResult');
+  const type  = chalState.type;
+  const queue = chalState.queue;
+  const qA    = queue.filter(q => q.team === 'A');
+  const qB    = queue.filter(q => q.team === 'B');
   const labels = { agent:'요원', full:'요원 + 총기', crosshair:'조준선', sensitivity:'감도' };
-  const max = Math.max(results.A.length, results.B.length);
+  const max   = Math.max(qA.length, qB.length);
   let rows = '';
   for (let i = 0; i < max; i++) {
-    const a = results.A[i], b = results.B[i];
+    const a = qA[i], b = qB[i];
     rows += `<div class="tf-chal-row">
       <div class="tf-chal-cell side-a">
         <div class="tf-chal-player"><span class="tf-result-ptier ${TIER_CLASSES[a?.tier||0]}">${a ? TIER_NAMES[a.tier] : ''}</span> ${a?.name||''}</div>
@@ -3471,14 +3715,12 @@ function tfRenderChallengeResult(type, results) {
     <div style="text-align:center;margin-top:14px;">
       <button class="tf-btn-secondary" id="tsChalRerollBtn">다시 굴리기</button>
     </div>`;
-  document.getElementById('tsChalRerollBtn').onclick = () => tfRenderChallengeResult(type, tfRollChallenge(type));
+  document.getElementById('tsChalRerollBtn').onclick = () => startChalSequence(type);
 }
 
 ['Agent','Full','Cross','Sens'].forEach((id, i) => {
   const types = ['agent','full','crosshair','sensitivity'];
-  document.getElementById('tsChal' + id).addEventListener('click', () => {
-    tfRenderChallengeResult(types[i], tfRollChallenge(types[i]));
-  });
+  document.getElementById('tsChal' + id).addEventListener('click', () => startChalSequence(types[i]));
 });
 
 /* ══ 테스트 서버 모드 ══ */
