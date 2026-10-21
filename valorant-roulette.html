@@ -3732,6 +3732,19 @@ function showChalFinalResult() {
   document.getElementById('tsChal' + id).addEventListener('click', () => startChalSequence(types[i]));
 });
 
+/* 캡슐 이미지 프리로드 — 첫 사용 시 로딩 지연 방지 */
+(function() {
+  const BASE = 'assets/valorant-roulette-capsule/';
+  ['capsule_machine','capsule_machine_work',
+   'red_capsule','red_capsule_open',
+   'green_capsule','green_capsule_open',
+   'yellow_capsule','yellow_capsule_open',
+   'purple_capsule','purple_capsule_open',
+   'pink_capsule','pink_capsule_open',
+   'blue_capsule','blue_capsule_open'
+  ].forEach(name => { const img = new Image(); img.src = BASE + name + '.png'; });
+})();
+
 /* ══ 테스트 서버 모드 ══ */
 document.getElementById('tfTSModeBtn').addEventListener('click', () => {
   document.getElementById('tfModeOverlay').style.display = 'none';
