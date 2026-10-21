@@ -1346,6 +1346,11 @@
     .chal-next-btn { padding:10px 26px; background:rgba(255,70,85,.18); border:1px solid rgba(255,70,85,.45); border-radius:4px; color:#ff7080; font-family:'Rajdhani',sans-serif; font-size:.82rem; font-weight:800; letter-spacing:2px; cursor:pointer; transition:background .2s; }
     .chal-next-btn:hover { background:rgba(255,70,85,.32); }
     .chal-next-btn:disabled { opacity:.3; cursor:default; }
+    /* 다음 순서 미리보기 */
+    .chal-next-preview { margin-top:10px; font-family:'Rajdhani',sans-serif; font-size:.78rem; color:rgba(255,255,255,.32); letter-spacing:1px; display:flex; align-items:center; gap:4px; }
+    .chal-next-badge { font-size:.68rem; font-weight:800; padding:2px 8px; border-radius:3px; }
+    .chal-next-badge.a { background:rgba(255,70,85,.12); color:rgba(255,110,120,.7); }
+    .chal-next-badge.b { background:rgba(100,150,255,.12); color:rgba(130,170,255,.7); }
     /* 조정 모달 */
     .chal-adj-overlay { position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:600; display:flex; align-items:center; justify-content:center; }
     .chal-adj-panel { background:#1c1c24; border:1px solid rgba(255,255,255,.11); border-radius:8px; padding:20px 18px; width:290px; max-height:72vh; overflow-y:auto; }
@@ -3565,6 +3570,12 @@ function renderChalStep() {
         <button class="chal-adj-btn" id="chalAdjBtn" disabled>조정</button>
         <button class="chal-next-btn" id="chalNextBtn" disabled>${isLast ? '결과 보기' : '다음 →'}</button>
       </div>
+      ${!isLast ? (() => {
+        const nx = queue[idx + 1];
+        const nxTeamItems = queue.filter(q => q.team === nx.team);
+        const nxIdx = nxTeamItems.indexOf(nx) + 1;
+        return `<div class="chal-next-preview">다음 &nbsp;·&nbsp; <span class="chal-next-badge ${nx.team.toLowerCase()}">팀 ${nx.team} ${nxIdx}/${nxTeamItems.length}</span> &nbsp;${nx.name}</div>`;
+      })() : ''}
     </div>`;
 
   document.getElementById('chalNextBtn').onclick = () => {
