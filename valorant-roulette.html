@@ -1305,21 +1305,17 @@
     .chal-seq-badge.a { background:rgba(255,70,85,.15); color:rgba(255,100,110,.85); }
     .chal-seq-badge.b { background:rgba(100,150,255,.15); color:rgba(130,170,255,.85); }
     .chal-seq-player { font-family:'Rajdhani',sans-serif; font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
-    /* 공 뽑기 기계 */
-    .chal-machine-area { display:flex; flex-direction:column; align-items:center; width:100%; margin:8px 0; min-height:240px; justify-content:center; }
-    .chal-machine-wrap { display:flex; flex-direction:column; align-items:center; }
-    .chal-machine-bowl { width:190px; height:190px; border-radius:50%; border:3px solid rgba(255,255,255,.22); background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.09),rgba(255,255,255,.02)); position:relative; overflow:hidden; box-shadow:0 0 40px rgba(255,255,255,.04),inset 0 0 40px rgba(0,0,0,.4); }
-    .chal-ball { position:absolute; border-radius:50%; animation:chalBallBounce var(--dur,0.7s) ease-in-out infinite alternate; box-shadow:0 2px 8px rgba(0,0,0,.55); }
-    @keyframes chalBallBounce { 0%{transform:translate(0,0) rotate(0deg);} 100%{transform:translate(var(--bdx,20px),var(--bdy,20px)) rotate(360deg);} }
-    @keyframes chalBowlOut { to{opacity:0;transform:scale(0.65);} }
-    .chal-machine-tube { width:28px; height:36px; background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.18); border-top:none; border-radius:0 0 14px 14px; margin-top:-1px; }
-    /* 캡슐 */
-    .chal-capsule-wrap { flex-direction:column; align-items:center; width:60px; }
-    @keyframes chalCapDrop { from{opacity:0;transform:translateY(-50px);} to{opacity:1;transform:translateY(0);} }
-    .chal-cap-top { width:60px; height:42px; border-radius:30px 30px 0 0; background:linear-gradient(145deg,#ff7080,#FF4655); box-shadow:0 0 18px rgba(255,70,85,.5); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
-    .chal-cap-btm { width:60px; height:42px; border-radius:0 0 30px 30px; background:linear-gradient(325deg,#e8e8e8,#bbb); box-shadow:0 0 10px rgba(200,200,200,.15); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
-    .chal-cap-top.chal-cap-open  { transform:translateY(-30px) rotate(-20deg); }
-    .chal-cap-open-btm           { transform:translateY(30px)  rotate(13deg); }
+    /* 캡슐 뽑기 기계 */
+    .chal-machine-area { display:flex; flex-direction:column; align-items:center; width:100%; margin:8px 0; min-height:220px; justify-content:center; }
+    .chal-machine-img  { width:220px; height:auto; object-fit:contain; }
+    @keyframes chalMachineShake { 0%,100%{transform:rotate(0deg);} 20%{transform:rotate(-2.5deg);} 40%{transform:rotate(2.5deg);} 60%{transform:rotate(-2deg);} 80%{transform:rotate(2deg);} }
+    .chal-machine-work { animation:chalMachineShake 0.22s ease-in-out infinite; }
+    /* 뽑힌 캡슐 */
+    .chal-capsule-img { width:160px; height:auto; object-fit:contain; }
+    @keyframes chalCapAppear { 0%{opacity:0;transform:translateY(-30px) scale(.85);} 60%{transform:translateY(6px) scale(1.04);} 100%{opacity:1;transform:translateY(0) scale(1);} }
+    .chal-cap-appear { animation:chalCapAppear 0.45s cubic-bezier(.34,1.56,.64,1) forwards; }
+    @keyframes chalCapOpenAnim { 0%{transform:scale(1);} 30%{transform:scale(1.08);} 70%{transform:scale(.96);} 100%{transform:scale(1);} }
+    .chal-cap-opening { animation:chalCapOpenAnim 0.4s ease-in-out forwards; }
     /* 종이 펼치기 */
     .chal-paper-reveal { flex-direction:column; align-items:center; background:rgba(245,240,220,.05); border:1px solid rgba(245,240,220,.12); border-radius:8px; padding:16px 20px; width:100%; max-width:300px; margin:4px auto; text-align:center; transform-origin:top center; }
     @keyframes chalPaperUnfold { 0%{transform:scaleY(0.04);opacity:0.2;} 65%{transform:scaleY(1.07);opacity:1;} 100%{transform:scaleY(1);opacity:1;} }
@@ -3586,50 +3582,31 @@ function runChalCapsuleAnim(item) {
   const next = document.getElementById('chalNextBtn');
   const adj  = document.getElementById('chalAdjBtn');
 
-  const COLS = ['#FF4655','#00B4C8','#FFD700','#7FBA00','#FF8C00','#BD3CF8','#FF6B4A','#00D4AA'];
-  const balls = Array.from({length: 18}, (_, i) => {
-    const c  = COLS[i % COLS.length];
-    const sz = 14 + Math.random() * 14;
-    const lx = 10 + Math.random() * 160;
-    const ly = 10 + Math.random() * 160;
-    const dx = (Math.random() - 0.5) * 100;
-    const dy = (Math.random() - 0.5) * 100;
-    const dr = (0.45 + Math.random() * 0.65).toFixed(2);
-    const dl = (Math.random() * 1.8).toFixed(2);
-    return `<div class="chal-ball" style="width:${sz}px;height:${sz}px;background:${c};left:${lx}px;top:${ly}px;--bdx:${dx}px;--bdy:${dy}px;animation-duration:${dr}s;animation-delay:-${dl}s"></div>`;
-  }).join('');
+  const CAP_COLORS = ['red','green','yellow','purple','pink','blue'];
+  const color = CAP_COLORS[Math.floor(Math.random() * CAP_COLORS.length)];
+  const BASE  = 'assets/valorant-roulette-capsule/';
 
-  area.innerHTML = `
-    <div class="chal-machine-wrap" id="chalMachineWrap">
-      <div class="chal-machine-bowl" id="chalBowl">${balls}</div>
-      <div class="chal-machine-tube"></div>
-    </div>
-    <div class="chal-capsule-wrap" id="chalCapsule" style="display:none">
-      <div class="chal-cap-top" id="chalCapTop"></div>
-      <div class="chal-cap-btm" id="chalCapBtm"></div>
-    </div>`;
+  /* Phase 1: 정지 기계 이미지 */
+  area.innerHTML = `<img id="chalMachineImg" class="chal-machine-img" src="${BASE}capsule_machine.png">`;
 
-  /* Phase 2 — 1400ms: 기계 사라지고 캡슐 등장 */
+  /* Phase 2 — 600ms: 작동 기계로 교체 + 흔들림 */
   setTimeout(() => {
-    const bowl = document.getElementById('chalBowl');
-    if (bowl) bowl.style.animation = 'chalBowlOut 0.35s ease-in forwards';
-    setTimeout(() => {
-      const wrap = document.getElementById('chalMachineWrap');
-      if (wrap) wrap.style.display = 'none';
-      const cap = document.getElementById('chalCapsule');
-      if (cap) { cap.style.display = 'flex'; cap.style.animation = 'chalCapDrop 0.45s cubic-bezier(.34,1.56,.64,1) forwards'; }
-    }, 360);
-  }, 1400);
+    const img = document.getElementById('chalMachineImg');
+    if (img) { img.src = `${BASE}capsule_machine_work.png`; img.classList.add('chal-machine-work'); }
+  }, 600);
 
-  /* Phase 3 — 2300ms: 캡슐 열림 */
+  /* Phase 3 — 1800ms: 뽑힌 캡슐 등장 */
   setTimeout(() => {
-    const t = document.getElementById('chalCapTop');
-    const b = document.getElementById('chalCapBtm');
-    if (t) t.classList.add('chal-cap-open');
-    if (b) b.classList.add('chal-cap-open-btm');
-  }, 2300);
+    area.innerHTML = `<img id="chalCapImg" class="chal-capsule-img chal-cap-appear" src="${BASE}${color}_capsule.png">`;
+  }, 1800);
 
-  /* Phase 4 — 3100ms: 종이 펼쳐짐 */
+  /* Phase 4 — 2600ms: 열린 캡슐로 교체 */
+  setTimeout(() => {
+    const img = document.getElementById('chalCapImg');
+    if (img) { img.src = `${BASE}${color}_capsule_open.png`; img.classList.remove('chal-cap-appear'); img.classList.add('chal-cap-opening'); }
+  }, 2600);
+
+  /* Phase 5 — 3200ms: 종이 펼쳐짐 */
   setTimeout(() => {
     area.style.display = 'none';
     const paper = document.getElementById('chalPaper');
@@ -3644,7 +3621,7 @@ function runChalCapsuleAnim(item) {
         setTimeout(() => copyBtn.textContent = '코드 복사', 1500);
       });
     }
-  }, 3100);
+  }, 3200);
 }
 
 function openChalAdjust(item) {
