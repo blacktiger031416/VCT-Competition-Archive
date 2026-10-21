@@ -1303,13 +1303,19 @@
     .tf-ts-count-btn { width:100px; padding:14px; background:rgba(255,255,255,.04); border:2px solid rgba(255,255,255,.12); border-radius:4px; font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:800; letter-spacing:2px; color:rgba(255,255,255,.5); cursor:pointer; transition:all .2s; }
     .tf-ts-count-btn.active { border-color:rgba(255,70,85,.7); background:rgba(255,70,85,.1); color:#ff7080; }
     .tf-ts-result-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; width:100%; max-width:480px; }
-    .tf-ts-team-col { background:rgba(255,255,255,.03); border-radius:6px; padding:16px; }
     .tf-ts-team-label { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:800; letter-spacing:3px; margin-bottom:12px; }
     .tf-ts-team-label.a { color:rgba(255,80,90,.8); }
     .tf-ts-team-label.b { color:rgba(100,150,255,.8); }
-    .tf-ts-pick { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:700; color:#fff; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+    .tf-ts-pick { font-family:'Rajdhani',sans-serif; font-size:1.05rem; font-weight:700; color:#fff; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); opacity:0; }
     .tf-ts-pick:last-child { border-bottom:none; }
     .tf-ts-pick-tier { font-size:.65rem; color:rgba(255,255,255,.35); letter-spacing:2px; display:block; margin-bottom:2px; }
+    @keyframes tsPickIn { from { opacity:0; transform:translateY(14px) scale(.92); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .tf-ts-pick.revealed { animation:tsPickIn .38s cubic-bezier(.22,1,.36,1) forwards; }
+    @keyframes tsSelectingPulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
+    .tf-ts-selecting { font-family:'Rajdhani',sans-serif; font-size:.9rem; letter-spacing:3px; color:rgba(255,255,255,.5); animation:tsSelectingPulse .9s ease infinite; padding:12px 0; }
+    @keyframes tsResultColIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .tf-ts-team-col { background:rgba(255,255,255,.03); border-radius:6px; padding:16px; opacity:0; }
+    .tf-ts-team-col.col-in { animation:tsResultColIn .4s cubic-bezier(.22,1,.36,1) forwards; }
 
     /* Result */
     .tf-result-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; width:100%; max-width:560px; margin:16px 0 28px; }
@@ -1647,7 +1653,8 @@ const AGENT_KO = {
   kayo:'케이/오', killjoy:'킬조이', miks:'믹스', neon:'네온',
   omen:'오멘', phoenix:'피닉스', raze:'레이즈', reyna:'레이나',
   sage:'세이지', skye:'스카이', sova:'소바', tejo:'테호',
-  veto:'비토', viper:'바이퍼', vyse:'바이스', waylay:'웨이레이', yoru:'요루'
+  veto:'비토', viper:'바이퍼', vyse:'바이스', waylay:'웨이레이', yoru:'요루',
+  hush:'허시'
 };
 const WEAPON_KO = {
   ares:'아레스', bandit:'벤딧', bucky:'버키', bulldog:'불독',
@@ -3426,6 +3433,9 @@ document.getElementById('tsTSCount2').addEventListener('click', () => {
 });
 
 document.getElementById('tsTSRollBtn').addEventListener('click', () => {
+  const btn = document.getElementById('tsTSRollBtn');
+  btn.disabled = true;
+
   const pickRandom = (team, n) => {
     const shuffled = [...team].sort(() => Math.random() - .5);
     return shuffled.slice(0, Math.min(n, shuffled.length));
@@ -3433,29 +3443,44 @@ document.getElementById('tsTSRollBtn').addEventListener('click', () => {
   const picksA = pickRandom(tfSnapA, tsTSCount);
   const picksB = pickRandom(tfSnapB, tsTSCount);
 
-  const renderPicks = (picks, side) => picks.map(p =>
-    `<div class="tf-ts-pick">
-      <span class="tf-ts-pick-tier">${TIER_NAMES[p.tier]}</span>${p.name}
-    </div>`).join('');
-
   const el = document.getElementById('tsTSResult');
   el.style.display = 'flex';
-  el.innerHTML = `
-    <div class="tf-ts-result-grid">
-      <div class="tf-ts-team-col">
-        <div class="tf-ts-team-label a">팀 A</div>
-        ${renderPicks(picksA, 'A')}
+  el.innerHTML = `<div class="tf-ts-selecting">선 정 중 . . .</div>`;
+
+  setTimeout(() => {
+    el.innerHTML = `
+      <div class="tf-ts-result-grid">
+        <div class="tf-ts-team-col" id="tsTSColA">
+          <div class="tf-ts-team-label a">팀 A</div>
+          ${picksA.map(p => `<div class="tf-ts-pick"><span class="tf-ts-pick-tier">${TIER_NAMES[p.tier]}</span>${p.name}</div>`).join('')}
+        </div>
+        <div class="tf-ts-team-col" id="tsTSColB">
+          <div class="tf-ts-team-label b">팀 B</div>
+          ${picksB.map(p => `<div class="tf-ts-pick"><span class="tf-ts-pick-tier">${TIER_NAMES[p.tier]}</span>${p.name}</div>`).join('')}
+        </div>
       </div>
-      <div class="tf-ts-team-col">
-        <div class="tf-ts-team-label b">팀 B</div>
-        ${renderPicks(picksB, 'B')}
-      </div>
-    </div>
-    <div style="margin-top:14px;">
-      <button class="tf-btn-secondary" id="tsTSRerollBtn">다시 뽑기</button>
-    </div>`;
-  document.getElementById('tsTSRerollBtn').onclick = () =>
-    document.getElementById('tsTSRollBtn').click();
+      <div style="margin-top:14px;">
+        <button class="tf-btn-secondary" id="tsTSRerollBtn">다시 뽑기</button>
+      </div>`;
+
+    const colA = document.getElementById('tsTSColA');
+    const colB = document.getElementById('tsTSColB');
+
+    setTimeout(() => {
+      colA.classList.add('col-in');
+      setTimeout(() => colB.classList.add('col-in'), 120);
+
+      const allPicks = el.querySelectorAll('.tf-ts-pick');
+      allPicks.forEach((pick, i) => {
+        setTimeout(() => pick.classList.add('revealed'), 280 + i * 160);
+      });
+
+      btn.disabled = false;
+    }, 50);
+
+    document.getElementById('tsTSRerollBtn').onclick = () =>
+      document.getElementById('tsTSRollBtn').click();
+  }, 900);
 });
 </script>
 </body>
