@@ -208,6 +208,7 @@
     'challengers-korea':  'Korea Challengers',
     'challengers-japan':  'Japan Challengers',
     'ewc':                'EWC',
+    'gc-champions':       'GC Champions',
   };
   var TOURNAMENT_LABELS = {
     santiago: 'Santiago',
@@ -234,6 +235,7 @@
     cj_japan_ph2_bracket:  'Phase 2',
     cj_japan_po_bracket:   'Playoffs',
     cj_split2:             'Split 2',
+    'gc-champions':        '',
   };
 
   /* 복합 stage key → 라벨 suffix */
@@ -388,6 +390,8 @@
     if (l === 'challengers-japan' && s === 'cj_japan_po_bracket')  return 320;
     if (l === 'challengers-japan' && s === 'cj_split2')            return 325;
     if (l === 'challengers-japan')                                  return 305;
+    /* GC Champions */
+    if (l === 'gc-champions')                                       return 400;
     return 999;
   }
 

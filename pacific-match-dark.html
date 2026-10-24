@@ -1694,7 +1694,7 @@ var MATCH_DATE  = _params.get('date')   || '04.26';
 var MATCH_TEAM_A = _params.get('teamA') || 'Nongshim RedForce';
 var MATCH_TEAM_B = _params.get('teamB') || 'Team Secret';
 var MATCH_FROM  = _params.get('from')   || 'stage1';
-var LEAGUE      = 'pacific';
+var LEAGUE      = _params.get('league') || 'pacific';
 var MATCH_BO5   = _params.get('bo5') === '1';
 var MATCH_GF    = _params.get('gf')  === '1';
 var MATCH_SCORE = _params.get('score')  || '- : -';
@@ -3678,13 +3678,6 @@ function toggleSlot(el, side) {
   const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
   el.setAttribute("data-v", next);
   el.textContent = next;
-  // 슬롯 O 개수로 시리즈 스코어 자동 계산
-  const aWins = document.querySelectorAll('#slots-a .mo-map-slot[data-v="O"]').length;
-  const bWins = document.querySelectorAll('#slots-b .mo-map-slot[data-v="O"]').length;
-  const saEl = document.getElementById('score-a');
-  const sbEl = document.getElementById('score-b');
-  if (saEl) saEl.value = String(aWins);
-  if (sbEl) sbEl.value = String(bWins);
   saveSharedResult();
 }
 
