@@ -96,7 +96,8 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   <button class="phase-btn" data-phase="kickoff">KickOff</button>
   <button class="phase-btn" data-phase="masters-seoul">Masters Seoul</button>
   <button class="phase-btn" data-phase="cups-oq">Cups OQ</button>
-  <button class="phase-btn" data-phase="cups">Cups</button>
+  <button class="phase-btn" data-phase="cups-1">Cups 1</button>
+  <button class="phase-btn" data-phase="cups-2">Cups 2</button>
   <button class="phase-btn" data-phase="masters-valencia">Masters Valencia</button>
   <button class="phase-btn" data-phase="champs-oq">Champions OQ</button>
   <button class="phase-btn" data-phase="champions">Champions Austin</button>
@@ -127,7 +128,8 @@ const REGION_LABELS = {americas:'Americas',emea:'EMEA',pacific:'Pacific',cn:'Chi
 const phaseLabels = {
   'kickoff-oq':'KickOff Open Qualifier','kickoff':'KickOff',
   'masters-seoul':'Masters Seoul','cups-oq':'Cups Open Qualifier',
-  'cups':'Cups','masters-valencia':'Masters Valencia',
+  'cups-1':'Cups 1','cups-2':'Cups 2',
+  'masters-valencia':'Masters Valencia',
   'champs-oq':'Champions Open Qualifier','champions':'Champions Austin'
 };
 
@@ -158,18 +160,24 @@ const OQ_PINS = [
 const phases = {
   'kickoff-oq': OQ_PINS,
   'kickoff':[
-    {id:'americas',flag:'🌎',name:'Americas',region:'americas',sub:'Americas',lat:5,  lng:-80},
-    {id:'emea',    flag:'🌍',name:'EMEA',    region:'emea',    sub:'EMEA',    lat:48, lng:10},
-    {id:'pacific', flag:'🌏',name:'Pacific', region:'pacific', sub:'Pacific', lat:20, lng:110},
-    {id:'cn',      flag:'🇨🇳',name:'China', region:'cn',      sub:'CN',      lat:39.9,lng:116.4},
+    {id:'americas',flag:'🇧🇷',name:'São Paulo',   region:'americas',sub:'Americas',lat:-23.5,lng:-46.6},
+    {id:'emea',    flag:'🇩🇪',name:'Berlin',       region:'emea',    sub:'EMEA',    lat:52.5, lng:13.4},
+    {id:'pacific', flag:'🇹🇭',name:'Bangkok',      region:'pacific', sub:'Pacific', lat:13.8, lng:100.5},
+    {id:'cn',      flag:'🇨🇳',name:'Hangzhou',     region:'cn',      sub:'CN',      lat:30.3, lng:120.2},
   ],
   'masters-seoul':[{id:'seoul',flag:'🇰🇷',name:'Masters Seoul',region:'pacific',sub:'International',lat:37.6,lng:127.0}],
   'cups-oq': OQ_PINS,
-  'cups':[
-    {id:'americas',flag:'🌎',name:'Americas',region:'americas',sub:'Americas',lat:5,  lng:-80},
-    {id:'emea',    flag:'🌍',name:'EMEA',    region:'emea',    sub:'EMEA',    lat:48, lng:10},
-    {id:'pacific', flag:'🌏',name:'Pacific', region:'pacific', sub:'Pacific', lat:20, lng:110},
-    {id:'cn',      flag:'🇨🇳',name:'China', region:'cn',      sub:'CN',      lat:39.9,lng:116.4},
+  'cups-1':[
+    {id:'americas',flag:'🇲🇽',name:'Mexico City',  region:'americas',sub:'Americas',lat:19.4, lng:-99.1},
+    {id:'emea',    flag:'🇵🇱',name:'Warsaw',        region:'emea',    sub:'EMEA',    lat:52.2, lng:21.0},
+    {id:'pacific', flag:'🇵🇭',name:'Manila',        region:'pacific', sub:'Pacific', lat:14.6, lng:121.0},
+    {id:'cn',      flag:'🇨🇳',name:'Wuhan',         region:'cn',      sub:'CN',      lat:30.6, lng:114.3},
+  ],
+  'cups-2':[
+    {id:'americas',flag:'🇧🇷',name:'Rio de Janeiro',region:'americas',sub:'Americas',lat:-22.9,lng:-43.2},
+    {id:'emea',    flag:'🇹🇷',name:'Istanbul',      region:'emea',    sub:'EMEA',    lat:41.0, lng:28.9},
+    {id:'pacific', flag:'🇯🇵',name:'Tokyo',         region:'pacific', sub:'Pacific', lat:35.7, lng:139.7},
+    {id:'cn',      flag:'🇨🇳',name:'Shanghai',      region:'cn',      sub:'CN',      lat:31.2, lng:121.5},
   ],
   'masters-valencia':[{id:'valencia',flag:'🇪🇸',name:'Masters Valencia',region:'emea',sub:'International',lat:39.5,lng:-0.4}],
   'champs-oq': OQ_PINS,
@@ -311,7 +319,8 @@ document.querySelectorAll('.phase-btn').forEach(btn => {
     const label = phaseLabels[currentPhase];
     const isOQ  = currentPhase.includes('oq');
     document.getElementById('sectionPhase').textContent = label;
-    document.getElementById('sectionName').innerHTML = isOQ ? 'Open<br>Qualifiers' : label.replace(' ','<br>');
+    const nameHTML = isOQ ? 'Open<br>Qualifiers' : label.replace(/(\s)(?=\S+$)/,'<br>');
+    document.getElementById('sectionName').innerHTML = nameHTML;
     renderPins(currentPhase);
   });
 });
