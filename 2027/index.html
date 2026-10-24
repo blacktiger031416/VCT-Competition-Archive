@@ -7,369 +7,63 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#FF4655;--americas:#FF4655;--emea:#00C8FF;--pacific:#FF8C00;--cn:#FF2244}
+body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidden;height:100vh}
 
-:root {
-  --red: #FF4655;
-  --americas: #FF4655;
-  --emea: #00C8FF;
-  --pacific: #FF8C00;
-  --cn: #FF2244;
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(8,8,8,.85) 60%,transparent);
 }
+.brand{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.6rem;letter-spacing:.12em;text-transform:uppercase}
+.brand b{color:var(--red)}
+.back-link{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+.back-link:hover{color:#fff}
 
-body {
-  background: #080808;
-  color: #fff;
-  font-family: 'Barlow', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+.map-section{position:fixed;inset:0;overflow:hidden}
+#worldMap{position:absolute;inset:0;width:100%;height:100%}
+#pinLayer{position:absolute;inset:0;pointer-events:none}
 
-/* ── Header ── */
-.hdr {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 200;
-  padding: 1.1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(8,8,8,.85) 60%, transparent);
-}
+.section-title{position:absolute;top:5.5rem;left:1.5rem;z-index:50;pointer-events:none}
+.section-phase{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:.3rem}
+.section-name{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;line-height:1;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.5)}
 
-.brand {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: 1.6rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-.brand b { color: var(--red); }
+.pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:10;display:flex;flex-direction:column;align-items:center;pointer-events:auto}
+.pin-bubble{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:rgba(8,8,8,.75);font-size:20px;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+.pin-stem{width:2px;height:14px;opacity:.7}
+.pin-dot{width:5px;height:5px;border-radius:50%;opacity:.8;margin-top:-1px}
+.pin-label{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(8,8,8,.92);border-radius:3px;padding:3px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity .15s}
+.pin:hover .pin-bubble{transform:scale(1.25) translateY(-3px)}
+.pin:hover .pin-label{opacity:1}
 
-.back-link {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.45);
-  text-decoration: none;
-  transition: color .15s;
-}
-.back-link:hover { color: #fff; }
+.legend{position:absolute;bottom:5.5rem;left:1.5rem;z-index:50;display:flex;flex-direction:column;gap:.35rem}
+.legend-row{display:flex;align-items:center;gap:.4rem;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* ── Map wrapper ── */
-.map-wrap {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.phase-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:.75rem 1.5rem;display:flex;align-items:center;gap:.3rem;background:rgba(8,8,8,.88);border-top:.5px solid rgba(255,255,255,.08);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.phase-nav::-webkit-scrollbar{display:none}
+.phase-btn{flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:.4rem .9rem;border-radius:3px;border:.5px solid transparent;cursor:pointer;color:rgba(255,255,255,.45);background:transparent;transition:color .15s,background .15s;white-space:nowrap}
+.phase-btn:hover{color:rgba(255,255,255,.75)}
+.phase-btn.active{background:var(--red);color:#fff}
 
-.map-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  user-select: none;
-  pointer-events: none;
-}
+.detail{position:fixed;right:0;top:0;bottom:0;width:280px;background:rgba(10,10,14,.97);border-left:.5px solid rgba(255,255,255,.09);z-index:300;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+.detail.open{transform:translateX(0)}
+.detail-top{padding:4.5rem 1.4rem 1.2rem;border-bottom:.5px solid rgba(255,255,255,.07)}
+.detail-flag{font-size:40px;line-height:1;margin-bottom:.7rem}
+.detail-region-tag{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px;display:inline-block;margin-bottom:.6rem}
+.detail-name{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;line-height:1.05;color:#fff}
+.detail-sub-id{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-top:.3rem}
+.detail-body{padding:1rem 1.4rem;display:flex;flex-direction:column}
+.detail-row{padding:.7rem 0;border-bottom:.5px solid rgba(255,255,255,.06)}
+.detail-row:last-child{border-bottom:none}
+.detail-row-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.25rem}
+.detail-row-val{font-size:14px;color:rgba(255,255,255,.8)}
+.status-pill{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px;background:rgba(255,70,85,.15);color:var(--red);border:.5px solid rgba(255,70,85,.3)}
+.detail-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:.25rem;transition:color .15s}
+.detail-close:hover{color:#fff}
 
-/* dark vignette so edges fade */
-.map-vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at center, transparent 40%, rgba(8,8,8,.6) 100%),
-    linear-gradient(to bottom, rgba(8,8,8,.4) 0%, transparent 15%, transparent 80%, rgba(8,8,8,.7) 100%);
-  pointer-events: none;
-}
-
-/* ── Section title overlay ── */
-.section-title {
-  position: absolute;
-  top: 5.5rem;
-  left: 1.5rem;
-  z-index: 50;
-  pointer-events: none;
-}
-.section-phase {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--red);
-  margin-bottom: .3rem;
-}
-.section-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  line-height: 1;
-  color: #fff;
-  text-shadow: 0 2px 20px rgba(0,0,0,.5);
-}
-
-/* ── Pins ── */
-.pin {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  cursor: pointer;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: z-index 0s;
-}
-
-.pin-bubble {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.15);
-  background: rgba(8,8,8,.7);
-  font-size: 20px;
-  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
-  position: relative;
-}
-
-.pin-bubble::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity .2s;
-}
-
-.pin-stem {
-  width: 2px;
-  height: 14px;
-  opacity: .7;
-  transition: opacity .2s;
-}
-
-.pin-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  opacity: .8;
-  margin-top: -1px;
-}
-
-.pin-label {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  background: rgba(8,8,8,.9);
-  border-radius: 3px;
-  padding: 3px 8px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .15s;
-}
-
-.pin:hover .pin-bubble {
-  transform: scale(1.25) translateY(-3px);
-}
-.pin:hover .pin-bubble::after { opacity: 1; }
-.pin:hover .pin-label { opacity: 1; }
-.pin:hover .pin-stem { opacity: 1; }
-
-/* ── Region legend ── */
-.legend {
-  position: absolute;
-  bottom: 5.5rem;
-  left: 1.5rem;
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  gap: .35rem;
-}
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.55);
-}
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* ── Phase nav bar ── */
-.phase-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  padding: .75rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: .3rem;
-  background: rgba(8,8,8,.88);
-  border-top: 0.5px solid rgba(255,255,255,.08);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.phase-nav::-webkit-scrollbar { display: none; }
-
-.phase-btn {
-  flex-shrink: 0;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  padding: .4rem .9rem;
-  border-radius: 3px;
-  border: 0.5px solid transparent;
-  cursor: pointer;
-  color: rgba(255,255,255,.45);
-  background: transparent;
-  transition: color .15s, background .15s, border-color .15s;
-  white-space: nowrap;
-}
-.phase-btn:hover { color: rgba(255,255,255,.75); }
-.phase-btn.active {
-  background: var(--red);
-  color: #fff;
-  border-color: var(--red);
-}
-
-/* ── Detail panel ── */
-.detail {
-  position: fixed;
-  right: 0; top: 0; bottom: 0;
-  width: 280px;
-  background: rgba(10,10,14,.97);
-  border-left: 0.5px solid rgba(255,255,255,.09);
-  z-index: 300;
-  transform: translateX(100%);
-  transition: transform .28s cubic-bezier(.4,0,.2,1);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  overflow-y: auto;
-}
-.detail.open { transform: translateX(0); }
-
-.detail-top {
-  padding: 4.5rem 1.4rem 1.2rem;
-  border-bottom: 0.5px solid rgba(255,255,255,.07);
-}
-
-.detail-flag {
-  font-size: 40px;
-  line-height: 1;
-  margin-bottom: .7rem;
-}
-.detail-region-tag {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 2px;
-  display: inline-block;
-  margin-bottom: .6rem;
-}
-.detail-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  line-height: 1.05;
-  color: #fff;
-}
-.detail-sub-id {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  color: rgba(255,255,255,.35);
-  margin-top: .3rem;
-}
-
-.detail-body {
-  padding: 1rem 1.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.detail-row {
-  padding: .7rem 0;
-  border-bottom: 0.5px solid rgba(255,255,255,.06);
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-row-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.3);
-  margin-bottom: .25rem;
-}
-.detail-row-val {
-  font-size: 14px;
-  color: rgba(255,255,255,.8);
-}
-
-.status-pill {
-  display: inline-block;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 2px;
-  background: rgba(255,70,85,.15);
-  color: var(--red);
-  border: 0.5px solid rgba(255,70,85,.3);
-}
-
-.detail-close {
-  position: absolute;
-  top: 1rem; right: 1rem;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,.4);
-  font-size: 16px;
-  cursor: pointer;
-  line-height: 1;
-  padding: .25rem;
-  transition: color .15s;
-}
-.detail-close:hover { color: #fff; }
+.map-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);transition:opacity .6s}
+.map-loading.done{opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -379,17 +73,15 @@ body {
   <a href="../index.html" class="back-link">← 2026</a>
 </header>
 
-<div class="map-wrap">
-  <img class="map-img" src="../assets/world_map.png" alt="World Map" draggable="false">
-  <div class="map-vignette"></div>
+<div class="map-section">
+  <svg id="worldMap"></svg>
+  <div id="pinLayer"></div>
+  <div class="map-loading" id="mapLoading">Loading map…</div>
 
   <div class="section-title">
     <div class="section-phase" id="sectionPhase">KickOff Open Qualifier</div>
     <div class="section-name" id="sectionName">Open<br>Qualifiers</div>
   </div>
-
-  <!-- Pins rendered by JS -->
-  <div id="pinLayer" style="position:absolute;inset:0;pointer-events:none"></div>
 
   <div class="legend">
     <div class="legend-row"><div class="legend-dot" style="background:var(--americas)"></div>Americas</div>
@@ -419,124 +111,172 @@ body {
     <div class="detail-sub-id" id="dSubId"></div>
   </div>
   <div class="detail-body">
-    <div class="detail-row">
-      <div class="detail-row-label">Phase</div>
-      <div class="detail-row-val" id="dPhase">KickOff Open Qualifier</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-label">Status</div>
-      <div class="detail-row-val"><span class="status-pill">예정</span></div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-label">지역</div>
-      <div class="detail-row-val" id="dRegion"></div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-label">참가 팀 수</div>
-      <div class="detail-row-val" id="dTeams">—</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-row-label">진출 팀 수</div>
-      <div class="detail-row-val" id="dSlots">—</div>
-    </div>
+    <div class="detail-row"><div class="detail-row-label">Phase</div><div class="detail-row-val" id="dPhase"></div></div>
+    <div class="detail-row"><div class="detail-row-label">Status</div><div class="detail-row-val"><span class="status-pill">예정</span></div></div>
+    <div class="detail-row"><div class="detail-row-label">지역</div><div class="detail-row-val" id="dRegion"></div></div>
+    <div class="detail-row"><div class="detail-row-label">참가 팀 수</div><div class="detail-row-val" id="dTeams">—</div></div>
+    <div class="detail-row"><div class="detail-row-label">진출 팀 수</div><div class="detail-row-val" id="dSlots">—</div></div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
-const COLORS = {
-  americas: '#FF4655',
-  emea:     '#00C8FF',
-  pacific:  '#FF8C00',
-  cn:       '#FF2244'
-};
-
-const REGION_LABELS = {
-  americas: 'Americas',
-  emea:     'EMEA',
-  pacific:  'Pacific',
-  cn:       'China'
-};
-
+const COLORS = {americas:'#FF4655',emea:'#00C8FF',pacific:'#FF8C00',cn:'#FF2244'};
+const REGION_LABELS = {americas:'Americas',emea:'EMEA',pacific:'Pacific',cn:'China'};
 const phaseLabels = {
-  'kickoff-oq':       'KickOff Open Qualifier',
-  'kickoff':          'KickOff',
-  'masters-seoul':    'Masters Seoul',
-  'cups-oq':          'Cups Open Qualifier',
-  'cups':             'Cups',
-  'masters-valencia': 'Masters Valencia',
-  'champs-oq':        'Champions Open Qualifier',
-  'champions':        'Champions Austin'
+  'kickoff-oq':'KickOff Open Qualifier','kickoff':'KickOff',
+  'masters-seoul':'Masters Seoul','cups-oq':'Cups Open Qualifier',
+  'cups':'Cups','masters-valencia':'Masters Valencia',
+  'champs-oq':'Champions Open Qualifier','champions':'Champions Austin'
 };
 
-/* OQ 핀 공통 (KickOff OQ / Cups OQ / Champions OQ 동일) */
+/* ── 핀 데이터: 이제 위도/경도로 정확하게 ── */
 const OQ_PINS = [
-  // Americas — 위도 기준 재보정
-  { id:'na',     flag:'🇺🇸', name:'North America',           region:'americas', sub:'NA',   x:20, y:38 },
-  { id:'lan',    flag:'🇲🇽', name:'Latin America North',     region:'americas', sub:'LAN',  x:24, y:56 },
-  { id:'brazil', flag:'🇧🇷', name:'Brazil',                  region:'americas', sub:'BR',   x:38, y:77 },
-  { id:'las',    flag:'🇦🇷', name:'Latin America South',     region:'americas', sub:'LAS',  x:33, y:84 },
+  // Americas
+  {id:'na',    flag:'🇺🇸',name:'North America',          region:'americas',sub:'NA',  lat:39.8, lng:-98.6},
+  {id:'lan',   flag:'🇲🇽',name:'Latin America North',    region:'americas',sub:'LAN', lat:19.4, lng:-99.1},
+  {id:'brazil',flag:'🇧🇷',name:'Brazil',                 region:'americas',sub:'BR',  lat:-15.8,lng:-47.9},
+  {id:'las',   flag:'🇦🇷',name:'Latin America South',    region:'americas',sub:'LAS', lat:-34.6,lng:-58.4},
   // EMEA
-  { id:'eu',     flag:'🇪🇺', name:'Europe',                  region:'emea',     sub:'EU',   x:47, y:36 },
-  { id:'tr',     flag:'🇹🇷', name:'Türkiye',                 region:'emea',     sub:'TR',   x:53, y:40 },
-  { id:'mena',   flag:'🇸🇦', name:'Middle East & N. Africa', region:'emea',     sub:'MENA', x:58, y:48 },
-  // China
-  { id:'cn',     flag:'🇨🇳', name:'China',                   region:'cn',       sub:'CN',   x:76, y:39 },
+  {id:'eu',    flag:'🇪🇺',name:'Europe',                 region:'emea',    sub:'EU',  lat:50.1, lng:10.4},
+  {id:'tr',    flag:'🇹🇷',name:'Türkiye',                region:'emea',    sub:'TR',  lat:39.9, lng:32.9},
+  {id:'mena',  flag:'🇸🇦',name:'Middle East & N.Africa', region:'emea',    sub:'MENA',lat:24.7, lng:46.7},
+  // CN
+  {id:'cn',    flag:'🇨🇳',name:'China',                  region:'cn',      sub:'CN',  lat:39.9, lng:116.4},
   // Pacific
-  { id:'kr',     flag:'🇰🇷', name:'South Korea',             region:'pacific',  sub:'KR',   x:80, y:38 },
-  { id:'jp',     flag:'🇯🇵', name:'Japan',                   region:'pacific',  sub:'JP',   x:84, y:37 },
-  { id:'sa',     flag:'🇮🇳', name:'South Asia',              region:'pacific',  sub:'SA',   x:66, y:49 },
-  { id:'th',     flag:'🇹🇭', name:'Thailand',                region:'pacific',  sub:'TH',   x:74, y:51 },
-  { id:'vn',     flag:'🇻🇳', name:'Vietnam',                 region:'pacific',  sub:'VN',   x:78, y:52 },
-  { id:'sea',    flag:'🇵🇭', name:'Southeast Asia',          region:'pacific',  sub:'SEA',  x:82, y:52 },
-  { id:'id',     flag:'🇮🇩', name:'Indonesia',               region:'pacific',  sub:'ID',   x:79, y:60 },
-  { id:'oce',    flag:'🇦🇺', name:'Oceania',                 region:'pacific',  sub:'OCE',  x:86, y:71 },
+  {id:'kr',    flag:'🇰🇷',name:'South Korea',            region:'pacific', sub:'KR',  lat:37.6, lng:127.0},
+  {id:'jp',    flag:'🇯🇵',name:'Japan',                  region:'pacific', sub:'JP',  lat:35.7, lng:139.7},
+  {id:'sa',    flag:'🇮🇳',name:'South Asia',             region:'pacific', sub:'SA',  lat:20.6, lng:78.1},
+  {id:'th',    flag:'🇹🇭',name:'Thailand',               region:'pacific', sub:'TH',  lat:13.8, lng:100.5},
+  {id:'vn',    flag:'🇻🇳',name:'Vietnam',                region:'pacific', sub:'VN',  lat:14.1, lng:108.3},
+  {id:'sea',   flag:'🇵🇭',name:'Southeast Asia',         region:'pacific', sub:'SEA', lat:12.9, lng:121.8},
+  {id:'id',    flag:'🇮🇩',name:'Indonesia',              region:'pacific', sub:'ID',  lat:-2.5, lng:117.9},
+  {id:'oce',   flag:'🇦🇺',name:'Oceania',                region:'pacific', sub:'OCE', lat:-25.3,lng:133.8},
 ];
 
-/* Pin data per phase */
 const phases = {
   'kickoff-oq': OQ_PINS,
-  'kickoff': [
-    { id:'americas', flag:'🌎', name:'Americas', region:'americas', sub:'Americas', x:19, y:55 },
-    { id:'emea',     flag:'🌍', name:'EMEA',     region:'emea',     sub:'EMEA',     x:50, y:40 },
-    { id:'pacific',  flag:'🌏', name:'Pacific',  region:'pacific',  sub:'Pacific',  x:78, y:46 },
-    { id:'cn',       flag:'🇨🇳', name:'China',  region:'cn',       sub:'CN',       x:76, y:39 },
+  'kickoff':[
+    {id:'americas',flag:'🌎',name:'Americas',region:'americas',sub:'Americas',lat:5,  lng:-80},
+    {id:'emea',    flag:'🌍',name:'EMEA',    region:'emea',    sub:'EMEA',    lat:48, lng:10},
+    {id:'pacific', flag:'🌏',name:'Pacific', region:'pacific', sub:'Pacific', lat:20, lng:110},
+    {id:'cn',      flag:'🇨🇳',name:'China', region:'cn',      sub:'CN',      lat:39.9,lng:116.4},
   ],
-  'masters-seoul': [
-    { id:'seoul', flag:'🇰🇷', name:'Masters Seoul', region:'pacific', sub:'International', x:80, y:38 },
-  ],
+  'masters-seoul':[{id:'seoul',flag:'🇰🇷',name:'Masters Seoul',region:'pacific',sub:'International',lat:37.6,lng:127.0}],
   'cups-oq': OQ_PINS,
-  'cups': [
-    { id:'americas', flag:'🌎', name:'Americas', region:'americas', sub:'Americas', x:19, y:55 },
-    { id:'emea',     flag:'🌍', name:'EMEA',     region:'emea',     sub:'EMEA',     x:50, y:40 },
-    { id:'pacific',  flag:'🌏', name:'Pacific',  region:'pacific',  sub:'Pacific',  x:78, y:46 },
-    { id:'cn',       flag:'🇨🇳', name:'China',  region:'cn',       sub:'CN',       x:76, y:39 },
+  'cups':[
+    {id:'americas',flag:'🌎',name:'Americas',region:'americas',sub:'Americas',lat:5,  lng:-80},
+    {id:'emea',    flag:'🌍',name:'EMEA',    region:'emea',    sub:'EMEA',    lat:48, lng:10},
+    {id:'pacific', flag:'🌏',name:'Pacific', region:'pacific', sub:'Pacific', lat:20, lng:110},
+    {id:'cn',      flag:'🇨🇳',name:'China', region:'cn',      sub:'CN',      lat:39.9,lng:116.4},
   ],
-  'masters-valencia': [
-    { id:'valencia', flag:'🇪🇸', name:'Masters Valencia', region:'emea', sub:'International', x:45, y:39 },
-  ],
+  'masters-valencia':[{id:'valencia',flag:'🇪🇸',name:'Masters Valencia',region:'emea',sub:'International',lat:39.5,lng:-0.4}],
   'champs-oq': OQ_PINS,
-  'champions': [
-    { id:'austin', flag:'🇺🇸', name:'Champions Austin', region:'americas', sub:'International', x:20, y:35 },
-  ],
+  'champions':[{id:'austin',flag:'🇺🇸',name:'Champions Austin',region:'americas',sub:'International',lat:30.3,lng:-97.7}],
 };
 
+let projection;
 let currentPhase = 'kickoff-oq';
 
+function buildMap() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  const svg = d3.select('#worldMap').attr('width', W).attr('height', H);
+  svg.selectAll('*').remove();
+
+  const defs = svg.append('defs');
+
+  /* 배경: 붉은 방사형 그라데이션 */
+  const bgGrad = defs.append('radialGradient')
+    .attr('id','bgGrad').attr('cx','38%').attr('cy','50%').attr('r','70%');
+  bgGrad.append('stop').attr('offset','0%').attr('stop-color','#B81020');
+  bgGrad.append('stop').attr('offset','55%').attr('stop-color','#6A0510');
+  bgGrad.append('stop').attr('offset','100%').attr('stop-color','#1A0208');
+
+  /* 빛 레이 (원본 이미지 느낌 재현) */
+  const rayGrad = defs.append('radialGradient')
+    .attr('id','rayGrad').attr('cx','38%').attr('cy','50%').attr('r','50%');
+  rayGrad.append('stop').attr('offset','0%').attr('stop-color','#FF3030').attr('stop-opacity','.18');
+  rayGrad.append('stop').attr('offset','100%').attr('stop-color','#FF3030').attr('stop-opacity','0');
+
+  /* 비네트 */
+  const vig = defs.append('radialGradient')
+    .attr('id','vig').attr('cx','50%').attr('cy','50%').attr('r','50%');
+  vig.append('stop').attr('offset','40%').attr('stop-color','transparent');
+  vig.append('stop').attr('offset','100%').attr('stop-color','#000').attr('stop-opacity','.65');
+
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','url(#bgGrad)');
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','url(#rayGrad)');
+
+  /* Natural Earth 투영 — 세계 지도 타원형 */
+  projection = d3.geoNaturalEarth1()
+    .scale(Math.min(W / 5.5, H / 2.8))
+    .translate([W / 2, H / 2]);
+
+  const pathGen = d3.geoPath().projection(projection);
+
+  /* 세계 지도 데이터 fetch */
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(world => {
+      const countries = topojson.feature(world, world.objects.countries);
+      const borders   = topojson.mesh(world, world.objects.countries, (a,b) => a !== b);
+      const land      = topojson.merge(world, world.objects.countries.geometries);
+
+      /* 대륙 그림자 (약간 두꺼운 어두운 외곽) */
+      svg.append('path').datum(land)
+        .attr('d', pathGen)
+        .attr('fill','none')
+        .attr('stroke','#000')
+        .attr('stroke-width', 4)
+        .attr('stroke-linejoin','round')
+        .attr('opacity', .4);
+
+      /* 나라 채우기 */
+      svg.append('g').selectAll('path')
+        .data(countries.features)
+        .join('path')
+        .attr('d', pathGen)
+        .attr('fill','#0e0808')
+        .attr('stroke','none');
+
+      /* 국경선 */
+      svg.append('path').datum(borders)
+        .attr('d', pathGen)
+        .attr('fill','none')
+        .attr('stroke','#301010')
+        .attr('stroke-width', .5);
+
+      /* 비네트 오버레이 */
+      svg.append('rect').attr('width',W).attr('height',H).attr('fill','url(#vig)');
+
+      document.getElementById('mapLoading').classList.add('done');
+      renderPins(currentPhase);
+    })
+    .catch(() => {
+      document.getElementById('mapLoading').textContent = '지도 로드 실패 (인터넷 연결 확인)';
+    });
+}
+
 function renderPins(phaseKey) {
+  if (!projection) return;
   const layer = document.getElementById('pinLayer');
   layer.innerHTML = '';
-  const pins = phases[phaseKey] || [];
-  pins.forEach(p => {
+  (phases[phaseKey] || []).forEach(p => {
+    const pt = projection([p.lng, p.lat]);
+    if (!pt) return;
+    const [px, py] = pt;
     const color = COLORS[p.region];
     const el = document.createElement('div');
     el.className = 'pin';
-    el.style.cssText = `left:${p.x}%;top:${p.y}%;pointer-events:auto`;
+    el.style.left = px + 'px';
+    el.style.top  = py + 'px';
     el.innerHTML = `
       <div class="pin-label" style="border-left:2px solid ${color}">${p.sub}</div>
-      <div class="pin-bubble" style="border-color:${color}44;box-shadow:0 0 12px ${color}33">${p.flag}</div>
-      <div class="pin-stem" style="background:${color}"></div>
-      <div class="pin-dot" style="background:${color}"></div>
-    `;
+      <div class="pin-bubble" style="border-color:${color}55;box-shadow:0 0 14px ${color}44">${p.flag}</div>
+      <div class="pin-stem"  style="background:${color}"></div>
+      <div class="pin-dot"   style="background:${color}"></div>`;
     el.addEventListener('click', () => openDetail(p, phaseKey));
     layer.appendChild(el);
   });
@@ -547,9 +287,7 @@ function openDetail(p, phaseKey) {
   document.getElementById('dFlag').textContent = p.flag;
   const tag = document.getElementById('dRegionTag');
   tag.textContent = REGION_LABELS[p.region];
-  tag.style.background = color + '22';
-  tag.style.color = color;
-  tag.style.border = `0.5px solid ${color}44`;
+  tag.style.cssText = `background:${color}22;color:${color};border:.5px solid ${color}44`;
   document.getElementById('dName').textContent = p.name;
   document.getElementById('dSubId').textContent = p.sub;
   document.getElementById('dPhase').textContent = phaseLabels[phaseKey];
@@ -559,9 +297,7 @@ function openDetail(p, phaseKey) {
   document.getElementById('detail').classList.add('open');
 }
 
-document.getElementById('detailClose').addEventListener('click', () => {
-  document.getElementById('detail').classList.remove('open');
-});
+document.getElementById('detailClose').addEventListener('click', () => document.getElementById('detail').classList.remove('open'));
 
 document.querySelectorAll('.phase-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -569,26 +305,23 @@ document.querySelectorAll('.phase-btn').forEach(btn => {
     btn.classList.add('active');
     currentPhase = btn.dataset.phase;
     document.getElementById('detail').classList.remove('open');
-
     const label = phaseLabels[currentPhase];
-    const isOQ = currentPhase.includes('oq');
+    const isOQ  = currentPhase.includes('oq');
     document.getElementById('sectionPhase').textContent = label;
-    document.getElementById('sectionName').innerHTML = isOQ
-      ? 'Open<br>Qualifiers'
-      : label.replace(' ', '<br>');
-
+    document.getElementById('sectionName').innerHTML = isOQ ? 'Open<br>Qualifiers' : label.replace(' ','<br>');
     renderPins(currentPhase);
   });
 });
 
-/* Close detail on map click */
-document.querySelector('.map-wrap').addEventListener('click', (e) => {
-  if (!e.target.closest('.pin') && !e.target.closest('.detail')) {
-    document.getElementById('detail').classList.remove('open');
-  }
+document.querySelector('.map-section').addEventListener('click', e => {
+  if (!e.target.closest('.pin')) document.getElementById('detail').classList.remove('open');
 });
 
-renderPins(currentPhase);
+window.addEventListener('resize', () => {
+  buildMap();
+});
+
+buildMap();
 </script>
 </body>
 </html>
