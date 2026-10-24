@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VCT Game Changers Champions 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d1520; color: #e8e4e0; font-family: 'Barlow', 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .site-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 0 32px; height: 56px;
+      background: rgba(13,21,32,0.9); border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+    }
+    .home-link {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+      font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.15s;
+    }
+    .home-link:hover { color: #fff; }
+    .header-sep { color: rgba(255,255,255,0.15); font-size: 14px; }
+    .current-page {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+      font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── HERO ── */
+    .league-hero {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 48px 48px 40px; max-width: 1200px; margin: 0 auto;
+      gap: 24px;
+    }
+    .hero-text .eyebrow {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #f5c518; margin-bottom: 8px;
+    }
+    .hero-text h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(32px, 5vw, 56px); font-weight: 900;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: #fff; line-height: 1; margin-bottom: 10px;
+    }
+    .hero-text .intro {
+      font-size: 14px; color: rgba(255,255,255,0.38);
+      font-family: 'Noto Sans KR', sans-serif;
+      max-width: 480px; line-height: 1.6;
+    }
+    .league-mark img { width: 100px; height: 100px; object-fit: contain; opacity: 0.9; }
+
+    /* ── SHELL ── */
+    .league-shell { max-width: 1200px; margin: 0 auto; padding: 0 32px 80px; }
+    .section-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 40px; }
+    .section-heading { margin-bottom: 24px; }
+    .section-heading .eyebrow {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #f5c518; margin-bottom: 6px;
+    }
+    .section-heading h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(20px, 3vw, 30px); font-weight: 900;
+      letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+    }
+
+    /* ── BRACKET ── */
+    .bracket-section { margin-bottom: 60px; }
+    .bracket-scroll { overflow-x: auto; padding-bottom: 20px; }
+
+    .bracket-round-labels {
+      display: grid; grid-template-columns: repeat(5, minmax(175px, 1fr));
+      gap: 8px; min-width: 900px; margin-bottom: 6px;
+    }
+    .bracket-round-labels span {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); text-align: center;
+      padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .bracket-subsection-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #f5c518; padding: 16px 0 8px 12px;
+      border-left: 3px solid #f5c518; margin: 8px 0 6px;
+    }
+
+    .bracket-grid {
+      display: grid; grid-template-columns: repeat(5, minmax(175px, 1fr));
+      gap: 8px; min-width: 900px;
+    }
+    .upper-bracket { min-height: 500px; margin-bottom: 6px; }
+    .lower-bracket { min-height: 320px; }
+
+    .bracket-column {
+      display: flex; flex-direction: column;
+      justify-content: space-around; gap: 8px;
+    }
+    .bracket-column-center { justify-content: center; }
+
+    .bracket-match {
+      background: #111a28; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 4px; overflow: hidden;
+    }
+    .bracket-match-header {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.28); padding: 6px 10px 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .bracket-match-header span { color: rgba(255,255,255,0.16); font-weight: 500; }
+
+    .grand-final-card { border-color: rgba(245,197,24,0.25); }
+    .grand-final-card .bracket-match-header { color: rgba(245,197,24,0.65); border-bottom-color: rgba(245,197,24,0.15); }
+
+    .bracket-team {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 10px; border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .bracket-team:first-of-type { border-top: none; }
+    .bracket-logo {
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .bracket-logo img { width: 20px; height: 20px; object-fit: contain; }
+    .bracket-team strong {
+      flex: 1; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: rgba(255,255,255,0.45);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bracket-team em {
+      font-style: normal; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.3);
+      min-width: 14px; text-align: right; flex-shrink: 0;
+    }
+    .match-time {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 9px;
+      color: rgba(255,255,255,0.2); padding: 4px 10px 5px; letter-spacing: 0.05em;
+    }
+
+    .bracket-team.winner { background: rgba(255,255,255,0.03); }
+    .bracket-team.winner strong { color: #fff; }
+    .bracket-team.winner em { color: rgba(255,255,255,0.9); }
+    .bracket-team.placeholder strong { color: rgba(255,255,255,0.22); }
+    .bracket-team.placeholder em { color: rgba(255,255,255,0.15); }
+
+    /* ── TEAMS SECTION ── */
+    .teams-section { margin-bottom: 60px; }
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .team-card {
+      background: #0f1928; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px; padding: 28px 16px 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      cursor: pointer; text-align: center;
+      transition: border-color 0.18s, background 0.18s;
+    }
+    .team-card:hover { border-color: rgba(245,197,24,0.35); background: #14212e; }
+    .team-logo-wrap { width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; }
+    .team-logo-wrap img { width: 72px; height: 72px; object-fit: contain; }
+    .team-card h3 {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+      font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #fff;
+    }
+    .team-card p { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: rgba(255,255,255,0.38); }
+
+    /* ── ROSTER MODAL ── */
+    .roster-modal {
+      position: fixed; inset: 0; z-index: 9900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .roster-modal[hidden] { display: none !important; }
+    .roster-modal-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(5,5,5,0.72); backdrop-filter: blur(8px);
+    }
+    .roster-modal-panel {
+      position: relative; z-index: 1;
+      width: min(540px, calc(100vw - 24px)); max-height: 88vh;
+      overflow-y: auto; background: #121b2a;
+      border: 1.5px solid rgba(245,197,24,0.22); border-radius: 16px;
+      padding: 24px; animation: panelIn 0.2s ease;
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.97); }
+      to   { opacity: 1; transform: none; }
+    }
+    .roster-modal-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .roster-modal-logo { width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .roster-modal-logo img { width: 52px; height: 52px; object-fit: contain; }
+    .roster-modal-header-text .eyebrow {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: #f5c518; margin-bottom: 3px;
+    }
+    #roster-modal-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 22px;
+      font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+    }
+    .roster-modal-close {
+      margin-left: auto; background: none; border: none;
+      color: rgba(255,255,255,0.45); font-size: 22px;
+      cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color 0.15s;
+    }
+    .roster-modal-close:hover { color: #fff; }
+
+    .roster-section-label {
+      display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin: 0 0 8px;
+      padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .roster-section-label:first-of-type { border-top: none; padding-top: 0; }
+
+    .roster-player-list { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+    .roster-player-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      background: rgba(255,255,255,0.03); border-radius: 6px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+      font-weight: 700; color: #fff; letter-spacing: 0.04em;
+    }
+    .roster-remove-btn {
+      margin-left: auto; background: none; border: none;
+      color: rgba(255,80,80,0.45); font-size: 18px;
+      cursor: pointer; padding: 2px 6px; transition: color 0.15s;
+    }
+    .roster-remove-btn:hover { color: #ff6b6b; }
+
+    .roster-add-row { display: flex; gap: 8px; margin-top: 12px; }
+    .roster-add-row input {
+      flex: 1; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 6px;
+      padding: 9px 12px; color: #fff;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 14px; outline: none;
+    }
+    .roster-add-row input:focus { border-color: rgba(245,197,24,0.5); }
+    .roster-add-btn {
+      padding: 9px 18px; background: rgba(245,197,24,0.15);
+      border: 1px solid rgba(245,197,24,0.35); border-radius: 6px;
+      color: #f5c518; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s;
+    }
+    .roster-add-btn:hover { background: rgba(245,197,24,0.28); }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="home-link" href="./index.html">VCT Archive</a>
+    <span class="header-sep">/</span>
+    <span class="current-page">GC Champions</span>
+  </header>
+
+  <div class="league-hero">
+    <div class="hero-text">
+      <p class="eyebrow">Game Changers</p>
+      <h1>GC Champions 2026</h1>
+      <p class="intro">VCT Game Changers Champions 2026에 참가하는 10개 팀의 대진표와 선수 정보를 확인하세요.</p>
+    </div>
+    <div class="league-mark">
+      <img src="./assets/VCT_Changers_Champions.png" alt="GC Champions Logo" />
+    </div>
+  </div>
+
+  <main class="league-shell">
+    <div class="section-divider"></div>
+
+    <!-- ── BRACKET ── -->
+    <section class="bracket-section" aria-labelledby="bracket-title">
+      <div class="section-heading">
+        <p class="eyebrow">Tournament</p>
+        <h2 id="bracket-title">GC Champions 2026 대진표</h2>
+      </div>
+
+      <div class="bracket-scroll">
+
+        <!-- UPPER BRACKET -->
+        <div class="bracket-round-labels" aria-hidden="true">
+          <span>Upper Round 1</span>
+          <span>Upper Quarterfinals</span>
+          <span>Upper Semifinals</span>
+          <span>Upper Final</span>
+          <span>Grand Final</span>
+        </div>
+        <p class="bracket-subsection-title">상위조 (Upper Bracket)</p>
+        <div class="bracket-grid upper-bracket">
+
+          <!-- Col 1: Upper Round 1 -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 1 <span>Oct 23</span></div>
+              <div class="bracket-team">
+                <span class="bracket-logo"><img src="./assets/teams/GC/FL.GC.png" alt="FENNEL GC"></span>
+                <strong>FENNEL GC</strong><em>0</em>
+              </div>
+              <div class="bracket-team winner">
+                <span class="bracket-logo"><img src="./assets/teams/GC/MIBR.GC.png" alt="MIBR GC"></span>
+                <strong>MIBR GC</strong><em>2</em>
+              </div>
+              <div class="match-time">3:00 am KST, Oct 23</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 2 <span>Oct 23</span></div>
+              <div class="bracket-team winner">
+                <span class="bracket-logo"><img src="./assets/teams/GC/SKN.png" alt="SK Nebula"></span>
+                <strong>SK Nebula</strong><em>2</em>
+              </div>
+              <div class="bracket-team">
+                <span class="bracket-logo"><img src="./assets/teams/GC/NOVA.GC.png" alt="Nova Esports GC"></span>
+                <strong>Nova GC</strong><em>0</em>
+              </div>
+              <div class="match-time">5:00 am KST, Oct 23</div>
+            </article>
+          </div>
+
+          <!-- Col 2: Upper Quarterfinals -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 3 <span>Oct 25</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/G2G.png" alt="G2 Gozen"></span>
+                <strong>G2 Gozen</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/MIBR.GC.png" alt="MIBR GC"></span>
+                <strong>MIBR GC</strong><em>-</em>
+              </div>
+              <div class="match-time">3:00 am KST, Oct 25</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 4 <span>Oct 24</span></div>
+              <div class="bracket-team">
+                <span class="bracket-logo"><img src="./assets/teams/GC/TLV.png" alt="Team Liquid Brazil"></span>
+                <strong>TL Brazil</strong><em>0</em>
+              </div>
+              <div class="bracket-team winner">
+                <span class="bracket-logo"><img src="./assets/teams/GC/M8GC.png" alt="Gentle Mates GC"></span>
+                <strong>Gentle Mates GC</strong><em>2</em>
+              </div>
+              <div class="match-time">3:00 am KST, Oct 24</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 5 <span>Oct 25</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/SRG.png" alt="Shopify Rebellion Gold"></span>
+                <strong>Shopify Gold</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/SKN.png" alt="SK Nebula"></span>
+                <strong>SK Nebula</strong><em>-</em>
+              </div>
+              <div class="match-time">6:00 am KST, Oct 25</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 6 <span>Oct 24</span></div>
+              <div class="bracket-team winner">
+                <span class="bracket-logo"><img src="./assets/teams/GC/KRÜB.png" alt="KRÜ BLAZE"></span>
+                <strong>KRÜ BLAZE</strong><em>2</em>
+              </div>
+              <div class="bracket-team">
+                <span class="bracket-logo"><img src="./assets/teams/GC/GEN.GC.png" alt="Gen.G GC"></span>
+                <strong>Gen.G GC</strong><em>1</em>
+              </div>
+              <div class="match-time">5:35 am KST, Oct 24</div>
+            </article>
+          </div>
+
+          <!-- Col 3: Upper Semifinals -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 7 <span>Oct 28</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"></span>
+                <strong>TBD</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/M8GC.png" alt="Gentle Mates GC"></span>
+                <strong>Gentle Mates GC</strong><em>-</em>
+              </div>
+              <div class="match-time">3:00 am KST, Oct 28</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 8 <span>Oct 28</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"></span>
+                <strong>TBD</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/KRÜB.png" alt="KRÜ BLAZE"></span>
+                <strong>KRÜ BLAZE</strong><em>-</em>
+              </div>
+              <div class="match-time">6:00 am KST, Oct 28</div>
+            </article>
+          </div>
+
+          <!-- Col 4: Upper Final -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Upper Final <span>Oct 31</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">3:00 am KST, Oct 31</div>
+            </article>
+          </div>
+
+          <!-- Col 5: Grand Final -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match grand-final-card">
+              <div class="bracket-match-header">Grand Final <span>Nov TBD</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">3:00 am KST, Nov TBD</div>
+            </article>
+          </div>
+
+        </div>
+
+        <!-- LOWER BRACKET -->
+        <div class="bracket-round-labels" style="margin-top:28px" aria-hidden="true">
+          <span>Lower Round 1</span>
+          <span>Lower Round 2</span>
+          <span>Lower Round 3</span>
+          <span>Lower Round 4</span>
+          <span>Lower Final</span>
+        </div>
+        <p class="bracket-subsection-title">하위조 (Lower Bracket)</p>
+        <div class="bracket-grid lower-bracket">
+
+          <!-- Col 1: LR1 -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 10 <span>Oct 26</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/TLV.png" alt="Team Liquid Brazil"></span>
+                <strong>TL Brazil</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/NOVA.GC.png" alt="Nova Esports GC"></span>
+                <strong>Nova GC</strong><em>-</em>
+              </div>
+              <div class="match-time">6:00 am KST, Oct 26</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 11 <span>Oct 26</span></div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/GEN.GC.png" alt="Gen.G GC"></span>
+                <strong>Gen.G GC</strong><em>-</em>
+              </div>
+              <div class="bracket-team placeholder">
+                <span class="bracket-logo"><img src="./assets/teams/GC/FL.GC.png" alt="FENNEL GC"></span>
+                <strong>FENNEL GC</strong><em>-</em>
+              </div>
+              <div class="match-time">3:00 am KST, Oct 26</div>
+            </article>
+          </div>
+
+          <!-- Col 2: LR2 -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 12 <span>Oct 27</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">6:00 am KST, Oct 27</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 13 <span>Oct 27</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">3:00 am KST, Oct 27</div>
+            </article>
+          </div>
+
+          <!-- Col 3: LR3 -->
+          <div class="bracket-column">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 14 <span>Oct 29</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">6:00 am KST, Oct 29</div>
+            </article>
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 15 <span>Oct 29</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">3:00 am KST, Oct 29</div>
+            </article>
+          </div>
+
+          <!-- Col 4: LR4 -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Match 16 <span>Oct 31</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">6:00 am KST, Oct 31</div>
+            </article>
+          </div>
+
+          <!-- Col 5: Lower Final -->
+          <div class="bracket-column bracket-column-center">
+            <article class="bracket-match">
+              <div class="bracket-match-header">Lower Final <span>Nov TBD</span></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="bracket-team placeholder"><span class="bracket-logo"></span><strong>TBD</strong><em>-</em></div>
+              <div class="match-time">3:00 am KST, Nov TBD</div>
+            </article>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TEAMS ── -->
+    <section class="teams-section" aria-labelledby="teams-title">
+      <div class="section-heading">
+        <p class="eyebrow">Teams</p>
+        <h2 id="teams-title">GC Champions 참가 팀</h2>
+      </div>
+      <div class="team-grid">
+        <article class="team-card" data-team="G2 Gozen">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/G2G.png" alt="G2 Gozen"></div>
+          <h3>G2 Gozen</h3><p>EMEA</p>
+        </article>
+        <article class="team-card" data-team="MIBR GC">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/MIBR.GC.png" alt="MIBR GC"></div>
+          <h3>MIBR GC</h3><p>Americas</p>
+        </article>
+        <article class="team-card" data-team="Team Liquid Brazil">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/TLV.png" alt="Team Liquid Brazil"></div>
+          <h3>Team Liquid Brazil</h3><p>Americas</p>
+        </article>
+        <article class="team-card" data-team="Gentle Mates GC">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/M8GC.png" alt="Gentle Mates GC"></div>
+          <h3>Gentle Mates GC</h3><p>EMEA</p>
+        </article>
+        <article class="team-card" data-team="SK Nebula">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/SKN.png" alt="SK Nebula"></div>
+          <h3>SK Nebula</h3><p>EMEA</p>
+        </article>
+        <article class="team-card" data-team="Nova Esports GC">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/NOVA.GC.png" alt="Nova Esports GC"></div>
+          <h3>Nova Esports GC</h3><p>Pacific</p>
+        </article>
+        <article class="team-card" data-team="Shopify Rebellion Gold">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/SRG.png" alt="Shopify Rebellion Gold"></div>
+          <h3>Shopify Rebellion Gold</h3><p>Americas</p>
+        </article>
+        <article class="team-card" data-team="KRÜ BLAZE">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/KRÜB.png" alt="KRÜ BLAZE"></div>
+          <h3>KRÜ BLAZE</h3><p>Americas</p>
+        </article>
+        <article class="team-card" data-team="Gen.G GC">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/GEN.GC.png" alt="Gen.G GC"></div>
+          <h3>Gen.G GC</h3><p>Pacific</p>
+        </article>
+        <article class="team-card" data-team="FENNEL GC">
+          <div class="team-logo-wrap"><img src="./assets/teams/GC/FL.GC.png" alt="FENNEL GC"></div>
+          <h3>FENNEL GC</h3><p>Pacific</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── ROSTER MODAL ── -->
+  <div id="roster-modal" class="roster-modal" hidden>
+    <div class="roster-modal-backdrop" id="roster-backdrop"></div>
+    <div class="roster-modal-panel">
+      <div class="roster-modal-header">
+        <div class="roster-modal-logo" id="roster-modal-logo"></div>
+        <div class="roster-modal-header-text">
+          <p class="eyebrow">선수 명단</p>
+          <h2 id="roster-modal-title">팀</h2>
+        </div>
+        <button class="roster-modal-close" id="roster-modal-close" aria-label="닫기">×</button>
+      </div>
+      <span class="roster-section-label">메인 선수 <span style="opacity:0.5;font-size:10px">(5명)</span></span>
+      <ul class="roster-player-list" id="roster-main-list"></ul>
+      <span class="roster-section-label">서브 선수</span>
+      <ul class="roster-player-list" id="roster-sub-list"></ul>
+      <div class="roster-add-row">
+        <input type="text" id="roster-add-input" placeholder="선수 이름 입력..." autocomplete="off" />
+        <button class="roster-add-btn" id="roster-add-btn">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./storage.js"></script>
+  <script>
+  window.storageReady.then(function () {
+    (function () {
+      const LEAGUE = 'gc-champions';
+      const TEAM_LOGOS = {
+        'G2 Gozen':               './assets/teams/GC/G2G.png',
+        'MIBR GC':                './assets/teams/GC/MIBR.GC.png',
+        'Team Liquid Brazil':     './assets/teams/GC/TLV.png',
+        'Gentle Mates GC':        './assets/teams/GC/M8GC.png',
+        'SK Nebula':              './assets/teams/GC/SKN.png',
+        'Nova Esports GC':        './assets/teams/GC/NOVA.GC.png',
+        'Shopify Rebellion Gold': './assets/teams/GC/SRG.png',
+        'KRÜ BLAZE':             './assets/teams/GC/KRÜB.png',
+        'Gen.G GC':               './assets/teams/GC/GEN.GC.png',
+        'FENNEL GC':              './assets/teams/GC/FL.GC.png',
+      };
+
+      function storageKey(team) { return 'vct_roster:' + LEAGUE + ':' + team; }
+
+      function load(team) {
+        try {
+          const raw = localStorage.getItem(storageKey(team));
+          if (raw) {
+            const p = JSON.parse(raw);
+            if (p && !Array.isArray(p) && p.main) return p;
+            if (Array.isArray(p)) return { main: p.slice(0, 5), subs: p.slice(5) };
+          }
+        } catch (e) {}
+        return { main: [], subs: [] };
+      }
+
+      function save(team, data) {
+        try { localStorage.setItem(storageKey(team), JSON.stringify(data)); } catch (e) {}
+      }
+
+      let currentTeam = null;
+
+      function renderRoster(team) {
+        const data = load(team);
+        const mainList = document.getElementById('roster-main-list');
+        const subList  = document.getElementById('roster-sub-list');
+        mainList.innerHTML = '';
+        subList.innerHTML  = '';
+
+        function makeItem(name, list, isMain) {
+          const li = document.createElement('li');
+          li.className = 'roster-player-item';
+          li.innerHTML = '<span>' + name + '</span><button class="roster-remove-btn" aria-label="삭제">×</button>';
+          li.querySelector('.roster-remove-btn').addEventListener('click', function () {
+            const d = load(team);
+            if (isMain) d.main = d.main.filter(function (n) { return n !== name; });
+            else        d.subs = d.subs.filter(function (n) { return n !== name; });
+            save(team, d);
+            renderRoster(team);
+          });
+          list.appendChild(li);
+        }
+
+        data.main.forEach(function (n) { makeItem(n, mainList, true); });
+        data.subs.forEach(function (n) { makeItem(n, subList, false); });
+      }
+
+      function openModal(team) {
+        currentTeam = team;
+        document.getElementById('roster-modal-title').textContent = team;
+        const logoEl = document.getElementById('roster-modal-logo');
+        const src = TEAM_LOGOS[team] || '';
+        logoEl.innerHTML = src ? '<img src="' + src + '" alt="' + team + '">' : '';
+        renderRoster(team);
+        document.getElementById('roster-add-input').value = '';
+        document.getElementById('roster-modal').removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        document.getElementById('roster-modal').setAttribute('hidden', '');
+        document.body.style.overflow = '';
+        currentTeam = null;
+      }
+
+      document.querySelectorAll('.team-card').forEach(function (card) {
+        card.addEventListener('click', function () { openModal(card.dataset.team); });
+      });
+
+      document.getElementById('roster-modal-close').addEventListener('click', closeModal);
+      document.getElementById('roster-backdrop').addEventListener('click', closeModal);
+
+      document.getElementById('roster-add-btn').addEventListener('click', function () {
+        const input = document.getElementById('roster-add-input');
+        const name  = input.value.trim();
+        if (!name || !currentTeam) return;
+        const d = load(currentTeam);
+        if (d.main.length < 5) d.main.push(name);
+        else d.subs.push(name);
+        save(currentTeam, d);
+        renderRoster(currentTeam);
+        input.value = '';
+        input.focus();
+      });
+
+      document.getElementById('roster-add-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') document.getElementById('roster-add-btn').click();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+      });
+    })();
+  });
+  </script>
+</body>
+</html>
