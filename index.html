@@ -176,7 +176,7 @@
       .champions{ --accent: #c5b174; }
 
       /* ── Grid Slider ── */
-      .grid-slider-outer { display: flex; flex-direction: column; gap: 10px; }
+      .grid-slider-outer { position: relative; display: flex; flex-direction: column; gap: 10px; }
 
       .grid-slider-tabs { display: flex; gap: 6px; }
       .gst-tab {
@@ -209,8 +209,13 @@
       .grid-slide-arrow.flipped { transform: scaleX(-1); }
 
       /* ── VCT 2027 이동 버튼 ── */
+      .vct2027-btn-wrap {
+        position: absolute; right: 0; bottom: 0;
+        display: flex; align-items: center; gap: 8px;
+        pointer-events: none;
+      }
       .vct2027-btn {
-        flex-shrink: 0;
+        pointer-events: auto;
         display: flex; align-items: center; gap: 7px;
         padding: 0 14px; height: 40px; border-radius: 20px;
         background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
@@ -683,7 +688,9 @@
             </div>
             <!-- 슬라이드 화살표 -->
             <button class="grid-slide-arrow" id="grid-arrow" title="슬라이드">›</button>
-            <!-- VCT 2027 이동 -->
+          </div>
+          <!-- VCT 2027 이동 (absolute, 화살표 옆) -->
+          <div class="vct2027-btn-wrap">
             <a href="./2027/index.html" class="vct2027-btn">
               VCT 2027
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
