@@ -3678,6 +3678,13 @@ function toggleSlot(el, side) {
   const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
   el.setAttribute("data-v", next);
   el.textContent = next;
+  // 슬롯 O 개수로 시리즈 스코어 자동 계산
+  const aWins = document.querySelectorAll('#slots-a .mo-map-slot[data-v="O"]').length;
+  const bWins = document.querySelectorAll('#slots-b .mo-map-slot[data-v="O"]').length;
+  const saEl = document.getElementById('score-a');
+  const sbEl = document.getElementById('score-b');
+  if (saEl) saEl.value = String(aWins);
+  if (sbEl) sbEl.value = String(bWins);
   saveSharedResult();
 }
 
