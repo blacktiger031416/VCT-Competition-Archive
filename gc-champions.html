@@ -210,26 +210,35 @@
     .roster-modal-panel {
       position: relative; z-index: 1; width: min(540px,calc(100vw - 24px)); max-height: 88vh;
       overflow-y: auto; background: #121b2a;
-      border: 1.5px solid rgba(245,197,24,0.22); border-radius: 16px; padding: 24px; animation: panelIn 0.2s ease;
+      border: 1.5px solid rgba(245,197,24,0.22); border-radius: 16px; overflow: hidden; animation: panelIn 0.2s ease;
     }
-    .roster-modal-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .roster-modal-header { display: flex; align-items: center; gap: 14px; padding: 20px 20px 16px; }
     .roster-modal-logo { width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .roster-modal-logo img { width: 52px; height: 52px; object-fit: contain; }
+    .roster-modal-header-text { flex: 1; }
     .roster-modal-header-text .eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #f5c518; margin-bottom: 3px; }
     #roster-modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
-    .roster-modal-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.45); font-size: 22px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color 0.15s; }
+    .roster-modal-close { background: none; border: none; color: rgba(255,255,255,0.45); font-size: 22px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color 0.15s; flex-shrink: 0; }
     .roster-modal-close:hover { color: #fff; }
-    .roster-section-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin: 0 0 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .roster-section-label:first-of-type { border-top: none; padding-top: 0; }
-    .roster-player-list { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
-    .roster-player-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.04em; }
-    .roster-remove-btn { margin-left: auto; background: none; border: none; color: rgba(255,80,80,0.45); font-size: 18px; cursor: pointer; padding: 2px 6px; transition: color 0.15s; }
-    .roster-remove-btn:hover { color: #ff6b6b; }
-    .roster-add-row { display: flex; gap: 8px; margin-top: 12px; }
-    .roster-add-row input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 9px 12px; color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; outline: none; }
-    .roster-add-row input:focus { border-color: rgba(245,197,24,0.5); }
-    .roster-add-btn { padding: 9px 18px; background: rgba(245,197,24,0.15); border: 1px solid rgba(245,197,24,0.35); border-radius: 6px; color: #f5c518; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+    .roster-section-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 12px 20px 4px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .roster-player-list { list-style: none; max-height: 300px; overflow-y: auto; padding: 4px 0; }
+    .roster-player-list li { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.12s; }
+    .roster-player-list li:hover { background: rgba(255,255,255,0.04); }
+    .roster-player-list li:last-child { border-bottom: none; }
+    .roster-empty-msg { color: rgba(255,255,255,0.3); font-size: 13px; text-align: center; padding: 20px !important; font-family: 'Noto Sans KR', sans-serif; }
+    .player-index { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.25); width: 18px; flex-shrink: 0; text-align: center; }
+    .roster-player-list li > span:not(.player-index) { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.04em; color: rgba(255,255,255,0.85); }
+    .roster-player-remove { background: none; border: none; color: rgba(255,255,255,0.2); font-size: 16px; cursor: pointer; padding: 2px 4px; transition: color 0.12s; line-height: 1; }
+    .roster-player-remove:hover { color: rgba(232,67,45,0.85); }
+    .roster-add-row { display: flex; gap: 0; border-top: 1px solid rgba(255,255,255,0.07); }
+    #roster-add-input { flex: 1; background: transparent; border: none; padding: 14px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; color: #fff; outline: none; }
+    #roster-add-input::placeholder { color: rgba(255,255,255,0.2); }
+    .roster-add-btn { background: rgba(245,197,24,0.15); border: none; border-left: 1px solid rgba(255,255,255,0.07); color: #f5c518; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 20px; cursor: pointer; transition: background 0.15s; }
     .roster-add-btn:hover { background: rgba(245,197,24,0.28); }
+    .roster-main-item { display: flex; align-items: center; gap: 8px; padding: 8px 20px !important; }
+    .roster-main-input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; color: #fff; outline: none; }
+    .roster-main-input:focus { border-color: rgba(245,197,24,0.5); background: rgba(245,197,24,0.04); }
+    .roster-main-input::placeholder { color: rgba(255,255,255,0.18); }
   </style>
 </head>
 <body>
@@ -491,8 +500,8 @@
   </div>
 
   <!-- ── ROSTER MODAL ── -->
-  <div id="roster-modal" class="roster-modal" hidden>
-    <div class="roster-modal-backdrop" id="roster-backdrop"></div>
+  <div id="roster-modal" class="roster-modal" role="dialog" aria-modal="true" aria-labelledby="roster-modal-title" hidden>
+    <div class="roster-modal-backdrop"></div>
     <div class="roster-modal-panel">
       <div class="roster-modal-header">
         <div class="roster-modal-logo" id="roster-modal-logo"></div>
@@ -504,10 +513,10 @@
       </div>
       <span class="roster-section-label">메인 선수 <span style="opacity:0.5;font-size:10px">(5명)</span></span>
       <ul class="roster-player-list" id="roster-main-list"></ul>
-      <span class="roster-section-label">서브 선수</span>
+      <span class="roster-section-label" style="margin-top:2px">서브 선수</span>
       <ul class="roster-player-list" id="roster-sub-list"></ul>
-      <div class="roster-add-row">
-        <input type="text" id="roster-add-input" placeholder="선수 이름 입력..." autocomplete="off" />
+      <div class="roster-add-row" id="roster-add-row">
+        <input type="text" id="roster-add-input" placeholder="서브 선수 이름 입력..." autocomplete="off" />
         <button class="roster-add-btn" id="roster-add-btn">추가</button>
       </div>
     </div>
@@ -833,111 +842,255 @@
     /* ════════════════════════════════════════
        ROSTER MODAL
        ════════════════════════════════════════ */
+    (function() {
+      const LEAGUE = "gc-champions";
+      const modal   = document.getElementById("roster-modal");
+      const logoEl  = document.getElementById("roster-modal-logo");
+      const titleEl = document.getElementById("roster-modal-title");
+      const mainEl  = document.getElementById("roster-main-list");
+      const subEl   = document.getElementById("roster-sub-list");
+      const input   = document.getElementById("roster-add-input");
+      let current = null;
 
-    const LEAGUE = "gc-champions";
-    const TEAM_LOGOS = {
-      "G2 Gozen":               "./assets/teams/GC/G2G.png",
-      "MIBR GC":                "./assets/teams/GC/MIBR.GC.png",
-      "Team Liquid Brazil":     "./assets/teams/GC/TLV.png",
-      "Gentle Mates GC":        "./assets/teams/GC/M8GC.png",
-      "SK Nebula":              "./assets/teams/GC/SKN.png",
-      "Nova Esports GC":        "./assets/teams/GC/NOVA.GC.png",
-      "Shopify Rebellion Gold": "./assets/teams/GC/SRG.png",
-      "KRÜ BLAZE":             "./assets/teams/GC/KRÜB.png",
-      "Gen.G GC":               "./assets/teams/GC/GEN.GC.png",
-      "FENNEL GC":              "./assets/teams/GC/FL.GC.png",
-    };
+      function rosterKey(team) { return "vct_roster:" + LEAGUE + ":" + team; }
 
-    function rosterKey(team) { return "vct_roster:" + LEAGUE + ":" + team; }
-
-    function loadRoster(team) {
-      try {
-        const raw = localStorage.getItem(rosterKey(team));
-        if (raw) {
-          const p = JSON.parse(raw);
-          if (p && !Array.isArray(p) && p.main) return p;
-          if (Array.isArray(p)) return { main: p.slice(0,5), subs: p.slice(5) };
-        }
-      } catch(e) {}
-      return { main: [], subs: [] };
-    }
-    function saveRoster(team, data) { try { localStorage.setItem(rosterKey(team), JSON.stringify(data)); } catch(e) {} }
-
-    let currentTeam = null;
-
-    function renderRosterModal(team) {
-      const data = loadRoster(team);
-      const mainList = document.getElementById("roster-main-list");
-      const subList  = document.getElementById("roster-sub-list");
-      mainList.innerHTML = "";
-      subList.innerHTML  = "";
-
-      function makeItem(name, list, isMain) {
-        const li = document.createElement("li");
-        li.className = "roster-player-item";
-        li.innerHTML = "<span>" + name + "</span><button class=\"roster-remove-btn\" aria-label=\"삭제\">×</button>";
-        li.querySelector(".roster-remove-btn").addEventListener("click", function() {
-          const d = loadRoster(team);
-          if (isMain) d.main = d.main.filter(function(n) { return n !== name; });
-          else        d.subs = d.subs.filter(function(n) { return n !== name; });
-          saveRoster(team, d);
-          renderRosterModal(team);
-        });
-        list.appendChild(li);
+      function load(team) {
+        try {
+          const s = localStorage.getItem(rosterKey(team));
+          if (s) {
+            const p = JSON.parse(s);
+            if (p && !Array.isArray(p) && p.main) return p;
+            if (Array.isArray(p)) return { main: p.slice(0,5), subs: p.slice(5) };
+          }
+        } catch(e) {}
+        return { main: [], subs: [] };
       }
 
-      data.main.forEach(function(n) { makeItem(n, mainList, true); });
-      data.subs.forEach(function(n) { makeItem(n, subList, false); });
-    }
+      function save(team, data) {
+        const k = rosterKey(team);
+        const v = JSON.stringify(data);
+        try { localStorage.setItem(k, v); } catch(e) {}
+        fetch('/api/data/' + encodeURIComponent(k), {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value: v }),
+        }).catch(function(){});
+      }
 
-    function openRosterModal(team) {
-      currentTeam = team;
-      document.getElementById("roster-modal-title").textContent = team;
-      const logoEl = document.getElementById("roster-modal-logo");
-      const src = TEAM_LOGOS[team] || "";
-      logoEl.innerHTML = src ? "<img src=\"" + src + "\" alt=\"" + team + "\">" : "";
-      renderRosterModal(team);
-      document.getElementById("roster-add-input").value = "";
-      document.getElementById("roster-modal").removeAttribute("hidden");
-      document.body.style.overflow = "hidden";
-    }
+      function getLogoHTML() { return logoEl ? logoEl.innerHTML : ""; }
 
-    function closeRosterModal() {
-      document.getElementById("roster-modal").setAttribute("hidden", "");
-      document.body.style.overflow = "";
-      currentTeam = null;
-    }
+      function attachPlayerClick(el) {
+        const pName = el.getAttribute("data-player");
+        if (!pName) return;
+        el.addEventListener("click", function() {
+          if (window.openPlayerModal) window.openPlayerModal(pName, current, getLogoHTML());
+        });
+        el.style.cursor = "pointer";
+      }
 
-    document.querySelectorAll(".team-card").forEach(function(card) {
-      card.addEventListener("click", function() { openRosterModal(card.dataset.team); });
-    });
+      function saveMain() {
+        if (!current) return;
+        const d = load(current);
+        const oldMain = (d.main || []).slice();
+        d.main = Array.from(mainEl.querySelectorAll(".roster-main-input")).map(function(i) { return i.value.trim(); });
+        save(current, d);
+        oldMain.forEach(function(oldName, idx) {
+          const newName = d.main[idx];
+          if (!oldName || !newName || oldName === newName) return;
+          var pKeys = [];
+          for (var ki = 0; ki < localStorage.length; ki++) {
+            var k = localStorage.key(ki);
+            if (k && k.indexOf('players:') === 0) pKeys.push(k);
+          }
+          pKeys.forEach(function(k) {
+            try {
+              var obj = JSON.parse(localStorage.getItem(k) || '{}');
+              var chg = false;
+              Object.keys(obj).forEach(function(slot) {
+                if (obj[slot] && obj[slot].name === oldName) { obj[slot].name = newName; chg = true; }
+              });
+              if (chg) localStorage.setItem(k, JSON.stringify(obj));
+            } catch(e) {}
+          });
+          ['vct_p:'].forEach(function(prefix) {
+            const val = localStorage.getItem(prefix + oldName);
+            if (val !== null) { localStorage.setItem(prefix + newName, val); localStorage.removeItem(prefix + oldName); }
+          });
+          localStorage.setItem('_playerRenameEvent', JSON.stringify({ from: oldName, to: newName, t: Date.now() }));
+        });
+      }
 
-    document.getElementById("roster-modal-close").addEventListener("click", closeRosterModal);
-    document.getElementById("roster-backdrop").addEventListener("click", closeRosterModal);
+      function demoteToSub(idx) {
+        if (!current) return;
+        const d = load(current);
+        const name = (d.main[idx] || '').trim();
+        if (!name) return;
+        d.main[idx] = '';
+        if (!d.subs) d.subs = [];
+        d.subs.push(name);
+        save(current, d);
+        render();
+      }
 
-    document.getElementById("roster-add-btn").addEventListener("click", function() {
-      const input = document.getElementById("roster-add-input");
-      const name  = input.value.trim();
-      if (!name || !currentTeam) return;
-      const d = loadRoster(currentTeam);
-      if (d.main.length < 5) d.main.push(name);
-      else d.subs.push(name);
-      saveRoster(currentTeam, d);
-      renderRosterModal(currentTeam);
-      input.value = "";
-      input.focus();
-    });
+      function promoteToMain(subIdx) {
+        if (!current) return;
+        const d = load(current);
+        const name = (d.subs[subIdx] || '').trim();
+        if (!name) return;
+        let emptySlot = -1;
+        for (let i = 0; i < 5; i++) { if (!d.main[i] || !d.main[i].trim()) { emptySlot = i; break; } }
+        if (emptySlot === -1) { alert('메인 슬롯이 모두 찼습니다. 먼저 한 명을 서브로 내리세요.'); return; }
+        d.main[emptySlot] = name;
+        d.subs.splice(subIdx, 1);
+        save(current, d);
+        render();
+      }
 
-    document.getElementById("roster-add-input").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") document.getElementById("roster-add-btn").click();
-    });
+      function saveSub(idx, newName) {
+        if (!current) return;
+        const d = load(current);
+        const oldName = (d.subs[idx] || '').trim();
+        newName = (newName || '').trim();
+        if (!oldName || !newName || oldName === newName) return;
+        d.subs[idx] = newName;
+        save(current, d);
+        var pKeys = [];
+        for (var ki = 0; ki < localStorage.length; ki++) {
+          var k = localStorage.key(ki);
+          if (k && k.indexOf('players:') === 0) pKeys.push(k);
+        }
+        pKeys.forEach(function(k) {
+          try {
+            var obj = JSON.parse(localStorage.getItem(k) || '{}');
+            var chg = false;
+            Object.keys(obj).forEach(function(slot) {
+              if (obj[slot] && obj[slot].name === oldName) { obj[slot].name = newName; chg = true; }
+            });
+            if (chg) localStorage.setItem(k, JSON.stringify(obj));
+          } catch(e) {}
+        });
+        ['vct_p:'].forEach(function(prefix) {
+          const val = localStorage.getItem(prefix + oldName);
+          if (val !== null) { localStorage.setItem(prefix + newName, val); localStorage.removeItem(prefix + oldName); }
+        });
+        localStorage.setItem('_playerRenameEvent', JSON.stringify({ from: oldName, to: newName, t: Date.now() }));
+      }
 
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && !document.getElementById("roster-modal").hasAttribute("hidden")) closeRosterModal();
-    });
+      function render() {
+        if (!current) return;
+        const d = load(current);
+        const admin = window.vctIsAdmin && window.vctIsAdmin();
+
+        mainEl.innerHTML = [0,1,2,3,4].map(function(i) {
+          const nameVal = d.main[i] || '';
+          if (admin) {
+            return '<li class="roster-main-item">' +
+              '<input class="roster-main-input" data-i="' + i + '" value="' + nameVal.replace(/"/g,'&quot;') + '" placeholder="선수 이름" />' +
+              (nameVal ? '<button class="pm-roster-btn" data-player="' + nameVal.replace(/"/g,'&quot;') + '" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↗</button>' +
+                         '<button class="roster-demote-btn" data-main="' + i + '" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↓</button>' : '') +
+              '</li>';
+          } else {
+            return '<li class="roster-main-item">' +
+              '<span data-player="' + nameVal.replace(/"/g,'&quot;') + '" style="opacity:0.85">' + (nameVal || '—') + '</span>' +
+              '</li>';
+          }
+        }).join("");
+
+        mainEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
+        if (admin) {
+          mainEl.querySelectorAll(".roster-main-input").forEach(function(inp) {
+            inp.addEventListener("blur", saveMain);
+            inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveMain(); inp.blur(); } });
+          });
+          mainEl.querySelectorAll(".roster-demote-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() { demoteToSub(Number(btn.dataset.main)); });
+          });
+        }
+
+        if (!d.subs || !d.subs.length) {
+          subEl.innerHTML = '<li class="roster-empty-msg">등록된 서브 선수가 없습니다</li>';
+        } else {
+          subEl.innerHTML = d.subs.map(function(p, i) {
+            if (admin) {
+              return '<li class="roster-main-item">' +
+                '<button class="roster-promote-btn" data-sub="' + i + '" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:13px;padding:0 6px;line-height:1;flex-shrink:0;transition:color 0.12s">↑</button>' +
+                '<input class="roster-main-input roster-sub-input" data-sub="' + i + '" value="' + p.replace(/"/g,'&quot;') + '" placeholder="서브 선수 이름" />' +
+                '<button class="roster-player-remove" data-sub="' + i + '" style="flex-shrink:0">×</button>' +
+                '</li>';
+            }
+            return '<li><span data-player="' + p.replace(/"/g,'&quot;') + '" style="flex:1;opacity:0.85">' + p + '</span></li>';
+          }).join("");
+          subEl.querySelectorAll("[data-player]").forEach(attachPlayerClick);
+          if (admin) {
+            subEl.querySelectorAll(".roster-sub-input").forEach(function(inp) {
+              inp.addEventListener("blur", function() { saveSub(Number(inp.dataset.sub), inp.value); });
+              inp.addEventListener("keydown", function(e) { if (e.key === "Enter") { saveSub(Number(inp.dataset.sub), inp.value); inp.blur(); } });
+            });
+            subEl.querySelectorAll(".roster-promote-btn").forEach(function(btn) {
+              btn.addEventListener("click", function() { promoteToMain(Number(btn.dataset.sub)); });
+            });
+            subEl.querySelectorAll(".roster-player-remove").forEach(function(btn) {
+              btn.addEventListener("click", function() {
+                const d = load(current);
+                d.subs.splice(Number(btn.dataset.sub), 1);
+                save(current, d);
+                render();
+              });
+            });
+          }
+        }
+      }
+
+      function open(teamName, logoHTML) {
+        current = teamName;
+        titleEl.textContent = teamName;
+        logoEl.innerHTML = logoHTML || "";
+        render();
+        modal.removeAttribute("hidden");
+        document.body.classList.add("roster-open");
+        const addRow = document.getElementById("roster-add-row");
+        if (addRow) addRow.style.display = (window.vctIsAdmin && window.vctIsAdmin()) ? "flex" : "none";
+        input.value = "";
+        if (window.vctIsAdmin && window.vctIsAdmin()) setTimeout(function() { input.focus(); }, 260);
+      }
+
+      function close() {
+        modal.setAttribute("hidden", "");
+        document.body.classList.remove("roster-open");
+        current = null;
+      }
+
+      function add() {
+        const name = input.value.trim();
+        if (!name || !current) return;
+        const d = load(current);
+        if (!d.subs) d.subs = [];
+        d.subs.push(name);
+        save(current, d);
+        input.value = "";
+        render();
+      }
+
+      document.querySelector(".roster-modal-backdrop").addEventListener("click", close);
+      document.getElementById("roster-modal-close").addEventListener("click", close);
+      document.addEventListener("keydown", function(e) { if (e.key === "Escape") close(); });
+      document.getElementById("roster-add-btn").addEventListener("click", add);
+      input.addEventListener("keydown", function(e) { if (e.key === "Enter") add(); });
+
+      document.querySelectorAll(".teams-section .team-card").forEach(function(card) {
+        const nameEl = card.querySelector("h3");
+        if (!nameEl) return;
+        const teamName = nameEl.textContent.trim();
+        const logoWrap = card.querySelector(".team-logo-wrap");
+        const logoHTML = logoWrap ? logoWrap.innerHTML : "";
+        card.addEventListener("click", function() { open(teamName, logoHTML); });
+      });
+    })();
 
   }); // storageReady
   </script>
+  <script src="./player-modal.js"></script>
+  <script src="./help.js" defer></script>
   <script src="./auth.js"></script>
 </body>
 </html>
