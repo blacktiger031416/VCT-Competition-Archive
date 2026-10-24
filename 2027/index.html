@@ -210,10 +210,13 @@ function buildMap() {
   svg.append('rect').attr('width',W).attr('height',H).attr('fill','url(#bgGrad)');
   svg.append('rect').attr('width',W).attr('height',H).attr('fill','url(#rayGrad)');
 
-  /* Natural Earth 투영 — 세계 지도 타원형 */
+  /* Natural Earth 투영 — 세계 지도 타원형
+     D3 기본: scale=153 → 960×500 픽셀
+     → 현재 뷰포트에 맞게: scale = min(W/960, H/500) × 153 × 0.92 (여백) */
+  const s = Math.min(W / 960, H / 500) * 153 * 0.92;
   projection = d3.geoNaturalEarth1()
-    .scale(Math.min(W / 5.5, H / 2.8))
-    .translate([W / 2, H / 2]);
+    .scale(s)
+    .translate([W / 2, H / 2 + H * 0.04]);
 
   const pathGen = d3.geoPath().projection(projection);
 
