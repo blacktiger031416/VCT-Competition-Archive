@@ -110,6 +110,7 @@ body::after{content:'';position:fixed;inset:0;
   overflow:hidden;position:relative;transition:border-color .2s,box-shadow .2s;width:100%}
 .mc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
   background:linear-gradient(to bottom,var(--red),rgba(255,34,68,.2));opacity:.4}
+.mc[data-href]{cursor:pointer}
 .mc:hover{border-color:rgba(255,34,68,.4);
   box-shadow:0 0 16px rgba(255,34,68,.14),0 4px 20px rgba(0,0,0,.4)}
 .mc.gf-card{border-color:rgba(255,34,68,.2);
@@ -291,9 +292,10 @@ function teamRow(t, extraCls='', slotAttr='') {
   </div>`;
 }
 
-function matchCard(t1, t2, isGF=false, t1Slot='', t2Slot='') {
+function matchCard(t1, t2, isGF=false, t1Slot='', t2Slot='', href='') {
   const cc = isGF ? ' gf-card' : '';
-  return `<div class="mc${cc}">
+  const hrefAttr = href ? ` data-href="${href}"` : '';
+  return `<div class="mc${cc}"${hrefAttr}>
     ${teamRow(t1,'',t1Slot)}
     ${teamRow(t2,'',t2Slot)}
     <div class="mtime"></div>
@@ -334,26 +336,29 @@ function render(wk) {
     html += `<div style="grid-column:${gc};grid-row:1"></div>`;
   });
 
+  function mhref(r,mi){ return `cn-threshold-match.html?w=${wk}&r=${r}&m=${mi}`; }
+
   // R12 column
   const r12Html = r12Teams.map(([t1,t2],mi)=>`
     <div class="mg">${matchCard(
       t1, t2, false,
       admin?`data-type="r12" data-mi="${mi}" data-si="0"`:'',
       admin?`data-type="r12" data-mi="${mi}" data-si="1"`:'',
+      mhref('r12',mi),
     )}</div>`).join('');
   html += `<div class="rcol" id="rc0" style="grid-column:1">${r12Html}</div>`;
 
   // QF column
   const qfHtml = qfMatches.map((m,mi)=>`
-    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'')}</div>`).join('');
+    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'',mhref('qf',mi))}</div>`).join('');
   html += `<div class="rcol" id="rc1" style="grid-column:3">${qfHtml}</div>`;
 
   // SF column
-  const sfHtml = sfMatches.map(m=>`<div class="mg">${matchCard(m.t1,m.t2)}</div>`).join('');
+  const sfHtml = sfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,false,'','',mhref('sf',mi))}</div>`).join('');
   html += `<div class="rcol" id="rc2" style="grid-column:5">${sfHtml}</div>`;
 
   // GF column
-  const gfHtml = gfMatches.map(m=>`<div class="mg">${matchCard(m.t1,m.t2,true)}</div>`).join('');
+  const gfHtml = gfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,true,'','',mhref('gf',mi))}</div>`).join('');
   html += `<div class="rcol" id="rc3" style="grid-column:7">${gfHtml}</div>`;
 
   [2,4,6].forEach((gc,i)=>{
@@ -365,7 +370,8 @@ function render(wk) {
   // Attach click listeners for admin slots
   if (admin) {
     el.querySelectorAll('.tr.editable').forEach(row=>{
-      row.addEventListener('click', ()=>{
+      row.addEventListener('click', e=>{
+        e.stopPropagation(); // prevent match card navigation
         const type = row.dataset.type;
         const mi   = +row.dataset.mi;
         const si   = row.dataset.si !== undefined ? +row.dataset.si : -1;
@@ -373,6 +379,13 @@ function render(wk) {
       });
     });
   }
+
+  // Match card navigation
+  el.querySelectorAll('.mc[data-href]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      window.location.href = card.dataset.href;
+    });
+  });
 
   requestAnimationFrame(()=>requestAnimationFrame(drawConnectors));
 }
