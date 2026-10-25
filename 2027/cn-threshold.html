@@ -70,7 +70,7 @@ body::after{content:'';position:fixed;inset:0;
   text-transform:uppercase;letter-spacing:.06em;color:#fff}
 .hdr-sub{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;
   letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:1px}
-.hdr-right{display:flex;align-items:center;gap:.4rem}
+.hdr-right{display:flex;align-items:center;gap:.4rem;margin-left:2.5rem}
 .wtab{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;padding:.35rem .85rem;border-radius:3px;
   border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--muted);
@@ -183,106 +183,254 @@ body::after{content:'';position:fixed;inset:0;
   </div>
 
 </div>
+<style>
+/* ── Admin edit indicator ── */
+.tr.editable{cursor:pointer}
+.tr.editable:hover{background:rgba(255,34,68,.07)}
+.edit-hint{font-size:9px;color:rgba(255,34,68,.4);margin-left:auto;flex-shrink:0;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.05em;
+  opacity:0;transition:opacity .15s}
+.tr.editable:hover .edit-hint{opacity:1}
+/* ── Team picker overlay ── */
+#pickerOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center}
+#pickerOverlay.open{display:flex}
+#pickerBox{background:#0d0d14;border:1px solid rgba(255,34,68,.3);border-radius:6px;
+  padding:1.2rem;width:min(520px,92vw);max-height:80vh;overflow-y:auto;
+  box-shadow:0 0 40px rgba(255,34,68,.15)}
+.picker-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,34,68,.7);
+  margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between}
+.picker-close-btn{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;
+  font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  transition:color .15s}
+.picker-close-btn:hover{color:#fff}
+#pickerGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem}
+.picker-team{display:flex;align-items:center;gap:.55rem;padding:.5rem .7rem;
+  border:1px solid rgba(255,255,255,.08);border-radius:4px;cursor:pointer;
+  background:rgba(255,255,255,.03);transition:all .15s}
+.picker-team:hover:not(.used){border-color:rgba(255,34,68,.4);
+  background:rgba(255,34,68,.09)}
+.picker-team.used{opacity:.3;cursor:not-allowed}
+.picker-team .pt-logo{width:24px;height:24px;border-radius:3px;overflow:hidden;
+  background:rgba(255,255,255,.06);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.picker-team .pt-logo img{width:100%;height:100%;object-fit:contain}
+.picker-team .pt-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff}
+.picker-team .pt-full{font-family:'Barlow',sans-serif;font-size:9px;
+  color:rgba(255,255,255,.3);margin-top:1px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.picker-team-clear{display:flex;align-items:center;justify-content:center;
+  padding:.5rem;border:1px dashed rgba(255,255,255,.12);border-radius:4px;
+  cursor:pointer;color:rgba(255,255,255,.25);font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  transition:all .15s;grid-column:1/-1}
+.picker-team-clear:hover{border-color:rgba(255,34,68,.3);color:rgba(255,34,68,.6)}
+</style>
+<!-- Team Picker -->
+<div id="pickerOverlay">
+  <div id="pickerBox">
+    <div class="picker-title">
+      <span id="pickerLabel">팀 선택</span>
+      <button class="picker-close-btn" onclick="closePicker()">[ 닫기 ]</button>
+    </div>
+    <div id="pickerGrid"></div>
+  </div>
+</div>
 <script>
 const LP = '../assets/teams/VCT 2027/VCT CN/CN_OQ/';
 
-// team object: {abbr, name?, logo?}
-const T = (abbr, logo, name) => ({abbr, logo: logo||null, name: name||abbr});
+const CN_OQ_POOL = [
+  {abbr:'NOVA', name:'Nova Esports',                 logo:'NOVA.png'},
+  {abbr:'TEC',  name:'Titan Esports Club',           logo:'TEC.png'},
+  {abbr:'DRG',  name:'Dragon Ranger Gaming',         logo:'DRG.png'},
+  {abbr:'WOL',  name:'Wolves Esports',               logo:'WOL.png'},
+  {abbr:'FPX',  name:'FunPlus Phoenix',              logo:'FPX.png'},
+  {abbr:'KBG',  name:'KeepBest Gaming',              logo:'KBG.png'},
+  {abbr:'AQ',   name:'Any Question Gaming',          logo:'AQ.png'},
+  {abbr:'UR',   name:'Unsettled Resentment',         logo:'UR.png'},
+  {abbr:'AT',   name:'A Team',                       logo:'AT.png'},
+  {abbr:'RA',   name:'Rare Atom',                    logo:'RA.png'},
+  {abbr:'WSIG', name:'World Sports Invictus Gaming', logo:'WSIG.png'},
+  {abbr:'ODG',  name:'Octagonal Disposition Gaming', logo:'ODG.png'},
+  {abbr:'VLG',  name:'Victory No Limits Gaming',     logo:'VLG.png'},
+];
+
+function isAdmin() {
+  try { const u=JSON.parse(localStorage.getItem('vct_auth_user')); return !!(u&&u.role==='admin'); } catch(e){return false;}
+}
+function getPoolTeam(abbr) { return CN_OQ_POOL.find(t=>t.abbr===abbr)||null; }
+function storageKey(wk) { return `cnt_w${wk}`; }
+const emptyAssign = () => ({ r12:[[null,null],[null,null],[null,null],[null,null]], qf_seeds:[null,null,null,null] });
+function loadA(wk) {
+  try { const s=localStorage.getItem(storageKey(wk)); return s?JSON.parse(s):emptyAssign(); } catch(e){return emptyAssign();}
+}
+function saveA(wk,d) { try{localStorage.setItem(storageKey(wk),JSON.stringify(d));}catch(e){} }
+
+let currentWeek = 1;
+let pickerSlot = null; // {type:'r12'|'qf_seed', mi, si}
+
+// ── TBD (team object: {abbr, name?, logo?}
 const TBD = () => ({abbr:'TBD', logo:null, name:'TBD', tbd:true});
 
-// Match object: {t1, t2, time, seed?}
-const M = (t1, t2, time) => ({t1, t2, time});
 
-const WEEKS = {
-  1: {
-    r12:[
-      M(TBD(),TBD(),'6:00 PM · Oct 27 KST'),
-      M(TBD(),TBD(),'8:00 PM · Oct 27 KST'),
-      M(TBD(),TBD(),'6:00 PM · Oct 28 KST'),
-      M(TBD(),TBD(),'8:00 PM · Oct 28 KST'),
-    ],
-    qf:[
-      M(TBD(),TBD(),'6:00 PM · Oct 29 KST'),
-      M(TBD(),TBD(),'8:00 PM · Oct 29 KST'),
-      M(TBD(),TBD(),'6:00 PM · Oct 30 KST'),
-      M(TBD(),TBD(),'8:00 PM · Oct 30 KST'),
-    ],
-    sf:[
-      M(TBD(),TBD(),'6:00 PM · Oct 31 KST'),
-      M(TBD(),TBD(),'8:00 PM · Oct 31 KST'),
-    ],
-    gf:[
-      M(TBD(),TBD(),'6:00 PM · Nov 1 KST'),
-    ],
-  },
-  2:{
-    r12:[M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD')],
-    qf: [M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD')],
-    sf: [M(TBD(),TBD(),'TBD'),M(TBD(),TBD(),'TBD')],
-    gf: [M(TBD(),TBD(),'TBD')],
-  },
-};
-
-function teamRow(t, cls='') {
-  const logo = t.logo
+function teamRow(t, extraCls='', slotAttr='') {
+  const hasTeam = t && !t.tbd;
+  const logo = hasTeam && t.logo
     ? `<img src="${LP}${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
     : `<span class="qi">?</span>`;
-  const nc = t.tbd ? 'tname tbd' : 'tname';
-  return `<div class="tr${cls?` ${cls}`:''}">
+  const nc = hasTeam ? 'tname' : 'tname tbd';
+  const display = hasTeam ? t.abbr : 'TBD';
+  const winCls = t.winner===true?' win':t.winner===false?' loss':'';
+  const editableCls = slotAttr ? ' editable' : '';
+  return `<div class="tr${winCls}${editableCls}${extraCls?' '+extraCls:''}" ${slotAttr}>
     <div class="tlogo">${logo}</div>
-    <span class="${nc}">${t.tbd?'TBD':t.abbr}</span>
+    <span class="${nc}">${display}</span>
     ${t.score!=null?`<span class="score">${t.score}</span>`:''}
+    ${slotAttr?'<span class="edit-hint">✎</span>':''}
   </div>`;
 }
 
-function matchCard(m, isGF=false) {
+function matchCard(t1, t2, isGF=false, t1Slot='', t2Slot='') {
   const cc = isGF ? ' gf-card' : '';
   return `<div class="mc${cc}">
-    ${teamRow(m.t1, m.t1.winner===true?'win':m.t1.winner===false?'loss':'')}
-    ${teamRow(m.t2, m.t2.winner===true?'win':m.t2.winner===false?'loss':'')}
-    <div class="mtime">${m.time}</div>
+    ${teamRow(t1,'',t1Slot)}
+    ${teamRow(t2,'',t2Slot)}
+    <div class="mtime"></div>
   </div>`;
 }
 
 function render(wk) {
-  const d = WEEKS[wk];
+  currentWeek = wk;
+  const a = loadA(wk);
+  const admin = isAdmin();
   const el = document.getElementById('bracket');
 
-  // Grid: R12 | conn | QF | conn | SF | conn | GF
-  // Row 1: labels (grid-column 1,3,5,7)
-  // Row 2: match columns + connector columns
+  // Build team objects from assignments
+  const r12Teams = a.r12.map(([a1,a2])=>[
+    a1 ? {...getPoolTeam(a1)} : TBD(),
+    a2 ? {...getPoolTeam(a2)} : TBD(),
+  ]);
+  const qfSeeds = a.qf_seeds.map(s => s ? {...getPoolTeam(s)} : TBD());
+
+  // QF matches: t1=seeded(assignable), t2=R12 winner (TBD)
+  const qfMatches = qfSeeds.map((seed, i) => ({
+    t1: seed, t2: TBD(),
+    t1Slot: admin ? `data-type="qf_seed" data-mi="${i}"` : '',
+    t2Slot: '',
+  }));
+
+  // SF and GF are auto-propagated (always TBD for now)
+  const sfMatches = [{t1:TBD(),t2:TBD()},{t1:TBD(),t2:TBD()}];
+  const gfMatches = [{t1:TBD(),t2:TBD()}];
 
   const labels = ['Round of 12','Quarterfinals','Semifinals','Grand Final'];
-  const cols = ['r12','qf','sf','gf'];
-  const rounds = [d.r12, d.qf, d.sf, d.gf];
 
   let html = '';
-
-  // Labels row
   [1,3,5,7].forEach((gc,i)=>{
     html += `<div class="rlabel" style="grid-column:${gc}">${labels[i]}</div>`;
   });
-  // Connector label placeholders
   [2,4,6].forEach(gc=>{
     html += `<div style="grid-column:${gc};grid-row:1"></div>`;
   });
 
-  // Round columns
-  rounds.forEach((matches, ri)=>{
-    const gc = ri*2+1;
-    const isGF = ri===3;
-    const matchesHtml = matches.map(m=>`<div class="mg">${matchCard(m,isGF)}</div>`).join('');
-    html += `<div class="rcol" id="rc${ri}" style="grid-column:${gc}">${matchesHtml}</div>`;
-  });
+  // R12 column
+  const r12Html = r12Teams.map(([t1,t2],mi)=>`
+    <div class="mg">${matchCard(
+      t1, t2, false,
+      admin?`data-type="r12" data-mi="${mi}" data-si="0"`:'',
+      admin?`data-type="r12" data-mi="${mi}" data-si="1"`:'',
+    )}</div>`).join('');
+  html += `<div class="rcol" id="rc0" style="grid-column:1">${r12Html}</div>`;
 
-  // Connector columns (SVG drawn after layout)
+  // QF column
+  const qfHtml = qfMatches.map((m,mi)=>`
+    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'')}</div>`).join('');
+  html += `<div class="rcol" id="rc1" style="grid-column:3">${qfHtml}</div>`;
+
+  // SF column
+  const sfHtml = sfMatches.map(m=>`<div class="mg">${matchCard(m.t1,m.t2)}</div>`).join('');
+  html += `<div class="rcol" id="rc2" style="grid-column:5">${sfHtml}</div>`;
+
+  // GF column
+  const gfHtml = gfMatches.map(m=>`<div class="mg">${matchCard(m.t1,m.t2,true)}</div>`).join('');
+  html += `<div class="rcol" id="rc3" style="grid-column:7">${gfHtml}</div>`;
+
   [2,4,6].forEach((gc,i)=>{
     html += `<div class="ccol" id="cc${i}" style="grid-column:${gc}"></div>`;
   });
 
   el.innerHTML = html;
+
+  // Attach click listeners for admin slots
+  if (admin) {
+    el.querySelectorAll('.tr.editable').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        const type = row.dataset.type;
+        const mi   = +row.dataset.mi;
+        const si   = row.dataset.si !== undefined ? +row.dataset.si : -1;
+        openPicker(type, mi, si);
+      });
+    });
+  }
+
   requestAnimationFrame(()=>requestAnimationFrame(drawConnectors));
 }
+
+/* ── Picker ── */
+function getUsedAbbrs(wk, exclude) {
+  const a = loadA(wk);
+  const used = new Set();
+  a.r12.forEach(([a1,a2],mi)=>{
+    a1 && !(exclude.type==='r12'&&exclude.mi===mi&&exclude.si===0) && used.add(a1);
+    a2 && !(exclude.type==='r12'&&exclude.mi===mi&&exclude.si===1) && used.add(a2);
+  });
+  a.qf_seeds.forEach((s,mi)=>{
+    s && !(exclude.type==='qf_seed'&&exclude.mi===mi) && used.add(s);
+  });
+  return used;
+}
+
+function openPicker(type, mi, si) {
+  pickerSlot = {type, mi, si};
+  const used = getUsedAbbrs(currentWeek, pickerSlot);
+  const label = type==='r12' ? `Round of 12 · Match ${mi+1} · ${si===0?'Team 1':'Team 2'}` : `Quarterfinals · Match ${mi+1} · Seeded`;
+  document.getElementById('pickerLabel').textContent = label;
+
+  const grid = document.getElementById('pickerGrid');
+  grid.innerHTML = `<div class="picker-team-clear" onclick="assignTeam(null)">슬롯 비우기</div>` +
+    CN_OQ_POOL.map(t=>`
+      <div class="picker-team${used.has(t.abbr)?' used':''}" onclick="${used.has(t.abbr)?'':'assignTeam(\''+t.abbr+'\')'}">
+        <div class="pt-logo"><img src="${LP}${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'"></div>
+        <div><div class="pt-name">${t.abbr}</div><div class="pt-full">${t.name}</div></div>
+      </div>`).join('');
+
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+  pickerSlot = null;
+}
+
+function assignTeam(abbr) {
+  if (!pickerSlot) return;
+  const a = loadA(currentWeek);
+  const {type, mi, si} = pickerSlot;
+  if (type==='r12') {
+    if (!a.r12[mi]) a.r12[mi] = [null,null];
+    a.r12[mi][si] = abbr;
+  } else if (type==='qf_seed') {
+    a.qf_seeds[mi] = abbr;
+  }
+  saveA(currentWeek, a);
+  closePicker();
+  render(currentWeek);
+}
+
+document.getElementById('pickerOverlay').addEventListener('click', e=>{
+  if (e.target === document.getElementById('pickerOverlay')) closePicker();
+});
 
 function drawConnectors() {
   const bracket = document.getElementById('bracket');
@@ -383,7 +531,7 @@ function switchWeek(n) {
 }
 
 render(1);
-window.addEventListener('resize',drawConnectors);
+window.addEventListener('resize', ()=>{ drawConnectors(); });
 </script>
 <script src="../auth.js"></script>
 </body>
