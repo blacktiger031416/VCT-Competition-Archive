@@ -314,6 +314,7 @@ body::after{content:'';position:fixed;inset:0;
 .score-vs{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
   color:rgba(255,255,255,.18);letter-spacing:.1em;flex-shrink:0}
 .score-opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.45rem}
+.score-opts.bo5{grid-template-columns:1fr 1fr 1fr}
 .score-opt-btn{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
   letter-spacing:.04em;padding:.52rem;border-radius:3px;
   border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);
@@ -355,7 +356,8 @@ body::after{content:'';position:fixed;inset:0;
         <div class="st-name" id="scoreT2Name">TBD</div>
       </div>
     </div>
-    <div class="score-opts">
+    <div class="score-opts" id="scoreOpts">
+      <!-- BO3 기본; GF(BO5)는 openScoreModal에서 동적 교체 -->
       <button class="score-opt-btn" data-sa="2" data-sb="0" onclick="setScore(2,0)">2 — 0</button>
       <button class="score-opt-btn" data-sa="0" data-sb="2" onclick="setScore(0,2)">0 — 2</button>
       <button class="score-opt-btn" data-sa="2" data-sb="1" onclick="setScore(2,1)">2 — 1</button>
@@ -504,10 +506,10 @@ function makeAdminBar(round, mi, href) {
   </div>`;
 }
 
-function mhref(t1, t2) {
+function mhref(t1, t2, extra) {
   const a = encodeURIComponent(t1.tbd ? '' : (t1.name||''));
   const b = encodeURIComponent(t2.tbd ? '' : (t2.name||''));
-  return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold`;
+  return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold${extra||''}`;
 }
 
 function render(wk) {
@@ -554,9 +556,9 @@ function render(wk) {
   }).join('');
   html += `<div class="rcol" id="rc2" style="grid-column:5">${sfHtml}</div>`;
 
-  // GF
+  // GF (BO5)
   const gfHtml = bc.gf.map(m => {
-    const href = mhref(m.t1, m.t2);
+    const href = mhref(m.t1, m.t2, '&bo5=1&gf=1');
     const aBar = admin ? makeAdminBar('gf', 0, href) : '';
     return `<div class="mg">${matchCard(m.t1, m.t2, true, '', '', admin?'':href, aBar)}</div>`;
   }).join('');
@@ -682,6 +684,28 @@ function openScoreModal(round, mi) {
   document.getElementById('scoreT1Name').textContent = t1.abbr;
   document.getElementById('scoreT2Logo').innerHTML = logoHtml(t2);
   document.getElementById('scoreT2Name').textContent = t2.abbr;
+
+  // GF는 BO5, 나머지는 BO3 스코어 옵션 동적 생성
+  const isGF = round === 'gf';
+  const scoreOpts = document.getElementById('scoreOpts');
+  scoreOpts.classList.toggle('bo5', isGF);
+  if (isGF) {
+    scoreOpts.innerHTML = `
+      <button class="score-opt-btn" data-sa="3" data-sb="0" onclick="setScore(3,0)">3 — 0</button>
+      <button class="score-opt-btn" data-sa="0" data-sb="3" onclick="setScore(0,3)">0 — 3</button>
+      <button class="score-opt-btn" data-sa="3" data-sb="1" onclick="setScore(3,1)">3 — 1</button>
+      <button class="score-opt-btn" data-sa="1" data-sb="3" onclick="setScore(1,3)">1 — 3</button>
+      <button class="score-opt-btn" data-sa="3" data-sb="2" onclick="setScore(3,2)">3 — 2</button>
+      <button class="score-opt-btn" data-sa="2" data-sb="3" onclick="setScore(2,3)">2 — 3</button>
+      <button class="score-reset-btn" onclick="setScore(null,null)">스코어 초기화</button>`;
+  } else {
+    scoreOpts.innerHTML = `
+      <button class="score-opt-btn" data-sa="2" data-sb="0" onclick="setScore(2,0)">2 — 0</button>
+      <button class="score-opt-btn" data-sa="0" data-sb="2" onclick="setScore(0,2)">0 — 2</button>
+      <button class="score-opt-btn" data-sa="2" data-sb="1" onclick="setScore(2,1)">2 — 1</button>
+      <button class="score-opt-btn" data-sa="1" data-sb="2" onclick="setScore(1,2)">1 — 2</button>
+      <button class="score-reset-btn" onclick="setScore(null,null)">스코어 초기화</button>`;
+  }
 
   document.querySelectorAll('.score-opt-btn').forEach(btn => {
     const active = matchData.result
