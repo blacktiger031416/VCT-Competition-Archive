@@ -236,9 +236,9 @@ body::after{content:'';position:fixed;inset:0;
 /* ── Admin edit indicator ── */
 .tr.editable{cursor:pointer}
 .tr.editable:hover{background:rgba(255,34,68,.07)}
-.edit-hint{font-size:9px;color:rgba(255,34,68,.4);margin-left:auto;flex-shrink:0;
-  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.05em;
-  opacity:0;transition:opacity .15s}
+.edit-hint{position:absolute;right:.65rem;top:50%;transform:translateY(-50%);
+  font-size:9px;color:rgba(255,34,68,.4);font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;letter-spacing:.05em;opacity:0;transition:opacity .15s;pointer-events:none}
 .tr.editable:hover .edit-hint{opacity:1}
 /* ── Team picker overlay ── */
 #pickerOverlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);
@@ -484,7 +484,7 @@ function teamRow(t, extraCls='', slotAttr='') {
     <div class="tlogo">${logo}</div>
     <span class="${nc}">${display}</span>
     ${t.score!=null?`<span class="score">${t.score}</span>`:''}
-    <span class="edit-hint">${slotAttr?'✎':''}</span>
+    ${slotAttr?'<span class="edit-hint">✎</span>':''}
   </div>`;
 }
 
