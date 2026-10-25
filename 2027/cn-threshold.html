@@ -137,9 +137,7 @@ body::after{content:'';position:fixed;inset:0;
 .tr.win .score{color:#fff}
 .tr.win .tname{color:#fff}
 
-.mtime{font-family:'Barlow Condensed',sans-serif;font-size:8.5px;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);
-  padding:.22rem .65rem .25rem;border-top:1px solid var(--bdr);background:var(--s2)}
+.mtime{display:none}
 
 /* seeded indicator */
 .seed-tag{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
@@ -159,7 +157,7 @@ body::after{content:'';position:fixed;inset:0;
 <body>
 <div id="screen">
 
-  <div class="hdr">
+  <div class="hdr site-header">
     <div class="hdr-left">
       <button class="back-btn" onclick="history.back()">← VCT 2027</button>
       <div class="sep"></div>
@@ -169,7 +167,7 @@ body::after{content:'';position:fixed;inset:0;
         <div class="hdr-sub">KickOff Open Qualifier · China</div>
       </div>
     </div>
-    <div class="hdr-right">
+    <div class="hdr-right" id="hdrRight">
       <button class="wtab on" id="w1btn" onclick="switchWeek(1)">Week 1</button>
       <button class="wtab"    id="w2btn" onclick="switchWeek(2)">Week 2</button>
     </div>
@@ -387,5 +385,6 @@ function switchWeek(n) {
 render(1);
 window.addEventListener('resize',drawConnectors);
 </script>
+<script src="../auth.js"></script>
 </body>
 </html>
