@@ -2856,6 +2856,22 @@ maps.forEach(function(m, i) { renderTeamStats(m, i); });
     VETO_MAP_SLOT = [2, 3, 4, 5, 6];
   }
 
+  // ① 저장된 스코어로 activeMapCount 보정
+  (function() {
+    var _res = loadSharedResult();
+    var _sa = parseInt(_res.scoreA) || 0;
+    var _sb = parseInt(_res.scoreB) || 0;
+    if (_sa + _sb > 0) {
+      var _c = Math.max(1, Math.min(_sa + _sb, currentBo));
+      if (_c > activeMapCount) {
+        activeMapCount = _c;
+        for (var _i = 1; _i <= Math.min(activeMapCount, 3); _i++) {
+          initializedMaps[_i] = true;
+        }
+      }
+    }
+  })();
+
   // ② 맵 4~5 scoreState 초기화 (maps 데이터는 이미 sync에서 생성됨)
   for (var _mi = 4; _mi <= Math.min(activeMapCount, currentBo); _mi++) {
     if (!maps[_mi - 1]) maps[_mi - 1] = createBlankMapData(_mi - 1);
