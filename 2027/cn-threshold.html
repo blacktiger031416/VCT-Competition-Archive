@@ -275,6 +275,57 @@ body::after{content:'';position:fixed;inset:0;
   font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   transition:all .15s;grid-column:1/-1}
 .picker-team-clear:hover{border-color:rgba(255,34,68,.3);color:rgba(255,34,68,.6)}
+
+/* ── Admin bar inside match card ── */
+.mc-admin-bar{display:flex;align-items:center;gap:.4rem;padding:.28rem .55rem;
+  border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.22)}
+.btn-score{font-family:'Barlow Condensed',sans-serif;font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid rgba(255,34,68,.3);background:transparent;
+  color:rgba(255,34,68,.65);border-radius:2px;padding:2px 8px;
+  cursor:pointer;transition:all .15s;line-height:1.4}
+.btn-score:hover{background:rgba(255,34,68,.18);color:#fff;border-color:rgba(255,34,68,.6)}
+.btn-detail{font-family:'Barlow Condensed',sans-serif;font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.1);background:transparent;
+  color:rgba(228,228,238,.35);border-radius:2px;padding:2px 8px;
+  cursor:pointer;transition:all .15s;margin-left:auto;line-height:1.4}
+.btn-detail:hover{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.3)}
+
+/* ── Score Modal ── */
+#scoreOverlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);
+  display:none;align-items:center;justify-content:center}
+#scoreOverlay.open{display:flex}
+#scoreBox{background:#0d0d14;border:1px solid rgba(255,34,68,.28);border-radius:6px;
+  padding:1.35rem 1.4rem;width:min(340px,92vw);
+  box-shadow:0 0 48px rgba(255,34,68,.14)}
+.score-modal-title{font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,34,68,.65);
+  margin-bottom:.95rem;display:flex;align-items:center;justify-content:space-between}
+.score-matchup{display:flex;align-items:center;justify-content:center;
+  gap:.85rem;margin-bottom:1.15rem}
+.score-team{text-align:center;flex:1}
+.score-team .st-logo{width:38px;height:38px;margin:0 auto .4rem;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
+.score-team .st-logo img{width:100%;height:100%;object-fit:contain}
+.score-team .st-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;
+  font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff}
+.score-vs{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.18);letter-spacing:.1em;flex-shrink:0}
+.score-opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.45rem}
+.score-opt-btn{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.04em;padding:.52rem;border-radius:3px;
+  border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);
+  color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;text-align:center}
+.score-opt-btn:hover{background:rgba(255,34,68,.14);border-color:rgba(255,34,68,.38);color:#fff}
+.score-opt-btn.active{background:rgba(255,34,68,.22);border-color:rgba(255,34,68,.65);
+  color:#fff;box-shadow:0 0 10px rgba(255,34,68,.18)}
+.score-reset-btn{width:100%;grid-column:1/-1;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.32rem;border:1px dashed rgba(255,255,255,.1);border-radius:3px;
+  background:transparent;color:rgba(255,255,255,.22);cursor:pointer;transition:all .15s}
+.score-reset-btn:hover{border-color:rgba(255,34,68,.3);color:rgba(255,34,68,.55)}
 </style>
 <!-- Team Picker -->
 <div id="pickerOverlay">
@@ -284,6 +335,33 @@ body::after{content:'';position:fixed;inset:0;
       <button class="picker-close-btn" onclick="closePicker()">[ 닫기 ]</button>
     </div>
     <div id="pickerGrid"></div>
+  </div>
+</div>
+<!-- Score Modal -->
+<div id="scoreOverlay">
+  <div id="scoreBox">
+    <div class="score-modal-title">
+      <span id="scoreModalTitle">스코어 입력</span>
+      <button class="picker-close-btn" onclick="closeScoreModal()">[ 닫기 ]</button>
+    </div>
+    <div class="score-matchup">
+      <div class="score-team">
+        <div class="st-logo" id="scoreT1Logo"></div>
+        <div class="st-name" id="scoreT1Name">TBD</div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-team">
+        <div class="st-logo" id="scoreT2Logo"></div>
+        <div class="st-name" id="scoreT2Name">TBD</div>
+      </div>
+    </div>
+    <div class="score-opts">
+      <button class="score-opt-btn" data-sa="2" data-sb="0" onclick="setScore(2,0)">2 — 0</button>
+      <button class="score-opt-btn" data-sa="0" data-sb="2" onclick="setScore(0,2)">0 — 2</button>
+      <button class="score-opt-btn" data-sa="2" data-sb="1" onclick="setScore(2,1)">2 — 1</button>
+      <button class="score-opt-btn" data-sa="1" data-sb="2" onclick="setScore(1,2)">1 — 2</button>
+      <button class="score-reset-btn" onclick="setScore(null,null)">스코어 초기화</button>
+    </div>
   </div>
 </div>
 <script>
@@ -310,18 +388,86 @@ function isAdmin() {
 }
 function getPoolTeam(abbr) { return CN_OQ_POOL.find(t=>t.abbr===abbr)||null; }
 function storageKey(wk) { return `cnt_w${wk}`; }
-const emptyAssign = () => ({ r12:[[null,null],[null,null],[null,null],[null,null]], qf_seeds:[null,null,null,null] });
+
+const emptyAssign = () => ({
+  r12: [[null,null],[null,null],[null,null],[null,null]],
+  qf_seeds: [null,null,null,null],
+  r12_result: [null,null,null,null],
+  qf_result:  [null,null,null,null],
+  sf_result:  [null,null],
+  gf_result:  null,
+});
+
 function loadA(wk) {
-  try { const s=localStorage.getItem(storageKey(wk)); return s?JSON.parse(s):emptyAssign(); } catch(e){return emptyAssign();}
+  try {
+    const s = localStorage.getItem(storageKey(wk));
+    if (!s) return emptyAssign();
+    const d = JSON.parse(s);
+    if (!d.r12_result) d.r12_result = [null,null,null,null];
+    if (!d.qf_result)  d.qf_result  = [null,null,null,null];
+    if (!d.sf_result)  d.sf_result  = [null,null];
+    if (d.gf_result === undefined) d.gf_result = null;
+    return d;
+  } catch(e) { return emptyAssign(); }
 }
-function saveA(wk,d) { try{localStorage.setItem(storageKey(wk),JSON.stringify(d));}catch(e){} }
+
+function saveA(wk, d) {
+  try { localStorage.setItem(storageKey(wk), JSON.stringify(d)); } catch(e) {}
+}
 
 let currentWeek = 1;
-let pickerSlot = null; // {type:'r12'|'qf_seed', mi, si}
+let pickerSlot = null;
+let scoreSlot = null;
 
-// ── TBD (team object: {abbr, name?, logo?}
 const TBD = () => ({abbr:'TBD', logo:null, name:'TBD', tbd:true});
 
+function makeTeam(abbr, result, slot) {
+  if (!abbr) return TBD();
+  const base = getPoolTeam(abbr);
+  if (!base) return TBD();
+  const t = {...base};
+  if (result && result.sa != null && result.sb != null) {
+    t.score = slot === 0 ? result.sa : result.sb;
+    const opSc = slot === 0 ? result.sb : result.sa;
+    t.winner = t.score > opSc;
+  }
+  return t;
+}
+
+function winnerAbbr(a1, a2, result) {
+  if (!result || result.sa == null) return null;
+  return result.sa > result.sb ? a1 : a2;
+}
+
+function computeBracket(a) {
+  const r12 = a.r12.map(([a1,a2], i) => ({
+    t1: makeTeam(a1, a.r12_result[i], 0),
+    t2: makeTeam(a2, a.r12_result[i], 1),
+    result: a.r12_result[i], a1, a2,
+  }));
+  const r12W = r12.map((m, i) => winnerAbbr(m.a1, m.a2, m.result));
+
+  const qf = a.qf_seeds.map((seed, i) => ({
+    t1: makeTeam(seed, a.qf_result[i], 0),
+    t2: makeTeam(r12W[i], a.qf_result[i], 1),
+    result: a.qf_result[i], a1: seed, a2: r12W[i],
+  }));
+  const qfW = qf.map((m, i) => winnerAbbr(m.a1, m.a2, m.result));
+
+  const sf = [
+    { t1: makeTeam(qfW[0], a.sf_result[0], 0), t2: makeTeam(qfW[1], a.sf_result[0], 1), result: a.sf_result[0], a1: qfW[0], a2: qfW[1] },
+    { t1: makeTeam(qfW[2], a.sf_result[1], 0), t2: makeTeam(qfW[3], a.sf_result[1], 1), result: a.sf_result[1], a1: qfW[2], a2: qfW[3] },
+  ];
+  const sfW = sf.map((m, i) => winnerAbbr(m.a1, m.a2, m.result));
+
+  const gf = [{
+    t1: makeTeam(sfW[0], a.gf_result, 0),
+    t2: makeTeam(sfW[1], a.gf_result, 1),
+    result: a.gf_result, a1: sfW[0], a2: sfW[1],
+  }];
+
+  return { r12, qf, sf, gf };
+}
 
 function teamRow(t, extraCls='', slotAttr='') {
   const hasTeam = t && !t.tbd;
@@ -340,14 +486,28 @@ function teamRow(t, extraCls='', slotAttr='') {
   </div>`;
 }
 
-function matchCard(t1, t2, isGF=false, t1Slot='', t2Slot='', href='') {
+function matchCard(t1, t2, isGF=false, t1Slot='', t2Slot='', href='', adminBar='') {
   const cc = isGF ? ' gf-card' : '';
   const hrefAttr = href ? ` data-href="${href}"` : '';
   return `<div class="mc${cc}"${hrefAttr}>
     ${teamRow(t1,'',t1Slot)}
     ${teamRow(t2,'',t2Slot)}
     <div class="mtime"></div>
+    ${adminBar}
   </div>`;
+}
+
+function makeAdminBar(round, mi, href) {
+  return `<div class="mc-admin-bar">
+    <button class="btn-score" data-round="${round}" data-mi="${mi}">스코어</button>
+    <button class="btn-detail" data-href="${href}">상세 →</button>
+  </div>`;
+}
+
+function mhref(t1, t2) {
+  const a = encodeURIComponent(t1.tbd ? '' : (t1.name||''));
+  const b = encodeURIComponent(t2.tbd ? '' : (t2.name||''));
+  return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold`;
 }
 
 function render(wk) {
@@ -356,99 +516,95 @@ function render(wk) {
   const admin = isAdmin();
   const el = document.getElementById('bracket');
 
-  // Build team objects from assignments
-  const r12Teams = a.r12.map(([a1,a2])=>[
-    a1 ? {...getPoolTeam(a1)} : TBD(),
-    a2 ? {...getPoolTeam(a2)} : TBD(),
-  ]);
-  const qfSeeds = a.qf_seeds.map(s => s ? {...getPoolTeam(s)} : TBD());
-
-  // QF matches: t1=seeded(assignable), t2=R12 winner (TBD)
-  const qfMatches = qfSeeds.map((seed, i) => ({
-    t1: seed, t2: TBD(),
-    t1Slot: admin ? `data-type="qf_seed" data-mi="${i}"` : '',
-    t2Slot: '',
-  }));
-
-  // SF and GF are auto-propagated (always TBD for now)
-  const sfMatches = [{t1:TBD(),t2:TBD()},{t1:TBD(),t2:TBD()}];
-  const gfMatches = [{t1:TBD(),t2:TBD()}];
-
+  const bc = computeBracket(a);
   const labels = ['Round of 12','Quarterfinals','Semifinals','Grand Final'];
 
   let html = '';
-  [1,3,5,7].forEach((gc,i)=>{
+  [1,3,5,7].forEach((gc,i) => {
     html += `<div class="rlabel" style="grid-column:${gc}">${labels[i]}</div>`;
   });
-  [2,4,6].forEach(gc=>{
+  [2,4,6].forEach(gc => {
     html += `<div style="grid-column:${gc};grid-row:1"></div>`;
   });
 
-  function mhref(t1, t2){
-    const a = encodeURIComponent(t1.tbd ? '' : (t1.name||''));
-    const b = encodeURIComponent(t2.tbd ? '' : (t2.name||''));
-    return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold`;
-  }
-
-  // R12 column
-  const r12Html = r12Teams.map(([t1,t2],mi)=>`
-    <div class="mg">${matchCard(
-      t1, t2, false,
-      admin?`data-type="r12" data-mi="${mi}" data-si="0"`:'',
-      admin?`data-type="r12" data-mi="${mi}" data-si="1"`:'',
-      mhref(t1,t2),
-    )}</div>`).join('');
+  // R12
+  const r12Html = bc.r12.map((m, mi) => {
+    const t1Slot = admin ? `data-type="r12" data-mi="${mi}" data-si="0"` : '';
+    const t2Slot = admin ? `data-type="r12" data-mi="${mi}" data-si="1"` : '';
+    const href = mhref(m.t1, m.t2);
+    const aBar = admin ? makeAdminBar('r12', mi, href) : '';
+    return `<div class="mg">${matchCard(m.t1, m.t2, false, t1Slot, t2Slot, admin?'':href, aBar)}</div>`;
+  }).join('');
   html += `<div class="rcol" id="rc0" style="grid-column:1">${r12Html}</div>`;
 
-  // QF column
-  const qfHtml = qfMatches.map((m,mi)=>`
-    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'',mhref(m.t1,m.t2))}</div>`).join('');
+  // QF
+  const qfHtml = bc.qf.map((m, mi) => {
+    const t1Slot = admin ? `data-type="qf_seed" data-mi="${mi}"` : '';
+    const href = mhref(m.t1, m.t2);
+    const aBar = admin ? makeAdminBar('qf', mi, href) : '';
+    return `<div class="mg">${matchCard(m.t1, m.t2, false, t1Slot, '', admin?'':href, aBar)}</div>`;
+  }).join('');
   html += `<div class="rcol" id="rc1" style="grid-column:3">${qfHtml}</div>`;
 
-  // SF column
-  const sfHtml = sfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,false,'','',mhref(m.t1,m.t2))}</div>`).join('');
+  // SF
+  const sfHtml = bc.sf.map((m, mi) => {
+    const href = mhref(m.t1, m.t2);
+    const aBar = admin ? makeAdminBar('sf', mi, href) : '';
+    return `<div class="mg">${matchCard(m.t1, m.t2, false, '', '', admin?'':href, aBar)}</div>`;
+  }).join('');
   html += `<div class="rcol" id="rc2" style="grid-column:5">${sfHtml}</div>`;
 
-  // GF column
-  const gfHtml = gfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,true,'','',mhref(m.t1,m.t2))}</div>`).join('');
+  // GF
+  const gfHtml = bc.gf.map(m => {
+    const href = mhref(m.t1, m.t2);
+    const aBar = admin ? makeAdminBar('gf', 0, href) : '';
+    return `<div class="mg">${matchCard(m.t1, m.t2, true, '', '', admin?'':href, aBar)}</div>`;
+  }).join('');
   html += `<div class="rcol" id="rc3" style="grid-column:7">${gfHtml}</div>`;
 
-  [2,4,6].forEach((gc,i)=>{
+  [2,4,6].forEach((gc,i) => {
     html += `<div class="ccol" id="cc${i}" style="grid-column:${gc}"></div>`;
   });
 
   el.innerHTML = html;
 
-  // Attach click listeners for admin slots
   if (admin) {
-    el.querySelectorAll('.tr.editable').forEach(row=>{
-      row.addEventListener('click', e=>{
-        e.stopPropagation(); // prevent match card navigation
-        const type = row.dataset.type;
-        const mi   = +row.dataset.mi;
-        const si   = row.dataset.si !== undefined ? +row.dataset.si : -1;
-        openPicker(type, mi, si);
+    el.querySelectorAll('.tr.editable').forEach(row => {
+      row.addEventListener('click', e => {
+        e.stopPropagation();
+        openPicker(row.dataset.type, +row.dataset.mi, row.dataset.si !== undefined ? +row.dataset.si : -1);
       });
+    });
+    el.querySelectorAll('.btn-score').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        openScoreModal(btn.dataset.round, +btn.dataset.mi);
+      });
+    });
+    el.querySelectorAll('.btn-detail').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        navigateTo(btn.dataset.href);
+      });
+    });
+  } else {
+    el.querySelectorAll('.mc[data-href]').forEach(card => {
+      card.addEventListener('click', () => navigateTo(card.dataset.href));
     });
   }
 
-  // Match card navigation with digital transition
-  el.querySelectorAll('.mc[data-href]').forEach(card=>{
-    card.addEventListener('click', ()=>navigateTo(card.dataset.href));
-  });
-
-  requestAnimationFrame(()=>requestAnimationFrame(drawConnectors));
+  requestAnimationFrame(() => requestAnimationFrame(drawConnectors));
 }
 
-/* ── Picker ── */
+/* ── Team Picker ── */
 function getUsedAbbrs(wk, exclude) {
   const a = loadA(wk);
   const used = new Set();
-  a.r12.forEach(([a1,a2],mi)=>{
+  a.r12.forEach(([a1,a2],mi) => {
     a1 && !(exclude.type==='r12'&&exclude.mi===mi&&exclude.si===0) && used.add(a1);
     a2 && !(exclude.type==='r12'&&exclude.mi===mi&&exclude.si===1) && used.add(a2);
   });
-  a.qf_seeds.forEach((s,mi)=>{
+  a.qf_seeds.forEach((s,mi) => {
     s && !(exclude.type==='qf_seed'&&exclude.mi===mi) && used.add(s);
   });
   return used;
@@ -457,12 +613,14 @@ function getUsedAbbrs(wk, exclude) {
 function openPicker(type, mi, si) {
   pickerSlot = {type, mi, si};
   const used = getUsedAbbrs(currentWeek, pickerSlot);
-  const label = type==='r12' ? `Round of 12 · Match ${mi+1} · ${si===0?'Team 1':'Team 2'}` : `Quarterfinals · Match ${mi+1} · Seeded`;
+  const label = type==='r12'
+    ? `Round of 12 · Match ${mi+1} · ${si===0?'Team 1':'Team 2'}`
+    : `Quarterfinals · Match ${mi+1} · Seeded`;
   document.getElementById('pickerLabel').textContent = label;
 
   const grid = document.getElementById('pickerGrid');
   grid.innerHTML = `<div class="picker-team-clear" onclick="assignTeam(null)">슬롯 비우기</div>` +
-    CN_OQ_POOL.map(t=>`
+    CN_OQ_POOL.map(t => `
       <div class="picker-team${used.has(t.abbr)?' used':''}" onclick="${used.has(t.abbr)?'':'assignTeam(\''+t.abbr+'\')'}">
         <div class="pt-logo"><img src="${LP}${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'"></div>
         <div><div class="pt-name">${t.abbr}</div><div class="pt-full">${t.name}</div></div>
@@ -480,27 +638,90 @@ function assignTeam(abbr) {
   if (!pickerSlot) return;
   const a = loadA(currentWeek);
   const {type, mi, si} = pickerSlot;
-  if (type==='r12') {
+  if (type === 'r12') {
     if (!a.r12[mi]) a.r12[mi] = [null,null];
     a.r12[mi][si] = abbr;
-  } else if (type==='qf_seed') {
+    a.r12_result[mi] = null; // 팀 변경 시 스코어 초기화
+  } else if (type === 'qf_seed') {
     a.qf_seeds[mi] = abbr;
+    a.qf_result[mi] = null;
   }
   saveA(currentWeek, a);
   closePicker();
   render(currentWeek);
 }
 
-document.getElementById('pickerOverlay').addEventListener('click', e=>{
+document.getElementById('pickerOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('pickerOverlay')) closePicker();
 });
 
+/* ── Score Modal ── */
+function openScoreModal(round, mi) {
+  const a = loadA(currentWeek);
+  const bc = computeBracket(a);
+
+  let matchData;
+  if (round === 'r12') matchData = bc.r12[mi];
+  else if (round === 'qf') matchData = bc.qf[mi];
+  else if (round === 'sf') matchData = bc.sf[mi];
+  else if (round === 'gf') matchData = bc.gf[0];
+  if (!matchData) return;
+
+  scoreSlot = { round, mi };
+
+  const rLabel = {r12:'Round of 12', qf:'Quarterfinals', sf:'Semifinals', gf:'Grand Final'}[round];
+  const mNum = round === 'gf' ? '' : ` · Match ${mi+1}`;
+  document.getElementById('scoreModalTitle').textContent = rLabel + mNum;
+
+  const t1 = matchData.t1, t2 = matchData.t2;
+  const logoHtml = t => t.logo
+    ? `<img src="${LP}${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`
+    : `<span style="color:var(--muted2);font-size:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700">?</span>`;
+
+  document.getElementById('scoreT1Logo').innerHTML = logoHtml(t1);
+  document.getElementById('scoreT1Name').textContent = t1.abbr;
+  document.getElementById('scoreT2Logo').innerHTML = logoHtml(t2);
+  document.getElementById('scoreT2Name').textContent = t2.abbr;
+
+  document.querySelectorAll('.score-opt-btn').forEach(btn => {
+    const active = matchData.result
+      && +btn.dataset.sa === matchData.result.sa
+      && +btn.dataset.sb === matchData.result.sb;
+    btn.classList.toggle('active', !!active);
+  });
+
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function setScore(sa, sb) {
+  if (!scoreSlot) return;
+  const a = loadA(currentWeek);
+  const result = (sa == null) ? null : {sa, sb};
+
+  if (scoreSlot.round === 'r12') a.r12_result[scoreSlot.mi] = result;
+  else if (scoreSlot.round === 'qf') a.qf_result[scoreSlot.mi] = result;
+  else if (scoreSlot.round === 'sf') a.sf_result[scoreSlot.mi] = result;
+  else if (scoreSlot.round === 'gf') a.gf_result = result;
+
+  saveA(currentWeek, a);
+  closeScoreModal();
+  render(currentWeek);
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreOverlay').classList.remove('open');
+  scoreSlot = null;
+}
+
+document.getElementById('scoreOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scoreOverlay')) closeScoreModal();
+});
+
+/* ── Connectors ── */
 function drawConnectors() {
   const bracket = document.getElementById('bracket');
   const bRect = bracket.getBoundingClientRect();
 
-  // For each connector column, draw lines between adjacent round columns
-  // cc0: R12→QF, cc1: QF→SF, cc2: SF→GF
   const pairs = [
     {cc:'cc0', from:'rc0', to:'rc1'},
     {cc:'cc1', from:'rc1', to:'rc2'},
@@ -510,11 +731,11 @@ function drawConnectors() {
   const stroke = 'rgba(255,34,68,.22)';
   const strokeW = 1;
 
-  pairs.forEach(({cc,from,to})=>{
+  pairs.forEach(({cc,from,to}) => {
     const ccEl = document.getElementById(cc);
     const fromEl = document.getElementById(from);
     const toEl = document.getElementById(to);
-    if(!ccEl||!fromEl||!toEl) return;
+    if (!ccEl||!fromEl||!toEl) return;
 
     const ccRect = ccEl.getBoundingClientRect();
     const fromMatches = fromEl.querySelectorAll('.mc');
@@ -524,10 +745,9 @@ function drawConnectors() {
     svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none';
 
     const W = ccRect.width;
-    const ratio = fromMatches.length / toMatches.length; // e.g. 2 for QF→SF
+    const ratio = fromMatches.length / toMatches.length;
 
-    // For each "to" match, gather its "from" matches and draw connectors
-    Array.from(toMatches).forEach((toMc, ti)=>{
+    Array.from(toMatches).forEach((toMc, ti) => {
       const toRect = toMc.getBoundingClientRect();
       const toY = toRect.top + toRect.height/2 - ccRect.top;
 
@@ -535,8 +755,7 @@ function drawConnectors() {
       const fromEnd   = Math.round((ti+1) * ratio);
       const fromSlice = Array.from(fromMatches).slice(fromStart, fromEnd);
 
-      if(fromSlice.length === 1) {
-        // straight horizontal line
+      if (fromSlice.length === 1) {
         const fRect = fromSlice[0].getBoundingClientRect();
         const fY = fRect.top + fRect.height/2 - ccRect.top;
         const path = `M0,${fY} H${W/2} V${toY} H${W}`;
@@ -547,9 +766,8 @@ function drawConnectors() {
         el.setAttribute('fill','none');
         svg.appendChild(el);
       } else {
-        // elbow: each from-match → midpoint vertical → to-match
         const midX = W/2;
-        const ys = fromSlice.map(f=>{
+        const ys = fromSlice.map(f => {
           const r = f.getBoundingClientRect();
           return r.top + r.height/2 - ccRect.top;
         });
@@ -557,15 +775,13 @@ function drawConnectors() {
         const botY = Math.max(...ys);
         const midY = (topY+botY)/2;
 
-        // vertical spine
         const spine = document.createElementNS('http://www.w3.org/2000/svg','line');
         spine.setAttribute('x1',midX); spine.setAttribute('y1',topY);
         spine.setAttribute('x2',midX); spine.setAttribute('y2',botY);
         spine.setAttribute('stroke',stroke); spine.setAttribute('stroke-width',strokeW);
         svg.appendChild(spine);
 
-        // horizontal arms from each "from" match to midX
-        ys.forEach(fy=>{
+        ys.forEach(fy => {
           const arm = document.createElementNS('http://www.w3.org/2000/svg','line');
           arm.setAttribute('x1',0); arm.setAttribute('y1',fy);
           arm.setAttribute('x2',midX); arm.setAttribute('y2',fy);
@@ -573,7 +789,6 @@ function drawConnectors() {
           svg.appendChild(arm);
         });
 
-        // line from spine midY to "to" match
         const out = document.createElementNS('http://www.w3.org/2000/svg','path');
         out.setAttribute('d',`M${midX},${midY} H${W}`);
         out.setAttribute('stroke',stroke); out.setAttribute('stroke-width',strokeW);
@@ -582,7 +797,7 @@ function drawConnectors() {
       }
     });
 
-    ccEl.innerHTML='';
+    ccEl.innerHTML = '';
     ccEl.appendChild(svg);
   });
 }
@@ -594,12 +809,11 @@ function switchWeek(n) {
 }
 
 render(1);
-window.addEventListener('resize', ()=>{ drawConnectors(); });
+window.addEventListener('resize', () => { drawConnectors(); });
 
 /* ── Digital transition ── */
 let _navigating = false;
 
-// bfcache 복원 시 transition 상태 리셋
 window.addEventListener('pageshow', e => {
   if (e.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward') {
     _navigating = false;
@@ -619,30 +833,23 @@ function navigateTo(href) {
   const nl = overlay.querySelector('.nl');
   const nr = overlay.querySelector('.nr');
 
-  // Phase 1: glitch the screen (50ms)
   screen.style.animation = 'glitchH .18s steps(1) forwards';
 
   setTimeout(() => {
-    // Phase 2: CRT off animation
     screen.classList.add('crt-off');
-
-    // Show scanline overlay simultaneously
     nl.style.opacity = '1';
     nr.style.opacity = '1';
     overlay.style.opacity = '0';
     overlay.classList.add('active');
 
-    // Phase 3: flash overlay to black during collapse
     setTimeout(() => {
       overlay.style.transition = 'opacity .18s ease-in';
       overlay.style.opacity = '1';
     }, 180);
 
-    // Phase 4: navigate when black
     setTimeout(() => {
       window.location.href = href;
     }, 430);
-
   }, 60);
 }
 </script>
