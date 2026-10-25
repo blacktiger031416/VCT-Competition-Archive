@@ -372,6 +372,23 @@ const PARTNER_TEAMS = {
   ],
 };
 
+/* ── CN OQ 팀 데이터 ── */
+const CN_OQ = `${BASE}/VCT CN/CN_OQ`;
+const CN_OQ_TEAMS = [
+  {abbr:'NOVA', name:'Nova Esports',                    logo:`${CN_OQ}/NOVA.png`},
+  {abbr:'TEC',  name:'Titan Esports Club',              logo:`${CN_OQ}/TEC.png`},
+  {abbr:'DRG',  name:'Dragon Ranger Gaming',            logo:`${CN_OQ}/DRG.png`},
+  {abbr:'WOL',  name:'Wolves Esports',                  logo:`${CN_OQ}/WOL.png`},
+  {abbr:'FPX',  name:'FunPlus Phoenix',                 logo:`${CN_OQ}/FPX.png`},
+  {abbr:'KBG',  name:'KeepBest Gaming',                 logo:`${CN_OQ}/KBG.png`},
+  {abbr:'AQ',   name:'Any Question Gaming',             logo:`${CN_OQ}/AQ.png`},
+  {abbr:'UR',   name:'Unsettled Resentment',            logo:`${CN_OQ}/UR.png`},
+  {abbr:'AT',   name:'A Team',                          logo:`${CN_OQ}/AT.png`},
+  {abbr:'RA',   name:'Rare Atom',                       logo:`${CN_OQ}/RA.png`},
+  {abbr:'WSIG', name:'World Sports Invictus Gaming',    logo:`${CN_OQ}/WSIG.png`},
+  {abbr:'ODG',  name:'Octagonal Disposition Gaming',    logo:`${CN_OQ}/ODG.png`},
+];
+
 /* ── 핀 데이터: 이제 위도/경도로 정확하게 ── */
 const OQ_PINS = [
   // Americas
@@ -396,8 +413,12 @@ const OQ_PINS = [
   {id:'oce',   flag:'🇦🇺',name:'Oceania',                region:'pacific', sub:'OCE', lat:-25.3,lng:133.8},
 ];
 
+const KICKOFF_OQ_PINS = OQ_PINS.map(p =>
+  p.id === 'cn' ? {...p, teams: CN_OQ_TEAMS} : p
+);
+
 const phases = {
-  'kickoff-oq':  OQ_PINS,
+  'kickoff-oq':  KICKOFF_OQ_PINS,
   'kickoff':[
     {id:'americas',flag:'🇧🇷',name:'São Paulo', region:'americas',sub:'Americas',lat:-23.5,lng:-46.6,teams:PARTNER_TEAMS.americas},
     {id:'emea',    flag:'🇩🇪',name:'Berlin',    region:'emea',    sub:'EMEA',    lat:52.5, lng:13.4, teams:PARTNER_TEAMS.emea},
