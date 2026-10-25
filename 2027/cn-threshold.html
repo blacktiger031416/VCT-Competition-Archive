@@ -44,11 +44,58 @@ body::after{content:'';position:fixed;inset:0;
   32% {transform:scaleY(1);filter:brightness(2.8)}
   65% {filter:brightness(1.15)}
   100%{transform:scaleY(1);filter:brightness(1);opacity:1}}
+@keyframes crtOff{
+  0%  {transform:scaleY(1);filter:brightness(1);opacity:1}
+  35% {transform:scaleY(1);filter:brightness(3.5) saturate(2)}
+  55% {transform:scaleY(.04);filter:brightness(8) saturate(0)}
+  80% {transform:scaleY(.02);filter:brightness(.5)}
+  100%{transform:scaleY(0);filter:brightness(0);opacity:0}}
 @keyframes scanSweep{0%{top:-5px;opacity:1}100%{top:100%;opacity:.3}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes glowPulse{
   0%,100%{box-shadow:0 0 8px var(--glow),0 0 20px var(--glow2),inset 0 0 20px rgba(255,34,68,.03)}
   50%    {box-shadow:0 0 14px var(--glow),0 0 35px var(--glow2),0 0 60px rgba(255,34,68,.06),inset 0 0 30px rgba(255,34,68,.05)}}
+@keyframes glitchH{
+  0%  {transform:translateX(0)   scaleY(1)}
+  15% {transform:translateX(-6px) scaleY(1.002)}
+  30% {transform:translateX(8px)  scaleY(.998)}
+  45% {transform:translateX(-4px) scaleY(1.003)}
+  60% {transform:translateX(5px)  scaleY(.997)}
+  75% {transform:translateX(-3px) scaleY(1)}
+  100%{transform:translateX(0)   scaleY(1)}}
+@keyframes rgbSplit{
+  0%  {text-shadow:0 0 0 transparent}
+  20% {text-shadow:-4px 0 rgba(255,0,60,.7), 4px 0 rgba(0,200,255,.5)}
+  50% {text-shadow:3px 0 rgba(255,0,60,.8), -3px 0 rgba(0,200,255,.6)}
+  80% {text-shadow:-2px 0 rgba(255,0,60,.4), 2px 0 rgba(0,200,255,.3)}
+  100%{text-shadow:0 0 0 transparent}}
+@keyframes flashRed{
+  0%  {opacity:0}
+  20% {opacity:.65}
+  45% {opacity:.3}
+  65% {opacity:.8}
+  85% {opacity:.2}
+  100%{opacity:1}}
+
+/* ── Nav transition overlay ── */
+#nav-overlay{
+  position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:linear-gradient(135deg,#000 0%,#0a0005 50%,#000 100%);
+  opacity:0;transition:opacity .05s}
+#nav-overlay.active{pointer-events:all}
+#nav-overlay .nl{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(to right,transparent,var(--red),transparent);
+  animation:nlScan .3s linear infinite;opacity:0}
+@keyframes nlScan{0%{top:0}100%{top:100%}}
+#nav-overlay .nr{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(to bottom,rgba(255,34,68,.04) 0,rgba(255,34,68,.04) 1px,transparent 1px,transparent 4px);
+  opacity:0}
+/* CRT off state applied to #screen */
+#screen.crt-off{
+  animation:crtOff .42s cubic-bezier(.4,0,1,1) forwards;
+  pointer-events:none}
 
 /* ── Header ── */
 .hdr{flex-shrink:0;padding:.85rem 1.5rem .8rem;
@@ -156,6 +203,7 @@ body::after{content:'';position:fixed;inset:0;
 </style>
 </head>
 <body>
+<div id="nav-overlay"><div class="nl"></div><div class="nr"></div></div>
 <div id="screen">
 
   <div class="hdr site-header">
@@ -384,11 +432,9 @@ function render(wk) {
     });
   }
 
-  // Match card navigation
+  // Match card navigation with digital transition
   el.querySelectorAll('.mc[data-href]').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      window.location.href = card.dataset.href;
-    });
+    card.addEventListener('click', ()=>navigateTo(card.dataset.href));
   });
 
   requestAnimationFrame(()=>requestAnimationFrame(drawConnectors));
@@ -549,6 +595,44 @@ function switchWeek(n) {
 
 render(1);
 window.addEventListener('resize', ()=>{ drawConnectors(); });
+
+/* ── Digital transition ── */
+let _navigating = false;
+function navigateTo(href) {
+  if (_navigating) return;
+  _navigating = true;
+
+  const overlay = document.getElementById('nav-overlay');
+  const screen  = document.getElementById('screen');
+  const nl = overlay.querySelector('.nl');
+  const nr = overlay.querySelector('.nr');
+
+  // Phase 1: glitch the screen (50ms)
+  screen.style.animation = 'glitchH .18s steps(1) forwards';
+
+  setTimeout(() => {
+    // Phase 2: CRT off animation
+    screen.classList.add('crt-off');
+
+    // Show scanline overlay simultaneously
+    nl.style.opacity = '1';
+    nr.style.opacity = '1';
+    overlay.style.opacity = '0';
+    overlay.classList.add('active');
+
+    // Phase 3: flash overlay to black during collapse
+    setTimeout(() => {
+      overlay.style.transition = 'opacity .18s ease-in';
+      overlay.style.opacity = '1';
+    }, 180);
+
+    // Phase 4: navigate when black
+    setTimeout(() => {
+      window.location.href = href;
+    }, 430);
+
+  }, 60);
+}
 </script>
 <script src="../auth.js"></script>
 </body>
