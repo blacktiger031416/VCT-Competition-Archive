@@ -598,6 +598,18 @@ window.addEventListener('resize', ()=>{ drawConnectors(); });
 
 /* ── Digital transition ── */
 let _navigating = false;
+
+// bfcache 복원 시 transition 상태 리셋
+window.addEventListener('pageshow', e => {
+  if (e.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward') {
+    _navigating = false;
+    const ov = document.getElementById('nav-overlay');
+    const sc = document.getElementById('screen');
+    if (ov) { ov.style.opacity='0'; ov.style.transition='none'; ov.classList.remove('active'); }
+    if (sc) { sc.classList.remove('crt-off'); sc.style.animation=''; sc.style.opacity='1'; sc.style.transform=''; }
+  }
+});
+
 function navigateTo(href) {
   if (_navigating) return;
   _navigating = true;
