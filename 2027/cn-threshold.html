@@ -336,7 +336,11 @@ function render(wk) {
     html += `<div style="grid-column:${gc};grid-row:1"></div>`;
   });
 
-  function mhref(r,mi){ return `cn-threshold-match.html?w=${wk}&r=${r}&m=${mi}`; }
+  function mhref(t1, t2){
+    const a = encodeURIComponent(t1.tbd ? '' : (t1.name||''));
+    const b = encodeURIComponent(t2.tbd ? '' : (t2.name||''));
+    return `../cn-match-dark.html?teamA=${a}&teamB=${b}&from=threshold`;
+  }
 
   // R12 column
   const r12Html = r12Teams.map(([t1,t2],mi)=>`
@@ -344,21 +348,21 @@ function render(wk) {
       t1, t2, false,
       admin?`data-type="r12" data-mi="${mi}" data-si="0"`:'',
       admin?`data-type="r12" data-mi="${mi}" data-si="1"`:'',
-      mhref('r12',mi),
+      mhref(t1,t2),
     )}</div>`).join('');
   html += `<div class="rcol" id="rc0" style="grid-column:1">${r12Html}</div>`;
 
   // QF column
   const qfHtml = qfMatches.map((m,mi)=>`
-    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'',mhref('qf',mi))}</div>`).join('');
+    <div class="mg">${matchCard(m.t1,m.t2,false,m.t1Slot,'',mhref(m.t1,m.t2))}</div>`).join('');
   html += `<div class="rcol" id="rc1" style="grid-column:3">${qfHtml}</div>`;
 
   // SF column
-  const sfHtml = sfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,false,'','',mhref('sf',mi))}</div>`).join('');
+  const sfHtml = sfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,false,'','',mhref(m.t1,m.t2))}</div>`).join('');
   html += `<div class="rcol" id="rc2" style="grid-column:5">${sfHtml}</div>`;
 
   // GF column
-  const gfHtml = gfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,true,'','',mhref('gf',mi))}</div>`).join('');
+  const gfHtml = gfMatches.map((m,mi)=>`<div class="mg">${matchCard(m.t1,m.t2,true,'','',mhref(m.t1,m.t2))}</div>`).join('');
   html += `<div class="rcol" id="rc3" style="grid-column:7">${gfHtml}</div>`;
 
   [2,4,6].forEach((gc,i)=>{
