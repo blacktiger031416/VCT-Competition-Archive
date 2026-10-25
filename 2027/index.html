@@ -181,29 +181,44 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 /* Team grid */
 .teams-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:.6rem;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:.5rem;
 }
 .team-slot{
   border:1px solid rgba(255,255,255,.08);
   border-radius:4px;
-  padding:.75rem .7rem;
-  display:flex;align-items:center;gap:.6rem;
+  padding:.65rem .75rem;
+  display:flex;align-items:center;gap:.65rem;
   background:rgba(255,255,255,.03);
   transition:background .15s,border-color .15s;
   min-height:52px;
+  cursor:default;
 }
-.team-slot:hover{background:rgba(255,255,255,.06)}
+.team-slot.partner:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.16)}
+.team-slot.oq-slot{opacity:.45}
 .team-logo{
-  width:28px;height:28px;border-radius:3px;
-  background:rgba(255,255,255,.07);
+  width:32px;height:32px;border-radius:3px;
+  background:rgba(255,255,255,.06);
   flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:14px;
+  font-size:13px;overflow:hidden;
 }
-.team-name{
+.team-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.team-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.team-abbr{
   font-family:'Barlow Condensed',sans-serif;
-  font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-  color:rgba(255,255,255,.35);
+  font-size:14px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+  color:#fff;line-height:1;
+}
+.team-fullname{
+  font-family:'Barlow',sans-serif;
+  font-size:10px;color:rgba(255,255,255,.35);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.oq-badge{
+  margin-top:.1rem;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.22);
 }
 
 /* ── Keyframes ── */
@@ -312,6 +327,50 @@ const phaseLabels = {
   'champions':   'Champions Austin'
 };
 
+/* ── 파트너 팀 데이터 ── */
+const BASE = '../assets/teams/VCT 2027';
+const PARTNER_TEAMS = {
+  americas:[
+    {abbr:'LOUD', name:'LOUD',           logo:`${BASE}/VCT Americas/Americas_Partnership/LOUD.webp`},
+    {abbr:'G2',   name:'G2 Esports',     logo:`${BASE}/VCT Americas/Americas_Partnership/G2.png`},
+    {abbr:'NRG',  name:'NRG',            logo:`${BASE}/VCT Americas/Americas_Partnership/NRG.png`},
+    {abbr:'SEN',  name:'Sentinels',      logo:`${BASE}/VCT Americas/Americas_Partnership/SEN.png`},
+    {abbr:'KRÜ',  name:'KRÜ Esports',   logo:`${BASE}/VCT Americas/Americas_Partnership/KRÜ.svg`},
+    {abbr:'LEV',  name:'LEVIATÁN',       logo:`${BASE}/VCT Americas/Americas_Partnership/LEV.png`},
+    {abbr:'MIBR', name:'Made In Brazil', logo:`${BASE}/VCT Americas/Americas_Partnership/MIBR.png`},
+    {abbr:'100T', name:'100 Thieves',    logo:`${BASE}/VCT Americas/Americas_Partnership/100T.svg`},
+  ],
+  emea:[
+    {abbr:'TH',  name:'Team Heretics', logo:`${BASE}/VCT EMEA/EMEA_Partnership/TH.svg`},
+    {abbr:'BBL', name:'BBL Esports',   logo:`${BASE}/VCT EMEA/EMEA_Partnership/BBL.svg`},
+    {abbr:'FNC', name:'Fnatic',        logo:`${BASE}/VCT EMEA/EMEA_Partnership/FNC.svg`},
+    {abbr:'VIT', name:'Team Vitality', logo:`${BASE}/VCT EMEA/EMEA_Partnership/VIT.png`},
+    {abbr:'TL',  name:'Team Liquid',   logo:`${BASE}/VCT EMEA/EMEA_Partnership/TL.png`},
+    {abbr:'M8',  name:'Gentle Mates',  logo:`${BASE}/VCT EMEA/EMEA_Partnership/M8.svg`},
+    {abbr:'KC',  name:'Karmine Corp',  logo:`${BASE}/VCT EMEA/EMEA_Partnership/KC.png`},
+    {abbr:'FUT', name:'FUT Esports',   logo:`${BASE}/VCT EMEA/EMEA_Partnership/FUT.webp`},
+  ],
+  pacific:[
+    {abbr:'RRQ',  name:'Rex Regum Qeon', logo:`${BASE}/VCT Pacific/Pacific_Partnership/RRQ.svg`},
+    {abbr:'FS',   name:'FULL SENSE',     logo:`${BASE}/VCT Pacific/Pacific_Partnership/FS.svg`},
+    {abbr:'T1',   name:'T1',             logo:`${BASE}/VCT Pacific/Pacific_Partnership/T1.webp`},
+    {abbr:'PRX',  name:'Paper Rex',      logo:`${BASE}/VCT Pacific/Pacific_Partnership/PRX.webp`},
+    {abbr:'CR',   name:'Crazy Raccoon',  logo:`${BASE}/VCT Pacific/Pacific_Partnership/CR.png`},
+    {abbr:'ZETA', name:'ZETA Division',  logo:`${BASE}/VCT Pacific/Pacific_Partnership/ZETA.png`},
+    {abbr:'GEN',  name:'Gen.G Esports',  logo:`${BASE}/VCT Pacific/Pacific_Partnership/GEN.png`},
+    {abbr:'GAM',  name:'GAM Esports',    logo:`${BASE}/VCT Pacific/Pacific_Partnership/GAM.svg`},
+  ],
+  cn:[
+    {abbr:'EDG', name:'EDward Gaming', logo:`${BASE}/VCT CN/CN_Partnership/EDG.png`},
+    {abbr:'JDG', name:'JD Gaming',     logo:`${BASE}/VCT CN/CN_Partnership/JDG.svg`},
+    {abbr:'TYL', name:'TYLOO',         logo:`${BASE}/VCT CN/CN_Partnership/TLY.webp`},
+    {abbr:'AG',  name:'All Gamers',    logo:`${BASE}/VCT CN/CN_Partnership/AG.svg`},
+    {abbr:'TE',  name:'Trace Esports', logo:`${BASE}/VCT CN/CN_Partnership/TE.svg`},
+    {abbr:'XLG', name:'Xi Lai Gaming', logo:`${BASE}/VCT CN/CN_Partnership/XLG.webp`},
+    {abbr:'WBG', name:'Weibo Gaming',  logo:`${BASE}/VCT CN/CN_Partnership/WBG.png`},
+  ],
+};
+
 /* ── 핀 데이터: 이제 위도/경도로 정확하게 ── */
 const OQ_PINS = [
   // Americas
@@ -339,24 +398,24 @@ const OQ_PINS = [
 const phases = {
   'kickoff-oq':  OQ_PINS,
   'kickoff':[
-    {id:'americas',flag:'🇧🇷',name:'São Paulo',   region:'americas',sub:'Americas',lat:-23.5,lng:-46.6},
-    {id:'emea',    flag:'🇩🇪',name:'Berlin',       region:'emea',    sub:'EMEA',    lat:52.5, lng:13.4},
-    {id:'pacific', flag:'🇹🇭',name:'Bangkok',      region:'pacific', sub:'Pacific', lat:13.8, lng:100.5},
-    {id:'cn',      flag:'🇨🇳',name:'Hangzhou',     region:'cn',      sub:'CN',      lat:30.3, lng:120.2},
+    {id:'americas',flag:'🇧🇷',name:'São Paulo', region:'americas',sub:'Americas',lat:-23.5,lng:-46.6,teams:PARTNER_TEAMS.americas},
+    {id:'emea',    flag:'🇩🇪',name:'Berlin',    region:'emea',    sub:'EMEA',    lat:52.5, lng:13.4, teams:PARTNER_TEAMS.emea},
+    {id:'pacific', flag:'🇹🇭',name:'Bangkok',   region:'pacific', sub:'Pacific', lat:13.8, lng:100.5,teams:PARTNER_TEAMS.pacific},
+    {id:'cn',      flag:'🇨🇳',name:'Hangzhou',  region:'cn',      sub:'CN',      lat:30.3, lng:120.2,teams:PARTNER_TEAMS.cn},
   ],
   'masters-seoul':[{id:'seoul',flag:'🇰🇷',name:'Masters Seoul',region:'pacific',sub:'International',lat:37.6,lng:127.0}],
   'cups-oq-1': OQ_PINS,
   'cups-1':[
-    {id:'americas',flag:'🇲🇽',name:'Mexico City',  region:'americas',sub:'Americas',lat:19.4, lng:-99.1},
-    {id:'emea',    flag:'🇵🇱',name:'Warsaw',        region:'emea',    sub:'EMEA',    lat:52.2, lng:21.0},
-    {id:'pacific', flag:'🇵🇭',name:'Manila',        region:'pacific', sub:'Pacific', lat:14.6, lng:121.0},
-    {id:'cn',      flag:'🇨🇳',name:'Wuhan',         region:'cn',      sub:'CN',      lat:30.6, lng:114.3},
+    {id:'americas',flag:'🇲🇽',name:'Mexico City',   region:'americas',sub:'Americas',lat:19.4, lng:-99.1, teams:PARTNER_TEAMS.americas},
+    {id:'emea',    flag:'🇵🇱',name:'Warsaw',         region:'emea',    sub:'EMEA',    lat:52.2, lng:21.0,  teams:PARTNER_TEAMS.emea},
+    {id:'pacific', flag:'🇵🇭',name:'Manila',         region:'pacific', sub:'Pacific', lat:14.6, lng:121.0, teams:PARTNER_TEAMS.pacific},
+    {id:'cn',      flag:'🇨🇳',name:'Wuhan',          region:'cn',      sub:'CN',      lat:30.6, lng:114.3, teams:PARTNER_TEAMS.cn},
   ],
   'cups-2':[
-    {id:'americas',flag:'🇧🇷',name:'Rio de Janeiro',region:'americas',sub:'Americas',lat:-22.9,lng:-43.2},
-    {id:'emea',    flag:'🇹🇷',name:'Istanbul',      region:'emea',    sub:'EMEA',    lat:41.0, lng:28.9},
-    {id:'pacific', flag:'🇯🇵',name:'Tokyo',         region:'pacific', sub:'Pacific', lat:35.7, lng:139.7},
-    {id:'cn',      flag:'🇨🇳',name:'Shanghai',      region:'cn',      sub:'CN',      lat:31.2, lng:121.5},
+    {id:'americas',flag:'🇧🇷',name:'Rio de Janeiro', region:'americas',sub:'Americas',lat:-22.9,lng:-43.2, teams:PARTNER_TEAMS.americas},
+    {id:'emea',    flag:'🇹🇷',name:'Istanbul',        region:'emea',    sub:'EMEA',    lat:41.0, lng:28.9,  teams:PARTNER_TEAMS.emea},
+    {id:'pacific', flag:'🇯🇵',name:'Tokyo',           region:'pacific', sub:'Pacific', lat:35.7, lng:139.7, teams:PARTNER_TEAMS.pacific},
+    {id:'cn',      flag:'🇨🇳',name:'Shanghai',        region:'cn',      sub:'CN',      lat:31.2, lng:121.5, teams:PARTNER_TEAMS.cn},
   ],
   'masters-valencia':[{id:'valencia',flag:'🇪🇸',name:'Masters Valencia',region:'emea',sub:'International',lat:39.5,lng:-0.4}],
   'cups-oq-2': OQ_PINS,
@@ -494,17 +553,51 @@ function openModal(p, phaseKey) {
   document.getElementById('mTitle').textContent  = p.name;
   document.getElementById('mPhase').textContent  = phaseLabels[phaseKey];
 
-  /* Team slots — TBD placeholders */
+  /* Team slots */
   const grid = document.getElementById('mTeamsGrid');
   grid.innerHTML = '';
-  const slotCount = phaseKey.includes('oq') ? 16 : phaseKey.includes('masters') || phaseKey === 'champions' ? 12 : 8;
-  for (let i = 0; i < slotCount; i++) {
-    const slot = document.createElement('div');
-    slot.className = 'team-slot';
-    slot.innerHTML = `
-      <div class="team-logo" style="border:1px solid ${color}22">?</div>
-      <div class="team-name">TBD</div>`;
-    grid.appendChild(slot);
+
+  if (p.teams && p.teams.length) {
+    /* Partner teams */
+    p.teams.forEach(t => {
+      const slot = document.createElement('div');
+      slot.className = 'team-slot partner';
+      slot.innerHTML = `
+        <div class="team-logo">
+          <img src="${t.logo}" alt="${t.abbr}" loading="lazy" onerror="this.parentNode.textContent='?'">
+        </div>
+        <div class="team-info">
+          <div class="team-abbr">${t.abbr}</div>
+          <div class="team-fullname">${t.name}</div>
+        </div>`;
+      grid.appendChild(slot);
+    });
+    /* OQ placeholder slots */
+    const oqCount = 12 - p.teams.length;
+    for (let i = 0; i < oqCount; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'team-slot oq-slot';
+      slot.innerHTML = `
+        <div class="team-logo" style="border:1px dashed rgba(255,255,255,.15)">?</div>
+        <div class="team-info">
+          <div class="team-abbr" style="color:rgba(255,255,255,.25)">TBD</div>
+          <div class="oq-badge">Open Qualifier</div>
+        </div>`;
+      grid.appendChild(slot);
+    }
+  } else {
+    /* Pure TBD (OQ phases, Masters, Champions) */
+    const slotCount = phaseKey.includes('oq') ? 16 : (phaseKey.includes('masters') || phaseKey === 'champions') ? 12 : 8;
+    for (let i = 0; i < slotCount; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'team-slot oq-slot';
+      slot.innerHTML = `
+        <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
+        <div class="team-info">
+          <div class="team-abbr" style="color:rgba(255,255,255,.2)">TBD</div>
+        </div>`;
+      grid.appendChild(slot);
+    }
   }
 
   /* Remove old animation classes to retrigger */
