@@ -575,6 +575,20 @@ function openModal(p, phaseKey) {
   document.getElementById('mTitle').textContent  = p.name;
   document.getElementById('mPhase').textContent  = phaseLabels[phaseKey];
 
+  /* 대진표 링크 버튼 (KickOff OQ CN 전용) */
+  const existingBracketBtn = document.getElementById('mBracketBtn');
+  if (existingBracketBtn) existingBracketBtn.remove();
+  if (phaseKey === 'kickoff-oq' && p.id === 'cn') {
+    const btn = document.createElement('a');
+    btn.id = 'mBracketBtn';
+    btn.href = 'cn-threshold.html';
+    btn.style.cssText = `display:inline-block;margin-top:.4rem;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cn);border:1px solid rgba(255,34,68,.35);padding:3px 10px;border-radius:2px;text-decoration:none;transition:background .15s;`;
+    btn.textContent = '대진표 보기 →';
+    btn.onmouseover = () => btn.style.background = 'rgba(255,34,68,.15)';
+    btn.onmouseout  = () => btn.style.background = '';
+    document.getElementById('mPhase').insertAdjacentElement('afterend', btn);
+  }
+
   /* Team slots */
   const grid = document.getElementById('mTeamsGrid');
   grid.innerHTML = '';
