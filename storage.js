@@ -23,6 +23,7 @@
   var LOCAL_ONLY_PREFIXES = [
     "__vct_am:",
     "__vct_am_id:",
+    "cnt_",   /* China Threshold 팀 배정 데이터 */
   ];
 
   var SERVER_ONLY_PREFIXES = [
