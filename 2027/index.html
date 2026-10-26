@@ -160,8 +160,11 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 
 /* ── Body ── */
 .modal-body{
-  flex:1;overflow-y:auto;
-  padding:1.25rem 1.5rem 1.5rem;
+  flex:1;
+  padding:0;
+  position:relative;
+  min-height:340px;
+  overflow:hidden;
 }
 .modal-body::-webkit-scrollbar{width:3px}
 .modal-body::-webkit-scrollbar-track{background:transparent}
@@ -246,6 +249,114 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 
 .map-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);transition:opacity .6s}
 .map-loading.done{opacity:0;pointer-events:none}
+
+/* ── Roster Panel ── */
+.modal-body{position:relative;overflow:hidden}
+.teams-view,.roster-view{
+  position:absolute;inset:0;padding:1.25rem 1.5rem 1.5rem;
+  overflow-y:auto;transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .2s;
+}
+.teams-view::-webkit-scrollbar,.roster-view::-webkit-scrollbar{width:3px}
+.teams-view::-webkit-scrollbar-thumb,.roster-view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
+.teams-view{transform:translateX(0);opacity:1}
+.teams-view.slide-out{transform:translateX(-60px);opacity:0;pointer-events:none}
+.roster-view{transform:translateX(60px);opacity:0;pointer-events:none}
+.roster-view.slide-in{transform:translateX(0);opacity:1;pointer-events:auto}
+
+.rp-back{
+  display:flex;align-items:center;gap:.4rem;
+  background:none;border:none;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.32);padding:0;margin-bottom:1rem;
+  transition:color .15s;
+}
+.rp-back:hover{color:rgba(255,255,255,.7)}
+.rp-back::before{content:'←';font-size:12px}
+
+.rp-team-header{
+  display:flex;align-items:center;gap:.85rem;
+  margin-bottom:1.25rem;padding-bottom:1rem;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.rp-logo{
+  width:48px;height:48px;border-radius:4px;
+  background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;
+}
+.rp-logo img{width:100%;height:100%;object-fit:contain}
+.rp-team-abbr{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;line-height:1;
+}
+.rp-team-name{
+  font-family:'Barlow',sans-serif;
+  font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;
+}
+
+.rp-section{margin-bottom:1.1rem}
+.rp-section-head{
+  display:flex;align-items:center;gap:.55rem;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.25);
+  margin-bottom:.5rem;
+}
+.rp-section-head .rp-section-icon{
+  display:inline-block;width:2px;height:10px;
+  background:var(--rp-accent,rgba(255,34,68,.7));border-radius:1px;
+}
+.rp-section-head::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+
+.rp-player-row{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.38rem 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.rp-player-row:last-child{border-bottom:none}
+.rp-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  color:rgba(255,34,68,.5);width:18px;text-align:center;flex-shrink:0;
+}
+.rp-ign{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.04em;color:rgba(255,255,255,.88);flex:1;
+}
+.rp-real-name{
+  font-family:'Barlow',sans-serif;font-size:10px;color:rgba(255,255,255,.3);
+}
+
+.rp-staff-row{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.36rem 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.rp-staff-row:last-child{border-bottom:none}
+.rp-role-badge{
+  font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,34,68,.12);color:rgba(255,100,120,.85);
+  border:1px solid rgba(255,34,68,.2);
+  padding:2px 5px;border-radius:2px;flex-shrink:0;min-width:28px;text-align:center;
+}
+.rp-staff-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;
+  letter-spacing:.03em;color:rgba(255,255,255,.75);flex:1;
+}
+.rp-staff-real{
+  font-family:'Barlow',sans-serif;font-size:10px;color:rgba(255,255,255,.3);
+}
+.rp-empty{
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.08em;
+  color:rgba(255,255,255,.18);padding:.4rem 0;text-align:center;
+}
+.team-slot.partner.clickable{cursor:pointer}
+.team-slot.partner.clickable:hover{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);
+}
+.team-slot.partner.clickable:hover .team-abbr{color:var(--mc,#FF2244)}
 </style>
 </head>
 <body>
@@ -303,8 +414,21 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
         </div>
       </div>
       <div class="modal-body">
-        <div class="modal-section-label">Participating Teams</div>
-        <div class="teams-grid" id="mTeamsGrid"></div>
+        <div class="teams-view" id="teamsView">
+          <div class="modal-section-label">Participating Teams</div>
+          <div class="teams-grid" id="mTeamsGrid"></div>
+        </div>
+        <div class="roster-view" id="rosterView">
+          <button class="rp-back" id="rosterBack">팀 목록으로</button>
+          <div class="rp-team-header">
+            <div class="rp-logo" id="rpLogo"></div>
+            <div>
+              <div class="rp-team-abbr" id="rpAbbr"></div>
+              <div class="rp-team-name" id="rpName"></div>
+            </div>
+          </div>
+          <div id="rpBody"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -389,6 +513,166 @@ const CN_OQ_TEAMS = [
   {abbr:'ODG',  name:'Octagonal Disposition Gaming',    logo:`${CN_OQ}/ODG.png`},
   {abbr:'VLG',  name:'Victory No Limits Gaming',        logo:`${CN_OQ}/VLG.png`},
 ];
+
+/* ── CN OQ 팀 로스터 데이터 ── */
+const CN_OQ_ROSTERS = {
+  NOVA:{
+    players:[
+      {ign:'Mag',    real:'马政'},
+      {ign:'Smoggy', real:'薛晓冬'},
+      {ign:'Biank',  real:'陈廷毅'},
+      {ign:'CHICHOO',real:'刘俊豪'},
+      {ign:'FantasyJ',real:'苏佑杰'},
+    ],
+    감독:[{name:'Aimer',real:''}],
+    코치:[{name:'Shanks',real:'',role:'HC'},{name:'Mistic',real:'',role:'C'}],
+    기타:[],
+  },
+  TEC:{
+    players:[
+      {ign:'Mercury', real:''},
+      {ign:'Monka',   real:''},
+      {ign:'Asuna',   real:''},
+      {ign:'Chronicle',real:''},
+      {ign:'nzr',     real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  DRG:{
+    players:[
+      {ign:'Haodong', real:'刘浩东'},
+      {ign:'BerLIN',  real:''},
+      {ign:'GodLike', real:''},
+      {ign:'Kiles',   real:''},
+      {ign:'Levi',    real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  WOL:{
+    players:[
+      {ign:'SyouTA', real:''},
+      {ign:'XLR8',   real:''},
+      {ign:'Halo',   real:''},
+      {ign:'Derrick',real:''},
+      {ign:'Leia',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  FPX:{
+    players:[
+      {ign:'AAAAY',  real:''},
+      {ign:'Lysoar', real:''},
+      {ign:'pho',    real:''},
+      {ign:'Yuicaw', real:''},
+      {ign:'FOOL',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  KBG:{
+    players:[
+      {ign:'Mako',   real:''},
+      {ign:'Meteor', real:''},
+      {ign:'Stark',  real:''},
+      {ign:'Jingg',  real:''},
+      {ign:'Hades',  real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  AQ:{
+    players:[
+      {ign:'Sofa',   real:''},
+      {ign:'DuDu',   real:''},
+      {ign:'AMBI',   real:''},
+      {ign:'Cloud',  real:''},
+      {ign:'Dawn',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  UR:{
+    players:[
+      {ign:'Ban',    real:''},
+      {ign:'Cipher', real:''},
+      {ign:'Logi',   real:''},
+      {ign:'Reito',  real:''},
+      {ign:'W1SH',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  AT:{
+    players:[
+      {ign:'Aevis',  real:''},
+      {ign:'Rin',    real:''},
+      {ign:'Fang',   real:''},
+      {ign:'Lori',   real:''},
+      {ign:'Hex',    real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  RA:{
+    players:[
+      {ign:'Chichoo',real:''},
+      {ign:'Biank',  real:''},
+      {ign:'wolf',   real:''},
+      {ign:'ZmjjKK', real:''},
+      {ign:'s1mple', real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  WSIG:{
+    players:[
+      {ign:'Apex',   real:''},
+      {ign:'Crow',   real:''},
+      {ign:'Nova',   real:''},
+      {ign:'Blade',  real:''},
+      {ign:'Zone',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  ODG:{
+    players:[
+      {ign:'Dagger', real:''},
+      {ign:'Echo',   real:''},
+      {ign:'Flux',   real:''},
+      {ign:'Ghost',  real:''},
+      {ign:'Haze',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+  VLG:{
+    players:[
+      {ign:'Vortex', real:''},
+      {ign:'Lance',  real:''},
+      {ign:'Grid',   real:''},
+      {ign:'Pixel',  real:''},
+      {ign:'Sync',   real:''},
+    ],
+    감독:[],
+    코치:[],
+    기타:[],
+  },
+};
 
 /* ── 핀 데이터: 이제 위도/경도로 정확하게 ── */
 const OQ_PINS = [
@@ -596,9 +880,10 @@ function openModal(p, phaseKey) {
 
   if (p.teams && p.teams.length) {
     /* Partner teams */
+    const isOQCN = (phaseKey === 'kickoff-oq' && p.id === 'cn');
     p.teams.forEach(t => {
       const slot = document.createElement('div');
-      slot.className = 'team-slot partner';
+      slot.className = 'team-slot partner' + (isOQCN ? ' clickable' : '');
       slot.innerHTML = `
         <div class="team-logo">
           <img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">
@@ -607,6 +892,9 @@ function openModal(p, phaseKey) {
           <div class="team-abbr">${t.abbr}</div>
           <div class="team-fullname">${t.name}</div>
         </div>`;
+      if (isOQCN) {
+        slot.addEventListener('click', () => openRosterPanel(t));
+      }
       grid.appendChild(slot);
     });
     /* OQ placeholder slots */
@@ -642,9 +930,65 @@ function openModal(p, phaseKey) {
   overlay.classList.add('open');
 }
 
+/* ── 로스터 패널 ── */
+function rpSection(label, icon, rows, emptyMsg) {
+  if (!rows || rows.length === 0) return '';
+  return `<div class="rp-section">
+    <div class="rp-section-head"><span class="rp-section-icon"></span>${label}</div>
+    ${rows.map((r,i) => icon === 'player'
+      ? `<div class="rp-player-row">
+           <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
+           <span class="rp-ign">${r.ign}</span>
+           ${r.real ? `<span class="rp-real-name">${r.real}</span>` : ''}
+         </div>`
+      : `<div class="rp-staff-row">
+           <span class="rp-role-badge">${r.role || label.slice(0,2).toUpperCase()}</span>
+           <span class="rp-staff-name">${r.name}</span>
+           ${r.real ? `<span class="rp-staff-real">${r.real}</span>` : ''}
+         </div>`
+    ).join('')}
+  </div>`;
+}
+
+function openRosterPanel(t) {
+  const teamsView  = document.getElementById('teamsView');
+  const rosterView = document.getElementById('rosterView');
+
+  /* 팀 헤더 */
+  document.getElementById('rpLogo').innerHTML =
+    `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`;
+  document.getElementById('rpAbbr').textContent = t.abbr;
+  document.getElementById('rpName').textContent = t.name;
+
+  /* 로스터 렌더 */
+  const r = CN_OQ_ROSTERS[t.abbr] || {players:[],감독:[],코치:[],기타:[]};
+  const body = document.getElementById('rpBody');
+  body.innerHTML =
+    rpSection('PLAYERS', 'player', r.players, '등록된 선수 없음') +
+    rpSection('감독', '감독', r.감독.map(s=>({...s, role:'감독'})), '') +
+    rpSection('코치', '코치', r.코치.map(s=>({...s, role:s.role||'코치'})), '') +
+    rpSection('기타 스태프', '스태프', r.기타.map(s=>({...s, role:s.role||'스태프'})), '');
+
+  if (!body.innerHTML.trim()) {
+    body.innerHTML = '<div class="rp-empty" style="margin-top:2rem">등록된 로스터가 없습니다</div>';
+  }
+
+  teamsView.classList.add('slide-out');
+  rosterView.classList.add('slide-in');
+  rosterView.scrollTop = 0;
+}
+
+function closeRosterPanel() {
+  document.getElementById('teamsView').classList.remove('slide-out');
+  document.getElementById('rosterView').classList.remove('slide-in');
+}
+
+document.getElementById('rosterBack').addEventListener('click', closeRosterPanel);
+
 function closeModal() {
   const overlay = document.getElementById('modalOverlay');
   if (!overlay.classList.contains('open')) return;
+  closeRosterPanel();
   overlay.classList.add('closing');
   setTimeout(() => overlay.classList.remove('open','closing'), 200);
 }
