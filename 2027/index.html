@@ -357,11 +357,40 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);
 }
 .team-slot.partner.clickable:hover .team-abbr{color:var(--mc,#FF2244)}
+
+/* 편집 모드 */
+.rp-edit-input{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:2px;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;
+  letter-spacing:.03em;padding:3px 6px;outline:none;
+  transition:border-color .15s;
+}
+.rp-edit-input:focus{border-color:rgba(255,34,68,.55);background:rgba(255,34,68,.06)}
+.rp-ign-input{width:90px}
+.rp-name-input{width:90px}
+.rp-role-input{width:52px}
+.rp-real-input{width:72px;color:rgba(255,255,255,.55)}
+.rp-del-btn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.2);font-size:12px;padding:2px 4px;
+  transition:color .12s;line-height:1;flex-shrink:0;
+}
+.rp-del-btn:hover{color:rgba(255,60,80,.85)}
+.rp-add-btn{
+  display:block;width:100%;margin-top:.35rem;
+  background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.12);
+  border-radius:2px;color:rgba(255,255,255,.3);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 0;cursor:pointer;transition:all .15s;
+}
+.rp-add-btn:hover{background:rgba(255,34,68,.08);border-color:rgba(255,34,68,.3);color:rgba(255,34,68,.7)}
 </style>
 </head>
 <body>
 
-<header class="hdr">
+<header class="hdr site-header">
   <div class="brand">VCT <b>2027</b></div>
   <a href="../index.html" class="back-link">← 2026</a>
 </header>
@@ -434,6 +463,7 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   </div>
 </div>
 
+<script src="../storage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
@@ -515,163 +545,13 @@ const CN_OQ_TEAMS = [
 ];
 
 /* ── CN OQ 팀 로스터 데이터 ── */
+function _emptyRoster(){return{players:[],감독:[],코치:[],기타:[]};}
 const CN_OQ_ROSTERS = {
-  NOVA:{
-    players:[
-      {ign:'Mag',    real:'马政'},
-      {ign:'Smoggy', real:'薛晓冬'},
-      {ign:'Biank',  real:'陈廷毅'},
-      {ign:'CHICHOO',real:'刘俊豪'},
-      {ign:'FantasyJ',real:'苏佑杰'},
-    ],
-    감독:[{name:'Aimer',real:''}],
-    코치:[{name:'Shanks',real:'',role:'HC'},{name:'Mistic',real:'',role:'C'}],
-    기타:[],
-  },
-  TEC:{
-    players:[
-      {ign:'Mercury', real:''},
-      {ign:'Monka',   real:''},
-      {ign:'Asuna',   real:''},
-      {ign:'Chronicle',real:''},
-      {ign:'nzr',     real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  DRG:{
-    players:[
-      {ign:'Haodong', real:'刘浩东'},
-      {ign:'BerLIN',  real:''},
-      {ign:'GodLike', real:''},
-      {ign:'Kiles',   real:''},
-      {ign:'Levi',    real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  WOL:{
-    players:[
-      {ign:'SyouTA', real:''},
-      {ign:'XLR8',   real:''},
-      {ign:'Halo',   real:''},
-      {ign:'Derrick',real:''},
-      {ign:'Leia',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  FPX:{
-    players:[
-      {ign:'AAAAY',  real:''},
-      {ign:'Lysoar', real:''},
-      {ign:'pho',    real:''},
-      {ign:'Yuicaw', real:''},
-      {ign:'FOOL',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  KBG:{
-    players:[
-      {ign:'Mako',   real:''},
-      {ign:'Meteor', real:''},
-      {ign:'Stark',  real:''},
-      {ign:'Jingg',  real:''},
-      {ign:'Hades',  real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  AQ:{
-    players:[
-      {ign:'Sofa',   real:''},
-      {ign:'DuDu',   real:''},
-      {ign:'AMBI',   real:''},
-      {ign:'Cloud',  real:''},
-      {ign:'Dawn',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  UR:{
-    players:[
-      {ign:'Ban',    real:''},
-      {ign:'Cipher', real:''},
-      {ign:'Logi',   real:''},
-      {ign:'Reito',  real:''},
-      {ign:'W1SH',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  AT:{
-    players:[
-      {ign:'Aevis',  real:''},
-      {ign:'Rin',    real:''},
-      {ign:'Fang',   real:''},
-      {ign:'Lori',   real:''},
-      {ign:'Hex',    real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  RA:{
-    players:[
-      {ign:'Chichoo',real:''},
-      {ign:'Biank',  real:''},
-      {ign:'wolf',   real:''},
-      {ign:'ZmjjKK', real:''},
-      {ign:'s1mple', real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  WSIG:{
-    players:[
-      {ign:'Apex',   real:''},
-      {ign:'Crow',   real:''},
-      {ign:'Nova',   real:''},
-      {ign:'Blade',  real:''},
-      {ign:'Zone',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  ODG:{
-    players:[
-      {ign:'Dagger', real:''},
-      {ign:'Echo',   real:''},
-      {ign:'Flux',   real:''},
-      {ign:'Ghost',  real:''},
-      {ign:'Haze',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
-  VLG:{
-    players:[
-      {ign:'Vortex', real:''},
-      {ign:'Lance',  real:''},
-      {ign:'Grid',   real:''},
-      {ign:'Pixel',  real:''},
-      {ign:'Sync',   real:''},
-    ],
-    감독:[],
-    코치:[],
-    기타:[],
-  },
+  NOVA:_emptyRoster(), TEC:_emptyRoster(),  DRG:_emptyRoster(),
+  WOL:_emptyRoster(),  FPX:_emptyRoster(),  KBG:_emptyRoster(),
+  AQ:_emptyRoster(),   UR:_emptyRoster(),   AT:_emptyRoster(),
+  RA:_emptyRoster(),   WSIG:_emptyRoster(), ODG:_emptyRoster(),
+  VLG:_emptyRoster(),
 };
 
 /* ── 핀 데이터: 이제 위도/경도로 정확하게 ── */
@@ -931,47 +811,161 @@ function openModal(p, phaseKey) {
 }
 
 /* ── 로스터 패널 ── */
-function rpSection(label, icon, rows, emptyMsg) {
-  if (!rows || rows.length === 0) return '';
-  return `<div class="rp-section">
-    <div class="rp-section-head"><span class="rp-section-icon"></span>${label}</div>
-    ${rows.map((r,i) => icon === 'player'
-      ? `<div class="rp-player-row">
-           <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
-           <span class="rp-ign">${r.ign}</span>
-           ${r.real ? `<span class="rp-real-name">${r.real}</span>` : ''}
-         </div>`
-      : `<div class="rp-staff-row">
-           <span class="rp-role-badge">${r.role || label.slice(0,2).toUpperCase()}</span>
-           <span class="rp-staff-name">${r.name}</span>
-           ${r.real ? `<span class="rp-staff-real">${r.real}</span>` : ''}
-         </div>`
-    ).join('')}
+const RP_STORE_PREFIX = 'roster:cn-oq:';
+let _rpCurrentAbbr = null;
+
+function isAdmin() {
+  try {
+    if (localStorage.getItem('vct_admin_auth')) return true;
+    const u = JSON.parse(localStorage.getItem('vct_auth_user'));
+    return !!(u && u.role === 'admin');
+  } catch(e) { return false; }
+}
+
+function rpLoadRoster(abbr) {
+  const key = RP_STORE_PREFIX + abbr;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return CN_OQ_ROSTERS[abbr] || {players:[],감독:[],코치:[],기타:[]};
+}
+
+function rpSaveRoster(abbr, data) {
+  localStorage.setItem(RP_STORE_PREFIX + abbr, JSON.stringify(data));
+}
+
+/* 뷰 모드 행 */
+function rpPlayerRowHTML(r, i) {
+  return `<div class="rp-player-row">
+    <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
+    <span class="rp-ign">${r.ign || ''}</span>
+    ${r.real ? `<span class="rp-real-name">${r.real}</span>` : ''}
+  </div>`;
+}
+function rpStaffRowHTML(r, label) {
+  return `<div class="rp-staff-row">
+    <span class="rp-role-badge">${r.role || label}</span>
+    <span class="rp-staff-name">${r.name || ''}</span>
+    ${r.real ? `<span class="rp-staff-real">${r.real}</span>` : ''}
   </div>`;
 }
 
+/* 편집 모드 행 */
+function rpPlayerEditHTML(r, i, sectionKey) {
+  return `<div class="rp-player-row rp-edit-row" data-section="${sectionKey}" data-idx="${i}">
+    <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
+    <input class="rp-edit-input rp-ign-input" data-field="ign" placeholder="IGN" value="${r.ign||''}">
+    <input class="rp-edit-input rp-real-input" data-field="real" placeholder="실명" value="${r.real||''}">
+    <button class="rp-del-btn" data-section="${sectionKey}" data-idx="${i}" title="삭제">✕</button>
+  </div>`;
+}
+function rpStaffEditHTML(r, i, sectionKey, roleDefault) {
+  return `<div class="rp-staff-row rp-edit-row" data-section="${sectionKey}" data-idx="${i}">
+    <input class="rp-edit-input rp-role-input" data-field="role" placeholder="역할" value="${r.role||roleDefault}">
+    <input class="rp-edit-input rp-name-input" data-field="name" placeholder="이름" value="${r.name||''}">
+    <input class="rp-edit-input rp-real-input" data-field="real" placeholder="실명" value="${r.real||''}">
+    <button class="rp-del-btn" data-section="${sectionKey}" data-idx="${i}" title="삭제">✕</button>
+  </div>`;
+}
+
+function rpSectionHTML(label, sectionKey, rows, admin, roleDefault) {
+  const isPlayer = sectionKey === 'players';
+  const rowsHTML = rows.length
+    ? rows.map((r,i) => admin
+        ? (isPlayer ? rpPlayerEditHTML(r,i,sectionKey) : rpStaffEditHTML(r,i,sectionKey,roleDefault))
+        : (isPlayer ? rpPlayerRowHTML(r,i) : rpStaffRowHTML(r,label))
+      ).join('')
+    : (admin ? '' : `<div class="rp-empty">등록된 항목 없음</div>`);
+  const addBtn = admin
+    ? `<button class="rp-add-btn" data-section="${sectionKey}">+ 추가</button>` : '';
+  return `<div class="rp-section">
+    <div class="rp-section-head"><span class="rp-section-icon"></span>${label}</div>
+    ${rowsHTML}
+    ${addBtn}
+  </div>`;
+}
+
+function rpRender(abbr) {
+  const r = rpLoadRoster(abbr);
+  const admin = isAdmin();
+  const body = document.getElementById('rpBody');
+  body.innerHTML =
+    rpSectionHTML('PLAYERS',    'players', r.players, admin, '') +
+    rpSectionHTML('감독',       '감독',    r.감독,    admin, '감독') +
+    rpSectionHTML('코치',       '코치',    r.코치,    admin, '코치') +
+    rpSectionHTML('기타 스태프','기타',    r.기타,    admin, '스태프');
+
+  if (!body.innerHTML.trim()) {
+    body.innerHTML = '<div class="rp-empty" style="margin-top:2rem">등록된 로스터가 없습니다</div>';
+  }
+
+  if (admin) rpBindEditEvents(abbr);
+}
+
+function rpBindEditEvents(abbr) {
+  const body = document.getElementById('rpBody');
+
+  /* 필드 변경 */
+  body.querySelectorAll('.rp-edit-input').forEach(input => {
+    input.addEventListener('change', () => rpFlushEdit(abbr));
+  });
+
+  /* 삭제 */
+  body.querySelectorAll('.rp-del-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.section;
+      const idx = parseInt(btn.dataset.idx);
+      const r = rpLoadRoster(abbr);
+      r[section].splice(idx, 1);
+      rpSaveRoster(abbr, r);
+      rpRender(abbr);
+    });
+  });
+
+  /* 추가 */
+  body.querySelectorAll('.rp-add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.section;
+      const r = rpLoadRoster(abbr);
+      if (section === 'players') r.players.push({ign:'',real:''});
+      else r[section].push({name:'',real:'',role:''});
+      rpSaveRoster(abbr, r);
+      rpRender(abbr);
+      /* 새 행의 첫 input 포커스 */
+      const rows = document.querySelectorAll(`[data-section="${section}"]`);
+      const last = rows[rows.length-1];
+      if (last) last.querySelector('input')?.focus();
+    });
+  });
+}
+
+function rpFlushEdit(abbr) {
+  const body = document.getElementById('rpBody');
+  const r = rpLoadRoster(abbr);
+  body.querySelectorAll('.rp-edit-row').forEach(row => {
+    const section = row.dataset.section;
+    const idx = parseInt(row.dataset.idx);
+    const obj = r[section][idx];
+    if (!obj) return;
+    row.querySelectorAll('.rp-edit-input').forEach(inp => {
+      obj[inp.dataset.field] = inp.value.trim();
+    });
+  });
+  rpSaveRoster(abbr, r);
+}
+
 function openRosterPanel(t) {
+  _rpCurrentAbbr = t.abbr;
   const teamsView  = document.getElementById('teamsView');
   const rosterView = document.getElementById('rosterView');
 
-  /* 팀 헤더 */
   document.getElementById('rpLogo').innerHTML =
     `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`;
   document.getElementById('rpAbbr').textContent = t.abbr;
   document.getElementById('rpName').textContent = t.name;
 
-  /* 로스터 렌더 */
-  const r = CN_OQ_ROSTERS[t.abbr] || {players:[],감독:[],코치:[],기타:[]};
-  const body = document.getElementById('rpBody');
-  body.innerHTML =
-    rpSection('PLAYERS', 'player', r.players, '등록된 선수 없음') +
-    rpSection('감독', '감독', r.감독.map(s=>({...s, role:'감독'})), '') +
-    rpSection('코치', '코치', r.코치.map(s=>({...s, role:s.role||'코치'})), '') +
-    rpSection('기타 스태프', '스태프', r.기타.map(s=>({...s, role:s.role||'스태프'})), '');
-
-  if (!body.innerHTML.trim()) {
-    body.innerHTML = '<div class="rp-empty" style="margin-top:2rem">등록된 로스터가 없습니다</div>';
-  }
+  rpRender(t.abbr);
 
   teamsView.classList.add('slide-out');
   rosterView.classList.add('slide-in');
@@ -1019,5 +1013,6 @@ window.addEventListener('resize', () => {
 
 buildMap();
 </script>
+<script src="../auth.js"></script>
 </body>
 </html>
