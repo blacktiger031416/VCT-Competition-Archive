@@ -325,7 +325,8 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   letter-spacing:.04em;color:rgba(255,255,255,.88);flex:1;
 }
 .rp-real-name{
-  font-family:'Barlow',sans-serif;font-size:10px;color:rgba(255,255,255,.3);
+  font-family:'Barlow',sans-serif;font-size:13px;color:rgba(255,255,255,.38);
+  margin-left:auto;flex-shrink:0;
 }
 
 .rp-staff-row{
@@ -346,7 +347,8 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   letter-spacing:.03em;color:rgba(255,255,255,.75);flex:1;
 }
 .rp-staff-real{
-  font-family:'Barlow',sans-serif;font-size:10px;color:rgba(255,255,255,.3);
+  font-family:'Barlow',sans-serif;font-size:13px;color:rgba(255,255,255,.38);
+  margin-left:auto;flex-shrink:0;
 }
 .rp-empty{
   font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.08em;
@@ -545,7 +547,7 @@ const CN_OQ_TEAMS = [
 ];
 
 /* ── CN OQ 팀 로스터 데이터 ── */
-function _emptyRoster(){return{players:[],감독:[],코치:[],기타:[]};}
+function _emptyRoster(){return{players:[],스태프:[]};}
 const CN_OQ_ROSTERS = {
   NOVA:_emptyRoster(), TEC:_emptyRoster(),  DRG:_emptyRoster(),
   WOL:_emptyRoster(),  FPX:_emptyRoster(),  KBG:_emptyRoster(),
@@ -826,9 +828,17 @@ function rpLoadRoster(abbr) {
   const key = RP_STORE_PREFIX + abbr;
   try {
     const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const d = JSON.parse(raw);
+      /* 구 포맷(감독/코치/기타) → 新 포맷 마이그레이션 */
+      if (!d.스태프) {
+        d.스태프 = [].concat(d.감독||[], d.코치||[], d.기타||[]);
+        delete d.감독; delete d.코치; delete d.기타;
+      }
+      return d;
+    }
   } catch(e) {}
-  return CN_OQ_ROSTERS[abbr] || {players:[],감독:[],코치:[],기타:[]};
+  return CN_OQ_ROSTERS[abbr] || {players:[],스태프:[]};
 }
 
 function rpSaveRoster(abbr, data) {
@@ -860,20 +870,20 @@ function rpPlayerEditHTML(r, i, sectionKey) {
     <button class="rp-del-btn" data-section="${sectionKey}" data-idx="${i}" title="삭제">✕</button>
   </div>`;
 }
-function rpStaffEditHTML(r, i, sectionKey, roleDefault) {
+function rpStaffEditHTML(r, i, sectionKey) {
   return `<div class="rp-staff-row rp-edit-row" data-section="${sectionKey}" data-idx="${i}">
-    <input class="rp-edit-input rp-role-input" data-field="role" placeholder="역할" value="${r.role||roleDefault}">
+    <input class="rp-edit-input rp-role-input" data-field="role" placeholder="직책" value="${r.role||''}">
     <input class="rp-edit-input rp-name-input" data-field="name" placeholder="이름" value="${r.name||''}">
     <input class="rp-edit-input rp-real-input" data-field="real" placeholder="실명" value="${r.real||''}">
     <button class="rp-del-btn" data-section="${sectionKey}" data-idx="${i}" title="삭제">✕</button>
   </div>`;
 }
 
-function rpSectionHTML(label, sectionKey, rows, admin, roleDefault) {
+function rpSectionHTML(label, sectionKey, rows, admin) {
   const isPlayer = sectionKey === 'players';
   const rowsHTML = rows.length
     ? rows.map((r,i) => admin
-        ? (isPlayer ? rpPlayerEditHTML(r,i,sectionKey) : rpStaffEditHTML(r,i,sectionKey,roleDefault))
+        ? (isPlayer ? rpPlayerEditHTML(r,i,sectionKey) : rpStaffEditHTML(r,i,sectionKey))
         : (isPlayer ? rpPlayerRowHTML(r,i) : rpStaffRowHTML(r,label))
       ).join('')
     : (admin ? '' : `<div class="rp-empty">등록된 항목 없음</div>`);
@@ -891,10 +901,8 @@ function rpRender(abbr) {
   const admin = isAdmin();
   const body = document.getElementById('rpBody');
   body.innerHTML =
-    rpSectionHTML('PLAYERS',    'players', r.players, admin, '') +
-    rpSectionHTML('감독',       '감독',    r.감독,    admin, '감독') +
-    rpSectionHTML('코치',       '코치',    r.코치,    admin, '코치') +
-    rpSectionHTML('기타 스태프','기타',    r.기타,    admin, '스태프');
+    rpSectionHTML('PLAYERS', 'players', r.players, admin, '') +
+    rpSectionHTML('STAFF',   '스태프',  r.스태프,  admin, '');
 
   if (!body.innerHTML.trim()) {
     body.innerHTML = '<div class="rp-empty" style="margin-top:2rem">등록된 로스터가 없습니다</div>';
@@ -929,7 +937,7 @@ function rpBindEditEvents(abbr) {
       const section = btn.dataset.section;
       const r = rpLoadRoster(abbr);
       if (section === 'players') r.players.push({ign:'',real:''});
-      else r[section].push({name:'',real:'',role:''});
+      else r.스태프.push({role:'',name:'',real:''});
       rpSaveRoster(abbr, r);
       rpRender(abbr);
       /* 새 행의 첫 input 포커스 */

@@ -2424,6 +2424,17 @@ var _ALL_ROSTERS = {
 };
 var TEAM_ROSTERS = {};
 function _loadRoster(teamFullName, code) {
+  /* 1순위: 2027 CN OQ 로스터 (roster:cn-oq:{ABBR}) */
+  try {
+    var abbr = _TC[teamFullName] || code;
+    var oq = localStorage.getItem("roster:cn-oq:" + abbr);
+    if (oq) {
+      var d = JSON.parse(oq);
+      var list = (d.players || []).map(function(p){ return p.ign; }).filter(Boolean);
+      if (list.length) return list;
+    }
+  } catch (e) {}
+  /* 2순위: 기존 vct_roster 키 (2026 등) */
   try {
     var s = localStorage.getItem("vct_roster:" + teamFullName);
     if (s) {
