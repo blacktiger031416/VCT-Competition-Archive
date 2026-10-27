@@ -306,7 +306,7 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 }
 .rp-section-head .rp-section-icon{
   display:inline-block;width:2px;height:10px;
-  background:var(--rp-accent,rgba(255,34,68,.7));border-radius:1px;
+  background:var(--rp-accent-full,rgba(255,34,68,.7));border-radius:1px;
 }
 .rp-section-head::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
 
@@ -318,7 +318,7 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 .rp-player-row:last-child{border-bottom:none}
 .rp-num{
   font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
-  color:rgba(255,34,68,.5);width:18px;text-align:center;flex-shrink:0;
+  color:var(--rp-accent,rgba(255,34,68,.5));width:18px;text-align:center;flex-shrink:0;
 }
 .rp-ign{
   font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
@@ -531,19 +531,19 @@ const PARTNER_TEAMS = {
 /* ── CN OQ 팀 데이터 ── */
 const CN_OQ = `${BASE}/VCT CN/CN_OQ`;
 const CN_OQ_TEAMS = [
-  {abbr:'NOVA', name:'Nova Esports',                    logo:`${CN_OQ}/NOVA.png`},
-  {abbr:'TEC',  name:'Titan Esports Club',              logo:`${CN_OQ}/TEC.png`},
-  {abbr:'DRG',  name:'Dragon Ranger Gaming',            logo:`${CN_OQ}/DRG.png`},
-  {abbr:'WOL',  name:'Wolves Esports',                  logo:`${CN_OQ}/WOL.png`},
-  {abbr:'FPX',  name:'FunPlus Phoenix',                 logo:`${CN_OQ}/FPX.png`},
-  {abbr:'KBG',  name:'KeepBest Gaming',                 logo:`${CN_OQ}/KBG.png`},
-  {abbr:'AQ',   name:'Any Question Gaming',             logo:`${CN_OQ}/AQ.png`},
-  {abbr:'UR',   name:'Unsettled Resentment',            logo:`${CN_OQ}/UR.png`},
-  {abbr:'AT',   name:'A Team',                          logo:`${CN_OQ}/AT.png`},
-  {abbr:'RA',   name:'Rare Atom',                       logo:`${CN_OQ}/RA.png`},
-  {abbr:'WSIG', name:'World Sports Invictus Gaming',    logo:`${CN_OQ}/WSIG.png`},
-  {abbr:'ODG',  name:'Octagonal Disposition Gaming',    logo:`${CN_OQ}/ODG.png`},
-  {abbr:'VLG',  name:'Victory No Limits Gaming',        logo:`${CN_OQ}/VLG.png`},
+  {abbr:'NOVA', name:'Nova Esports',                    logo:`${CN_OQ}/NOVA.png`, color:'#A455BA'},
+  {abbr:'TEC',  name:'Titan Esports Club',              logo:`${CN_OQ}/TEC.png`,  color:'#DB2B1A'},
+  {abbr:'DRG',  name:'Dragon Ranger Gaming',            logo:`${CN_OQ}/DRG.png`,  color:'#2E60F9'},
+  {abbr:'WOL',  name:'Wolves Esports',                  logo:`${CN_OQ}/WOL.png`,  color:'#E19619'},
+  {abbr:'FPX',  name:'FunPlus Phoenix',                 logo:`${CN_OQ}/FPX.png`,  color:'#FF0400'},
+  {abbr:'KBG',  name:'KeepBest Gaming',                 logo:`${CN_OQ}/KBG.png`,  color:'#E7B350'},
+  {abbr:'AQ',   name:'Any Question Gaming',             logo:`${CN_OQ}/AQ.png`,   color:'#FAFAF9'},
+  {abbr:'UR',   name:'Unsettled Resentment',            logo:`${CN_OQ}/UR.png`,   color:'#2CC7E6'},
+  {abbr:'AT',   name:'A Team',                          logo:`${CN_OQ}/AT.png`,   color:'#8CF513'},
+  {abbr:'RA',   name:'Rare Atom',                       logo:`${CN_OQ}/RA.png`,   color:'#B04EC4'},
+  {abbr:'WSIG', name:'World Sports Invictus Gaming',    logo:`${CN_OQ}/WSIG.png`, color:'#0387C9'},
+  {abbr:'ODG',  name:'Octagonal Disposition Gaming',    logo:`${CN_OQ}/ODG.png`,  color:'#D0373F'},
+  {abbr:'VLG',  name:'Victory No Limits Gaming',        logo:`${CN_OQ}/VLG.png`,  color:'#FF0021'},
 ];
 
 /* ── CN OQ 팀 로스터 데이터 ── */
@@ -720,8 +720,10 @@ function renderPins(phaseKey) {
   });
 }
 
+var _modalRegionColor = '#ff2244';
 function openModal(p, phaseKey) {
   const color  = COLORS[p.region];
+  _modalRegionColor = color;
   const overlay = document.getElementById('modalOverlay');
   const modal   = document.getElementById('modal');
 
@@ -967,6 +969,20 @@ function openRosterPanel(t) {
   _rpCurrentAbbr = t.abbr;
   const teamsView  = document.getElementById('teamsView');
   const rosterView = document.getElementById('rosterView');
+  const modal      = document.getElementById('modal');
+
+  /* 팀 퍼스널 컬러 적용 */
+  const tc = t.color || '#FF2244';
+  rosterView.style.setProperty('--rp-accent', tc + '99');
+  /* 섹션 아이콘/헤드 색상도 덮어쓰기 */
+  rosterView.style.setProperty('--rp-accent-full', tc);
+  /* 모달 테두리/글로우 교체 */
+  modal.style.boxShadow = `
+    0 0 0 1px ${tc}99,
+    0 0 40px ${tc}44,
+    0 0 80px ${tc}22,
+    inset 0 0 60px rgba(0,0,0,.6)`;
+  modal.style.borderColor = tc + '99';
 
   document.getElementById('rpLogo').innerHTML =
     `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">`;
@@ -983,6 +999,11 @@ function openRosterPanel(t) {
 function closeRosterPanel() {
   document.getElementById('teamsView').classList.remove('slide-out');
   document.getElementById('rosterView').classList.remove('slide-in');
+  /* 모달 테두리를 원래 region 색으로 복원 */
+  const modal = document.getElementById('modal');
+  const c = _modalRegionColor;
+  modal.style.boxShadow = `0 0 0 1px ${c}99,0 0 40px ${c}44,0 0 80px ${c}22,inset 0 0 60px rgba(0,0,0,.6)`;
+  modal.style.borderColor = c + '99';
 }
 
 document.getElementById('rosterBack').addEventListener('click', closeRosterPanel);
