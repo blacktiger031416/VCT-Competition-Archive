@@ -506,10 +506,11 @@ function makeAdminBar(round, mi, href) {
   </div>`;
 }
 
-function mhref(t1, t2, extra) {
+function mhref(t1, t2, extra, matchId) {
   const a = encodeURIComponent(t1.tbd ? '' : (t1.name||''));
   const b = encodeURIComponent(t2.tbd ? '' : (t2.name||''));
-  return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold${extra||''}`;
+  const mid = matchId ? `&match=${encodeURIComponent(matchId)}` : '';
+  return `cn-threshold-match.html?teamA=${a}&teamB=${b}&from=threshold${mid}${extra||''}`;
 }
 
 function render(wk) {
@@ -533,7 +534,7 @@ function render(wk) {
   const r12Html = bc.r12.map((m, mi) => {
     const t1Slot = admin ? `data-type="r12" data-mi="${mi}" data-si="0"` : '';
     const t2Slot = admin ? `data-type="r12" data-mi="${mi}" data-si="1"` : '';
-    const href = mhref(m.t1, m.t2);
+    const href = mhref(m.t1, m.t2, '', `W${wk}R12-${mi}`);
     const aBar = admin ? makeAdminBar('r12', mi, href) : '';
     return `<div class="mg">${matchCard(m.t1, m.t2, false, t1Slot, t2Slot, admin?'':href, aBar)}</div>`;
   }).join('');
@@ -542,7 +543,7 @@ function render(wk) {
   // QF
   const qfHtml = bc.qf.map((m, mi) => {
     const t1Slot = admin ? `data-type="qf_seed" data-mi="${mi}"` : '';
-    const href = mhref(m.t1, m.t2);
+    const href = mhref(m.t1, m.t2, '', `W${wk}QF-${mi}`);
     const aBar = admin ? makeAdminBar('qf', mi, href) : '';
     return `<div class="mg">${matchCard(m.t1, m.t2, false, t1Slot, '', admin?'':href, aBar)}</div>`;
   }).join('');
@@ -550,7 +551,7 @@ function render(wk) {
 
   // SF
   const sfHtml = bc.sf.map((m, mi) => {
-    const href = mhref(m.t1, m.t2);
+    const href = mhref(m.t1, m.t2, '', `W${wk}SF-${mi}`);
     const aBar = admin ? makeAdminBar('sf', mi, href) : '';
     return `<div class="mg">${matchCard(m.t1, m.t2, false, '', '', admin?'':href, aBar)}</div>`;
   }).join('');
@@ -558,7 +559,7 @@ function render(wk) {
 
   // GF (BO5)
   const gfHtml = bc.gf.map(m => {
-    const href = mhref(m.t1, m.t2, '&bo5=1&gf=1');
+    const href = mhref(m.t1, m.t2, '&bo5=1&gf=1', `W${wk}GF`);
     const aBar = admin ? makeAdminBar('gf', 0, href) : '';
     return `<div class="mg">${matchCard(m.t1, m.t2, true, '', '', admin?'':href, aBar)}</div>`;
   }).join('');
