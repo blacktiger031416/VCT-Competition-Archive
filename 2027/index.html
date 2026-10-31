@@ -584,6 +584,18 @@ const KICKOFF_OQ_PINS = OQ_PINS.map(p =>
   p.id === 'cn' ? {...p, teams: CN_OQ_TEAMS} : p
 );
 
+/* Cups OQ: 각 OQ 핀에 해당 서브리전 파트너 팀 자동 연결 */
+const _allPartnerTeams = [].concat(
+  PARTNER_TEAMS.americas,
+  PARTNER_TEAMS.emea,
+  PARTNER_TEAMS.pacific,
+  PARTNER_TEAMS.cn
+);
+const CUPS_OQ_PINS = OQ_PINS.map(p => {
+  const matched = _allPartnerTeams.filter(t => t.sub === p.sub);
+  return matched.length > 0 ? {...p, teams: matched} : p;
+});
+
 const phases = {
   'kickoff-oq':  KICKOFF_OQ_PINS,
   'kickoff':[
@@ -593,21 +605,21 @@ const phases = {
     {id:'cn',      flag:'🇨🇳',name:'Hangzhou',  region:'cn',      sub:'CN',      lat:30.3, lng:120.2,teams:PARTNER_TEAMS.cn},
   ],
   'masters-seoul':[{id:'seoul',flag:'🇰🇷',name:'Masters Seoul',region:'pacific',sub:'International',lat:37.6,lng:127.0}],
-  'cups-oq-1': OQ_PINS,
+  'cups-oq-1': CUPS_OQ_PINS,
   'cups-1':[
-    {id:'americas',flag:'🇲🇽',name:'Mexico City',   region:'americas',sub:'Americas',lat:19.4, lng:-99.1, teams:PARTNER_TEAMS.americas},
-    {id:'emea',    flag:'🇵🇱',name:'Warsaw',         region:'emea',    sub:'EMEA',    lat:52.2, lng:21.0,  teams:PARTNER_TEAMS.emea},
-    {id:'pacific', flag:'🇵🇭',name:'Manila',         region:'pacific', sub:'Pacific', lat:14.6, lng:121.0, teams:PARTNER_TEAMS.pacific},
-    {id:'cn',      flag:'🇨🇳',name:'Wuhan',          region:'cn',      sub:'CN',      lat:30.6, lng:114.3, teams:PARTNER_TEAMS.cn},
+    {id:'americas',flag:'🇲🇽',name:'Mexico City',   region:'americas',sub:'Americas',lat:19.4, lng:-99.1},
+    {id:'emea',    flag:'🇵🇱',name:'Warsaw',         region:'emea',    sub:'EMEA',    lat:52.2, lng:21.0 },
+    {id:'pacific', flag:'🇵🇭',name:'Manila',         region:'pacific', sub:'Pacific', lat:14.6, lng:121.0},
+    {id:'cn',      flag:'🇨🇳',name:'Wuhan',          region:'cn',      sub:'CN',      lat:30.6, lng:114.3},
   ],
   'cups-2':[
-    {id:'americas',flag:'🇧🇷',name:'Rio de Janeiro', region:'americas',sub:'Americas',lat:-22.9,lng:-43.2, teams:PARTNER_TEAMS.americas},
-    {id:'emea',    flag:'🇹🇷',name:'Istanbul',        region:'emea',    sub:'EMEA',    lat:41.0, lng:28.9,  teams:PARTNER_TEAMS.emea},
-    {id:'pacific', flag:'🇯🇵',name:'Tokyo',           region:'pacific', sub:'Pacific', lat:35.7, lng:139.7, teams:PARTNER_TEAMS.pacific},
-    {id:'cn',      flag:'🇨🇳',name:'Shanghai',        region:'cn',      sub:'CN',      lat:31.2, lng:121.5, teams:PARTNER_TEAMS.cn},
+    {id:'americas',flag:'🇧🇷',name:'Rio de Janeiro', region:'americas',sub:'Americas',lat:-22.9,lng:-43.2},
+    {id:'emea',    flag:'🇹🇷',name:'Istanbul',        region:'emea',    sub:'EMEA',    lat:41.0, lng:28.9 },
+    {id:'pacific', flag:'🇯🇵',name:'Tokyo',           region:'pacific', sub:'Pacific', lat:35.7, lng:139.7},
+    {id:'cn',      flag:'🇨🇳',name:'Shanghai',        region:'cn',      sub:'CN',      lat:31.2, lng:121.5},
   ],
   'masters-valencia':[{id:'valencia',flag:'🇪🇸',name:'Masters Valencia',region:'emea',sub:'International',lat:39.5,lng:-0.4}],
-  'cups-oq-2': OQ_PINS,
+  'cups-oq-2': CUPS_OQ_PINS,
   'champions':[{id:'austin',flag:'🇺🇸',name:'Champions Austin',region:'americas',sub:'International',lat:30.3,lng:-97.7}],
 };
 
