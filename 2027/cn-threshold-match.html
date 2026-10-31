@@ -1733,27 +1733,29 @@ var MATCH_KEY = (function() {
 
 /* ── vct_p: stage 태그 교정: 현재 MATCH_KEY 진입 stage로 동기화 ── */
 (function repairVctpStage() {
-  try {
-    for (var _ri = 0; _ri < localStorage.length; _ri++) {
-      var _rk = localStorage.key(_ri);
-      if (!_rk || _rk.indexOf('vct_p:') !== 0) continue;
-      try {
-        var _rpd = JSON.parse(localStorage.getItem(_rk) || '{}');
-        if (!_rpd.maps) continue;
-        var _changed = false;
-        _rpd.maps.forEach(function(_rm) {
-          if (_rm.matchKey === MATCH_KEY && _rm.stage !== MATCH_FROM) {
-            _rm.stage = MATCH_FROM;
-            _rm.league = LEAGUE;
-            _changed = true;
-          }
-        });
-        if (_changed) {
-          localStorage.setItem(_rk, JSON.stringify(_rpd));
-        }
-      } catch(_re) {}
-    }
-  } catch(_re2) {}
+  function _run() {
+    try {
+      var _keys = typeof window.storageKeys === 'function' ? window.storageKeys() :
+        (function(){ var a=[]; for(var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a; })();
+      _keys.forEach(function(_rk) {
+        if (!_rk || _rk.indexOf('vct_p:') !== 0) return;
+        try {
+          var _rpd = JSON.parse(localStorage.getItem(_rk) || '{}');
+          if (!_rpd.maps) return;
+          var _changed = false;
+          _rpd.maps.forEach(function(_rm) {
+            if (_rm.matchKey === MATCH_KEY && _rm.stage !== MATCH_FROM) {
+              _rm.stage = MATCH_FROM;
+              _rm.league = LEAGUE;
+              _changed = true;
+            }
+          });
+          if (_changed) localStorage.setItem(_rk, JSON.stringify(_rpd));
+        } catch(_re) {}
+      });
+    } catch(_re2) {}
+  }
+  if (window.storageReady) { window.storageReady.then(_run); } else { _run(); }
 })();
 
 /* ── MATCH_KEY 마이그레이션: 구버전(date|teamA|teamB) → 신버전 키 ── */
@@ -1761,10 +1763,13 @@ var MATCH_KEY = (function() {
   function migrateFrom(oldKey) {
     if (!oldKey || oldKey === MATCH_KEY) return 0;
     if (_MATCH_TOURNAMENT && oldKey.indexOf(_MATCH_TOURNAMENT) === -1) return 0;
+    /* storage.js 환경에서는 localStorage.length/key() 가 real localStorage(비어있음)를 읽으므로
+       window.storageKeys() 로 _mem 키 목록을 가져온다 */
+    var allKeys = typeof window.storageKeys === 'function' ? window.storageKeys() :
+      (function(){ var a=[]; for(var i=0;i<localStorage.length;i++) a.push(localStorage.key(i)); return a; })();
     var toMove = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      if (!k) continue;
+    allKeys.forEach(function(k) {
+      if (!k) return;
       if (k === oldKey ||
           k.startsWith('set:'         + oldKey + ':') ||
           k.startsWith('stats:'       + oldKey + ':') ||
@@ -1777,7 +1782,7 @@ var MATCH_KEY = (function() {
           k === 'vct_bo:'     + oldKey) {
         toMove.push(k);
       }
-    }
+    });
     toMove.forEach(function(k) {
       var newK = k.replace(oldKey, MATCH_KEY);
       if (!localStorage.getItem(newK)) {
@@ -1789,13 +1794,18 @@ var MATCH_KEY = (function() {
     return toMove.length;
   }
 
-  /* 구버전 키 1: date|teamA|teamB (현재 팀명) */
-  var _oldKey = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
-  migrateFrom(_oldKey);
+  function _runMigration() {
+    /* 구버전 키 1: date|teamA|teamB (현재 팀명) */
+    var _oldKey = MATCH_DATE + '|' + MATCH_TEAM_A + '|' + MATCH_TEAM_B;
+    migrateFrom(_oldKey);
 
-  /* 구버전 키 2: 대진 미확정 상태(미정|미정)에서 저장된 키 */
-  var _pendingKey = MATCH_DATE + '|미정|미정';
-  if (_pendingKey !== _oldKey) migrateFrom(_pendingKey);
+    /* 구버전 키 2: 대진 미확정 상태(미정|미정)에서 저장된 키 */
+    var _pendingKey = MATCH_DATE + '|미정|미정';
+    if (_pendingKey !== _oldKey) migrateFrom(_pendingKey);
+  }
+
+  /* storageReady 이후에 실행해야 _mem이 채워진 상태 */
+  if (window.storageReady) { window.storageReady.then(_runMigration); } else { _runMigration(); }
 })();
 
 var _TC = {
