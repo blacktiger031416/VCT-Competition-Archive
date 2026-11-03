@@ -398,7 +398,13 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 
 /* ── OQ Stage Panel ── */
 .oq-panel{display:flex;flex-direction:column;min-height:100%}
-.oq-stage-header{padding:1.2rem 1.5rem .8rem;flex-shrink:0}
+.oq-stage-header{
+  padding:1.2rem 1.5rem .8rem;flex-shrink:0;position:relative;
+  background:
+    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:28px 28px;
+}
 .oq-structure-label{
   font-family:'Barlow Condensed',sans-serif;
   font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
@@ -406,13 +412,25 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 }
 .oq-structure-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
 .oq-stage-flow{display:flex;align-items:stretch}
+/* Connector: animated flowing dot */
 .oq-stage-conn{
   display:flex;align-items:center;justify-content:center;
-  width:26px;flex-shrink:0;color:rgba(255,255,255,.15);font-size:9px;position:relative;
+  width:26px;flex-shrink:0;position:relative;overflow:hidden;
 }
-.oq-stage-conn::before{
-  content:'';position:absolute;left:0;right:0;top:50%;
-  height:1px;background:rgba(255,255,255,.07);
+.oq-conn-line{
+  position:absolute;left:0;right:0;top:50%;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.18),rgba(255,255,255,.05));
+}
+.oq-conn-dot{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  top:calc(50% - 2.5px);
+  animation:oqDotFlow 1.3s linear infinite;
+}
+@keyframes oqDotFlow{
+  0%{left:-5px;opacity:0}
+  10%{opacity:1}
+  90%{opacity:.9}
+  100%{left:calc(100% + 5px);opacity:0}
 }
 .oq-stage-card{
   flex:1;min-width:0;background:rgba(255,255,255,.025);
@@ -455,7 +473,37 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
   color:rgba(255,255,255,.42);line-height:1.2;transition:color .2s;
 }
-.oq-stage-card.active .oq-card-name{color:#fff}
+.oq-stage-card.active .oq-card-name{
+  color:#fff;
+  animation:oqGlitch 5.5s ease infinite;
+}
+@keyframes oqGlitch{
+  0%,84%,100%{text-shadow:none;transform:none}
+  85%{transform:skewX(-3deg);text-shadow:-2px 0 var(--mc,#FF2244),2px 0 rgba(0,210,255,.8)}
+  86%{transform:skewX(2deg);text-shadow:1px 0 var(--mc,#FF2244)}
+  87%{transform:none;text-shadow:none;clip-path:inset(25% 0 45% 0)}
+  88%{clip-path:none}
+  89%{text-shadow:-1px 0 var(--mc,#FF2244);transform:translateX(1px)}
+  90%{text-shadow:none;transform:none}
+}
+/* Corner brackets on active card */
+.oq-card-corner{
+  position:absolute;width:7px;height:7px;pointer-events:none;
+  opacity:0;transition:opacity .3s;
+}
+.oq-stage-card.active .oq-card-corner{
+  opacity:1;animation:oqCornerIn .4s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes oqCornerIn{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
+.oq-card-corner.tl{top:3px;left:3px;border-top:1.5px solid var(--mc,#FF2244);border-left:1.5px solid var(--mc,#FF2244)}
+.oq-card-corner.tr{top:3px;right:3px;border-top:1.5px solid var(--mc,#FF2244);border-right:1.5px solid var(--mc,#FF2244)}
+.oq-card-corner.bl{bottom:3px;left:3px;border-bottom:1.5px solid var(--mc,#FF2244);border-left:1.5px solid var(--mc,#FF2244)}
+.oq-card-corner.br{bottom:3px;right:3px;border-bottom:1.5px solid var(--mc,#FF2244);border-right:1.5px solid var(--mc,#FF2244)}
+/* Active card pulse */
+@keyframes oqPulse{
+  0%,100%{box-shadow:0 0 18px var(--mc,#FF2244)22,inset 0 0 10px rgba(0,0,0,.2)}
+  50%{box-shadow:0 0 32px var(--mc,#FF2244)44,0 0 60px var(--mc,#FF2244)18,inset 0 0 14px rgba(0,0,0,.3)}
+}
 .oq-card-meta{
   margin-top:.35rem;font-family:'Barlow',sans-serif;
   font-size:9px;color:rgba(255,255,255,.16);line-height:1.35;transition:color .2s;
@@ -472,8 +520,26 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 .oq-content{
   flex:1;padding:.15rem 1.5rem 1.5rem;
   animation:oqContentIn .22s ease both;
+  position:relative;
 }
 @keyframes oqContentIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+/* Sweep line */
+.oq-sweep{
+  position:absolute;left:24px;right:24px;height:1px;top:0;
+  background:linear-gradient(90deg,transparent 0%,var(--mc,#FF2244) 40%,rgba(255,255,255,.8) 50%,var(--mc,#FF2244) 60%,transparent 100%);
+  opacity:0;pointer-events:none;z-index:2;
+  animation:oqSweep 4s ease-in-out 0.3s infinite;
+}
+@keyframes oqSweep{0%{top:0;opacity:0}4%{opacity:.6}96%{opacity:.25}100%{top:100%;opacity:0}}
+/* Flash overlay on stage switch */
+.oq-flash{
+  position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:var(--mc,#FF2244);
+  animation:oqFlashAnim .35s ease-out forwards;
+}
+@keyframes oqFlashAnim{0%{opacity:.18}100%{opacity:0}}
+/* Staggered slot reveal */
+@keyframes oqSlotIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .oq-stage-info{
   margin-bottom:.9rem;padding:.5rem .7rem;
   border-left:2px solid;background:rgba(255,255,255,.025);
@@ -1320,7 +1386,7 @@ function buildOQStageContentHTML(stage, color) {
   const oqSlots = total - invites;
   let slotsHTML = '';
   for (let i = 0; i < invites; i++) {
-    slotsHTML += `<div class="team-slot oq-slot" style="border-color:${color}44">
+    slotsHTML += `<div class="team-slot oq-slot" style="border-color:${color}44;animation:oqSlotIn .25s ease ${i*0.05}s both">
       <div class="team-logo" style="border:1px solid ${color}66;font-size:10px;color:${color}cc">✦</div>
       <div class="team-info">
         <div class="team-abbr" style="color:rgba(255,255,255,.32)">TBD</div>
@@ -1328,14 +1394,15 @@ function buildOQStageContentHTML(stage, color) {
       </div></div>`;
   }
   for (let i = 0; i < oqSlots; i++) {
-    slotsHTML += `<div class="team-slot oq-slot">
+    slotsHTML += `<div class="team-slot oq-slot" style="animation:oqSlotIn .25s ease ${(invites+i)*0.04}s both">
       <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
       <div class="team-info">
         <div class="team-abbr" style="color:rgba(255,255,255,.2)">TBD</div>
         <div class="oq-badge">Open Qualifier</div>
       </div></div>`;
   }
-  return `<div class="oq-stage-info" style="border-left-color:${color}">${stage.desc}${invTag}</div>
+  return `<div class="oq-sweep"></div>
+    <div class="oq-stage-info" style="border-left-color:${color}">${stage.desc}${invTag}</div>
     <div class="oq-teams-label">PARTICIPATING TEAMS</div>
     <div class="teams-grid">${slotsHTML}</div>`;
 }
@@ -1344,12 +1411,23 @@ function buildOQPanelHTML(data, color, activeIdx) {
   let flowHTML = '';
   data.stages.forEach((s, i) => {
     const act = i === activeIdx;
-    if (i > 0) flowHTML += `<div class="oq-stage-conn">▶</div>`;
-    flowHTML += `<div class="oq-stage-card${act?' active':''}" data-stageidx="${i}"
-      style="${act?`border-color:${color};box-shadow:0 0 18px ${color}22,inset 0 0 10px rgba(0,0,0,.2)`:''}">
+    if (i > 0) {
+      flowHTML += `<div class="oq-stage-conn">
+        <div class="oq-conn-line"></div>
+        <div class="oq-conn-dot" style="background:${color};box-shadow:0 0 5px ${color}"></div>
+      </div>`;
+    }
+    const actStyle = act
+      ? `border-color:${color};animation:oqPulse 2.8s ease-in-out infinite;--mc:${color}`
+      : `--mc:${color}`;
+    flowHTML += `<div class="oq-stage-card${act?' active':''}" data-stageidx="${i}" style="${actStyle}">
       <div class="oq-card-top" style="background:${color}"></div>
       <div class="oq-card-scan"></div>
       <div class="oq-card-shimmer"></div>
+      <div class="oq-card-corner tl"></div>
+      <div class="oq-card-corner tr"></div>
+      <div class="oq-card-corner bl"></div>
+      <div class="oq-card-corner br"></div>
       <div class="oq-card-num">
         <div class="oq-card-num-dot" style="background:${color}"></div>
         ${String(i+1).padStart(2,'0')}
@@ -1364,7 +1442,7 @@ function buildOQPanelHTML(data, color, activeIdx) {
       <div class="oq-structure-label">TOURNAMENT STRUCTURE</div>
       <div class="oq-stage-flow">${flowHTML}</div>
     </div>
-    <div class="oq-content" id="oqContent">${buildOQStageContentHTML(data.stages[activeIdx], color)}</div>
+    <div class="oq-content" id="oqContent" style="--mc:${color}">${buildOQStageContentHTML(data.stages[activeIdx], color)}</div>
   </div>`;
 }
 
@@ -1376,17 +1454,30 @@ function bindOQStageEvents(data, color) {
       tv.querySelectorAll('.oq-stage-card').forEach((c, i) => {
         const act = i === idx;
         c.classList.toggle('active', act);
-        c.style.borderColor   = act ? color : '';
-        c.style.boxShadow     = act ? `0 0 18px ${color}22,inset 0 0 10px rgba(0,0,0,.2)` : '';
+        if (act) {
+          c.style.borderColor = color;
+          c.style.animation   = `oqPulse 2.8s ease-in-out infinite`;
+        } else {
+          c.style.borderColor = '';
+          c.style.animation   = '';
+        }
         const ghost = c.querySelector('.oq-card-ghost');
         ghost.style.color   = act ? color : '';
         ghost.style.opacity = act ? '.1'  : '';
       });
       const oqC = document.getElementById('oqContent');
+      /* Flash overlay */
+      const flash = document.createElement('div');
+      flash.className = 'oq-flash';
+      flash.style.setProperty('--mc', color);
+      oqC.appendChild(flash);
+      setTimeout(() => flash.remove(), 400);
+      /* Content refresh */
       oqC.style.animation = 'none';
       void oqC.offsetHeight;
       oqC.style.animation = '';
       oqC.innerHTML = buildOQStageContentHTML(data.stages[idx], color);
+      oqC.style.setProperty('--mc', color);
     });
   });
 }
