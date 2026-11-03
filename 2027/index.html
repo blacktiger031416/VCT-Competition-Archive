@@ -388,6 +388,13 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   padding:.3rem 0;cursor:pointer;transition:all .15s;
 }
 .rp-add-btn:hover{background:rgba(255,34,68,.08);border-color:rgba(255,34,68,.3);color:rgba(255,34,68,.7)}
+.rp-move-btn{
+  background:none;border:1px solid rgba(255,255,255,.1);border-radius:2px;cursor:pointer;
+  color:rgba(255,255,255,.28);font-size:11px;padding:2px 5px;
+  transition:all .12s;line-height:1;flex-shrink:0;font-family:monospace;
+}
+.rp-move-btn:hover{border-color:var(--rp-accent-full,#FF2244);color:var(--rp-accent-full,#FF2244);background:rgba(255,34,68,.06)}
+.rp-bench-num{opacity:.4}
 </style>
 </head>
 <body>
@@ -849,10 +856,17 @@ function rpLoadRoster(abbr) {
         d.스태프 = [].concat(d.감독||[], d.코치||[], d.기타||[]);
         delete d.감독; delete d.코치; delete d.기타;
       }
+      /* players 6번째~를 bench로 분리 마이그레이션 */
+      if (!d.bench) {
+        d.bench = d.players.slice(5);
+        d.players = d.players.slice(0, 5);
+      }
       return d;
     }
   } catch(e) {}
-  return CN_OQ_ROSTERS[abbr] || {players:[],스태프:[]};
+  const base = CN_OQ_ROSTERS[abbr] || {players:[],스태프:[]};
+  if (!base.bench) { base.bench = base.players.slice(5); base.players = base.players.slice(0,5); }
+  return base;
 }
 
 function rpSaveRoster(abbr, data) {
@@ -864,6 +878,13 @@ function rpPlayerRowHTML(r, i) {
   return `<div class="rp-player-row">
     <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
     <span class="rp-ign">${r.ign || ''}</span>
+    ${r.real ? `<span class="rp-real-name">${r.real}</span>` : ''}
+  </div>`;
+}
+function rpBenchRowHTML(r, i) {
+  return `<div class="rp-player-row">
+    <span class="rp-num rp-bench-num">${String(i+1).padStart(2,'0')}</span>
+    <span class="rp-ign" style="opacity:.65">${r.ign || ''}</span>
     ${r.real ? `<span class="rp-real-name">${r.real}</span>` : ''}
   </div>`;
 }
@@ -881,7 +902,17 @@ function rpPlayerEditHTML(r, i, sectionKey) {
     <span class="rp-num">${String(i+1).padStart(2,'0')}</span>
     <input class="rp-edit-input rp-ign-input" data-field="ign" placeholder="IGN" value="${r.ign||''}">
     <input class="rp-edit-input rp-real-input" data-field="real" placeholder="실명" value="${r.real||''}">
+    <button class="rp-move-btn" data-idx="${i}" data-dir="toBench" title="후보로 이동">↓</button>
     <button class="rp-del-btn" data-section="${sectionKey}" data-idx="${i}" title="삭제">✕</button>
+  </div>`;
+}
+function rpBenchEditHTML(r, i) {
+  return `<div class="rp-player-row rp-edit-row" data-section="bench" data-idx="${i}">
+    <span class="rp-num rp-bench-num">${String(i+1).padStart(2,'0')}</span>
+    <input class="rp-edit-input rp-ign-input" data-field="ign" placeholder="IGN" value="${r.ign||''}">
+    <input class="rp-edit-input rp-real-input" data-field="real" placeholder="실명" value="${r.real||''}">
+    <button class="rp-move-btn" data-idx="${i}" data-dir="toRoster" title="로스터로 이동">↑</button>
+    <button class="rp-del-btn" data-section="bench" data-idx="${i}" title="삭제">✕</button>
   </div>`;
 }
 function rpStaffEditHTML(r, i, sectionKey) {
@@ -914,11 +945,34 @@ function rpRender(abbr) {
   const r = rpLoadRoster(abbr);
   const admin = isAdmin();
   const body = document.getElementById('rpBody');
-  body.innerHTML =
-    rpSectionHTML('PLAYERS', 'players', r.players, admin, '') +
-    rpSectionHTML('STAFF',   '스태프',  r.스태프,  admin, '');
 
-  if (!body.innerHTML.trim()) {
+  /* PLAYERS 섹션 */
+  const pRows = r.players.map((p,i) =>
+    admin ? rpPlayerEditHTML(p,i,'players') : rpPlayerRowHTML(p,i)
+  ).join('');
+  const pAddBtn = admin ? `<button class="rp-add-btn" data-section="players">+ 추가</button>` : '';
+  const pEmpty = !r.players.length && !admin ? `<div class="rp-empty">등록된 항목 없음</div>` : '';
+  const playersSection = `<div class="rp-section">
+    <div class="rp-section-head"><span class="rp-section-icon"></span>PLAYERS</div>
+    ${pRows}${pEmpty}${pAddBtn}
+  </div>`;
+
+  /* BENCH 섹션 (후보) */
+  let benchSection = '';
+  if (r.bench.length > 0 || admin) {
+    const bRows = r.bench.map((p,i) =>
+      admin ? rpBenchEditHTML(p,i) : rpBenchRowHTML(p,i)
+    ).join('');
+    const bAddBtn = admin ? `<button class="rp-add-btn" data-section="bench">+ 추가</button>` : '';
+    benchSection = `<div class="rp-section">
+      <div class="rp-section-head"><span class="rp-section-icon"></span>BENCH</div>
+      ${bRows}${bAddBtn}
+    </div>`;
+  }
+
+  body.innerHTML = playersSection + benchSection + rpSectionHTML('STAFF','스태프',r.스태프,admin);
+
+  if (!r.players.length && !r.bench.length && !r.스태프.length) {
     body.innerHTML = '<div class="rp-empty" style="margin-top:2rem">등록된 로스터가 없습니다</div>';
   }
 
@@ -951,6 +1005,7 @@ function rpBindEditEvents(abbr) {
       const section = btn.dataset.section;
       const r = rpLoadRoster(abbr);
       if (section === 'players') r.players.push({ign:'',real:''});
+      else if (section === 'bench') r.bench.push({ign:'',real:''});
       else r.스태프.push({role:'',name:'',real:''});
       rpSaveRoster(abbr, r);
       rpRender(abbr);
@@ -958,6 +1013,25 @@ function rpBindEditEvents(abbr) {
       const rows = document.querySelectorAll(`[data-section="${section}"]`);
       const last = rows[rows.length-1];
       if (last) last.querySelector('input')?.focus();
+    });
+  });
+
+  /* 이동 버튼 (↓ 후보로 / ↑ 로스터로) */
+  body.querySelectorAll('.rp-move-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      rpFlushEdit(abbr); /* 현재 입력값 먼저 저장 */
+      const idx = parseInt(btn.dataset.idx);
+      const dir = btn.dataset.dir;
+      const r = rpLoadRoster(abbr);
+      if (dir === 'toBench') {
+        const [player] = r.players.splice(idx, 1);
+        r.bench.unshift(player);
+      } else {
+        const [player] = r.bench.splice(idx, 1);
+        r.players.push(player);
+      }
+      rpSaveRoster(abbr, r);
+      rpRender(abbr);
     });
   });
 }
