@@ -861,6 +861,10 @@ function rpLoadRoster(abbr) {
         d.bench = d.players.slice(5);
         d.players = d.players.slice(0, 5);
       }
+      /* 손상된 undefined/null 항목 제거 */
+      d.players = (d.players || []).filter(p => p != null);
+      d.bench   = (d.bench   || []).filter(p => p != null);
+      d.스태프  = (d.스태프  || []).filter(p => p != null);
       return d;
     }
   } catch(e) {}
