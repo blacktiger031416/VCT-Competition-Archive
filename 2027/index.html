@@ -395,6 +395,105 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 }
 .rp-move-btn:hover{border-color:var(--rp-accent-full,#FF2244);color:var(--rp-accent-full,#FF2244);background:rgba(255,34,68,.06)}
 .rp-bench-num{opacity:.4}
+
+/* ── OQ Stage Panel ── */
+.oq-panel{display:flex;flex-direction:column;min-height:100%}
+.oq-stage-header{padding:1.2rem 1.5rem .8rem;flex-shrink:0}
+.oq-structure-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.18);display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;
+}
+.oq-structure-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.oq-stage-flow{display:flex;align-items:stretch}
+.oq-stage-conn{
+  display:flex;align-items:center;justify-content:center;
+  width:26px;flex-shrink:0;color:rgba(255,255,255,.15);font-size:9px;position:relative;
+}
+.oq-stage-conn::before{
+  content:'';position:absolute;left:0;right:0;top:50%;
+  height:1px;background:rgba(255,255,255,.07);
+}
+.oq-stage-card{
+  flex:1;min-width:0;background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.07);border-radius:3px;
+  padding:.8rem .65rem .55rem;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:background .2s,border-color .2s,box-shadow .2s;user-select:none;
+}
+.oq-stage-card:hover:not(.active){background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14)}
+.oq-card-top{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .34s cubic-bezier(.4,0,.2,1);
+}
+.oq-stage-card.active .oq-card-top{transform:scaleX(1)}
+.oq-card-scan{
+  position:absolute;left:0;right:0;height:3px;top:-3px;
+  background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.1),rgba(255,255,255,0));
+  opacity:0;pointer-events:none;
+}
+.oq-stage-card.active .oq-card-scan{animation:oqCardScan 3.2s ease-in-out .3s infinite}
+@keyframes oqCardScan{0%{top:-3px;opacity:0}5%{opacity:1}95%{opacity:.5}100%{top:100%;opacity:0}}
+.oq-card-shimmer{
+  position:absolute;top:0;left:-100%;width:45%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);
+  pointer-events:none;
+}
+.oq-stage-card.active .oq-card-shimmer{animation:oqShimmer 3s ease-in-out .6s infinite}
+@keyframes oqShimmer{0%,100%{left:-55%}55%{left:115%}}
+.oq-card-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:.2em;
+  color:rgba(255,255,255,.18);margin-bottom:.25rem;
+  display:flex;align-items:center;gap:.3rem;
+}
+.oq-card-num-dot{width:4px;height:4px;border-radius:50%;opacity:0;transition:opacity .2s;flex-shrink:0}
+.oq-stage-card.active .oq-card-num-dot{opacity:1}
+.oq-card-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+  color:rgba(255,255,255,.42);line-height:1.2;transition:color .2s;
+}
+.oq-stage-card.active .oq-card-name{color:#fff}
+.oq-card-meta{
+  margin-top:.35rem;font-family:'Barlow',sans-serif;
+  font-size:9px;color:rgba(255,255,255,.16);line-height:1.35;transition:color .2s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.oq-stage-card.active .oq-card-meta{color:rgba(255,255,255,.34)}
+.oq-card-ghost{
+  position:absolute;right:4px;bottom:-8px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:46px;font-weight:900;
+  color:rgba(255,255,255,.028);letter-spacing:-.02em;
+  pointer-events:none;line-height:1;transition:color .2s,opacity .2s;
+}
+.oq-content{
+  flex:1;padding:.15rem 1.5rem 1.5rem;
+  animation:oqContentIn .22s ease both;
+}
+@keyframes oqContentIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.oq-stage-info{
+  margin-bottom:.9rem;padding:.5rem .7rem;
+  border-left:2px solid;background:rgba(255,255,255,.025);
+  border-radius:0 2px 2px 0;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:.04em;color:rgba(255,255,255,.32);line-height:1.65;
+}
+.oq-invite-tag{
+  display:inline-block;vertical-align:middle;margin-left:.4rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.42);
+  border:1px solid rgba(255,255,255,.12);padding:1px 5px;border-radius:2px;
+}
+.oq-teams-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.18);
+  display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;
+}
+.oq-teams-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
 </style>
 </head>
 <body>
@@ -778,8 +877,25 @@ function openModal(p, phaseKey) {
   }
 
   /* Team slots */
+  const tv = document.getElementById('teamsView');
+  if (!document.getElementById('mTeamsGrid')) {
+    tv.innerHTML = '<div class="modal-section-label">Participating Teams</div>' +
+      '<div class="teams-grid" id="mTeamsGrid"></div>';
+  }
   const grid = document.getElementById('mTeamsGrid');
   grid.innerHTML = '';
+
+  /* Non-CN KickOff OQ → 스테이지 패널 */
+  if (phaseKey === 'kickoff-oq' && p.id !== 'cn') {
+    const oqData = OQ_STAGE_DATA[p.id];
+    if (oqData) {
+      tv.innerHTML = buildOQPanelHTML(oqData, color, 0);
+      bindOQStageEvents(oqData, color);
+      overlay.classList.remove('closing');
+      overlay.classList.add('open');
+      return;
+    }
+  }
 
   if (p.teams && p.teams.length) {
     /* Partner teams */
@@ -1134,6 +1250,146 @@ document.querySelectorAll('.phase-btn').forEach(btn => {
     renderPins(currentPhase);
   });
 });
+
+/* ── OQ Stage Panel 데이터 & 렌더 ── */
+const OQ_STAGE_DATA = (function(){
+  const ams2 = ()=>[
+    {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,    desc:'서브리전 모든 팀이 참가하는 오픈 브래킷.'},
+    {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청팀 + OQ 통과팀',         invites:'TBA',desc:'초청팀 미발표 — OQ 통과팀과 대결<br>1위 팀 → KickOff 진출'},
+  ];
+  return {
+    na:    {stages:ams2()},
+    lan:   {stages:ams2()},
+    brazil:{stages:ams2()},
+    las:   {stages:ams2()},
+    eu:{stages:[
+      {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.'},
+      {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff'},
+      {key:'playoff',name:'PLAYOFF', meta:'8팀 · 2조 · 조별 1위',invites:0,desc:'2개조 편성 — 각 조 1위, 총 2팀 → KickOff'},
+    ]},
+    tr:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'OQ 통과팀이 Playoff에 진출합니다.'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청 4팀 + OQ 통과팀',       invites:4,desc:'초청팀 4팀 + OQ 통과팀<br>1위 팀 → KickOff 진출'},
+    ]},
+    mena:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'초청팀 없음 — 오픈 브래킷만 진행.'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'OQ 통과팀만 참가 (초청 없음)',invites:0,desc:'초청팀 없음 — OQ 진출팀만 참가<br>1위 팀 → KickOff 진출'},
+    ]},
+    kr:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'OQ 통과팀이 Playoff에 진출합니다.'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청 4팀 + OQ 통과팀',       invites:4,desc:'초청팀 4팀 + OQ 통과팀<br>1위 팀 → KickOff 진출'},
+    ]},
+    jp:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'OQ 통과팀이 Playoff에 진출합니다.'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청 2팀 + OQ 통과팀',       invites:2,desc:'초청팀 2팀 + OQ 통과팀<br>1위 팀 → KickOff 진출'},
+    ]},
+    id:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1위 SEA 진출', invites:0,desc:'1위 팀이 SEA Playoff에 진출합니다.'},
+      {key:'sea',    name:'SEA<br>PLAYOFF',    meta:'8팀 · 초청 2팀',             invites:2,desc:'ID 1위, VN 1위, TH 1·2위, RoSEA 1·2위 + 초청 2팀<br>1위 → KickOff · 2위 → LCQ'},
+    ]},
+    vn:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1위 SEA 진출', invites:0,desc:'1위 팀이 SEA Playoff에 진출합니다.'},
+      {key:'sea',    name:'SEA<br>PLAYOFF',    meta:'8팀 · 초청 2팀',             invites:2,desc:'ID 1위, VN 1위, TH 1·2위, RoSEA 1·2위 + 초청 2팀<br>1위 → KickOff · 2위 → LCQ'},
+    ]},
+    th:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1·2위 SEA 진출',invites:0,desc:'1·2위 팀이 SEA Playoff에 진출합니다.'},
+      {key:'sea',    name:'SEA<br>PLAYOFF',    meta:'8팀 · 초청 2팀',              invites:2,desc:'ID 1위, VN 1위, TH 1·2위, RoSEA 1·2위 + 초청 2팀<br>1위 → KickOff · 2위 → LCQ'},
+    ]},
+    sea:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1·2위 SEA 진출',invites:0,desc:'1·2위 팀이 SEA Playoff에 진출합니다. (RoSEA)'},
+      {key:'sea',    name:'SEA<br>PLAYOFF',    meta:'8팀 · 초청 2팀',              invites:2,desc:'ID 1위, VN 1위, TH 1·2위, RoSEA 1·2위 + 초청 2팀<br>1위 → KickOff · 2위 → LCQ'},
+    ]},
+    sa:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1·2위 LCQ 진출',invites:0,desc:'1·2위 팀이 LCQ에 진출합니다.'},
+      {key:'lcq',    name:'LAST CHANCE<br>QUALIFIER',meta:'4팀 · 초청 없음',       invites:0,desc:'SA 1·2위 + OCE 1위 + SEA Playoff 2위<br>초청팀 없음 — 1위 팀 → KickOff'},
+    ]},
+    oce:{stages:[
+      {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · 1위 LCQ 진출', invites:0,desc:'1위 팀이 LCQ에 진출합니다.'},
+      {key:'lcq',    name:'LAST CHANCE<br>QUALIFIER',meta:'4팀 · 초청 없음',       invites:0,desc:'SA 1·2위 + OCE 1위 + SEA Playoff 2위<br>초청팀 없음 — 1위 팀 → KickOff'},
+    ]},
+  };
+})();
+
+function buildOQStageContentHTML(stage, color) {
+  const invites = typeof stage.invites === 'number' ? stage.invites : 0;
+  const invTag  = stage.invites === 'TBA'
+    ? '<span class="oq-invite-tag">INVITES TBA</span>'
+    : invites > 0 ? `<span class="oq-invite-tag">${invites} INVITED</span>` : '';
+  const totals = {oq:16, swiss:16, playoff:8, sea:8, lcq:4};
+  const total  = totals[stage.key] ?? 16;
+  const oqSlots = total - invites;
+  let slotsHTML = '';
+  for (let i = 0; i < invites; i++) {
+    slotsHTML += `<div class="team-slot oq-slot" style="border-color:${color}44">
+      <div class="team-logo" style="border:1px solid ${color}66;font-size:10px;color:${color}cc">✦</div>
+      <div class="team-info">
+        <div class="team-abbr" style="color:rgba(255,255,255,.32)">TBD</div>
+        <div class="oq-badge" style="color:${color}cc">INVITED</div>
+      </div></div>`;
+  }
+  for (let i = 0; i < oqSlots; i++) {
+    slotsHTML += `<div class="team-slot oq-slot">
+      <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
+      <div class="team-info">
+        <div class="team-abbr" style="color:rgba(255,255,255,.2)">TBD</div>
+        <div class="oq-badge">Open Qualifier</div>
+      </div></div>`;
+  }
+  return `<div class="oq-stage-info" style="border-left-color:${color}">${stage.desc}${invTag}</div>
+    <div class="oq-teams-label">PARTICIPATING TEAMS</div>
+    <div class="teams-grid">${slotsHTML}</div>`;
+}
+
+function buildOQPanelHTML(data, color, activeIdx) {
+  let flowHTML = '';
+  data.stages.forEach((s, i) => {
+    const act = i === activeIdx;
+    if (i > 0) flowHTML += `<div class="oq-stage-conn">▶</div>`;
+    flowHTML += `<div class="oq-stage-card${act?' active':''}" data-stageidx="${i}"
+      style="${act?`border-color:${color};box-shadow:0 0 18px ${color}22,inset 0 0 10px rgba(0,0,0,.2)`:''}">
+      <div class="oq-card-top" style="background:${color}"></div>
+      <div class="oq-card-scan"></div>
+      <div class="oq-card-shimmer"></div>
+      <div class="oq-card-num">
+        <div class="oq-card-num-dot" style="background:${color}"></div>
+        ${String(i+1).padStart(2,'0')}
+      </div>
+      <div class="oq-card-name">${s.name}</div>
+      <div class="oq-card-meta">${s.meta}</div>
+      <div class="oq-card-ghost" style="${act?`color:${color};opacity:.1`:''}">${String(i+1).padStart(2,'0')}</div>
+    </div>`;
+  });
+  return `<div class="oq-panel">
+    <div class="oq-stage-header">
+      <div class="oq-structure-label">TOURNAMENT STRUCTURE</div>
+      <div class="oq-stage-flow">${flowHTML}</div>
+    </div>
+    <div class="oq-content" id="oqContent">${buildOQStageContentHTML(data.stages[activeIdx], color)}</div>
+  </div>`;
+}
+
+function bindOQStageEvents(data, color) {
+  const tv = document.getElementById('teamsView');
+  tv.querySelectorAll('.oq-stage-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.stageidx);
+      tv.querySelectorAll('.oq-stage-card').forEach((c, i) => {
+        const act = i === idx;
+        c.classList.toggle('active', act);
+        c.style.borderColor   = act ? color : '';
+        c.style.boxShadow     = act ? `0 0 18px ${color}22,inset 0 0 10px rgba(0,0,0,.2)` : '';
+        const ghost = c.querySelector('.oq-card-ghost');
+        ghost.style.color   = act ? color : '';
+        ghost.style.opacity = act ? '.1'  : '';
+      });
+      const oqC = document.getElementById('oqContent');
+      oqC.style.animation = 'none';
+      void oqC.offsetHeight;
+      oqC.style.animation = '';
+      oqC.innerHTML = buildOQStageContentHTML(data.stages[idx], color);
+    });
+  });
+}
 
 window.addEventListener('resize', () => {
   buildMap();
