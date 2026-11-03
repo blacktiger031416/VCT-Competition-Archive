@@ -1019,10 +1019,19 @@ function rpBindEditEvents(abbr) {
   /* 이동 버튼 (↓ 후보로 / ↑ 로스터로) */
   body.querySelectorAll('.rp-move-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      rpFlushEdit(abbr); /* 현재 입력값 먼저 저장 */
       const idx = parseInt(btn.dataset.idx);
       const dir = btn.dataset.dir;
+      /* 현재 입력값 읽기 + 이동을 한 번의 load/save로 처리 (이중 저장 방지) */
       const r = rpLoadRoster(abbr);
+      body.querySelectorAll('.rp-edit-row').forEach(row => {
+        const section = row.dataset.section;
+        const rowIdx = parseInt(row.dataset.idx);
+        const obj = r[section]?.[rowIdx];
+        if (!obj) return;
+        row.querySelectorAll('.rp-edit-input').forEach(inp => {
+          obj[inp.dataset.field] = inp.value.trim();
+        });
+      });
       if (dir === 'toBench') {
         const [player] = r.players.splice(idx, 1);
         r.bench.unshift(player);
