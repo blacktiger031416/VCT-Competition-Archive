@@ -1061,6 +1061,15 @@ function openModal(p, phaseKey) {
     }
   }
 
+  /* Masters / Cups → 권역별 슬롯 패널 */
+  if (INTL_EVENT_DATA[phaseKey]) {
+    tv.innerHTML = buildIntlPanelHTML(INTL_EVENT_DATA[phaseKey], color);
+    bindIntlStageEvents(INTL_EVENT_DATA[phaseKey], color);
+    overlay.classList.remove('closing');
+    overlay.classList.add('open');
+    return;
+  }
+
   /* Remove old animation classes to retrigger */
   overlay.classList.remove('closing');
   overlay.classList.add('open');
@@ -1468,6 +1477,128 @@ const OQ_STAGE_DATA = (function(){
     ]},
   };
 })();
+
+/* ── 국제 대회 스테이지 데이터 ── */
+const RC = {
+  ams:{c:'#FF8C00',l:'AMERICAS'},
+  emea:{c:'#85E62C',l:'EMEA'},
+  pac:{c:'#00C8FF',l:'PACIFIC'},
+  cn:{c:'#FF2244',l:'CN'},
+};
+const _ms2 = (rank) => [
+  {rc:RC.ams,rank},{rc:RC.emea,rank},{rc:RC.pac,rank},{rc:RC.cn,rank}
+];
+const INTL_EVENT_DATA = {
+  'masters-seoul':{
+    title:'MASTERS SEOUL',
+    stages:[
+      {key:'swiss',  name:'SWISS<br>STAGE', meta:'각 권역 2·3위 · 8팀',
+        desc:'각 권역 KickOff <b>2·3위</b> 팀 — 총 8팀<br>상위 4팀 → Playoff 진출',
+        slots:[
+          {rc:RC.ams,rank:'KickOff 2위'},{rc:RC.ams,rank:'KickOff 3위'},
+          {rc:RC.emea,rank:'KickOff 2위'},{rc:RC.emea,rank:'KickOff 3위'},
+          {rc:RC.pac,rank:'KickOff 2위'},{rc:RC.pac,rank:'KickOff 3위'},
+          {rc:RC.cn, rank:'KickOff 2위'},{rc:RC.cn, rank:'KickOff 3위'},
+        ]},
+      {key:'playoff',name:'PLAYOFF',       meta:'각 권역 1위 · 4팀',
+        desc:'각 권역 KickOff <b>1위</b> 팀 — 총 4팀<br>직행 Playoff 진출',
+        slots:_ms2('KickOff 1위')},
+    ]},
+};
+
+function buildIntlSlotHTML(slots, color, offset) {
+  return slots.map((s, i) => {
+    const rc = s.rc;
+    return `<div class="team-slot oq-slot" style="
+        border-color:${rc.c}33;
+        animation:oqSlotIn .28s ease ${(offset+i)*0.04}s both">
+      <div class="team-logo" style="border:1px solid ${rc.c}66;background:${rc.c}11;font-size:10px;color:${rc.c}">■</div>
+      <div class="team-info" style="min-width:0">
+        <div class="team-abbr" style="color:rgba(255,255,255,.25)">TBD</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+          letter-spacing:.06em;color:${rc.c}99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${rc.l} · ${s.rank}</div>
+      </div></div>`;
+  }).join('');
+}
+
+function buildIntlStageContentHTML(stage, color) {
+  const slots = stage.slots || [];
+  return `<div class="oq-sweep" style="--mc:${color}"></div>
+    <div class="oq-stage-info" style="border-left-color:${color}">${stage.desc}</div>
+    <div class="oq-teams-label">PARTICIPATING TEAMS</div>
+    <div class="teams-grid" id="intlGrid">${buildIntlSlotHTML(slots, color, 0)}</div>`;
+}
+
+function buildIntlPanelHTML(data, color, activeIdx=0) {
+  let flowHTML = '';
+  data.stages.forEach((s, i) => {
+    const act = i === activeIdx;
+    if (i > 0) {
+      flowHTML += `<div class="oq-stage-conn">
+        <div class="oq-conn-line"></div>
+        <div class="oq-conn-dot" style="background:${color};box-shadow:0 0 5px ${color}"></div>
+      </div>`;
+    }
+    const actStyle = act
+      ? `border-color:${color};animation:oqPulse 2.8s ease-in-out infinite;--mc:${color}`
+      : `--mc:${color}`;
+    flowHTML += `<div class="oq-stage-card${act?' active':''}" data-stageidx="${i}" style="${actStyle}">
+      <div class="oq-card-top" style="background:${color}"></div>
+      <div class="oq-card-scan"></div>
+      <div class="oq-card-shimmer"></div>
+      <div class="oq-card-corner tl"></div>
+      <div class="oq-card-corner tr"></div>
+      <div class="oq-card-corner bl"></div>
+      <div class="oq-card-corner br"></div>
+      <div class="oq-card-num">
+        <div class="oq-card-num-dot" style="background:${color}"></div>
+        ${String(i+1).padStart(2,'0')}
+      </div>
+      <div class="oq-card-name">${s.name}</div>
+      <div class="oq-card-meta">${s.meta}</div>
+      <div class="oq-card-ghost" style="${act?`color:${color};opacity:.1`:''}">${String(i+1).padStart(2,'0')}</div>
+    </div>`;
+  });
+  return `<div class="oq-panel">
+    <div class="oq-stage-header" style="--mc:${color}">
+      <div class="oq-structure-label">TOURNAMENT STRUCTURE</div>
+      <div class="oq-stage-flow">${flowHTML}</div>
+    </div>
+    <div class="oq-content" id="intlContent" style="--mc:${color}">
+      ${buildIntlStageContentHTML(data.stages[activeIdx], color)}
+    </div>
+  </div>`;
+}
+
+function bindIntlStageEvents(data, color) {
+  const tv = document.getElementById('teamsView');
+  tv.querySelectorAll('.oq-stage-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.stageidx);
+      tv.querySelectorAll('.oq-stage-card').forEach((c, i) => {
+        const act = i === idx;
+        c.classList.toggle('active', act);
+        c.style.borderColor = act ? color : '';
+        c.style.animation   = act ? `oqPulse 2.8s ease-in-out infinite` : '';
+        const ghost = c.querySelector('.oq-card-ghost');
+        ghost.style.color   = act ? color : '';
+        ghost.style.opacity = act ? '.1'  : '';
+      });
+      const cnt = document.getElementById('intlContent');
+      const flash = document.createElement('div');
+      flash.className = 'oq-flash';
+      flash.style.setProperty('--mc', color);
+      cnt.appendChild(flash);
+      setTimeout(() => flash.remove(), 400);
+      cnt.style.animation = 'none';
+      void cnt.offsetHeight;
+      cnt.style.animation = '';
+      cnt.innerHTML = buildIntlStageContentHTML(data.stages[idx], color);
+      cnt.style.setProperty('--mc', color);
+    });
+  });
+}
 
 /* KickOff 지역별 OQ 진출팀 수 (파트너 외) */
 const KICKOFF_OQ_SLOTS = {americas:4, emea:4, pacific:4, cn:4};
