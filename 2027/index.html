@@ -561,6 +561,42 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
   display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;
 }
 .oq-teams-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+
+/* ── CN OQ Panel ── */
+.cn-oq-panel{display:flex;flex-direction:column;min-height:100%}
+.cn-oq-header{
+  padding:1.1rem 1.5rem .8rem;flex-shrink:0;position:relative;overflow:hidden;
+  background:
+    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.cn-oq-header-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.18);display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;
+}
+.cn-oq-header-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.cn-oq-desc{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.04em;
+  color:rgba(255,255,255,.32);line-height:1.6;padding:.45rem .65rem;
+  border-left:2px solid var(--mc,#FF2244);
+  background:rgba(255,255,255,.025);border-radius:0 2px 2px 0;
+}
+.cn-oq-content{
+  flex:1;padding:.15rem 1.5rem 1.5rem;position:relative;
+  animation:oqContentIn .22s ease both;
+}
+.cn-slot-partner{
+  border-color:var(--mc,#FF2244)33!important;
+  animation:oqSlotIn .28s ease both;
+}
+.cn-slot-partner:hover{
+  background:rgba(255,255,255,.07)!important;
+  border-color:var(--mc,#FF2244)66!important;
+  box-shadow:0 0 10px var(--mc,#FF2244)18;
+}
+.cn-slot-oq{animation:oqSlotIn .28s ease both}
 </style>
 </head>
 <body>
@@ -964,12 +1000,22 @@ function openModal(p, phaseKey) {
     }
   }
 
+  /* CN KickOff OQ → 화려한 CN 패널 */
+  if (phaseKey === 'kickoff-oq' && p.id === 'cn' && p.teams && p.teams.length) {
+    tv.innerHTML = buildCNOQPanelHTML(p, color);
+    tv.querySelectorAll('.cn-slot-partner').forEach((slot, i) => {
+      slot.addEventListener('click', () => openRosterPanel(p.teams[i]));
+    });
+    overlay.classList.remove('closing');
+    overlay.classList.add('open');
+    return;
+  }
+
   if (p.teams && p.teams.length) {
-    /* Partner teams */
-    const isOQCN = (phaseKey === 'kickoff-oq' && p.id === 'cn');
+    /* Partner teams (non-CN) */
     p.teams.forEach(t => {
       const slot = document.createElement('div');
-      slot.className = 'team-slot partner' + (isOQCN ? ' clickable' : '');
+      slot.className = 'team-slot partner';
       slot.innerHTML = `
         <div class="team-logo">
           <img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">
@@ -978,12 +1024,8 @@ function openModal(p, phaseKey) {
           <div class="team-abbr">${t.abbr}</div>
           <div class="team-fullname">${t.name}</div>
         </div>`;
-      if (isOQCN) {
-        slot.addEventListener('click', () => openRosterPanel(t));
-      }
       grid.appendChild(slot);
     });
-    /* OQ placeholder slots */
     const oqCount = 12 - p.teams.length;
     for (let i = 0; i < oqCount; i++) {
       const slot = document.createElement('div');
@@ -1418,6 +1460,43 @@ const OQ_STAGE_DATA = (function(){
     ]},
   };
 })();
+
+function buildCNOQPanelHTML(p, color) {
+  const teams = p.teams || [];
+  const oqCount = Math.max(0, 13 - teams.length);
+  let slotsHTML = '';
+  teams.forEach((t, i) => {
+    slotsHTML += `<div class="team-slot partner clickable cn-slot-partner" data-teamidx="${i}"
+        style="--mc:${color};animation-delay:${i*0.04}s">
+      <div class="team-logo"><img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'"></div>
+      <div class="team-info">
+        <div class="team-abbr">${t.abbr}</div>
+        <div class="team-fullname">${t.name}</div>
+      </div></div>`;
+  });
+  for (let i = 0; i < oqCount; i++) {
+    slotsHTML += `<div class="team-slot oq-slot cn-slot-oq" style="animation-delay:${(teams.length+i)*0.04}s">
+      <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
+      <div class="team-info">
+        <div class="team-abbr" style="color:rgba(255,255,255,.25)">TBD</div>
+        <div class="oq-badge">Open Qualifier</div>
+      </div></div>`;
+  }
+  return `<div class="cn-oq-panel">
+    <div class="cn-oq-header" style="--mc:${color}">
+      <div class="cn-oq-header-label">TOURNAMENT STRUCTURE</div>
+      <div class="cn-oq-desc" style="border-left-color:${color}">
+        파트너 팀 ${teams.length}팀 + OQ 통과팀으로 구성<br>
+        상위 팀 → KickOff 본선 진출 · <span style="color:${color}99">팀 클릭 시 로스터 확인</span>
+      </div>
+    </div>
+    <div class="cn-oq-content" style="--mc:${color}">
+      <div class="oq-sweep" style="--mc:${color}"></div>
+      <div class="oq-teams-label">PARTICIPATING TEAMS</div>
+      <div class="teams-grid" id="cnOQGrid">${slotsHTML}</div>
+    </div>
+  </div>`;
+}
 
 function buildOQStageContentHTML(stage, color) {
   const invites = typeof stage.invites === 'number' ? stage.invites : 0;
