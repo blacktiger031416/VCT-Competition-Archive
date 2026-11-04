@@ -562,30 +562,6 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 }
 .oq-teams-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
 
-/* ── MENA Bracket Panel ── */
-.mena-bracket{display:flex;flex-direction:column;gap:.6rem;width:100%}
-.mena-section-title{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.25rem}
-.mena-pair{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
-.mena-slot{display:flex;align-items:center;gap:.45rem;padding:.4rem .55rem;border:1px solid rgba(255,255,255,.08);border-radius:4px;background:rgba(255,255,255,.02)}
-.mena-slot-logo{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px}
-.mena-slot-info{min-width:0}
-.mena-slot-tbd{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.22)}
-.mena-slot-sub{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:600;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mena-arrow-down{display:flex;flex-direction:column;align-items:center;gap:2px;padding:.1rem 0}
-.mena-arrow-down span{width:1px;height:8px;display:block}
-.mena-arrow-down::after{content:'▼';font-size:7px}
-.mena-decider{padding:.45rem .7rem;border:1px solid;border-radius:4px;background:rgba(0,0,0,.2);display:flex;justify-content:space-between;align-items:center;animation:oqSlotIn .28s ease both}
-.mena-decider-name{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
-.mena-decider-hint{font-size:9px;color:rgba(255,255,255,.18)}
-.mena-vsep{display:flex;align-items:center;gap:.5rem;margin:.1rem 0}
-.mena-vsep-line{flex:1;height:1px;background:rgba(255,255,255,.05)}
-.mena-vsep-label{font-family:'Barlow Condensed',sans-serif;font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.12)}
-.mena-final{padding:.65rem .9rem;border:1px solid;border-radius:4px;background:rgba(0,0,0,.35);position:relative;overflow:hidden;animation:oqSlotIn .28s ease .2s both}
-.mena-final-bar{position:absolute;top:0;left:0;right:0;height:2px}
-.mena-final-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
-.mena-final-sub{font-size:9px;color:rgba(255,255,255,.2);margin:.15rem 0 .4rem}
-.mena-final-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;padding:3px 10px;border-radius:3px;display:inline-block}
-
 /* ── CN OQ Panel ── */
 .cn-oq-panel{display:flex;flex-direction:column;min-height:100%}
 .cn-oq-header{
@@ -1011,14 +987,6 @@ function openModal(p, phaseKey) {
   }
   const grid = document.getElementById('mTeamsGrid');
   grid.innerHTML = '';
-
-  /* MENA KickOff OQ → 브래킷 패널 */
-  if (phaseKey === 'kickoff-oq' && p.id === 'mena') {
-    tv.innerHTML = buildMENAOQPanelHTML(p, color);
-    overlay.classList.remove('closing');
-    overlay.classList.add('open');
-    return;
-  }
 
   /* Non-CN KickOff OQ → 스테이지 패널 */
   if (phaseKey === 'kickoff-oq' && p.id !== 'cn') {
@@ -1511,78 +1479,6 @@ const OQ_STAGE_DATA = (function(){
 })();
 
 /* ── MENA OQ 브래킷 패널 ── */
-function buildMENAOQPanelHTML(p, color) {
-  const slot = (label, sub, delay) => `
-    <div class="mena-slot" style="border-color:${color}33;animation:oqSlotIn .28s ease ${delay}s both">
-      <div class="mena-slot-logo" style="border:1px solid ${color}55;background:${color}11;color:${color}88">■</div>
-      <div class="mena-slot-info">
-        <div class="mena-slot-tbd">TBD</div>
-        <div class="mena-slot-sub" style="color:${color}88">${label}</div>
-        <div class="mena-slot-sub" style="color:rgba(255,255,255,.18)">${sub}</div>
-      </div>
-    </div>`;
-
-  const arrow = (c) => `
-    <div class="mena-arrow-down" style="color:${c}55">
-      <span style="background:${c}44"></span>
-    </div>`;
-
-  const decider = (name, delay) => `
-    <div class="mena-decider" style="border-color:${color}44;animation-delay:${delay}s">
-      <div class="mena-decider-name" style="color:${color}">${name}</div>
-      <div class="mena-decider-hint">승자 → 진출</div>
-    </div>`;
-
-  const sep = () => `
-    <div class="mena-vsep">
-      <div class="mena-vsep-line"></div>
-      <div class="mena-vsep-label">NEXT ROUND</div>
-      <div class="mena-vsep-line"></div>
-    </div>`;
-
-  return `<div class="oq-panel">
-    <div class="oq-stage-header" style="--mc:${color}">
-      <div class="oq-structure-label">TOURNAMENT STRUCTURE</div>
-      <div class="oq-stage-info" style="border-left-color:${color};margin-top:.4rem">
-        ME·NA 각 2개 Qualifier → Decider → <b style="color:${color}">MENA Qualifier Final</b> → KickOff 1팀 진출
-      </div>
-    </div>
-    <div class="oq-content" style="--mc:${color}">
-      <div class="oq-sweep" style="--mc:${color}"></div>
-      <div class="mena-bracket">
-
-        <div class="mena-section-title" style="color:${color}">MIDDLE EAST QUALIFIER</div>
-        <div class="mena-pair">
-          ${slot('ME Qualifier 1위','Group A',0)}
-          ${slot('ME Qualifier 1위','Group B',0.04)}
-        </div>
-        ${arrow(color)}
-        ${decider('Middle East Qualifier Decider', 0.08)}
-
-        ${sep()}
-
-        <div class="mena-section-title" style="color:${color}">NORTH AFRICA QUALIFIER</div>
-        <div class="mena-pair">
-          ${slot('NA Qualifier 1위','Group A',0.12)}
-          ${slot('NA Qualifier 1위','Group B',0.16)}
-        </div>
-        ${arrow(color)}
-        ${decider('North Africa Qualifier Decider', 0.2)}
-
-        ${sep()}
-
-        <div class="mena-final" style="border-color:${color};box-shadow:0 0 16px ${color}22">
-          <div class="mena-final-bar" style="background:${color}"></div>
-          <div class="mena-final-name" style="color:${color}">MENA Qualifier Final</div>
-          <div class="mena-final-sub">ME Decider 승자 vs NA Decider 승자</div>
-          <div class="mena-final-badge" style="background:${color}22;color:${color};border:1px solid ${color}55">→ KickOff 진출 1팀</div>
-        </div>
-
-      </div>
-    </div>
-  </div>`;
-}
-
 /* ── 국제 대회 스테이지 데이터 ── */
 const RC = {
   ams:{c:'#FF8C00',l:'AMERICAS'},
