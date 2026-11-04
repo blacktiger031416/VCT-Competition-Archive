@@ -1331,12 +1331,28 @@ const OQ_STAGE_DATA = (function(){
     las:   {stages:ams2()},
     eu:{stages:[
       {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.'},
-      {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff'},
+      {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff',
+        invitedTeams:[
+          {abbr:'SGE',  name:'Eintracht Frankfurt',  logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/SGE.png'},
+          {abbr:'JL',   name:'Joblife',               logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/JL.png'},
+          {abbr:'MDR',  name:'Mandatory',             logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MDR.png'},
+          {abbr:'UCAM', name:'UCAM Esports Club',     logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/UCAM.png'},
+          {abbr:'NAVI', name:'Natus Vincere',         logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/NAVI.png'},
+          {abbr:'MIR',  name:'MIR',                   logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MIR.png'},
+          {abbr:'EP',   name:'Enterprise Esports',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/EP.png'},
+          {abbr:'GX',   name:'GIANTX',                logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/GX.png'},
+        ]},
       {key:'playoff',name:'PLAYOFF', meta:'8팀 · 2조 · 조별 1위',invites:0,desc:'2개조 편성 — 각 조 1위, 총 2팀 → KickOff'},
     ]},
     tr:{stages:[
       {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'OQ 통과팀이 Playoff에 진출합니다.'},
-      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청 4팀 + OQ 통과팀',       invites:4,desc:'초청팀 4팀 + OQ 통과팀<br>1위 팀 → KickOff 진출'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청 4팀 + OQ 통과팀',       invites:4,desc:'초청팀 4팀 + OQ 통과팀<br>1위 팀 → KickOff 진출',
+        invitedTeams:[
+          {abbr:'EF',  name:'Eternal Fire',       logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/EF.png'},
+          {abbr:'PCF', name:'PACIFIC Esports',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/PCF.png'},
+          {abbr:'FF',  name:'Fire Flux Esports',  logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/FF.png'},
+          {abbr:'BJK', name:'Beşiktaş Esports',   logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/BJK.png'},
+        ]},
     ]},
     mena:{stages:[
       {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'초청팀 없음 — 오픈 브래킷만 진행.'},
@@ -1387,10 +1403,13 @@ function buildOQStageContentHTML(stage, color) {
   const oqSlots = total - invites;
   let slotsHTML = '';
   for (let i = 0; i < invites; i++) {
+    const t = stage.invitedTeams?.[i];
     slotsHTML += `<div class="team-slot oq-slot" style="border-color:${color}44;animation:oqSlotIn .25s ease ${i*0.05}s both">
-      <div class="team-logo" style="border:1px solid ${color}66;font-size:10px;color:${color}cc">✦</div>
+      <div class="team-logo" style="border:1px solid ${color}66${t?'':''}">
+        ${t ? `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span style="display:none;font-size:10px;color:${color}cc">✦</span>` : `<span style="font-size:10px;color:${color}cc">✦</span>`}
+      </div>
       <div class="team-info">
-        <div class="team-abbr" style="color:rgba(255,255,255,.32)">TBD</div>
+        <div class="team-abbr" style="color:${t?'rgba(255,255,255,.85)':'rgba(255,255,255,.32)'}">${t?t.abbr:'TBD'}</div>
         <div class="oq-badge" style="color:${color}cc">INVITED</div>
       </div></div>`;
   }
