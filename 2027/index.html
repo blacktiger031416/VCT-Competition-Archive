@@ -1485,6 +1485,7 @@ const RC = {
   emea:{c:'#85E62C',l:'EMEA'},
   pac:{c:'#00C8FF',l:'PACIFIC'},
   cn:{c:'#FF2244',l:'CN'},
+  ms:{c:'#A855F7',l:'SWISS STAGE'},
 };
 const _ms2 = (rank) => [
   {rc:RC.ams,rank},{rc:RC.emea,rank},{rc:RC.pac,rank},{rc:RC.cn,rank}
@@ -1501,9 +1502,13 @@ const INTL_EVENT_DATA = {
           {rc:RC.pac,rank:'KickOff 2위'},{rc:RC.pac,rank:'KickOff 3위'},
           {rc:RC.cn, rank:'KickOff 2위'},{rc:RC.cn, rank:'KickOff 3위'},
         ]},
-      {key:'playoff',name:'PLAYOFF',       meta:'각 권역 1위 · 4팀',
-        desc:'각 권역 KickOff <b>1위</b> 팀 — 총 4팀<br>직행 Playoff 진출',
-        slots:_ms2('KickOff 1위')},
+      {key:'playoff',name:'PLAYOFF',       meta:'KickOff 1위 4팀 + Swiss 2승 4팀',
+        desc:'각 권역 KickOff <b>1위</b> 직행 4팀 + Swiss Stage <b>2승</b> 진출 4팀 — 총 8팀',
+        slots:[
+          ...(_ms2('KickOff 1위')),
+          {rc:RC.ms,rank:'Swiss 2승 진출'},{rc:RC.ms,rank:'Swiss 2승 진출'},
+          {rc:RC.ms,rank:'Swiss 2승 진출'},{rc:RC.ms,rank:'Swiss 2승 진출'},
+        ]},
     ]},
 };
 
