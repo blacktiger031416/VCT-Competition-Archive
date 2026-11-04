@@ -1000,6 +1000,14 @@ function openModal(p, phaseKey) {
     }
   }
 
+  /* KickOff → 화려한 패널 */
+  if (phaseKey === 'kickoff' && p.teams && p.teams.length) {
+    tv.innerHTML = buildKickoffPanelHTML(p, color);
+    overlay.classList.remove('closing');
+    overlay.classList.add('open');
+    return;
+  }
+
   /* CN KickOff OQ → 화려한 CN 패널 */
   if (phaseKey === 'kickoff-oq' && p.id === 'cn' && p.teams && p.teams.length) {
     tv.innerHTML = buildCNOQPanelHTML(p, color);
@@ -1460,6 +1468,67 @@ const OQ_STAGE_DATA = (function(){
     ]},
   };
 })();
+
+/* KickOff 지역별 OQ 진출팀 수 (파트너 외) */
+const KICKOFF_OQ_SLOTS = {americas:4, emea:4, pacific:4, cn:4};
+
+function buildKickoffPanelHTML(p, color) {
+  const teams   = p.teams || [];
+  const oqCount = KICKOFF_OQ_SLOTS[p.id] ?? (12 - teams.length);
+
+  /* 서브리전 소속 표시용 색상 맵 */
+  const subColors = {
+    NA:'rgba(255,140,0,.55)', LAN:'rgba(255,140,0,.55)',
+    BR:'rgba(255,140,0,.55)', LAS:'rgba(255,140,0,.55)',
+    EU:'rgba(133,230,44,.55)',TR:'rgba(133,230,44,.55)',
+    MENA:'rgba(133,230,44,.55)',
+    KR:'rgba(0,200,255,.55)', JP:'rgba(0,200,255,.55)',
+    VN:'rgba(0,200,255,.55)', TH:'rgba(0,200,255,.55)',
+    ID:'rgba(0,200,255,.55)', SEA:'rgba(0,200,255,.55)',
+    CN:'rgba(255,34,68,.55)',
+  };
+
+  let partnerHTML = teams.map((t, i) => {
+    const sc = subColors[t.sub] || `${color}44`;
+    return `<div class="team-slot partner" style="border-color:${color}44;animation:oqSlotIn .28s ease ${i*0.04}s both">
+      <div class="team-logo" style="border:1px solid ${color}55">
+        <img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">
+      </div>
+      <div class="team-info">
+        <div class="team-abbr">${t.abbr}</div>
+        <div class="team-fullname">${t.name}</div>
+      </div>
+      <div style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+        letter-spacing:.08em;color:${sc};flex-shrink:0;padding-left:.3rem">${t.sub}</div>
+    </div>`;
+  }).join('');
+
+  let oqHTML = '';
+  for (let i = 0; i < oqCount; i++) {
+    oqHTML += `<div class="team-slot oq-slot" style="animation:oqSlotIn .28s ease ${(teams.length+i)*0.04}s both">
+      <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
+      <div class="team-info">
+        <div class="team-abbr" style="color:rgba(255,255,255,.25)">TBD</div>
+        <div class="oq-badge">Open Qualifier</div>
+      </div></div>`;
+  }
+
+  const total = teams.length + oqCount;
+  return `<div class="oq-panel">
+    <div class="oq-stage-header" style="--mc:${color}">
+      <div class="oq-structure-label">KICKOFF 2027 · ${p.name.toUpperCase()}</div>
+      <div class="cn-oq-desc" style="border-left-color:${color};margin-top:.1rem">
+        파트너 팀 ${teams.length}팀 + OQ 진출팀 ${oqCount}팀 · 총 ${total}팀<br>
+        <span style="color:rgba(255,255,255,.22)">대진표 미정 — 발표 후 업데이트 예정</span>
+      </div>
+    </div>
+    <div class="oq-content" style="--mc:${color}">
+      <div class="oq-sweep" style="--mc:${color}"></div>
+      <div class="oq-teams-label">PARTICIPATING TEAMS</div>
+      <div class="teams-grid">${partnerHTML}${oqHTML}</div>
+    </div>
+  </div>`;
+}
 
 function buildCNOQPanelHTML(p, color) {
   const teams = p.teams || [];
