@@ -1379,15 +1379,44 @@ document.querySelectorAll('.phase-btn').forEach(btn => {
 
 /* ── OQ Stage Panel 데이터 & 렌더 ── */
 const OQ_STAGE_DATA = (function(){
-  const ams2 = ()=>[
-    {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,    desc:'서브리전 모든 팀이 참가하는 오픈 브래킷.'},
-    {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'초청팀 + OQ 통과팀',         invites:'TBA',desc:'초청팀 미발표 — OQ 통과팀과 대결<br>1위 팀 → KickOff 진출'},
-  ];
+  const _amsOQ = {key:'oq', name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀', invites:0, desc:'서브리전 모든 팀이 참가하는 오픈 브래킷.'};
+  const _amsBase = '../assets/teams/VCT 2027/VCT Americas/Americas_OQ/';
+  const _at = (abbr, name) => ({abbr, name, logo:`${_amsBase}${abbr}.png`});
   return {
-    na:    {stages:ams2()},
-    lan:   {stages:ams2()},
-    brazil:{stages:ams2()},
-    las:   {stages:ams2()},
+    na:{stages:[
+      _amsOQ,
+      {key:'playoff',name:'OQ<br>PLAYOFF',meta:'초청 8팀 + OQ 통과팀',invites:8,
+        desc:'초청팀 8팀 + OQ 통과팀<br>1위 팀 → KickOff 진출',
+        invitedTeams:[
+          _at('ENVY','ENVY'), _at('C9','Cloud9'), _at('SAD','SaD Esports'), _at('YFP','YFP'),
+          _at('FLY','FlyQuest'), _at('SR','Shopify Rebellion'), _at('QOR','QoR Gaming'), _at('SRG','Shopify Rebellion Gold'),
+        ]},
+    ]},
+    brazil:{stages:[
+      _amsOQ,
+      {key:'playoff',name:'OQ<br>PLAYOFF',meta:'초청 6팀 + OQ 통과팀',invites:6,
+        desc:'초청팀 6팀 + OQ 통과팀<br>1위 팀 → KickOff 진출',
+        invitedTeams:[
+          _at('FX','Fluxo W7M'), _at('NEXT','Next'), _at('2G','2Game'),
+          _at('TSS','Team Solid'), _at('MT','Manticore'), _at('ELV','Elevate'),
+        ]},
+    ]},
+    lan:{stages:[
+      _amsOQ,
+      {key:'playoff',name:'OQ<br>PLAYOFF',meta:'초청 4팀 + OQ 통과팀',invites:4,
+        desc:'초청팀 4팀 + OQ 통과팀<br>1위 팀 → KickOff 진출',
+        invitedTeams:[
+          _at('FUE','Fuego'), _at('LEO','LEONES'), _at('CHV','Chivas Esports'), _at('CON','Contra'),
+        ]},
+    ]},
+    las:{stages:[
+      _amsOQ,
+      {key:'playoff',name:'OQ<br>PLAYOFF',meta:'초청 3팀 + OQ 통과팀',invites:3,
+        desc:'초청팀 3팀 + OQ 통과팀<br>1위 팀 → KickOff 진출',
+        invitedTeams:[
+          _at('KRÜB','KRÜ Blaze'), _at('UW','University War'), _at('9Z','9z Team'),
+        ]},
+    ]},
     eu:{stages:[
       {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.'},
       {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff',
