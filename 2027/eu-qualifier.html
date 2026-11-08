@@ -208,6 +208,74 @@ body::after{content:'';position:fixed;inset:0;
 .match-grid.f .mt-score{font-size:22px}
 .match-grid.f .match-vs{padding:.25rem .9rem}
 
+/* ── match card clickable ── */
+.match-card{cursor:pointer}
+.match-card:hover{border-color:rgba(133,230,44,.25)}
+.match-num{display:flex;align-items:center;justify-content:space-between}
+.match-edit-hint{font-size:7px;letter-spacing:.08em;color:rgba(133,230,44,.4);font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.match-card.has-result .match-edit-hint{color:rgba(133,230,44,.55)}
+
+/* ── score popup overlay ── */
+#scoreOverlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center}
+#scoreOverlay.open{display:flex}
+#scoreBox{
+  background:#0d0d14;border:1px solid rgba(133,230,44,.35);border-radius:6px;
+  width:min(380px,90vw);overflow:hidden;position:relative}
+#scoreBox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.sb-header{
+  padding:.7rem 1rem;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+.sb-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.sb-close:hover{color:var(--txt)}
+.sb-body{padding:.9rem 1rem}
+/* winner pick */
+.sb-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.sb-teams{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-team{
+  display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;
+  border:1px solid var(--bdr);border-radius:4px;background:rgba(255,255,255,.025);
+  cursor:pointer;transition:all .15s;text-align:left}
+.sb-team:hover{border-color:rgba(133,230,44,.4);background:rgba(133,230,44,.05)}
+.sb-team.selected{border-color:var(--g);background:rgba(133,230,44,.1)}
+.sb-team-logo{width:26px;height:26px;border-radius:2px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;overflow:hidden}
+.sb-team-logo img{width:100%;height:100%;object-fit:contain}
+.sb-team-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.03em;color:var(--txt);display:block;line-height:1}
+.sb-team-name{font-size:9px;color:var(--muted);display:block;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* score pick */
+.sb-scores{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-score-btn{
+  padding:.5rem;border:1px solid var(--bdr);border-radius:4px;
+  background:rgba(255,255,255,.025);cursor:pointer;transition:all .15s;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.06em;color:var(--muted);text-align:center}
+.sb-score-btn:hover{border-color:rgba(133,230,44,.4);color:var(--txt)}
+.sb-score-btn.selected{border-color:var(--g);color:var(--g);background:rgba(133,230,44,.08)}
+.sb-score-btn:disabled{opacity:.25;cursor:not-allowed}
+/* footer */
+.sb-footer{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--bdr)}
+.sb-btn{flex:1;padding:.5rem;border-radius:3px;border:1px solid var(--bdr);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sb-btn.cancel{background:transparent;color:var(--muted)}
+.sb-btn.cancel:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
+.sb-btn.confirm{background:rgba(133,230,44,.12);color:var(--g);border-color:rgba(133,230,44,.4)}
+.sb-btn.confirm:hover{background:rgba(133,230,44,.22)}
+.sb-btn.confirm:disabled{opacity:.3;cursor:not-allowed}
+/* reset btn in match-num */
+.match-reset{background:none;border:none;cursor:pointer;padding:0;line-height:1;
+  color:rgba(133,230,44,.35);font-size:10px;transition:color .15s}
+.match-reset:hover{color:rgba(133,230,44,.8)}
+
 /* ── winner panel ── */
 .winner-wrap{margin-top:.8rem;padding:.85rem 1rem;border-radius:4px;
   border:1px solid rgba(133,230,44,.35);background:rgba(133,230,44,.04);
@@ -285,6 +353,29 @@ body::after{content:'';position:fixed;inset:0;
   </div>
 </div>
 
+<!-- score input overlay -->
+<div id="scoreOverlay">
+  <div id="scoreBox">
+    <div class="sb-header">
+      <div class="sb-title" id="sbTitle">MATCH 01 · Bo3 결과 입력</div>
+      <button class="sb-close" onclick="closeScoreModal()">✕</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-label">승자 선택</div>
+      <div class="sb-teams" id="sbTeams"></div>
+      <div class="sb-label">스코어</div>
+      <div class="sb-scores" id="sbScores">
+        <button class="sb-score-btn" data-s="2-0" onclick="pickScore(this)">2 : 0</button>
+        <button class="sb-score-btn" data-s="2-1" onclick="pickScore(this)">2 : 1</button>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <button class="sb-btn cancel" onclick="closeScoreModal()">취소</button>
+      <button class="sb-btn confirm" id="sbConfirm" onclick="confirmScore()" disabled>확인</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ── 그룹 메타 ── */
 const GROUPS = {
@@ -353,15 +444,49 @@ Object.values(MATCHES).forEach(g => {
 let curGroup = 'A';
 let curRound = 'r16';
 
+/* ── localStorage 저장/복원 ── */
+const LS_KEY = 'euq_scores_v1';
+function saveScores() {
+  const out = {};
+  ['A','B','C','D'].forEach(g => {
+    out[g] = {};
+    ['r16','qf','sf','f'].forEach(rnd => {
+      out[g][rnd] = MATCHES[g][rnd].map(m => ({s1:m.s1,s2:m.s2,w:m.w}));
+    });
+    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
+  });
+  try { localStorage.setItem(LS_KEY, JSON.stringify(out)); } catch(e){}
+}
+function loadScores() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    ['A','B','C','D'].forEach(g => {
+      if (!data[g]) return;
+      ['r16','qf','sf','f'].forEach(rnd => {
+        (data[g][rnd] || []).forEach((s,i) => {
+          if (!MATCHES[g][rnd][i]) return;
+          MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
+        });
+      });
+      if (data[g].winner) {
+        const abbr = data[g].winner.abbr;
+        MATCHES[g].winner = {abbr, name:data[g].winner.name, logo:L(abbr)};
+      }
+    });
+  } catch(e){}
+}
+
 /* ── 렌더 헬퍼 ── */
-function teamRow(t, side, m, delay) {
+function teamRow(t, side, m) {
   const isWin = m.w === side;
   const isTbd = !t;
   const scoreHTML = (m.s1 !== null && !isTbd)
     ? `<div class="mt-score">${side===1 ? m.s1 : m.s2}</div>` : '';
   const markHTML = isWin
     ? `<div class="mt-win-mark"><svg viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#85E62C" stroke-width="1.5" fill="none"/></svg></div>` : '';
-  return `<div class="mt-row${isTbd?' tbd':''}${isWin?' win':''}" style="animation-delay:${delay}s">
+  return `<div class="mt-row${isTbd?' tbd':''}${isWin?' win':''}">
     <div class="mt-logo">
       ${t?.logo ? `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">` : `<div class="mt-logo-ph">?</div>`}
     </div>
@@ -373,18 +498,30 @@ function teamRow(t, side, m, delay) {
   </div>`;
 }
 
-function matchCard(m, idx, roundKey) {
-  const matchLabel = `MATCH ${String(idx+1).padStart(2,'0')}`;
-  const delay = idx * 0.04;
-  return `<div class="match-card" style="animation-delay:${delay}s">
-    <div class="match-num">${matchLabel}</div>
-    ${teamRow(m.t1, 1, m, delay)}
+function matchCard(m, idx) {
+  const num  = String(idx+1).padStart(2,'0');
+  const hasResult = m.w !== null;
+  const vsText = hasResult
+    ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--muted)">${m.s1} : ${m.s2}</span>`
+    : `<span class="match-vs-txt">VS</span>`;
+  const resetBtn = hasResult
+    ? `<button class="match-reset" title="결과 초기화" onclick="event.stopPropagation();resetMatch('${curGroup}','${curRound}',${idx})">↺</button>` : '';
+  return `<div class="match-card${hasResult?' has-result':''}" style="animation-delay:${idx*.04}s"
+    onclick="openScoreModal('${curGroup}','${curRound}',${idx})">
+    <div class="match-num">
+      <span>MATCH ${num}</span>
+      <div style="display:flex;align-items:center;gap:.4rem">
+        ${resetBtn}
+        <span class="match-edit-hint">${hasResult?'수정':'결과 입력'} ✎</span>
+      </div>
+    </div>
+    ${teamRow(m.t1, 1, m)}
     <div class="match-vs">
       <div class="match-vs-line"></div>
-      <div class="match-vs-txt">VS</div>
+      ${vsText}
       <div class="match-vs-line"></div>
     </div>
-    ${teamRow(m.t2, 2, m, delay + .015)}
+    ${teamRow(m.t2, 2, m)}
   </div>`;
 }
 
@@ -393,21 +530,17 @@ function renderContent() {
   const cfg  = ROUND_CFG[curRound];
   const matches = MATCHES[curGroup][curRound];
   const isFinal = curRound === 'f';
-
-  const cardsHTML = matches.map((m, i) => matchCard(m, i, curRound)).join('');
-
-  /* 우승팀 패널 (Final + winner 있을 때) */
+  const cardsHTML = matches.map((m,i) => matchCard(m,i)).join('');
   const w = MATCHES[curGroup].winner;
   const winnerHTML = isFinal ? `
-    <div class="winner-wrap" style="animation:matchIn .3s ease ${matches.length * 0.04 + .08}s both">
-      <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '🏆'}</div>
+    <div class="winner-wrap" style="margin-top:.8rem">
+      <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
       <div>
         <div class="winner-label">GROUP ${curGroup} WINNER → Swiss Stage</div>
         <div class="winner-name">${w?.name ?? '미정'}</div>
       </div>
       <div class="winner-badge">Swiss Stage 진출</div>
     </div>` : '';
-
   document.getElementById('content').innerHTML = `
     <div class="grp-header">
       <div class="grp-title">GROUP ${curGroup}</div>
@@ -433,6 +566,108 @@ function selectRound(r, el) {
   renderContent();
 }
 
+/* ── Score Modal ── */
+let _modalCtx = null; // {grp, rnd, idx}
+let _selWinner = null; // 1 or 2
+let _selScore  = null; // '2-0' or '2-1'
+
+function openScoreModal(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  _modalCtx = {grp, rnd, idx};
+  _selWinner = m.w;
+  _selScore  = (m.s1 !== null) ? `${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}` : null;
+
+  document.getElementById('sbTitle').textContent =
+    `MATCH ${String(idx+1).padStart(2,'0')} · Bo3 결과 입력`;
+
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${_selWinner===1?' selected':''}" onclick="pickWinner(1)">
+      <div class="sb-team-logo">
+        ${t1?.logo ? `<img src="${t1.logo}" onerror="this.style.display='none'">` : '?'}
+      </div>
+      <div>
+        <span class="sb-team-abbr">${t1?.abbr ?? 'TBD'}</span>
+        <span class="sb-team-name">${t1?.name ?? '미정'}</span>
+      </div>
+    </button>
+    <button class="sb-team${_selWinner===2?' selected':''}" onclick="pickWinner(2)">
+      <div class="sb-team-logo">
+        ${t2?.logo ? `<img src="${t2.logo}" onerror="this.style.display='none'">` : '?'}
+      </div>
+      <div>
+        <span class="sb-team-abbr">${t2?.abbr ?? 'TBD'}</span>
+        <span class="sb-team-name">${t2?.name ?? '미정'}</span>
+      </div>
+    </button>`;
+
+  updateScoreBtns();
+  updateConfirmBtn();
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickWinner(side) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach((el,i) =>
+    el.classList.toggle('selected', i+1 === side));
+  updateConfirmBtn();
+}
+
+function pickScore(btn) {
+  _selScore = btn.dataset.s;
+  document.querySelectorAll('.sb-score-btn').forEach(b =>
+    b.classList.toggle('selected', b === btn));
+  updateConfirmBtn();
+}
+
+function updateScoreBtns() {
+  document.querySelectorAll('.sb-score-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.s === _selScore);
+  });
+}
+
+function updateConfirmBtn() {
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmScore() {
+  if (!_selWinner || !_selScore) return;
+  const {grp, rnd, idx} = _modalCtx;
+  const m = MATCHES[grp][rnd][idx];
+  const [big, small] = _selScore.split('-').map(Number);
+  m.w  = _selWinner;
+  m.s1 = _selWinner === 1 ? big : small;
+  m.s2 = _selWinner === 2 ? big : small;
+  /* Final: 위너 자동 세팅 */
+  if (rnd === 'f') {
+    const winner = _selWinner === 1 ? m.t1 : m.t2;
+    if (winner) MATCHES[grp].winner = {...winner};
+  }
+  saveScores();
+  closeScoreModal();
+  renderContent();
+}
+
+function resetMatch(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  m.s1 = null; m.s2 = null; m.w = null;
+  if (rnd === 'f') MATCHES[grp].winner = null;
+  saveScores();
+  renderContent();
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreOverlay').classList.remove('open');
+  _modalCtx = null; _selWinner = null; _selScore = null;
+}
+
+/* ESC 키 닫기 */
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeScoreModal(); });
+/* 오버레이 배경 클릭 닫기 */
+document.getElementById('scoreOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scoreOverlay')) closeScoreModal();
+});
+
 function triggerCrtOff(e) {
   e.preventDefault();
   const href = e.currentTarget.href;
@@ -440,6 +675,7 @@ function triggerCrtOff(e) {
   setTimeout(() => { window.location.href = href; }, 420);
 }
 
+loadScores();
 renderContent();
 </script>
 </body>
