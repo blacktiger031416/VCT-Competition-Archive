@@ -317,13 +317,37 @@ const ROUND_CFG = {
    s1:2, s2:1, w:1}
 */
 const mkM = (n) => Array.from({length:n}, () => ({t1:null,t2:null,s1:null,s2:null,w:null}));
+const L = (abbr) => `../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/${abbr}.png`;
 
 const MATCHES = {
-  A:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
+  A:{
+    r16:[
+      {t1:{abbr:'SM',   name:'Szach Mat'},              t2:{abbr:'PROT', name:'Team Protocol'},            s1:null,s2:null,w:null},
+      {t1:{abbr:'FRG',  name:'FRG'},                    t2:{abbr:'D1G',  name:'DayOne Gaming'},             s1:null,s2:null,w:null},
+      {t1:{abbr:'VCE',  name:'VentuCorp eSports'},      t2:{abbr:'XXXM', name:'xXxMasterProMegaTeamxXx'},  s1:null,s2:null,w:null},
+      {t1:{abbr:'PASS', name:'Passion'},                 t2:{abbr:'CGN',  name:'CGN Esports'},               s1:null,s2:null,w:null},
+      {t1:{abbr:'ARIS', name:'Arise'},                   t2:{abbr:'LAST', name:'LAST ECHO'},                 s1:null,s2:null,w:null},
+      {t1:{abbr:'DEAT', name:'deathwatch'},              t2:{abbr:'RB',   name:'RB Corp'},                   s1:null,s2:null,w:null},
+      {t1:{abbr:'GRG',  name:'TEAM GEORGE'},             t2:{abbr:'TLR',  name:'TLR'},                       s1:null,s2:null,w:null},
+      {t1:{abbr:'INPU', name:'INPUTLAG'},                t2:{abbr:'STRA', name:'Strawberry Horses'},         s1:null,s2:null,w:null},
+    ],
+    qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null,
+  },
   B:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
   C:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
   D:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
 };
+
+/* 로고 경로 자동 주입 */
+Object.values(MATCHES).forEach(g => {
+  ['r16','qf','sf','f'].forEach(rnd => {
+    g[rnd].forEach(m => {
+      if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
+      if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
+    });
+  });
+  if (g.winner && !g.winner.logo) g.winner.logo = L(g.winner.abbr);
+});
 
 /* ── 상태 ── */
 let curGroup = 'A';
