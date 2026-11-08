@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Europe Qualifier — VCT 2027 EMEA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#85E62C;--g-hi:#a0ff40;
+  --glow:rgba(133,230,44,.28);--glow2:rgba(133,230,44,.09);
+  --bg:#06060a;--s1:#0d0d14;--s2:#12121a;
+  --bdr:rgba(255,255,255,.07);
+  --txt:#e4e4ee;--muted:rgba(228,228,238,.38);--muted2:rgba(228,228,238,.16);
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif;position:relative}
+
+body::before{content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%,rgba(133,230,44,.05) 0%,transparent 65%),
+    radial-gradient(ellipse 35% 45% at 5% 90%,rgba(133,230,44,.03) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 45% at 95% 10%,rgba(133,230,44,.03) 0%,transparent 55%);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.05) 0,rgba(0,0,0,.05) 1px,transparent 1px,transparent 3px);
+  pointer-events:none;z-index:1;opacity:.5}
+
+#screen{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;
+  transform:scaleY(.02);opacity:0;transform-origin:center;
+  animation:crtOn .5s cubic-bezier(.16,1,.3,1) .05s forwards}
+#screen::after{content:'';position:absolute;left:0;right:0;top:0;height:5px;
+  background:linear-gradient(to bottom,transparent,rgba(133,230,44,.5),transparent);
+  animation:scanSweep .6s .3s linear forwards;z-index:100;opacity:0}
+
+@keyframes crtOn{
+  0%  {transform:scaleY(.02);filter:brightness(7);opacity:.85}
+  18% {transform:scaleY(.02);filter:brightness(9)}
+  32% {transform:scaleY(1);filter:brightness(2.8)}
+  65% {filter:brightness(1.15)}
+  100%{transform:scaleY(1);filter:brightness(1);opacity:1}}
+@keyframes crtOff{
+  0%  {transform:scaleY(1);filter:brightness(1);opacity:1}
+  35% {transform:scaleY(1);filter:brightness(3.5) saturate(2)}
+  55% {transform:scaleY(.04);filter:brightness(8) saturate(0)}
+  80% {transform:scaleY(.02);filter:brightness(.5)}
+  100%{transform:scaleY(0);filter:brightness(0);opacity:0}}
+@keyframes scanSweep{0%{top:-5px;opacity:1}100%{top:100%;opacity:.3}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 8px var(--glow),0 0 20px var(--glow2)}
+  50%    {box-shadow:0 0 16px var(--glow),0 0 40px var(--glow2),0 0 60px rgba(133,230,44,.05)}}
+@keyframes borderScan{
+  0%  {background-position:0 0}
+  100%{background-position:0 100%}}
+@keyframes slotIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glitchFlash{
+  0%,100%{opacity:0}
+  48%{opacity:0}49%{opacity:1}51%{opacity:1}52%{opacity:0}}
+
+/* ── top bar ── */
+#topbar{
+  display:flex;align-items:center;gap:1rem;
+  padding:.7rem 2rem;border-bottom:1px solid var(--bdr);
+  background:rgba(6,6,10,.92);backdrop-filter:blur(8px);flex-shrink:0;
+  position:relative;overflow:hidden}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.5}
+.tb-back{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  text-decoration:none;border:1px solid rgba(255,255,255,.1);
+  padding:4px 12px;border-radius:2px;transition:all .15s;cursor:pointer}
+.tb-back:hover{color:var(--g);border-color:var(--g)44}
+.tb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--g);opacity:.7}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt)}
+.tb-sep{width:1px;height:20px;background:var(--bdr)}
+.tb-status{display:flex;align-items:center;gap:.4rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g);
+  background:rgba(133,230,44,.08);border:1px solid rgba(133,230,44,.2);
+  padding:3px 10px;border-radius:2px}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--g);
+  animation:pulse 1.2s ease-in-out infinite}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:.8rem}
+.tb-info{font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+
+/* ── body layout ── */
+#body{flex:1;display:flex;overflow:hidden}
+
+/* ── group sidebar ── */
+#sidebar{
+  width:72px;flex-shrink:0;border-right:1px solid var(--bdr);
+  background:var(--s1);display:flex;flex-direction:column;
+  align-items:center;padding:.8rem 0;gap:.4rem;position:relative}
+#sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,var(--g)33,transparent)}
+.g-btn{
+  width:50px;height:50px;border-radius:4px;border:1px solid var(--bdr);
+  background:transparent;cursor:pointer;position:relative;overflow:hidden;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.02em;color:var(--muted);transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.g-btn::before{content:'';position:absolute;inset:0;background:var(--g);opacity:0;transition:opacity .2s}
+.g-btn:hover{border-color:var(--g)66;color:var(--txt)}
+.g-btn:hover::before{opacity:.06}
+.g-btn.active{border-color:var(--g);color:var(--g);background:rgba(133,230,44,.06);
+  animation:glowPulse 2.5s ease-in-out infinite}
+.g-btn .g-label{position:relative;z-index:1;font-size:18px}
+.g-btn .g-sub{position:relative;z-index:1;font-size:7px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase}
+.g-btn.done .g-sub{color:var(--muted2)}
+.g-btn.live .g-sub{color:var(--g);animation:pulse 1.4s ease-in-out infinite}
+.g-btn.active .g-sub{color:var(--g)}
+.g-corner{position:absolute;width:6px;height:6px;border-color:var(--g);border-style:solid;opacity:0;transition:opacity .2s}
+.g-btn.active .g-corner{opacity:1}
+.g-corner.tl{top:3px;left:3px;border-width:1px 0 0 1px}
+.g-corner.tr{top:3px;right:3px;border-width:1px 1px 0 0}
+.g-corner.bl{bottom:3px;left:3px;border-width:0 0 1px 1px}
+.g-corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0}
+
+/* ── main content ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── round tabs ── */
+#round-tabs{
+  display:flex;align-items:stretch;border-bottom:1px solid var(--bdr);
+  background:var(--s1);flex-shrink:0;padding:0 1.5rem;gap:.25rem;position:relative}
+#round-tabs::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g)22,transparent)}
+.r-tab{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  padding:.6rem .9rem;border:none;background:none;cursor:pointer;
+  position:relative;transition:color .15s;white-space:nowrap}
+.r-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--g);opacity:0;transition:opacity .15s}
+.r-tab:hover{color:var(--txt)}
+.r-tab.active{color:var(--g)}
+.r-tab.active::after{opacity:1}
+.r-tab-count{font-size:9px;color:var(--muted2);margin-left:.3rem}
+.r-tab.active .r-tab-count{color:var(--g);opacity:.7}
+
+/* ── content area ── */
+#content{flex:1;overflow-y:auto;padding:1.2rem 1.5rem}
+#content::-webkit-scrollbar{width:4px}
+#content::-webkit-scrollbar-track{background:transparent}
+#content::-webkit-scrollbar-thumb{background:var(--g)33;border-radius:2px}
+
+/* ── group header ── */
+.grp-header{
+  display:flex;align-items:center;gap:1rem;margin-bottom:1rem;
+  padding-bottom:.7rem;border-bottom:1px solid var(--bdr)}
+.grp-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+.grp-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.grp-badge.done{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-badge.live{color:var(--g);background:rgba(133,230,44,.08);border:1px solid rgba(133,230,44,.25);
+  animation:pulse 1.4s ease-in-out infinite}
+.grp-desc{font-size:12px;color:var(--muted);margin-left:auto}
+
+/* ── round info bar ── */
+.round-info{
+  display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.round-info-line{flex:1;height:1px;background:var(--bdr)}
+
+/* ── team grid ── */
+.team-grid{
+  display:grid;gap:.5rem;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.team-grid.qf{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.team-grid.sf{grid-template-columns:repeat(2,1fr)}
+.team-grid.final{grid-template-columns:repeat(2,1fr)}
+
+/* ── team slot ── */
+.t-slot{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.55rem .7rem;border-radius:4px;
+  border:1px solid var(--bdr);background:var(--s1);
+  position:relative;overflow:hidden;animation:slotIn .22s ease both}
+.t-slot::before{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;
+  background:var(--g);opacity:0;transition:opacity .15s}
+.t-slot:hover::before{opacity:.5}
+.t-slot.tbd{opacity:.45}
+.t-slot.winner{border-color:var(--g)66;background:rgba(133,230,44,.04)}
+.t-slot.winner::before{opacity:.8}
+.t-logo{
+  width:34px;height:34px;border-radius:3px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.t-logo img{width:100%;height:100%;object-fit:contain}
+.t-logo-ph{font-size:11px;color:rgba(255,255,255,.18)}
+.t-info{min-width:0}
+.t-abbr{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.04em;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-slot.tbd .t-abbr{color:var(--muted2)}
+.t-name{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-slot.tbd .t-name{color:var(--muted2)}
+.t-seed{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.08em;color:var(--muted2);flex-shrink:0}
+
+/* ── winner panel ── */
+.winner-panel{
+  margin-top:1.2rem;padding:1rem 1.2rem;border-radius:4px;
+  border:1px solid var(--g)44;background:rgba(133,230,44,.04);
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:1rem}
+.winner-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.wp-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--g);opacity:.7;margin-bottom:.3rem}
+.wp-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.05em;color:var(--txt)}
+.wp-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:2px;
+  background:rgba(133,230,44,.15);color:var(--g);border:1px solid rgba(133,230,44,.3);
+  margin-left:auto;flex-shrink:0}
+.wp-logo{width:48px;height:48px;border-radius:4px;border:1px solid var(--g)33;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.wp-logo img{width:100%;height:100%;object-fit:contain}
+.wp-logo-ph{font-size:18px;color:rgba(255,255,255,.12)}
+
+/* ── empty / tbd notice ── */
+.tbd-notice{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2.5rem;color:var(--muted2);text-align:center;gap:.5rem}
+.tbd-notice-icon{font-size:28px;opacity:.3}
+.tbd-notice-text{font-family:'Barlow Condensed',sans-serif;font-size:12px;
+  font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+
+/* ── glitch overlay ── */
+#glitch{position:fixed;inset:0;z-index:999;pointer-events:none;
+  background:var(--g);mix-blend-mode:overlay;opacity:0;
+  animation:glitchFlash 8s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="screen">
+
+  <!-- top bar -->
+  <div id="topbar">
+    <a class="tb-back" href="index.html" onclick="triggerCrtOff(event)">← BACK</a>
+    <div class="tb-sep"></div>
+    <div>
+      <div class="tb-eyebrow">VCT 2027 · EMEA KICKOFF OQ</div>
+      <div class="tb-title">EUROPE QUALIFIER — GROUP STAGE</div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-status"><div class="tb-dot"></div>GROUP C IN PROGRESS</div>
+    <div class="tb-right">
+      <div class="tb-info">256팀 · Single Elimination · 그룹당 1팀 → Swiss Stage</div>
+    </div>
+  </div>
+
+  <div id="body">
+    <!-- group sidebar -->
+    <div id="sidebar">
+      <button class="g-btn done active" data-grp="A" onclick="selectGroup('A',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">A</span>
+        <span class="g-sub">완료</span>
+      </button>
+      <button class="g-btn done" data-grp="B" onclick="selectGroup('B',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">B</span>
+        <span class="g-sub">완료</span>
+      </button>
+      <button class="g-btn live" data-grp="C" onclick="selectGroup('C',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">C</span>
+        <span class="g-sub">진행중</span>
+      </button>
+      <button class="g-btn done" data-grp="D" onclick="selectGroup('D',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">D</span>
+        <span class="g-sub">완료</span>
+      </button>
+    </div>
+
+    <!-- main -->
+    <div id="main">
+      <!-- round tabs -->
+      <div id="round-tabs">
+        <button class="r-tab active" data-round="r16" onclick="selectRound('r16',this)">
+          R16 <span class="r-tab-count">16팀</span>
+        </button>
+        <button class="r-tab" data-round="qf" onclick="selectRound('qf',this)">
+          QF <span class="r-tab-count">8팀</span>
+        </button>
+        <button class="r-tab" data-round="sf" onclick="selectRound('sf',this)">
+          SF <span class="r-tab-count">4팀</span>
+        </button>
+        <button class="r-tab" data-round="f" onclick="selectRound('f',this)">
+          FINAL <span class="r-tab-count">2팀</span>
+        </button>
+      </div>
+
+      <!-- content -->
+      <div id="content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="glitch"></div>
+
+<script>
+/* ── 데이터 ── */
+const GROUPS = {
+  A:{status:'done', label:'완료'},
+  B:{status:'done', label:'완료'},
+  C:{status:'live', label:'진행중'},
+  D:{status:'done', label:'완료'},
+};
+
+const ROUNDS = [
+  {key:'r16',  name:'Round of 16', count:16, gridClass:''},
+  {key:'qf',   name:'Quarter-Final', count:8, gridClass:'qf'},
+  {key:'sf',   name:'Semi-Final',  count:4,  gridClass:'sf'},
+  {key:'f',    name:'Final',       count:2,  gridClass:'final'},
+];
+
+/* 팀 데이터 — 현재 전부 TBD. 나중에 여기를 채우면 됨
+   형식: {abbr, name, logo, seed}
+   예시: {abbr:'FNC', name:'Fnatic', logo:'../assets/teams/.../FNC.png', seed:1}
+*/
+const TEAMS = {
+  A:{r16:[],qf:[],sf:[],f:[],winner:null},
+  B:{r16:[],qf:[],sf:[],f:[],winner:null},
+  C:{r16:[],qf:[],sf:[],f:[],winner:null},
+  D:{r16:[],qf:[],sf:[],f:[],winner:null},
+};
+
+/* ── 상태 ── */
+let curGroup = 'A';
+let curRound = 'r16';
+
+/* ── 렌더 ── */
+function tSlot(t, idx, delay) {
+  const isTbd = !t;
+  return `<div class="t-slot${isTbd?' tbd':''}" style="animation-delay:${delay}s">
+    <div class="t-logo">
+      ${t?.logo ? `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">` : `<div class="t-logo-ph">?</div>`}
+    </div>
+    <div class="t-info">
+      <div class="t-abbr">${t?.abbr ?? 'TBD'}</div>
+      <div class="t-name">${t?.name ?? '미정'}</div>
+    </div>
+    ${t?.seed ? `<div class="t-seed">#${t.seed}</div>` : ''}
+  </div>`;
+}
+
+function renderContent() {
+  const grpData  = GROUPS[curGroup];
+  const teams    = TEAMS[curGroup][curRound] || [];
+  const roundCfg = ROUNDS.find(r => r.key === curRound);
+  const count    = roundCfg.count;
+  const isFinal  = curRound === 'f';
+
+  /* 슬롯 채우기: 실제팀 + 나머지 TBD */
+  const slots = Array.from({length: count}, (_, i) => teams[i] ?? null);
+  const slotsHTML = slots.map((t, i) => tSlot(t, i, i * 0.03)).join('');
+
+  /* 우승팀 패널 (Final 라운드만) */
+  const winner = TEAMS[curGroup].winner;
+  const winnerHTML = isFinal ? `
+    <div class="winner-panel" style="animation:slotIn .3s ease ${count * 0.03 + .1}s both">
+      <div class="wp-logo">${winner?.logo ? `<img src="${winner.logo}" alt="">` : `<div class="wp-logo-ph">🏆</div>`}</div>
+      <div>
+        <div class="wp-label">GROUP ${curGroup} WINNER → Swiss Stage</div>
+        <div class="wp-name">${winner?.name ?? '미정'}</div>
+      </div>
+      <div class="wp-badge">Swiss Stage 진출</div>
+    </div>` : '';
+
+  document.getElementById('content').innerHTML = `
+    <div class="grp-header">
+      <div class="grp-title">GROUP ${curGroup}</div>
+      <div class="grp-badge ${grpData.status}">${grpData.label}</div>
+      <div class="grp-desc">${roundCfg.name} · ${count}팀</div>
+    </div>
+    <div class="round-info">
+      <span>${roundCfg.name.toUpperCase()}</span>
+      <div class="round-info-line"></div>
+      <span>${count}팀</span>
+    </div>
+    <div class="team-grid ${roundCfg.gridClass}">${slotsHTML}</div>
+    ${winnerHTML}
+  `;
+}
+
+function selectGroup(g, el) {
+  curGroup = g;
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderContent();
+}
+
+function selectRound(r, el) {
+  curRound = r;
+  document.querySelectorAll('.r-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderContent();
+}
+
+/* ── CRT Off → Back ── */
+function triggerCrtOff(e) {
+  e.preventDefault();
+  const href = e.currentTarget.href;
+  const s = document.getElementById('screen');
+  s.style.animation = 'crtOff .4s ease forwards';
+  setTimeout(() => { window.location.href = href; }, 420);
+}
+
+renderContent();
+</script>
+</body>
+</html>

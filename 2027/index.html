@@ -965,7 +965,7 @@ function openModal(p, phaseKey) {
   document.getElementById('mTitle').textContent  = p.name;
   document.getElementById('mPhase').textContent  = phaseLabels[phaseKey];
 
-  /* 대진표 링크 버튼 (KickOff OQ CN 전용) */
+  /* 대진표 링크 버튼 */
   const existingBracketBtn = document.getElementById('mBracketBtn');
   if (existingBracketBtn) existingBracketBtn.remove();
   if (phaseKey === 'kickoff-oq' && p.id === 'cn') {
@@ -976,6 +976,62 @@ function openModal(p, phaseKey) {
     btn.textContent = '대진표 보기 →';
     btn.onmouseover = () => btn.style.background = 'rgba(255,34,68,.15)';
     btn.onmouseout  = () => btn.style.background = '';
+    document.getElementById('mPhase').insertAdjacentElement('afterend', btn);
+  }
+  if (phaseKey === 'kickoff-oq' && p.id === 'eu') {
+    if (!document.getElementById('euBtnStyles')) {
+      const st = document.createElement('style');
+      st.id = 'euBtnStyles';
+      st.textContent = `
+        @keyframes euGlow{0%,100%{box-shadow:0 0 8px rgba(133,230,44,.18),0 0 22px rgba(133,230,44,.07)}50%{box-shadow:0 0 18px rgba(133,230,44,.38),0 0 40px rgba(133,230,44,.14),inset 0 0 12px rgba(133,230,44,.04)}}
+        @keyframes euPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+        @keyframes euScan{0%{left:-80%}100%{left:130%}}
+        @keyframes euCornerPulse{0%,100%{opacity:.7}50%{opacity:1}}
+        #mBracketBtn.eu-btn{display:block;position:relative;overflow:hidden;margin-top:.55rem;padding:.65rem 1rem;border:1px solid rgba(133,230,44,.42);border-radius:3px;background:rgba(133,230,44,.045);text-decoration:none;cursor:pointer;animation:euGlow 2.8s ease-in-out infinite;transition:border-color .2s,background .2s}
+        #mBracketBtn.eu-btn:hover{border-color:rgba(133,230,44,.72);background:rgba(133,230,44,.09)}
+        #mBracketBtn.eu-btn:hover .eu-scan-line{animation:euScan .55s linear}
+        .eu-corner{position:absolute;width:8px;height:8px;border-color:rgba(133,230,44,.8);border-style:solid;animation:euCornerPulse 2s ease-in-out infinite}
+        .eu-corner.tl{top:4px;left:4px;border-width:1.5px 0 0 1.5px}
+        .eu-corner.tr{top:4px;right:4px;border-width:1.5px 1.5px 0 0}
+        .eu-corner.bl{bottom:4px;left:4px;border-width:0 0 1.5px 1.5px}
+        .eu-corner.br{bottom:4px;right:4px;border-width:0 1.5px 1.5px 0}
+        .eu-scan-line{position:absolute;top:0;bottom:0;width:35%;background:linear-gradient(90deg,transparent,rgba(133,230,44,.12),transparent);pointer-events:none;left:-80%}
+        .eu-btn-inner{display:flex;align-items:center;gap:.7rem;position:relative;z-index:1}
+        .eu-live-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+        .eu-live-dot{width:7px;height:7px;border-radius:50%;background:#85E62C;animation:euPulse 1.3s ease-in-out infinite}
+        .eu-live-txt{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;letter-spacing:.12em;color:rgba(133,230,44,.75)}
+        .eu-btn-sep{width:1px;height:28px;background:rgba(133,230,44,.22);flex-shrink:0}
+        .eu-text{flex:1;min-width:0}
+        .eu-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(133,230,44,.6);margin-bottom:2px}
+        .eu-headline{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#e4e4ee;line-height:1}
+        .eu-subline{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:.1em;color:rgba(228,228,238,.38);margin-top:2px}
+        .eu-arrow{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:rgba(133,230,44,.7);flex-shrink:0;transition:transform .2s,color .2s}
+        #mBracketBtn.eu-btn:hover .eu-arrow{transform:translate(2px,-2px);color:#85E62C}
+      `;
+      document.head.appendChild(st);
+    }
+    const btn = document.createElement('a');
+    btn.id = 'mBracketBtn';
+    btn.href = 'eu-qualifier.html';
+    btn.className = 'eu-btn';
+    btn.innerHTML = `
+      <div class="eu-corner tl"></div><div class="eu-corner tr"></div>
+      <div class="eu-corner bl"></div><div class="eu-corner br"></div>
+      <div class="eu-scan-line"></div>
+      <div class="eu-btn-inner">
+        <div class="eu-live-wrap">
+          <div class="eu-live-dot"></div>
+          <div class="eu-live-txt">LIVE</div>
+        </div>
+        <div class="eu-btn-sep"></div>
+        <div class="eu-text">
+          <div class="eu-eyebrow">Europe Qualifier · Group Stage</div>
+          <div class="eu-headline">GROUP STAGE BRACKET</div>
+          <div class="eu-subline">256팀 · 4 그룹 · 그룹당 1팀 → Swiss Stage</div>
+        </div>
+        <div class="eu-arrow">↗</div>
+      </div>
+    `;
     document.getElementById('mPhase').insertAdjacentElement('afterend', btn);
   }
 
