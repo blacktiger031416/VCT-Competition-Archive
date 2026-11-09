@@ -147,8 +147,7 @@ body::after{content:'';position:fixed;inset:0;
 /* ── match grid ── */
 .match-grid{display:grid;gap:.6rem}
 .match-grid.r16{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-.match-grid.qf {grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-.match-grid.sf {grid-template-columns:repeat(2,1fr)}
+.match-grid.f  {grid-template-columns:1fr}
 .match-grid.f  {grid-template-columns:1fr;max-width:420px}
 
 /* ── match card ── */
@@ -363,26 +362,23 @@ body.view-only .cr:hover{border-color:var(--bdr)}
 
     <div id="main">
       <div id="round-tabs">
-        <button class="r-tab active" data-round="r128" onclick="selectRound('r128',this)">
-          R128 <span class="r-tab-count">64경기</span>
+        <button class="r-tab active" data-round="r256" onclick="selectRound('r256',this)">
+          R256 <span class="r-tab-count">32경기</span>
+        </button>
+        <button class="r-tab" data-round="r128" onclick="selectRound('r128',this)">
+          R128 <span class="r-tab-count">16경기</span>
         </button>
         <button class="r-tab" data-round="r64" onclick="selectRound('r64',this)">
-          R64 <span class="r-tab-count">32경기</span>
+          R64 <span class="r-tab-count">8경기</span>
         </button>
         <button class="r-tab" data-round="r32" onclick="selectRound('r32',this)">
-          R32 <span class="r-tab-count">16경기</span>
+          R32 <span class="r-tab-count">4경기</span>
         </button>
         <button class="r-tab" data-round="r16" onclick="selectRound('r16',this)">
-          R16 <span class="r-tab-count">8경기</span>
+          R16 <span class="r-tab-count">2경기</span>
         </button>
-        <button class="r-tab" data-round="qf" onclick="selectRound('qf',this)">
-          QF <span class="r-tab-count">4경기</span>
-        </button>
-        <button class="r-tab" data-round="sf" onclick="selectRound('sf',this)">
-          SF <span class="r-tab-count">2경기</span>
-        </button>
-        <button class="r-tab" data-round="f" onclick="selectRound('f',this)">
-          FINAL <span class="r-tab-count">1경기</span>
+        <button class="r-tab" data-round="r8" onclick="selectRound('r8',this)">
+          R8 <span class="r-tab-count">FINAL</span>
         </button>
       </div>
       <div id="content"></div>
@@ -423,13 +419,12 @@ const GROUPS = {
 };
 
 const ROUND_CFG = {
-  r128:{name:'Round of 128', matchCount:64, gridClass:'r128', compact:true},
-  r64: {name:'Round of 64',  matchCount:32, gridClass:'r64',  compact:true},
-  r32: {name:'Round of 32',  matchCount:16, gridClass:'r32',  compact:true},
-  r16: {name:'Round of 16',  matchCount:8,  gridClass:'r16'},
-  qf:  {name:'Quarter-Final',matchCount:4,  gridClass:'qf'},
-  sf:  {name:'Semi-Final',   matchCount:2,  gridClass:'sf'},
-  f:   {name:'Final',        matchCount:1,  gridClass:'f'},
+  r256:{name:'Round of 256', matchCount:32, gridClass:'r256', compact:true},
+  r128:{name:'Round of 128', matchCount:16, gridClass:'r128', compact:true},
+  r64: {name:'Round of 64',  matchCount:8,  gridClass:'r64',  compact:true},
+  r32: {name:'Round of 32',  matchCount:4,  gridClass:'r32',  compact:true},
+  r16: {name:'Round of 16',  matchCount:2,  gridClass:'r16'},
+  r8:  {name:'Round of 8',   matchCount:1,  gridClass:'f'},
 };
 
 /*
@@ -452,8 +447,8 @@ const L = (abbr) => `../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/${abbr}.png`;
 
 const MATCHES = {
   A:{
-    r128:mkM(64), r64:mkM(32), r32:mkM(16),
-    r16:[
+    r256:mkM(32), r128:mkM(16), r64:mkM(8),
+    r32:[
       {t1:{abbr:'SM',   name:'Szach Mat'},              t2:{abbr:'PROT', name:'Team Protocol'},            s1:null,s2:null,w:null},
       {t1:{abbr:'FRG',  name:'FRG'},                    t2:{abbr:'D1G',  name:'DayOne Gaming'},             s1:null,s2:null,w:null},
       {t1:{abbr:'VCE',  name:'VentuCorp eSports'},      t2:{abbr:'XXXM', name:'xXxMasterProMegaTeamxXx'},  s1:null,s2:null,w:null},
@@ -463,16 +458,16 @@ const MATCHES = {
       {t1:{abbr:'GRG',  name:'TEAM GEORGE'},             t2:{abbr:'TLR',  name:'TLR'},                       s1:null,s2:null,w:null},
       {t1:{abbr:'INPU', name:'INPUTLAG'},                t2:{abbr:'STRA', name:'Strawberry Horses'},         s1:null,s2:null,w:null},
     ],
-    qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null,
+    r16:mkM(2), r8:mkM(1), winner:null,
   },
-  B:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
-  C:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
-  D:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
+  B:{r256:mkM(32), r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
+  C:{r256:mkM(32), r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
+  D:{r256:mkM(32), r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
 };
 
 /* 로고 경로 자동 주입 */
 Object.values(MATCHES).forEach(g => {
-  ['r128','r64','r32','r16','qf','sf','f'].forEach(rnd => {
+  ['r256','r128','r64','r32','r16','r8'].forEach(rnd => {
     g[rnd].forEach(m => {
       if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
       if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
@@ -483,11 +478,11 @@ Object.values(MATCHES).forEach(g => {
 
 /* ── 상태 ── */
 let curGroup = 'A';
-let curRound = 'r128';
+let curRound = 'r256';
 
 /* ── localStorage 저장/복원 ── */
-const LS_KEY = 'euq_scores_v2';
-const ALL_RNDS = ['r128','r64','r32','r16','qf','sf','f'];
+const LS_KEY = 'euq_scores_v3';
+const ALL_RNDS = ['r256','r128','r64','r32','r16','r8'];
 function saveScores() {
   const out = {};
   ['A','B','C','D'].forEach(g => {
@@ -598,7 +593,7 @@ function renderContent() {
   const grp  = GROUPS[curGroup];
   const cfg  = ROUND_CFG[curRound];
   const matches = MATCHES[curGroup][curRound];
-  const isFinal = curRound === 'f';
+  const isFinal = curRound === 'r8';
   const isCompact = !!cfg.compact;
 
   const gridHTML = isCompact
@@ -716,7 +711,7 @@ function confirmScore() {
   m.s1 = _selWinner === 1 ? big : small;
   m.s2 = _selWinner === 2 ? big : small;
   /* Final: 위너 자동 세팅 */
-  if (rnd === 'f') {
+  if (rnd === 'r8') {
     const winner = _selWinner === 1 ? m.t1 : m.t2;
     if (winner) MATCHES[grp].winner = {...winner};
   }
@@ -728,7 +723,7 @@ function confirmScore() {
 function resetMatch(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   m.s1 = null; m.s2 = null; m.w = null;
-  if (rnd === 'f') MATCHES[grp].winner = null;
+  if (rnd === 'r8') MATCHES[grp].winner = null;
   saveScores();
   renderContent();
 }
