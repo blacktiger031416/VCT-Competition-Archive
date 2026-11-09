@@ -276,12 +276,34 @@ body::after{content:'';position:fixed;inset:0;
   color:rgba(133,230,44,.35);font-size:10px;transition:color .15s}
 .match-reset:hover{color:rgba(133,230,44,.8)}
 
+/* ── compact rows (R128/R64/R32) ── */
+.compact-grid{display:grid;gap:.3rem;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.cr{display:flex;align-items:center;gap:0;border:1px solid var(--bdr);border-radius:3px;
+  background:var(--s1);overflow:hidden;cursor:pointer;transition:border-color .15s;
+  animation:matchIn .15s ease both}
+.cr:hover{border-color:rgba(133,230,44,.22)}
+.cr.has-result{border-color:rgba(133,230,44,.18)}
+.cr-team{flex:1;min-width:0;display:flex;align-items:center;gap:.45rem;padding:.38rem .55rem}
+.cr-team.win{background:rgba(133,230,44,.045)}
+.cr-team.win::after{display:none}
+.cr-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--muted);transition:color .1s}
+.cr-team.win .cr-abbr{color:var(--g)}
+.cr-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--muted2);flex-shrink:0;min-width:14px;text-align:right}
+.cr-team.win .cr-score{color:var(--g)}
+.cr-sep{width:1px;background:var(--bdr);align-self:stretch;flex-shrink:0}
+.cr-vs{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:.12em;color:var(--muted2);padding:0 .4rem;flex-shrink:0}
 /* no-edit cursor when view-only (not admin) */
 body.view-only .match-card{cursor:default}
 body.view-only .match-card:hover{border-color:var(--bdr)}
 body.view-only .match-card:hover::before{opacity:0}
 body.view-only .match-edit-hint{display:none}
 body.view-only .match-reset{display:none}
+body.view-only .cr{cursor:default}
+body.view-only .cr:hover{border-color:var(--bdr)}
 
 /* ── winner panel ── */
 .winner-wrap{margin-top:.8rem;padding:.85rem 1rem;border-radius:4px;
@@ -341,7 +363,16 @@ body.view-only .match-reset{display:none}
 
     <div id="main">
       <div id="round-tabs">
-        <button class="r-tab active" data-round="r16" onclick="selectRound('r16',this)">
+        <button class="r-tab active" data-round="r128" onclick="selectRound('r128',this)">
+          R128 <span class="r-tab-count">64경기</span>
+        </button>
+        <button class="r-tab" data-round="r64" onclick="selectRound('r64',this)">
+          R64 <span class="r-tab-count">32경기</span>
+        </button>
+        <button class="r-tab" data-round="r32" onclick="selectRound('r32',this)">
+          R32 <span class="r-tab-count">16경기</span>
+        </button>
+        <button class="r-tab" data-round="r16" onclick="selectRound('r16',this)">
           R16 <span class="r-tab-count">8경기</span>
         </button>
         <button class="r-tab" data-round="qf" onclick="selectRound('qf',this)">
@@ -392,10 +423,13 @@ const GROUPS = {
 };
 
 const ROUND_CFG = {
-  r16:{name:'Round of 16', matchCount:8,  gridClass:'r16'},
-  qf: {name:'Quarter-Final',matchCount:4, gridClass:'qf'},
-  sf: {name:'Semi-Final',   matchCount:2, gridClass:'sf'},
-  f:  {name:'Final',        matchCount:1, gridClass:'f'},
+  r128:{name:'Round of 128', matchCount:64, gridClass:'r128', compact:true},
+  r64: {name:'Round of 64',  matchCount:32, gridClass:'r64',  compact:true},
+  r32: {name:'Round of 32',  matchCount:16, gridClass:'r32',  compact:true},
+  r16: {name:'Round of 16',  matchCount:8,  gridClass:'r16'},
+  qf:  {name:'Quarter-Final',matchCount:4,  gridClass:'qf'},
+  sf:  {name:'Semi-Final',   matchCount:2,  gridClass:'sf'},
+  f:   {name:'Final',        matchCount:1,  gridClass:'f'},
 };
 
 /*
@@ -418,6 +452,7 @@ const L = (abbr) => `../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/${abbr}.png`;
 
 const MATCHES = {
   A:{
+    r128:mkM(64), r64:mkM(32), r32:mkM(16),
     r16:[
       {t1:{abbr:'SM',   name:'Szach Mat'},              t2:{abbr:'PROT', name:'Team Protocol'},            s1:null,s2:null,w:null},
       {t1:{abbr:'FRG',  name:'FRG'},                    t2:{abbr:'D1G',  name:'DayOne Gaming'},             s1:null,s2:null,w:null},
@@ -430,14 +465,14 @@ const MATCHES = {
     ],
     qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null,
   },
-  B:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
-  C:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
-  D:{r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
+  B:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
+  C:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
+  D:{r128:mkM(64), r64:mkM(32), r32:mkM(16), r16:mkM(8), qf:mkM(4), sf:mkM(2), f:mkM(1), winner:null},
 };
 
 /* 로고 경로 자동 주입 */
 Object.values(MATCHES).forEach(g => {
-  ['r16','qf','sf','f'].forEach(rnd => {
+  ['r128','r64','r32','r16','qf','sf','f'].forEach(rnd => {
     g[rnd].forEach(m => {
       if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
       if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
@@ -448,16 +483,17 @@ Object.values(MATCHES).forEach(g => {
 
 /* ── 상태 ── */
 let curGroup = 'A';
-let curRound = 'r16';
+let curRound = 'r128';
 
 /* ── localStorage 저장/복원 ── */
-const LS_KEY = 'euq_scores_v1';
+const LS_KEY = 'euq_scores_v2';
+const ALL_RNDS = ['r128','r64','r32','r16','qf','sf','f'];
 function saveScores() {
   const out = {};
   ['A','B','C','D'].forEach(g => {
     out[g] = {};
-    ['r16','qf','sf','f'].forEach(rnd => {
-      out[g][rnd] = MATCHES[g][rnd].map(m => ({s1:m.s1,s2:m.s2,w:m.w}));
+    ALL_RNDS.forEach(rnd => {
+      out[g][rnd] = MATCHES[g][rnd].map(m => ({t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null, t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null, s1:m.s1,s2:m.s2,w:m.w}));
     });
     out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
   });
@@ -470,9 +506,11 @@ function loadScores() {
     const data = JSON.parse(raw);
     ['A','B','C','D'].forEach(g => {
       if (!data[g]) return;
-      ['r16','qf','sf','f'].forEach(rnd => {
+      ALL_RNDS.forEach(rnd => {
         (data[g][rnd] || []).forEach((s,i) => {
           if (!MATCHES[g][rnd][i]) return;
+          if (s.t1) { MATCHES[g][rnd][i].t1 = {...s.t1, logo:L(s.t1.abbr)}; }
+          if (s.t2) { MATCHES[g][rnd][i].t2 = {...s.t2, logo:L(s.t2.abbr)}; }
           MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
         });
       });
@@ -485,6 +523,31 @@ function loadScores() {
 }
 
 /* ── 렌더 헬퍼 ── */
+function compactRow(m, idx) {
+  const hasResult = m.w !== null;
+  const t1win = m.w === 1, t2win = m.w === 2;
+  const t1 = m.t1, t2 = m.t2;
+  const resetBtn = (hasResult && window.vctIsAdmin && window.vctIsAdmin())
+    ? `<button class="match-reset" title="결과 초기화"
+        onclick="event.stopPropagation();resetMatch('${curGroup}','${curRound}',${idx})"
+        style="font-size:9px;padding:0 4px;margin-right:2px">↺</button>` : '';
+  return `<div class="cr${hasResult?' has-result':''}" style="animation-delay:${idx*.015}s"
+    onclick="openScoreModal('${curGroup}','${curRound}',${idx})">
+    <div class="cr-team${t1win?' win':''}">
+      <span class="cr-abbr">${t1?.abbr ?? 'TBD'}</span>
+      ${hasResult ? `<span class="cr-score" style="margin-left:auto">${m.s1}</span>` : ''}
+    </div>
+    <div class="cr-sep"></div>
+    <div class="cr-vs">${hasResult ? ':' : 'vs'}</div>
+    <div class="cr-sep"></div>
+    <div class="cr-team${t2win?' win':''}">
+      ${hasResult ? `<span class="cr-score">${m.s2}</span>` : ''}
+      <span class="cr-abbr" style="margin-left:auto;text-align:right">${t2?.abbr ?? 'TBD'}</span>
+    </div>
+    ${resetBtn}
+  </div>`;
+}
+
 function teamRow(t, side, m) {
   const isWin = m.w === side;
   const isTbd = !t;
@@ -536,7 +599,12 @@ function renderContent() {
   const cfg  = ROUND_CFG[curRound];
   const matches = MATCHES[curGroup][curRound];
   const isFinal = curRound === 'f';
-  const cardsHTML = matches.map((m,i) => matchCard(m,i)).join('');
+  const isCompact = !!cfg.compact;
+
+  const gridHTML = isCompact
+    ? `<div class="compact-grid">${matches.map((m,i) => compactRow(m,i)).join('')}</div>`
+    : `<div class="match-grid ${cfg.gridClass}">${matches.map((m,i) => matchCard(m,i)).join('')}</div>`;
+
   const w = MATCHES[curGroup].winner;
   const winnerHTML = isFinal ? `
     <div class="winner-wrap" style="margin-top:.8rem">
@@ -547,13 +615,14 @@ function renderContent() {
       </div>
       <div class="winner-badge">Swiss Stage 진출</div>
     </div>` : '';
+
   document.getElementById('content').innerHTML = `
     <div class="grp-header">
       <div class="grp-title">GROUP ${curGroup}</div>
       <div class="grp-badge ${grp.status}">${grp.label}</div>
       <div class="grp-desc">${cfg.name} · ${cfg.matchCount}경기</div>
     </div>
-    <div class="match-grid ${cfg.gridClass}">${cardsHTML}</div>
+    ${gridHTML}
     ${winnerHTML}
   `;
 }
@@ -584,8 +653,9 @@ function openScoreModal(grp, rnd, idx) {
   _selWinner = m.w;
   _selScore  = (m.s1 !== null) ? `${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}` : null;
 
+  const cfg = ROUND_CFG[rnd];
   document.getElementById('sbTitle').textContent =
-    `MATCH ${String(idx+1).padStart(2,'0')} · Bo3 결과 입력`;
+    `${cfg.name} · MATCH ${String(idx+1).padStart(2,'0')}`;
 
   const t1 = m.t1, t2 = m.t2;
   document.getElementById('sbTeams').innerHTML = `
