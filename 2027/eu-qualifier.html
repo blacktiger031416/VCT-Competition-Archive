@@ -470,6 +470,7 @@ body.view-only .cr:hover{border-color:var(--bdr)}
       <div class="sb-scores" id="sbScores">
         <button class="sb-score-btn" data-s="2-0" onclick="pickScore(this)">2 : 0</button>
         <button class="sb-score-btn" data-s="2-1" onclick="pickScore(this)">2 : 1</button>
+        <button class="sb-score-btn" data-s="FF" onclick="pickScore(this)" style="letter-spacing:.08em">FF</button>
       </div>
     </div>
     <div class="sb-footer">
@@ -794,7 +795,7 @@ function openScoreModal(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   _modalCtx = {grp, rnd, idx};
   _selWinner = m.w;
-  _selScore  = (m.s1 !== null) ? `${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}` : null;
+  _selScore  = (m.s1 !== null) ? (m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`) : null;
 
   const cfg = ROUND_CFG[rnd];
   document.getElementById('sbTitle').textContent =
@@ -855,10 +856,15 @@ function confirmScore() {
   if (!_selWinner || !_selScore) return;
   const {grp, rnd, idx} = _modalCtx;
   const m = MATCHES[grp][rnd][idx];
-  const [big, small] = _selScore.split('-').map(Number);
-  m.w  = _selWinner;
-  m.s1 = _selWinner === 1 ? big : small;
-  m.s2 = _selWinner === 2 ? big : small;
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner === 1 ? 'W' : 'FF';
+    m.s2 = _selWinner === 2 ? 'W' : 'FF';
+  } else {
+    const [big, small] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner === 1 ? big : small;
+    m.s2 = _selWinner === 2 ? big : small;
+  }
   /* Final: 위너 자동 세팅 */
   if (rnd === 'r8') {
     const winner = _selWinner === 1 ? m.t1 : m.t2;
@@ -953,7 +959,7 @@ function openSeedModal(ctx) {
       <div>${t2?.abbr??'TBD'}</div>
     </button>`;
   document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
-  _selWinner = m.w; _selScore = m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null;
+  _selWinner = m.w; _selScore = m.s1!==null?(m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`):null;
   document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
   document.getElementById('sbConfirm').onclick = confirmSeedScore;
   document.getElementById('scoreOverlay').classList.add('open');
@@ -969,8 +975,13 @@ function pickSeedWinner(side, btn) {
 function confirmSeedScore() {
   if (!_selWinner || !_selScore || !_sdCtx) return;
   const m = getSdMatch(_sdCtx);
-  const [big, small] = _selScore.split('-').map(Number);
-  m.w = _selWinner; m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner===1?'W':'FF'; m.s2 = _selWinner===2?'W':'FF';
+  } else {
+    const [big, small] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
+  }
   saveSeedScores();
   closeScoreModal(); _sdCtx = null;
   renderSeedDecider();
