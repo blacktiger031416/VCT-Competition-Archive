@@ -328,6 +328,62 @@ body.view-only .cr:hover{border-color:var(--bdr)}
   font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;
   border-radius:2px;background:rgba(133,230,44,.15);color:var(--g);
   border:1px solid rgba(133,230,44,.3);flex-shrink:0}
+
+/* ── seed decider toggle ── */
+#seed-decider-btn-wrap{padding:.6rem 0 0}
+.seed-toggle{background:transparent;border:1px solid var(--bdr);border-radius:3px;
+  color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:.4rem}
+.seed-toggle:hover{border-color:rgba(133,230,44,.3);color:var(--g)}
+.seed-toggle.open{border-color:rgba(133,230,44,.4);color:var(--g)}
+.seed-toggle-arrow{font-size:10px;transition:transform .2s}
+.seed-toggle.open .seed-toggle-arrow{transform:rotate(180deg)}
+#seed-decider{overflow:hidden;transition:max-height .3s ease,opacity .2s;max-height:600px;opacity:1;margin-bottom:.8rem}
+#seed-decider.seed-hidden{max-height:0;opacity:0;pointer-events:none}
+
+/* ── seed decider bracket ── */
+#seed-decider{overflow-x:auto}
+.sd-wrap{display:flex;gap:0;align-items:flex-start;padding:1rem 0 .5rem;min-width:max-content}
+.sd-col{display:flex;flex-direction:column;justify-content:center}
+.sd-col-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted2);margin-bottom:.6rem;text-align:center}
+
+/* bracket match card */
+.sd-match{background:var(--s1);border:1px solid var(--bdr);border-radius:3px;
+  width:200px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.sd-match:hover{border-color:rgba(133,230,44,.25)}
+.sd-match.has-result{border-color:rgba(133,230,44,.2)}
+.sd-row{display:flex;align-items:center;gap:.45rem;padding:.4rem .55rem;min-height:36px}
+.sd-row + .sd-row{border-top:1px solid var(--bdr)}
+.sd-row.win{background:rgba(133,230,44,.045)}
+.sd-logo{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sd-logo img{width:100%;height:100%;object-fit:contain}
+.sd-logo-ph{width:20px;height:20px;border-radius:2px;background:var(--bdr)}
+.sd-team-info{flex:1;min-width:0}
+.sd-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;
+  letter-spacing:.02em;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd-row.win .sd-abbr{color:var(--g)}
+.sd-tbd .sd-abbr{color:var(--muted2)}
+.sd-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--muted2);flex-shrink:0;min-width:14px;text-align:right}
+.sd-row.win .sd-score{color:var(--g)}
+
+/* connector lines between rounds */
+.sd-connectors{display:flex;flex-direction:column;justify-content:space-around;width:28px;align-self:stretch}
+.sd-conn{flex:1;display:flex;align-items:center}
+.sd-conn-line{flex:1;height:0;border-top:1px solid var(--bdr)}
+.sd-conn-mid{width:0;height:50%;border-right:1px solid var(--bdr);border-top:1px solid var(--bdr)}
+.sd-conn-mid-b{width:0;height:50%;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.sd-connector-pair{display:flex;flex-direction:column;width:28px;align-self:stretch}
+.sd-connector-pair .top{flex:1;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.sd-connector-pair .bot{flex:1;border-right:1px solid var(--bdr);border-top:1px solid var(--bdr)}
+.sd-connector-out{display:flex;flex-direction:column;width:14px;align-self:stretch;justify-content:center}
+.sd-connector-out .line{height:1px;background:var(--bdr);width:100%}
+
+/* consolation separator */
+.sd-divider{width:1px;background:var(--bdr);align-self:stretch;margin:0 1.5rem}
+.sd-consolation-wrap{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:0}
 </style>
 </head>
 <body>
@@ -369,6 +425,12 @@ body.view-only .cr:hover{border-color:var(--bdr)}
     </div>
 
     <div id="main">
+      <div id="seed-decider-btn-wrap">
+        <button class="seed-toggle" onclick="toggleSeedDecider(this)">
+          시드 결정전 <span class="seed-toggle-arrow">▾</span>
+        </button>
+      </div>
+      <div id="seed-decider" class="seed-hidden"></div>
       <div id="round-tabs">
         <button class="r-tab active" data-round="r256" onclick="selectRound('r256',this)">
           R256 <span class="r-tab-count">32경기</span>
@@ -712,6 +774,7 @@ function pickScore(btn) {
   document.querySelectorAll('.sb-score-btn').forEach(b =>
     b.classList.toggle('selected', b === btn));
   updateConfirmBtn();
+  document.getElementById('sbConfirm').onclick = _sdCtx ? confirmSeedScore : confirmScore;
 }
 
 function updateScoreBtns() {
@@ -752,7 +815,8 @@ function resetMatch(grp, rnd, idx) {
 
 function closeScoreModal() {
   document.getElementById('scoreOverlay').classList.remove('open');
-  _modalCtx = null; _selWinner = null; _selScore = null;
+  _modalCtx = null; _sdCtx = null; _selWinner = null; _selScore = null;
+  document.getElementById('sbConfirm').onclick = confirmScore;
 }
 
 /* 오버레이 배경 클릭 닫기 */
@@ -768,6 +832,176 @@ function triggerCrtOff(e) {
 }
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
+
+/* ── 시드 결정전 ── */
+const SD = {
+  sf: [
+    {t1:null, t2:null, s1:null, s2:null, w:null}, // SF1
+    {t1:null, t2:null, s1:null, s2:null, w:null}, // SF2
+  ],
+  gf:  {t1:null, t2:null, s1:null, s2:null, w:null}, // Grand Final
+  con: {t1:null, t2:null, s1:null, s2:null, w:null}, // Consolation Final
+};
+
+const LS_SD_KEY = 'euq_seed_v1';
+
+function saveSeedScores() {
+  try {
+    localStorage.setItem(LS_SD_KEY, JSON.stringify({
+      sf: SD.sf.map(m => ({s1:m.s1,s2:m.s2,w:m.w,t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null})),
+      gf: {s1:SD.gf.s1,s2:SD.gf.s2,w:SD.gf.w,t1:SD.gf.t1?{abbr:SD.gf.t1.abbr,name:SD.gf.t1.name}:null,t2:SD.gf.t2?{abbr:SD.gf.t2.abbr,name:SD.gf.t2.name}:null},
+      con:{s1:SD.con.s1,s2:SD.con.s2,w:SD.con.w,t1:SD.con.t1?{abbr:SD.con.t1.abbr,name:SD.con.t1.name}:null,t2:SD.con.t2?{abbr:SD.con.t2.abbr,name:SD.con.t2.name}:null},
+    }));
+  } catch(e){}
+}
+
+function loadSeedScores() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LS_SD_KEY)||'null');
+    if (!d) return;
+    d.sf.forEach((m,i) => Object.assign(SD.sf[i], m));
+    Object.assign(SD.gf, d.gf);
+    Object.assign(SD.con, d.con);
+    SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
+    if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
+    if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
+    if(SD.con.t1&&!SD.con.t1.logo) SD.con.t1.logo=L(SD.con.t1.abbr);
+    if(SD.con.t2&&!SD.con.t2.logo) SD.con.t2.logo=L(SD.con.t2.abbr);
+  } catch(e){}
+}
+
+let _sdCtx = null;
+
+function openSeedModal(ctx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  _sdCtx = ctx;
+  const m = getSdMatch(ctx);
+  document.getElementById('sbTitle').textContent = sdCtxLabel(ctx) + ' · Bo3 결과 입력';
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${m.w===1?' selected':''}" onclick="pickSeedWinner(1,this)">
+      <div class="sb-team-logo">${t1?.logo?`<img src="${t1.logo}" alt="" onerror="this.style.display='none'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t1?.abbr??'TBD'}</div>
+    </button>
+    <div class="sb-vs">VS</div>
+    <button class="sb-team${m.w===2?' selected':''}" onclick="pickSeedWinner(2,this)">
+      <div class="sb-team-logo">${t2?.logo?`<img src="${t2.logo}" alt="" onerror="this.style.display='none'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t2?.abbr??'TBD'}</div>
+    </button>`;
+  document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
+  _selWinner = m.w; _selScore = m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null;
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+  document.getElementById('sbConfirm').onclick = confirmSeedScore;
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickSeedWinner(side, btn) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmSeedScore() {
+  if (!_selWinner || !_selScore || !_sdCtx) return;
+  const m = getSdMatch(_sdCtx);
+  const [big, small] = _selScore.split('-').map(Number);
+  m.w = _selWinner; m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
+  saveSeedScores();
+  closeScoreModal(); _sdCtx = null;
+  renderSeedDecider();
+}
+
+function resetSeedMatch(ctx) {
+  const m = getSdMatch(ctx);
+  m.w = null; m.s1 = null; m.s2 = null;
+  saveSeedScores(); renderSeedDecider();
+}
+
+function getSdMatch(ctx) {
+  if (ctx.type === 'sf') return SD.sf[ctx.idx];
+  if (ctx.type === 'gf') return SD.gf;
+  return SD.con;
+}
+
+function sdCtxLabel(ctx) {
+  if (ctx.type === 'sf') return `SF${ctx.idx+1}`;
+  if (ctx.type === 'gf') return 'GRAND FINAL';
+  return 'CONSOLATION FINAL';
+}
+
+function sdMatchHTML(m, ctx) {
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const hasResult = m.w !== null;
+  function rowHTML(t, side) {
+    const win = m.w === side;
+    const score = side===1 ? m.s1 : m.s2;
+    const logoHTML = t?.logo
+      ? `<div class="sd-logo"><img src="${t.logo}" alt="" onerror="this.style.display='none'"></div>`
+      : `<div class="sd-logo"><div class="sd-logo-ph"></div></div>`;
+    return `<div class="sd-row${win?' win':''}${!t?' sd-tbd':''}">
+      ${logoHTML}
+      <div class="sd-team-info"><div class="sd-abbr">${t?.abbr??'TBD'}</div></div>
+      ${hasResult?`<div class="sd-score">${score}</div>`:''}
+    </div>`;
+  }
+  const ctxStr = JSON.stringify(ctx).replace(/"/g,'&quot;');
+  const resetHTML = hasResult && isAdmin
+    ? `<button class="match-reset" title="결과 초기화"
+        onclick="event.stopPropagation();resetSeedMatch(${ctxStr})"
+        style="position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px">↺</button>` : '';
+  return `<div class="sd-match${hasResult?' has-result':''}" style="position:relative"
+    onclick="openSeedModal(${ctxStr})">
+    ${rowHTML(m.t1,1)}${rowHTML(m.t2,2)}
+    ${resetHTML}
+  </div>`;
+}
+
+function renderSeedDecider() {
+  const sf1 = SD.sf[0], sf2 = SD.sf[1], gf = SD.gf, con = SD.con;
+  document.getElementById('seed-decider').innerHTML = `
+    <div class="sd-wrap">
+      <!-- Semifinals -->
+      <div class="sd-col">
+        <div class="sd-col-label">Semifinals</div>
+        <div style="display:flex;flex-direction:column;gap:.6rem">
+          ${sdMatchHTML(sf1,{type:'sf',idx:0})}
+          ${sdMatchHTML(sf2,{type:'sf',idx:1})}
+        </div>
+      </div>
+      <!-- connector SF→GF -->
+      <div style="display:flex;flex-direction:column;width:28px;align-self:stretch;padding-top:22px">
+        <div style="flex:1;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);margin-bottom:0"></div>
+        <div style="flex:1;border-right:1px solid var(--bdr);border-top:1px solid var(--bdr)"></div>
+      </div>
+      <div style="display:flex;align-items:center;width:14px;align-self:center;margin-top:22px">
+        <div style="height:1px;width:100%;background:var(--bdr)"></div>
+      </div>
+      <!-- Grand Final -->
+      <div class="sd-col">
+        <div class="sd-col-label">Grand Final</div>
+        <div style="margin-top:22px">${sdMatchHTML(gf,{type:'gf'})}</div>
+      </div>
+      <!-- divider -->
+      <div class="sd-divider"></div>
+      <!-- Consolation Final -->
+      <div class="sd-consolation-wrap">
+        <div class="sd-col-label">Consolation Final</div>
+        ${sdMatchHTML(con,{type:'con'})}
+      </div>
+    </div>`;
+}
+
+function toggleSeedDecider(btn) {
+  const el = document.getElementById('seed-decider');
+  const isOpen = !el.classList.contains('seed-hidden');
+  el.classList.toggle('seed-hidden', isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+loadSeedScores();
+renderSeedDecider();
+
 loadScores();
 renderContent();
 </script>
