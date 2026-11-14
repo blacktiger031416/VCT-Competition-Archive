@@ -627,7 +627,25 @@ function saveScores() {
     });
     out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
   });
-  try { localStorage.setItem(LS_KEY, JSON.stringify(out)); } catch(e){}
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(out));
+    showSaveToast();
+  } catch(e){ showSaveToast(true); }
+}
+function showSaveToast(err) {
+  let t = document.getElementById('save-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'save-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  t.textContent = err ? '⚠ 저장 실패 (저장 공간 부족)' : '✓ 저장됨';
+  t.style.background = err ? '#c00' : '#85E62C';
+  t.style.color = err ? '#fff' : '#000';
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.opacity = '0', 1500);
 }
 function loadScores() {
   try {
