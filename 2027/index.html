@@ -563,7 +563,7 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 .oq-teams-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
 
 /* ── EU Bracket Button ── */
-#euBracketWrap{padding:.55rem 0 .3rem}
+#euBracketWrap{padding:.55rem 0 .3rem;display:flex;flex-direction:column;gap:.4rem}
 @keyframes euGlow{0%,100%{box-shadow:0 0 8px rgba(133,230,44,.18),0 0 20px rgba(133,230,44,.07)}50%{box-shadow:0 0 16px rgba(133,230,44,.36),0 0 36px rgba(133,230,44,.13)}}
 @keyframes euDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
 @keyframes euScanSlide{0%{left:-80%}100%{left:130%}}
@@ -1443,7 +1443,7 @@ const OQ_STAGE_DATA = (function(){
         ]},
     ]},
     eu:{stages:[
-      {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.',bracketUrl:'eu-qualifier.html'},
+      {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.',bracketUrl:'eu-qualifier.html',bracketUrl2:'eu-qualifier-2.html'},
       {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff',
         invitedTeams:[
           {abbr:'SGE',  name:'Eintracht Frankfurt',  logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/SGE.png'},
@@ -1823,18 +1823,23 @@ function buildOQPanelHTML(data, color, activeIdx) {
     </div>`;
   });
   const bracketUrl = data.stages[0]?.bracketUrl;
-  const bracketBtnHTML = bracketUrl ? `<div id="euBracketWrap" style="${activeIdx===0?'':'display:none'}">
-    <a href="${bracketUrl}" class="eu-oq-btn">
+  const bracketUrl2 = data.stages[0]?.bracketUrl2;
+  function mkBracketBtn(url, label) {
+    return `<a href="${url}" class="eu-oq-btn">
       <div class="eu-oq-corner tl"></div><div class="eu-oq-corner tr"></div>
       <div class="eu-oq-corner bl"></div><div class="eu-oq-corner br"></div>
       <div class="eu-oq-scan"></div>
       <div class="eu-oq-inner">
         <div class="eu-oq-live"><div class="eu-oq-dot"></div><span>LIVE</span></div>
         <div class="eu-oq-sep"></div>
-        <div class="eu-oq-label">GROUP STAGE BRACKET</div>
+        <div class="eu-oq-label">${label}</div>
         <div class="eu-oq-arrow">↗</div>
       </div>
-    </a>
+    </a>`;
+  }
+  const bracketBtnHTML = bracketUrl ? `<div id="euBracketWrap" style="${activeIdx===0?'':'display:none'}">
+    ${mkBracketBtn(bracketUrl, 'QUALIFIER 1')}
+    ${bracketUrl2 ? mkBracketBtn(bracketUrl2, 'QUALIFIER 2') : ''}
   </div>` : '';
   return `<div class="oq-panel">
     <div class="oq-stage-header">
