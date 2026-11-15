@@ -616,9 +616,30 @@ let curGroup = 'A';
 let curRound = 'r256';
 
 /* ── localStorage 저장/복원 ── */
-const LS_KEY = 'euq_scores_v3';
+const DB_KEY = 'euq_scores_v3';
 const ALL_RNDS = ['r256','r128','r64','r32','r16','r8'];
-function saveScores() {
+
+function showSaveToast(state) {
+  let t = document.getElementById('save-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'save-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  if (state === 'saving') {
+    t.textContent = '저장 중...'; t.style.background = '#555'; t.style.color = '#fff';
+  } else if (state === 'ok') {
+    t.textContent = '✓ 저장됨'; t.style.background = '#85E62C'; t.style.color = '#000';
+  } else {
+    t.textContent = '⚠ 저장 실패'; t.style.background = '#c00'; t.style.color = '#fff';
+  }
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  if (state !== 'saving') t._timer = setTimeout(() => t.style.opacity = '0', 2000);
+}
+
+function buildScoresPayload() {
   const out = {};
   ['A','B','C','D'].forEach(g => {
     out[g] = {};
@@ -627,31 +648,13 @@ function saveScores() {
     });
     out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
   });
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(out));
-    showSaveToast();
-  } catch(e){ showSaveToast(true); }
+  return JSON.stringify(out);
 }
-function showSaveToast(err) {
-  let t = document.getElementById('save-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'save-toast';
-    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
-    document.body.appendChild(t);
-  }
-  t.textContent = err ? '⚠ 저장 실패 (저장 공간 부족)' : '✓ 저장됨';
-  t.style.background = err ? '#c00' : '#85E62C';
-  t.style.color = err ? '#fff' : '#000';
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.style.opacity = '0', 1500);
-}
-function loadScores() {
+
+function applyScoresData(raw) {
+  if (!raw) return;
   try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
     ['A','B','C','D'].forEach(g => {
       if (!data[g]) return;
       ALL_RNDS.forEach(rnd => {
@@ -667,7 +670,26 @@ function loadScores() {
         MATCHES[g].winner = {abbr, name:data[g].winner.name, logo:L(abbr)};
       }
     });
-  } catch(e){}
+  } catch(e) {}
+}
+
+function saveScores() {
+  const payload = buildScoresPayload();
+  showSaveToast('saving');
+  fetch('/api/data/' + encodeURIComponent(DB_KEY), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({value: payload})
+  }).then(r => r.json()).then(d => {
+    if (d.ok) showSaveToast('ok'); else showSaveToast('err');
+  }).catch(() => showSaveToast('err'));
+}
+
+function loadScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_KEY))
+    .then(r => r.json())
+    .then(raw => { applyScoresData(raw); renderContent(); })
+    .catch(() => {});
 }
 
 /* ── 렌더 헬퍼 ── */
@@ -931,31 +953,39 @@ const SD = {
   con: {t1:null, t2:null, s1:null, s2:null, w:null}, // Consolation Final
 };
 
-const LS_SD_KEY = 'euq_seed_v1';
+const DB_SD_KEY = 'euq_seed_v1';
 
 function saveSeedScores() {
-  try {
-    localStorage.setItem(LS_SD_KEY, JSON.stringify({
-      sf: SD.sf.map(m => ({s1:m.s1,s2:m.s2,w:m.w,t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null})),
-      gf: {s1:SD.gf.s1,s2:SD.gf.s2,w:SD.gf.w,t1:SD.gf.t1?{abbr:SD.gf.t1.abbr,name:SD.gf.t1.name}:null,t2:SD.gf.t2?{abbr:SD.gf.t2.abbr,name:SD.gf.t2.name}:null},
-      con:{s1:SD.con.s1,s2:SD.con.s2,w:SD.con.w,t1:SD.con.t1?{abbr:SD.con.t1.abbr,name:SD.con.t1.name}:null,t2:SD.con.t2?{abbr:SD.con.t2.abbr,name:SD.con.t2.name}:null},
-    }));
-  } catch(e){}
+  const payload = JSON.stringify({
+    sf: SD.sf.map(m => ({s1:m.s1,s2:m.s2,w:m.w,t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null})),
+    gf: {s1:SD.gf.s1,s2:SD.gf.s2,w:SD.gf.w,t1:SD.gf.t1?{abbr:SD.gf.t1.abbr,name:SD.gf.t1.name}:null,t2:SD.gf.t2?{abbr:SD.gf.t2.abbr,name:SD.gf.t2.name}:null},
+    con:{s1:SD.con.s1,s2:SD.con.s2,w:SD.con.w,t1:SD.con.t1?{abbr:SD.con.t1.abbr,name:SD.con.t1.name}:null,t2:SD.con.t2?{abbr:SD.con.t2.abbr,name:SD.con.t2.name}:null},
+  });
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({value: payload})
+  }).catch(() => {});
 }
 
 function loadSeedScores() {
-  try {
-    const d = JSON.parse(localStorage.getItem(LS_SD_KEY)||'null');
-    if (!d) return;
-    d.sf.forEach((m,i) => Object.assign(SD.sf[i], m));
-    Object.assign(SD.gf, d.gf);
-    Object.assign(SD.con, d.con);
-    SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
-    if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
-    if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
-    if(SD.con.t1&&!SD.con.t1.logo) SD.con.t1.logo=L(SD.con.t1.abbr);
-    if(SD.con.t2&&!SD.con.t2.logo) SD.con.t2.logo=L(SD.con.t2.abbr);
-  } catch(e){}
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY))
+    .then(r => r.json())
+    .then(raw => {
+      try {
+        const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!d) return;
+        d.sf.forEach((m,i) => Object.assign(SD.sf[i], m));
+        Object.assign(SD.gf, d.gf);
+        Object.assign(SD.con, d.con);
+        SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
+        if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
+        if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
+        if(SD.con.t1&&!SD.con.t1.logo) SD.con.t1.logo=L(SD.con.t1.abbr);
+        if(SD.con.t2&&!SD.con.t2.logo) SD.con.t2.logo=L(SD.con.t2.abbr);
+        renderSeedDecider();
+      } catch(e) {}
+    }).catch(() => {});
 }
 
 let _sdCtx = null;
@@ -1092,11 +1122,11 @@ function toggleSeedDecider(btn) {
   btn.classList.toggle('open', !isOpen);
 }
 
-loadSeedScores();
 renderSeedDecider();
-
-loadScores();
 renderContent();
+
+loadSeedScores();
+loadScores();
 </script>
 <script src="../auth.js"></script>
 </body>
