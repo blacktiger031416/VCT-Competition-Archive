@@ -1454,6 +1454,16 @@ const OQ_STAGE_DATA = (function(){
           {abbr:'MIR',  name:'MIR',                   logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MIR.png'},
           {abbr:'EP',   name:'Enterprise Esports',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/EP.png'},
           {abbr:'GX',   name:'GIANTX',                logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/GX.png'},
+        ],
+        oqTeams:[
+          {abbr:'AURA', name:'AURA Esports',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/AURA.png'},
+          {abbr:'F9',   name:'F9 EICAR',        logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/F9.png'},
+          {abbr:'MPMT', name:'xXxMasterProMegaTeamxXx', logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MPMT.png'},
+          {abbr:'PXL',  name:'Pixel Lumina',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/PXL.png'},
+          {abbr:'BAR',  name:'Barça eSports',   logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/BAR.png'},
+          {abbr:'WIP',  name:'WIP Esports',     logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/WIP.png'},
+          {abbr:'MSA',  name:'La Masia',        logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MSA.png'},
+          {abbr:'CGN',  name:'CGN Esports',     logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/CGN.png'},
         ]},
       {key:'playoff',name:'PLAYOFF', meta:'8팀 · 2조 · 조별 1위',invites:0,desc:'2개조 편성 — 각 조 1위, 총 2팀 → KickOff'},
     ]},
@@ -1778,8 +1788,20 @@ function buildOQStageContentHTML(stage, color) {
         <div class="oq-badge" style="color:${color}cc">INVITED</div>
       </div></div>`;
   }
-  for (let i = 0; i < oqSlots; i++) {
+  const oqTeams = stage.oqTeams || [];
+  const remainSlots = Math.max(0, oqSlots - oqTeams.length);
+  oqTeams.forEach((t, i) => {
     slotsHTML += `<div class="team-slot oq-slot" style="animation:oqSlotIn .25s ease ${(invites+i)*0.04}s both">
+      <div class="team-logo" style="border:1px dashed rgba(255,255,255,.25)">
+        <img src="${t.logo}" alt="${t.abbr}" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">
+      </div>
+      <div class="team-info">
+        <div class="team-abbr" style="color:rgba(255,255,255,.85)">${t.abbr}</div>
+        <div class="oq-badge">Open Qualifier</div>
+      </div></div>`;
+  });
+  for (let i = 0; i < remainSlots; i++) {
+    slotsHTML += `<div class="team-slot oq-slot" style="animation:oqSlotIn .25s ease ${(invites+oqTeams.length+i)*0.04}s both">
       <div class="team-logo" style="border:1px dashed rgba(255,255,255,.12)">?</div>
       <div class="team-info">
         <div class="team-abbr" style="color:rgba(255,255,255,.2)">TBD</div>
