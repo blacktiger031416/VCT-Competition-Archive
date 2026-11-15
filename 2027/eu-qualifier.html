@@ -866,7 +866,7 @@ function bCardRow(t, side, m) {
   const score = side === 1 ? m.s1 : m.s2;
   const hasResult = m.w !== null;
   const logoHTML = t?.logo
-    ? `<img src="${t.logo}" alt="" onerror="this.style.display='none'">`
+    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`
     : '<div class="bcard-logo-ph"></div>';
   const fullname = t?.name && t.name !== t?.abbr ? t.name : '';
   return `<div class="bcard-row${win?' win':''}">
@@ -1004,7 +1004,7 @@ function openScoreModal(grp, rnd, idx) {
   document.getElementById('sbTeams').innerHTML = `
     <button class="sb-team${_selWinner===1?' selected':''}" onclick="pickWinner(1)">
       <div class="sb-team-logo">
-        ${t1?.logo ? `<img src="${t1.logo}" onerror="this.style.display='none'">` : '?'}
+        ${t1?.logo ? `<img src="${t1.logo}" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">` : '?'}
       </div>
       <div>
         <span class="sb-team-abbr">${t1?.abbr ?? 'TBD'}</span>
@@ -1013,7 +1013,7 @@ function openScoreModal(grp, rnd, idx) {
     </button>
     <button class="sb-team${_selWinner===2?' selected':''}" onclick="pickWinner(2)">
       <div class="sb-team-logo">
-        ${t2?.logo ? `<img src="${t2.logo}" onerror="this.style.display='none'">` : '?'}
+        ${t2?.logo ? `<img src="${t2.logo}" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">` : '?'}
       </div>
       <div>
         <span class="sb-team-abbr">${t2?.abbr ?? 'TBD'}</span>
@@ -1156,12 +1156,12 @@ function openSeedModal(ctx) {
   const t1 = m.t1, t2 = m.t2;
   document.getElementById('sbTeams').innerHTML = `
     <button class="sb-team${m.w===1?' selected':''}" onclick="pickSeedWinner(1,this)">
-      <div class="sb-team-logo">${t1?.logo?`<img src="${t1.logo}" alt="" onerror="this.style.display='none'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div class="sb-team-logo">${t1?.logo?`<img src="${t1.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
       <div>${t1?.abbr??'TBD'}</div>
     </button>
     <div class="sb-vs">VS</div>
     <button class="sb-team${m.w===2?' selected':''}" onclick="pickSeedWinner(2,this)">
-      <div class="sb-team-logo">${t2?.logo?`<img src="${t2.logo}" alt="" onerror="this.style.display='none'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div class="sb-team-logo">${t2?.logo?`<img src="${t2.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
       <div>${t2?.abbr??'TBD'}</div>
     </button>`;
   document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
@@ -1233,7 +1233,7 @@ function sdMatchHTML(m, ctx) {
     const win = m.w === side;
     const score = side===1 ? m.s1 : m.s2;
     const logoHTML = t?.logo
-      ? `<div class="sd-logo"><img src="${t.logo}" alt="" onerror="this.style.display='none'"></div>`
+      ? `<div class="sd-logo"><img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'"></div>`
       : `<div class="sd-logo"><div class="sd-logo-ph"></div></div>`;
     return `<div class="sd-row${win?' win':''}${!t?' sd-tbd':''}">
       ${logoHTML}
