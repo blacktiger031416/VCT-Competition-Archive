@@ -633,6 +633,29 @@ Object.values(MATCHES).forEach(g => {
 let curGroup = 'A';
 let bracketStart = 0; // 0=R256 … 5=R8
 
+/* 위너를 다음 라운드 슬롯에 전파 */
+function propagateWinner(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const winner = (() => { const m = MATCHES[grp][rnd][idx]; return m.w === 1 ? m.t1 : m.t2; })();
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  MATCHES[grp][nextRnd][nextIdx][slot] = winner ? {...winner} : null;
+}
+
+/* 위너 전파 취소 (리셋 시): 다음 라운드 해당 슬롯 비우고 그 이후도 연쇄 클리어 */
+function clearPropagated(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  const nm = MATCHES[grp][nextRnd][nextIdx];
+  nm[slot] = null;
+  // 그 다음 경기에 이미 결과가 있으면 함께 클리어
+  if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearPropagated(grp, nextRnd, nextIdx); }
+  if (nextRnd === 'r8') MATCHES[grp].winner = null;
+}
+
 const BK = { SLOT_H:60, CARD_H:52, CARD_W:185, CONN_W:26 };
 const RND_SHORT = {r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
 const RND_FULL  = {r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
@@ -927,7 +950,8 @@ function confirmScore() {
     m.s1 = _selWinner === 1 ? big : small;
     m.s2 = _selWinner === 2 ? big : small;
   }
-  /* Final: 위너 자동 세팅 */
+  /* 다음 라운드 슬롯에 위너 전파 */
+  propagateWinner(grp, rnd, idx);
   if (rnd === 'r8') {
     const winner = _selWinner === 1 ? m.t1 : m.t2;
     if (winner) MATCHES[grp].winner = {...winner};
@@ -940,6 +964,7 @@ function confirmScore() {
 function resetMatch(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   m.s1 = null; m.s2 = null; m.w = null;
+  clearPropagated(grp, rnd, idx);
   if (rnd === 'r8') MATCHES[grp].winner = null;
   saveScores();
   renderContent();
