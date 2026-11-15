@@ -139,7 +139,7 @@ body::after{content:'';position:fixed;inset:0;
   color:var(--txt);line-height:1}
 .bcard-row.win .bcard-abbr{color:var(--g)}
 .bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
-  color:var(--muted2);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
+  color:var(--txt);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
 .bcard-row.win .bcard-score{color:var(--g)}
 .bcard-sep{height:1px;background:var(--bdr)}
 
@@ -459,13 +459,7 @@ body.view-only .cr:hover{border-color:var(--bdr)}
         </button>
       </div>
       <div id="seed-decider" class="seed-hidden"></div>
-      <div id="round-tabs">
-        <div class="bnav">
-          <button class="bnav-arr" id="bnav-left" onclick="shiftBracket(-1)" disabled>‹</button>
-          <span class="bnav-label" id="bnav-label">Ro256</span>
-          <button class="bnav-arr" id="bnav-right" onclick="shiftBracket(1)">›</button>
-        </div>
-      </div>
+      <div id="round-tabs"></div>
       <div id="content"></div>
     </div>
   </div>
@@ -741,7 +735,7 @@ function bCardRow(t, side, m) {
 
 function renderBracket(grp) {
   const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
-  const visRnds = ALL_RNDS.slice(bracketStart);
+  const visRnds = ALL_RNDS.slice(0);
   const totalH = 32 * BK.SLOT_H;
   const COL_STEP = BK.CARD_W + BK.CONN_W;
   const totalW = visRnds.length * COL_STEP - BK.CONN_W;
@@ -758,7 +752,7 @@ function renderBracket(grp) {
   }).join('');
 
   visRnds.forEach((rnd, vi) => {
-    const ri = bracketStart + vi;
+    const ri = vi;
     const matches = MATCHES[grp][rnd];
     const colLeft = vi * COL_STEP;
     let cardsHTML = '';
@@ -804,12 +798,6 @@ function renderBracket(grp) {
 
 function renderContent() {
   const grp = GROUPS[curGroup];
-
-  /* update nav buttons */
-  const lbl = ALL_RNDS[bracketStart];
-  document.getElementById('bnav-label').textContent = RND_SHORT[lbl];
-  document.getElementById('bnav-left').disabled  = bracketStart <= 0;
-  document.getElementById('bnav-right').disabled = bracketStart >= ALL_RNDS.length - 1;
 
   /* winner panel */
   const w = MATCHES[curGroup].winner;
