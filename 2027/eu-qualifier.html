@@ -158,38 +158,12 @@ body::after{content:'';position:fixed;inset:0;
 #content::-webkit-scrollbar-thumb{background:rgba(133,230,44,.2);border-radius:2px}
 
 /* ── group switch animation ── */
-@keyframes grp-scanline{
-  0%  {transform:translateY(-100%);opacity:1}
-  100%{transform:translateY(100%);opacity:0}
+@keyframes grp-in{
+  0%  {opacity:0;transform:translateY(10px)}
+  100%{opacity:1;transform:translateY(0)}
 }
-@keyframes grp-flicker{
-  0%  {opacity:0}
-  8%  {opacity:.7}
-  12% {opacity:.1}
-  20% {opacity:.85}
-  25% {opacity:0}
-  30% {opacity:.9}
-  100%{opacity:1}
-}
-@keyframes grp-glitch-h{
-  0%  {clip-path:inset(0 0 95% 0);transform:translate(-4px,0)}
-  10% {clip-path:inset(30% 0 55% 0);transform:translate(3px,0)}
-  20% {clip-path:inset(60% 0 20% 0);transform:translate(-2px,0)}
-  30% {clip-path:inset(0 0 95% 0);transform:translate(0,0)}
-  100%{clip-path:inset(0 0 0 0);transform:translate(0,0)}
-}
-#content.grp-switching{animation:grp-flicker .32s ease-out forwards}
-#content.grp-switching::before{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:99;
-  background:linear-gradient(180deg,transparent 0%,rgba(133,230,44,.06) 50%,transparent 100%);
-  animation:grp-scanline .32s ease-in forwards;
-}
-#content.grp-switching::after{
-  content:'GROUP '  attr(data-grp);
-  position:absolute;top:1rem;left:1.2rem;
-  font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;
-  color:var(--g);letter-spacing:.08em;pointer-events:none;z-index:98;
-  animation:grp-glitch-h .32s ease-out forwards;
+#content.grp-switching{
+  animation:grp-in .22s cubic-bezier(.22,.61,.36,1) forwards;
 }
 
 /* ── group header ── */
