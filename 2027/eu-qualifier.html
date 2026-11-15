@@ -699,7 +699,8 @@ function crTeamHTML(t, side, win, score, hasResult) {
     : `<div class="cr-logo"><div class="cr-logo-ph">?</div></div>`;
   const nameHTML = t?.name ? `<div class="cr-name">${t.name}</div>` : '';
   const abbrHTML = `<div class="cr-abbr">${t?.abbr ?? 'TBD'}</div>`;
-  const scoreHTML = hasResult ? `<span class="cr-score" style="margin-left:auto;flex-shrink:0">${score}</span>` : '';
+  const scoreMargin = side === 2 ? 'margin-right:auto' : 'margin-left:auto';
+  const scoreHTML = hasResult ? `<span class="cr-score" style="${scoreMargin};flex-shrink:0">${score}</span>` : '';
   if (side === 2) {
     return `<div class="cr-team${win?' win':''}" style="flex-direction:row-reverse;text-align:right">
       ${logoHTML}
