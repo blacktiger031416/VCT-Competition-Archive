@@ -830,8 +830,9 @@ function applyScoresData(raw) {
       ALL_RNDS.forEach(rnd => {
         (data[g][rnd] || []).forEach((s,i) => {
           if (!MATCHES[g][rnd][i]) return;
-          if (s.t1) { MATCHES[g][rnd][i].t1 = {...s.t1, logo:L(s.t1.abbr)}; }
-          if (s.t2) { MATCHES[g][rnd][i].t2 = {...s.t2, logo:L(s.t2.abbr)}; }
+          // Only overwrite team data from DB for TBD slots (propagated); preserve HTML-defined teams
+          if (s.t1 && !MATCHES[g][rnd][i].t1) { MATCHES[g][rnd][i].t1 = {...s.t1, logo:L(s.t1.abbr)}; }
+          if (s.t2 && !MATCHES[g][rnd][i].t2) { MATCHES[g][rnd][i].t2 = {...s.t2, logo:L(s.t2.abbr)}; }
           MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
         });
       });
