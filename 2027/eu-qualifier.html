@@ -425,9 +425,6 @@ body.view-only .cr:hover{border-color:var(--bdr)}
 .sd-connector-out{display:flex;flex-direction:column;width:14px;align-self:stretch;justify-content:center}
 .sd-connector-out .line{height:1px;background:var(--bdr);width:100%}
 
-/* consolation separator */
-.sd-divider{width:1px;background:var(--bdr);align-self:stretch;margin:0 1.5rem}
-.sd-consolation-wrap{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:0}
 </style>
 </head>
 <body>
@@ -1110,11 +1107,10 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModa
 /* ── 시드 결정전 ── */
 const SD = {
   sf: [
-    {t1:null, t2:null, s1:null, s2:null, w:null}, // SF1
-    {t1:null, t2:null, s1:null, s2:null, w:null}, // SF2
+    {t1:{abbr:'MPMT', name:'xXxMasterProMegaTeamxXx', logo:L('MPMT')}, t2:{abbr:'F9', name:'F9 EICAR', logo:L('F9')}, s1:null, s2:null, w:null}, // SF1
+    {t1:{abbr:'AURA', name:'AURA Esports', logo:L('AURA')},            t2:{abbr:'PXL', name:'Pixel Lumina', logo:L('PXL')}, s1:null, s2:null, w:null}, // SF2
   ],
-  gf:  {t1:null, t2:null, s1:null, s2:null, w:null}, // Grand Final
-  con: {t1:null, t2:null, s1:null, s2:null, w:null}, // Consolation Final
+  gf: {t1:null, t2:null, s1:null, s2:null, w:null}, // Grand Final
 };
 
 const DB_SD_KEY = 'euq_seed_v1';
@@ -1123,7 +1119,6 @@ function saveSeedScores() {
   const payload = JSON.stringify({
     sf: SD.sf.map(m => ({s1:m.s1,s2:m.s2,w:m.w,t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null})),
     gf: {s1:SD.gf.s1,s2:SD.gf.s2,w:SD.gf.w,t1:SD.gf.t1?{abbr:SD.gf.t1.abbr,name:SD.gf.t1.name}:null,t2:SD.gf.t2?{abbr:SD.gf.t2.abbr,name:SD.gf.t2.name}:null},
-    con:{s1:SD.con.s1,s2:SD.con.s2,w:SD.con.w,t1:SD.con.t1?{abbr:SD.con.t1.abbr,name:SD.con.t1.name}:null,t2:SD.con.t2?{abbr:SD.con.t2.abbr,name:SD.con.t2.name}:null},
   });
   fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
     method: 'POST',
@@ -1139,14 +1134,11 @@ function loadSeedScores() {
       try {
         const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
         if (!d) return;
-        d.sf.forEach((m,i) => Object.assign(SD.sf[i], m));
-        Object.assign(SD.gf, d.gf);
-        Object.assign(SD.con, d.con);
+        d.sf.forEach((m,i) => { SD.sf[i].s1=m.s1; SD.sf[i].s2=m.s2; SD.sf[i].w=m.w; });
+        if (d.gf) Object.assign(SD.gf, d.gf);
         SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
         if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
         if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
-        if(SD.con.t1&&!SD.con.t1.logo) SD.con.t1.logo=L(SD.con.t1.abbr);
-        if(SD.con.t2&&!SD.con.t2.logo) SD.con.t2.logo=L(SD.con.t2.abbr);
         renderSeedDecider();
       } catch(e) {}
     }).catch(() => {});
@@ -1207,14 +1199,12 @@ function resetSeedMatch(ctx) {
 
 function getSdMatch(ctx) {
   if (ctx.type === 'sf') return SD.sf[ctx.idx];
-  if (ctx.type === 'gf') return SD.gf;
-  return SD.con;
+  return SD.gf;
 }
 
 function sdCtxLabel(ctx) {
   if (ctx.type === 'sf') return `SF${ctx.idx+1}`;
-  if (ctx.type === 'gf') return 'GRAND FINAL';
-  return 'CONSOLATION FINAL';
+  return 'GRAND FINAL';
 }
 
 function sdMatchHTML(m, ctx) {
@@ -1245,7 +1235,7 @@ function sdMatchHTML(m, ctx) {
 }
 
 function renderSeedDecider() {
-  const sf1 = SD.sf[0], sf2 = SD.sf[1], gf = SD.gf, con = SD.con;
+  const sf1 = SD.sf[0], sf2 = SD.sf[1], gf = SD.gf;
   document.getElementById('seed-decider').innerHTML = `
     <div class="sd-wrap">
       <!-- Semifinals -->
@@ -1268,13 +1258,6 @@ function renderSeedDecider() {
       <div class="sd-col">
         <div class="sd-col-label">Grand Final</div>
         <div style="margin-top:22px">${sdMatchHTML(gf,{type:'gf'})}</div>
-      </div>
-      <!-- divider -->
-      <div class="sd-divider"></div>
-      <!-- Consolation Final -->
-      <div class="sd-consolation-wrap">
-        <div class="sd-col-label">Consolation Final</div>
-        ${sdMatchHTML(con,{type:'con'})}
       </div>
     </div>`;
 }
