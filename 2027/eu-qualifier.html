@@ -128,16 +128,21 @@ body::after{content:'';position:fixed;inset:0;
   background:var(--s1);cursor:pointer;transition:border-color .15s}
 .bcard:hover{border-color:rgba(133,230,44,.3)}
 .bcard.has-result{border-color:rgba(133,230,44,.18)}
-.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.3rem .5rem;min-height:25px}
+.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.25rem .5rem .1rem;min-height:30px}
 .bcard-row.win{background:rgba(133,230,44,.07)}
 .bcard.has-result .bcard-row:not(.win){opacity:.42}
 .bcard-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .bcard-logo img{width:100%;height:100%;object-fit:contain}
 .bcard-logo-ph{width:18px;height:18px;background:var(--bdr);border-radius:2px}
+.bcard-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .bcard-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
-  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  color:var(--txt);line-height:1}
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--txt);line-height:1.1}
+.bcard-fullname{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted2);line-height:1.1;letter-spacing:.02em}
 .bcard-row.win .bcard-abbr{color:var(--g)}
+.bcard-row.win .bcard-fullname{color:rgba(133,230,44,.6)}
 .bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
   color:var(--txt);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
 .bcard-row.win .bcard-score{color:var(--g)}
@@ -691,7 +696,7 @@ function clearPropagated(grp, rnd, idx) {
   if (nextRnd === 'r8') MATCHES[grp].winner = null;
 }
 
-const BK = { SLOT_H:60, CARD_H:52, CARD_W:185, CONN_W:26 };
+const BK = { SLOT_H:68, CARD_H:64, CARD_W:200, CONN_W:26 };
 const RND_SHORT = {r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
 const RND_FULL  = {r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
 
@@ -793,9 +798,13 @@ function bCardRow(t, side, m) {
   const logoHTML = t?.logo
     ? `<img src="${t.logo}" alt="" onerror="this.style.display='none'">`
     : '<div class="bcard-logo-ph"></div>';
+  const fullname = t?.name && t.name !== t?.abbr ? t.name : '';
   return `<div class="bcard-row${win?' win':''}">
     <div class="bcard-logo">${logoHTML}</div>
-    <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+    <div class="bcard-info">
+      <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+      ${fullname ? `<div class="bcard-fullname">${fullname}</div>` : ''}
+    </div>
     ${hasResult ? `<div class="bcard-score">${score}</div>` : ''}
   </div>`;
 }
