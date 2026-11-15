@@ -153,9 +153,44 @@ body::after{content:'';position:fixed;inset:0;
 .bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
 
 /* ── content ── */
-#content{flex:1;overflow-y:auto;padding:1rem 1.2rem}
+#content{flex:1;overflow-y:auto;padding:1rem 1.2rem;position:relative}
 #content::-webkit-scrollbar{width:3px}
 #content::-webkit-scrollbar-thumb{background:rgba(133,230,44,.2);border-radius:2px}
+
+/* ── group switch animation ── */
+@keyframes grp-scanline{
+  0%  {transform:translateY(-100%);opacity:1}
+  100%{transform:translateY(100%);opacity:0}
+}
+@keyframes grp-flicker{
+  0%  {opacity:0}
+  8%  {opacity:.7}
+  12% {opacity:.1}
+  20% {opacity:.85}
+  25% {opacity:0}
+  30% {opacity:.9}
+  100%{opacity:1}
+}
+@keyframes grp-glitch-h{
+  0%  {clip-path:inset(0 0 95% 0);transform:translate(-4px,0)}
+  10% {clip-path:inset(30% 0 55% 0);transform:translate(3px,0)}
+  20% {clip-path:inset(60% 0 20% 0);transform:translate(-2px,0)}
+  30% {clip-path:inset(0 0 95% 0);transform:translate(0,0)}
+  100%{clip-path:inset(0 0 0 0);transform:translate(0,0)}
+}
+#content.grp-switching{animation:grp-flicker .32s ease-out forwards}
+#content.grp-switching::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:99;
+  background:linear-gradient(180deg,transparent 0%,rgba(133,230,44,.06) 50%,transparent 100%);
+  animation:grp-scanline .32s ease-in forwards;
+}
+#content.grp-switching::after{
+  content:'GROUP '  attr(data-grp);
+  position:absolute;top:1rem;left:1.2rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;
+  color:var(--g);letter-spacing:.08em;pointer-events:none;z-index:98;
+  animation:grp-glitch-h .32s ease-out forwards;
+}
 
 /* ── group header ── */
 .grp-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.85rem;
@@ -823,9 +858,18 @@ function renderContent() {
 }
 
 function selectGroup(g, el) {
+  if (g === curGroup) return;
   curGroup = g;
   document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
+
+  const ct = document.getElementById('content');
+  ct.dataset.grp = g;
+  ct.classList.remove('grp-switching');
+  void ct.offsetWidth; // reflow to restart animation
+  ct.classList.add('grp-switching');
+  ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+
   renderContent();
 }
 
