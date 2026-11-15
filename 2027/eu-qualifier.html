@@ -1135,7 +1135,9 @@ function loadSeedScores() {
         const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
         if (!d) return;
         d.sf.forEach((m,i) => { SD.sf[i].s1=m.s1; SD.sf[i].s2=m.s2; SD.sf[i].w=m.w; });
-        if (d.gf) Object.assign(SD.gf, d.gf);
+        // Restore GF scores/winner only; re-propagate teams from SF results
+        if (d.gf) { SD.gf.s1=d.gf.s1; SD.gf.s2=d.gf.s2; SD.gf.w=d.gf.w; }
+        SD.sf.forEach((m,i) => { if(m.w) propagateSeedWinner({type:'sf',idx:i}); });
         SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
         if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
         if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
@@ -1176,6 +1178,21 @@ function pickSeedWinner(side, btn) {
   document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
 }
 
+function propagateSeedWinner(ctx) {
+  if (ctx.type !== 'sf') return;
+  const m = SD.sf[ctx.idx];
+  const winner = m.w === 1 ? m.t1 : m.t2;
+  const slot = ctx.idx === 0 ? 't1' : 't2';
+  SD.gf[slot] = winner ? {...winner} : null;
+}
+
+function clearSeedPropagated(ctx) {
+  if (ctx.type !== 'sf') return;
+  const slot = ctx.idx === 0 ? 't1' : 't2';
+  SD.gf[slot] = null;
+  if (SD.gf.w !== null) { SD.gf.w = null; SD.gf.s1 = null; SD.gf.s2 = null; }
+}
+
 function confirmSeedScore() {
   if (!_selWinner || !_selScore || !_sdCtx) return;
   const m = getSdMatch(_sdCtx);
@@ -1186,6 +1203,7 @@ function confirmSeedScore() {
     const [big, small] = _selScore.split('-').map(Number);
     m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
   }
+  propagateSeedWinner(_sdCtx);
   saveSeedScores();
   closeScoreModal(); _sdCtx = null;
   renderSeedDecider();
@@ -1194,6 +1212,7 @@ function confirmSeedScore() {
 function resetSeedMatch(ctx) {
   const m = getSdMatch(ctx);
   m.w = null; m.s1 = null; m.s2 = null;
+  clearSeedPropagated(ctx);
   saveSeedScores(); renderSeedDecider();
 }
 
