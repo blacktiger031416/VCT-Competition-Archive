@@ -1443,7 +1443,7 @@ const OQ_STAGE_DATA = (function(){
         ]},
     ]},
     eu:{stages:[
-      {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.',bracketUrl:'eu-qualifier.html',bracketUrl2:'eu-qualifier-2.html'},
+      {key:'oq',     name:'OQ',      meta:'→ 상위 8팀 진출',    invites:0,desc:'상위 8팀이 Swiss Stage로 진출합니다.',bracketUrl:'eu-qualifier.html',bracketUrl2:'eu-qualifier-2.html',hideTeams:true},
       {key:'swiss',  name:'SWISS',   meta:'초청 8 + OQ 8팀',    invites:8,desc:'초청팀 8팀 + OQ 진출팀 8팀 — 총 16팀<br>상위 8팀 → OQ Playoff',
         invitedTeams:[
           {abbr:'SGE',  name:'Eintracht Frankfurt',  logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/SGE.png'},
@@ -1786,10 +1786,11 @@ function buildOQStageContentHTML(stage, color) {
         <div class="oq-badge">Open Qualifier</div>
       </div></div>`;
   }
+  const teamsSection = stage.hideTeams ? '' :
+    `<div class="oq-teams-label">PARTICIPATING TEAMS</div><div class="teams-grid">${slotsHTML}</div>`;
   return `<div class="oq-sweep"></div>
     <div class="oq-stage-info" style="border-left-color:${color}">${stage.desc}${invTag}</div>
-    <div class="oq-teams-label">PARTICIPATING TEAMS</div>
-    <div class="teams-grid">${slotsHTML}</div>`;
+    ${teamsSection}`;
 }
 
 function buildOQPanelHTML(data, color, activeIdx) {
