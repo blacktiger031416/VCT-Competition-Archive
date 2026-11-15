@@ -109,22 +109,48 @@ body::after{content:'';position:fixed;inset:0;
 /* ── main ── */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* ── round tabs ── */
-#round-tabs{display:flex;align-items:stretch;border-bottom:1px solid var(--bdr);
-  background:var(--s1);flex-shrink:0;padding:0 1.2rem;gap:.2rem;position:relative}
+/* ── bracket nav ── */
+#round-tabs{display:flex;align-items:center;border-bottom:1px solid var(--bdr);
+  background:var(--s1);flex-shrink:0;padding:0 1.2rem;position:relative;min-height:40px}
 #round-tabs::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
   background:linear-gradient(90deg,transparent,rgba(133,230,44,.18),transparent)}
-.r-tab{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
-  padding:.55rem .85rem;border:none;background:none;cursor:pointer;
-  position:relative;transition:color .15s;white-space:nowrap}
-.r-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:var(--g);opacity:0;transition:opacity .15s}
-.r-tab:hover{color:var(--txt)}
-.r-tab.active{color:var(--g)}
-.r-tab.active::after{opacity:1}
-.r-tab-count{font-size:9px;color:var(--muted2);margin-left:.3rem}
-.r-tab.active .r-tab-count{color:rgba(133,230,44,.6)}
+.bnav{display:flex;align-items:center;gap:.35rem;margin-left:auto}
+.bnav-arr{background:none;border:1px solid var(--bdr);color:var(--muted);border-radius:3px;
+  width:26px;height:26px;cursor:pointer;font-size:16px;line-height:1;padding:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.bnav-arr:hover:not(:disabled){border-color:var(--g);color:var(--g)}
+.bnav-arr:disabled{opacity:.25;cursor:default}
+.bnav-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  letter-spacing:.12em;color:var(--txt);min-width:52px;text-align:center}
+
+/* ── bracket cards ── */
+.bcard{width:185px;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;
+  background:var(--s1);cursor:pointer;transition:border-color .15s}
+.bcard:hover{border-color:rgba(133,230,44,.3)}
+.bcard.has-result{border-color:rgba(133,230,44,.18)}
+.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.3rem .5rem;min-height:25px}
+.bcard-row.win{background:rgba(133,230,44,.07)}
+.bcard.has-result .bcard-row:not(.win){opacity:.42}
+.bcard-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bcard-logo img{width:100%;height:100%;object-fit:contain}
+.bcard-logo-ph{width:18px;height:18px;background:var(--bdr);border-radius:2px}
+.bcard-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--txt);line-height:1}
+.bcard-row.win .bcard-abbr{color:var(--g)}
+.bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--muted2);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
+.bcard-row.win .bcard-score{color:var(--g)}
+.bcard-sep{height:1px;background:var(--bdr)}
+
+/* ── bracket layout ── */
+.bracket-outer{overflow-x:auto;overflow-y:auto;padding-bottom:.5rem}
+.bracket-rnd-labels{display:flex;padding:6px 0 10px}
+.bcol-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;text-align:center}
+.bracket-inner{position:relative}
+.bm-wrap{position:absolute}
+.bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
 
 /* ── content ── */
 #content{flex:1;overflow-y:auto;padding:1rem 1.2rem}
@@ -434,24 +460,11 @@ body.view-only .cr:hover{border-color:var(--bdr)}
       </div>
       <div id="seed-decider" class="seed-hidden"></div>
       <div id="round-tabs">
-        <button class="r-tab active" data-round="r256" onclick="selectRound('r256',this)">
-          R256 <span class="r-tab-count">32경기</span>
-        </button>
-        <button class="r-tab" data-round="r128" onclick="selectRound('r128',this)">
-          R128 <span class="r-tab-count">16경기</span>
-        </button>
-        <button class="r-tab" data-round="r64" onclick="selectRound('r64',this)">
-          R64 <span class="r-tab-count">8경기</span>
-        </button>
-        <button class="r-tab" data-round="r32" onclick="selectRound('r32',this)">
-          R32 <span class="r-tab-count">4경기</span>
-        </button>
-        <button class="r-tab" data-round="r16" onclick="selectRound('r16',this)">
-          R16 <span class="r-tab-count">2경기</span>
-        </button>
-        <button class="r-tab" data-round="r8" onclick="selectRound('r8',this)">
-          R8 <span class="r-tab-count">FINAL</span>
-        </button>
+        <div class="bnav">
+          <button class="bnav-arr" id="bnav-left" onclick="shiftBracket(-1)" disabled>‹</button>
+          <span class="bnav-label" id="bnav-label">Ro256</span>
+          <button class="bnav-arr" id="bnav-right" onclick="shiftBracket(1)">›</button>
+        </div>
       </div>
       <div id="content"></div>
     </div>
@@ -615,7 +628,24 @@ Object.values(MATCHES).forEach(g => {
 
 /* ── 상태 ── */
 let curGroup = 'A';
-let curRound = 'r256';
+let bracketStart = 0; // 0=R256 … 5=R8
+
+const BK = { SLOT_H:60, CARD_H:52, CARD_W:185, CONN_W:26 };
+const RND_SHORT = {r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
+const RND_FULL  = {r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
+
+function bCardTop(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + (s * BK.SLOT_H - BK.CARD_H) / 2;
+}
+function bCenterY(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + s * BK.SLOT_H / 2;
+}
+function shiftBracket(dir) {
+  bracketStart = Math.max(0, Math.min(ALL_RNDS.length - 1, bracketStart + dir));
+  renderContent();
+}
 
 /* ── localStorage 저장/복원 ── */
 const DB_KEY = 'euq_scores_v3';
@@ -694,122 +724,112 @@ function loadScores() {
     .catch(() => {});
 }
 
-/* ── 렌더 헬퍼 ── */
-function crTeamHTML(t, side, win, score, hasResult) {
+/* ── bracket renderer ── */
+function bCardRow(t, side, m) {
+  const win = m.w === side;
+  const score = side === 1 ? m.s1 : m.s2;
+  const hasResult = m.w !== null;
   const logoHTML = t?.logo
-    ? `<div class="cr-logo"><img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'"></div>`
-    : `<div class="cr-logo"><div class="cr-logo-ph">?</div></div>`;
-  const nameHTML = t?.name ? `<div class="cr-name">${t.name}</div>` : '';
-  const abbrHTML = `<div class="cr-abbr">${t?.abbr ?? 'TBD'}</div>`;
-  const scoreMargin = side === 2 ? 'margin-right:auto' : 'margin-left:auto';
-  const scoreHTML = hasResult ? `<span class="cr-score" style="${scoreMargin};flex-shrink:0">${score}</span>` : '';
-  if (side === 2) {
-    return `<div class="cr-team${win?' win':''}" style="flex-direction:row-reverse;text-align:right">
-      ${logoHTML}
-      <div class="cr-info" style="text-align:right">${abbrHTML}${nameHTML}</div>
-      ${scoreHTML}
+    ? `<img src="${t.logo}" alt="" onerror="this.style.display='none'">`
+    : '<div class="bcard-logo-ph"></div>';
+  return `<div class="bcard-row${win?' win':''}">
+    <div class="bcard-logo">${logoHTML}</div>
+    <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+    ${hasResult ? `<div class="bcard-score">${score}</div>` : ''}
+  </div>`;
+}
+
+function renderBracket(grp) {
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const visRnds = ALL_RNDS.slice(bracketStart);
+  const totalH = 32 * BK.SLOT_H;
+  const COL_STEP = BK.CARD_W + BK.CONN_W;
+  const totalW = visRnds.length * COL_STEP - BK.CONN_W;
+
+  let svgLines = '';
+  let colsHTML = '';
+
+  /* round label row */
+  const labelsHTML = visRnds.map((rnd, vi) => {
+    const mr = vi < visRnds.length - 1 ? BK.CONN_W : 0;
+    return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px">
+      <div class="bcol-label">${RND_FULL[rnd]}</div>
     </div>`;
-  }
-  return `<div class="cr-team${win?' win':''}">
-    ${logoHTML}
-    <div class="cr-info">${abbrHTML}${nameHTML}</div>
-    ${scoreHTML}
-  </div>`;
-}
+  }).join('');
 
-function compactRow(m, idx) {
-  const hasResult = m.w !== null;
-  const t1win = m.w === 1, t2win = m.w === 2;
-  const resetBtn = (hasResult && window.vctIsAdmin && window.vctIsAdmin())
-    ? `<button class="match-reset" title="결과 초기화"
-        onclick="event.stopPropagation();resetMatch('${curGroup}','${curRound}',${idx})"
-        style="font-size:9px;padding:0 4px;margin-right:2px">↺</button>` : '';
-  return `<div class="cr${hasResult?' has-result':''}" style="animation-delay:${idx*.015}s"
-    onclick="openScoreModal('${curGroup}','${curRound}',${idx})">
-    ${crTeamHTML(m.t1, 1, t1win, m.s1, hasResult)}
-    <div class="cr-sep"></div>
-    <div class="cr-vs">${hasResult ? ':' : 'vs'}</div>
-    <div class="cr-sep"></div>
-    ${crTeamHTML(m.t2, 2, t2win, m.s2, hasResult)}
-    ${resetBtn}
-  </div>`;
-}
+  visRnds.forEach((rnd, vi) => {
+    const ri = bracketStart + vi;
+    const matches = MATCHES[grp][rnd];
+    const colLeft = vi * COL_STEP;
+    let cardsHTML = '';
 
-function teamRow(t, side, m) {
-  const isWin = m.w === side;
-  const isTbd = !t;
-  const scoreHTML = (m.s1 !== null && !isTbd)
-    ? `<div class="mt-score">${side===1 ? m.s1 : m.s2}</div>` : '';
-  const markHTML = isWin
-    ? `<div class="mt-win-mark"><svg viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#85E62C" stroke-width="1.5" fill="none"/></svg></div>` : '';
-  return `<div class="mt-row${isTbd?' tbd':''}${isWin?' win':''}">
-    <div class="mt-logo">
-      ${t?.logo ? `<img src="${t.logo}" alt="${t.abbr}" onerror="this.style.display='none'">` : `<div class="mt-logo-ph">?</div>`}
-    </div>
-    <div class="mt-info">
-      <span class="mt-abbr">${t?.abbr ?? 'TBD'}</span>
-      <span class="mt-name">${t?.name ?? '미정'}</span>
-    </div>
-    ${scoreHTML}${markHTML}
-  </div>`;
-}
+    matches.forEach((m, mi) => {
+      const top = bCardTop(ri, mi);
+      const hasResult = m.w !== null;
+      const ctx = `'${grp}','${rnd}',${mi}`;
+      const resetBtn = hasResult && isAdmin
+        ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})" style="position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px">↺</button>` : '';
 
-function matchCard(m, idx) {
-  const num  = String(idx+1).padStart(2,'0');
-  const hasResult = m.w !== null;
-  const vsText = hasResult
-    ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--muted)">${m.s1} : ${m.s2}</span>`
-    : `<span class="match-vs-txt">VS</span>`;
-  const resetBtn = hasResult
-    ? `<button class="match-reset" title="결과 초기화" onclick="event.stopPropagation();resetMatch('${curGroup}','${curRound}',${idx})">↺</button>` : '';
-  return `<div class="match-card${hasResult?' has-result':''}" style="animation-delay:${idx*.04}s"
-    onclick="openScoreModal('${curGroup}','${curRound}',${idx})">
-    <div class="match-num">
-      <span>MATCH ${num}</span>
-      <div style="display:flex;align-items:center;gap:.4rem">
-        ${resetBtn}
-        <span class="match-edit-hint">${hasResult?'수정':'결과 입력'} ✎</span>
-      </div>
-    </div>
-    ${teamRow(m.t1, 1, m)}
-    <div class="match-vs">
-      <div class="match-vs-line"></div>
-      ${vsText}
-      <div class="match-vs-line"></div>
-    </div>
-    ${teamRow(m.t2, 2, m)}
-  </div>`;
+      cardsHTML += `<div class="bm-wrap" style="top:${top}px;left:0">
+        <div class="bcard${hasResult?' has-result':''}" style="position:relative" onclick="openScoreModal(${ctx})">
+          ${bCardRow(m.t1,1,m)}<div class="bcard-sep"></div>${bCardRow(m.t2,2,m)}${resetBtn}
+        </div>
+      </div>`;
+
+      /* SVG connectors — process pairs (even mi only) */
+      if (vi < visRnds.length - 1 && ri < ALL_RNDS.length - 1 && mi % 2 === 0 && mi + 1 < matches.length) {
+        const topCY = bCenterY(ri, mi);
+        const botCY = bCenterY(ri, mi + 1);
+        const parCY = bCenterY(ri + 1, mi / 2);
+        const srcX  = colLeft + BK.CARD_W;
+        const jx    = srcX + BK.CONN_W * 0.5;
+        const parX  = colLeft + COL_STEP;
+        const c     = 'rgba(255,255,255,.09)';
+        svgLines += `<line x1="${srcX}" y1="${topCY}" x2="${jx}" y2="${topCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${srcX}" y1="${botCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
+      }
+    });
+
+    colsHTML += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${vi < visRnds.length-1 ? BK.CONN_W : 0}px">${cardsHTML}</div>`;
+  });
+
+  return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
+    <div class="bracket-inner" style="width:${totalW}px;height:${totalH}px">
+      <svg class="bracket-svg" width="${totalW}" height="${totalH}">${svgLines}</svg>
+      <div style="display:flex">${colsHTML}</div>
+    </div>`;
 }
 
 function renderContent() {
-  const grp  = GROUPS[curGroup];
-  const cfg  = ROUND_CFG[curRound];
-  const matches = MATCHES[curGroup][curRound];
-  const isFinal = curRound === 'r8';
-  const isCompact = !!cfg.compact;
+  const grp = GROUPS[curGroup];
 
-  const gridHTML = isCompact
-    ? `<div class="compact-grid">${matches.map((m,i) => compactRow(m,i)).join('')}</div>`
-    : `<div class="match-grid ${cfg.gridClass}">${matches.map((m,i) => matchCard(m,i)).join('')}</div>`;
+  /* update nav buttons */
+  const lbl = ALL_RNDS[bracketStart];
+  document.getElementById('bnav-label').textContent = RND_SHORT[lbl];
+  document.getElementById('bnav-left').disabled  = bracketStart <= 0;
+  document.getElementById('bnav-right').disabled = bracketStart >= ALL_RNDS.length - 1;
 
+  /* winner panel */
   const w = MATCHES[curGroup].winner;
-  const winnerHTML = isFinal ? `
-    <div class="winner-wrap" style="margin-top:.8rem">
-      <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
-      <div>
-        <div class="winner-label">GROUP ${curGroup} WINNER → Swiss Stage</div>
-        <div class="winner-name">${w?.name ?? '미정'}</div>
-      </div>
-      <div class="winner-badge">Swiss Stage 진출</div>
-    </div>` : '';
+  const winnerHTML = `<div class="winner-wrap" style="margin-top:.8rem;${w?'':'opacity:.35'}">
+    <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
+    <div>
+      <div class="winner-label">GROUP ${curGroup} WINNER → Swiss Stage</div>
+      <div class="winner-name">${w?.name ?? '미정'}</div>
+    </div>
+    <div class="winner-badge">Swiss Stage 진출</div>
+  </div>`;
 
   document.getElementById('content').innerHTML = `
     <div class="grp-header">
       <div class="grp-title">GROUP ${curGroup}</div>
       <div class="grp-badge ${grp.status}">${grp.label}</div>
-      <div class="grp-desc">${cfg.name} · ${cfg.matchCount}경기</div>
     </div>
-    ${gridHTML}
+    <div class="bracket-outer">
+      ${renderBracket(curGroup)}
+    </div>
     ${winnerHTML}
   `;
 }
@@ -821,12 +841,6 @@ function selectGroup(g, el) {
   renderContent();
 }
 
-function selectRound(r, el) {
-  curRound = r;
-  document.querySelectorAll('.r-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderContent();
-}
 
 /* ── Score Modal ── */
 let _modalCtx = null; // {grp, rnd, idx}
@@ -840,9 +854,8 @@ function openScoreModal(grp, rnd, idx) {
   _selWinner = m.w;
   _selScore  = (m.s1 !== null) ? (m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`) : null;
 
-  const cfg = ROUND_CFG[rnd];
   document.getElementById('sbTitle').textContent =
-    `${cfg.name} · MATCH ${String(idx+1).padStart(2,'0')}`;
+    `${RND_FULL[rnd]} · MATCH ${String(idx+1).padStart(2,'0')}`;
 
   const t1 = m.t1, t2 = m.t2;
   document.getElementById('sbTeams').innerHTML = `
