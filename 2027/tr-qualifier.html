@@ -366,7 +366,20 @@ body.view-only .cr:hover{border-color:var(--bdr)}
   border-radius:2px;background:rgba(133,230,44,.15);color:var(--g);
   border:1px solid rgba(133,230,44,.3);flex-shrink:0}
 
-/* seed decider styles (not used for TR, kept for future) */
+/* ── seed decider toggle ── */
+#seed-decider-btn-wrap{padding:.6rem 0 0}
+.seed-toggle{background:transparent;border:1px solid var(--bdr);border-radius:3px;
+  color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:.4rem}
+.seed-toggle:hover{border-color:rgba(133,230,44,.3);color:var(--g)}
+.seed-toggle.open{border-color:rgba(133,230,44,.4);color:var(--g)}
+.seed-toggle-arrow{font-size:10px;transition:transform .2s}
+.seed-toggle.open .seed-toggle-arrow{transform:rotate(180deg)}
+#seed-decider{overflow:hidden;transition:max-height .3s ease,opacity .2s;max-height:300px;opacity:1;margin-bottom:.8rem}
+#seed-decider.seed-hidden{max-height:0;opacity:0;pointer-events:none}
+/* ── seed decider match ── */
+.sd-wrap{padding:1rem 0 .5rem}
 .sd-match{background:var(--s1);border:1px solid var(--bdr);border-radius:3px;
   width:200px;overflow:hidden;cursor:pointer;transition:border-color .15s}
 .sd-match:hover{border-color:rgba(133,230,44,.25)}
@@ -416,6 +429,12 @@ body.view-only .cr:hover{border-color:var(--bdr)}
     </div>
 
     <div id="main">
+      <div id="seed-decider-btn-wrap">
+        <button class="seed-toggle" onclick="toggleSeedDecider(this)">
+          시드 결정전 <span class="seed-toggle-arrow">▾</span>
+        </button>
+      </div>
+      <div id="seed-decider" class="seed-hidden"></div>
       <div id="round-tabs"></div>
       <div id="content"></div>
     </div>
@@ -906,7 +925,128 @@ function triggerCrtOff(e) {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
 
+/* ── 시드 결정전 (Bo3 단판) ── */
+const SD = {
+  gf: {t1:{abbr:'MISA', name:'Misa Esports', logo:L('MISA')}, t2:{abbr:'TT', name:'Trigon Titans', logo:L('TT')}, s1:null, s2:null, w:null},
+};
+const DB_SD_KEY = 'trq_seed_v1';
+
+function saveSeedScores() {
+  const m = SD.gf;
+  const payload = JSON.stringify({s1:m.s1,s2:m.s2,w:m.w});
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({value: payload})
+  }).catch(() => {});
+}
+
+function loadSeedScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY))
+    .then(r => r.json())
+    .then(raw => {
+      try {
+        const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!d) return;
+        SD.gf.s1 = d.s1; SD.gf.s2 = d.s2; SD.gf.w = d.w;
+        renderSeedDecider();
+      } catch(e) {}
+    }).catch(() => {});
+}
+
+let _sdCtx = null;
+
+function openSeedModal(ctx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  _sdCtx = ctx;
+  const m = SD.gf;
+  document.getElementById('sbTitle').textContent = '시드 결정전 · Bo3 결과 입력';
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${m.w===1?' selected':''}" onclick="pickSeedWinner(1,this)">
+      <div class="sb-team-logo">${t1?.logo?`<img src="${t1.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t1?.abbr??'TBD'}</div>
+    </button>
+    <div class="sb-vs">VS</div>
+    <button class="sb-team${m.w===2?' selected':''}" onclick="pickSeedWinner(2,this)">
+      <div class="sb-team-logo">${t2?.logo?`<img src="${t2.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t2?.abbr??'TBD'}</div>
+    </button>`;
+  document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
+  _selWinner = m.w; _selScore = m.s1!==null?(m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`):null;
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+  document.getElementById('sbConfirm').onclick = confirmSeedScore;
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickSeedWinner(side, btn) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmSeedScore() {
+  if (!_selWinner || !_selScore || !_sdCtx) return;
+  const m = SD.gf;
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner===1?'W':'FF'; m.s2 = _selWinner===2?'W':'FF';
+  } else {
+    const [big, small] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
+  }
+  saveSeedScores();
+  closeScoreModal(); _sdCtx = null;
+  renderSeedDecider();
+}
+
+function resetSeedMatch() {
+  SD.gf.w = null; SD.gf.s1 = null; SD.gf.s2 = null;
+  saveSeedScores(); renderSeedDecider();
+}
+
+function sdMatchHTML() {
+  const m = SD.gf;
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const hasResult = m.w !== null;
+  function rowHTML(t, side) {
+    const win = m.w === side;
+    const score = side===1 ? m.s1 : m.s2;
+    const logoHTML = t?.logo
+      ? `<div class="sd-logo"><img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'"></div>`
+      : `<div class="sd-logo"><div class="sd-logo-ph"></div></div>`;
+    return `<div class="sd-row${win?' win':''}${!t?' sd-tbd':''}">
+      ${logoHTML}
+      <div class="sd-team-info"><div class="sd-abbr">${t?.abbr??'TBD'}</div></div>
+      ${hasResult?`<div class="sd-score">${score}</div>`:''}
+    </div>`;
+  }
+  const resetHTML = hasResult && isAdmin
+    ? `<button class="match-reset" title="결과 초기화"
+        onclick="event.stopPropagation();resetSeedMatch()"
+        style="position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px">↺</button>` : '';
+  return `<div class="sd-match${hasResult?' has-result':''}" style="position:relative"
+    onclick="openSeedModal('gf')">
+    ${rowHTML(m.t1,1)}${rowHTML(m.t2,2)}
+    ${resetHTML}
+  </div>`;
+}
+
+function renderSeedDecider() {
+  document.getElementById('seed-decider').innerHTML =
+    `<div class="sd-wrap">${sdMatchHTML()}</div>`;
+}
+
+function toggleSeedDecider(btn) {
+  const el = document.getElementById('seed-decider');
+  const isOpen = !el.classList.contains('seed-hidden');
+  el.classList.toggle('seed-hidden', isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+renderSeedDecider();
 renderContent();
+loadSeedScores();
 loadScores();
 </script>
 <script src="../auth.js"></script>
