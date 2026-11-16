@@ -508,6 +508,17 @@ const MATCHES = {
   B:{r128:mkM(32), r64:mkM(16), r32:mkM(8), r16:mkM(4), r8:mkM(2), f:mkM(1), winner:null},
 };
 
+/* 로고 경로 자동 주입 */
+Object.values(MATCHES).forEach(g => {
+  ['r128','r64','r32','r16','r8','f'].forEach(rnd => {
+    g[rnd].forEach(m => {
+      if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
+      if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
+    });
+  });
+  if (g.winner && !g.winner.logo) g.winner.logo = L(g.winner.abbr);
+});
+
 /* ── 상태 ── */
 let curGroup = 'A';
 let bracketStart = 0;
