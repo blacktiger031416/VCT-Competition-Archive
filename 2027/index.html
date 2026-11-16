@@ -1499,7 +1499,11 @@ const OQ_STAGE_DATA = (function(){
         bracketUrl3Soon:true,                   bracketUrl3Label:'MIDDLE EAST 2',
         bracketUrl4Soon:true,                   bracketUrl4Label:'NORTH AFRICA 2',
       },
-      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'OQ 통과팀만 참가 (초청 없음)',invites:0,desc:'초청팀 없음 — OQ 진출팀만 참가<br>1위 팀 → KickOff 진출'},
+      {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'OQ 통과팀만 참가 (초청 없음)',invites:0,total:4,desc:'초청팀 없음 — OQ 진출팀만 참가<br>1위 팀 → KickOff 진출',
+        oqTeams:[
+          {abbr:'MIX',  name:'Mix My Miks',         logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MENA/MIX.png'},
+          {abbr:'NO O', name:'No Org No Problem',    logo:'../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MENA/NO O.png'},
+        ]},
     ]},
     kr:{stages:[
       {key:'oq',     name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀',       invites:0,desc:'OQ 통과팀이 Playoff에 진출합니다.'},
@@ -1794,7 +1798,7 @@ function buildOQStageContentHTML(stage, color) {
     ? '<span class="oq-invite-tag">INVITES TBA</span>'
     : invites > 0 ? `<span class="oq-invite-tag">${invites} INVITED</span>` : '';
   const totals = {oq:16, swiss:16, playoff:8, sea:8, lcq:4};
-  const total  = totals[stage.key] ?? 16;
+  const total  = stage.total ?? (totals[stage.key] ?? 16);
   const oqSlots = total - invites;
   let slotsHTML = '';
   for (let i = 0; i < invites; i++) {
