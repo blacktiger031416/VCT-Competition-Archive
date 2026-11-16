@@ -204,24 +204,51 @@ body::after{content:'';position:fixed;inset:0;
 
 <script>
 const DB_KEY = 'mena_me1_scores_v1';
-const ALL_RNDS = ['r32','r16','r8','r4','f'];
-const RND_FULL = {r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',r4:'Semifinals',f:'Final'};
-
-const ROUND_CFG = {
-  r32:{matchCount:16, compact:true},
-  r16:{matchCount:8,  compact:true},
-  r8: {matchCount:4,  compact:true},
-  r4: {matchCount:2},
-  f:  {matchCount:1},
-};
+const ALL_RNDS = ['r64','r32','r16','r8','r4','f'];
+const RND_FULL = {r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',r4:'Semifinals',f:'Final'};
 
 const L = (abbr) => `../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/MENA/${abbr}.png`;
 
 function mkM(n) {
   return Array.from({length:n}, () => ({t1:null,t2:null,s1:null,s2:null,w:null}));
 }
+function mkT(abbr, name) { return {abbr, name, logo:L(abbr)}; }
 
 const MATCHES = {
+  r64: [
+    {t1:mkT('100K','100K'),               t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('HWL','Howlers'),             t2:mkT('LOGI','LogIQ'),                   s1:null,s2:null,w:null},
+    {t1:mkT('MYM','MAYHEM'),              t2:mkT('ALC','ALC'),                      s1:null,s2:null,w:null},
+    {t1:mkT('LK','Lion Kings'),           t2:mkT('BLBU','Black bulls'),             s1:null,s2:null,w:null},
+    {t1:mkT('VALY','valyrian'),           t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('67','Six Seven'),            t2:mkT('SE7','Se7en Sins'),               s1:null,s2:null,w:null},
+    {t1:mkT('NOV','Nova Esports'),        t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('ONLI','Onliners'),           t2:mkT('XENO','Xenon Esports'),           s1:null,s2:null,w:null},
+    {t1:mkT('LEVE','LEVELERS'),           t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('FATA','Fatality'),           t2:mkT('EGYG','EGY Ghoul E-Sports'),      s1:null,s2:null,w:null},
+    {t1:mkT('TRH','Team Ruthless'),       t2:mkT('LAHO','Last hope'),               s1:null,s2:null,w:null},
+    {t1:mkT('CALA','Calamity'),           t2:mkT('5050','Team Fifty Fifty'),        s1:null,s2:null,w:null},
+    {t1:mkT('SPID','The Spider'),         t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('NYXO','NYXORA'),             t2:mkT('TKR','Team Kryptic'),             s1:null,s2:null,w:null},
+    {t1:mkT('MG','MG'),                   t2:mkT('EBT','EBT'),                      s1:null,s2:null,w:null},
+    {t1:mkT('REDS','Team Reds'),          t2:mkT('VEIL','VEIL'),                    s1:null,s2:null,w:null},
+    {t1:mkT('STS','Stallions Esports'),   t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('EL','Eternals'),             t2:mkT('DYNA','Dynamao'),                 s1:null,s2:null,w:null},
+    {t1:mkT('WINA','winnable'),           t2:mkT('JAGU','Jaguar'),                  s1:null,s2:null,w:null},
+    {t1:mkT('PARAD','Paradox'),           t2:mkT('NONA','no name'),                 s1:null,s2:null,w:null},
+    {t1:mkT('NOOP','No Org No Problem'),  t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('ARC9','Arcanine'),           t2:mkT('RETA','Retakers Gaming'),         s1:null,s2:null,w:null},
+    {t1:mkT('INVI','invictus'),           t2:mkT('ILGA','Illusion Gatekeepers'),    s1:null,s2:null,w:null},
+    {t1:mkT('WEST','WEST ESPORTS'),       t2:mkT('GRFL','Green flag'),              s1:null,s2:null,w:null},
+    {t1:mkT('PDF','PDF'),                 t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('KRD','krd marines'),         t2:mkT('ONYX','Team ONYX'),               s1:null,s2:null,w:null},
+    {t1:mkT('NEME','NEMESIS'),            t2:mkT('INVA','Invaders'),                s1:null,s2:null,w:null},
+    {t1:mkT('TTP','Trust the process'),   t2:mkT('EGO','EGO'),                      s1:null,s2:null,w:null},
+    {t1:mkT('LIAP','Lifeless Apes'),      t2:null,                                  s1:null,s2:null,w:1},
+    {t1:mkT('FODA','formidable'),         t2:mkT('NI60','Nikotine#60mg'),           s1:null,s2:null,w:null},
+    {t1:mkT('AUTH','Authority'),          t2:mkT('ZEPO','Zeropoint'),               s1:null,s2:null,w:null},
+    {t1:mkT('ATOM','Team Atomic'),        t2:mkT('RECK','RECKLEES FAMILY'),         s1:null,s2:null,w:null},
+  ],
   r32: mkM(16),
   r16: mkM(8),
   r8:  mkM(4),
@@ -258,6 +285,9 @@ function propagateWinner(rnd, idx) {
   const slot = idx % 2 === 0 ? 't1' : 't2';
   MATCHES[nextRnd][nextIdx][slot] = winner ? {...winner} : null;
 }
+
+/* 부전승 자동 propagate */
+MATCHES.r64.forEach((m, i) => { if (m.w !== null) propagateWinner('r64', i); });
 
 function clearPropagated(rnd, idx) {
   const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
@@ -354,7 +384,7 @@ function bCardRow(t, side, m) {
 
 function renderBracket() {
   const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
-  const totalH = 16 * BK.SLOT_H;
+  const totalH = MATCHES[ALL_RNDS[0]].length * BK.SLOT_H;
   const COL_STEP = BK.CARD_W + BK.CONN_W;
   const totalW = ALL_RNDS.length * COL_STEP - BK.CONN_W;
 
