@@ -574,26 +574,26 @@ body{background:#080808;color:#fff;font-family:'Barlow',sans-serif;overflow:hidd
 .eu-oq-btn-soon .eu-oq-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2)}
 .eu-oq-btn-soon .eu-oq-label{padding:.6rem 1rem;font-family:'Barlow Condensed',sans-serif;
   font-size:13px;font-weight:800;letter-spacing:.12em;color:rgba(255,255,255,.3)}
-@keyframes euGlow{0%,100%{box-shadow:0 0 8px rgba(133,230,44,.18),0 0 20px rgba(133,230,44,.07)}50%{box-shadow:0 0 16px rgba(133,230,44,.36),0 0 36px rgba(133,230,44,.13)}}
+@keyframes euGlow{0%,100%{box-shadow:0 0 8px color-mix(in srgb,var(--btn-color) 18%,transparent),0 0 20px color-mix(in srgb,var(--btn-color) 7%,transparent)}50%{box-shadow:0 0 16px color-mix(in srgb,var(--btn-color) 36%,transparent),0 0 36px color-mix(in srgb,var(--btn-color) 13%,transparent)}}
 @keyframes euDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
 @keyframes euScanSlide{0%{left:-80%}100%{left:130%}}
 @keyframes euCrnPulse{0%,100%{opacity:.65}50%{opacity:1}}
-.eu-oq-btn{display:block;position:relative;overflow:hidden;padding:.55rem .9rem;border:1px solid rgba(133,230,44,.4);border-radius:3px;background:rgba(133,230,44,.04);text-decoration:none;cursor:pointer;animation:euGlow 2.8s ease-in-out infinite;transition:border-color .2s,background .2s}
-.eu-oq-btn:hover{border-color:rgba(133,230,44,.7);background:rgba(133,230,44,.08)}
+.eu-oq-btn{--btn-color:#85E62C;display:block;position:relative;overflow:hidden;padding:.55rem .9rem;border:1px solid color-mix(in srgb,var(--btn-color) 40%,transparent);border-radius:3px;background:color-mix(in srgb,var(--btn-color) 4%,transparent);text-decoration:none;cursor:pointer;animation:euGlow 2.8s ease-in-out infinite;transition:border-color .2s,background .2s}
+.eu-oq-btn:hover{border-color:color-mix(in srgb,var(--btn-color) 70%,transparent);background:color-mix(in srgb,var(--btn-color) 8%,transparent)}
 .eu-oq-btn:hover .eu-oq-scan{animation:euScanSlide .5s linear}
-.eu-oq-corner{position:absolute;width:7px;height:7px;border-color:rgba(133,230,44,.8);border-style:solid;animation:euCrnPulse 2s ease-in-out infinite}
+.eu-oq-corner{position:absolute;width:7px;height:7px;border-color:color-mix(in srgb,var(--btn-color) 80%,transparent);border-style:solid;animation:euCrnPulse 2s ease-in-out infinite}
 .eu-oq-corner.tl{top:4px;left:4px;border-width:1.5px 0 0 1.5px}
 .eu-oq-corner.tr{top:4px;right:4px;border-width:1.5px 1.5px 0 0}
 .eu-oq-corner.bl{bottom:4px;left:4px;border-width:0 0 1.5px 1.5px}
 .eu-oq-corner.br{bottom:4px;right:4px;border-width:0 1.5px 1.5px 0}
-.eu-oq-scan{position:absolute;top:0;bottom:0;width:35%;background:linear-gradient(90deg,transparent,rgba(133,230,44,.1),transparent);pointer-events:none;left:-80%}
+.eu-oq-scan{position:absolute;top:0;bottom:0;width:35%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--btn-color) 10%,transparent),transparent);pointer-events:none;left:-80%}
 .eu-oq-inner{display:flex;align-items:center;gap:.6rem;position:relative;z-index:1}
-.eu-oq-live{display:flex;align-items:center;gap:5px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;color:rgba(133,230,44,.75)}
-.eu-oq-dot{width:6px;height:6px;border-radius:50%;background:#85E62C;animation:euDot 1.3s ease-in-out infinite}
-.eu-oq-sep{width:1px;height:22px;background:rgba(133,230,44,.2);flex-shrink:0}
+.eu-oq-live{display:flex;align-items:center;gap:5px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;color:color-mix(in srgb,var(--btn-color) 75%,transparent)}
+.eu-oq-dot{width:6px;height:6px;border-radius:50%;background:var(--btn-color);animation:euDot 1.3s ease-in-out infinite}
+.eu-oq-sep{width:1px;height:22px;background:color-mix(in srgb,var(--btn-color) 20%,transparent);flex-shrink:0}
 .eu-oq-label{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#e4e4ee}
-.eu-oq-arrow{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:rgba(133,230,44,.65);flex-shrink:0;transition:transform .2s,color .2s}
-.eu-oq-btn:hover .eu-oq-arrow{transform:translate(2px,-2px);color:#85E62C}
+.eu-oq-arrow{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:color-mix(in srgb,var(--btn-color) 65%,transparent);flex-shrink:0;transition:transform .2s,color .2s}
+.eu-oq-btn:hover .eu-oq-arrow{transform:translate(2px,-2px);color:var(--btn-color)}
 
 /* ── CN OQ Panel ── */
 .cn-oq-panel{display:flex;flex-direction:column;min-height:100%}
@@ -1881,15 +1881,13 @@ function buildOQPanelHTML(data, color, activeIdx) {
   const bracketUrl2Soon = s0.bracketUrl2Soon;
   const bracketUrl3Soon = s0.bracketUrl3Soon;
   const bracketUrl4Soon = s0.bracketUrl4Soon;
-  const c0 = color.replace(')',',').replace('rgb','rgba') ; // fallback
-  const cr = color; // e.g. #FF8C00
   function mkBracketBtn(url, label) {
-    return `<a href="${url}" class="eu-oq-btn" style="border-color:${cr}66;background:${cr}0a">
+    return `<a href="${url}" class="eu-oq-btn" style="--btn-color:${color}">
       <div class="eu-oq-corner tl"></div><div class="eu-oq-corner tr"></div>
       <div class="eu-oq-corner bl"></div><div class="eu-oq-corner br"></div>
-      <div class="eu-oq-scan" style="background:linear-gradient(90deg,transparent,${cr}1a,transparent)"></div>
+      <div class="eu-oq-scan"></div>
       <div class="eu-oq-inner">
-        <div class="eu-oq-live" style="color:${cr}bb"><div class="eu-oq-dot" style="background:${cr}"></div><span>LIVE</span></div>
+        <div class="eu-oq-live"><div class="eu-oq-dot"></div><span>LIVE</span></div>
         <div class="eu-oq-sep"></div>
         <div class="eu-oq-label">${label}</div>
       </div>
