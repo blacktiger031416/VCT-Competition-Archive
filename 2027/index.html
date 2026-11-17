@@ -1881,13 +1881,15 @@ function buildOQPanelHTML(data, color, activeIdx) {
   const bracketUrl2Soon = s0.bracketUrl2Soon;
   const bracketUrl3Soon = s0.bracketUrl3Soon;
   const bracketUrl4Soon = s0.bracketUrl4Soon;
+  const c0 = color.replace(')',',').replace('rgb','rgba') ; // fallback
+  const cr = color; // e.g. #FF8C00
   function mkBracketBtn(url, label) {
-    return `<a href="${url}" class="eu-oq-btn">
+    return `<a href="${url}" class="eu-oq-btn" style="border-color:${cr}66;background:${cr}0a">
       <div class="eu-oq-corner tl"></div><div class="eu-oq-corner tr"></div>
       <div class="eu-oq-corner bl"></div><div class="eu-oq-corner br"></div>
-      <div class="eu-oq-scan"></div>
+      <div class="eu-oq-scan" style="background:linear-gradient(90deg,transparent,${cr}1a,transparent)"></div>
       <div class="eu-oq-inner">
-        <div class="eu-oq-live"><div class="eu-oq-dot"></div><span>LIVE</span></div>
+        <div class="eu-oq-live" style="color:${cr}bb"><div class="eu-oq-dot" style="background:${cr}"></div><span>LIVE</span></div>
         <div class="eu-oq-sep"></div>
         <div class="eu-oq-label">${label}</div>
       </div>
