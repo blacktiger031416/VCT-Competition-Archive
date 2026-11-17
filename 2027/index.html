@@ -1417,7 +1417,12 @@ const OQ_STAGE_DATA = (function(){
   const _at = (abbr, name) => ({abbr, name, logo:`${_amsBase}${abbr}.png`});
   return {
     na:{stages:[
-      _amsOQ,
+      {key:'oq', name:'OPEN<br>QUALIFIER', meta:'오픈 브래킷 · ~16 팀', invites:0,
+       desc:'서브리전 모든 팀이 참가하는 오픈 브래킷.',
+       hideTeams:true,
+       bracketUrl1Soon:true, bracketUrl1Label:'QUALIFIER 1',
+       bracketUrl2Soon:true, bracketUrl2Label:'QUALIFIER 2',
+      },
       {key:'swiss', name:'SWISS<br>STAGE', meta:'초청 8 + OQ 통과팀', invites:8,
         desc:'초청팀 8팀 + OQ 통과팀 — Swiss Stage<br>상위 팀 → OQ Playoff 진출',
         invitedTeams:[
@@ -1870,8 +1875,9 @@ function buildOQPanelHTML(data, color, activeIdx) {
     </div>`;
   });
   const s0 = data.stages[0] || {};
-  const bracketUrl  = s0.bracketUrl;
-  const bracketUrl2 = s0.bracketUrl2;
+  const bracketUrl      = s0.bracketUrl;
+  const bracketUrl1Soon = s0.bracketUrl1Soon;
+  const bracketUrl2     = s0.bracketUrl2;
   const bracketUrl2Soon = s0.bracketUrl2Soon;
   const bracketUrl3Soon = s0.bracketUrl3Soon;
   const bracketUrl4Soon = s0.bracketUrl4Soon;
@@ -1896,8 +1902,10 @@ function buildOQPanelHTML(data, color, activeIdx) {
       </div>
     </div>`;
   }
-  const bracketBtnHTML = bracketUrl ? `<div id="euBracketWrap" style="${activeIdx===0?'':'display:none'}">
-    ${mkBracketBtn(bracketUrl,  s0.bracketUrlLabel  || 'QUALIFIER 1')}
+  const bracketHasSomething = bracketUrl || bracketUrl1Soon || bracketUrl2Soon || bracketUrl3Soon || bracketUrl4Soon;
+  const bracketBtnHTML = bracketHasSomething ? `<div id="euBracketWrap" style="${activeIdx===0?'':'display:none'}">
+    ${bracketUrl      ? mkBracketBtn(bracketUrl,  s0.bracketUrlLabel  || 'QUALIFIER 1') : ''}
+    ${bracketUrl1Soon ? mkBracketBtnSoon(s0.bracketUrl1Label || 'QUALIFIER 1') : ''}
     ${bracketUrl2     ? mkBracketBtn(bracketUrl2, s0.bracketUrl2Label || 'QUALIFIER 2') : ''}
     ${bracketUrl2Soon ? mkBracketBtnSoon(s0.bracketUrl2Label || 'QUALIFIER 2') : ''}
     ${bracketUrl3Soon ? mkBracketBtnSoon(s0.bracketUrl3Label || 'QUALIFIER 3') : ''}
