@@ -1064,19 +1064,17 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModa
 
 /* ── 시드 결정전 ── */
 const SD = {
-  sf: [
-    {t1:{abbr:'MPMT', name:'xXxMasterProMegaTeamxXx', logo:L('MPMT')}, t2:{abbr:'F9', name:'F9 EICAR', logo:L('F9')}, s1:null, s2:null, w:null}, // SF1
-    {t1:{abbr:'AURA', name:'AURA Esports', logo:L('AURA')},            t2:{abbr:'PXL', name:'Pixel Lumina', logo:L('PXL')}, s1:null, s2:null, w:null}, // SF2
+  matches: [
+    {t1:{abbr:'WU',   name:'Winthrop University', logo:L('WU')},  t2:{abbr:'MC',   name:'Masterclass',   logo:L('MC')},   s1:null, s2:null, w:null},
+    {t1:{abbr:'XORA', name:'Xora Esports',         logo:L('XORA')}, t2:{abbr:'OAF',  name:'Oafs',          logo:L('OAF')},  s1:null, s2:null, w:null},
   ],
-  gf: {t1:null, t2:null, s1:null, s2:null, w:null}, // Grand Final
 };
 
 const DB_SD_KEY = 'na_oq1_seed_v1';
 
 function saveSeedScores() {
   const payload = JSON.stringify({
-    sf: SD.sf.map(m => ({s1:m.s1,s2:m.s2,w:m.w,t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null})),
-    gf: {s1:SD.gf.s1,s2:SD.gf.s2,w:SD.gf.w,t1:SD.gf.t1?{abbr:SD.gf.t1.abbr,name:SD.gf.t1.name}:null,t2:SD.gf.t2?{abbr:SD.gf.t2.abbr,name:SD.gf.t2.name}:null},
+    matches: SD.matches.map(m => ({s1:m.s1,s2:m.s2,w:m.w})),
   });
   fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
     method: 'POST',
@@ -1091,14 +1089,8 @@ function loadSeedScores() {
     .then(raw => {
       try {
         const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        if (!d) return;
-        d.sf.forEach((m,i) => { SD.sf[i].s1=m.s1; SD.sf[i].s2=m.s2; SD.sf[i].w=m.w; });
-        // Restore GF scores/winner only; re-propagate teams from SF results
-        if (d.gf) { SD.gf.s1=d.gf.s1; SD.gf.s2=d.gf.s2; SD.gf.w=d.gf.w; }
-        SD.sf.forEach((m,i) => { if(m.w) propagateSeedWinner({type:'sf',idx:i}); });
-        SD.sf.forEach(m => { if(m.t1&&!m.t1.logo) m.t1.logo=L(m.t1.abbr); if(m.t2&&!m.t2.logo) m.t2.logo=L(m.t2.abbr); });
-        if(SD.gf.t1&&!SD.gf.t1.logo) SD.gf.t1.logo=L(SD.gf.t1.abbr);
-        if(SD.gf.t2&&!SD.gf.t2.logo) SD.gf.t2.logo=L(SD.gf.t2.abbr);
+        if (!d || !d.matches) return;
+        d.matches.forEach((m,i) => { if(SD.matches[i]){ SD.matches[i].s1=m.s1; SD.matches[i].s2=m.s2; SD.matches[i].w=m.w; } });
         renderSeedDecider();
       } catch(e) {}
     }).catch(() => {});
@@ -1136,21 +1128,6 @@ function pickSeedWinner(side, btn) {
   document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
 }
 
-function propagateSeedWinner(ctx) {
-  if (ctx.type !== 'sf') return;
-  const m = SD.sf[ctx.idx];
-  const winner = m.w === 1 ? m.t1 : m.t2;
-  const slot = ctx.idx === 0 ? 't1' : 't2';
-  SD.gf[slot] = winner ? {...winner} : null;
-}
-
-function clearSeedPropagated(ctx) {
-  if (ctx.type !== 'sf') return;
-  const slot = ctx.idx === 0 ? 't1' : 't2';
-  SD.gf[slot] = null;
-  if (SD.gf.w !== null) { SD.gf.w = null; SD.gf.s1 = null; SD.gf.s2 = null; }
-}
-
 function confirmSeedScore() {
   if (!_selWinner || !_selScore || !_sdCtx) return;
   const m = getSdMatch(_sdCtx);
@@ -1161,7 +1138,6 @@ function confirmSeedScore() {
     const [big, small] = _selScore.split('-').map(Number);
     m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
   }
-  propagateSeedWinner(_sdCtx);
   saveSeedScores();
   closeScoreModal(); _sdCtx = null;
   renderSeedDecider();
@@ -1170,18 +1146,15 @@ function confirmSeedScore() {
 function resetSeedMatch(ctx) {
   const m = getSdMatch(ctx);
   m.w = null; m.s1 = null; m.s2 = null;
-  clearSeedPropagated(ctx);
   saveSeedScores(); renderSeedDecider();
 }
 
 function getSdMatch(ctx) {
-  if (ctx.type === 'sf') return SD.sf[ctx.idx];
-  return SD.gf;
+  return SD.matches[ctx.idx];
 }
 
 function sdCtxLabel(ctx) {
-  if (ctx.type === 'sf') return `SF${ctx.idx+1}`;
-  return 'GRAND FINAL';
+  return `경기 ${ctx.idx + 1}`;
 }
 
 function sdMatchHTML(m, ctx) {
@@ -1212,30 +1185,13 @@ function sdMatchHTML(m, ctx) {
 }
 
 function renderSeedDecider() {
-  const sf1 = SD.sf[0], sf2 = SD.sf[1], gf = SD.gf;
   document.getElementById('seed-decider').innerHTML = `
-    <div class="sd-wrap">
-      <!-- Semifinals -->
-      <div class="sd-col">
-        <div class="sd-col-label">Semifinals</div>
-        <div style="display:flex;flex-direction:column;gap:.6rem">
-          ${sdMatchHTML(sf1,{type:'sf',idx:0})}
-          ${sdMatchHTML(sf2,{type:'sf',idx:1})}
-        </div>
-      </div>
-      <!-- connector SF→GF -->
-      <div style="display:flex;flex-direction:column;width:28px;align-self:stretch;padding-top:22px">
-        <div style="flex:1;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);margin-bottom:0"></div>
-        <div style="flex:1;border-right:1px solid var(--bdr);border-top:1px solid var(--bdr)"></div>
-      </div>
-      <div style="display:flex;align-items:center;width:14px;align-self:center;margin-top:22px">
-        <div style="height:1px;width:100%;background:var(--bdr)"></div>
-      </div>
-      <!-- Grand Final -->
-      <div class="sd-col">
-        <div class="sd-col-label">Grand Final</div>
-        <div style="margin-top:22px">${sdMatchHTML(gf,{type:'gf'})}</div>
-      </div>
+    <div style="display:flex;gap:1.2rem;flex-wrap:wrap;padding:.4rem 0">
+      ${SD.matches.map((m,i) => `
+        <div class="sd-col">
+          <div class="sd-col-label">Match ${i+1}</div>
+          ${sdMatchHTML(m,{idx:i})}
+        </div>`).join('')}
     </div>`;
 }
 
