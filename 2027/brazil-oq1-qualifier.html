@@ -483,6 +483,7 @@ body.view-only .cr:hover{border-color:var(--bdr)}
         <button class="sb-score-btn" data-s="2-0" onclick="pickScore(this)">2 : 0</button>
         <button class="sb-score-btn" data-s="2-1" onclick="pickScore(this)">2 : 1</button>
         <button class="sb-score-btn" data-s="FF" onclick="pickScore(this)" style="letter-spacing:.08em">FF</button>
+        <button class="sb-score-btn" data-s="BYE" onclick="pickScore(this)" style="letter-spacing:.08em">부전승</button>
       </div>
     </div>
     <div class="sb-footer">
@@ -934,7 +935,7 @@ function openScoreModal(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   _modalCtx = {grp, rnd, idx};
   _selWinner = m.w;
-  _selScore  = (m.s1 !== null) ? (m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`) : null;
+  _selScore  = (m.s1 !== null) ? (m.s1==='부전승'||m.s2==='부전승'?'BYE':m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`) : null;
 
   document.getElementById('sbTitle').textContent =
     `${RND_FULL[rnd]} · MATCH ${String(idx+1).padStart(2,'0')}`;
@@ -960,6 +961,20 @@ function openScoreModal(grp, rnd, idx) {
       </div>
     </button>`;
 
+  /* 한쪽 팀 없는 부전승 경기: 부전승 버튼만 보이고 상대팀 자동 선택 */
+  const isBye = (t1 && !t2) || (!t1 && t2);
+  document.querySelectorAll('.sb-score-btn').forEach(b => {
+    if (isBye) b.style.display = b.dataset.s === 'BYE' ? '' : 'none';
+    else b.style.display = b.dataset.s === 'BYE' ? 'none' : '';
+  });
+  if (isBye) {
+    _selWinner = t1 ? 1 : 2;
+    _selScore = 'BYE';
+    document.querySelectorAll('.sb-team').forEach((el,i) =>
+      el.classList.toggle('selected', i+1 === _selWinner));
+    document.querySelectorAll('.sb-score-btn').forEach(b =>
+      b.classList.toggle('selected', b.dataset.s === 'BYE'));
+  }
   updateScoreBtns();
   updateConfirmBtn();
   document.getElementById('scoreOverlay').classList.add('open');
@@ -995,7 +1010,10 @@ function confirmScore() {
   const {grp, rnd, idx} = _modalCtx;
   const m = MATCHES[grp][rnd][idx];
   m.w = _selWinner;
-  if (_selScore === 'FF') {
+  if (_selScore === 'BYE') {
+    m.s1 = _selWinner === 1 ? 'W' : '부전승';
+    m.s2 = _selWinner === 2 ? 'W' : '부전승';
+  } else if (_selScore === 'FF') {
     m.s1 = _selWinner === 1 ? 'W' : 'FF';
     m.s2 = _selWinner === 2 ? 'W' : 'FF';
   } else {
@@ -1102,7 +1120,7 @@ function openSeedModal(ctx) {
       <div>${t2?.abbr??'TBD'}</div>
     </button>`;
   document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
-  _selWinner = m.w; _selScore = m.s1!==null?(m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`):null;
+  _selWinner = m.w; _selScore = m.s1!==null?(m.s1==='부전승'||m.s2==='부전승'?'BYE':m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`):null;
   document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
   document.getElementById('sbConfirm').onclick = confirmSeedScore;
   document.getElementById('scoreOverlay').classList.add('open');
@@ -1119,7 +1137,9 @@ function confirmSeedScore() {
   if (!_selWinner || !_selScore || !_sdCtx) return;
   const m = getSdMatch(_sdCtx);
   m.w = _selWinner;
-  if (_selScore === 'FF') {
+  if (_selScore === 'BYE') {
+    m.s1 = _selWinner===1?'W':'부전승'; m.s2 = _selWinner===2?'W':'부전승';
+  } else if (_selScore === 'FF') {
     m.s1 = _selWinner===1?'W':'FF'; m.s2 = _selWinner===2?'W':'FF';
   } else {
     const [big, small] = _selScore.split('-').map(Number);
@@ -1198,20 +1218,6 @@ function toggleSeedDecider(btn) {
   el.classList.toggle('seed-hidden', isOpen);
   btn.classList.toggle('open', !isOpen);
 }
-
-/* 부전승 자동 전파 (한쪽만 있는 경기) */
-function initByes() {
-  ['A','B'].forEach(g => {
-    ALL_RNDS.forEach(rnd => {
-      MATCHES[g][rnd].forEach((m, idx) => {
-        if (m.w !== null) return;
-        if (m.t1 && !m.t2) { m.w = 1; propagateWinner(g, rnd, idx); }
-        else if (!m.t1 && m.t2) { m.w = 2; propagateWinner(g, rnd, idx); }
-      });
-    });
-  });
-}
-initByes();
 
 renderSeedDecider();
 renderContent();
