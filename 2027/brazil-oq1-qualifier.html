@@ -438,37 +438,27 @@ body.view-only .cr:hover{border-color:var(--bdr)}
       <div class="tb-title">BRAZIL OPEN QUALIFIER 1 — GROUP STAGE</div>
     </div>
     <div class="tb-sep"></div>
-    <div class="tb-right">256팀 · Single Elimination · 그룹당 1팀 → Swiss Stage</div>
+    <div class="tb-right">256팀 · Single Elimination · 2 Groups · 각 그룹 4팀 → Swiss Stage</div>
   </div>
 
   <div id="body">
     <div id="sidebar">
-      <button class="g-btn done active" data-grp="A" onclick="selectGroup('A',this)">
+      <button class="g-btn active" data-grp="A" onclick="selectGroup('A',this)">
         <div class="g-corner tl"></div><div class="g-corner tr"></div>
         <div class="g-corner bl"></div><div class="g-corner br"></div>
-        <span class="g-label">A</span><span class="g-sub">완료</span>
+        <span class="g-label">A</span><span class="g-sub">예정</span>
       </button>
-      <button class="g-btn done" data-grp="B" onclick="selectGroup('B',this)">
+      <button class="g-btn" data-grp="B" onclick="selectGroup('B',this)">
         <div class="g-corner tl"></div><div class="g-corner tr"></div>
         <div class="g-corner bl"></div><div class="g-corner br"></div>
-        <span class="g-label">B</span><span class="g-sub">완료</span>
-      </button>
-      <button class="g-btn done" data-grp="C" onclick="selectGroup('C',this)">
-        <div class="g-corner tl"></div><div class="g-corner tr"></div>
-        <div class="g-corner bl"></div><div class="g-corner br"></div>
-        <span class="g-label">C</span><span class="g-sub">완료</span>
-      </button>
-      <button class="g-btn done" data-grp="D" onclick="selectGroup('D',this)">
-        <div class="g-corner tl"></div><div class="g-corner tr"></div>
-        <div class="g-corner bl"></div><div class="g-corner br"></div>
-        <span class="g-label">D</span><span class="g-sub">완료</span>
+        <span class="g-label">B</span><span class="g-sub">예정</span>
       </button>
     </div>
 
     <div id="main">
       <div id="seed-decider-btn-wrap">
         <button class="seed-toggle" onclick="toggleSeedDecider(this)">
-          시드 결정전 <span class="seed-toggle-arrow">▾</span>
+          결정전 <span class="seed-toggle-arrow">▾</span>
         </button>
       </div>
       <div id="seed-decider" class="seed-hidden"></div>
@@ -507,17 +497,15 @@ body.view-only .cr:hover{border-color:var(--bdr)}
 const GROUPS = {
   A:{status:'upcoming',label:'예정'},
   B:{status:'upcoming',label:'예정'},
-  C:{status:'upcoming',label:'예정'},
-  D:{status:'upcoming',label:'예정'},
 };
 
 const ROUND_CFG = {
-  r256:{name:'Round of 256', matchCount:32, gridClass:'r256', compact:true},
-  r128:{name:'Round of 128', matchCount:16, gridClass:'r128', compact:true},
-  r64: {name:'Round of 64',  matchCount:8,  gridClass:'r64',  compact:true},
-  r32: {name:'Round of 32',  matchCount:4,  gridClass:'r32',  compact:true},
-  r16: {name:'Round of 16',  matchCount:2,  gridClass:'r16'},
-  r8:  {name:'Round of 8',   matchCount:1,  gridClass:'f'},
+  r128:{name:'Round of 128', matchCount:64, gridClass:'r128', compact:true},
+  r64: {name:'Round of 64',  matchCount:32, gridClass:'r64',  compact:true},
+  r32: {name:'Round of 32',  matchCount:16, gridClass:'r32',  compact:true},
+  r16: {name:'Round of 16',  matchCount:8,  gridClass:'r16',  compact:true},
+  r8:  {name:'Round of 8',   matchCount:4,  gridClass:'r8'},
+  r4:  {name:'Semifinals',   matchCount:2,  gridClass:'f'},
 };
 
 /*
@@ -539,120 +527,149 @@ const mkM = (n) => Array.from({length:n}, () => ({t1:null,t2:null,s1:null,s2:nul
 const L = (abbr) => `../assets/teams/VCT 2027/VCT Americas/Americas_OQ/Brazil/${abbr}.png`;
 
 const MATCHES = {
-  A:{ r256:mkM(32), r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null },
+  A:{
+    r128:[
+  {t1:null, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'MDA',name:'MDA'}, t2:{abbr:'OFF',name:'OFF'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'HIGH',name:'HIGH'}, t2:{abbr:'RESE',name:'RESE'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'LIP',name:'LIP'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'CHEC',name:'CHEC'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'0DDT',name:'0DDT'}, t2:{abbr:'FTW',name:'FTW'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'UND',name:'UND'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'CDB',name:'CDB'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'ARAS',name:'ARAS'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'HHCP',name:'HHCP'}, t2:{abbr:'UNN',name:'UNN'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'EHD',name:'EHD'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'UMDV',name:'UMDV'}, t2:{abbr:'PEPS',name:'PEPS'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'RBCT',name:'RBCT'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'7Y',name:'7Y'}, t2:{abbr:'EEFE',name:'EEFE'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'UABC',name:'UABC'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'MICE',name:'MICE'}, t2:{abbr:'JARE',name:'JARE'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'ZÊN',name:'ZÊN'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'VENT',name:'VENT'}, t2:{abbr:'KNTP',name:'KNTP'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'TB3',name:'TB3'}, t2:{abbr:'JOSEG',name:'JOSEG'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'FEBR',name:'FEBR'}, t2:{abbr:'UNCH',name:'UNCH'}, s1:null,s2:null,w:null},
+  {t1:null, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'KRØN',name:'KRØN'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'VLIF',name:'VLIF'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'XMEN',name:'XMEN'}, t2:{abbr:'INAZ',name:'INAZ'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'FDS',name:'FDS'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TOTU',name:'TOTU'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'OWS',name:'OWS'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TROP',name:'TROP'}, t2:{abbr:'REV',name:'REV'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'NØX',name:'NØX'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'ESCO',name:'ESCO'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'00CA',name:'00CA'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'CAPU',name:'CAPU'}, t2:{abbr:'MEA',name:'MEA'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'AIMT',name:'AIMT'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'RETA',name:'RETA'}, t2:{abbr:'LDA',name:'LDA'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'ZYRE',name:'ZYRE'}, t2:{abbr:'37DN',name:'37DN'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'HDMS',name:'HDMS'}, t2:{abbr:'SKILL',name:'SKILL'}, s1:null,s2:null,w:null},
+  {t1:null, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TRIB',name:'TRIB'}, t2:{abbr:'25AG',name:'25AG'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'SECR',name:'SECR'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TAI',name:'TAI'}, t2:{abbr:'FURIK',name:'FURIK'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'AZR',name:'AZR'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'MAUAB',name:'MAUAB'}, t2:{abbr:'DAHU',name:'DAHU'}, s1:null,s2:null,w:null},
+  {t1:null, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TLKES',name:'TLKES'}, t2:null, s1:null,s2:null,w:null},
+  {t1:null, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'YAMF',name:'YAMF'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'CV26',name:'CV26'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'TLD',name:'TLD'}, t2:{abbr:'JAYJ',name:'JAYJ'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'MONO',name:'MONO'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'A1M',name:'A1M'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'SWOU',name:'SWOU'}, t2:{abbr:'FOXD',name:'FOXD'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'JPFC',name:'JPFC'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'KRVR',name:'KRVR'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'ZED',name:'ZED'}, t2:{abbr:'OSLA',name:'OSLA'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'KING',name:'KING'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'R10F',name:'R10F'}, t2:{abbr:'CNET',name:'CNET'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'PR0M',name:'PR0M'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'UNK',name:'UNK'}, t2:{abbr:'ATL4',name:'ATL4'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'UNN',name:'UNN'}, t2:{abbr:'FPM',name:'FPM'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'VISU',name:'VISU'}, t2:{abbr:'DUAL',name:'DUAL'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'SOLI',name:'SOLI'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'JUV',name:'JUV'}, t2:{abbr:'CADT',name:'CADT'}, s1:null,s2:null,w:null},
+  {t1:{abbr:'AMORA',name:'AMORA'}, t2:null, s1:null,s2:null,w:null},
+  {t1:{abbr:'MINER',name:'MINER'}, t2:{abbr:'NORME',name:'NORME'}, s1:null,s2:null,w:null}
+    ],
+    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), winner:null
+  },
   B:{
-    r256:[
-      {t1:{abbr:'FAKE', name:'counterfeit'},            t2:{abbr:'DOGG', name:'doggo'},                      s1:null,s2:null,w:null},
-      {t1:{abbr:'NOCT', name:'Noctvrnas'},              t2:{abbr:'ZER0', name:'ZER0 Esports'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'EMP.GC',name:'Empire GC'},             t2:{abbr:'EAOSU',name:'EaOSU Black Valorant'},       s1:null,s2:null,w:null},
-      {t1:{abbr:'CF',   name:'Cool Frogs'},              t2:{abbr:'LLC',  name:'Long Live Chickle'},          s1:null,s2:null,w:null},
-      {t1:{abbr:'FARE', name:'Faker Rex'},               t2:{abbr:'UNI',  name:'Team United'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'ALAK', name:'Alakaer Esports'},         t2:{abbr:'BIMA', name:'Chicken Big Mac'},            s1:null,s2:null,w:null},
-      {t1:{abbr:'SURF', name:'Surfs Up'},                t2:{abbr:'TIMS', name:'Timstone'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'INDE', name:'Team Indecisive'},         t2:{abbr:'FEFR', name:'Fear the Frogs'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'OBCL', name:'OBA CLAN'},                t2:{abbr:'FRJA', name:'free jackb'},                 s1:null,s2:null,w:null},
-      {t1:{abbr:'ZESH', name:'ZENSHIN'},                 t2:{abbr:'FRMA', name:'Free Masons'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'CULT', name:'Culturized'},              t2:{abbr:'HOPL', name:'Horse Plinko'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'EVER', name:'Everest'},                 t2:{abbr:'KEBA', name:'Beyti Kebab'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'LIAC', name:'Liga Ace'},                t2:{abbr:'SEKI', name:'Sekiro Esports'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'RAR',  name:'Rutgers Academy Red'},     t2:{abbr:'BUJO', name:'burger joint'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'DISP', name:'Digital Spiders'},         t2:{abbr:'UO G', name:'UO Green'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'RS',   name:'Rain Syndicate'},          t2:{abbr:'WWT',  name:'We Wiff Those'},              s1:null,s2:null,w:null},
-      {t1:{abbr:'MC',   name:'Masterclass'},             t2:{abbr:'LEBU', name:"Let's Build"},                s1:null,s2:null,w:null},
-      {t1:{abbr:'ARCH', name:'Archaic'},                 t2:{abbr:'ROSI', name:'Rosoideae'},                  s1:null,s2:null,w:null},
-      {t1:{abbr:'CSL',  name:'CSL acad'},                t2:{abbr:'H3',   name:'hthree esports'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'XS',   name:'Exsouls Esports'},         t2:{abbr:'INSO', name:'Insomnia'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'FISH', name:'Fisher Esports'},          t2:{abbr:'CLOC', name:'Clock Up'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'SPPG', name:'SPPG'},                    t2:{abbr:'BEN',  name:'Ben Theory'},                 s1:null,s2:null,w:null},
-      {t1:{abbr:'SUNN', name:'the sunnets'},             t2:{abbr:'WOND', name:'Wonder Academy'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'G59',  name:'G59'},                     t2:{abbr:'PASTA',name:'pasta fazool'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'YOSHI',name:'yoshi industries'},        t2:{abbr:'JUPR', name:'just prawns'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'DEDR', name:'Dew Drops'},               t2:{abbr:'OSQDC',name:'OSQD Crucia7'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'ASHA', name:'Ashwagandha advisory'},    t2:{abbr:'FLFA', name:'Flashbang Farmers'},          s1:null,s2:null,w:null},
-      {t1:{abbr:'OBLI', name:'Oblivion'},                t2:{abbr:'NOPA', name:'NoPrac'},                     s1:null,s2:null,w:null},
-      {t1:{abbr:'JUDE', name:'jude bellingham'},         t2:{abbr:'RGO',  name:'RG Outlaws'},                 s1:null,s2:null,w:null},
-      {t1:{abbr:'LETI', name:'Learning Time'},           t2:{abbr:'CITL', name:'Citlalli Axcah'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'BZK',  name:'Berzerkers'},              t2:{abbr:'EM',   name:'Ends Meet'},                  s1:null,s2:null,w:null},
-      {t1:{abbr:'RESH', name:'Reshiram'},                t2:{abbr:'VEIL', name:'Veil'},                       s1:null,s2:null,w:null},
+    r128:[
+      {t1:{abbr:'PIOR',name:'PIOR'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'KAIRO',name:'KAIRO'}, t2:{abbr:'VESA',name:'VESA'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'BOAS',name:'BOAS'}, t2:{abbr:'NOD',name:'NOD'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'KPHU',name:'KPHU'}, t2:{abbr:'VENTS',name:'VENTS'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'LFABG',name:'LFABG'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'SV',name:'SV'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'WICE',name:'WICE'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'MARER',name:'MARER'}, t2:{abbr:'VORTX',name:'VORTX'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'SILEN',name:'SILEN'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'RABO',name:'RABO'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'MUZAN',name:'MUZAN'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'APOS',name:'APOS'}, t2:{abbr:'VV',name:'VV'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'ALBA',name:'ALBA'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'LOOO',name:'LOOO'}, t2:{abbr:'PEVA',name:'PEVA'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'FLAS',name:'FLAS'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'OCAV',name:'OCAV'}, t2:{abbr:'GUAR',name:'GUAR'}, s1:null,s2:null,w:null},
+      {t1:null, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'FCF',name:'FCF'}, t2:{abbr:'BRA2002',name:'BRA2002'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'CDG',name:'CDG'}, t2:{abbr:'AIMSS',name:'AIMSS'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'FZDG',name:'FZDG'}, t2:{abbr:'GAR4',name:'GAR4'}, s1:null,s2:null,w:null},
+      {t1:null, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'WL99',name:'WL99'}, t2:{abbr:'ONI',name:'ONI'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'FUR',name:'FUR'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'SGJ',name:'SGJ'}, t2:{abbr:'SOLARI',name:'SOLARI'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'MABA',name:'MABA'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'LOG7',name:'LOG7'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'HNR',name:'HNR'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'SAHU',name:'SAHU'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'GG',name:'GG'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'MHDD',name:'MHDD'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'SOSO',name:'SOSO'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'DUBI',name:'DUBI'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'OGG',name:'OGG'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'LCJO',name:'LCJO'}, t2:{abbr:'SORAI',name:'SORAI'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'GBET',name:'GBET'}, t2:{abbr:'SORAL',name:'SORAL'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'AMIG',name:'AMIG'}, t2:{abbr:'TDP',name:'TDP'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'WGCE',name:'WGCE'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'LAOD',name:'LAOD'}, t2:{abbr:'SOJO',name:'SOJO'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'0PAN',name:'0PAN'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'NEWX',name:'NEWX'}, t2:null, s1:null,s2:null,w:null},
+      {t1:null, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'THEK',name:'THEK'}, t2:{abbr:'FTOT',name:'FTOT'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'EOCO',name:'EOCO'}, t2:{abbr:'FFF',name:'FFF'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'QPN',name:'QPN'}, t2:{abbr:'RUPT',name:'RUPT'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'FECG',name:'FECG'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'PDC',name:'PDC'}, t2:{abbr:'MBMO',name:'MBMO'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'LOSR',name:'LOSR'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'IECO',name:'IECO'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'MINO',name:'MINO'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'BIZA',name:'BIZA'}, t2:{abbr:'SORAIN',name:'SORAIN'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'ROFE',name:'ROFE'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'VPRI',name:'VPRI'}, t2:{abbr:'STGA',name:'STGA'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'GATU',name:'GATU'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'AXK',name:'AXK'}, t2:{abbr:'Mafia',name:'Mafia'}, s1:null,s2:null,w:null},
+      {t1:null, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'BR94',name:'BR94'}, t2:{abbr:'VILÕ',name:'VILÕ'}, s1:null,s2:null,w:null},
+      {t1:null, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'VOGU',name:'VOGU'}, t2:{abbr:'100P',name:'100P'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'UIPC',name:'UIPC'}, t2:{abbr:'NIEA',name:'NIEA'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'ARRA',name:'ARRA'}, t2:{abbr:'USHI',name:'USHI'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'GADC',name:'GADC'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'GPET',name:'GPET'}, t2:{abbr:'REQE',name:'REQE'}, s1:null,s2:null,w:null},
+      {t1:{abbr:'OSRX',name:'OSRX'}, t2:null, s1:null,s2:null,w:null},
+      {t1:{abbr:'AFG',name:'AFG'}, t2:{abbr:'OGDG',name:'OGDG'}, s1:null,s2:null,w:null},
     ],
-    r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null },
-  C:{
-    r256:[
-      {t1:{abbr:'REJE', name:'Rejects'},                    t2:{abbr:'TGX',  name:'The Gaming Xylophones'},     s1:null,s2:null,w:null},
-      {t1:{abbr:'ARUN', name:'Ares United'},                t2:{abbr:'CONO', name:'Conestoga Condors'},          s1:null,s2:null,w:null},
-      {t1:{abbr:'KROW', name:'KROW'},                       t2:{abbr:'CHMI', name:'Chex Mix'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'EMPI', name:'Empire Gaming'},              t2:{abbr:'REIG', name:'Reign Gaming'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'CCG',  name:'CCG Esports'},                t2:{abbr:'ROAR', name:'Roar Esports'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'HUMB', name:'Humble Lions'},               t2:{abbr:'ETS',  name:'ETS esports'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'XORA', name:'Xora Esports'},               t2:{abbr:'HOBO', name:'HOLY BONKERS'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'SLOO', name:'Sloopy'},                     t2:{abbr:'UOND', name:'University of North Dakota'}, s1:null,s2:null,w:null},
-      {t1:{abbr:'UNTA', name:'UNTAMABLE BEASTS'},           t2:{abbr:'ASTR', name:'Astris'},                     s1:null,s2:null,w:null},
-      {t1:{abbr:'PXM',  name:'Project M'},                  t2:{abbr:'UTAH', name:'University of Utah'},         s1:null,s2:null,w:null},
-      {t1:{abbr:'ETER', name:'Eternal Focus'},              t2:{abbr:'KSTA', name:'K-State'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'NC S', name:'NC State Esports'},           t2:{abbr:'PHAN', name:'Phantasia'},                  s1:null,s2:null,w:null},
-      {t1:{abbr:'BKR',  name:'Baker College'},              t2:{abbr:'OSUG', name:'Ohio State University Gray'}, s1:null,s2:null,w:null},
-      {t1:{abbr:'NON',  name:'Nonnegative'},                t2:{abbr:'TOIR', name:'To Iris'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'NAQS', name:'the naqs'},                   t2:{abbr:'TOBU', name:'Tobu'},                       s1:null,s2:null,w:null},
-      {t1:{abbr:'ORTX', name:'ORTYX'},                      t2:{abbr:'HE7',  name:'Heaven7'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'NBG',  name:'Nightblood Gaming'},          t2:{abbr:'VESP', name:'VESPERA'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'SC',   name:'SychCore'},                   t2:{abbr:'1F4N', name:'one french and 4 noobs'},     s1:null,s2:null,w:null},
-      {t1:{abbr:'XYRA', name:'Xyra eSports'},               t2:{abbr:'UOSA', name:'University of Saskatchewan'}, s1:null,s2:null,w:null},
-      {t1:{abbr:'BRHZ', name:'BRIHNZ'},                     t2:{abbr:'JOAT', name:"Let's Go Joat"},              s1:null,s2:null,w:null},
-      {t1:{abbr:'ZE',   name:'Zodiac Esports'},             t2:{abbr:'GAAD', name:'Gambling Addicts'},           s1:null,s2:null,w:null},
-      {t1:{abbr:'MICA', name:'Made in Canada'},             t2:{abbr:'NERVE',name:'Nerve Esports'},              s1:null,s2:null,w:null},
-      {t1:{abbr:'AKBL', name:'Akron Blue'},                 t2:{abbr:'POSM', name:'Positively Smashing'},        s1:null,s2:null,w:null},
-      {t1:{abbr:'FAEM', name:"Fade 'n em"},                 t2:{abbr:'FTR',  name:'Forget The Rest'},            s1:null,s2:null,w:null},
-      {t1:{abbr:'YDG',  name:'Yellow Dragon Gaming'},       t2:{abbr:'RENA', name:'Renari Esports'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'REBE', name:'The Rebels'},                 t2:{abbr:'YO',   name:'Your Ops'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'R1EX', name:'Round 1 Exit'},               t2:{abbr:'SILE', name:'SILENCE'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'KENN', name:'Kennesaw State Premier'},     t2:{abbr:'VYPER',name:'Vyper'},                      s1:null,s2:null,w:null},
-      {t1:{abbr:'TEMP', name:'TEMPR'},                      t2:{abbr:'NCD',  name:'Nexus core Division'},        s1:null,s2:null,w:null},
-      {t1:{abbr:'NEXU', name:'Nexus'},                      t2:{abbr:'LIMI', name:'Limitless Esports'},          s1:null,s2:null,w:null},
-      {t1:{abbr:'34505',name:'r34505'},                     t2:{abbr:'AGAR', name:'Agartha'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'TRHU', name:'True Hussers'},               t2:{abbr:'NAEA', name:'Natty East'},                 s1:null,s2:null,w:null},
-    ],
-    r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null },
-  D:{
-    r256:[
-      {t1:{abbr:'MU',   name:'Maryville University'},         t2:{abbr:'RAFL', name:'Rascal Flattened'},            s1:null,s2:null,w:null},
-      {t1:{abbr:'WT',   name:'Win Traded'},                   t2:{abbr:'RE.FC',name:'refugee fc'},                  s1:null,s2:null,w:null},
-      {t1:{abbr:'P101', name:'Project 101'},                  t2:{abbr:'DREAM',name:'Dreamers'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'MUTE', name:'mute up'},                      t2:{abbr:'PND',  name:'Passion or No Deal'},          s1:null,s2:null,w:null},
-      {t1:{abbr:'THEA', name:'Theamata'},                     t2:{abbr:'SEEA', name:'Sakura Eclipse Esports Astrals'}, s1:null,s2:null,w:null},
-      {t1:{abbr:'CEC',  name:'Comet Esports Club'},           t2:{abbr:'DIAB', name:'El Diablo Esports'},           s1:null,s2:null,w:null},
-      {t1:{abbr:'KEIS', name:'Keiser University'},            t2:{abbr:'FDA',  name:'FDA APPROVED'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'DWG',  name:'Dragon Warriors Gaming'},       t2:{abbr:'HUNG', name:'I was Hungry'},                s1:null,s2:null,w:null},
-      {t1:{abbr:'WVU',  name:'West Virginia University'},     t2:{abbr:'TILE', name:'Timeless'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'WTXR', name:'WTX Ronin'},                    t2:{abbr:'TKOI', name:'Team Koi'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'QUPA', name:'Quack Pack'},                   t2:{abbr:'HUH',  name:'Huh'},                         s1:null,s2:null,w:null},
-      {t1:{abbr:'STSW', name:'Street Sweepers'},              t2:{abbr:'ALIE', name:'Alienz'},                      s1:null,s2:null,w:null},
-      {t1:{abbr:'BABO', name:'baboons'},                      t2:{abbr:'FE4',  name:'Fe4red'},                      s1:null,s2:null,w:null},
-      {t1:{abbr:'NM',   name:'Nang Man'},                     t2:{abbr:'WSU',  name:'Wichita State Esports'},       s1:null,s2:null,w:null},
-      {t1:{abbr:'SS',   name:'Seals Sorry'},                  t2:{abbr:'TUT',  name:'Towson University Tigers'},    s1:null,s2:null,w:null},
-      {t1:{abbr:'GRAP', name:'Green Apple Val'},              t2:{abbr:'SOLA', name:'Solar'},                       s1:null,s2:null,w:null},
-      {t1:{abbr:'OAF',  name:'Oafs'},                         t2:{abbr:'AUDAC',name:'Audacious'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'NACO', name:'Nameless Core'},                t2:{abbr:'DTEA', name:'DTEAM'},                       s1:null,s2:null,w:null},
-      {t1:{abbr:'GANA', name:'Garlic Naan'},                  t2:{abbr:'STAV', name:'Stravix'},                     s1:null,s2:null,w:null},
-      {t1:{abbr:'BOOM', name:'boom'},                         t2:{abbr:'HC',   name:'Highcard'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'LIGA', name:'Life Game'},                    t2:{abbr:'ESGA', name:'Esports Gaming'},              s1:null,s2:null,w:null},
-      {t1:{abbr:'WHMA', name:"Whimsy Maxxer's"},              t2:{abbr:'PSYD', name:'Psyducks'},                    s1:null,s2:null,w:null},
-      {t1:{abbr:'HP',   name:'HP'},                           t2:{abbr:'TABE', name:'TAMEABLE BEASTS'},             s1:null,s2:null,w:null},
-      {t1:{abbr:'AFT',  name:'AFTERHOURS'},                   t2:{abbr:'CLUT', name:'CLUTCH'},                      s1:null,s2:null,w:null},
-      {t1:{abbr:'D1',   name:'Division One'},                 t2:{abbr:'RASE', name:'Rased'},                       s1:null,s2:null,w:null},
-      {t1:{abbr:'ORBI', name:'ORBITAL'},                      t2:{abbr:'ORAN', name:'oranges'},                     s1:null,s2:null,w:null},
-      {t1:{abbr:'SENI', name:'Senior Citizens'},              t2:{abbr:'ELBAR',name:'Elite Barbarians.'},           s1:null,s2:null,w:null},
-      {t1:{abbr:'SJSU', name:'SJSU Spartans'},                t2:{abbr:'UNCT', name:'The Unction'},                 s1:null,s2:null,w:null},
-      {t1:{abbr:'FOCUS',name:'focus'},                        t2:{abbr:'NHEX', name:'North Hex'},                   s1:null,s2:null,w:null},
-      {t1:{abbr:'SDSU', name:'SDSU Black'},                   t2:{abbr:'DEAM', name:'Deathmark Esports'},           s1:null,s2:null,w:null},
-      {t1:{abbr:'HANA', name:'Hanami'},                       t2:{abbr:'OMNI', name:'Omnia Esports'},               s1:null,s2:null,w:null},
-      {t1:{abbr:'MIAM', name:'Made In America'},              t2:{abbr:'BUBI', name:'Team BUBI'},                   s1:null,s2:null,w:null},
-    ],
-    r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null },
+    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), winner:null
+  },
 };
 
 /* 로고 경로 자동 주입 */
 Object.values(MATCHES).forEach(g => {
-  ['r256','r128','r64','r32','r16','r8'].forEach(rnd => {
+  ['r128','r64','r32','r16','r8','r4'].forEach(rnd => {
     g[rnd].forEach(m => {
       if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
       if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
@@ -663,7 +680,7 @@ Object.values(MATCHES).forEach(g => {
 
 /* ── 상태 ── */
 let curGroup = 'A';
-let bracketStart = 0; // 0=R256 … 5=R8
+let bracketStart = 0; // 0=R128 … 5=Semis
 
 /* 위너를 다음 라운드 슬롯에 전파 */
 function propagateWinner(grp, rnd, idx) {
@@ -685,12 +702,12 @@ function clearPropagated(grp, rnd, idx) {
   nm[slot] = null;
   // 그 다음 경기에 이미 결과가 있으면 함께 클리어
   if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearPropagated(grp, nextRnd, nextIdx); }
-  if (nextRnd === 'r8') MATCHES[grp].winner = null;
+  if (nextRnd === 'r4') MATCHES[grp].winner = null;
 }
 
 const BK = { SLOT_H:68, CARD_H:64, CARD_W:200, CONN_W:26 };
-const RND_SHORT = {r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
-const RND_FULL  = {r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
+const RND_SHORT = {r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Ro8',r4:'Semi'};
+const RND_FULL  = {r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',r4:'Semifinals'};
 
 function bCardTop(ri, mi) {
   const s = Math.pow(2, ri);
@@ -707,7 +724,7 @@ function shiftBracket(dir) {
 
 /* ── localStorage 저장/복원 ── */
 const DB_KEY = 'brazil_oq1_scores_v1';
-const ALL_RNDS = ['r256','r128','r64','r32','r16','r8'];
+const ALL_RNDS = ['r128','r64','r32','r16','r8','r4'];
 
 function showSaveToast(state) {
   let t = document.getElementById('save-toast');
@@ -731,7 +748,7 @@ function showSaveToast(state) {
 
 function buildScoresPayload() {
   const out = {};
-  ['A','B','C','D'].forEach(g => {
+  ['A','B'].forEach(g => {
     out[g] = {};
     ALL_RNDS.forEach(rnd => {
       out[g][rnd] = MATCHES[g][rnd].map(m => ({t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null, t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null, s1:m.s1,s2:m.s2,w:m.w}));
@@ -745,7 +762,7 @@ function applyScoresData(raw) {
   if (!raw) return;
   try {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    ['A','B','C','D'].forEach(g => {
+    ['A','B'].forEach(g => {
       if (!data[g]) return;
       ALL_RNDS.forEach(rnd => {
         (data[g][rnd] || []).forEach((s,i) => {
@@ -805,7 +822,7 @@ function bCardRow(t, side, m) {
 function renderBracket(grp) {
   const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
   const visRnds = ALL_RNDS.slice(0);
-  const totalH = 32 * BK.SLOT_H;
+  const totalH = 64 * BK.SLOT_H;
   const COL_STEP = BK.CARD_W + BK.CONN_W;
   const totalW = visRnds.length * COL_STEP - BK.CONN_W;
 
@@ -988,7 +1005,7 @@ function confirmScore() {
   }
   /* 다음 라운드 슬롯에 위너 전파 */
   propagateWinner(grp, rnd, idx);
-  if (rnd === 'r8') {
+  if (rnd === 'r4') {
     const winner = _selWinner === 1 ? m.t1 : m.t2;
     if (winner) MATCHES[grp].winner = {...winner};
   }
@@ -1001,7 +1018,7 @@ function resetMatch(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   m.s1 = null; m.s2 = null; m.w = null;
   clearPropagated(grp, rnd, idx);
-  if (rnd === 'r8') MATCHES[grp].winner = null;
+  if (rnd === 'r4') MATCHES[grp].winner = null;
   saveScores();
   renderContent();
 }
@@ -1026,11 +1043,15 @@ function triggerCrtOff(e) {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
 
-/* ── 시드 결정전 ── */
+/* ── 결정전 ── */
 const SD = {
-  matches: [
-    {t1:null, t2:null, s1:null, s2:null, w:null},
-    {t1:null, t2:null, s1:null, s2:null, w:null},
+  rank56: [
+    {t1:{abbr:'ARA',name:'ARA',logo:L('ARA')}, t2:{abbr:'CV26',name:'CV26',logo:L('CV26')}, s1:null,s2:null,w:null},
+    {t1:{abbr:'SV', name:'SV', logo:L('SV')},  t2:{abbr:'PDC', name:'PDC', logo:L('PDC')},  s1:null,s2:null,w:null},
+  ],
+  seed: [
+    {t1:{abbr:'SOLI',   name:'SOLI',    logo:L('SOLI')},    t2:{abbr:'BRA2002',name:'BRA2002',logo:L('BRA2002')}, s1:null,s2:null,w:null},
+    {t1:{abbr:'TB3',    name:'TB3',     logo:L('TB3')},     t2:{abbr:'Mafia',  name:'Mafia',  logo:L('Mafia')},   s1:null,s2:null,w:null},
   ],
 };
 
@@ -1038,7 +1059,8 @@ const DB_SD_KEY = 'brazil_oq1_seed_v1';
 
 function saveSeedScores() {
   const payload = JSON.stringify({
-    matches: SD.matches.map(m => ({s1:m.s1,s2:m.s2,w:m.w})),
+    rank56: SD.rank56.map(m => ({s1:m.s1,s2:m.s2,w:m.w})),
+    seed:   SD.seed.map(m => ({s1:m.s1,s2:m.s2,w:m.w})),
   });
   fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
     method: 'POST',
@@ -1053,8 +1075,9 @@ function loadSeedScores() {
     .then(raw => {
       try {
         const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        if (!d || !d.matches) return;
-        d.matches.forEach((m,i) => { if(SD.matches[i]){ SD.matches[i].s1=m.s1; SD.matches[i].s2=m.s2; SD.matches[i].w=m.w; } });
+        if (!d) return;
+        if (d.rank56) d.rank56.forEach((m,i) => { if(SD.rank56[i]){ SD.rank56[i].s1=m.s1; SD.rank56[i].s2=m.s2; SD.rank56[i].w=m.w; } });
+        if (d.seed)   d.seed.forEach((m,i)   => { if(SD.seed[i]){   SD.seed[i].s1=m.s1;   SD.seed[i].s2=m.s2;   SD.seed[i].w=m.w;   } });
         renderSeedDecider();
       } catch(e) {}
     }).catch(() => {});
@@ -1114,11 +1137,12 @@ function resetSeedMatch(ctx) {
 }
 
 function getSdMatch(ctx) {
-  return SD.matches[ctx.idx];
+  return SD[ctx.type][ctx.idx];
 }
 
 function sdCtxLabel(ctx) {
-  return `경기 ${ctx.idx + 1}`;
+  const label = ctx.type === 'rank56' ? '5/6등 결정전' : '시드 결정전';
+  return `${label} · 경기 ${ctx.idx + 1}`;
 }
 
 function sdMatchHTML(m, ctx) {
@@ -1149,13 +1173,22 @@ function sdMatchHTML(m, ctx) {
 }
 
 function renderSeedDecider() {
+  function sectionHTML(arr, type, title) {
+    return `<div style="margin-bottom:.8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--g);margin-bottom:.5rem;padding-left:.1rem">${title}</div>
+      <div style="display:flex;gap:1.2rem;flex-wrap:wrap">
+        ${arr.map((m,i) => `
+          <div class="sd-col">
+            <div class="sd-col-label">Match ${i+1}</div>
+            ${sdMatchHTML(m,{type,idx:i})}
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
   document.getElementById('seed-decider').innerHTML = `
-    <div style="display:flex;gap:1.2rem;flex-wrap:wrap;padding:.4rem 0">
-      ${SD.matches.map((m,i) => `
-        <div class="sd-col">
-          <div class="sd-col-label">Match ${i+1}</div>
-          ${sdMatchHTML(m,{idx:i})}
-        </div>`).join('')}
+    <div style="padding:.4rem 0">
+      ${sectionHTML(SD.rank56,'rank56','5 · 6등 결정전')}
+      ${sectionHTML(SD.seed,  'seed',  '시드 결정전')}
     </div>`;
 }
 
@@ -1165,6 +1198,20 @@ function toggleSeedDecider(btn) {
   el.classList.toggle('seed-hidden', isOpen);
   btn.classList.toggle('open', !isOpen);
 }
+
+/* 부전승 자동 전파 (한쪽만 있는 경기) */
+function initByes() {
+  ['A','B'].forEach(g => {
+    ALL_RNDS.forEach(rnd => {
+      MATCHES[g][rnd].forEach((m, idx) => {
+        if (m.w !== null) return;
+        if (m.t1 && !m.t2) { m.w = 1; propagateWinner(g, rnd, idx); }
+        else if (!m.t1 && m.t2) { m.w = 2; propagateWinner(g, rnd, idx); }
+      });
+    });
+  });
+}
+initByes();
 
 renderSeedDecider();
 renderContent();
