@@ -595,7 +595,7 @@ const MATCHES = {
   {t1:{abbr:'AMORA',name:'Amora E-Sports'}, t2:null, s1:null,s2:null,w:null},
   {t1:{abbr:'MINER',name:'Minerva eSports'}, t2:{abbr:'NORME',name:'NORMERMORR'}, s1:null,s2:null,w:null}
     ],
-    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), winner:null
+    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), final:mkM(1), winner:null
   },
   B:{
     r128:[
@@ -664,13 +664,13 @@ const MATCHES = {
       {t1:{abbr:'OSRX',name:'OS RELAXADOS'}, t2:null, s1:null,s2:null,w:null},
       {t1:{abbr:'AFG',name:'Afrogames'}, t2:{abbr:'OGDG',name:'Os Guri Do Grêmio'}, s1:null,s2:null,w:null},
     ],
-    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), winner:null
+    r64:mkM(32), r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), final:mkM(1), winner:null
   },
 };
 
 /* 로고 경로 자동 주입 */
 Object.values(MATCHES).forEach(g => {
-  ['r128','r64','r32','r16','r8','r4'].forEach(rnd => {
+  ['r128','r64','r32','r16','r8','r4','final'].forEach(rnd => {
     g[rnd].forEach(m => {
       if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
       if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
@@ -703,12 +703,12 @@ function clearPropagated(grp, rnd, idx) {
   nm[slot] = null;
   // 그 다음 경기에 이미 결과가 있으면 함께 클리어
   if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearPropagated(grp, nextRnd, nextIdx); }
-  if (nextRnd === 'r4') MATCHES[grp].winner = null;
+  if (nextRnd === 'final') MATCHES[grp].winner = null;
 }
 
 const BK = { SLOT_H:68, CARD_H:64, CARD_W:200, CONN_W:26 };
-const RND_SHORT = {r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Ro8',r4:'Semi'};
-const RND_FULL  = {r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',r4:'Semifinals'};
+const RND_SHORT = {r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Ro8',r4:'Semi',final:'Final'};
+const RND_FULL  = {r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',r4:'Semifinals',final:'Final'};
 
 function bCardTop(ri, mi) {
   const s = Math.pow(2, ri);
@@ -725,7 +725,7 @@ function shiftBracket(dir) {
 
 /* ── localStorage 저장/복원 ── */
 const DB_KEY = 'brazil_oq1_scores_v1';
-const ALL_RNDS = ['r128','r64','r32','r16','r8','r4'];
+const ALL_RNDS = ['r128','r64','r32','r16','r8','r4','final'];
 
 function showSaveToast(state) {
   let t = document.getElementById('save-toast');
@@ -1023,7 +1023,7 @@ function confirmScore() {
   }
   /* 다음 라운드 슬롯에 위너 전파 */
   propagateWinner(grp, rnd, idx);
-  if (rnd === 'r4') {
+  if (rnd === 'final') {
     const winner = _selWinner === 1 ? m.t1 : m.t2;
     if (winner) MATCHES[grp].winner = {...winner};
   }
@@ -1036,7 +1036,7 @@ function resetMatch(grp, rnd, idx) {
   const m = MATCHES[grp][rnd][idx];
   m.s1 = null; m.s2 = null; m.w = null;
   clearPropagated(grp, rnd, idx);
-  if (rnd === 'r4') MATCHES[grp].winner = null;
+  if (rnd === 'final') MATCHES[grp].winner = null;
   saveScores();
   renderContent();
 }
