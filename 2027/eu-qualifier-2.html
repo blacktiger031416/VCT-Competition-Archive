@@ -438,7 +438,7 @@ body.view-only .cr:hover{border-color:var(--bdr)}
       <div class="tb-title">EUROPE QUALIFIER 2 — GROUP STAGE</div>
     </div>
     <div class="tb-sep"></div>
-    <div class="tb-right">256팀 · Single Elimination · 그룹당 1팀 → Swiss Stage</div>
+    <div class="tb-right">512팀 · Single Elimination · 그룹당 1팀 → Swiss Stage</div>
   </div>
 
   <div id="body">
@@ -512,6 +512,7 @@ const GROUPS = {
 };
 
 const ROUND_CFG = {
+  r512:{name:'Round of 512', matchCount:64, gridClass:'r512', compact:true},
   r256:{name:'Round of 256', matchCount:32, gridClass:'r256', compact:true},
   r128:{name:'Round of 128', matchCount:16, gridClass:'r128', compact:true},
   r64: {name:'Round of 64',  matchCount:8,  gridClass:'r64',  compact:true},
@@ -540,6 +541,7 @@ const L = (abbr) => `../assets/teams/VCT 2027/VCT EMEA/EMEA_OQ/Europe/${abbr}.pn
 
 const MATCHES = {
   A:{
+    r512:mkM(64),
     r256:[
       {t1:{abbr:'SM',      name:'Szach Mat'},                   t2:{abbr:'LING',    name:'LingLing Gaming'},            s1:null,s2:null,w:null},
       {t1:{abbr:'APEC',    name:'ApeCrime'},                    t2:{abbr:'K2',      name:'K2'},                        s1:null,s2:null,w:null},
@@ -576,6 +578,7 @@ const MATCHES = {
     ],
     r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
   B:{
+    r512:mkM(64),
     r256:[
       {t1:{abbr:'CLMIX',  name:'Cloud Mix'},                   t2:{abbr:'ORIX',    name:'Origami X'},                 s1:null,s2:null,w:null},
       {t1:{abbr:'SAINT',  name:'SAINT Myraids'},                t2:{abbr:'TUTTC',   name:'Tutt Tutt Corp'},             s1:null,s2:null,w:null},
@@ -612,6 +615,7 @@ const MATCHES = {
     ],
     r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
   C:{
+    r512:mkM(64),
     r256:[
       {t1:{abbr:'MSA',    name:'La Masia'},                      t2:{abbr:'HBT',     name:'Habitual GG'},                s1:null,s2:null,w:null},
       {t1:{abbr:'BPIP',   name:'Bpips prime'},                   t2:{abbr:'CLOV',    name:'Clover eSports'},              s1:null,s2:null,w:null},
@@ -648,6 +652,7 @@ const MATCHES = {
     ],
     r128:mkM(16), r64:mkM(8), r32:mkM(4), r16:mkM(2), r8:mkM(1), winner:null},
   D:{
+    r512:mkM(64),
     r256:[
       {t1:{abbr:'WEAT',   name:'weather'},                        t2:{abbr:'FOOT',    name:'Foot Clan'},                   s1:null,s2:null,w:null},
       {t1:{abbr:'PRICHA', name:'Prime Champions'},                 t2:{abbr:'FVCOMB',  name:'Project Free Vlr Charity Org'}, s1:null,s2:null,w:null},
@@ -687,7 +692,7 @@ const MATCHES = {
 
 /* 로고 경로 자동 주입 */
 Object.values(MATCHES).forEach(g => {
-  ['r256','r128','r64','r32','r16','r8'].forEach(rnd => {
+  ['r512','r256','r128','r64','r32','r16','r8'].forEach(rnd => {
     g[rnd].forEach(m => {
       if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
       if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
@@ -724,8 +729,8 @@ function clearPropagated(grp, rnd, idx) {
 }
 
 const BK = { SLOT_H:68, CARD_H:64, CARD_W:200, CONN_W:26 };
-const RND_SHORT = {r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
-const RND_FULL  = {r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
+const RND_SHORT = {r512:'Ro512',r256:'Ro256',r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Final'};
+const RND_FULL  = {r512:'Round of 512',r256:'Round of 256',r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Final'};
 
 function bCardTop(ri, mi) {
   const s = Math.pow(2, ri);
@@ -742,7 +747,7 @@ function shiftBracket(dir) {
 
 /* ── localStorage 저장/복원 ── */
 const DB_KEY = 'euq2_scores_v1';
-const ALL_RNDS = ['r256','r128','r64','r32','r16','r8'];
+const ALL_RNDS = ['r512','r256','r128','r64','r32','r16','r8'];
 
 function showSaveToast(state) {
   let t = document.getElementById('save-toast');
