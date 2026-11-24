@@ -222,59 +222,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 .panel-body{padding:.85rem 1rem;position:relative;z-index:1}
 
 /* ── compact rows (Bo1) ── */
-.compact-grid{display:grid;gap:.4rem;grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
-.cr{
-  display:flex;align-items:center;
-  border:1px solid rgba(0,200,255,.09);border-radius:3px;
-  background:linear-gradient(135deg,rgba(0,10,30,.75) 0%,rgba(0,5,18,.65) 100%);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  overflow:hidden;cursor:pointer;min-height:56px;
-  transition:all .22s;animation:matchIn .18s ease both;position:relative}
-.cr::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,rgba(0,200,255,.12),rgba(0,200,255,.04));
-  opacity:0;transition:opacity .2s}
-.cr:hover{border-color:rgba(0,200,255,.28);
-  background:linear-gradient(135deg,rgba(0,20,45,.85) 0%,rgba(0,10,30,.75) 100%);
-  box-shadow:0 4px 24px rgba(0,200,255,.07),0 0 0 1px rgba(0,200,255,.08);
-  transform:translateY(-1px)}
-.cr:hover::before{opacity:1}
-.cr.has-result{border-color:rgba(0,200,255,.16)}
-.cr-team{flex:1;min-width:0;display:flex;align-items:center;gap:.7rem;padding:.6rem .85rem}
-.cr-team.win{background:linear-gradient(90deg,rgba(0,200,255,.1) 0%,rgba(0,200,255,.03) 100%)}
-.cr.has-result .cr-team:not(.win){opacity:.38}
-.cr-logo{
-  width:34px;height:34px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  position:relative}
-.cr-logo::before{content:'';position:absolute;inset:-2px;border-radius:50%;
-  border:1px solid rgba(0,200,255,.12);opacity:0;transition:opacity .2s}
-.cr-team.win .cr-logo::before{opacity:1;border-color:rgba(0,200,255,.5);
-  box-shadow:0 0 8px rgba(0,200,255,.25)}
-.cr-logo img{width:100%;height:100%;object-fit:contain;border-radius:2px}
-.cr-logo-ph{width:34px;height:34px;border-radius:2px;
-  background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.1);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,200,255,.3)}
-.cr-info{min-width:0;display:flex;flex-direction:column;gap:3px}
-.cr-abbr{
-  font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;
-  letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  color:var(--txt);line-height:1;transition:all .15s}
-.cr-name{
-  font-family:'Barlow',sans-serif;font-size:10px;font-weight:300;
-  letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  color:var(--muted);line-height:1}
-.cr-team.win .cr-abbr{
-  color:var(--g);text-shadow:0 0 14px rgba(0,200,255,.55)}
-.cr-team.win .cr-name{color:rgba(0,200,255,.5)}
-.cr-sep{width:1px;background:rgba(0,200,255,.08);align-self:stretch;flex-shrink:0}
-.cr-vs{
-  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.12em;
-  color:rgba(0,200,255,.25);padding:0 .6rem;flex-shrink:0}
-
-/* ── match card (Bo3) ── */
+/* ── match grid (unified) ── */
 .match-grid{display:grid;gap:.6rem}
-.match-grid.g2{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.match-grid.g2{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .match-card{
   border:1px solid rgba(0,200,255,.1);border-radius:4px;
   background:linear-gradient(160deg,rgba(0,10,28,.8) 0%,rgba(0,5,16,.72) 100%);
@@ -605,34 +555,7 @@ function renderNav(){
   });
 }
 
-function crTeamHTML(t,isWin){
-  const logoInner=t?.logo
-    ?`<img src="${t.logo}" alt="" onerror="this.style.display='none'">`
-    :`<div class="cr-logo-ph">?</div>`;
-  const abbr=t?.abbr??'TBD';
-  const name=t?.name&&t.name!==abbr?t.name:'';
-  return `<div class="cr-team${isWin?' win':''}">
-    <div class="cr-logo">${logoInner}</div>
-    <div class="cr-info">
-      <span class="cr-abbr">${abbr}</span>
-      ${name?`<span class="cr-name">${name}</span>`:''}
-    </div>
-  </div>`;
-}
 
-function renderCrRow(bid,m,idx){
-  const hasResult=m.w!==null;
-  const t1w=hasResult&&m.w===1, t2w=hasResult&&m.w===2;
-  const el=document.createElement('div');
-  el.className='cr'+(hasResult?' has-result':'');
-  el.style.animationDelay=`${Math.min(idx,20)*.016}s`;
-  el.innerHTML=
-    crTeamHTML(m.t1,t1w)+
-    `<div class="cr-sep"></div><span class="cr-vs">VS</span><div class="cr-sep"></div>`+
-    crTeamHTML(m.t2,t2w);
-  el.onclick=()=>openScoreModal(bid,idx,1);
-  return el;
-}
 
 function mtRowHTML(t,side,m){
   const win=m.w===side, hasResult=m.w!==null;
@@ -655,15 +578,15 @@ function mtRowHTML(t,side,m){
   </div>`;
 }
 
-function renderMatchCard(bid,m,idx){
+function renderMatchCard(bid,m,idx,bo=3){
   const hasResult=m.w!==null;
   const el=document.createElement('div');
   el.className='match-card'+(hasResult?' has-result':'');
-  el.style.animationDelay=`${Math.min(idx,12)*.022}s`;
+  el.style.animationDelay=`${Math.min(idx,20)*.016}s`;
   el.innerHTML=`
     <div class="match-num-row">
       <span class="match-num-txt">MATCH ${String(idx+1).padStart(2,'0')}</span>
-      <span class="match-bo-badge">Bo3</span>
+      <span class="match-bo-badge">Bo${bo}</span>
     </div>
     ${mtRowHTML(m.t1,1,m)}
     <div class="match-vs">
@@ -672,7 +595,7 @@ function renderMatchCard(bid,m,idx){
       <div class="match-vs-line"></div>
     </div>
     ${mtRowHTML(m.t2,2,m)}`;
-  el.onclick=()=>openScoreModal(bid,idx,3);
+  el.onclick=()=>openScoreModal(bid,idx,bo);
   return el;
 }
 
@@ -707,17 +630,10 @@ function renderContent(){
     // Panel body
     const body=document.createElement('div');
     body.className='panel-body';
-    if(b.bo===1){
-      const grid=document.createElement('div');
-      grid.className='compact-grid';
-      matches.forEach((m,idx)=>grid.appendChild(renderCrRow(b.id,m,idx)));
-      body.appendChild(grid);
-    }else{
-      const grid=document.createElement('div');
-      grid.className='match-grid g2';
-      matches.forEach((m,idx)=>grid.appendChild(renderMatchCard(b.id,m,idx)));
-      body.appendChild(grid);
-    }
+    const grid=document.createElement('div');
+    grid.className='match-grid g2';
+    matches.forEach((m,idx)=>grid.appendChild(renderMatchCard(b.id,m,idx,b.bo)));
+    body.appendChild(grid);
     sec.appendChild(body);
     content.appendChild(sec);
   });
