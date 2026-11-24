@@ -152,17 +152,61 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 #content::-webkit-scrollbar-thumb{background:rgba(0,200,255,.25);border-radius:2px}
 #content::-webkit-scrollbar-track{background:transparent}
 
-/* ── section header ── */
+/* ── holographic panel ── */
+.bracket-sec{
+  position:relative;
+  margin-bottom:1.8rem;
+  border:1px solid rgba(0,200,255,.22);
+  border-radius:4px;
+  background:linear-gradient(160deg,rgba(0,14,38,.86) 0%,rgba(0,7,22,.74) 100%);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:
+    0 14px 55px rgba(0,0,0,.62),
+    0 0 0 1px rgba(0,200,255,.05),
+    0 0 30px rgba(0,200,255,.07),
+    inset 0 1px 0 rgba(0,200,255,.22),
+    inset 0 0 70px rgba(0,200,255,.03);
+  overflow:hidden}
+/* scan-line texture */
+.bracket-sec::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,200,255,.014) 0,rgba(0,200,255,.014) 1px,
+    transparent 1px,transparent 5px);
+  z-index:0}
+/* top glow edge */
+.bracket-sec::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(0,200,255,.55) 35%,rgba(0,200,255,.85) 50%,rgba(0,200,255,.55) 65%,transparent 100%);
+  z-index:2}
+/* corner bracket decorators */
+.pc{position:absolute;z-index:3}
+.pc::before,.pc::after{content:'';position:absolute;background:rgba(0,200,255,.55)}
+.pc-tl{top:5px;left:5px}
+.pc-tl::before{top:0;left:0;width:1px;height:10px}
+.pc-tl::after{top:0;left:0;width:10px;height:1px}
+.pc-tr{top:5px;right:5px}
+.pc-tr::before{top:0;right:0;width:1px;height:10px}
+.pc-tr::after{top:0;right:0;width:10px;height:1px}
+.pc-bl{bottom:5px;left:5px}
+.pc-bl::before{bottom:0;left:0;width:1px;height:10px}
+.pc-bl::after{bottom:0;left:0;width:10px;height:1px}
+.pc-br{bottom:5px;right:5px}
+.pc-br::before{bottom:0;right:0;width:1px;height:10px}
+.pc-br::after{bottom:0;right:0;width:10px;height:1px}
+
+/* ── panel title bar ── */
 .grp-header{
   display:flex;align-items:center;gap:.9rem;
-  margin-bottom:1rem;padding-bottom:.7rem;
-  border-bottom:1px solid rgba(0,200,255,.1);
-  position:relative}
-.grp-header::after{content:'';position:absolute;bottom:-1px;left:0;width:60px;height:1px;
-  background:var(--g);opacity:.6}
+  padding:.65rem 1.1rem;
+  background:linear-gradient(to right,rgba(0,200,255,.13) 0%,rgba(0,200,255,.04) 55%,transparent 100%);
+  border-bottom:1px solid rgba(0,200,255,.14);
+  position:relative;z-index:1;margin:0}
 .grp-title{
-  font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g);
+  text-shadow:0 0 12px rgba(0,200,255,.4);opacity:.9}
 .grp-badge{
   font-family:'Share Tech Mono',monospace;font-size:9px;
   letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:2px}
@@ -172,10 +216,10 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   text-shadow:0 0 8px rgba(0,200,255,.5);animation:pulse 1.4s ease-in-out infinite}
 .grp-desc{
   margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:rgba(0,200,255,.45);letter-spacing:.06em;text-transform:uppercase}
+  color:rgba(0,200,255,.4);letter-spacing:.06em;text-transform:uppercase}
 
-/* ── bracket section ── */
-.bracket-sec{margin-bottom:2rem}
+/* ── panel body ── */
+.panel-body{padding:.85rem 1rem;position:relative;z-index:1}
 
 /* ── compact rows (Bo1) ── */
 .compact-grid{display:grid;gap:.4rem;grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
@@ -646,23 +690,35 @@ function renderContent(){
     const badgeCls=done===matches.length?'done':done>0?'live':'pending';
     const badgeTxt=done===matches.length?'완료':done>0?`${done}/${matches.length}`:`${matches.length}경기`;
     const descTxt=b.bo===1?'BO1':'BO3';
-    sec.innerHTML=`
-      <div class="grp-header">
-        <span class="grp-title">${title}</span>
-        <span class="grp-badge ${badgeCls}">${badgeTxt}</span>
-        <span class="grp-desc">${descTxt}</span>
-      </div>`;
+    // Corner bracket decorators
+    ['tl','tr','bl','br'].forEach(c=>{
+      const d=document.createElement('div');
+      d.className=`pc pc-${c}`;
+      sec.appendChild(d);
+    });
+    // Title bar
+    const hdr=document.createElement('div');
+    hdr.className='grp-header';
+    hdr.innerHTML=`
+      <span class="grp-title">${title}</span>
+      <span class="grp-badge ${badgeCls}">${badgeTxt}</span>
+      <span class="grp-desc">${descTxt}</span>`;
+    sec.appendChild(hdr);
+    // Panel body
+    const body=document.createElement('div');
+    body.className='panel-body';
     if(b.bo===1){
       const grid=document.createElement('div');
       grid.className='compact-grid';
       matches.forEach((m,idx)=>grid.appendChild(renderCrRow(b.id,m,idx)));
-      sec.appendChild(grid);
+      body.appendChild(grid);
     }else{
       const grid=document.createElement('div');
       grid.className='match-grid g2';
       matches.forEach((m,idx)=>grid.appendChild(renderMatchCard(b.id,m,idx)));
-      sec.appendChild(grid);
+      body.appendChild(grid);
     }
+    sec.appendChild(body);
     content.appendChild(sec);
   });
 }
