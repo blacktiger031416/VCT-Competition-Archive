@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAN Qualifier 1 — VCT 2027 Americas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#85E62C;--bg:#06060a;--s1:#0d0d14;
+  --bdr:rgba(255,255,255,.07);
+  --txt:#e4e4ee;--muted:rgba(228,228,238,.38);--muted2:rgba(228,228,238,.14);
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
+
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(133,230,44,.045) 0%,transparent 65%);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.05) 0,rgba(0,0,0,.05) 1px,transparent 1px,transparent 3px);
+  pointer-events:none;z-index:1;opacity:.5}
+
+#screen{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;
+  transform:scaleY(.02);opacity:0;transform-origin:center;
+  animation:crtOn .5s cubic-bezier(.16,1,.3,1) .05s forwards}
+#screen::after{content:'';position:absolute;left:0;right:0;top:0;height:5px;
+  background:linear-gradient(to bottom,transparent,rgba(133,230,44,.5),transparent);
+  animation:scanSweep .6s .3s linear forwards;z-index:100;opacity:0}
+
+@keyframes crtOn{
+  0%  {transform:scaleY(.02);filter:brightness(7);opacity:.85}
+  18% {transform:scaleY(.02);filter:brightness(9)}
+  32% {transform:scaleY(1);filter:brightness(2.8)}
+  65% {filter:brightness(1.15)}
+  100%{transform:scaleY(1);filter:brightness(1);opacity:1}}
+@keyframes crtOff{
+  0%  {transform:scaleY(1);filter:brightness(1);opacity:1}
+  35% {transform:scaleY(1);filter:brightness(3.5) saturate(2)}
+  55% {transform:scaleY(.04);filter:brightness(8) saturate(0)}
+  80% {transform:scaleY(.02);filter:brightness(.5)}
+  100%{transform:scaleY(0);filter:brightness(0);opacity:0}}
+@keyframes scanSweep{0%{top:-5px;opacity:1}100%{top:100%;opacity:.3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 8px rgba(133,230,44,.2),0 0 20px rgba(133,230,44,.07)}
+  50%    {box-shadow:0 0 16px rgba(133,230,44,.38),0 0 40px rgba(133,230,44,.13)}}
+@keyframes matchIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── top bar ── */
+#topbar{
+  display:flex;align-items:center;gap:1rem;
+  padding:.65rem 1.5rem;border-bottom:1px solid var(--bdr);
+  background:rgba(6,6,10,.92);backdrop-filter:blur(8px);flex-shrink:0;
+  position:relative;overflow:hidden}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.4}
+.tb-back{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  text-decoration:none;border:1px solid rgba(255,255,255,.1);
+  padding:4px 12px;border-radius:2px;transition:all .15s;flex-shrink:0}
+.tb-back:hover{color:var(--g);border-color:rgba(133,230,44,.3)}
+.tb-sep{width:1px;height:20px;background:var(--bdr);flex-shrink:0}
+.tb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--g);opacity:.65}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt)}
+.tb-status{display:flex;align-items:center;gap:.4rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g);
+  background:rgba(133,230,44,.07);border:1px solid rgba(133,230,44,.22);
+  padding:3px 10px;border-radius:2px;flex-shrink:0}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--g);
+  animation:pulse 1.2s ease-in-out infinite}
+.tb-right{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:.08em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+
+/* ── layout ── */
+#body{flex:1;display:flex;overflow:hidden}
+
+/* ── sidebar ── */
+#sidebar{width:68px;flex-shrink:0;border-right:1px solid var(--bdr);
+  background:var(--s1);display:flex;flex-direction:column;
+  align-items:center;padding:.7rem 0;gap:.35rem;position:relative}
+#sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(133,230,44,.25),transparent)}
+.g-btn{width:46px;height:46px;border-radius:3px;border:1px solid var(--bdr);
+  background:transparent;cursor:pointer;position:relative;overflow:hidden;
+  font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  color:var(--muted);transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.g-btn:hover{border-color:rgba(133,230,44,.4);color:var(--txt)}
+.g-btn.active{border-color:var(--g);color:var(--g);background:rgba(133,230,44,.06);
+  animation:glowPulse 2.5s ease-in-out infinite}
+.g-btn .g-label{position:relative;z-index:1}
+.g-btn .g-sub{position:relative;z-index:1;font-size:7px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+.g-btn.live .g-sub{color:var(--g);animation:pulse 1.4s ease-in-out infinite}
+.g-btn.active .g-sub{color:var(--g)}
+.g-corner{position:absolute;width:6px;height:6px;border-color:var(--g);border-style:solid;opacity:0;transition:opacity .2s}
+.g-btn.active .g-corner{opacity:1}
+.g-corner.tl{top:3px;left:3px;border-width:1px 0 0 1px}
+.g-corner.tr{top:3px;right:3px;border-width:1px 1px 0 0}
+.g-corner.bl{bottom:3px;left:3px;border-width:0 0 1px 1px}
+.g-corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0}
+
+/* ── main ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── bracket nav ── */
+#round-tabs{display:flex;align-items:center;border-bottom:1px solid var(--bdr);
+  background:var(--s1);flex-shrink:0;padding:0 1.2rem;position:relative;min-height:40px}
+#round-tabs::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(133,230,44,.18),transparent)}
+.bnav{display:flex;align-items:center;gap:.35rem;margin-left:auto}
+.bnav-arr{background:none;border:1px solid var(--bdr);color:var(--muted);border-radius:3px;
+  width:26px;height:26px;cursor:pointer;font-size:16px;line-height:1;padding:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.bnav-arr:hover:not(:disabled){border-color:var(--g);color:var(--g)}
+.bnav-arr:disabled{opacity:.25;cursor:default}
+.bnav-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  letter-spacing:.12em;color:var(--txt);min-width:52px;text-align:center}
+
+/* ── bracket cards ── */
+.bcard{width:185px;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;
+  background:var(--s1);cursor:pointer;transition:border-color .15s}
+.bcard:hover{border-color:rgba(133,230,44,.3)}
+.bcard.has-result{border-color:rgba(133,230,44,.18)}
+.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.25rem .5rem .1rem;min-height:30px}
+.bcard-row.win{background:rgba(133,230,44,.07)}
+.bcard.has-result .bcard-row:not(.win) .bcard-logo{opacity:.35}
+.bcard.has-result .bcard-row:not(.win) .bcard-abbr{color:var(--muted2)}
+.bcard.has-result .bcard-row:not(.win) .bcard-score{color:var(--muted2)}
+.bcard-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bcard-logo img{width:100%;height:100%;object-fit:contain}
+.bcard-logo-ph{width:18px;height:18px;background:var(--bdr);border-radius:2px}
+.bcard-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.bcard-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--txt);line-height:1.1}
+.bcard-fullname{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted2);line-height:1.1;letter-spacing:.02em}
+.bcard-row.win .bcard-abbr{color:var(--g)}
+.bcard-row.win .bcard-fullname{color:rgba(133,230,44,.6)}
+.bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--txt);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
+.bcard-row.win .bcard-score{color:var(--g)}
+.bcard-sep{height:1px;background:var(--bdr)}
+
+/* ── bracket layout ── */
+.bracket-outer{overflow-x:auto;overflow-y:auto;padding-bottom:.5rem}
+.bracket-rnd-labels{display:flex;padding:6px 0 10px}
+.bcol-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;text-align:center}
+.bracket-inner{position:relative}
+.bm-wrap{position:absolute}
+.bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+
+/* ── content ── */
+#content{flex:1;overflow-y:auto;padding:1rem 1.2rem;position:relative}
+#content::-webkit-scrollbar{width:3px}
+#content::-webkit-scrollbar-thumb{background:rgba(133,230,44,.2);border-radius:2px}
+
+/* ── group switch animation ── */
+@keyframes grp-in{
+  0%  {opacity:0;transform:translateY(10px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+#content.grp-switching{
+  animation:grp-in .22s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+/* ── group header ── */
+.grp-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.85rem;
+  padding-bottom:.65rem;border-bottom:1px solid var(--bdr)}
+.grp-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase}
+.grp-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.grp-badge.done{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-badge.pending{color:var(--muted);background:rgba(255,255,255,.02);border:1px solid var(--bdr)}
+.grp-badge.live{color:var(--g);background:rgba(133,230,44,.08);border:1px solid rgba(133,230,44,.25);
+  animation:pulse 1.4s ease-in-out infinite}
+.grp-desc{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── match grid ── */
+.match-grid{display:grid;gap:.6rem}
+.match-grid.r16{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.match-grid.f  {grid-template-columns:1fr;max-width:420px}
+
+/* ── match card ── */
+.match-card{
+  border:1px solid var(--bdr);border-radius:4px;background:var(--s1);
+  overflow:hidden;position:relative;animation:matchIn .2s ease both}
+.match-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;
+  background:var(--g);opacity:0;transition:opacity .2s}
+.match-card:hover::before{opacity:.35}
+.match-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);
+  padding:.3rem .7rem;border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.018)}
+
+/* ── match team row ── */
+.mt-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .65rem;position:relative}
+.mt-row.tbd{opacity:.38}
+.mt-row.win{background:rgba(133,230,44,.045)}
+.mt-row.win::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--g)}
+.mt-logo{width:30px;height:30px;border-radius:3px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;overflow:hidden}
+.mt-logo img{width:100%;height:100%;object-fit:contain}
+.mt-logo-ph{font-size:10px;color:rgba(255,255,255,.18)}
+.mt-info{flex:1;min-width:0}
+.mt-abbr{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.03em;color:var(--txt);display:block;line-height:1.1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-row.tbd .mt-abbr{color:var(--muted2)}
+.mt-name{font-size:10px;color:var(--muted);display:block;line-height:1.1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-row.tbd .mt-name{color:var(--muted2)}
+.mt-score{
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.02em;flex-shrink:0;color:var(--muted);min-width:16px;text-align:right}
+.mt-row.win .mt-score{color:var(--g)}
+.mt-win-mark{flex-shrink:0;width:14px;height:14px;border-radius:50%;
+  background:rgba(133,230,44,.15);border:1px solid rgba(133,230,44,.4);
+  display:flex;align-items:center;justify-content:center}
+.mt-win-mark svg{width:7px;height:7px;fill:var(--g)}
+
+/* ── vs divider ── */
+.match-vs{
+  display:flex;align-items:center;gap:.5rem;padding:.18rem .65rem;
+  border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.match-vs-line{flex:1;height:1px;background:var(--bdr)}
+.match-vs-txt{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:.15em;color:var(--muted2)}
+
+/* ── final card (larger) ── */
+.match-grid.f .match-card{border-color:rgba(133,230,44,.22);background:rgba(133,230,44,.025)}
+.match-grid.f .match-card::before{opacity:.5}
+.match-grid.f .mt-row{padding:.7rem .9rem}
+.match-grid.f .mt-logo{width:38px;height:38px}
+.match-grid.f .mt-abbr{font-size:17px}
+.match-grid.f .mt-score{font-size:22px}
+.match-grid.f .match-vs{padding:.25rem .9rem}
+
+/* ── match card clickable ── */
+.match-card{cursor:pointer}
+.match-card:hover{border-color:rgba(133,230,44,.25)}
+.match-num{display:flex;align-items:center;justify-content:space-between}
+.match-edit-hint{font-size:7px;letter-spacing:.08em;color:rgba(133,230,44,.4);font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.match-card.has-result .match-edit-hint{color:rgba(133,230,44,.55)}
+
+/* ── score popup overlay ── */
+#scoreOverlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center}
+#scoreOverlay.open{display:flex}
+#scoreBox{
+  background:#0d0d14;border:1px solid rgba(133,230,44,.35);border-radius:6px;
+  width:min(380px,90vw);overflow:hidden;position:relative}
+#scoreBox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.sb-header{
+  padding:.7rem 1rem;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+.sb-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.sb-close:hover{color:var(--txt)}
+.sb-body{padding:.9rem 1rem}
+.sb-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.sb-teams{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-team{
+  display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;
+  border:1px solid var(--bdr);border-radius:4px;background:rgba(255,255,255,.025);
+  cursor:pointer;transition:all .15s;text-align:left}
+.sb-team:hover{border-color:rgba(133,230,44,.4);background:rgba(133,230,44,.05)}
+.sb-team.selected{border-color:var(--g);background:rgba(133,230,44,.1)}
+.sb-team-logo{width:26px;height:26px;border-radius:2px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;overflow:hidden}
+.sb-team-logo img{width:100%;height:100%;object-fit:contain}
+.sb-team-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.03em;color:var(--txt);display:block;line-height:1}
+.sb-team-name{font-size:9px;color:var(--muted);display:block;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-scores{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-score-btn{
+  padding:.5rem;border:1px solid var(--bdr);border-radius:4px;
+  background:rgba(255,255,255,.025);cursor:pointer;transition:all .15s;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.06em;color:var(--muted);text-align:center}
+.sb-score-btn:hover{border-color:rgba(133,230,44,.4);color:var(--txt)}
+.sb-score-btn.selected{border-color:var(--g);color:var(--g);background:rgba(133,230,44,.08)}
+.sb-score-btn:disabled{opacity:.25;cursor:not-allowed}
+.sb-footer{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--bdr)}
+.sb-btn{flex:1;padding:.5rem;border-radius:3px;border:1px solid var(--bdr);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sb-btn.cancel{background:transparent;color:var(--muted)}
+.sb-btn.cancel:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
+.sb-btn.confirm{background:rgba(133,230,44,.12);color:var(--g);border-color:rgba(133,230,44,.4)}
+.sb-btn.confirm:hover{background:rgba(133,230,44,.22)}
+.sb-btn.confirm:disabled{opacity:.3;cursor:not-allowed}
+.match-reset{background:none;border:none;cursor:pointer;padding:0;line-height:1;
+  color:rgba(133,230,44,.35);font-size:10px;transition:color .15s}
+.match-reset:hover{color:rgba(133,230,44,.8)}
+
+/* ── compact rows ── */
+.compact-grid{display:grid;gap:.4rem;grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+.cr{display:flex;align-items:center;gap:0;border:1px solid var(--bdr);border-radius:3px;
+  background:var(--s1);overflow:hidden;cursor:pointer;transition:border-color .15s;
+  animation:matchIn .15s ease both;min-height:54px}
+.cr:hover{border-color:rgba(133,230,44,.22)}
+.cr.has-result{border-color:rgba(133,230,44,.18)}
+.cr-team{flex:1;min-width:0;display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem}
+.cr-team.win{background:rgba(133,230,44,.07)}
+.cr.has-result .cr-team:not(.win){opacity:.42}
+.cr-logo{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cr-logo img{width:100%;height:100%;object-fit:contain}
+.cr-logo-ph{width:32px;height:32px;border-radius:2px;background:var(--bdr);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;color:var(--muted2)}
+.cr-info{min-width:0;display:flex;flex-direction:column;gap:2px}
+.cr-abbr{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;
+  letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--txt);transition:color .1s;line-height:1}
+.cr-name{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--muted);line-height:1}
+.cr-team.win .cr-abbr{color:var(--g)}
+.cr-score{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  color:var(--muted2);flex-shrink:0;min-width:18px;text-align:right}
+.cr-team.win .cr-score{color:var(--g)}
+.cr-sep{width:1px;background:var(--bdr);align-self:stretch;flex-shrink:0}
+.cr-vs{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;color:var(--muted2);padding:0 .5rem;flex-shrink:0}
+body.view-only .match-card{cursor:default}
+body.view-only .match-card:hover{border-color:var(--bdr)}
+body.view-only .match-card:hover::before{opacity:0}
+body.view-only .match-edit-hint{display:none}
+body.view-only .match-reset{display:none}
+body.view-only .cr{cursor:default}
+body.view-only .cr:hover{border-color:var(--bdr)}
+
+/* ── winner panel ── */
+.winner-wrap{margin-top:.8rem;padding:.85rem 1rem;border-radius:4px;
+  border:1px solid rgba(133,230,44,.35);background:rgba(133,230,44,.04);
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:.9rem}
+.winner-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.winner-logo{width:44px;height:44px;border-radius:4px;border:1px solid rgba(133,230,44,.25);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.winner-logo img{width:100%;height:100%;object-fit:contain}
+.winner-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:rgba(133,230,44,.65);margin-bottom:.25rem}
+.winner-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.05em;color:var(--txt)}
+.winner-badge{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;
+  border-radius:2px;background:rgba(133,230,44,.15);color:var(--g);
+  border:1px solid rgba(133,230,44,.3);flex-shrink:0}
+
+/* ── seed decider toggle ── */
+#seed-decider-btn-wrap{padding:.6rem 0 0}
+.seed-toggle{background:transparent;border:1px solid var(--bdr);border-radius:3px;
+  color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:.35rem .8rem;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:.4rem}
+.seed-toggle:hover{border-color:rgba(133,230,44,.3);color:var(--g)}
+.seed-toggle.open{border-color:rgba(133,230,44,.4);color:var(--g)}
+.seed-toggle-arrow{font-size:10px;transition:transform .2s}
+.seed-toggle.open .seed-toggle-arrow{transform:rotate(180deg)}
+#seed-decider{overflow:hidden;transition:max-height .3s ease,opacity .2s;max-height:300px;opacity:1;margin-bottom:.8rem}
+#seed-decider.seed-hidden{max-height:0;opacity:0;pointer-events:none}
+/* ── seed decider match ── */
+.sd-wrap{padding:1rem 0 .5rem}
+.sd-match{background:var(--s1);border:1px solid var(--bdr);border-radius:3px;
+  width:200px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.sd-match:hover{border-color:rgba(133,230,44,.25)}
+.sd-match.has-result{border-color:rgba(133,230,44,.2)}
+.sd-row{display:flex;align-items:center;gap:.45rem;padding:.4rem .55rem;min-height:36px}
+.sd-row + .sd-row{border-top:1px solid var(--bdr)}
+.sd-row.win{background:rgba(133,230,44,.045)}
+.sd-logo{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sd-logo img{width:100%;height:100%;object-fit:contain}
+.sd-logo-ph{width:20px;height:20px;border-radius:2px;background:var(--bdr)}
+.sd-team-info{flex:1;min-width:0}
+.sd-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;
+  letter-spacing:.02em;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sd-row.win .sd-abbr{color:var(--g)}
+.sd-tbd .sd-abbr{color:var(--muted2)}
+.sd-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--muted2);flex-shrink:0;min-width:14px;text-align:right}
+.sd-row.win .sd-score{color:var(--g)}
+</style>
+</head>
+<body>
+<div id="screen">
+
+  <div id="topbar" class="site-header">
+    <a class="tb-back" href="index.html" onclick="triggerCrtOff(event)">← BACK</a>
+    <div class="tb-sep"></div>
+    <div>
+      <div class="tb-eyebrow">VCT 2027 · LAN KICKOFF OQ</div>
+      <div class="tb-title">LAN QUALIFIER 1 — GROUP STAGE</div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-right">128팀 · Single Elimination · 그룹당 1팀 → Swiss Stage</div>
+  </div>
+
+  <div id="body">
+    <div id="sidebar">
+      <button class="g-btn active" data-grp="A" onclick="selectGroup('A',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">A</span><span class="g-sub">대기중</span>
+      </button>
+      <button class="g-btn" data-grp="B" onclick="selectGroup('B',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">B</span><span class="g-sub">대기중</span>
+      </button>
+    </div>
+
+    <div id="main">
+      <div id="seed-decider-btn-wrap">
+        <button class="seed-toggle" onclick="toggleSeedDecider(this)">
+          시드 결정전 <span class="seed-toggle-arrow">▾</span>
+        </button>
+      </div>
+      <div id="seed-decider" class="seed-hidden"></div>
+      <div id="round-tabs"></div>
+      <div id="content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- score input overlay -->
+<div id="scoreOverlay">
+  <div id="scoreBox">
+    <div class="sb-header">
+      <div class="sb-title" id="sbTitle">MATCH 01 · Bo3 결과 입력</div>
+      <button class="sb-close" onclick="closeScoreModal()">✕</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-label">승자 선택</div>
+      <div class="sb-teams" id="sbTeams"></div>
+      <div class="sb-label">스코어</div>
+      <div class="sb-scores" id="sbScores">
+        <button class="sb-score-btn" data-s="2-0" onclick="pickScore(this)">2 : 0</button>
+        <button class="sb-score-btn" data-s="2-1" onclick="pickScore(this)">2 : 1</button>
+        <button class="sb-score-btn" data-s="FF" onclick="pickScore(this)" style="letter-spacing:.08em">FF</button>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <button class="sb-btn cancel" onclick="closeScoreModal()">취소</button>
+      <button class="sb-btn confirm" id="sbConfirm" onclick="confirmScore()" disabled>확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── 그룹 메타 ── */
+const GROUPS = {
+  A:{status:'pending',label:'대기중'},
+  B:{status:'pending',label:'대기중'},
+};
+
+const ROUND_CFG = {
+  r128:{name:'Round of 128', matchCount:32, gridClass:'r128', compact:true},
+  r64: {name:'Round of 64',  matchCount:16, gridClass:'r64',  compact:true},
+  r32: {name:'Round of 32',  matchCount:8,  gridClass:'r32',  compact:true},
+  r16: {name:'Round of 16',  matchCount:4,  gridClass:'r16'},
+  r8:  {name:'Round of 8',   matchCount:2,  gridClass:'r8'},
+  f:   {name:'Final',        matchCount:1,  gridClass:'f'},
+};
+
+const L = (abbr) => `../assets/teams/VCT 2027/VCT Americas/Americas_OQ/LAN/${abbr}.png`;
+
+function mkM(n) {
+  return Array.from({length:n}, () => ({t1:null, t2:null, s1:null, s2:null, w:null}));
+}
+
+const MATCHES = {
+  A:{r128:mkM(32), r64:mkM(16), r32:mkM(8), r16:mkM(4), r8:mkM(2), f:mkM(1), winner:null},
+  B:{r128:mkM(32), r64:mkM(16), r32:mkM(8), r16:mkM(4), r8:mkM(2), f:mkM(1), winner:null},
+};
+
+/* 로고 경로 자동 주입 */
+Object.values(MATCHES).forEach(g => {
+  ['r128','r64','r32','r16','r8','f'].forEach(rnd => {
+    g[rnd].forEach(m => {
+      if (m.t1 && !m.t1.logo) m.t1.logo = L(m.t1.abbr);
+      if (m.t2 && !m.t2.logo) m.t2.logo = L(m.t2.abbr);
+    });
+  });
+  if (g.winner && !g.winner.logo) g.winner.logo = L(g.winner.abbr);
+});
+
+/* ── 상태 ── */
+let curGroup = 'A';
+let bracketStart = 0;
+
+const ALL_RNDS = ['r128','r64','r32','r16','r8','f'];
+
+function propagateWinner(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const winner = (() => { const m = MATCHES[grp][rnd][idx]; return m.w === 1 ? m.t1 : m.t2; })();
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  MATCHES[grp][nextRnd][nextIdx][slot] = winner ? {...winner} : null;
+}
+
+function clearPropagated(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  const nm = MATCHES[grp][nextRnd][nextIdx];
+  nm[slot] = null;
+  if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearPropagated(grp, nextRnd, nextIdx); }
+  if (nextRnd === 'f') MATCHES[grp].winner = null;
+}
+
+const BK = { SLOT_H:68, CARD_H:64, CARD_W:200, CONN_W:26 };
+const RND_SHORT = {r128:'Ro128',r64:'Ro64',r32:'Ro32',r16:'Ro16',r8:'Ro8',f:'Final'};
+const RND_FULL  = {r128:'Round of 128',r64:'Round of 64',r32:'Round of 32',r16:'Round of 16',r8:'Round of 8',f:'Final'};
+
+function bCardTop(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + (s * BK.SLOT_H - BK.CARD_H) / 2;
+}
+function bCenterY(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + s * BK.SLOT_H / 2;
+}
+function shiftBracket(dir) {
+  bracketStart = Math.max(0, Math.min(ALL_RNDS.length - 1, bracketStart + dir));
+  renderContent();
+}
+
+/* ── DB 저장/복원 ── */
+const DB_KEY = 'lan_q1_scores_v1';
+
+function showSaveToast(state) {
+  let t = document.getElementById('save-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'save-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  if (state === 'saving') {
+    t.textContent = '저장 중...'; t.style.background = '#555'; t.style.color = '#fff';
+  } else if (state === 'ok') {
+    t.textContent = '✓ 저장됨'; t.style.background = '#85E62C'; t.style.color = '#000';
+  } else {
+    t.textContent = '⚠ 저장 실패'; t.style.background = '#c00'; t.style.color = '#fff';
+  }
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  if (state !== 'saving') t._timer = setTimeout(() => t.style.opacity = '0', 2000);
+}
+
+function buildScoresPayload() {
+  const out = {};
+  ['A','B'].forEach(g => {
+    out[g] = {};
+    ALL_RNDS.forEach(rnd => {
+      out[g][rnd] = MATCHES[g][rnd].map(m => ({t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null, t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null, s1:m.s1,s2:m.s2,w:m.w}));
+    });
+    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
+  });
+  return JSON.stringify(out);
+}
+
+function applyScoresData(raw) {
+  if (!raw) return;
+  try {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    ['A','B'].forEach(g => {
+      if (!data[g]) return;
+      ALL_RNDS.forEach(rnd => {
+        (data[g][rnd] || []).forEach((s,i) => {
+          if (!MATCHES[g][rnd][i]) return;
+          if (s.t1 && !MATCHES[g][rnd][i].t1) { MATCHES[g][rnd][i].t1 = {...s.t1, logo:L(s.t1.abbr)}; }
+          if (s.t2 && !MATCHES[g][rnd][i].t2) { MATCHES[g][rnd][i].t2 = {...s.t2, logo:L(s.t2.abbr)}; }
+          MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
+        });
+      });
+      if (data[g].winner) {
+        const abbr = data[g].winner.abbr;
+        MATCHES[g].winner = {abbr, name:data[g].winner.name, logo:L(abbr)};
+      }
+    });
+  } catch(e) {}
+}
+
+function saveScores() {
+  const payload = buildScoresPayload();
+  showSaveToast('saving');
+  fetch('/api/data/' + encodeURIComponent(DB_KEY), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({value: payload})
+  }).then(r => r.json()).then(d => {
+    if (d.ok) showSaveToast('ok'); else showSaveToast('err');
+  }).catch(() => showSaveToast('err'));
+}
+
+function loadScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_KEY))
+    .then(r => r.json())
+    .then(raw => { applyScoresData(raw); renderContent(); })
+    .catch(() => {});
+}
+
+/* ── bracket renderer ── */
+function bCardRow(t, side, m) {
+  const win = m.w === side;
+  const score = side === 1 ? m.s1 : m.s2;
+  const hasResult = m.w !== null;
+  const logoHTML = t?.logo
+    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`
+    : '<div class="bcard-logo-ph"></div>';
+  const fullname = t?.name && t.name !== t?.abbr ? t.name : '';
+  return `<div class="bcard-row${win?' win':''}">
+    <div class="bcard-logo">${logoHTML}</div>
+    <div class="bcard-info">
+      <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+      ${fullname ? `<div class="bcard-fullname">${fullname}</div>` : ''}
+    </div>
+    ${hasResult ? `<div class="bcard-score">${score}</div>` : ''}
+  </div>`;
+}
+
+function renderBracket(grp) {
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const visRnds = ALL_RNDS.slice(0);
+  const totalH = 32 * BK.SLOT_H;
+  const COL_STEP = BK.CARD_W + BK.CONN_W;
+  const totalW = visRnds.length * COL_STEP - BK.CONN_W;
+
+  let svgLines = '';
+  let colsHTML = '';
+
+  const labelsHTML = visRnds.map((rnd, vi) => {
+    const mr = vi < visRnds.length - 1 ? BK.CONN_W : 0;
+    return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px">
+      <div class="bcol-label">${RND_FULL[rnd]}</div>
+    </div>`;
+  }).join('');
+
+  visRnds.forEach((rnd, vi) => {
+    const ri = vi;
+    const matches = MATCHES[grp][rnd];
+    const colLeft = vi * COL_STEP;
+    let cardsHTML = '';
+
+    matches.forEach((m, mi) => {
+      const top = bCardTop(ri, mi);
+      const hasResult = m.w !== null;
+      const ctx = `'${grp}','${rnd}',${mi}`;
+      const resetBtn = hasResult && isAdmin
+        ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})" style="position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px">↺</button>` : '';
+
+      cardsHTML += `<div class="bm-wrap" style="top:${top}px;left:0">
+        <div class="bcard${hasResult?' has-result':''}" style="position:relative" onclick="openScoreModal(${ctx})">
+          ${bCardRow(m.t1,1,m)}<div class="bcard-sep"></div>${bCardRow(m.t2,2,m)}${resetBtn}
+        </div>
+      </div>`;
+
+      if (vi < visRnds.length - 1 && ri < ALL_RNDS.length - 1 && mi % 2 === 0 && mi + 1 < matches.length) {
+        const topCY = bCenterY(ri, mi);
+        const botCY = bCenterY(ri, mi + 1);
+        const parCY = bCenterY(ri + 1, mi / 2);
+        const srcX  = colLeft + BK.CARD_W;
+        const jx    = srcX + BK.CONN_W * 0.5;
+        const parX  = colLeft + COL_STEP;
+        const c     = 'rgba(255,255,255,.09)';
+        svgLines += `<line x1="${srcX}" y1="${topCY}" x2="${jx}" y2="${topCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${srcX}" y1="${botCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
+      }
+    });
+
+    colsHTML += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${vi < visRnds.length-1 ? BK.CONN_W : 0}px">${cardsHTML}</div>`;
+  });
+
+  return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
+    <div class="bracket-inner" style="width:${totalW}px;height:${totalH}px">
+      <svg class="bracket-svg" width="${totalW}" height="${totalH}">${svgLines}</svg>
+      <div style="display:flex">${colsHTML}</div>
+    </div>`;
+}
+
+function renderContent() {
+  const grp = GROUPS[curGroup];
+  const w = MATCHES[curGroup].winner;
+  const winnerHTML = `<div class="winner-wrap" style="margin-top:.8rem;${w?'':'opacity:.35'}">
+    <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
+    <div>
+      <div class="winner-label">GROUP ${curGroup} WINNER → OQ Playoff</div>
+      <div class="winner-name">${w?.name ?? '미정'}</div>
+    </div>
+    <div class="winner-badge">OQ Playoff 진출</div>
+  </div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="grp-header">
+      <div class="grp-title">GROUP ${curGroup}</div>
+      <div class="grp-badge ${grp.status}">${grp.label}</div>
+    </div>
+    <div class="bracket-outer">
+      ${renderBracket(curGroup)}
+    </div>
+    ${winnerHTML}
+  `;
+}
+
+function selectGroup(g, el) {
+  if (g === curGroup) return;
+  curGroup = g;
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  const ct = document.getElementById('content');
+  ct.dataset.grp = g;
+  ct.classList.remove('grp-switching');
+  void ct.offsetWidth;
+  ct.classList.add('grp-switching');
+  ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+
+  renderContent();
+}
+
+/* ── Score Modal ── */
+let _modalCtx = null;
+let _selWinner = null;
+let _selScore  = null;
+
+function openScoreModal(grp, rnd, idx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  const m = MATCHES[grp][rnd][idx];
+  _modalCtx = {grp, rnd, idx};
+  _selWinner = m.w;
+  _selScore  = (m.s1 !== null) ? (m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`) : null;
+
+  document.getElementById('sbTitle').textContent =
+    `${RND_FULL[rnd]} · MATCH ${String(idx+1).padStart(2,'0')}`;
+
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${_selWinner===1?' selected':''}" onclick="pickWinner(1)">
+      <div class="sb-team-logo">
+        ${t1?.logo ? `<img src="${t1.logo}" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">` : '?'}
+      </div>
+      <div>
+        <span class="sb-team-abbr">${t1?.abbr ?? 'TBD'}</span>
+        <span class="sb-team-name">${t1?.name ?? '미정'}</span>
+      </div>
+    </button>
+    <button class="sb-team${_selWinner===2?' selected':''}" onclick="pickWinner(2)">
+      <div class="sb-team-logo">
+        ${t2?.logo ? `<img src="${t2.logo}" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">` : '?'}
+      </div>
+      <div>
+        <span class="sb-team-abbr">${t2?.abbr ?? 'TBD'}</span>
+        <span class="sb-team-name">${t2?.name ?? '미정'}</span>
+      </div>
+    </button>`;
+
+  updateScoreBtns();
+  updateConfirmBtn();
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickWinner(side) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach((el,i) =>
+    el.classList.toggle('selected', i+1 === side));
+  updateConfirmBtn();
+}
+
+function pickScore(btn) {
+  _selScore = btn.dataset.s;
+  document.querySelectorAll('.sb-score-btn').forEach(b =>
+    b.classList.toggle('selected', b === btn));
+  updateConfirmBtn();
+}
+
+function updateScoreBtns() {
+  document.querySelectorAll('.sb-score-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.s === _selScore);
+  });
+}
+
+function updateConfirmBtn() {
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmScore() {
+  if (!_selWinner || !_selScore) return;
+  const {grp, rnd, idx} = _modalCtx;
+  const m = MATCHES[grp][rnd][idx];
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner === 1 ? 'W' : 'FF';
+    m.s2 = _selWinner === 2 ? 'W' : 'FF';
+  } else {
+    const [big, small] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner === 1 ? big : small;
+    m.s2 = _selWinner === 2 ? big : small;
+  }
+  propagateWinner(grp, rnd, idx);
+  if (rnd === 'f') {
+    const winner = _selWinner === 1 ? m.t1 : m.t2;
+    if (winner) MATCHES[grp].winner = {...winner};
+  }
+  saveScores();
+  closeScoreModal();
+  renderContent();
+}
+
+function resetMatch(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  m.s1 = null; m.s2 = null; m.w = null;
+  clearPropagated(grp, rnd, idx);
+  if (rnd === 'f') MATCHES[grp].winner = null;
+  saveScores();
+  renderContent();
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreOverlay').classList.remove('open');
+  _modalCtx = null; _selWinner = null; _selScore = null;
+}
+
+document.getElementById('scoreOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scoreOverlay')) closeScoreModal();
+});
+
+function triggerCrtOff(e) {
+  e.preventDefault();
+  const href = e.currentTarget.href;
+  document.getElementById('screen').style.animation = 'crtOff .4s ease forwards';
+  setTimeout(() => { window.location.href = href; }, 420);
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
+
+/* ── 시드 결정전 (Bo3 단판) ── */
+const SD = {
+  gf: {t1:null, t2:null, s1:null, s2:null, w:null},
+};
+const DB_SD_KEY = 'lan_q1_seed_v1';
+
+function saveSeedScores() {
+  const m = SD.gf;
+  const payload = JSON.stringify({s1:m.s1,s2:m.s2,w:m.w});
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({value: payload})
+  }).catch(() => {});
+}
+
+function loadSeedScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_SD_KEY))
+    .then(r => r.json())
+    .then(raw => {
+      try {
+        const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!d) return;
+        SD.gf.s1 = d.s1; SD.gf.s2 = d.s2; SD.gf.w = d.w;
+        renderSeedDecider();
+      } catch(e) {}
+    }).catch(() => {});
+}
+
+let _sdCtx = null;
+
+function openSeedModal(ctx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  _sdCtx = ctx;
+  const m = SD.gf;
+  document.getElementById('sbTitle').textContent = '시드 결정전 · Bo3 결과 입력';
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${m.w===1?' selected':''}" onclick="pickSeedWinner(1,this)">
+      <div class="sb-team-logo">${t1?.logo?`<img src="${t1.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t1?.abbr??'TBD'}</div>
+    </button>
+    <div class="sb-vs">VS</div>
+    <button class="sb-team${m.w===2?' selected':''}" onclick="pickSeedWinner(2,this)">
+      <div class="sb-team-logo">${t2?.logo?`<img src="${t2.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`:'<div class="sb-logo-ph">?</div>'}</div>
+      <div>${t2?.abbr??'TBD'}</div>
+    </button>`;
+  document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === (m.s1!==null?`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`:null)));
+  _selWinner = m.w; _selScore = m.s1!==null?(m.s1==='W'||m.s1==='FF'?'FF':`${Math.max(m.s1,m.s2)}-${Math.min(m.s1,m.s2)}`):null;
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+  document.getElementById('sbConfirm').onclick = confirmSeedScore;
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickSeedWinner(side, btn) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmSeedScore() {
+  if (!_selWinner || !_selScore || !_sdCtx) return;
+  const m = SD.gf;
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner===1?'W':'FF'; m.s2 = _selWinner===2?'W':'FF';
+  } else {
+    const [big, small] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner===1?big:small; m.s2 = _selWinner===2?big:small;
+  }
+  saveSeedScores();
+  closeScoreModal(); _sdCtx = null;
+  renderSeedDecider();
+}
+
+function resetSeedMatch() {
+  SD.gf.w = null; SD.gf.s1 = null; SD.gf.s2 = null;
+  saveSeedScores(); renderSeedDecider();
+}
+
+function sdMatchHTML() {
+  const m = SD.gf;
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const hasResult = m.w !== null;
+  function rowHTML(t, side) {
+    const win = m.w === side;
+    const score = side===1 ? m.s1 : m.s2;
+    const logoHTML = t?.logo
+      ? `<div class="sd-logo"><img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'"></div>`
+      : `<div class="sd-logo"><div class="sd-logo-ph"></div></div>`;
+    return `<div class="sd-row${win?' win':''}${!t?' sd-tbd':''}">
+      ${logoHTML}
+      <div class="sd-team-info"><div class="sd-abbr">${t?.abbr??'TBD'}</div></div>
+      ${hasResult?`<div class="sd-score">${score}</div>`:''}
+    </div>`;
+  }
+  const resetHTML = hasResult && isAdmin
+    ? `<button class="match-reset" title="결과 초기화"
+        onclick="event.stopPropagation();resetSeedMatch()"
+        style="position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px">↺</button>` : '';
+  return `<div class="sd-match${hasResult?' has-result':''}" style="position:relative"
+    onclick="openSeedModal('gf')">
+    ${rowHTML(m.t1,1)}${rowHTML(m.t2,2)}
+    ${resetHTML}
+  </div>`;
+}
+
+function renderSeedDecider() {
+  document.getElementById('seed-decider').innerHTML =
+    `<div class="sd-wrap">${sdMatchHTML()}</div>`;
+}
+
+function toggleSeedDecider(btn) {
+  const el = document.getElementById('seed-decider');
+  const isOpen = !el.classList.contains('seed-hidden');
+  el.classList.toggle('seed-hidden', isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+renderSeedDecider();
+renderContent();
+loadSeedScores();
+loadScores();
+</script>
+<script src="../auth.js"></script>
+</body>
+</html>
