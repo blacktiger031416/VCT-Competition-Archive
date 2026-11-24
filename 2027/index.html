@@ -1534,8 +1534,8 @@ const OQ_STAGE_DATA = (function(){
         hideTeams:true,
         bracketUrl:'mena-me1-qualifier.html',   bracketUrlLabel:'MIDDLE EAST 1',
         bracketUrl2:'mena-na1-qualifier.html',  bracketUrl2Label:'NORTH AFRICA 1',
-        bracketUrl3Soon:true,                   bracketUrl3Label:'MIDDLE EAST 2',
-        bracketUrl4Soon:true,                   bracketUrl4Label:'NORTH AFRICA 2',
+        bracketUrl3:'mena-me2-qualifier.html',  bracketUrl3Label:'MIDDLE EAST 2',
+        bracketUrl4:'mena-na2-qualifier.html',  bracketUrl4Label:'NORTH AFRICA 2',
       },
       {key:'playoff',name:'OQ<br>PLAYOFF',     meta:'OQ 통과팀만 참가 (초청 없음)',invites:0,total:4,desc:'초청팀 없음 — OQ 진출팀만 참가<br>1위 팀 → KickOff 진출',
         oqTeams:[
@@ -1912,7 +1912,9 @@ function buildOQPanelHTML(data, color, activeIdx) {
   const bracketUrl1Soon = s0.bracketUrl1Soon;
   const bracketUrl2     = s0.bracketUrl2;
   const bracketUrl2Soon = s0.bracketUrl2Soon;
+  const bracketUrl3     = s0.bracketUrl3;
   const bracketUrl3Soon = s0.bracketUrl3Soon;
+  const bracketUrl4     = s0.bracketUrl4;
   const bracketUrl4Soon = s0.bracketUrl4Soon;
   function mkBracketBtn(url, label) {
     return `<a href="${url}" class="eu-oq-btn" style="--btn-color:${color}">
@@ -1935,13 +1937,15 @@ function buildOQPanelHTML(data, color, activeIdx) {
       </div>
     </div>`;
   }
-  const bracketHasSomething = bracketUrl || bracketUrl1Soon || bracketUrl2Soon || bracketUrl3Soon || bracketUrl4Soon;
+  const bracketHasSomething = bracketUrl || bracketUrl1Soon || bracketUrl2Soon || bracketUrl3Soon || bracketUrl4Soon || bracketUrl3 || bracketUrl4;
   const bracketBtnHTML = bracketHasSomething ? `<div id="euBracketWrap" style="${activeIdx===0?'':'display:none'}">
     ${bracketUrl      ? mkBracketBtn(bracketUrl,  s0.bracketUrlLabel  || 'QUALIFIER 1') : ''}
     ${bracketUrl1Soon ? mkBracketBtnSoon(s0.bracketUrl1Label || 'QUALIFIER 1') : ''}
     ${bracketUrl2     ? mkBracketBtn(bracketUrl2, s0.bracketUrl2Label || 'QUALIFIER 2') : ''}
     ${bracketUrl2Soon ? mkBracketBtnSoon(s0.bracketUrl2Label || 'QUALIFIER 2') : ''}
+    ${bracketUrl3     ? mkBracketBtn(bracketUrl3, s0.bracketUrl3Label || 'QUALIFIER 3') : ''}
     ${bracketUrl3Soon ? mkBracketBtnSoon(s0.bracketUrl3Label || 'QUALIFIER 3') : ''}
+    ${bracketUrl4     ? mkBracketBtn(bracketUrl4, s0.bracketUrl4Label || 'QUALIFIER 4') : ''}
     ${bracketUrl4Soon ? mkBracketBtnSoon(s0.bracketUrl4Label || 'QUALIFIER 4') : ''}
   </div>` : '';
   return `<div class="oq-panel">
