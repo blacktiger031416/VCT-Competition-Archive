@@ -323,6 +323,25 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 #rw2{animation:waveBob2 14s ease-in-out infinite .6s;transform-origin:center}
 .rb-diamond{animation:diamondPulse 4s ease-in-out infinite}
 
+/* ── Pacific Motion Graphics ── */
+.pacific-motion{position:relative;width:100%;aspect-ratio:1916/821;isolation:isolate;pointer-events:none}
+.pacific-motion img,.pacific-motion svg{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain}
+.pacific-motion svg{overflow:visible}
+.pacific-motion .radar{transform-origin:610px 313px;animation:radar-turn 11s linear infinite}
+.pacific-motion .radar-pulse{transform-origin:610px 313px;animation:radar-pulse 4.8s ease-out infinite}
+.pacific-motion .node-pulse{transform-box:fill-box;transform-origin:center;animation:node-pulse 3.8s ease-out infinite;animation-delay:var(--delay,0s)}
+.pacific-motion .wave-glint{stroke-dasharray:85 1500;animation:wave-flow 6s linear infinite}
+.pacific-motion .route-glint{stroke-dasharray:12 720;animation:route-flow 4.8s linear infinite;animation-delay:var(--delay,0s)}
+.pacific-motion .node-core{animation:core-breathe 3.8s ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes radar-turn{to{transform:rotate(360deg)}}
+@keyframes radar-pulse{0%{transform:scale(.80);opacity:0}18%{opacity:.44}85%,100%{transform:scale(1.07);opacity:0}}
+@keyframes node-pulse{0%{transform:scale(.6);opacity:0}15%{opacity:.9}62%,100%{transform:scale(3.3);opacity:0}}
+@keyframes wave-flow{0%{stroke-dashoffset:100;opacity:0}15%,65%{opacity:.75}85%,100%{stroke-dashoffset:-1100;opacity:0}}
+@keyframes route-flow{0%{stroke-dashoffset:14;opacity:0}12%,72%{opacity:1}88%,100%{stroke-dashoffset:-535;opacity:0}}
+@keyframes core-breathe{0%,100%{opacity:.25}50%{opacity:.85}}
+/* header-scale override */
+.rb-map .pacific-motion{aspect-ratio:auto;height:100%;align-self:stretch}
+
 /* ── round number watermark ── */
 .round-wm{
   position:absolute;right:.3rem;bottom:-.22em;
@@ -571,9 +590,40 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
           <span class="rb-name">VCT PACIFIC</span>
           <span class="rb-sub">Open Qualifier — Swiss Stage</span>
         </div>
-        <!-- Pacific Region Graphic -->
+        <!-- Pacific Motion Graphic -->
         <div class="rb-map">
-          <img src="../assets/Pacific_Graphic.png" alt="" class="rb-map-img">
+          <div class="pacific-motion">
+            <img src="../assets/pacific-map.png" alt="VCT Pacific South Asia Network Map">
+            <svg viewBox="0 0 1870 801.3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="pm-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <linearGradient id="pm-wave"><stop stop-color="#53fbff"/><stop offset=".5" stop-color="#eab7ff"/><stop offset="1" stop-color="#a17aff"/></linearGradient>
+                <radialGradient id="pm-sweep"><stop stop-color="#63fff5" stop-opacity="0"/><stop offset=".75" stop-color="#63fff5" stop-opacity=".05"/><stop offset="1" stop-color="#63fff5" stop-opacity=".23"/></radialGradient>
+              </defs>
+              <g class="animated" fill="none" stroke="#7cfff5">
+                <circle class="radar-pulse" cx="610" cy="313" r="230" stroke-width="1.6" opacity="0"/>
+                <g class="radar">
+                  <path d="M610 313 L610 83 A230 230 0 0 1 702 102 Z" fill="url(#pm-sweep)" stroke="none"/>
+                  <path d="M610 83 A230 230 0 0 1 702 102" stroke-width="3" filter="url(#pm-glow)" opacity=".85"/>
+                  <path d="M610 313 L702 102" stroke-width="1.3" opacity=".55"/>
+                </g>
+              </g>
+              <g class="animated" fill="none" stroke="#9efff9" stroke-linecap="round" stroke-width="3" filter="url(#pm-glow)">
+                <path class="route-glint" d="M478 320 C610 302 734 358 858 468" style="--delay:-.5s"/>
+                <path class="route-glint" d="M858 468 Q929 294 1078 228" style="--delay:-2s"/>
+                <path class="route-glint" d="M858 468 Q1095 675 1341 647" style="--delay:-3.3s"/>
+              </g>
+              <path class="wave-glint animated" d="M195 518 C410 610 655 650 902 550" fill="none" stroke="url(#pm-wave)" stroke-width="4" stroke-linecap="round" filter="url(#pm-glow)"/>
+              <g class="animated" style="--delay:0s"><circle class="node-pulse" cx="478" cy="320" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="478" cy="320" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-1.3s"><circle class="node-pulse" cx="1078" cy="228" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="1078" cy="228" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-2.1s"><circle class="node-pulse" cx="1256" cy="269" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="1256" cy="269" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-0.8s"><circle class="node-pulse" cx="858" cy="468" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="858" cy="468" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-2.8s"><circle class="node-pulse" cx="818" cy="544" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="818" cy="544" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-1.7s"><circle class="node-pulse" cx="1008" cy="362" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="1008" cy="362" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+              <g class="animated" style="--delay:-3.2s"><circle class="node-pulse" cx="1341" cy="647" r="9" fill="none" stroke="#9efff9" stroke-width="1.6"/><circle class="node-core" cx="1341" cy="647" r="4.5" fill="#d8ffff" filter="url(#pm-glow)"/></g>
+            </svg>
+          </div>
+          <!-- (hidden SVG stubs for unused animation vars) -->
           <svg class="rb-map-svg" viewBox="0 0 600 190" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display:none">
             <defs>
               <filter id="mGlow" x="-15%" y="-15%" width="130%" height="130%">
