@@ -300,20 +300,20 @@
     /* ── PLAYER TABLE ─────────────────────────── */
     .player-table {
       width: 100%;
-      table-layout: fixed;
       border-collapse: separate;
       border-spacing: 0 4px;
       padding: 4px 6px 6px;
     }
 
-    /* 컬럼: [skills-l][ult-l][player-l] | div | [player-r][ult-r][skills-r] */
-    .player-table colgroup col:nth-child(1) { width: 96px; }   /* left skills */
-    .player-table colgroup col:nth-child(2) { width: 50px; }   /* left ult */
-    .player-table colgroup col:nth-child(3) { width: auto; }   /* left player cell — 균등 분배 */
-    .player-table colgroup col:nth-child(4) { width: 1px;  }   /* divider */
-    .player-table colgroup col:nth-child(5) { width: auto; }   /* right player cell — 균등 분배 */
-    .player-table colgroup col:nth-child(6) { width: 52px; }   /* right ult */
-    .player-table colgroup col:nth-child(7) { width: 96px; }   /* right skills */
+    /* 컬럼: [skills-l][ult-l][player-l] | div | [player-r][ult-r][skills-r]
+       player-cell 열은 width:1px 힌트 → auto 분배로 양쪽 균등 */
+    .player-table colgroup col:nth-child(1) { width: 96px; }
+    .player-table colgroup col:nth-child(2) { width: 50px; }
+    .player-table colgroup col:nth-child(3) { width: 1px;  }
+    .player-table colgroup col:nth-child(4) { width: 1px;  }
+    .player-table colgroup col:nth-child(5) { width: 1px;  }
+    .player-table colgroup col:nth-child(6) { width: 52px; }
+    .player-table colgroup col:nth-child(7) { width: 96px; }
 
     /* ── PLAYER CELL ── */
     .player-cell {
@@ -2637,8 +2637,12 @@ function shrinkLongNames(root) {
 
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
-      var maxW = el.parentElement.offsetWidth;
-      if (!maxW) return;
+      // TD 기준으로 측정 — agent portrait(54px) + pc-text padding(14px×2) 제외
+      var td = el.parentElement;
+      while (td && td.tagName !== 'TD') td = td.parentElement;
+      if (!td) return;
+      var maxW = td.offsetWidth - 54 - 28;
+      if (maxW <= 10) return;
       var size = 17;
       ruler.style.fontSize = size + 'px';
       ruler.textContent = el.textContent;
