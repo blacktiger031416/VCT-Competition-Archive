@@ -2643,7 +2643,9 @@ function shrinkLongNames(root) {
       if (len <= threshold) return;
       ruler.textContent = text;
       var textW = ruler.offsetWidth;
-      var cellW = el.offsetWidth;
+      var pcText = el.parentElement;
+      var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
+      var cellW = pcText ? (pcText.offsetWidth - (statsEl ? statsEl.offsetWidth : 0)) : el.offsetWidth;
       if (textW <= cellW - 25) return;
       var ratio = (cellW - 25) / textW;
       var base = isKorean ? 15 : (isJapanese ? 16 : 17);
