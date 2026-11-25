@@ -262,6 +262,45 @@ body.view-only .bcard{cursor:default}
 body.view-only .bcard:hover{border-color:var(--bdr)}
 body.view-only .bcard-edit-hint{display:none}
 body.view-only .match-reset{display:none}
+
+/* ── region banner ── */
+#region-banner{
+  flex-shrink:0;
+  display:flex;align-items:stretch;gap:2rem;
+  min-height:220px;
+  padding:1.2rem 1.6rem 1rem;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid rgba(0,210,190,.1)}
+#region-banner::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,20,18,.85) 0%,rgba(3,12,14,.5) 60%,transparent 100%);
+  pointer-events:none;z-index:0}
+.rb-logo{
+  height:90px;width:auto;flex-shrink:0;position:relative;z-index:1;
+  align-self:flex-start;
+  filter:drop-shadow(0 0 18px rgba(0,210,190,.5)) drop-shadow(0 0 50px rgba(0,210,190,.2));
+  opacity:.92}
+.rb-info{
+  display:flex;flex-direction:column;justify-content:flex-start;gap:.3rem;
+  position:relative;z-index:1;align-self:flex-start}
+.rb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--g);opacity:.7}
+.rb-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt);line-height:1}
+.rb-subtitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.rb-divider{width:1px;background:rgba(0,210,190,.15);align-self:stretch;flex-shrink:0;
+  position:relative;z-index:1}
+.rb-stats{display:flex;flex-direction:column;gap:.6rem;position:relative;z-index:1;align-self:center}
+.rb-stat{display:flex;flex-direction:column;gap:2px}
+.rb-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.04em;color:var(--g)}
+.rb-stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.rb-map{
+  flex:1;min-width:0;
+  position:relative;z-index:1;overflow:hidden;
+  margin:0 .5rem;display:flex;align-items:stretch;align-self:stretch}
+.rb-kr-map{height:100%;width:auto;display:block;pointer-events:none;user-select:none;opacity:.95}
 </style>
 </head>
 <body>
@@ -277,6 +316,24 @@ body.view-only .match-reset{display:none}
     </div>
     <div class="tb-sep"></div>
     <div class="tb-right">32팀 · 2개조 · Single Elimination · 각 조 1위 → OQ Playoff</div>
+  </div>
+
+  <div id="region-banner">
+    <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+    <div class="rb-info">
+      <div class="rb-eyebrow">VCT 2027 · Pacific · Open Qualifier</div>
+      <div class="rb-title">SOUTH<br>KOREA</div>
+      <div class="rb-subtitle">대한민국 · OQ 1</div>
+    </div>
+    <div class="rb-divider"></div>
+    <div class="rb-stats">
+      <div class="rb-stat"><div class="rb-stat-val">32</div><div class="rb-stat-lbl">참가팀</div></div>
+      <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">그룹</div></div>
+      <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">OQ Playoff 진출</div></div>
+    </div>
+    <div class="rb-map">
+      <img class="rb-kr-map" src="../assets/pacific-korea.svg" alt="VCT Pacific Korea Map">
+    </div>
   </div>
 
   <div id="body">
