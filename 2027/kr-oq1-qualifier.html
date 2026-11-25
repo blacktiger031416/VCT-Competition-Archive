@@ -605,9 +605,10 @@ function bCardRow(t, side, m) {
   const win = m.w === side;
   const score = side === 1 ? m.s1 : m.s2;
   const hasResult = m.w !== null;
+  const baseLogo = `../assets/teams/VCT 2027/Base_Logo.png`;
   const logoHTML = t?.logo
-    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`
-    : '<div class="bcard-logo-ph"></div>';
+    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='${baseLogo}'">`
+    : `<img src="${baseLogo}" alt="">`;
   const fullname = t?.name && t.name !== t?.abbr ? t.name : '';
   return `<div class="bcard-row${win?' win':''}">
     <div class="bcard-logo">${logoHTML}</div>
@@ -964,5 +965,6 @@ initTeams();
 loadScores();
 renderContent();
 </script>
+<script src="../auth.js"></script>
 </body>
 </html>
