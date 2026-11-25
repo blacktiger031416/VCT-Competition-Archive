@@ -193,10 +193,35 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   text-transform:uppercase;color:rgba(0,200,255,.4)}
 
 /* ── content ── */
-#content{flex:1;overflow-y:auto;padding:1.2rem 1.4rem;position:relative}
+#content{
+  flex:1;overflow-y:auto;padding:1.2rem 1.4rem;position:relative;
+  background-image:radial-gradient(circle,rgba(0,200,255,.035) 1px,transparent 1px);
+  background-size:30px 30px}
 #content::-webkit-scrollbar{width:3px}
 #content::-webkit-scrollbar-thumb{background:rgba(0,200,255,.25);border-radius:2px}
 #content::-webkit-scrollbar-track{background:transparent}
+
+/* Pacific logo watermark */
+#content::before{
+  content:'';position:fixed;
+  right:8%;bottom:0;
+  width:420px;height:420px;
+  background:url('../assets/vct-pacific.webp') center/contain no-repeat;
+  opacity:.03;pointer-events:none;z-index:0;
+  transform:translateY(-10%)}
+
+/* ── scan line ── */
+#scan-line{
+  position:fixed;left:70px;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(0,200,255,.18) 25%,rgba(0,200,255,.45) 50%,rgba(0,200,255,.18) 75%,transparent 100%);
+  box-shadow:0 0 10px rgba(0,200,255,.25),0 0 25px rgba(0,200,255,.08);
+  pointer-events:none;z-index:60;
+  animation:scanDown 14s linear infinite}
+@keyframes scanDown{
+  0%{top:0;opacity:0}
+  3%{opacity:1}
+  92%{opacity:1}
+  100%{top:100vh;opacity:0}}
 
 /* ── holographic panel ── */
 .bracket-sec{
@@ -333,15 +358,24 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   flex-shrink:0;color:var(--muted2);min-width:18px;text-align:right;letter-spacing:-.02em}
 .mt-row.win .mt-score{color:var(--g);text-shadow:0 0 12px rgba(0,200,255,.5)}
 
-/* ── vs divider (Bo3) ── */
+/* ── match card corner brackets ── */
+.match-card .pc::before,.match-card .pc::after{background:rgba(0,200,255,.3)}
+
+/* ── vs divider ── */
 .match-vs{
-  display:flex;align-items:center;gap:.5rem;padding:.16rem .8rem;
-  border-top:1px solid rgba(0,200,255,.06);border-bottom:1px solid rgba(0,200,255,.06);
-  background:rgba(0,0,0,.12)}
-.match-vs-line{flex:1;height:1px;background:rgba(0,200,255,.07)}
+  display:flex;align-items:center;gap:.5rem;padding:.18rem .8rem;
+  border-top:1px solid rgba(0,200,255,.07);border-bottom:1px solid rgba(0,200,255,.07);
+  background:rgba(0,0,0,.14)}
+.match-vs-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,.12))}
+.match-vs-line:last-child{background:linear-gradient(90deg,rgba(0,200,255,.12),transparent)}
 .match-vs-txt{
   font-family:'Share Tech Mono',monospace;font-size:8px;
-  letter-spacing:.18em;color:rgba(0,200,255,.2)}
+  letter-spacing:.18em;color:rgba(0,200,255,.28);
+  display:flex;align-items:center;gap:.35rem}
+.match-vs-txt::before,.match-vs-txt::after{
+  content:'◆';font-size:5px;color:rgba(0,200,255,.35);
+  animation:pulse 2s ease-in-out infinite}
+.match-vs-txt::after{animation-delay:.6s}
 
 /* ── score overlay ── */
 #scoreOverlay{
@@ -433,6 +467,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 <canvas id="stars-canvas"></canvas>
 <div id="atm"></div>
 
+<div id="scan-line"></div>
 <div id="screen">
 
   <div id="topbar">
@@ -643,7 +678,14 @@ function renderMatchCard(bid,m,idx,bo=3){
   const el=document.createElement('div');
   el.className='match-card'+(hasResult?' has-result':'');
   el.style.animationDelay=`${Math.min(idx,20)*.016}s`;
-  el.innerHTML=`
+  ['tl','tr','bl','br'].forEach(c=>{
+    const d=document.createElement('div');
+    d.className=`pc pc-${c}`;
+    el.appendChild(d);
+  });
+  const inner=document.createElement('div');
+  inner.style.cssText='position:relative;z-index:1';
+  inner.innerHTML=`
     <div class="match-num-row">
       <span class="match-num-txt">MATCH ${String(idx+1).padStart(2,'0')}</span>
       <span class="match-bo-badge">Bo${bo}</span>
@@ -655,6 +697,7 @@ function renderMatchCard(bid,m,idx,bo=3){
       <div class="match-vs-line"></div>
     </div>
     ${mtRowHTML(m.t2,2,m)}`;
+  el.appendChild(inner);
   el.onclick=()=>openScoreModal(bid,idx,bo);
   return el;
 }
