@@ -596,6 +596,9 @@
       font-weight: 700;
       letter-spacing: 0.03em;
       color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      display: block;
     }
     .player-sub {
       font-size: 10px;
@@ -2617,6 +2620,18 @@ function renderMap(mapData, mapIdx) {
     </tr>`;
   }
   tbody.innerHTML = html;
+  shrinkLongNames(tbody);
+}
+
+function shrinkLongNames(root) {
+  (root || document).querySelectorAll('.player-name').forEach(function(el) {
+    el.style.fontSize = '';
+    var size = 17;
+    while (el.scrollWidth > el.offsetWidth && size > 9) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+  });
 }
 
 function clickUlt(mapIdx, pIdx) {
