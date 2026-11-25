@@ -484,19 +484,23 @@ function matchCard(grp, rnd, idx, extraClass='') {
   </div>`;
 }
 
-/* ── Winners Bracket renderer ── */
+/* ── Winners Bracket renderer (includes GF as last column) ── */
 function renderWB(grp) {
   const totalH = 8 * BK.SLOT_H;
   const COL_STEP = BK.CARD_W + BK.CONN_W;
-  const totalW = WB_RNDS.length * COL_STEP - BK.CONN_W;
+  const ALL_WB = [...WB_RNDS, 'gf'];
+  const totalW = ALL_WB.length * COL_STEP - BK.CONN_W;
   let svgLines = '';
   let cols = '';
-  const c = 'rgba(0,210,190,.14)';
+  const c  = 'rgba(0,210,190,.14)';
+  const cG = 'rgba(200,160,20,.35)';
 
-  const labelsHTML = WB_RNDS.map((rnd, vi) => {
-    const mr = vi < WB_RNDS.length - 1 ? BK.CONN_W : 0;
+  const labelsHTML = ALL_WB.map((rnd, vi) => {
+    const mr = vi < ALL_WB.length - 1 ? BK.CONN_W : 0;
+    const style = rnd === 'gf' ? 'color:rgba(200,160,20,.7)' : '';
+    const label = WB_LABELS[rnd] ?? 'Grand Final';
     return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px;text-align:center">
-      <div class="bcol-label">${WB_LABELS[rnd]}</div>
+      <div class="bcol-label" style="${style}">${label}</div>
     </div>`;
   }).join('');
 
@@ -507,7 +511,7 @@ function renderWB(grp) {
     matches.forEach((m, mi) => {
       const top = bCardTop(vi, mi);
       cards += `<div class="bm-wrap" style="top:${top}px;left:0">${matchCard(grp, rnd, mi)}</div>`;
-      /* connector to next round */
+      /* V-shape connector to next WB round */
       if (vi < WB_RNDS.length - 1 && mi % 2 === 0 && mi + 1 < matches.length) {
         const topCY = bCenterY(vi, mi);
         const botCY = bCenterY(vi, mi + 1);
@@ -520,9 +524,22 @@ function renderWB(grp) {
         svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
         svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
       }
+      /* WRF → GF horizontal connector */
+      if (rnd === 'wrf' && mi === 0) {
+        const cy   = bCenterY(vi, 0);
+        const srcX = colLeft + BK.CARD_W;
+        const parX = colLeft + COL_STEP;
+        svgLines += `<line x1="${srcX}" y1="${cy}" x2="${parX}" y2="${cy}" stroke="${cG}" stroke-width="1"/>`;
+      }
     });
-    cols += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${vi < WB_RNDS.length-1 ? BK.CONN_W : 0}px">${cards}</div>`;
+    cols += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${BK.CONN_W}px">${cards}</div>`;
   });
+
+  /* GF column — centered vertically */
+  const gfTop = (totalH - BK.CARD_H) / 2;
+  cols += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0">
+    <div class="bm-wrap" style="top:${gfTop}px;left:0">${matchCard(grp,'gf',0,' gf-card')}</div>
+  </div>`;
 
   return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
     <div class="bracket-inner" style="width:${totalW}px;height:${totalH}px">
@@ -628,14 +645,6 @@ function renderContent() {
         <span class="bracket-section-desc" style="color:rgba(160,120,255,.5)">패자조 — 패배 시 탈락 · LB Final 우승자 → Grand Final</span>
       </div>
       <div class="bracket-outer">${renderLB(curGroup)}</div>
-    </div>
-
-    <div class="bracket-section">
-      <div class="bracket-section-hdr gf-hdr">
-        Grand Final
-        <span class="bracket-section-desc" style="color:rgba(220,180,50,.4)">WB Final 우승 vs LB Final 우승 · 승자 → OQ Playoff</span>
-      </div>
-      <div class="bracket-outer">${renderGF(curGroup)}</div>
     </div>
 
     <div class="winner-wrap" style="${w?'':'opacity:.35'}">
