@@ -300,6 +300,7 @@
     /* ── PLAYER TABLE ─────────────────────────── */
     .player-table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: separate;
       border-spacing: 0 4px;
       padding: 4px 6px 6px;
@@ -308,9 +309,9 @@
     /* 컬럼: [skills-l][ult-l][player-l] | div | [player-r][ult-r][skills-r] */
     .player-table colgroup col:nth-child(1) { width: 96px; }   /* left skills */
     .player-table colgroup col:nth-child(2) { width: 50px; }   /* left ult */
-    .player-table colgroup col:nth-child(3) { width: 50%; }    /* left player cell — 반반 고정 */
+    .player-table colgroup col:nth-child(3) { width: auto; }   /* left player cell — 균등 분배 */
     .player-table colgroup col:nth-child(4) { width: 1px;  }   /* divider */
-    .player-table colgroup col:nth-child(5) { width: 50%; }    /* right player cell — 반반 고정 */
+    .player-table colgroup col:nth-child(5) { width: auto; }   /* right player cell — 균등 분배 */
     .player-table colgroup col:nth-child(6) { width: 52px; }   /* right ult */
     .player-table colgroup col:nth-child(7) { width: 96px; }   /* right skills */
 
@@ -599,6 +600,7 @@
       white-space: nowrap;
       overflow: hidden;
       display: block;
+      min-width: 0;
     }
     .player-sub {
       font-size: 10px;
@@ -2624,13 +2626,15 @@ function renderMap(mapData, mapIdx) {
 }
 
 function shrinkLongNames(root) {
-  (root || document).querySelectorAll('.player-name').forEach(function(el) {
-    el.style.fontSize = '';
-    var size = 17;
-    while (el.scrollWidth > el.offsetWidth && size > 9) {
-      size -= 1;
-      el.style.fontSize = size + 'px';
-    }
+  requestAnimationFrame(function() {
+    (root || document).querySelectorAll('.player-name').forEach(function(el) {
+      el.style.fontSize = '';
+      var size = 17;
+      while (el.scrollWidth > el.offsetWidth && size > 9) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+      }
+    });
   });
 }
 
