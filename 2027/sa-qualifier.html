@@ -91,12 +91,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 .tb-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
   letter-spacing:.07em;text-transform:uppercase;color:var(--txt);
   text-shadow:0 0 20px rgba(0,200,255,.15)}
-.tb-logo{
-  height:34px;width:auto;flex-shrink:0;
-  opacity:.82;
-  filter:drop-shadow(0 0 10px rgba(0,200,255,.35)) drop-shadow(0 0 24px rgba(0,200,255,.15));
-  transition:opacity .2s}
-.tb-logo:hover{opacity:1}
 .tb-meta{
   margin-left:auto;
   font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.06em;
@@ -150,7 +144,53 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 .g-corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0}
 
 /* ── main ── */
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;
+  background:linear-gradient(to bottom,rgba(0,8,22,.5) 0%,transparent 200px)}
+
+/* ── region banner ── */
+#region-banner{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:2rem;
+  padding:1.4rem 1.8rem 1.2rem;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid rgba(0,200,255,.1)}
+#region-banner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 100% at 15% 50%,rgba(0,200,255,.07) 0%,transparent 70%),
+    repeating-linear-gradient(to bottom,
+      rgba(0,200,255,.012) 0,rgba(0,200,255,.012) 1px,transparent 1px,transparent 5px)}
+#region-banner::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,200,255,.5) 40%,rgba(0,200,255,.8) 50%,rgba(0,200,255,.5) 60%,transparent)}
+.rb-logo{
+  height:90px;width:auto;flex-shrink:0;position:relative;z-index:1;
+  filter:
+    drop-shadow(0 0 18px rgba(0,200,255,.5))
+    drop-shadow(0 0 50px rgba(0,200,255,.2));
+  opacity:.92}
+.rb-info{position:relative;z-index:1;display:flex;flex-direction:column;gap:.35rem}
+.rb-label{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(0,200,255,.5)}
+.rb-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt);
+  text-shadow:0 0 30px rgba(0,200,255,.2);line-height:1}
+.rb-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:400;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,255,.55)}
+.rb-divider{
+  width:1px;height:60px;background:rgba(0,200,255,.14);flex-shrink:0;position:relative;z-index:1}
+.rb-stats{
+  position:relative;z-index:1;display:flex;gap:2rem;margin-left:auto}
+.rb-stat{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.rb-stat-num{
+  font-family:'Share Tech Mono',monospace;font-size:22px;
+  color:var(--g);text-shadow:0 0 14px rgba(0,200,255,.45);line-height:1}
+.rb-stat-lbl{
+  font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(0,200,255,.4)}
 
 /* ── content ── */
 #content{flex:1;overflow-y:auto;padding:1.2rem 1.4rem;position:relative}
@@ -398,8 +438,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   <div id="topbar">
     <a class="tb-back" href="index.html" onclick="triggerCrtOff(event)">← BACK</a>
     <div class="tb-sep"></div>
-    <img class="tb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
-    <div class="tb-sep"></div>
     <div>
       <div class="tb-eyebrow">VCT 2027 · SA KICKOFF OQ</div>
       <div class="tb-title">SA OPEN QUALIFIER — SWISS STAGE</div>
@@ -410,6 +448,20 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   <div id="body">
     <div id="sidebar"></div>
     <div id="main">
+      <div id="region-banner">
+        <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+        <div class="rb-divider"></div>
+        <div class="rb-info">
+          <span class="rb-label">VCT 2027 · South Asia</span>
+          <span class="rb-name">VCT PACIFIC</span>
+          <span class="rb-sub">Open Qualifier — Swiss Stage</span>
+        </div>
+        <div class="rb-stats">
+          <div class="rb-stat"><span class="rb-stat-num">64</span><span class="rb-stat-lbl">Teams</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">5</span><span class="rb-stat-lbl">Rounds</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">8</span><span class="rb-stat-lbl">Advance</span></div>
+        </div>
+      </div>
       <div id="content"></div>
     </div>
   </div>
