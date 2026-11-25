@@ -2629,15 +2629,27 @@ function renderMap(mapData, mapIdx) {
 
 function shrinkLongNames(root) {
   requestAnimationFrame(function() {
+    var ruler = document.createElement('span');
+    ruler.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;'
+      + 'white-space:nowrap;font-family:\'Barlow Condensed\',sans-serif;'
+      + 'font-weight:700;letter-spacing:0.03em;';
+    document.body.appendChild(ruler);
+
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
-      var container = el.parentElement;
+      var maxW = el.parentElement.offsetWidth;
+      if (!maxW) return;
       var size = 17;
-      while (el.scrollWidth > container.offsetWidth && size > 9) {
+      ruler.style.fontSize = size + 'px';
+      ruler.textContent = el.textContent;
+      while (ruler.offsetWidth > maxW && size > 9) {
         size -= 1;
-        el.style.fontSize = size + 'px';
+        ruler.style.fontSize = size + 'px';
       }
+      if (size < 17) el.style.fontSize = size + 'px';
     });
+
+    document.body.removeChild(ruler);
   });
 }
 
