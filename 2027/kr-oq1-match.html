@@ -352,6 +352,8 @@
       gap: 10px;
       padding: 0 14px;
       flex: 1;
+      min-width: 0;
+      overflow: hidden;
     }
     /* 왼팀: ACS+KDA 묶음을 오른쪽 끝으로 */
     .player-cell-l .pc-stats { margin-left: auto; }
@@ -2629,8 +2631,9 @@ function shrinkLongNames(root) {
   requestAnimationFrame(function() {
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
+      var container = el.parentElement;
       var size = 17;
-      while (el.scrollWidth > el.offsetWidth && size > 9) {
+      while (el.scrollWidth > container.offsetWidth && size > 9) {
         size -= 1;
         el.style.fontSize = size + 'px';
       }
