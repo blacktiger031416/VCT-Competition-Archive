@@ -2630,33 +2630,14 @@ function renderMap(mapData, mapIdx) {
 
 function shrinkLongNames(root) {
   requestAnimationFrame(function() {
-    var ruler = document.createElement('span');
-    ruler.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;'
-      + 'white-space:nowrap;font-family:\'Barlow Condensed\',sans-serif;'
-      + 'font-weight:700;letter-spacing:0.03em;';
-    document.body.appendChild(ruler);
-
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
-      // TD 기준 측정: agent(54) + pc-text padding(14×2) + pc-stats 너비 제외
-      var td = el.parentElement;
-      while (td && td.tagName !== 'TD') td = td.parentElement;
-      if (!td) return;
-      var stats = td.querySelector('.pc-stats');
-      var statsW = stats ? stats.offsetWidth : 0;
-      var maxW = td.offsetWidth - 54 - 28 - statsW - 40;
-      if (maxW <= 10) return;
-      var size = 17;
-      ruler.style.fontSize = size + 'px';
-      ruler.textContent = el.textContent;
-      while (ruler.offsetWidth > maxW && size > 9) {
-        size -= 1;
-        ruler.style.fontSize = size + 'px';
-      }
-      if (size < 17) el.style.fontSize = size + 'px';
+      var len = el.textContent.trim().length;
+      if (len <= 10) return;
+      // 10자 기준으로 비례 축소, 최소 12px
+      var size = Math.max(12, Math.round(17 * 10 / len));
+      el.style.fontSize = size + 'px';
     });
-
-    document.body.removeChild(ruler);
   });
 }
 
