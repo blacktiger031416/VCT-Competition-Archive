@@ -111,7 +111,9 @@ body::after{content:'';position:fixed;inset:0;
 .g-corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0}
 
 /* ── main ── */
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-width:0}
+#main::-webkit-scrollbar{width:3px}
+#main::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
 
 /* ── bracket cards ── */
 .bcard{width:185px;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;
@@ -152,9 +154,7 @@ body::after{content:'';position:fixed;inset:0;
 .bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
 
 /* ── content ── */
-#content{flex:1;overflow-y:auto;padding:0;position:relative;display:flex;flex-direction:column}
-#content::-webkit-scrollbar{width:3px}
-#content::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
+#content{flex-shrink:0;padding:0;position:relative;display:flex;flex-direction:column}
 
 /* ── group switch animation ── */
 @keyframes grp-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
@@ -266,41 +266,40 @@ body.view-only .match-reset{display:none}
 /* ── region banner ── */
 #region-banner{
   flex-shrink:0;
-  display:flex;align-items:stretch;gap:2rem;
-  min-height:220px;
-  padding:1.2rem 1.6rem 1rem;
+  display:flex;align-items:center;gap:1.4rem;
+  min-height:150px;
+  padding:1rem 1.4rem;
   position:relative;overflow:hidden;
   border-bottom:1px solid rgba(0,210,190,.1)}
 #region-banner::before{content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(0,20,18,.85) 0%,rgba(3,12,14,.5) 60%,transparent 100%);
+  background:linear-gradient(135deg,rgba(0,20,18,.9) 0%,rgba(3,12,14,.6) 55%,transparent 85%);
   pointer-events:none;z-index:0}
 .rb-logo{
-  height:90px;width:auto;flex-shrink:0;position:relative;z-index:1;
-  align-self:flex-start;
-  filter:drop-shadow(0 0 18px rgba(0,210,190,.5)) drop-shadow(0 0 50px rgba(0,210,190,.2));
+  height:76px;width:auto;flex-shrink:0;position:relative;z-index:1;
+  align-self:flex-start;margin-top:.1rem;
+  filter:drop-shadow(0 0 14px rgba(0,210,190,.5)) drop-shadow(0 0 40px rgba(0,210,190,.18));
   opacity:.92}
 .rb-info{
-  display:flex;flex-direction:column;justify-content:flex-start;gap:.3rem;
-  position:relative;z-index:1;align-self:flex-start}
+  display:flex;flex-direction:column;justify-content:flex-start;gap:.25rem;
+  position:relative;z-index:1;align-self:flex-start;flex-shrink:0}
 .rb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
   letter-spacing:.2em;text-transform:uppercase;color:var(--g);opacity:.7}
-.rb-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+.rb-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;
   letter-spacing:.06em;text-transform:uppercase;color:var(--txt);line-height:1}
-.rb-subtitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;
+.rb-subtitle{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;
   letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.rb-divider{width:1px;background:rgba(0,210,190,.15);align-self:stretch;flex-shrink:0;
-  position:relative;z-index:1}
-.rb-stats{display:flex;flex-direction:column;gap:.6rem;position:relative;z-index:1;align-self:center}
-.rb-stat{display:flex;flex-direction:column;gap:2px}
-.rb-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+.rb-stats-row{display:flex;gap:1.2rem;margin-top:.5rem}
+.rb-stat{display:flex;flex-direction:column;gap:1px}
+.rb-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
   letter-spacing:.04em;color:var(--g)}
-.rb-stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.rb-stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:7.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .rb-map{
   flex:1;min-width:0;
   position:relative;z-index:1;overflow:hidden;
-  margin:0 .5rem;display:flex;align-items:stretch;align-self:stretch}
-.rb-kr-map{height:100%;width:auto;display:block;pointer-events:none;user-select:none;opacity:.95}
+  display:flex;align-items:center;justify-content:flex-end}
+.rb-kr-map{height:140px;width:auto;display:block;
+  pointer-events:none;user-select:none;opacity:.9}
 </style>
 </head>
 <body>
@@ -318,24 +317,6 @@ body.view-only .match-reset{display:none}
     <div class="tb-right">32팀 · 2개조 · Single Elimination · 각 조 1위 → OQ Playoff</div>
   </div>
 
-  <div id="region-banner">
-    <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
-    <div class="rb-info">
-      <div class="rb-eyebrow">VCT 2027 · Pacific · Open Qualifier</div>
-      <div class="rb-title">SOUTH<br>KOREA</div>
-      <div class="rb-subtitle">대한민국 · OQ 1</div>
-    </div>
-    <div class="rb-divider"></div>
-    <div class="rb-stats">
-      <div class="rb-stat"><div class="rb-stat-val">32</div><div class="rb-stat-lbl">참가팀</div></div>
-      <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">그룹</div></div>
-      <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">OQ Playoff 진출</div></div>
-    </div>
-    <div class="rb-map">
-      <img class="rb-kr-map" src="../assets/pacific-korea.svg" alt="VCT Pacific Korea Map">
-    </div>
-  </div>
-
   <div id="body">
     <div id="sidebar">
       <button class="g-btn active" data-grp="A" onclick="selectGroup('A',this)">
@@ -351,6 +332,22 @@ body.view-only .match-reset{display:none}
     </div>
 
     <div id="main">
+      <div id="region-banner">
+        <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+        <div class="rb-info">
+          <div class="rb-eyebrow">VCT 2027 · Pacific · Open Qualifier</div>
+          <div class="rb-title">SOUTH KOREA</div>
+          <div class="rb-subtitle">대한민국 · OQ 1</div>
+          <div class="rb-stats-row">
+            <div class="rb-stat"><div class="rb-stat-val">32</div><div class="rb-stat-lbl">참가팀</div></div>
+            <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">그룹</div></div>
+            <div class="rb-stat"><div class="rb-stat-val">2</div><div class="rb-stat-lbl">OQ Playoff 진출</div></div>
+          </div>
+        </div>
+        <div class="rb-map">
+          <img class="rb-kr-map" src="../assets/pacific-korea.svg" alt="VCT Pacific Korea Map">
+        </div>
+      </div>
       <div id="content"></div>
     </div>
   </div>
