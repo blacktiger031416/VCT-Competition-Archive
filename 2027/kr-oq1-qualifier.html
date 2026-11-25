@@ -653,7 +653,9 @@ function renderBracket(grp) {
       const ctx = `'${grp}','${rnd}',${mi}`;
       const resetBtn = hasResult && isAdmin
         ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})">↺</button>` : '';
-      const detailUrl = `kr-oq1-match.html?grp=${grp}&rnd=${rnd}&idx=${mi}`;
+      const tA = encodeURIComponent(m.t1?.name || m.t1?.abbr || 'TBD');
+      const tB = encodeURIComponent(m.t2?.name || m.t2?.abbr || 'TBD');
+      const detailUrl = `kr-oq1-match.html?teamA=${tA}&teamB=${tB}&from=kr_oq1&date=${grp}_${rnd}_${mi}`;
       const detailBtn = isAdmin
         ? `<a class="bcard-detail-link" href="${detailUrl}" onclick="event.stopPropagation()" >상세 ↗</a>` : '';
 
