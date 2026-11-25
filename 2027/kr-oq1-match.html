@@ -1017,7 +1017,7 @@
       color: rgba(255,255,255,0.25);
     }
     .mo-veto-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
+      display: grid; grid-template-columns: 1fr;
       gap: 4px; padding: 0 8px 10px;
     }
     .mo-veto-cell {
@@ -1041,7 +1041,7 @@
       font-size: 13px; font-weight: 700;
       color: rgba(255,255,255,0.65); margin-top: 2px;
     }
-    .mo-veto-img-wrap { position: relative; height: 130px; overflow: hidden; }
+    .mo-veto-img-wrap { position: relative; height: 220px; overflow: hidden; }
     .mo-veto-img {
       width: 100%; height: 100%; object-fit: cover; display: block;
     }
@@ -1145,11 +1145,7 @@
     }
 
     /* ── MAP COUNT CONTROLS ──────────────────────── */
-    .map-count-bar {
-      display: flex; align-items: center; justify-content: flex-end;
-      gap: 10px; padding: 32px 0 8px;
-      max-width: 900px; margin: 0 auto 10px;
-    }
+    .map-count-bar { display: none; } /* Bo1 고정 — 맵 수 조절 불필요 */
     .map-count-label {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
@@ -1478,8 +1474,6 @@
       <div class="mo-results-team">
         <div class="mo-map-icons" id="slots-a">
           <div class="mo-map-slot side-a" data-v="" data-idx="0" onclick="toggleSlot(this,'a')"></div>
-          <div class="mo-map-slot side-a" data-v="" data-idx="1" onclick="toggleSlot(this,'a')"></div>
-          <div class="mo-map-slot side-a" data-v="" data-idx="2" onclick="toggleSlot(this,'a')"></div>
         </div>
       </div>
       <div class="mo-score-center">
@@ -1490,8 +1484,6 @@
       <div class="mo-results-team mo-results-team-b">
         <div class="mo-map-icons" id="slots-b">
           <div class="mo-map-slot side-b" data-v="" data-idx="0" onclick="toggleSlot(this,'b')"></div>
-          <div class="mo-map-slot side-b" data-v="" data-idx="1" onclick="toggleSlot(this,'b')"></div>
-          <div class="mo-map-slot side-b" data-v="" data-idx="2" onclick="toggleSlot(this,'b')"></div>
         </div>
       </div>
     </div>
@@ -1541,10 +1533,8 @@
         <div class="sb-score-diamond-r" id="m1-score-r" onclick="openScoreEditor('m1','r')" style="cursor:pointer">-</div>
         <div class="sb-diamonds sb-diamonds-l" id="m1-diamonds-l">
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
-          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
         <div class="sb-diamonds sb-diamonds-r" id="m1-diamonds-r">
-          <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
           <div class="sb-diamond" onclick="toggleDiamond(this)"></div>
         </div>
       </div>
@@ -1796,7 +1786,7 @@ var _fromDefault = { href: './kr-oq1-qualifier.html', label: 'KR OQ1 브래킷' 
 var _fromInfo = _fromMap[MATCH_FROM] || _fromDefault;
 
 // ── 맵 카드 +/- 컨트롤 ──────────────────────────────────────────
-var currentBo = MATCH_BO5 ? 5 : 3;
+var currentBo = 1; /* Bo1 고정 */
 var activeMapCount = Math.max(1, Math.min(_sA + _sB, currentBo));
 var initializedMaps = (function() {
   var m = {};
@@ -1924,7 +1914,7 @@ function changeMapCount(delta) {
 }
 
 function updateDiamonds() {
-  var count = currentBo === 5 ? 3 : 2;
+  var count = currentBo === 1 ? 1 : currentBo === 5 ? 3 : 2;
   var diamond = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>';
   var html = diamond.repeat(count);
   ["m1-diamonds-l","m1-diamonds-r","m2-diamonds-l","m2-diamonds-r","m3-diamonds-l","m3-diamonds-r"].forEach(function(id) {
@@ -3546,6 +3536,9 @@ const MAP_IMGS = {
 const ALL_MAPS = ["어센트","바인드","브리즈","코로드","프랙처","헤이븐","아이스박스","로터스","펄","스플릿","선셋","어비스","서밋","미공개"];
 
 /* Bo3 고정 순서: ban ban pick pick ban ban decider */
+const VETO_STEPS_BO1 = [
+  { type: "pick", label: "PICK", mapIndex: 0 },
+];
 const VETO_STEPS_BO3 = [
   { type: "ban",     label: "BAN" },
   { type: "ban",     label: "BAN" },
@@ -3574,7 +3567,7 @@ const VETO_STEPS_GF = [
   { type: "pick",    label: "PICK",    team: "B", mapIndex: 3 },
   { type: "decider", label: "DECIDER", mapIndex: 4 },
 ];
-var VETO_STEPS = MATCH_GF ? VETO_STEPS_GF : VETO_STEPS_BO3;
+var VETO_STEPS = VETO_STEPS_BO1;
 
 /* 각 스텝에서 행동하는 팀 (A=상위조/선팀, B=상대팀) */
 function vetoStepTeam(idx, firstBan) {
@@ -3888,7 +3881,7 @@ function openVetoPicker(idx) {
 
 /* 밴픽 → 스코어보드 맵 이미지 자동 연동 */
 /* Bo3: 픽은 index 2, 3 / 디사이더 index 6 */
-var VETO_MAP_SLOT = [2, 3, 6]; /* Bo3: map-1, map-2, map-3 / Bo5: [2,3,4,5,6] */
+var VETO_MAP_SLOT = [0]; /* Bo1: step index 0 = 유일한 pick */
 
 function syncVetoMaps() {
   VETO_MAP_SLOT.forEach(function(stepIdx, i) {
@@ -3896,7 +3889,7 @@ function syncVetoMaps() {
     var imgSrc   = MAP_IMGS[mapName] || "";
     var imgEl    = document.getElementById("m" + (i+1) + "-sb-map-img");
     var nameEl   = document.getElementById("m" + (i+1) + "-sb-map-name");
-    if (imgEl) { imgEl.src = imgSrc || "images/Map.png"; imgEl.alt = mapName || ""; }
+    if (imgEl) { imgEl.src = imgSrc || "../images/Map.png"; imgEl.alt = mapName || ""; }
     if (nameEl && mapName) { nameEl.textContent = mapName; }
 
     // 베토 사이드 → firstAttacker 자동 계산
