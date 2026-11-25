@@ -2629,15 +2629,21 @@ function renderMap(mapData, mapIdx) {
 }
 
 function shrinkLongNames(root) {
+  var ruler = document.createElement('span');
+  ruler.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-family:"Barlow Condensed",sans-serif;font-size:17px;font-weight:700;letter-spacing:0.03em;';
+  document.body.appendChild(ruler);
   requestAnimationFrame(function() {
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
-      var len = el.textContent.trim().length;
-      if (len <= 10) return;
-      // 10자 기준으로 비례 축소, 최소 12px
-      var size = Math.max(12, Math.round(17 * 10 / len));
+      ruler.textContent = el.textContent;
+      var textW = ruler.offsetWidth;
+      var cellW = el.offsetWidth;
+      if (textW <= cellW - 15) return;
+      var ratio = (cellW - 15) / textW;
+      var size = Math.max(12, Math.floor(17 * ratio));
       el.style.fontSize = size + 'px';
     });
+    document.body.removeChild(ruler);
   });
 }
 
