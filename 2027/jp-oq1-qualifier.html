@@ -259,6 +259,74 @@ body::after{content:'';position:fixed;inset:0;
 body.view-only .bcard{cursor:default}
 body.view-only .bcard:hover{border-color:var(--bdr)}
 body.view-only .bcard-edit-hint,.view-only .match-reset{display:none}
+
+/* ── Region Banner ── */
+#region-banner{
+  flex-shrink:0;
+  display:flex;align-items:stretch;gap:2rem;
+  min-height:300px;
+  padding:1.4rem 1.8rem 1.2rem;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid rgba(0,210,190,.1)}
+#region-banner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(105deg, rgba(0,185,170,.18) 0%, rgba(0,160,145,.08) 30%, transparent 60%, rgba(55,8,110,.12) 100%),
+    repeating-linear-gradient(to bottom,
+      rgba(0,210,190,.012) 0,rgba(0,210,190,.012) 1px,transparent 1px,transparent 5px)}
+#region-banner::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,210,190,.5) 40%,rgba(0,210,190,.8) 50%,rgba(0,210,190,.5) 60%,transparent)}
+.rb-logo{
+  height:110px;width:auto;flex-shrink:0;position:relative;z-index:1;
+  align-self:flex-start;
+  filter:
+    drop-shadow(0 0 18px rgba(0,210,190,.5))
+    drop-shadow(0 0 50px rgba(0,210,190,.2));
+  opacity:.92}
+.rb-info{position:relative;z-index:1;display:flex;flex-direction:column;gap:.35rem;align-self:flex-start}
+.rb-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(0,210,190,.5)}
+.rb-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt);
+  text-shadow:0 0 30px rgba(0,210,190,.2);line-height:1}
+.rb-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:400;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(0,210,190,.55)}
+.rb-divider{
+  width:1px;height:60px;background:rgba(0,210,190,.14);flex-shrink:0;position:relative;z-index:1;align-self:flex-start}
+.rb-map{
+  flex:1;min-width:0;
+  position:relative;z-index:1;overflow:hidden;
+  margin:0 1rem;display:flex;align-items:stretch;align-self:stretch}
+.rb-stats{
+  position:relative;z-index:1;display:flex;gap:2rem;flex-shrink:0;align-self:center}
+.rb-stat{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.rb-stat-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;
+  color:var(--g);text-shadow:0 0 14px rgba(0,210,190,.45);line-height:1}
+.rb-stat-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(0,210,190,.4)}
+.rb-bg-text{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(55px,9vw,135px);font-weight:900;letter-spacing:.28em;
+  text-transform:uppercase;color:transparent;
+  -webkit-text-stroke:1px rgba(0,210,190,.055);
+  white-space:nowrap;pointer-events:none;z-index:0;user-select:none;line-height:1}
+.rb-wave-svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;overflow:visible}
+#rw1{animation:waveBob1 10s ease-in-out infinite;transform-origin:center}
+#rw2{animation:waveBob2 14s ease-in-out infinite .6s;transform-origin:center}
+.rb-diamond{animation:diamondPulse 4s ease-in-out infinite}
+@keyframes waveBob1{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes waveBob2{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+@keyframes diamondPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.2;transform:scale(.82)}}
+.rb-jp-map{height:100%;width:auto;display:block;pointer-events:none;user-select:none;opacity:.95}
 </style>
 </head>
 <body>
@@ -304,6 +372,55 @@ body.view-only .bcard-edit-hint,.view-only .match-reset{display:none}
     </div>
 
     <div id="main">
+      <div id="region-banner">
+        <!-- Background graphics -->
+        <div class="rb-bg-text">PACIFIC</div>
+        <svg class="rb-wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 130" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="rwg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+              <stop offset="22%" stop-color="#00D2BE" stop-opacity="0.75"/>
+              <stop offset="65%" stop-color="#6218CC" stop-opacity="0.52"/>
+              <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="rwg2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+              <stop offset="30%" stop-color="#00C4B0" stop-opacity="0.32"/>
+              <stop offset="68%" stop-color="#7828D8" stop-opacity="0.26"/>
+              <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="wglow" x="-10%" y="-100%" width="120%" height="300%">
+              <feGaussianBlur stdDeviation="3.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path id="rw1" d="M-50,96 C220,46 480,148 760,80 S1060,118 1260,72"
+            fill="none" stroke="url(#rwg)" stroke-width="2" filter="url(#wglow)"/>
+          <path id="rw2" d="M-50,114 C220,62 480,164 760,98 S1060,136 1260,90"
+            fill="none" stroke="url(#rwg2)" stroke-width="1.2"/>
+          <polygon class="rb-diamond" points="92,30 106,44 92,58 78,44"
+            fill="none" stroke="rgba(0,210,190,0.45)" stroke-width="1"/>
+          <polygon class="rb-diamond" points="720,22 736,38 720,54 704,38"
+            fill="none" stroke="rgba(130,30,210,0.38)" stroke-width="1" style="animation-delay:1.8s"/>
+        </svg>
+        <!-- Content -->
+        <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+        <div class="rb-divider"></div>
+        <div class="rb-info">
+          <span class="rb-label">VCT 2027 · Japan</span>
+          <span class="rb-name">JAPAN</span>
+          <span class="rb-sub">Open Qualifier 1 — Double Elimination</span>
+        </div>
+        <!-- Japan Motion Graphic SVG -->
+        <div class="rb-map">
+          <img class="rb-jp-map" src="../assets/pacific-japan.svg" alt="VCT Pacific Japan Network Map">
+        </div>
+        <div class="rb-stats">
+          <div class="rb-stat"><span class="rb-stat-num">96</span><span class="rb-stat-lbl">Teams</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">6</span><span class="rb-stat-lbl">Groups</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">6</span><span class="rb-stat-lbl">Advance</span></div>
+        </div>
+      </div>
       <div id="content"></div>
     </div>
   </div>
