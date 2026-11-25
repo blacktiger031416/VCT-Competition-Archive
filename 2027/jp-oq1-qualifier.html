@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Open Qualifier 1 — VCT 2027 Pacific</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00D2BE;--bg:#030c0e;--s1:#0a1418;
+  --bdr:rgba(0,210,190,.1);--bdr2:rgba(0,210,190,.22);
+  --txt:#d8eeea;--muted:rgba(160,220,210,.42);--muted2:rgba(160,220,210,.14);
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
+body::before{content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 30%,rgba(0,180,165,.12) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 50% at 88% 72%,rgba(55,8,110,.16) 0%,transparent 62%),
+    radial-gradient(ellipse 40% 30% at 55% 100%,rgba(0,130,118,.06) 0%,transparent 55%);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.04) 0,rgba(0,0,0,.04) 1px,transparent 1px,transparent 3px);
+  pointer-events:none;z-index:1;opacity:.5}
+
+#screen{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;
+  transform:scaleY(.02);opacity:0;transform-origin:center;
+  animation:crtOn .55s cubic-bezier(.16,1,.3,1) .08s forwards}
+#screen::after{content:'';position:absolute;left:0;right:0;top:0;height:4px;
+  background:linear-gradient(to bottom,transparent,rgba(0,210,190,.6),transparent);
+  animation:scanSweep .7s .35s linear forwards;z-index:100;opacity:0}
+@keyframes crtOn{
+  0%  {transform:scaleY(.02);filter:brightness(8);opacity:.9}
+  18% {transform:scaleY(.02);filter:brightness(10)}
+  34% {transform:scaleY(1);filter:brightness(2.5)}
+  70% {filter:brightness(1.1)}
+  100%{transform:scaleY(1);filter:brightness(1);opacity:1}}
+@keyframes crtOff{
+  0%  {transform:scaleY(1);filter:brightness(1);opacity:1}
+  35% {transform:scaleY(1);filter:brightness(4) saturate(2)}
+  55% {transform:scaleY(.04);filter:brightness(9) saturate(0)}
+  80% {transform:scaleY(.02);filter:brightness(.4)}
+  100%{transform:scaleY(0);filter:brightness(0);opacity:0}}
+@keyframes scanSweep{0%{top:-4px;opacity:1}100%{top:100%;opacity:.3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 8px rgba(0,210,190,.2),0 0 20px rgba(0,210,190,.07)}
+  50%    {box-shadow:0 0 16px rgba(0,210,190,.38),0 0 40px rgba(0,210,190,.13)}}
+
+/* ── topbar ── */
+#topbar{
+  display:flex;align-items:center;gap:1rem;
+  padding:.65rem 1.5rem;border-bottom:1px solid var(--bdr);
+  background:rgba(3,12,14,.92);backdrop-filter:blur(8px);flex-shrink:0;position:relative}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.4}
+.tb-back{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  text-decoration:none;border:1px solid rgba(0,210,190,.15);
+  padding:4px 12px;border-radius:2px;transition:all .15s;flex-shrink:0}
+.tb-back:hover{color:var(--g);border-color:rgba(0,210,190,.4)}
+.tb-sep{width:1px;height:20px;background:var(--bdr);flex-shrink:0}
+.tb-logo{height:32px;width:auto;opacity:.9;
+  filter:drop-shadow(0 0 10px rgba(0,210,190,.4));flex-shrink:0}
+.tb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--g);opacity:.65}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt)}
+.tb-right{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:.08em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+
+/* ── layout ── */
+#body{flex:1;display:flex;overflow:hidden}
+
+/* ── sidebar ── */
+#sidebar{width:60px;flex-shrink:0;border-right:1px solid var(--bdr);
+  background:var(--s1);display:flex;flex-direction:column;
+  align-items:center;padding:.5rem 0;gap:.3rem;position:relative;overflow-y:auto}
+#sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(0,210,190,.25),transparent)}
+.g-btn{width:40px;height:40px;border-radius:3px;border:1px solid var(--bdr);
+  background:transparent;cursor:pointer;position:relative;overflow:hidden;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;
+  color:var(--muted);transition:all .2s;
+  display:flex;align-items:center;justify-content:center}
+.g-btn:hover{border-color:rgba(0,210,190,.4);color:var(--txt)}
+.g-btn.active{border-color:var(--g);color:var(--g);background:rgba(0,210,190,.06);
+  animation:glowPulse 2.5s ease-in-out infinite}
+.g-corner{position:absolute;width:5px;height:5px;border-color:var(--g);border-style:solid;opacity:0;transition:opacity .2s}
+.g-btn.active .g-corner{opacity:1}
+.g-corner.tl{top:2px;left:2px;border-width:1px 0 0 1px}
+.g-corner.tr{top:2px;right:2px;border-width:1px 1px 0 0}
+.g-corner.bl{bottom:2px;left:2px;border-width:0 0 1px 1px}
+.g-corner.br{bottom:2px;right:2px;border-width:0 1px 1px 0}
+
+/* ── main ── */
+#main{flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-width:0}
+#main::-webkit-scrollbar{width:3px}
+#main::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
+
+/* ── content ── */
+#content{flex-shrink:0;padding:0;position:relative;display:flex;flex-direction:column}
+
+@keyframes grp-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+#content.grp-switching{animation:grp-in .22s cubic-bezier(.22,.61,.36,1) forwards}
+
+/* ── group header ── */
+.grp-header{display:flex;align-items:center;gap:.8rem;
+  padding:.85rem 1.2rem .65rem;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.grp-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase}
+.grp-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.grp-badge.upcoming{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-badge.live{color:var(--g);background:rgba(0,210,190,.08);border:1px solid rgba(0,210,190,.25);
+  animation:pulse 1.4s ease-in-out infinite}
+.grp-badge.done{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-desc{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── bracket section header ── */
+.bracket-section{margin:.6rem 1.2rem}
+.bracket-section-hdr{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.4rem .6rem;margin-bottom:.4rem;
+  border-left:2px solid var(--g);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g)}
+.bracket-section-hdr.lb{border-left-color:rgba(130,30,210,.7);color:rgba(170,100,255,.8)}
+.bracket-section-hdr.gf-hdr{border-left-color:rgba(255,200,50,.6);color:rgba(255,200,50,.8)}
+.bracket-section-desc{font-size:9px;color:var(--muted);font-weight:400;letter-spacing:.06em;
+  text-transform:none;margin-left:.4rem}
+
+/* ── bracket cards ── */
+.bcard{width:185px;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;
+  background:var(--s1);cursor:pointer;transition:border-color .15s}
+.bcard:hover{border-color:rgba(0,210,190,.3)}
+.bcard.has-result{border-color:rgba(0,210,190,.18)}
+.bcard.lb-card{border-color:rgba(90,20,150,.25)}
+.bcard.lb-card:hover{border-color:rgba(130,50,200,.5)}
+.bcard.lb-card.has-result{border-color:rgba(130,50,200,.35)}
+.bcard.gf-card{border-color:rgba(200,160,20,.3)}
+.bcard.gf-card:hover{border-color:rgba(255,200,50,.5)}
+.bcard.gf-card.has-result{border-color:rgba(255,200,50,.4)}
+.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.25rem .5rem .1rem;min-height:30px}
+.bcard-row.win{background:rgba(0,210,190,.07)}
+.lb-card .bcard-row.win{background:rgba(100,20,180,.12)}
+.gf-card .bcard-row.win{background:rgba(180,140,0,.1)}
+.bcard.has-result .bcard-row:not(.win) .bcard-logo{opacity:.35}
+.bcard.has-result .bcard-row:not(.win) .bcard-abbr{color:var(--muted2)}
+.bcard.has-result .bcard-row:not(.win) .bcard-score{color:var(--muted2)}
+.bcard-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bcard-logo img{width:100%;height:100%;object-fit:contain}
+.bcard-logo-ph{width:18px;height:18px;background:var(--bdr);border-radius:2px}
+.bcard-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.bcard-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt);line-height:1.1}
+.bcard-fullname{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted2);line-height:1.1;letter-spacing:.02em}
+.bcard-row.win .bcard-abbr{color:var(--g)}
+.lb-card .bcard-row.win .bcard-abbr{color:rgba(170,100,255,.9)}
+.gf-card .bcard-row.win .bcard-abbr{color:rgba(255,200,50,.9)}
+.bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--txt);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
+.bcard-row.win .bcard-score{color:var(--g)}
+.lb-card .bcard-row.win .bcard-score{color:rgba(170,100,255,.9)}
+.gf-card .bcard-row.win .bcard-score{color:rgba(255,200,50,.9)}
+.bcard-sep{height:1px;background:var(--bdr)}
+.bcard-num{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);
+  padding:.2rem .5rem;border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.018);
+  display:flex;align-items:center;justify-content:space-between}
+.bcard-edit-hint{font-size:7px;letter-spacing:.08em;color:rgba(0,210,190,.4)}
+.match-reset{background:none;border:none;cursor:pointer;padding:0;line-height:1;
+  color:rgba(0,210,190,.35);font-size:10px;transition:color .15s}
+.match-reset:hover{color:rgba(0,210,190,.8)}
+.bcard-drop-tag{font-family:'Barlow Condensed',sans-serif;font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(130,80,220,.55);padding-left:.5rem;
+  border-top:1px solid rgba(90,20,150,.2);padding:.18rem .5rem}
+
+/* ── bracket layout ── */
+.bracket-outer{overflow-x:auto;padding:.6rem .4rem .6rem}
+.bracket-outer::-webkit-scrollbar{width:3px;height:3px}
+.bracket-outer::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
+.bracket-rnd-labels{display:flex;padding:4px 0 8px}
+.bcol-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;text-align:center}
+.bracket-inner{position:relative}
+.bm-wrap{position:absolute}
+.bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+
+/* ── winner panel ── */
+.winner-wrap{margin:.6rem 1.2rem;padding:.8rem 1rem;border-radius:4px;
+  border:1px solid rgba(0,210,190,.35);background:rgba(0,210,190,.04);
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:.9rem}
+.winner-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.winner-logo{width:40px;height:40px;border-radius:4px;border:1px solid rgba(0,210,190,.25);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.winner-logo img{width:100%;height:100%;object-fit:contain}
+.winner-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:rgba(0,210,190,.65);margin-bottom:.25rem}
+.winner-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;
+  letter-spacing:.05em;color:var(--txt)}
+.winner-badge{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;
+  border-radius:2px;background:rgba(0,210,190,.15);color:var(--g);
+  border:1px solid rgba(0,210,190,.3);flex-shrink:0}
+
+/* ── score overlay ── */
+#scoreOverlay{display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center}
+#scoreOverlay.open{display:flex}
+#scoreBox{background:#0a1418;border:1px solid rgba(0,210,190,.35);border-radius:6px;
+  width:min(380px,90vw);overflow:hidden;position:relative}
+#scoreBox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.sb-header{padding:.7rem 1rem;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+.sb-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.sb-close:hover{color:var(--txt)}
+.sb-body{padding:.9rem 1rem}
+.sb-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.sb-teams{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-team{display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;
+  border:1px solid var(--bdr);border-radius:4px;background:rgba(255,255,255,.025);
+  cursor:pointer;transition:all .15s;text-align:left}
+.sb-team:hover{border-color:rgba(0,210,190,.4);background:rgba(0,210,190,.05)}
+.sb-team.selected{border-color:var(--g);background:rgba(0,210,190,.1)}
+.sb-team-logo{width:26px;height:26px;border-radius:2px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sb-team-logo img{width:100%;height:100%;object-fit:contain}
+.sb-team-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.03em;color:var(--txt);display:block;line-height:1}
+.sb-team-name{font-size:9px;color:var(--muted);display:block;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-scores{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:.9rem}
+.sb-score-btn{padding:.4rem .2rem;border:1px solid var(--bdr);border-radius:4px;
+  background:rgba(255,255,255,.025);cursor:pointer;transition:all .15s;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  letter-spacing:.03em;color:var(--muted);text-align:center}
+.sb-score-btn:hover{border-color:rgba(0,210,190,.4);color:var(--txt)}
+.sb-score-btn.selected{border-color:var(--g);color:var(--g);background:rgba(0,210,190,.08)}
+.sb-footer{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--bdr)}
+.sb-btn{flex:1;padding:.5rem;border-radius:3px;border:1px solid var(--bdr);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sb-btn.cancel{background:transparent;color:var(--muted)}
+.sb-btn.cancel:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
+.sb-btn.confirm{background:rgba(0,210,190,.12);color:var(--g);border-color:rgba(0,210,190,.4)}
+.sb-btn.confirm:hover{background:rgba(0,210,190,.22)}
+.sb-btn.confirm:disabled{opacity:.3;cursor:not-allowed}
+
+body.view-only .bcard{cursor:default}
+body.view-only .bcard:hover{border-color:var(--bdr)}
+body.view-only .bcard-edit-hint,.view-only .match-reset{display:none}
+</style>
+</head>
+<body>
+<div id="screen">
+  <div id="topbar">
+    <a class="tb-back" href="index.html" onclick="triggerCrtOff(event)">← BACK</a>
+    <div class="tb-sep"></div>
+    <img class="tb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+    <div>
+      <div class="tb-eyebrow">VCT 2027 · PACIFIC KICKOFF OQ · JAPAN</div>
+      <div class="tb-title">JP OPEN QUALIFIER 1 — BRACKET</div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-right">96팀 · 6개조 각 16팀 · Double Elimination · 각 조 1위 → OQ Playoff</div>
+  </div>
+
+  <div id="body">
+    <div id="sidebar">
+      <button class="g-btn active" data-grp="A" onclick="selectGroup('A',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>A
+      </button>
+      <button class="g-btn" data-grp="B" onclick="selectGroup('B',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>B
+      </button>
+      <button class="g-btn" data-grp="C" onclick="selectGroup('C',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>C
+      </button>
+      <button class="g-btn" data-grp="D" onclick="selectGroup('D',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>D
+      </button>
+      <button class="g-btn" data-grp="E" onclick="selectGroup('E',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>E
+      </button>
+      <button class="g-btn" data-grp="F" onclick="selectGroup('F',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>F
+      </button>
+    </div>
+
+    <div id="main">
+      <div id="content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="scoreOverlay">
+  <div id="scoreBox">
+    <div class="sb-header">
+      <div class="sb-title" id="sbTitle">결과 입력</div>
+      <button class="sb-close" onclick="closeScoreModal()">✕</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-label">승자 선택</div>
+      <div class="sb-teams" id="sbTeams"></div>
+      <div class="sb-label">스코어 (Bo3)</div>
+      <div class="sb-scores" id="sbScores">
+        <button class="sb-score-btn" data-s="2-0" onclick="pickScore(this)">2:0</button>
+        <button class="sb-score-btn" data-s="2-1" onclick="pickScore(this)">2:1</button>
+        <button class="sb-score-btn" data-s="1-2" onclick="pickScore(this)">1:2</button>
+        <button class="sb-score-btn" data-s="0-2" onclick="pickScore(this)">0:2</button>
+        <button class="sb-score-btn" data-s="FF"  onclick="pickScore(this)" style="font-size:11px;letter-spacing:.06em">FF</button>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <button class="sb-btn cancel" onclick="closeScoreModal()">취소</button>
+      <button class="sb-btn confirm" id="sbConfirm" onclick="confirmScore()" disabled>확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GROUPS_LIST = ['A','B','C','D','E','F'];
+
+/* ── Match structure ── */
+const mkM = (n) => Array.from({length:n}, () => ({t1:null,t2:null,s1:null,s2:null,w:null}));
+function mkGroup() {
+  return {
+    /* Winners Bracket */
+    wr1:mkM(8), wr2:mkM(4), wrsf:mkM(2), wrf:mkM(1),
+    /* Losers Bracket */
+    lr1:mkM(4), lr2:mkM(4), lr3:mkM(2), lr4:mkM(2), lrsf:mkM(1), lrf:mkM(1),
+    /* Grand Final */
+    gf:mkM(1),
+    winner:null
+  };
+}
+const MATCHES = {};
+GROUPS_LIST.forEach(g => { MATCHES[g] = mkGroup(); });
+
+const WB_RNDS = ['wr1','wr2','wrsf','wrf'];
+const WB_LABELS = {wr1:'WB Round 1', wr2:'WB Round 2', wrsf:'WB Semifinals', wrf:'WB Final'};
+const LB_RNDS  = ['lr1','lr2','lr3','lr4','lrsf','lrf'];
+const LB_LABELS = {lr1:'LB Round 1', lr2:'LB Round 2', lr3:'LB Quarter', lr4:'LB Semis', lrsf:'LB Semi-Final', lrf:'LB Final'};
+const LB_COUNTS = {lr1:4, lr2:4, lr3:2, lr4:2, lrsf:1, lrf:1};
+
+/* ── Propagation maps ── */
+/* Where the WINNER goes next */
+const WIN_DEST = {
+  wr1:  (i) => ({rnd:'wr2',  slot:Math.floor(i/2), pos:i%2===0?'t1':'t2'}),
+  wr2:  (i) => ({rnd:'wrsf', slot:Math.floor(i/2), pos:i%2===0?'t1':'t2'}),
+  wrsf: (i) => ({rnd:'wrf',  slot:0,                pos:i===0?'t1':'t2'}),
+  wrf:  (i) => ({rnd:'gf',   slot:0,                pos:'t1'}),
+  lr1:  (i) => ({rnd:'lr2',  slot:i,                pos:'t2'}),
+  lr2:  (i) => ({rnd:'lr3',  slot:Math.floor(i/2), pos:i%2===0?'t1':'t2'}),
+  lr3:  (i) => ({rnd:'lr4',  slot:i,                pos:'t2'}),
+  lr4:  (i) => ({rnd:'lrsf', slot:Math.floor(i/2), pos:i%2===0?'t1':'t2'}),
+  lrsf: (i) => ({rnd:'lrf',  slot:0,                pos:'t1'}),
+  lrf:  (i) => ({rnd:'gf',   slot:0,                pos:'t2'}),
+};
+/* Where the LOSER drops (WB→LB only) */
+const LOSS_DEST = {
+  wr1:  (i) => ({rnd:'lr1',  slot:Math.floor(i/2), pos:i%2===0?'t1':'t2'}),
+  wr2:  (i) => ({rnd:'lr2',  slot:i,                pos:'t1'}),
+  wrsf: (i) => ({rnd:'lr4',  slot:i,                pos:'t1'}),
+  wrf:  (i) => ({rnd:'lrf',  slot:0,                pos:'t2'}),
+};
+
+function propagateWinner(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  const winner = m.w === 1 ? m.t1 : m.t2;
+  const loser  = m.w === 1 ? m.t2 : m.t1;
+
+  const winDest = WIN_DEST[rnd];
+  if (winDest) {
+    const d = winDest(idx);
+    if (MATCHES[grp][d.rnd] && MATCHES[grp][d.rnd][d.slot] !== undefined)
+      MATCHES[grp][d.rnd][d.slot][d.pos] = winner ? {...winner} : null;
+  }
+  const lossDest = LOSS_DEST[rnd];
+  if (lossDest) {
+    const d = lossDest(idx);
+    if (MATCHES[grp][d.rnd] && MATCHES[grp][d.rnd][d.slot] !== undefined)
+      MATCHES[grp][d.rnd][d.slot][d.pos] = loser ? {...loser} : null;
+  }
+}
+
+function clearAllDownstream(grp, rnd, idx) {
+  const winDest = WIN_DEST[rnd];
+  if (winDest) {
+    const d = winDest(idx);
+    const arr = MATCHES[grp][d.rnd];
+    if (arr && arr[d.slot]) {
+      const nm = arr[d.slot];
+      if (nm[d.pos] !== null) {
+        nm[d.pos] = null;
+        if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearAllDownstream(grp, d.rnd, d.slot); }
+      }
+    }
+  }
+  const lossDest = LOSS_DEST[rnd];
+  if (lossDest) {
+    const d = lossDest(idx);
+    const arr = MATCHES[grp][d.rnd];
+    if (arr && arr[d.slot]) {
+      const nm = arr[d.slot];
+      if (nm[d.pos] !== null) {
+        nm[d.pos] = null;
+        if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearAllDownstream(grp, d.rnd, d.slot); }
+      }
+    }
+  }
+  if (rnd === 'gf') MATCHES[grp].winner = null;
+}
+
+/* ── Rendering constants ── */
+const BK = { SLOT_H:86, CARD_H:60, CARD_W:188, CONN_W:28 };
+const LB_TOTAL_H = 4 * BK.SLOT_H;
+
+function bCardTop(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + (s * BK.SLOT_H - BK.CARD_H) / 2;
+}
+function bCenterY(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + s * BK.SLOT_H / 2;
+}
+function lbCardTop(rnd, mi) {
+  const n = LB_COUNTS[rnd];
+  const slotH = LB_TOTAL_H / n;
+  return mi * slotH + (slotH - BK.CARD_H) / 2;
+}
+function lbCenterY(rnd, mi) {
+  const n = LB_COUNTS[rnd];
+  const slotH = LB_TOTAL_H / n;
+  return mi * slotH + slotH / 2;
+}
+
+/* ── Card HTML builder ── */
+function bCardRow(t, side, m) {
+  const win = m.w === side;
+  const score = side === 1 ? m.s1 : m.s2;
+  const hasResult = m.w !== null;
+  const logoHTML = t?.logo
+    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='../assets/teams/VCT 2027/Base_Logo.png'">`
+    : '<div class="bcard-logo-ph"></div>';
+  return `<div class="bcard-row${win?' win':''}">
+    <div class="bcard-logo">${logoHTML}</div>
+    <div class="bcard-info">
+      <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+      ${t?.name && t.name !== t?.abbr ? `<div class="bcard-fullname">${t.name}</div>` : ''}
+    </div>
+    ${hasResult ? `<div class="bcard-score">${score}</div>` : ''}
+  </div>`;
+}
+
+function matchCard(grp, rnd, idx, extraClass='') {
+  const m = MATCHES[grp][rnd][idx];
+  const hasResult = m.w !== null;
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const ctx = `'${grp}','${rnd}',${idx}`;
+  const reset = hasResult && isAdmin ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})">↺</button>` : '';
+  const rndLabel = WB_LABELS[rnd] || LB_LABELS[rnd] || 'GF';
+  return `<div class="bcard${extraClass}${hasResult?' has-result':''}" onclick="openScoreModal(${ctx})">
+    <div class="bcard-num">${rndLabel} · ${String(idx+1).padStart(2,'0')}
+      <span class="bcard-edit-hint">${isAdmin?'클릭 입력':''}</span>${reset}
+    </div>
+    ${bCardRow(m.t1,1,m)}<div class="bcard-sep"></div>${bCardRow(m.t2,2,m)}
+  </div>`;
+}
+
+/* ── Winners Bracket renderer ── */
+function renderWB(grp) {
+  const totalH = 8 * BK.SLOT_H;
+  const COL_STEP = BK.CARD_W + BK.CONN_W;
+  const totalW = WB_RNDS.length * COL_STEP - BK.CONN_W;
+  let svgLines = '';
+  let cols = '';
+  const c = 'rgba(0,210,190,.14)';
+
+  const labelsHTML = WB_RNDS.map((rnd, vi) => {
+    const mr = vi < WB_RNDS.length - 1 ? BK.CONN_W : 0;
+    return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px;text-align:center">
+      <div class="bcol-label">${WB_LABELS[rnd]}</div>
+    </div>`;
+  }).join('');
+
+  WB_RNDS.forEach((rnd, vi) => {
+    const colLeft = vi * COL_STEP;
+    const matches = MATCHES[grp][rnd];
+    let cards = '';
+    matches.forEach((m, mi) => {
+      const top = bCardTop(vi, mi);
+      cards += `<div class="bm-wrap" style="top:${top}px;left:0">${matchCard(grp, rnd, mi)}</div>`;
+      /* connector to next round */
+      if (vi < WB_RNDS.length - 1 && mi % 2 === 0 && mi + 1 < matches.length) {
+        const topCY = bCenterY(vi, mi);
+        const botCY = bCenterY(vi, mi + 1);
+        const parCY = bCenterY(vi + 1, mi / 2);
+        const srcX = colLeft + BK.CARD_W;
+        const jx   = srcX + BK.CONN_W * 0.5;
+        const parX = colLeft + COL_STEP;
+        svgLines += `<line x1="${srcX}" y1="${topCY}" x2="${jx}" y2="${topCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${srcX}" y1="${botCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
+      }
+    });
+    cols += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${vi < WB_RNDS.length-1 ? BK.CONN_W : 0}px">${cards}</div>`;
+  });
+
+  return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
+    <div class="bracket-inner" style="width:${totalW}px;height:${totalH}px">
+      <svg class="bracket-svg" width="${totalW}" height="${totalH}">${svgLines}</svg>
+      <div style="display:flex">${cols}</div>
+    </div>`;
+}
+
+/* ── Losers Bracket renderer ── */
+function renderLB(grp) {
+  const COL_STEP = BK.CARD_W + BK.CONN_W;
+  const totalW = LB_RNDS.length * COL_STEP - BK.CONN_W;
+  let svgLines = '';
+  let cols = '';
+  /* only draw connectors for pure-halving rounds */
+  const c = 'rgba(130,50,200,.2)';
+
+  const labelsHTML = LB_RNDS.map((rnd, vi) => {
+    const mr = vi < LB_RNDS.length - 1 ? BK.CONN_W : 0;
+    return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px;text-align:center">
+      <div class="bcol-label" style="color:rgba(130,80,220,.55)">${LB_LABELS[rnd]}</div>
+    </div>`;
+  }).join('');
+
+  LB_RNDS.forEach((rnd, vi) => {
+    const colLeft = vi * COL_STEP;
+    const matches = MATCHES[grp][rnd];
+    const n = LB_COUNTS[rnd];
+    let cards = '';
+    matches.forEach((m, mi) => {
+      const top = lbCardTop(rnd, mi);
+      cards += `<div class="bm-wrap" style="top:${top}px;left:0">${matchCard(grp, rnd, mi, ' lb-card')}</div>`;
+    });
+
+    /* Connectors: lr2→lr3 and lr4→lrsf (pure halving) */
+    const nextRnd = LB_RNDS[vi + 1];
+    if ((rnd === 'lr2' || rnd === 'lr4') && nextRnd) {
+      for (let mi = 0; mi < n; mi += 2) {
+        if (mi + 1 < n) {
+          const topCY = lbCenterY(rnd, mi);
+          const botCY = lbCenterY(rnd, mi + 1);
+          const parCY = lbCenterY(nextRnd, mi / 2);
+          const srcX  = colLeft + BK.CARD_W;
+          const jx    = srcX + BK.CONN_W * 0.5;
+          const parX  = colLeft + COL_STEP;
+          svgLines += `<line x1="${srcX}" y1="${topCY}" x2="${jx}" y2="${topCY}" stroke="${c}" stroke-width="1"/>`;
+          svgLines += `<line x1="${srcX}" y1="${botCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+          svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+          svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
+        }
+      }
+    }
+    /* lrsf→lrf simple connector */
+    if (rnd === 'lrsf') {
+      const srcX = colLeft + BK.CARD_W;
+      const parX = colLeft + COL_STEP;
+      const cy   = lbCenterY('lrsf', 0);
+      const lrfcy = lbCenterY('lrf', 0);
+      const jx = srcX + BK.CONN_W * 0.4;
+      svgLines += `<line x1="${srcX}" y1="${cy}" x2="${jx}" y2="${cy}" stroke="${c}" stroke-width="1"/>`;
+      svgLines += `<line x1="${jx}" y1="${cy}" x2="${jx}" y2="${lrfcy}" stroke="${c}" stroke-width="1"/>`;
+      svgLines += `<line x1="${jx}" y1="${lrfcy}" x2="${parX}" y2="${lrfcy}" stroke="${c}" stroke-width="1"/>`;
+    }
+
+    cols += `<div style="position:relative;width:${BK.CARD_W}px;height:${LB_TOTAL_H}px;flex-shrink:0;margin-right:${vi < LB_RNDS.length-1 ? BK.CONN_W : 0}px">${cards}</div>`;
+  });
+
+  return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
+    <div class="bracket-inner" style="width:${totalW}px;height:${LB_TOTAL_H}px">
+      <svg class="bracket-svg" width="${totalW}" height="${LB_TOTAL_H}">${svgLines}</svg>
+      <div style="display:flex">${cols}</div>
+    </div>`;
+}
+
+/* ── Grand Final renderer ── */
+function renderGF(grp) {
+  return `<div style="padding:.4rem 0">${matchCard(grp, 'gf', 0, ' gf-card')}</div>`;
+}
+
+/* ── Full content render ── */
+let curGroup = 'A';
+
+function renderContent() {
+  const w = MATCHES[curGroup].winner;
+  document.getElementById('content').innerHTML = `
+    <div class="grp-header">
+      <div class="grp-title">GROUP ${curGroup}</div>
+      <div class="grp-badge upcoming">예정</div>
+      <div class="grp-desc">16팀 · Double Elimination · 1위 → OQ Playoff</div>
+    </div>
+
+    <div class="bracket-section">
+      <div class="bracket-section-hdr">
+        Winners Bracket
+        <span class="bracket-section-desc">승자조 — 1라운드 패배 시 패자조로 이동</span>
+      </div>
+      <div class="bracket-outer">${renderWB(curGroup)}</div>
+    </div>
+
+    <div class="bracket-section">
+      <div class="bracket-section-hdr lb">
+        Losers Bracket
+        <span class="bracket-section-desc" style="color:rgba(160,120,255,.5)">패자조 — 패배 시 탈락 · LB Final 우승자 → Grand Final</span>
+      </div>
+      <div class="bracket-outer">${renderLB(curGroup)}</div>
+    </div>
+
+    <div class="bracket-section">
+      <div class="bracket-section-hdr gf-hdr">
+        Grand Final
+        <span class="bracket-section-desc" style="color:rgba(220,180,50,.4)">WB Final 우승 vs LB Final 우승 · 승자 → OQ Playoff</span>
+      </div>
+      <div class="bracket-outer">${renderGF(curGroup)}</div>
+    </div>
+
+    <div class="winner-wrap" style="${w?'':'opacity:.35'}">
+      <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
+      <div>
+        <div class="winner-label">GROUP ${curGroup} WINNER → OQ Playoff</div>
+        <div class="winner-name">${w?.name ?? '미정'}</div>
+      </div>
+      <div class="winner-badge">OQ Playoff 진출</div>
+    </div>
+  `;
+}
+
+function selectGroup(g, el) {
+  if (g === curGroup) return;
+  curGroup = g;
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const ct = document.getElementById('content');
+  ct.classList.remove('grp-switching'); void ct.offsetWidth; ct.classList.add('grp-switching');
+  ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+  renderContent();
+  document.getElementById('main').scrollTop = 0;
+}
+
+/* ── Score Modal ── */
+let _modalCtx = null;
+let _selWinner = null;
+let _selScore  = null;
+
+function openScoreModal(grp, rnd, idx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  const m = MATCHES[grp][rnd][idx];
+  _modalCtx = {grp, rnd, idx};
+  _selWinner = m.w;
+  _selScore  = m.s1 !== null ? (m.s1 === 'W' || m.s1 === 'FF' ? 'FF' : `${m.s1}-${m.s2}`) : null;
+  const rndLabel = WB_LABELS[rnd] || LB_LABELS[rnd] || 'Grand Final';
+  document.getElementById('sbTitle').textContent = `${rndLabel} · MATCH ${String(idx+1).padStart(2,'0')} · Bo3`;
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbTeams').innerHTML = `
+    <button class="sb-team${_selWinner===1?' selected':''}" onclick="pickWinner(1)">
+      <div class="sb-team-logo">${t1?.logo ? `<img src="${t1.logo}" onerror="this.onerror=null">` : '?'}</div>
+      <div><span class="sb-team-abbr">${t1?.abbr ?? 'TBD'}</span><span class="sb-team-name">${t1?.name ?? '미정'}</span></div>
+    </button>
+    <button class="sb-team${_selWinner===2?' selected':''}" onclick="pickWinner(2)">
+      <div class="sb-team-logo">${t2?.logo ? `<img src="${t2.logo}" onerror="this.onerror=null">` : '?'}</div>
+      <div><span class="sb-team-abbr">${t2?.abbr ?? 'TBD'}</span><span class="sb-team-name">${t2?.name ?? '미정'}</span></div>
+    </button>`;
+  document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b.dataset.s === _selScore));
+  updateConfirmBtn();
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function pickWinner(side) {
+  _selWinner = side;
+  document.querySelectorAll('.sb-team').forEach((el,i) => el.classList.toggle('selected', i+1 === side));
+  updateConfirmBtn();
+}
+function pickScore(btn) {
+  _selScore = btn.dataset.s;
+  document.querySelectorAll('.sb-score-btn').forEach(b => b.classList.toggle('selected', b === btn));
+  updateConfirmBtn();
+}
+function updateConfirmBtn() {
+  document.getElementById('sbConfirm').disabled = !(_selWinner && _selScore);
+}
+
+function confirmScore() {
+  if (!_selWinner || !_selScore) return;
+  const {grp, rnd, idx} = _modalCtx;
+  const m = MATCHES[grp][rnd][idx];
+  m.w = _selWinner;
+  if (_selScore === 'FF') {
+    m.s1 = _selWinner === 1 ? 'W' : 'FF';
+    m.s2 = _selWinner === 2 ? 'W' : 'FF';
+  } else {
+    const [a, b] = _selScore.split('-').map(Number);
+    m.s1 = _selWinner === 1 ? a : b;
+    m.s2 = _selWinner === 2 ? a : b;
+  }
+  propagateWinner(grp, rnd, idx);
+  if (rnd === 'gf') {
+    const winner = _selWinner === 1 ? m.t1 : m.t2;
+    if (winner) MATCHES[grp].winner = {...winner};
+  }
+  saveScores();
+  closeScoreModal();
+  renderContent();
+}
+
+function resetMatch(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  m.s1 = null; m.s2 = null; m.w = null;
+  clearAllDownstream(grp, rnd, idx);
+  if (rnd === 'gf') MATCHES[grp].winner = null;
+  saveScores();
+  renderContent();
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreOverlay').classList.remove('open');
+  _modalCtx = null; _selWinner = null; _selScore = null;
+}
+document.getElementById('scoreOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scoreOverlay')) closeScoreModal();
+});
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
+
+/* ── Storage ── */
+const DB_KEY = 'jp_oq1_scores_v1';
+
+function showSaveToast(state) {
+  let t = document.getElementById('save-toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = 'save-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  t.textContent = state==='saving'?'저장 중...':state==='ok'?'✓ 저장됨':'⚠ 저장 실패';
+  t.style.background = state==='saving'?'#555':state==='ok'?'#00D2BE':'#c00';
+  t.style.color = state==='ok'?'#000':'#fff';
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  if (state !== 'saving') t._timer = setTimeout(() => t.style.opacity='0', 2000);
+}
+
+function saveScores() {
+  const out = {};
+  GROUPS_LIST.forEach(g => {
+    out[g] = {};
+    [...WB_RNDS, ...LB_RNDS, 'gf'].forEach(rnd => {
+      out[g][rnd] = MATCHES[g][rnd].map(m => ({
+        t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name}:null,
+        t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name}:null,
+        s1:m.s1, s2:m.s2, w:m.w
+      }));
+    });
+    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
+  });
+  showSaveToast('saving');
+  fetch('/api/data/' + encodeURIComponent(DB_KEY), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({value:JSON.stringify(out)})
+  }).then(r=>r.json()).then(d => showSaveToast(d.ok?'ok':'err')).catch(() => showSaveToast('err'));
+}
+
+function loadScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_KEY))
+    .then(r=>r.json())
+    .then(raw => {
+      if (!raw) return;
+      try {
+        const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        GROUPS_LIST.forEach(g => {
+          if (!data[g]) return;
+          [...WB_RNDS, ...LB_RNDS, 'gf'].forEach(rnd => {
+            (data[g][rnd] || []).forEach((s,i) => {
+              if (!MATCHES[g][rnd][i]) return;
+              if (s.t1 && !MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1 = {...s.t1};
+              if (s.t2 && !MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2 = {...s.t2};
+              MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
+            });
+          });
+          if (data[g].winner) MATCHES[g].winner = data[g].winner;
+        });
+      } catch(e) {}
+      renderContent();
+    }).catch(() => {});
+}
+
+function triggerCrtOff(e) {
+  e.preventDefault();
+  const href = e.currentTarget.href;
+  document.getElementById('screen').style.animation = 'crtOff .4s ease forwards';
+  setTimeout(() => { window.location.href = href; }, 420);
+}
+
+/* ── Init ── */
+loadScores();
+renderContent();
+</script>
+</body>
+</html>
