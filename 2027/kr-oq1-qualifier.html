@@ -183,6 +183,11 @@ body::after{content:'';position:fixed;inset:0;
   display:flex;align-items:center;justify-content:space-between}
 .bcard-edit-hint{font-size:7px;letter-spacing:.08em;color:rgba(0,210,190,.4)}
 .bcard.has-result .bcard-edit-hint{color:rgba(0,210,190,.55)}
+.bcard-detail-link{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:rgba(0,210,190,.5);
+  text-decoration:none;padding:1px 4px;border:1px solid rgba(0,210,190,.2);
+  border-radius:2px;transition:all .15s;margin-right:2px}
+.bcard-detail-link:hover{color:var(--g);border-color:rgba(0,210,190,.5);background:rgba(0,210,190,.06)}
 .match-reset{background:none;border:none;cursor:pointer;padding:0;line-height:1;
   color:rgba(0,210,190,.35);font-size:10px;transition:color .15s}
 .match-reset:hover{color:rgba(0,210,190,.8)}
@@ -648,12 +653,15 @@ function renderBracket(grp) {
       const ctx = `'${grp}','${rnd}',${mi}`;
       const resetBtn = hasResult && isAdmin
         ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})">↺</button>` : '';
+      const detailUrl = `kr-oq1-match.html?grp=${grp}&rnd=${rnd}&idx=${mi}`;
+      const detailBtn = isAdmin
+        ? `<a class="bcard-detail-link" href="${detailUrl}" onclick="event.stopPropagation()" >상세 ↗</a>` : '';
 
       cardsHTML += `<div class="bm-wrap" style="top:${top}px;left:0">
-        <div class="bcard${hasResult?' has-result':''}" style="position:relative" onclick="openScoreModal(${ctx})">
+        <div class="bcard${hasResult?' has-result':''}" style="position:relative" onclick="${isAdmin ? `openScoreModal(${ctx})` : `location.href='${detailUrl}'`}">
           <div class="bcard-num">${RND_SHORT[rnd]} · ${String(mi+1).padStart(2,'0')}
             <span class="bcard-edit-hint">${isAdmin?'클릭하여 입력':''}</span>
-            ${resetBtn}
+            ${detailBtn}${resetBtn}
           </div>
           ${bCardRow(m.t1,1,m)}<div class="bcard-sep"></div>${bCardRow(m.t2,2,m)}
         </div>
