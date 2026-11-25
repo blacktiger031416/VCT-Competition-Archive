@@ -2635,6 +2635,8 @@ function shrinkLongNames(root) {
   requestAnimationFrame(function() {
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
+      var len = el.textContent.trim().length;
+      if (len <= 10) return;
       ruler.textContent = el.textContent;
       var textW = ruler.offsetWidth;
       var cellW = el.offsetWidth;
