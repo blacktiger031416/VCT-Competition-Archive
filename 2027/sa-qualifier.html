@@ -210,18 +210,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
   opacity:.03;pointer-events:none;z-index:0;
   transform:translateY(-10%)}
 
-/* ── scan line ── */
-#scan-line{
-  position:fixed;left:70px;right:0;height:1px;
-  background:linear-gradient(90deg,transparent 0%,rgba(0,200,255,.18) 25%,rgba(0,200,255,.45) 50%,rgba(0,200,255,.18) 75%,transparent 100%);
-  box-shadow:0 0 10px rgba(0,200,255,.25),0 0 25px rgba(0,200,255,.08);
-  pointer-events:none;z-index:60;
-  animation:scanDown 14s linear infinite}
-@keyframes scanDown{
-  0%{top:0;opacity:0}
-  3%{opacity:1}
-  92%{opacity:1}
-  100%{top:100vh;opacity:0}}
 
 /* ── holographic panel ── */
 .bracket-sec{
@@ -467,7 +455,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
 <canvas id="stars-canvas"></canvas>
 <div id="atm"></div>
 
-<div id="scan-line"></div>
 <div id="screen">
 
   <div id="topbar">
@@ -678,14 +665,7 @@ function renderMatchCard(bid,m,idx,bo=3){
   const el=document.createElement('div');
   el.className='match-card'+(hasResult?' has-result':'');
   el.style.animationDelay=`${Math.min(idx,20)*.016}s`;
-  ['tl','tr','bl','br'].forEach(c=>{
-    const d=document.createElement('div');
-    d.className=`pc pc-${c}`;
-    el.appendChild(d);
-  });
-  const inner=document.createElement('div');
-  inner.style.cssText='position:relative;z-index:1';
-  inner.innerHTML=`
+  el.innerHTML=`
     <div class="match-num-row">
       <span class="match-num-txt">MATCH ${String(idx+1).padStart(2,'0')}</span>
       <span class="match-bo-badge">Bo${bo}</span>
@@ -697,7 +677,6 @@ function renderMatchCard(bid,m,idx,bo=3){
       <div class="match-vs-line"></div>
     </div>
     ${mtRowHTML(m.t2,2,m)}`;
-  el.appendChild(inner);
   el.onclick=()=>openScoreModal(bid,idx,bo);
   return el;
 }
