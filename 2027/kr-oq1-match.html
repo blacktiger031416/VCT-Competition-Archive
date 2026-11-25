@@ -2630,6 +2630,9 @@ function renderMap(mapData, mapIdx) {
 }
 
 function shrinkLongNames(root) {
+  var ruler = document.createElement('span');
+  ruler.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-family:"Barlow Condensed",sans-serif;font-size:17px;font-weight:700;letter-spacing:0.03em;';
+  document.body.appendChild(ruler);
   requestAnimationFrame(function() {
     (root || document).querySelectorAll('.player-name').forEach(function(el) {
       el.style.fontSize = '';
@@ -2637,22 +2640,27 @@ function shrinkLongNames(root) {
       var len = text.length;
       var isKorean   = /[가-힯㄰-㆏]/.test(text);
       var isJapanese = /[぀-ヿ]/.test(text);
-      var size;
-      if (isKorean) {
-        // 10자 이하: 그대로 / 11자+: 비례 축소 / 최소 9px
-        if (len <= 10) return;
-        size = Math.max(9, Math.min(17, Math.round(17 * 10 / len)));
-      } else if (isJapanese) {
-        // 9자 이하: 그대로 / 10자+: 비례 축소 / 최소 10px
-        if (len <= 9) return;
-        size = Math.max(10, Math.min(17, Math.round(17 * 9 / len)));
-      } else {
-        // 영어: 14자 이하 그대로 / 15자+: 비례 축소 / 최소 11px
+      if (!isKorean && !isJapanese) {
+        // 영어: 글자수 기반
         if (len <= 14) return;
-        size = Math.max(11, Math.min(17, Math.round(17 * 14 / len)));
+        el.style.fontSize = Math.max(11, Math.min(17, Math.round(17 * 14 / len))) + 'px';
+        return;
       }
-      el.style.fontSize = size + 'px';
+      // 한국어·일본어: ruler 측정 기반
+      var threshold = isKorean ? 6 : 7;
+      if (len <= threshold) return;
+      ruler.textContent = text;
+      var textW = ruler.offsetWidth;
+      var pcText = el.parentElement;
+      var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
+      var cellW = pcText ? (pcText.offsetWidth - (statsEl ? statsEl.offsetWidth : 0)) : el.offsetWidth;
+      if (textW <= cellW - 25) return;
+      var ratio = (cellW - 25) / textW;
+      var base  = isKorean ? (len > 12 ? 11 : len > 10 ? 13 : 15) : 16;
+      var minPx = isKorean ? (len > 12 ?  8 : len > 10 ?  9 : 10) : 11;
+      el.style.fontSize = Math.max(minPx, Math.floor(base * ratio)) + 'px';
     });
+    document.body.removeChild(ruler);
   });
 }
 
