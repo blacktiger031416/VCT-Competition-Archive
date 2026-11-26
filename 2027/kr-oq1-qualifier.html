@@ -580,13 +580,14 @@ function applyScoresData(raw) {
       ALL_RNDS.forEach(rnd => {
         (data[g][rnd] || []).forEach((s,i) => {
           if (!MATCHES[g][rnd][i]) return;
-          if (s.t1) { if (!MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1 = {}; Object.assign(MATCHES[g][rnd][i].t1, s.t1); remapAbbr(MATCHES[g][rnd][i].t1); }
-          if (s.t2) { if (!MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2 = {}; Object.assign(MATCHES[g][rnd][i].t2, s.t2); remapAbbr(MATCHES[g][rnd][i].t2); }
+          if (s.t1) { const sl=MATCHES[g][rnd][i].t1?.logo; if (!MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1={}; Object.assign(MATCHES[g][rnd][i].t1, s.t1); if (!MATCHES[g][rnd][i].t1.logo && sl) MATCHES[g][rnd][i].t1.logo=sl; remapAbbr(MATCHES[g][rnd][i].t1); }
+          if (s.t2) { const sl=MATCHES[g][rnd][i].t2?.logo; if (!MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2={}; Object.assign(MATCHES[g][rnd][i].t2, s.t2); if (!MATCHES[g][rnd][i].t2.logo && sl) MATCHES[g][rnd][i].t2.logo=sl; remapAbbr(MATCHES[g][rnd][i].t2); }
           MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
         });
       });
       if (data[g].winner) {
-        MATCHES[g].winner = {abbr:data[g].winner.abbr,name:data[g].winner.name,logo:data[g].winner.logo};
+        const wl = data[g].winner.logo || _findLogoByName(data[g].winner.name) || _findLogoByAbbr(data[g].winner.abbr);
+        MATCHES[g].winner = {abbr:data[g].winner.abbr,name:data[g].winner.name,logo:wl};
         remapAbbr(MATCHES[g].winner);
       }
     });
@@ -976,6 +977,21 @@ function initTeams() {
     bye.w = 1; bye.s1 = 'W'; bye.s2 = 'FF';
     propagateWinner('B', 'r32', 15);
   }
+}
+
+function _findLogoByName(name) {
+  for (const g of ['A','B']) for (const rnd of ALL_RNDS) for (const m of MATCHES[g][rnd]) {
+    if (m.t1?.name === name && m.t1.logo) return m.t1.logo;
+    if (m.t2?.name === name && m.t2.logo) return m.t2.logo;
+  }
+  return null;
+}
+function _findLogoByAbbr(abbr) {
+  for (const g of ['A','B']) for (const rnd of ALL_RNDS) for (const m of MATCHES[g][rnd]) {
+    if (m.t1?.abbr === abbr && m.t1.logo) return m.t1.logo;
+    if (m.t2?.abbr === abbr && m.t2.logo) return m.t2.logo;
+  }
+  return null;
 }
 
 /* ── init ── */
