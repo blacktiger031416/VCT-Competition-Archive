@@ -1427,18 +1427,70 @@
     .site-header .auth-header-btn { margin-left: auto !important; }
     .site-header .home-link-dark::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
 
+    /* ── REGION BANNER ─────────────────────────── */
+    #region-banner {
+      display: flex; align-items: center; gap: 2rem;
+      min-height: 160px;
+      padding: 1.2rem 2rem 1rem;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid rgba(0,210,190,.1);
+      background: #040e1a;
+    }
+    #region-banner::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(105deg, rgba(0,185,170,.15) 0%, rgba(0,160,145,.06) 30%, transparent 60%, rgba(55,8,110,.10) 100%),
+        repeating-linear-gradient(to bottom,
+          rgba(0,210,190,.01) 0, rgba(0,210,190,.01) 1px, transparent 1px, transparent 5px);
+    }
+    #region-banner::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,210,190,.5) 40%, rgba(0,210,190,.8) 50%, rgba(0,210,190,.5) 60%, transparent);
+    }
+    .rb-logo { height: 80px; width: auto; flex-shrink: 0; position: relative; z-index: 1;
+      filter: drop-shadow(0 0 14px rgba(0,210,190,.5)) drop-shadow(0 0 40px rgba(0,210,190,.2)); opacity: .9; }
+    .rb-info { position: relative; z-index: 1; display: flex; flex-direction: column; gap: .3rem; }
+    .rb-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: .22em;
+      text-transform: uppercase; color: rgba(0,210,190,.5); }
+    .rb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900;
+      letter-spacing: .06em; text-transform: uppercase; color: #fff;
+      text-shadow: 0 0 24px rgba(0,210,190,.2); line-height: 1; }
+    .rb-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 400;
+      letter-spacing: .12em; text-transform: uppercase; color: rgba(0,210,190,.55); }
+    .rb-divider { width: 1px; height: 50px; background: rgba(0,210,190,.14); flex-shrink: 0; position: relative; z-index: 1; }
+    .rb-map { flex: 1; min-width: 0; position: relative; z-index: 1; overflow: hidden;
+      display: flex; align-items: center; align-self: stretch; }
+    .rb-stats { position: relative; z-index: 1; display: flex; gap: 1.8rem; flex-shrink: 0; }
+    .rb-stat { display: flex; flex-direction: column; align-items: center; gap: .15rem; }
+    .rb-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900;
+      color: #00d2be; text-shadow: 0 0 12px rgba(0,210,190,.45); line-height: 1; }
+    .rb-stat-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 8px; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(0,210,190,.4); }
+    .rb-bg-text { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      font-family: 'Barlow Condensed', sans-serif; font-size: clamp(50px, 9vw, 120px);
+      font-weight: 900; letter-spacing: .28em; text-transform: uppercase; color: transparent;
+      -webkit-text-stroke: 1px rgba(0,210,190,.045);
+      white-space: nowrap; pointer-events: none; z-index: 0; user-select: none; line-height: 1; }
+    .rb-wave-svg { position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: visible; }
+    #rw1 { animation: waveBob1 10s ease-in-out infinite; transform-origin: center; }
+    #rw2 { animation: waveBob2 14s ease-in-out infinite .6s; transform-origin: center; }
+    .rb-diamond { animation: diamondPulse 4s ease-in-out infinite; }
+    @keyframes waveBob1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes waveBob2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+    @keyframes diamondPulse { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:.2;transform:scale(.82)} }
+    .rb-kr-map { height: 100%; width: auto; display: block; pointer-events: none; user-select: none; opacity: .9; }
+
   </style>
 </head>
 <body>
 
   <!-- ── NAV HEADER ──────────────────────────────── -->
   <header class="site-header" style="
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(7,21,21,0.92);
-    border-bottom: 1px solid rgba(0,180,255,0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 0 32px; height: 56px;
+    position: static;
+    background: #030c16;
+    border-bottom: 1px solid rgba(0,160,210,0.12);
+    padding: 0 32px; height: 52px;
     display: flex; align-items: center; gap: 20px;
   ">
     <a class="home-link-dark" href="./index.html" style="
@@ -1459,6 +1511,55 @@
       transition: color 0.15s;
     ">–</a>
   </header>
+
+  <!-- ── REGION BANNER ─────────────────────────── -->
+  <div id="region-banner">
+    <div class="rb-bg-text">PACIFIC</div>
+    <svg class="rb-wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 100" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="rwg" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+          <stop offset="22%" stop-color="#00D2BE" stop-opacity="0.75"/>
+          <stop offset="65%" stop-color="#6218CC" stop-opacity="0.52"/>
+          <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="rwg2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+          <stop offset="30%" stop-color="#00C4B0" stop-opacity="0.32"/>
+          <stop offset="68%" stop-color="#7828D8" stop-opacity="0.26"/>
+          <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="wglow" x="-10%" y="-100%" width="120%" height="300%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path id="rw1" d="M-50,74 C220,34 480,114 760,60 S1060,90 1260,54"
+        fill="none" stroke="url(#rwg)" stroke-width="1.8" filter="url(#wglow)"/>
+      <path id="rw2" d="M-50,88 C220,48 480,128 760,76 S1060,106 1260,70"
+        fill="none" stroke="url(#rwg2)" stroke-width="1.2"/>
+      <polygon class="rb-diamond" points="92,22 104,34 92,46 80,34"
+        fill="none" stroke="rgba(0,210,190,0.45)" stroke-width="1"/>
+      <polygon class="rb-diamond" points="720,16 734,30 720,44 706,30"
+        fill="none" stroke="rgba(130,30,210,0.38)" stroke-width="1" style="animation-delay:1.8s"/>
+    </svg>
+    <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+    <div class="rb-divider"></div>
+    <div class="rb-info">
+      <span class="rb-label">VCT 2027 · South Korea</span>
+      <span class="rb-name">SOUTH KOREA</span>
+      <span class="rb-sub">Pacific Open Qualifier 1</span>
+    </div>
+    <div class="rb-map">
+      <img class="rb-kr-map" src="../assets/pacific-korea.svg" alt="VCT Pacific Korea">
+    </div>
+    <div class="rb-stats">
+      <div class="rb-stat"><span class="rb-stat-num">32</span><span class="rb-stat-lbl">Teams</span></div>
+      <div class="rb-stat"><span class="rb-stat-num">2</span><span class="rb-stat-lbl">Groups</span></div>
+      <div class="rb-stat"><span class="rb-stat-num">2</span><span class="rb-stat-lbl">Advance</span></div>
+    </div>
+  </div>
+
   <!-- ── MATCH OVERVIEW ──────────────────────────── -->
 
   <div class="overview-card">
