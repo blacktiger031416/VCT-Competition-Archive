@@ -42,7 +42,32 @@
       overflow: hidden;
       height: 160px;
       background: linear-gradient(135deg, #081c3c 0%, #0e2448 40%, #081c3c 100%);
+      isolation: isolate;
     }
+
+    /* ── Pacific Scoreboard Motion ── */
+    .psm-host{isolation:isolate}
+    .psm-foreground{z-index:1}
+    .psm-host .psm-motion{z-index:0;inset:var(--psm-inset,0);opacity:var(--psm-strength,.72)}
+    .psm-motion{position:absolute;pointer-events:none;overflow:hidden;inset:0}
+    .psm-fx{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+    .psm-sweep{position:absolute;top:-65%;bottom:-65%;width:42%;filter:blur(9px);transform:skewX(-24deg);background:radial-gradient(ellipse,#1ab8e165 0%,#16d6cc28 36%,transparent 69%);animation:psm-sweep-left 9s ease-in-out infinite}
+    .psm-sweep.psm-right{background:radial-gradient(ellipse,#e64f9966 0%,#f05a7428 36%,transparent 69%);animation:psm-sweep-right 9s ease-in-out infinite}
+    .psm-pulse-light{position:absolute;left:35%;right:35%;bottom:-13%;height:40%;background:radial-gradient(ellipse,#60dfea66,transparent 69%);animation:psm-breathe 4.8s ease-in-out infinite}
+    .psm-pulse-ring{transform-box:fill-box;transform-origin:center;animation:psm-ring 4.8s ease-out infinite}
+    .psm-pulse-ring.psm-second{animation-delay:-2.4s}
+    .psm-edge-run{stroke-dasharray:7 93;animation:psm-travel 7s linear infinite;filter:drop-shadow(0 0 3px currentColor)}
+    .psm-edge-run:last-child{animation-delay:-1.8s}
+    .psm-motion .psm-sweep{opacity:.75}
+    .psm-motion .psm-pulse{opacity:.65}
+    .psm-motion .psm-edge{opacity:.9}
+    @keyframes psm-sweep-left{0%,100%{left:-22%;opacity:.15}45%,60%{left:22%;opacity:1}}
+    @keyframes psm-sweep-right{0%,100%{right:-22%;opacity:.15}45%,60%{right:22%;opacity:1}}
+    @keyframes psm-breathe{0%,100%{opacity:.2}50%{opacity:1}}
+    @keyframes psm-ring{0%{transform:scale(.55);opacity:0}18%{opacity:.7}100%{transform:scale(1.8);opacity:0}}
+    @keyframes psm-travel{from{stroke-dashoffset:7}to{stroke-dashoffset:-93}}
+    .psm-paused .psm-motion *{animation-play-state:paused!important}
+    @media(prefers-reduced-motion:reduce){.psm-motion *{animation:none!important}.psm-motion .psm-sweep,.psm-motion .psm-pulse-light,.psm-motion .psm-pulse-ring,.psm-motion .psm-edge-run{display:none}}
 
     .scoreboard-img {
       width: 100%;
@@ -1759,9 +1784,18 @@
 
   <!-- MAP 1 -->
   <div class="map-card" id="map-1">
-    <div class="map-scoreboard">
+    <div class="map-scoreboard psm-host">
+      <div class="psm-motion" aria-hidden="true">
+        <div class="psm-sweep"></div>
+        <div class="psm-sweep psm-right"></div>
+        <div class="psm-pulse-light"></div>
+        <svg class="psm-fx" viewBox="0 0 1806 322" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <g class="psm-pulse" fill="none"><ellipse cx="903" cy="265" rx="150" ry="38" stroke="#7aebef" stroke-width="1.2" opacity=".25"/><ellipse class="psm-pulse-ring" cx="903" cy="265" rx="115" ry="29" stroke="#8debf2" stroke-width="2"/><ellipse class="psm-pulse-ring psm-second" cx="903" cy="265" rx="115" ry="29" stroke="#a391f9" stroke-width="1.6"/></g>
+          <g class="psm-edge" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#46d9e0" stroke-width="1.8" opacity=".24"/><path d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#f76787" stroke-width="1.8" opacity=".24"/><path class="psm-edge-run" pathLength="100" d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#8dfef8" stroke-width="3.5"/><path class="psm-edge-run" pathLength="100" d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#ff9cb3" stroke-width="3.5"/></g>
+        </svg>
+      </div>
       <img class="scoreboard-img" src="../images/scoreborad.png" alt="scoreboard" />
-      <div class="scoreboard-overlay">
+      <div class="scoreboard-overlay psm-foreground">
         <div class="sb-team-block sb-team-block-l">
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
@@ -1817,9 +1851,18 @@
 
   <!-- MAP 2 -->
   <div class="map-card" id="map-2">
-    <div class="map-scoreboard">
+    <div class="map-scoreboard psm-host">
+      <div class="psm-motion" aria-hidden="true">
+        <div class="psm-sweep"></div>
+        <div class="psm-sweep psm-right"></div>
+        <div class="psm-pulse-light"></div>
+        <svg class="psm-fx" viewBox="0 0 1806 322" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <g class="psm-pulse" fill="none"><ellipse cx="903" cy="265" rx="150" ry="38" stroke="#7aebef" stroke-width="1.2" opacity=".25"/><ellipse class="psm-pulse-ring" cx="903" cy="265" rx="115" ry="29" stroke="#8debf2" stroke-width="2"/><ellipse class="psm-pulse-ring psm-second" cx="903" cy="265" rx="115" ry="29" stroke="#a391f9" stroke-width="1.6"/></g>
+          <g class="psm-edge" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#46d9e0" stroke-width="1.8" opacity=".24"/><path d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#f76787" stroke-width="1.8" opacity=".24"/><path class="psm-edge-run" pathLength="100" d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#8dfef8" stroke-width="3.5"/><path class="psm-edge-run" pathLength="100" d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#ff9cb3" stroke-width="3.5"/></g>
+        </svg>
+      </div>
       <img class="scoreboard-img" src="../images/scoreborad.png" alt="scoreboard" />
-      <div class="scoreboard-overlay">
+      <div class="scoreboard-overlay psm-foreground">
         <div class="sb-team-block sb-team-block-l">
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
@@ -1877,9 +1920,18 @@
 
   <!-- MAP 3 -->
   <div class="map-card" id="map-3">
-    <div class="map-scoreboard">
+    <div class="map-scoreboard psm-host">
+      <div class="psm-motion" aria-hidden="true">
+        <div class="psm-sweep"></div>
+        <div class="psm-sweep psm-right"></div>
+        <div class="psm-pulse-light"></div>
+        <svg class="psm-fx" viewBox="0 0 1806 322" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <g class="psm-pulse" fill="none"><ellipse cx="903" cy="265" rx="150" ry="38" stroke="#7aebef" stroke-width="1.2" opacity=".25"/><ellipse class="psm-pulse-ring" cx="903" cy="265" rx="115" ry="29" stroke="#8debf2" stroke-width="2"/><ellipse class="psm-pulse-ring psm-second" cx="903" cy="265" rx="115" ry="29" stroke="#a391f9" stroke-width="1.6"/></g>
+          <g class="psm-edge" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#46d9e0" stroke-width="1.8" opacity=".24"/><path d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#f76787" stroke-width="1.8" opacity=".24"/><path class="psm-edge-run" pathLength="100" d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#8dfef8" stroke-width="3.5"/><path class="psm-edge-run" pathLength="100" d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#ff9cb3" stroke-width="3.5"/></g>
+        </svg>
+      </div>
       <img class="scoreboard-img" src="../images/scoreborad.png" alt="scoreboard" />
-      <div class="scoreboard-overlay">
+      <div class="scoreboard-overlay psm-foreground">
         <div class="sb-team-block sb-team-block-l">
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
@@ -2099,9 +2151,18 @@ function buildMapCardHtml(n) {
   var diagCount = currentBo === 5 ? 3 : 2;
   var diag = '<div class="sb-diamond" onclick="toggleDiamond(this)"></div>'.repeat(diagCount);
   return `
-    <div class="map-scoreboard">
+    <div class="map-scoreboard psm-host">
+      <div class="psm-motion" aria-hidden="true">
+        <div class="psm-sweep"></div>
+        <div class="psm-sweep psm-right"></div>
+        <div class="psm-pulse-light"></div>
+        <svg class="psm-fx" viewBox="0 0 1806 322" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <g class="psm-pulse" fill="none"><ellipse cx="903" cy="265" rx="150" ry="38" stroke="#7aebef" stroke-width="1.2" opacity=".25"/><ellipse class="psm-pulse-ring" cx="903" cy="265" rx="115" ry="29" stroke="#8debf2" stroke-width="2"/><ellipse class="psm-pulse-ring psm-second" cx="903" cy="265" rx="115" ry="29" stroke="#a391f9" stroke-width="1.6"/></g>
+          <g class="psm-edge" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#46d9e0" stroke-width="1.8" opacity=".24"/><path d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#f76787" stroke-width="1.8" opacity=".24"/><path class="psm-edge-run" pathLength="100" d="M36 128H78L137 180V211L196 263H420L445 273H646L662 263H732L751 269H855" stroke="#8dfef8" stroke-width="3.5"/><path class="psm-edge-run" pathLength="100" d="M1770 128H1734L1678 180V211L1618 263H1404L1390 270H1227L1212 263H1080L1062 269H950" stroke="#ff9cb3" stroke-width="3.5"/></g>
+        </svg>
+      </div>
       <img class="scoreboard-img" src="../images/scoreborad.png" alt="scoreboard" />
-      <div class="scoreboard-overlay">
+      <div class="scoreboard-overlay psm-foreground">
         <div class="sb-team-block sb-team-block-l">
           <img class="sb-team-logo sb-logo-a" src="" alt="" />
           <span class="sb-team-name-l sb-name-a">–</span>
