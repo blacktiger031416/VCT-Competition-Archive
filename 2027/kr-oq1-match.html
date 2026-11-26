@@ -1427,6 +1427,45 @@
     .site-header .auth-header-btn { margin-left: auto !important; }
     .site-header .home-link-dark::after { content: " /"; margin-left: 4px; color: rgba(255,255,255,.18); font-weight: 400; }
 
+    /* ── PACIFIC MOTION EFFECTS ───────────────── */
+    .pme { position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; }
+    .pme-contain { object-fit: contain; }
+    .pme-fill    { object-fit: fill; }
+    .pme-cover   { object-fit: cover; }
+    @media (prefers-reduced-motion: reduce) { .pme { display: none; } }
+
+    /* scoreboard에 radar 오버레이 */
+    .map-scoreboard::after {
+      content: ''; position: absolute; inset: 0;
+      background: url('../assets/pacific-radar.svg') center/contain no-repeat;
+      opacity: .40; pointer-events: none; z-index: 1;
+    }
+
+    /* ts-header(팀 스탯 헤더)에 circuit 오버레이 */
+    .ts-header { position: relative; overflow: hidden; }
+    .ts-header::after {
+      content: ''; position: absolute; inset: 0;
+      background: url('../assets/pacific-circuit.svg') center/cover no-repeat;
+      opacity: .22; pointer-events: none; z-index: 0;
+    }
+
+    /* round table 행 영역에 circuit */
+    .rt-block { position: relative; isolation: isolate; }
+    .rt-block::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('../assets/pacific-circuit.svg') center/cover no-repeat;
+      opacity: .10; pointer-events: none; z-index: 0;
+    }
+
+    /* 플레이어 카드 블록에 corner-brackets */
+    .player-table { position: relative; isolation: isolate; }
+    .player-table::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('../assets/pacific-corner-brackets.svg') center/contain no-repeat;
+      opacity: .30; pointer-events: none; z-index: 0;
+    }
+
     /* ── REGION BANNER ─────────────────────────── */
     #region-banner-wrap {
       padding: 0 24px;
@@ -1576,6 +1615,7 @@
     <!-- 팀 헤더 -->
     <div class="mo-header">
       <div class="mo-team-side mo-team-side-a">
+        <img class="pme pme-cover" src="../assets/pacific-hex-grid.svg" alt="" aria-hidden="true" style="opacity:.18">
         <div class="mo-team-accent mo-team-accent-a"></div>
         <img class="mo-team-logo-sm" id="mo-logo-a" src="" alt="" />
         <span class="mo-team-name-lg" id="mo-name-a">–</span>
@@ -1586,6 +1626,7 @@
         <span class="mo-match-sub" id="mo-match-sub">–</span>
       </div>
       <div class="mo-team-side mo-team-side-b">
+        <img class="pme pme-cover" src="../assets/pacific-hex-grid.svg" alt="" aria-hidden="true" style="opacity:.18">
         <span class="mo-team-name-lg" id="mo-name-b">–</span>
         <img class="mo-team-logo-sm" id="mo-logo-b" src="" alt="" />
         <div class="mo-team-accent mo-team-accent-b"></div>
@@ -1593,16 +1634,18 @@
     </div>
 
     <!-- 맵 결과 & 스코어 -->
-    <div class="mo-results">
+    <div class="mo-results" style="position:relative;overflow:hidden">
+      <img class="pme pme-fill" src="../assets/pacific-circuit.svg" alt="" aria-hidden="true" style="opacity:.20">
       <div class="mo-results-team">
         <div class="mo-map-icons" id="slots-a">
           <div class="mo-map-slot side-a" data-v="" data-idx="0" onclick="toggleSlot(this,'a')"></div>
         </div>
       </div>
-      <div class="mo-score-center">
-        <input class="mo-score-num" id="score-a" type="text" value="-" maxlength="2" />
-        <span class="mo-score-sep">:</span>
-        <input class="mo-score-num" id="score-b" type="text" value="-" maxlength="2" />
+      <div class="mo-score-center" style="position:relative;overflow:hidden">
+        <img class="pme pme-contain" src="../assets/pacific-radar.svg" alt="" aria-hidden="true" style="opacity:.45">
+        <input class="mo-score-num" id="score-a" type="text" value="-" maxlength="2" style="position:relative;z-index:1" />
+        <span class="mo-score-sep" style="position:relative;z-index:1">:</span>
+        <input class="mo-score-num" id="score-b" type="text" value="-" maxlength="2" style="position:relative;z-index:1" />
       </div>
       <div class="mo-results-team mo-results-team-b">
         <div class="mo-map-icons" id="slots-b">
