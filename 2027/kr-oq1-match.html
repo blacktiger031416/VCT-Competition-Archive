@@ -1435,17 +1435,19 @@
     .pme-cover   { object-fit: cover; }
     @media (prefers-reduced-motion: reduce) { .pme { display: none; } }
 
-    /* 팀 스탯 블록 전체 — hex-grid + circuit 혼합 */
+    /* 팀 스탯 블록 전체 — radar(중앙 크게) + circuit */
     .team-stats-wrap { isolation: isolate; }
     .team-stats-wrap::before {
-      content: ''; position: absolute; inset: 0;
-      background: url('../assets/pacific-hex-grid.svg') center / auto 85% no-repeat;
-      opacity: 0.75; pointer-events: none; z-index: 1;
+      content: ''; position: absolute;
+      width: 360px; height: 360px;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      background: url('../assets/pacific-radar.svg') center/contain no-repeat;
+      opacity: 0.65; pointer-events: none; z-index: 1;
     }
     .team-stats-wrap::after {
       content: ''; position: absolute; inset: 0;
       background: url('../assets/pacific-circuit.svg') center / 85% auto no-repeat;
-      opacity: 0.75; pointer-events: none; z-index: 2;
+      opacity: 0.65; pointer-events: none; z-index: 2;
     }
     /* ts-bg-logo는 absolute 유지 — z-index만 올리기 */
     .ts-bg-logo { z-index: 3; }
