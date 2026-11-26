@@ -726,16 +726,18 @@ function renderContent() {
   `;
 }
 
-function selectGroup(g, el) {
-  if (g === curGroup) return;
+function selectGroup(g, el, skipHash) {
+  if (g === curGroup && el) return;
   curGroup = g;
-  document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  const ct = document.getElementById('content');
-  ct.classList.remove('grp-switching');
-  void ct.offsetWidth;
-  ct.classList.add('grp-switching');
-  ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+  if (!skipHash) location.hash = 'grp-' + g;
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.toggle('active', b.dataset.grp === g));
+  if (el) {
+    const ct = document.getElementById('content');
+    ct.classList.remove('grp-switching');
+    void ct.offsetWidth;
+    ct.classList.add('grp-switching');
+    ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+  }
   renderContent();
 }
 
@@ -978,6 +980,10 @@ function initTeams() {
 
 /* ── init ── */
 initTeams();
+(function restoreGroupFromHash() {
+  const h = location.hash.replace('#','');
+  if (h === 'grp-B') { curGroup = 'B'; selectGroup('B', null, true); }
+})();
 loadScores();
 renderContent();
 </script>
