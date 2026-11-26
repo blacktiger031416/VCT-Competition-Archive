@@ -568,6 +568,9 @@ function buildScoresPayload() {
   return JSON.stringify(out);
 }
 
+const ABBR_REMAP = { 'IMK': 'IMCO' };
+function remapAbbr(t) { if (t && t.abbr && ABBR_REMAP[t.abbr]) t.abbr = ABBR_REMAP[t.abbr]; }
+
 function applyScoresData(raw) {
   if (!raw) return;
   try {
@@ -577,12 +580,15 @@ function applyScoresData(raw) {
       ALL_RNDS.forEach(rnd => {
         (data[g][rnd] || []).forEach((s,i) => {
           if (!MATCHES[g][rnd][i]) return;
-          if (s.t1) { if (!MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1 = {}; Object.assign(MATCHES[g][rnd][i].t1, s.t1); }
-          if (s.t2) { if (!MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2 = {}; Object.assign(MATCHES[g][rnd][i].t2, s.t2); }
+          if (s.t1) { if (!MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1 = {}; Object.assign(MATCHES[g][rnd][i].t1, s.t1); remapAbbr(MATCHES[g][rnd][i].t1); }
+          if (s.t2) { if (!MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2 = {}; Object.assign(MATCHES[g][rnd][i].t2, s.t2); remapAbbr(MATCHES[g][rnd][i].t2); }
           MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
         });
       });
-      if (data[g].winner) MATCHES[g].winner = {abbr:data[g].winner.abbr,name:data[g].winner.name,logo:data[g].winner.logo};
+      if (data[g].winner) {
+        MATCHES[g].winner = {abbr:data[g].winner.abbr,name:data[g].winner.name,logo:data[g].winner.logo};
+        remapAbbr(MATCHES[g].winner);
+      }
     });
   } catch(e) {}
 }
