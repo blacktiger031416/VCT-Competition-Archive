@@ -1454,14 +1454,36 @@
     /* 나머지 콘텐츠는 오버레이 위에 */
     .ts-header, .ts-row, .ts-divider { position: relative; z-index: 3; }
 
-    /* 플레이어 카드 블록에 corner-brackets — fill로 꽉 채워 크게 */
-    .player-table { position: relative; isolation: isolate; }
-    .player-table::before {
-      content: ''; position: absolute;
-      inset: -18% 4%;
-      background: url('../assets/pacific-corner-brackets.svg') center/contain no-repeat;
-      opacity: 1; pointer-events: none; z-index: 0;
+    /* 플레이어 카드 블록 corner-brackets — 독립형 4코너 방식 */
+    .player-table-wrap { position: relative; isolation: isolate; }
+    .player-table { width: 100%; }
+    .pcf-overlay {
+      --pcf-size: 76px;
+      --pcf-inset: 2px;
+      --pcf-opacity: 1;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      opacity: var(--pcf-opacity);
     }
+    .pcf-corner {
+      position: absolute;
+      display: block;
+      width: min(var(--pcf-size), 25%);
+      height: auto;
+      aspect-ratio: 100 / 48;
+      max-height: 45%;
+      object-fit: contain;
+      object-position: left top;
+      pointer-events: none;
+      margin: 0;
+    }
+    .pcf-tl { top:var(--pcf-inset); left:var(--pcf-inset); }
+    .pcf-tr { top:var(--pcf-inset); right:var(--pcf-inset); transform:scaleX(-1); }
+    .pcf-bl { bottom:var(--pcf-inset); left:var(--pcf-inset); transform:scaleY(-1); }
+    .pcf-br { bottom:var(--pcf-inset); right:var(--pcf-inset); transform:scale(-1); }
+    @media(prefers-reduced-motion:reduce){ .pcf-corner{visibility:hidden} }
 
     /* ── REGION BANNER ─────────────────────────── */
     #region-banner-wrap {
@@ -1708,23 +1730,31 @@
 
     <div class="rt-wrap" id="rt-0"></div>
 
-    <table class="player-table">
-      <colgroup>
-        <col /><col /><col />
-        <col />
-        <col /><col /><col />
-      </colgroup>
-      <thead>
-        <tr>
-          <th></th><th></th>
-          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-          <th class="col-div"></th>
-          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-          <th></th><th></th>
-        </tr>
-      </thead>
-      <tbody id="m1-rows"></tbody>
-    </table>
+    <div class="player-table-wrap">
+      <div class="pcf-overlay" aria-hidden="true">
+        <img class="pcf-corner pcf-tl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-tr" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-bl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-br" src="../assets/pacific-corner.svg" alt="">
+      </div>
+      <table class="player-table">
+        <colgroup>
+          <col /><col /><col />
+          <col />
+          <col /><col /><col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th><th></th>
+            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+            <th class="col-div"></th>
+            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+            <th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="m1-rows"></tbody>
+      </table>
+    </div>
     <div class="team-stats-wrap" id="ts-0"></div>
   </div>
 
@@ -1760,23 +1790,31 @@
 
     <div class="rt-wrap" id="rt-1"></div>
 
-    <table class="player-table">
-      <colgroup>
-        <col /><col /><col />
-        <col />
-        <col /><col /><col />
-      </colgroup>
-      <thead>
-        <tr>
-          <th></th><th></th>
-          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-          <th class="col-div"></th>
-          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-          <th></th><th></th>
-        </tr>
-      </thead>
-      <tbody id="m2-rows"></tbody>
-    </table>
+    <div class="player-table-wrap">
+      <div class="pcf-overlay" aria-hidden="true">
+        <img class="pcf-corner pcf-tl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-tr" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-bl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-br" src="../assets/pacific-corner.svg" alt="">
+      </div>
+      <table class="player-table">
+        <colgroup>
+          <col /><col /><col />
+          <col />
+          <col /><col /><col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th><th></th>
+            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+            <th class="col-div"></th>
+            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+            <th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="m2-rows"></tbody>
+      </table>
+    </div>
     <div class="team-stats-wrap" id="ts-1"></div>
   </div>
 
@@ -1812,23 +1850,31 @@
 
     <div class="rt-wrap" id="rt-2"></div>
 
-    <table class="player-table">
-      <colgroup>
-        <col /><col /><col />
-        <col />
-        <col /><col /><col />
-      </colgroup>
-      <thead>
-        <tr>
-          <th></th><th></th>
-          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-          <th class="col-div"></th>
-          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-          <th></th><th></th>
-        </tr>
-      </thead>
-      <tbody id="m3-rows"></tbody>
-    </table>
+    <div class="player-table-wrap">
+      <div class="pcf-overlay" aria-hidden="true">
+        <img class="pcf-corner pcf-tl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-tr" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-bl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-br" src="../assets/pacific-corner.svg" alt="">
+      </div>
+      <table class="player-table">
+        <colgroup>
+          <col /><col /><col />
+          <col />
+          <col /><col /><col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th><th></th>
+            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+            <th class="col-div"></th>
+            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+            <th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="m3-rows"></tbody>
+      </table>
+    </div>
     <div class="team-stats-wrap" id="ts-2"></div>
   </div>
 
@@ -2018,19 +2064,27 @@ function buildMapCardHtml(n) {
       </div>
     </div>
     <div class="rt-wrap" id="${rtId}"></div>
-    <table class="player-table">
-      <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
-      <thead>
-        <tr>
-          <th></th><th></th>
-          <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
-          <th class="col-div"></th>
-          <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
-          <th></th><th></th>
-        </tr>
-      </thead>
-      <tbody id="${mid}-rows"></tbody>
-    </table>
+    <div class="player-table-wrap">
+      <div class="pcf-overlay" aria-hidden="true">
+        <img class="pcf-corner pcf-tl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-tr" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-bl" src="../assets/pacific-corner.svg" alt="">
+        <img class="pcf-corner pcf-br" src="../assets/pacific-corner.svg" alt="">
+      </div>
+      <table class="player-table">
+        <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
+        <thead>
+          <tr>
+            <th></th><th></th>
+            <th class="col-name-l sb-th-a">– &nbsp;·&nbsp; K / D / A</th>
+            <th class="col-div"></th>
+            <th class="col-name-r sb-th-b">K / D / A &nbsp;·&nbsp; –</th>
+            <th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="${mid}-rows"></tbody>
+      </table>
+    </div>
     <div class="team-stats-wrap" id="${tsId}"></div>`;
 }
 
