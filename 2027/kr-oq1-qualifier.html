@@ -563,7 +563,7 @@ function buildScoresPayload() {
         s1:m.s1,s2:m.s2,w:m.w
       }));
     });
-    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name} : null;
+    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name,logo:MATCHES[g].winner.logo} : null;
   });
   return JSON.stringify(out);
 }
@@ -705,7 +705,7 @@ function renderContent() {
   const grpMeta = GROUPS[curGroup];
 
   const winnerHTML = `<div class="winner-wrap" style="${w?'':'opacity:.35'}">
-    <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="">` : '<span style="font-size:1.2rem">🏆</span>'}</div>
+    <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="${w.abbr||''}">` : w ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;color:var(--g)">${w.abbr||'?'}</span>` : '<span style="font-size:1.2rem">🏆</span>'}</div>
     <div>
       <div class="winner-label">GROUP ${curGroup} WINNER → OQ Playoff</div>
       <div class="winner-name">${w?.name ?? '미정'}</div>
@@ -956,7 +956,7 @@ function initTeams() {
       [t('BOXB','BoxBox'),                  t('NURI','NURI E-Sports Academy')],
       [t('PSIM','PSIM E-SPORTS'),           t('DB','db')],
       [t('NIRV','Nirvana'),                 t('FRON','Frontier')],
-      [t('4KB','4kb'),                      t('NOT','Not Outdone Anywhere')],
+      [t('4KB','4kb'),                      t('NOT','Not Outdone Anywhere','NOT.png')],
       [t('IDES','IDesports','IDES.png'),     t('HAIL','HAIL MARY','HAIL.png')],
       [t('GOOD','Good Game'),               null],  // bye
     ]},
