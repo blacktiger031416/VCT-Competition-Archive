@@ -963,6 +963,8 @@
     .mo-pred-side {
       display: flex; align-items: center;
       gap: 12px; padding: 0 20px; overflow: hidden;
+      position: relative;
+      transition: flex 0.7s ease;
     }
     .mo-pred-a {
       background: linear-gradient(to right, rgba(var(--color-a-rgb),0.30), rgba(var(--color-a-rgb),0.06));
@@ -989,7 +991,76 @@
       cursor: pointer; text-decoration: underline dotted rgba(255,255,255,0.4);
     }
     .mo-pred-odds:hover { color: #fff; }
-    .mo-pred-sep { width: 1px; background: rgba(0,180,255,0.09); flex-shrink: 0; }
+    .mo-pred-sep {
+      width: 1px; flex-shrink: 0; position: relative; z-index: 2;
+      background: rgba(0,180,255,0.09);
+      box-shadow: 0 0 6px 2px rgba(0,200,255,0.5), 0 0 18px 4px rgba(0,200,255,0.2);
+    }
+
+    /* ── 승부 예측 애니메이션 레이어 ── */
+    .pred-anim-layer {
+      position: absolute; inset: 0;
+      pointer-events: none; overflow: hidden;
+    }
+
+    /* Energy beams */
+    .pred-beam {
+      position: absolute; top: 0; bottom: 0;
+      width: 60px;
+      background: linear-gradient(to right, transparent, rgba(0,200,255,0.18), transparent);
+      animation: pred-beam-a 6s ease-in-out infinite;
+    }
+    .mo-pred-b .pred-beam {
+      background: linear-gradient(to left, transparent, rgba(220,50,50,0.18), transparent);
+      animation: pred-beam-b 6s ease-in-out infinite;
+    }
+    @keyframes pred-beam-a {
+      0%   { left: -60px; opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 0.7; }
+      100% { left: calc(100% + 60px); opacity: 0; }
+    }
+    @keyframes pred-beam-b {
+      0%   { right: -60px; opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 0.7; }
+      100% { right: calc(100% + 60px); opacity: 0; }
+    }
+    .pred-beam:nth-child(2) { animation-delay: -2s; opacity: 0.6; width: 35px; }
+    .pred-beam:nth-child(3) { animation-delay: -4s; opacity: 0.4; width: 20px; }
+
+    /* Segmented bar at bottom */
+    .pred-seg-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 4px; overflow: hidden;
+    }
+    .pred-seg-track {
+      position: absolute; inset: 0;
+      display: flex; gap: 3px; align-items: center;
+      animation: pred-seg-slide-a 5s linear infinite;
+    }
+    .mo-pred-b .pred-seg-track {
+      animation: pred-seg-slide-b 5s linear infinite;
+    }
+    .pred-seg-unit {
+      flex-shrink: 0; width: 10px; height: 3px;
+      background: rgba(0,210,230,0.5);
+      transform: skewX(-20deg);
+    }
+    .mo-pred-b .pred-seg-unit {
+      background: rgba(200,60,60,0.5);
+    }
+    @keyframes pred-seg-slide-a {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-26px); }
+    }
+    @keyframes pred-seg-slide-b {
+      from { transform: translateX(0); }
+      to   { transform: translateX(26px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pred-anim-layer { display: none; }
+    }
     /* 배당률 입력 팝업 */
     .odds-popup {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
@@ -3872,21 +3943,31 @@ function renderPredBar() {
   }
   var oddsLabelA = predState.oddsA ? "배당률 " + predState.oddsA : "배당률 클릭 입력";
   var oddsLabelB = predState.oddsB ? "배당률 " + predState.oddsB : "배당률 클릭 입력";
+  var beams = '<div class="pred-anim-layer">' +
+    '<div class="pred-beam"></div>' +
+    '<div class="pred-beam"></div>' +
+    '<div class="pred-beam"></div>' +
+    '<div class="pred-seg-bar"><div class="pred-seg-track">' +
+      Array(60).fill('<div class="pred-seg-unit"></div>').join('') +
+    '</div></div>' +
+  '</div>';
   bar.innerHTML =
     '<div class="mo-pred-side mo-pred-a" style="flex:' + pctA + ';min-width:120px">' +
-      '<img class="mo-pred-logo' + (TEAM_A_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_A_LOGO + '" alt="' + TEAM_A_CODE + '" />' +
-      '<div class="mo-pred-info">' +
+      beams +
+      '<img class="mo-pred-logo' + (TEAM_A_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_A_LOGO + '" alt="' + TEAM_A_CODE + '" style="position:relative;z-index:1" />' +
+      '<div class="mo-pred-info" style="position:relative;z-index:1">' +
         '<span class="mo-pred-pct">' + pctA + '%</span>' +
         '<span class="mo-pred-odds" onclick="openOddsEditor(\'A\')">' + oddsLabelA + '</span>' +
       '</div>' +
     '</div>' +
     '<div class="mo-pred-sep"></div>' +
     '<div class="mo-pred-side mo-pred-b" style="flex:' + pctB + ';min-width:120px">' +
-      '<div class="mo-pred-info" style="text-align:right">' +
+      beams +
+      '<div class="mo-pred-info" style="text-align:right;position:relative;z-index:1">' +
         '<span class="mo-pred-pct">' + pctB + '%</span>' +
         '<span class="mo-pred-odds" onclick="openOddsEditor(\'B\')">' + oddsLabelB + '</span>' +
       '</div>' +
-      '<img class="mo-pred-logo' + (TEAM_B_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_B_LOGO + '" alt="' + TEAM_B_CODE + '" />' +
+      '<img class="mo-pred-logo' + (TEAM_B_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_B_LOGO + '" alt="' + TEAM_B_CODE + '" style="position:relative;z-index:1" />' +
     '</div>';
 }
 
