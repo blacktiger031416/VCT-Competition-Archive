@@ -1018,21 +1018,22 @@
     .mo-pred-odds:hover { color: #fff; }
     .mo-pred-sep { width: 1px; background: rgba(0,180,255,0.09); flex-shrink: 0; }
 
-    /* ── Pacific Prediction Motion ── */
+    /* ── Pacific Prediction Motion V2 (team color) ── */
     .pp-motion-side { isolation: isolate; }
     .pp-motion-fx {
-      --pp-rgb: 85 181 255;
+      --pp-base: var(--pp-team-color, #a9b4c2);
+      --pp-light: color-mix(in srgb, var(--pp-base) 76%, white);
+      --pp-glow: color-mix(in srgb, var(--pp-base) 88%, white);
       position:absolute; inset:0; z-index:-1; overflow:hidden;
       pointer-events:none; user-select:none; opacity:var(--pp-intensity,.64);
       border-radius:inherit; container-type:inline-size;
     }
-    .pp-motion-fx--right { --pp-rgb: 255 112 143; }
     .pp-motion-track { position:absolute; inset:0; }
     .pp-motion-fx--right .pp-motion-track { transform:scaleX(-1); }
     .pp-motion-beam {
       position:absolute; left:0; top:var(--pp-y); width:32%; height:1px;
-      background:linear-gradient(90deg,transparent,rgb(var(--pp-rgb)/.22) 45%,rgb(var(--pp-rgb)/.95));
-      box-shadow:0 0 7px rgb(var(--pp-rgb)/.17);
+      background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--pp-glow) 22%, transparent) 45%,color-mix(in srgb, var(--pp-light) 95%, transparent));
+      box-shadow:0 0 7px color-mix(in srgb, var(--pp-glow) 17%, transparent);
       opacity:0; animation:pp-motion-beam var(--pp-speed,6s) linear infinite;
       animation-delay:var(--pp-delay);
     }
@@ -1048,23 +1049,24 @@
     }
     .pp-motion-segments {
       position:absolute; left:5px; right:4px; bottom:5px; height:6px;
-      background:rgb(var(--pp-rgb)/.30); overflow:hidden;
+      background:color-mix(in srgb, var(--pp-glow) 30%, transparent); overflow:hidden;
       mask-image:repeating-linear-gradient(105deg,#000 0 10px,transparent 10px 13px);
     }
     .pp-motion-segments::after {
       content:""; position:absolute; top:0; bottom:0; left:0; width:30%;
-      background:linear-gradient(90deg,transparent,rgb(var(--pp-rgb)/.95),transparent);
+      background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--pp-light) 95%, transparent),transparent);
       animation:pp-motion-seg var(--pp-seg-speed,5s) linear infinite;
     }
     @keyframes pp-motion-seg{from{left:-30%}to{left:100%}}
     .pp-motion-seam {
       position:absolute; right:0; top:0; bottom:0; width:1px;
-      background:rgb(var(--pp-rgb)/.75); box-shadow:0 0 8px 1px rgb(var(--pp-rgb)/.42);
+      background:color-mix(in srgb, var(--pp-light) 75%, transparent);
+      box-shadow:0 0 8px 1px color-mix(in srgb, var(--pp-glow) 42%, transparent);
       animation:pp-motion-seam 4s ease-in-out infinite;
     }
     .pp-motion-seam::before {
       content:"";position:absolute;right:0;top:0;bottom:0;width:22px;
-      background:linear-gradient(90deg,transparent,rgb(var(--pp-rgb)/.12));
+      background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--pp-glow) 12%, transparent));
     }
     @keyframes pp-motion-seam{0%,100%{opacity:.42}50%{opacity:1}}
     @container (max-width:64px){
@@ -3998,7 +4000,7 @@ function renderPredBar() {
   var fxLeft  = '<span class="pp-motion-fx pp-motion-fx--left" aria-hidden="true"><span class="pp-motion-track"><i class="pp-motion-beam"></i><i class="pp-motion-beam"></i><i class="pp-motion-beam"></i><span class="pp-motion-segments"></span><span class="pp-motion-seam"></span></span></span>';
   var fxRight = '<span class="pp-motion-fx pp-motion-fx--right" aria-hidden="true"><span class="pp-motion-track"><i class="pp-motion-beam"></i><i class="pp-motion-beam"></i><i class="pp-motion-beam"></i><span class="pp-motion-segments"></span><span class="pp-motion-seam"></span></span></span>';
   bar.innerHTML =
-    '<div class="mo-pred-side mo-pred-a pp-motion-side" style="flex:' + pctA + ';min-width:120px">' +
+    '<div class="mo-pred-side mo-pred-a pp-motion-side" style="flex:' + pctA + ';min-width:120px;--pp-team-color:var(--color-a)">' +
       fxLeft +
       '<img class="mo-pred-logo' + (TEAM_A_LOGO_WHITE ? ' mo-logo-white' : '') + '" src="' + TEAM_A_LOGO + '" alt="' + TEAM_A_CODE + '" />' +
       '<div class="mo-pred-info">' +
@@ -4007,7 +4009,7 @@ function renderPredBar() {
       '</div>' +
     '</div>' +
     '<div class="mo-pred-sep"></div>' +
-    '<div class="mo-pred-side mo-pred-b pp-motion-side" style="flex:' + pctB + ';min-width:120px">' +
+    '<div class="mo-pred-side mo-pred-b pp-motion-side" style="flex:' + pctB + ';min-width:120px;--pp-team-color:var(--color-b)">' +
       fxRight +
       '<div class="mo-pred-info" style="text-align:right">' +
         '<span class="mo-pred-pct">' + pctB + '%</span>' +
