@@ -1439,18 +1439,18 @@
     .team-stats-wrap { isolation: isolate; }
     .team-stats-wrap::before {
       content: ''; position: absolute; inset: 0;
-      background: url('../assets/pacific-hex-grid.svg') center/cover no-repeat;
-      opacity: 1; pointer-events: none; z-index: 1;
+      background: url('../assets/pacific-hex-grid.svg') center / auto 85% no-repeat;
+      opacity: 0.75; pointer-events: none; z-index: 1;
     }
     .team-stats-wrap::after {
       content: ''; position: absolute; inset: 0;
-      background: url('../assets/pacific-circuit.svg') center/cover no-repeat;
-      opacity: 1; pointer-events: none; z-index: 2;
+      background: url('../assets/pacific-circuit.svg') center / 85% auto no-repeat;
+      opacity: 0.75; pointer-events: none; z-index: 2;
     }
-    /* 팀 스탯 콘텐츠는 오버레이 위에 */
-    .ts-header, .ts-row, .ts-bg-logo, .ts-divider {
-      position: relative; z-index: 3;
-    }
+    /* ts-bg-logo는 absolute 유지 — z-index만 올리기 */
+    .ts-bg-logo { z-index: 3; }
+    /* 나머지 콘텐츠는 오버레이 위에 */
+    .ts-header, .ts-row, .ts-divider { position: relative; z-index: 3; }
 
     /* 플레이어 카드 블록에 corner-brackets — fill로 꽉 채워 크게 */
     .player-table { position: relative; isolation: isolate; }
