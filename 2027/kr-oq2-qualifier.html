@@ -924,8 +924,61 @@ function initTeams() {
   const LP = '../assets/teams/VCT 2027/VCT Pacific/Pacific_OQ/Korea/';
   const t = (abbr, name, logo) => ({abbr, name, logo: logo ? LP+logo : null});
 
-  // OQ2 팀 미정 — 추후 입력
-  void t;
+  const seed = {
+    A: { r32: [
+      [t('정권으로','정권으로 세계정복'),       null],              // bye
+      [t('X1P','X1 Project'),                t('BIG','BIG BANANA')],
+      [t('HP','HP'),                          t('ZEST','Zest Academy')],
+      [t('ANI','Team ANI'),                   t('VM','VM')],
+      [t('인생패배','인생패배자'),              t('NOPR','NOPROBLEM')],
+      [t('NERD','Nerd Family'),               t('NURI','NURI E-Sports Academy','NURI.png')],
+      [t('FENR','FENRIR'),                    t('DB','db')],
+      [t('SIMB','SIMB'),                      t('BOXB','BoxBox')],
+      [t('KAWA','Kawaii Heroes'),             t('FRAN','FrankBurger')],
+      [t('SPD','SPD'),                        t('HAMS','Hamster SU')],
+      [t('HERM','Hermanos'),                  t('XOX','XoX')],
+      [t('BBIR','bbiribbiri'),                t('GOOD','Good Game')],
+      [t('APA','APA'),                        t('1STG','1stgeneration')],
+      [t('SGA','SGA','SGA.png'),              t('INNA','Innate')],
+      [t('미자','미자'),                       t('PROV','Provit')],
+      [t('IMK','IMCOOKIE'),                   null],              // bye
+    ]},
+    B: { r32: [
+      [t('EOS','EOS','EOS.png'),              null],              // bye
+      [t('VEX','Vex E-Sports','VEX.png'),     t('PB','PB')],
+      [t('SRP','SHERPA','SRP.png'),           t('PSIM','PSIM E-SPORTS')],
+      [t('AXE','Axe'),                        t('ARCH','Team ARCHE')],
+      [t('SILE','Silent Nova','SILE.png'),    t('EZ4U','ez4us')],
+      [t('PROJ','Project_Lagrange'),          t('BLUE','Blue Jeans')],
+      [t('CLAY','CLAY'),                      t('CNE','CNEsports','CNE.png')],
+      [t('HAIL','HAIL MARY','HAIL.png'),      t('BORN','Born Hater')],
+      [t('WSE','WSE'),                        t('HUNT','hunters')],
+      [t('RETU','RETURNS'),                   t('DK','Dplus Esports','DK.png')],
+      [t('4KB','4kb'),                        t('CELE','Celestia Comet')],
+      [t('WGS','WGS X','WGS.png'),            t('QQ','TEAM QQ')],
+      [t('CUTE','Cute Gorilla'),              t('오합지졸','오합지졸')],
+      [t('FRON','Frontier'),                  t('NIRV','Nirvana')],
+      [t('NOPL','NoPlan'),                    t('PRON','Pronus E-Sports')],
+      [t('IDES','IDesports','IDES.png'),      null],              // bye
+    ]},
+  };
+
+  ['A','B'].forEach(g => {
+    seed[g].r32.forEach(([s1,s2],i) => {
+      const m = MATCHES[g]['r32'][i];
+      if (!m.t1 && s1) m.t1 = {...s1};
+      if (!m.t2 && s2) m.t2 = {...s2};
+    });
+  });
+
+  /* Auto-advance bye teams */
+  [[`A`,0],[`A`,15],[`B`,0],[`B`,15]].forEach(([g,i]) => {
+    const m = MATCHES[g]['r32'][i];
+    if (m.t1 && !m.t2 && m.w === null) {
+      m.w = 1; m.s1 = 'W'; m.s2 = 'FF';
+      propagateWinner(g, 'r32', i);
+    }
+  });
 }
 
 function _findLogoByName(name) {
