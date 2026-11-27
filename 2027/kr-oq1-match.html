@@ -632,6 +632,7 @@
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
       display: block;
       min-width: 0;
     }
@@ -2996,10 +2997,13 @@ function shrinkLongNames(root) {
       if (len <= threshold) return;
       ruler.textContent = text;
       var textW = ruler.offsetWidth;
-      var pcText = el.parentElement;
-      var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
-      var cellW = pcText ? (pcText.offsetWidth - (statsEl ? statsEl.offsetWidth : 0)) : el.offsetWidth;
-      if (textW <= cellW - 25) return;
+      var cellW = el.offsetWidth;
+      if (cellW <= 0) cellW = (function() {
+        var pcText = el.parentElement;
+        var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
+        return pcText ? (pcText.offsetWidth - (statsEl ? statsEl.offsetWidth : 0) - 38) : el.offsetWidth;
+      })();
+      if (textW <= cellW - 4) return;
       var ratio = (cellW - 25) / textW;
       var base  = isKorean ? (len > 12 ? 11 : len > 10 ? 13 : 15) : 16;
       var minPx = isKorean ? (len > 12 ?  8 : len > 10 ?  9 : 10) : 11;
