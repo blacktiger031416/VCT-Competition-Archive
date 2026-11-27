@@ -3005,8 +3005,8 @@ function shrinkLongNames(root) {
       var cellW = pcText ? (pcText.offsetWidth - padH - (statsEl ? statsEl.offsetWidth : 0) - 10) : el.offsetWidth;
       if (textW <= cellW - 4) return;
       var ratio = (cellW - 25) / textW;
-      var base  = isKorean ? (len > 12 ? 11 : len > 10 ? 13 : 15) : 16;
-      var minPx = isKorean ? (len > 12 ?  8 : len > 10 ?  9 : 10) : 11;
+      var base  = isKorean ? 15 : 16;
+      var minPx = isKorean ? 13 : 11;
       el.style.fontSize = Math.max(minPx, Math.floor(base * ratio)) + 'px';
     });
     document.body.removeChild(ruler);
