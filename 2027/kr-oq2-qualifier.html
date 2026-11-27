@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VCT 2027 Pacific OQ2 Korea Qualifier</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00D2BE;--bg:#030c0e;--s1:#0a1418;
+  --bdr:rgba(0,210,190,.1);--bdr2:rgba(0,210,190,.22);
+  --txt:#d8eeea;--muted:rgba(160,220,210,.42);--muted2:rgba(160,220,210,.14);
+  color-scheme:dark;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Barlow',sans-serif}
+
+body::before{content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 30%,rgba(0,180,165,.12) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 50% at 88% 72%,rgba(55,8,110,.16) 0%,transparent 62%),
+    radial-gradient(ellipse 40% 30% at 55% 100%,rgba(0,130,118,.06) 0%,transparent 55%);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,.04) 0,rgba(0,0,0,.04) 1px,transparent 1px,transparent 3px);
+  pointer-events:none;z-index:1;opacity:.5}
+
+#screen{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;
+  transform:scaleY(.02);opacity:0;transform-origin:center;
+  animation:crtOn .55s cubic-bezier(.16,1,.3,1) .08s forwards}
+#screen::after{content:'';position:absolute;left:0;right:0;top:0;height:4px;
+  background:linear-gradient(to bottom,transparent,rgba(0,210,190,.6),transparent);
+  animation:scanSweep .7s .35s linear forwards;z-index:100;opacity:0}
+
+@keyframes crtOn{
+  0%  {transform:scaleY(.02);filter:brightness(8);opacity:.9}
+  18% {transform:scaleY(.02);filter:brightness(10)}
+  34% {transform:scaleY(1);filter:brightness(2.5)}
+  70% {filter:brightness(1.1)}
+  100%{transform:scaleY(1);filter:brightness(1);opacity:1}}
+@keyframes crtOff{
+  0%  {transform:scaleY(1);filter:brightness(1);opacity:1}
+  35% {transform:scaleY(1);filter:brightness(4) saturate(2)}
+  55% {transform:scaleY(.04);filter:brightness(9) saturate(0)}
+  80% {transform:scaleY(.02);filter:brightness(.4)}
+  100%{transform:scaleY(0);filter:brightness(0);opacity:0}}
+@keyframes scanSweep{0%{top:-4px;opacity:1}100%{top:100%;opacity:.3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 8px rgba(0,210,190,.2),0 0 20px rgba(0,210,190,.07)}
+  50%    {box-shadow:0 0 16px rgba(0,210,190,.38),0 0 40px rgba(0,210,190,.13)}}
+@keyframes matchIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── top bar ── */
+#topbar{
+  display:flex;align-items:center;gap:1rem;
+  padding:.65rem 1.5rem;border-bottom:1px solid var(--bdr);
+  background:rgba(3,12,14,.92);backdrop-filter:blur(8px);flex-shrink:0;
+  position:relative;overflow:hidden}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.4}
+.tb-back{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  text-decoration:none;border:1px solid rgba(0,210,190,.15);
+  padding:4px 12px;border-radius:2px;transition:all .15s;flex-shrink:0}
+.tb-back:hover{color:var(--g);border-color:rgba(0,210,190,.4)}
+.tb-sep{width:1px;height:20px;background:var(--bdr);flex-shrink:0}
+.tb-logo{height:32px;width:auto;opacity:.9;
+  filter:drop-shadow(0 0 10px rgba(0,210,190,.4));flex-shrink:0}
+.tb-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--g);opacity:.65}
+.tb-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt)}
+.tb-status{display:flex;align-items:center;gap:.4rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g);
+  background:rgba(0,210,190,.07);border:1px solid rgba(0,210,190,.22);
+  padding:3px 10px;border-radius:2px;flex-shrink:0}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--g);
+  animation:pulse 1.2s ease-in-out infinite}
+.tb-right{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  letter-spacing:.08em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+
+/* ── layout ── */
+#body{flex:1;display:flex;overflow:hidden}
+
+/* ── sidebar ── */
+#sidebar{width:68px;flex-shrink:0;border-right:1px solid var(--bdr);
+  background:var(--s1);display:flex;flex-direction:column;
+  align-items:center;padding:.7rem 0;gap:.35rem;position:relative}
+#sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(0,210,190,.25),transparent)}
+.g-btn{width:46px;height:46px;border-radius:3px;border:1px solid var(--bdr);
+  background:transparent;cursor:pointer;position:relative;overflow:hidden;
+  font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  color:var(--muted);transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.g-btn:hover{border-color:rgba(0,210,190,.4);color:var(--txt)}
+.g-btn.active{border-color:var(--g);color:var(--g);background:rgba(0,210,190,.06);
+  animation:glowPulse 2.5s ease-in-out infinite}
+.g-btn .g-label{position:relative;z-index:1}
+.g-btn .g-sub{position:relative;z-index:1;font-size:7px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+.g-btn.active .g-sub{color:var(--g)}
+.g-corner{position:absolute;width:6px;height:6px;border-color:var(--g);border-style:solid;opacity:0;transition:opacity .2s}
+.g-btn.active .g-corner{opacity:1}
+.g-corner.tl{top:3px;left:3px;border-width:1px 0 0 1px}
+.g-corner.tr{top:3px;right:3px;border-width:1px 1px 0 0}
+.g-corner.bl{bottom:3px;left:3px;border-width:0 0 1px 1px}
+.g-corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0}
+
+/* ── main ── */
+#main{flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;min-width:0}
+#main::-webkit-scrollbar{width:3px}
+#main::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
+
+/* ── bracket cards ── */
+.bcard{width:185px;border:1px solid var(--bdr);border-radius:3px;overflow:hidden;
+  background:var(--s1);cursor:pointer;transition:border-color .15s}
+.bcard:hover{border-color:rgba(0,210,190,.3)}
+.bcard.has-result{border-color:rgba(0,210,190,.18)}
+.bcard-row{display:flex;align-items:center;gap:.4rem;padding:.25rem .5rem .1rem;min-height:30px}
+.bcard-row.win{background:rgba(0,210,190,.07)}
+.bcard.has-result .bcard-row:not(.win) .bcard-logo{opacity:.35}
+.bcard.has-result .bcard-row:not(.win) .bcard-abbr{color:var(--muted2)}
+.bcard.has-result .bcard-row:not(.win) .bcard-score{color:var(--muted2)}
+.bcard-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bcard-logo img{width:100%;height:100%;object-fit:contain}
+.bcard-logo-ph{width:18px;height:18px;background:var(--bdr);border-radius:2px}
+.bcard-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.bcard-abbr{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--txt);line-height:1.1}
+.bcard-fullname{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted2);line-height:1.1;letter-spacing:.02em}
+.bcard-row.win .bcard-abbr{color:var(--g)}
+.bcard-row.win .bcard-fullname{color:rgba(0,210,190,.6)}
+.bcard-score{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;
+  color:var(--txt);flex-shrink:0;min-width:16px;text-align:right;line-height:1}
+.bcard-row.win .bcard-score{color:var(--g)}
+.bcard-sep{height:1px;background:var(--bdr)}
+
+/* ── bracket layout ── */
+.bracket-outer{overflow-x:auto;overflow-y:auto;padding:1rem 1.2rem 1rem}
+.bracket-outer::-webkit-scrollbar{width:3px;height:3px}
+.bracket-outer::-webkit-scrollbar-thumb{background:rgba(0,210,190,.2);border-radius:2px}
+.bracket-rnd-labels{display:flex;padding:6px 0 10px}
+.bcol-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;text-align:center}
+.bracket-inner{position:relative}
+.bm-wrap{position:absolute}
+.bracket-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+
+/* ── content ── */
+#content{flex-shrink:0;padding:0;position:relative;display:flex;flex-direction:column}
+
+/* ── group switch animation ── */
+@keyframes grp-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+#content.grp-switching{animation:grp-in .22s cubic-bezier(.22,.61,.36,1) forwards}
+
+/* ── group header ── */
+.grp-header{display:flex;align-items:center;gap:.8rem;
+  padding:.85rem 1.2rem .65rem;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.grp-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase}
+.grp-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.grp-badge.upcoming{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-badge.live{color:var(--g);background:rgba(0,210,190,.08);border:1px solid rgba(0,210,190,.25);
+  animation:pulse 1.4s ease-in-out infinite}
+.grp-badge.done{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--bdr)}
+.grp-desc{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;
+  color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── bracket card clickable ── */
+.bcard{cursor:pointer}
+.bcard-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);
+  padding:.2rem .5rem;border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.018);
+  display:flex;align-items:center;justify-content:space-between}
+.bcard-edit-hint{font-size:7px;letter-spacing:.08em;color:rgba(0,210,190,.4)}
+.bcard.has-result .bcard-edit-hint{color:rgba(0,210,190,.55)}
+.bcard-detail-link{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:rgba(0,210,190,.5);
+  text-decoration:none;padding:1px 4px;border:1px solid rgba(0,210,190,.2);
+  border-radius:2px;transition:all .15s;margin-right:2px}
+.bcard-detail-link:hover{color:var(--g);border-color:rgba(0,210,190,.5);background:rgba(0,210,190,.06)}
+.match-reset{background:none;border:none;cursor:pointer;padding:0;line-height:1;
+  color:rgba(0,210,190,.35);font-size:10px;transition:color .15s}
+.match-reset:hover{color:rgba(0,210,190,.8)}
+
+/* ── score popup overlay ── */
+#scoreOverlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center}
+#scoreOverlay.open{display:flex}
+#scoreBox{
+  background:#0a1418;border:1px solid rgba(0,210,190,.35);border-radius:6px;
+  width:min(360px,90vw);overflow:hidden;position:relative}
+#scoreBox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.sb-header{
+  padding:.7rem 1rem;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--txt)}
+.sb-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.sb-close:hover{color:var(--txt)}
+.sb-body{padding:.9rem 1rem}
+.sb-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.sb-teams{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-team{
+  display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;
+  border:1px solid var(--bdr);border-radius:4px;background:rgba(255,255,255,.025);
+  cursor:pointer;transition:all .15s;text-align:left}
+.sb-team:hover{border-color:rgba(0,210,190,.4);background:rgba(0,210,190,.05)}
+.sb-team.selected{border-color:var(--g);background:rgba(0,210,190,.1)}
+.sb-team-logo{width:26px;height:26px;border-radius:2px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;overflow:hidden}
+.sb-team-logo img{width:100%;height:100%;object-fit:contain}
+.sb-team-abbr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.03em;color:var(--txt);display:block;line-height:1}
+.sb-team-name{font-size:9px;color:var(--muted);display:block;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-scores{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.9rem}
+.sb-score-btn{
+  padding:.5rem;border:1px solid var(--bdr);border-radius:4px;
+  background:rgba(255,255,255,.025);cursor:pointer;transition:all .15s;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.06em;color:var(--muted);text-align:center}
+.sb-score-btn:hover{border-color:rgba(0,210,190,.4);color:var(--txt)}
+.sb-score-btn.selected{border-color:var(--g);color:var(--g);background:rgba(0,210,190,.08)}
+.sb-score-btn:disabled{opacity:.25;cursor:not-allowed}
+.sb-footer{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--bdr)}
+.sb-btn{flex:1;padding:.5rem;border-radius:3px;border:1px solid var(--bdr);
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.sb-btn.cancel{background:transparent;color:var(--muted)}
+.sb-btn.cancel:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
+.sb-btn.confirm{background:rgba(0,210,190,.12);color:var(--g);border-color:rgba(0,210,190,.4)}
+.sb-btn.confirm:hover{background:rgba(0,210,190,.22)}
+.sb-btn.confirm:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── round score inputs ── */
+.sb-round-wrap{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.sb-round-col{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex:1}
+.sb-round-tname{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;
+  letter-spacing:.03em;color:var(--muted);max-width:72px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.sb-round-tname.win{color:var(--g)}
+.sb-round-input{width:64px;padding:.45rem .3rem;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:3px;
+  color:var(--txt);outline:none;transition:border-color .15s,color .15s;
+  -moz-appearance:textfield}
+.sb-round-input::-webkit-outer-spin-button,.sb-round-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.sb-round-input:focus{border-color:rgba(0,210,190,.4)}
+.sb-round-input.win{border-color:rgba(0,210,190,.5);color:var(--g)}
+.sb-round-sep{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;
+  color:var(--muted2);flex-shrink:0;align-self:flex-end;padding-bottom:.5rem}
+.sb-ff-btn{padding:.3rem .6rem;border:1px solid var(--bdr);border-radius:3px;
+  background:transparent;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.08em;color:var(--muted);transition:all .15s;flex-shrink:0;
+  align-self:flex-end;margin-bottom:.07rem}
+.sb-ff-btn:hover{border-color:rgba(255,100,100,.4);color:rgba(255,100,100,.7)}
+.sb-ff-btn.active{border-color:rgba(255,100,100,.5);color:rgba(255,100,100,.8);background:rgba(255,80,80,.07)}
+
+/* ── winner panel ── */
+.winner-wrap{margin:.8rem 1.2rem;padding:.85rem 1rem;border-radius:4px;
+  border:1px solid rgba(0,210,190,.35);background:rgba(0,210,190,.04);
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:.9rem}
+.winner-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g)}
+.winner-logo{width:44px;height:44px;border-radius:4px;border:1px solid rgba(0,210,190,.25);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.winner-logo img{width:100%;height:100%;object-fit:contain}
+.winner-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:rgba(0,210,190,.65);margin-bottom:.25rem}
+.winner-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;
+  letter-spacing:.05em;color:var(--txt)}
+.winner-badge{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;
+  border-radius:2px;background:rgba(0,210,190,.15);color:var(--g);
+  border:1px solid rgba(0,210,190,.3);flex-shrink:0}
+
+body.view-only .bcard{cursor:default}
+body.view-only .bcard:hover{border-color:var(--bdr)}
+body.view-only .bcard-edit-hint{display:none}
+body.view-only .match-reset{display:none}
+
+/* ── region banner ── */
+#region-banner{
+  flex-shrink:0;
+  display:flex;align-items:stretch;gap:2rem;
+  min-height:300px;
+  padding:1.4rem 1.8rem 1.2rem;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid rgba(0,210,190,.1)}
+#region-banner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(105deg, rgba(0,185,170,.18) 0%, rgba(0,160,145,.08) 30%, transparent 60%, rgba(55,8,110,.12) 100%),
+    repeating-linear-gradient(to bottom,
+      rgba(0,210,190,.012) 0,rgba(0,210,190,.012) 1px,transparent 1px,transparent 5px)}
+#region-banner::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,210,190,.5) 40%,rgba(0,210,190,.8) 50%,rgba(0,210,190,.5) 60%,transparent)}
+.rb-logo{
+  height:110px;width:auto;flex-shrink:0;position:relative;z-index:1;
+  align-self:flex-start;
+  filter:
+    drop-shadow(0 0 18px rgba(0,210,190,.5))
+    drop-shadow(0 0 50px rgba(0,210,190,.2));
+  opacity:.92}
+.rb-info{position:relative;z-index:1;display:flex;flex-direction:column;gap:.35rem;align-self:flex-start}
+.rb-label{
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(0,210,190,.5)}
+.rb-name{
+  font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--txt);
+  text-shadow:0 0 30px rgba(0,210,190,.2);line-height:1}
+.rb-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:400;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(0,210,190,.55)}
+.rb-divider{
+  width:1px;height:60px;background:rgba(0,210,190,.14);flex-shrink:0;position:relative;z-index:1;align-self:flex-start}
+.rb-map{
+  flex:1;min-width:0;
+  position:relative;z-index:1;overflow:hidden;
+  margin:0 1rem;display:flex;align-items:stretch;align-self:stretch}
+.rb-stats{
+  position:relative;z-index:1;display:flex;gap:2rem;flex-shrink:0;align-self:center}
+.rb-stat{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.rb-stat-num{
+  font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;
+  color:var(--g);text-shadow:0 0 14px rgba(0,210,190,.45);line-height:1}
+.rb-stat-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(0,210,190,.4)}
+.rb-bg-text{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(55px,9vw,135px);font-weight:900;letter-spacing:.28em;
+  text-transform:uppercase;color:transparent;
+  -webkit-text-stroke:1px rgba(0,210,190,.055);
+  white-space:nowrap;pointer-events:none;z-index:0;user-select:none;line-height:1}
+.rb-wave-svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;overflow:visible}
+#rw1{animation:waveBob1 10s ease-in-out infinite;transform-origin:center}
+#rw2{animation:waveBob2 14s ease-in-out infinite .6s;transform-origin:center}
+.rb-diamond{animation:diamondPulse 4s ease-in-out infinite}
+@keyframes waveBob1{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes waveBob2{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+@keyframes diamondPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.2;transform:scale(.82)}}
+.rb-kr-map{height:100%;width:auto;display:block;pointer-events:none;user-select:none;opacity:.95}
+</style>
+</head>
+<body>
+<div id="screen">
+
+  <div id="topbar">
+    <a class="tb-back" href="index.html" onclick="triggerCrtOff(event)">← BACK</a>
+    <div class="tb-sep"></div>
+    <img class="tb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+    <div>
+      <div class="tb-eyebrow">VCT 2027 · PACIFIC KICKOFF OQ · KOREA</div>
+      <div class="tb-title">KR OPEN QUALIFIER 1 — BRACKET</div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-right">32팀 · 2개조 · Single Elimination · 각 조 1위 → OQ Playoff</div>
+  </div>
+
+  <div id="body">
+    <div id="sidebar">
+      <button class="g-btn active" data-grp="A" onclick="selectGroup('A',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">A</span><span class="g-sub">예정</span>
+      </button>
+      <button class="g-btn" data-grp="B" onclick="selectGroup('B',this)">
+        <div class="g-corner tl"></div><div class="g-corner tr"></div>
+        <div class="g-corner bl"></div><div class="g-corner br"></div>
+        <span class="g-label">B</span><span class="g-sub">예정</span>
+      </button>
+    </div>
+
+    <div id="main">
+      <div id="region-banner">
+        <!-- Background graphics -->
+        <div class="rb-bg-text">PACIFIC</div>
+        <svg class="rb-wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 130" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="rwg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+              <stop offset="22%" stop-color="#00D2BE" stop-opacity="0.75"/>
+              <stop offset="65%" stop-color="#6218CC" stop-opacity="0.52"/>
+              <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="rwg2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00D2BE" stop-opacity="0"/>
+              <stop offset="30%" stop-color="#00C4B0" stop-opacity="0.32"/>
+              <stop offset="68%" stop-color="#7828D8" stop-opacity="0.26"/>
+              <stop offset="100%" stop-color="#A020F0" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="wglow" x="-10%" y="-100%" width="120%" height="300%">
+              <feGaussianBlur stdDeviation="3.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path id="rw1" d="M-50,96 C220,46 480,148 760,80 S1060,118 1260,72"
+            fill="none" stroke="url(#rwg)" stroke-width="2" filter="url(#wglow)"/>
+          <path id="rw2" d="M-50,114 C220,62 480,164 760,98 S1060,136 1260,90"
+            fill="none" stroke="url(#rwg2)" stroke-width="1.2"/>
+          <polygon class="rb-diamond" points="92,30 106,44 92,58 78,44"
+            fill="none" stroke="rgba(0,210,190,0.45)" stroke-width="1"/>
+          <polygon class="rb-diamond" points="720,22 736,38 720,54 704,38"
+            fill="none" stroke="rgba(130,30,210,0.38)" stroke-width="1" style="animation-delay:1.8s"/>
+        </svg>
+        <!-- Content -->
+        <img class="rb-logo" src="../assets/vct-pacific.webp" alt="VCT Pacific">
+        <div class="rb-divider"></div>
+        <div class="rb-info">
+          <span class="rb-label">VCT 2027 · South Korea</span>
+          <span class="rb-name">SOUTH KOREA</span>
+          <span class="rb-sub">Open Qualifier 1 — Ro32</span>
+        </div>
+        <!-- Korea Motion Graphic SVG -->
+        <div class="rb-map">
+          <img class="rb-kr-map" src="../assets/pacific-korea.svg" alt="VCT Pacific Korea Network Map">
+        </div>
+        <div class="rb-stats">
+          <div class="rb-stat"><span class="rb-stat-num">32</span><span class="rb-stat-lbl">Teams</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">2</span><span class="rb-stat-lbl">Groups</span></div>
+          <div class="rb-stat"><span class="rb-stat-num">2</span><span class="rb-stat-lbl">Advance</span></div>
+        </div>
+      </div>
+      <div id="content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="scoreOverlay">
+  <div id="scoreBox">
+    <div class="sb-header">
+      <div class="sb-title" id="sbTitle">결과 입력</div>
+      <button class="sb-close" onclick="closeScoreModal()">✕</button>
+    </div>
+    <div class="sb-body">
+      <div class="sb-label">라운드 스코어 (Bo1)</div>
+      <div class="sb-round-wrap">
+        <div class="sb-round-col">
+          <div class="sb-round-tname" id="sbRT1name">-</div>
+          <input type="number" class="sb-round-input" id="sbR1" min="0" max="99" placeholder="13" oninput="onRoundInput()">
+        </div>
+        <div class="sb-round-sep">—</div>
+        <div class="sb-round-col">
+          <input type="number" class="sb-round-input" id="sbR2" min="0" max="99" placeholder="7" oninput="onRoundInput()">
+          <div class="sb-round-tname" id="sbRT2name">-</div>
+        </div>
+        <button class="sb-ff-btn" id="sbFFBtn" onclick="toggleFF()">FF</button>
+      </div>
+      <div id="sbFFWinners" style="display:none;margin-top:.5rem">
+        <div class="sb-label">FF 승자</div>
+        <div class="sb-teams" id="sbTeams"></div>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <button class="sb-btn cancel" onclick="closeScoreModal()">취소</button>
+      <button class="sb-btn confirm" id="sbConfirm" onclick="confirmScore()" disabled>확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GROUPS = {
+  A:{status:'upcoming',label:'예정'},
+  B:{status:'upcoming',label:'예정'},
+};
+
+const mkM = (n) => Array.from({length:n}, () => ({t1:null,t2:null,s1:null,s2:null,w:null}));
+
+const MATCHES = {
+  A:{ r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), r2:mkM(1), winner:null },
+  B:{ r32:mkM(16), r16:mkM(8), r8:mkM(4), r4:mkM(2), r2:mkM(1), winner:null },
+};
+
+const ALL_RNDS = ['r32','r16','r8','r4','r2'];
+const RND_SHORT = {r32:'Ro32',r16:'Ro16',r8:'QF',r4:'SF',r2:'Final'};
+const RND_FULL  = {r32:'Round of 32',r16:'Round of 16',r8:'Quarterfinals',r4:'Semifinals',r2:'Final'};
+
+let curGroup = 'A';
+
+function propagateWinner(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const m = MATCHES[grp][rnd][idx];
+  const winner = m.w === 1 ? m.t1 : m.t2;
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  MATCHES[grp][nextRnd][nextIdx][slot] = winner ? {...winner} : null;
+}
+
+function clearPropagated(grp, rnd, idx) {
+  const nextRnd = ALL_RNDS[ALL_RNDS.indexOf(rnd) + 1];
+  if (!nextRnd) return;
+  const nextIdx = Math.floor(idx / 2);
+  const slot = idx % 2 === 0 ? 't1' : 't2';
+  const nm = MATCHES[grp][nextRnd][nextIdx];
+  nm[slot] = null;
+  if (nm.w !== null) { nm.w = null; nm.s1 = null; nm.s2 = null; clearPropagated(grp, nextRnd, nextIdx); }
+  if (nextRnd === 'r2') MATCHES[grp].winner = null;
+}
+
+const BK = { SLOT_H:86, CARD_H:60, CARD_W:188, CONN_W:28 };
+
+function bCardTop(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + (s * BK.SLOT_H - BK.CARD_H) / 2;
+}
+function bCenterY(ri, mi) {
+  const s = Math.pow(2, ri);
+  return mi * s * BK.SLOT_H + s * BK.SLOT_H / 2;
+}
+
+/* ── localStorage 저장/복원 ── */
+const DB_KEY = 'kr_oq2_scores_v1';
+
+function showSaveToast(state) {
+  let t = document.getElementById('save-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'save-toast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(t);
+  }
+  if (state === 'saving') {
+    t.textContent = '저장 중...'; t.style.background = '#555'; t.style.color = '#fff';
+  } else if (state === 'ok') {
+    t.textContent = '✓ 저장됨'; t.style.background = '#00D2BE'; t.style.color = '#000';
+  } else {
+    t.textContent = '⚠ 저장 실패'; t.style.background = '#c00'; t.style.color = '#fff';
+  }
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  if (state !== 'saving') t._timer = setTimeout(() => t.style.opacity = '0', 2000);
+}
+
+function buildScoresPayload() {
+  const out = {};
+  ['A','B'].forEach(g => {
+    out[g] = {};
+    ALL_RNDS.forEach(rnd => {
+      out[g][rnd] = MATCHES[g][rnd].map(m => ({
+        t1:m.t1?{abbr:m.t1.abbr,name:m.t1.name,logo:m.t1.logo}:null,
+        t2:m.t2?{abbr:m.t2.abbr,name:m.t2.name,logo:m.t2.logo}:null,
+        s1:m.s1,s2:m.s2,w:m.w
+      }));
+    });
+    out[g].winner = MATCHES[g].winner ? {abbr:MATCHES[g].winner.abbr,name:MATCHES[g].winner.name,logo:MATCHES[g].winner.logo} : null;
+  });
+  return JSON.stringify(out);
+}
+
+const ABBR_REMAP = { 'IMK': 'IMCO' };
+function remapAbbr(t) { if (t && t.abbr && ABBR_REMAP[t.abbr]) t.abbr = ABBR_REMAP[t.abbr]; }
+
+function applyScoresData(raw) {
+  if (!raw) return;
+  try {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    ['A','B'].forEach(g => {
+      if (!data[g]) return;
+      ALL_RNDS.forEach(rnd => {
+        (data[g][rnd] || []).forEach((s,i) => {
+          if (!MATCHES[g][rnd][i]) return;
+          if (s.t1) { const sl=MATCHES[g][rnd][i].t1?.logo; if (!MATCHES[g][rnd][i].t1) MATCHES[g][rnd][i].t1={}; Object.assign(MATCHES[g][rnd][i].t1, s.t1); if (!MATCHES[g][rnd][i].t1.logo && sl) MATCHES[g][rnd][i].t1.logo=sl; remapAbbr(MATCHES[g][rnd][i].t1); }
+          if (s.t2) { const sl=MATCHES[g][rnd][i].t2?.logo; if (!MATCHES[g][rnd][i].t2) MATCHES[g][rnd][i].t2={}; Object.assign(MATCHES[g][rnd][i].t2, s.t2); if (!MATCHES[g][rnd][i].t2.logo && sl) MATCHES[g][rnd][i].t2.logo=sl; remapAbbr(MATCHES[g][rnd][i].t2); }
+          MATCHES[g][rnd][i].s1 = s.s1; MATCHES[g][rnd][i].s2 = s.s2; MATCHES[g][rnd][i].w = s.w;
+        });
+      });
+      if (data[g].winner) {
+        const wl = data[g].winner.logo || _findLogoByName(data[g].winner.name) || _findLogoByAbbr(data[g].winner.abbr);
+        MATCHES[g].winner = {abbr:data[g].winner.abbr,name:data[g].winner.name,logo:wl};
+        remapAbbr(MATCHES[g].winner);
+      }
+    });
+  } catch(e) {}
+}
+
+function saveScores() {
+  const payload = buildScoresPayload();
+  showSaveToast('saving');
+  fetch('/api/data/' + encodeURIComponent(DB_KEY), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({value:payload})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok) showSaveToast('ok'); else showSaveToast('err');
+  }).catch(()=>showSaveToast('err'));
+}
+
+function loadScores() {
+  fetch('/api/data/' + encodeURIComponent(DB_KEY))
+    .then(r=>r.json())
+    .then(raw=>{ applyScoresData(raw); renderContent(); })
+    .catch(()=>{});
+}
+
+/* ── bracket renderer ── */
+function bCardRow(t, side, m) {
+  const win = m.w === side;
+  const score = side === 1 ? m.s1 : m.s2;
+  const hasResult = m.w !== null;
+  const baseLogo = `../assets/teams/VCT 2027/Base_Logo.png`;
+  const logoHTML = t?.logo
+    ? `<img src="${t.logo}" alt="" onerror="this.onerror=null;this.src='${baseLogo}'">`
+    : `<img src="${baseLogo}" alt="">`;
+  const fullname = t?.name && t.name !== t?.abbr ? t.name : '';
+  return `<div class="bcard-row${win?' win':''}">
+    <div class="bcard-logo">${logoHTML}</div>
+    <div class="bcard-info">
+      <div class="bcard-abbr">${t?.abbr ?? 'TBD'}</div>
+      ${fullname ? `<div class="bcard-fullname">${fullname}</div>` : ''}
+    </div>
+    ${hasResult ? `<div class="bcard-score">${score}</div>` : ''}
+  </div>`;
+}
+
+function renderBracket(grp) {
+  const isAdmin = window.vctIsAdmin && window.vctIsAdmin();
+  const totalH = 16 * BK.SLOT_H;
+  const COL_STEP = BK.CARD_W + BK.CONN_W;
+  const totalW = ALL_RNDS.length * COL_STEP - BK.CONN_W;
+
+  let svgLines = '';
+  let colsHTML = '';
+
+  const labelsHTML = ALL_RNDS.map((rnd, vi) => {
+    const mr = vi < ALL_RNDS.length - 1 ? BK.CONN_W : 0;
+    return `<div style="width:${BK.CARD_W}px;flex-shrink:0;margin-right:${mr}px;text-align:center">
+      <div class="bcol-label">${RND_FULL[rnd]}</div>
+    </div>`;
+  }).join('');
+
+  ALL_RNDS.forEach((rnd, vi) => {
+    const ri = vi;
+    const matches = MATCHES[grp][rnd];
+    const colLeft = vi * COL_STEP;
+    let cardsHTML = '';
+
+    matches.forEach((m, mi) => {
+      const top = bCardTop(ri, mi);
+      const hasResult = m.w !== null;
+      const ctx = `'${grp}','${rnd}',${mi}`;
+      const resetBtn = hasResult && isAdmin
+        ? `<button class="match-reset" onclick="event.stopPropagation();resetMatch(${ctx})">↺</button>` : '';
+      const tA = encodeURIComponent(m.t1?.name || m.t1?.abbr || 'TBD');
+      const tB = encodeURIComponent(m.t2?.name || m.t2?.abbr || 'TBD');
+      const detailUrl = `kr-oq2-match.html?teamA=${tA}&teamB=${tB}&from=kr_oq2&date=${grp}_${rnd}_${mi}`;
+      const detailBtn = isAdmin
+        ? `<a class="bcard-detail-link" href="${detailUrl}" onclick="event.stopPropagation()" >상세 ↗</a>` : '';
+
+      cardsHTML += `<div class="bm-wrap" style="top:${top}px;left:0">
+        <div class="bcard${hasResult?' has-result':''}" style="position:relative" onclick="${isAdmin ? `openScoreModal(${ctx})` : `location.href='${detailUrl}'`}">
+          <div class="bcard-num">${RND_SHORT[rnd]} · ${String(mi+1).padStart(2,'0')}
+            <span class="bcard-edit-hint">${isAdmin?'클릭하여 입력':''}</span>
+            ${detailBtn}${resetBtn}
+          </div>
+          ${bCardRow(m.t1,1,m)}<div class="bcard-sep"></div>${bCardRow(m.t2,2,m)}
+        </div>
+      </div>`;
+
+      if (vi < ALL_RNDS.length - 1 && mi % 2 === 0 && mi + 1 < matches.length) {
+        const topCY = bCenterY(ri, mi);
+        const botCY = bCenterY(ri, mi + 1);
+        const parCY = bCenterY(ri + 1, mi / 2);
+        const srcX  = colLeft + BK.CARD_W;
+        const jx    = srcX + BK.CONN_W * 0.5;
+        const parX  = colLeft + COL_STEP;
+        const c     = 'rgba(0,210,190,.14)';
+        svgLines += `<line x1="${srcX}" y1="${topCY}" x2="${jx}" y2="${topCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${srcX}" y1="${botCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${topCY}" x2="${jx}" y2="${botCY}" stroke="${c}" stroke-width="1"/>`;
+        svgLines += `<line x1="${jx}" y1="${parCY}" x2="${parX}" y2="${parCY}" stroke="${c}" stroke-width="1"/>`;
+      }
+    });
+
+    colsHTML += `<div style="position:relative;width:${BK.CARD_W}px;height:${totalH}px;flex-shrink:0;margin-right:${vi < ALL_RNDS.length-1 ? BK.CONN_W : 0}px">${cardsHTML}</div>`;
+  });
+
+  return `<div class="bracket-rnd-labels" style="width:${totalW}px">${labelsHTML}</div>
+    <div class="bracket-inner" style="width:${totalW}px;height:${totalH}px">
+      <svg class="bracket-svg" width="${totalW}" height="${totalH}">${svgLines}</svg>
+      <div style="display:flex">${colsHTML}</div>
+    </div>`;
+}
+
+function renderContent() {
+  const w = MATCHES[curGroup].winner;
+  const grpMeta = GROUPS[curGroup];
+
+  const winnerHTML = `<div class="winner-wrap" style="${w?'':'opacity:.35'}">
+    <div class="winner-logo">${w?.logo ? `<img src="${w.logo}" alt="${w.abbr||''}">` : w ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;color:var(--g)">${w.abbr||'?'}</span>` : '<span style="font-size:1.2rem">🏆</span>'}</div>
+    <div>
+      <div class="winner-label">GROUP ${curGroup} WINNER → OQ Playoff</div>
+      <div class="winner-name">${w?.name ?? '미정'}</div>
+    </div>
+    <div class="winner-badge">OQ Playoff 진출</div>
+  </div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="grp-header">
+      <div class="grp-title">GROUP ${curGroup}</div>
+      <div class="grp-badge ${grpMeta.status}">${grpMeta.label}</div>
+      <div class="grp-desc">Ro32 · Single Elimination · 1위 → OQ Playoff</div>
+    </div>
+    <div class="bracket-outer">
+      ${renderBracket(curGroup)}
+    </div>
+    ${winnerHTML}
+  `;
+}
+
+function selectGroup(g, el, skipHash) {
+  if (g === curGroup && el) return;
+  curGroup = g;
+  if (!skipHash) location.hash = 'grp-' + g;
+  document.querySelectorAll('.g-btn').forEach(b => b.classList.toggle('active', b.dataset.grp === g));
+  if (el) {
+    const ct = document.getElementById('content');
+    ct.classList.remove('grp-switching');
+    void ct.offsetWidth;
+    ct.classList.add('grp-switching');
+    ct.addEventListener('animationend', () => ct.classList.remove('grp-switching'), {once:true});
+  }
+  renderContent();
+}
+
+/* ── Score Modal ── */
+let _modalCtx = null;
+let _selWinner = null;
+let _isFF = false;
+
+function openScoreModal(grp, rnd, idx) {
+  if (!(window.vctIsAdmin && window.vctIsAdmin())) return;
+  const m = MATCHES[grp][rnd][idx];
+  _modalCtx = {grp, rnd, idx};
+  _selWinner = m.w;
+  _isFF = (m.s1 === 'W' || m.s1 === 'FF');
+
+  document.getElementById('sbTitle').textContent =
+    `${RND_FULL[rnd]} · MATCH ${String(idx+1).padStart(2,'0')} · Bo1`;
+
+  const t1 = m.t1, t2 = m.t2;
+  document.getElementById('sbRT1name').textContent = t1?.abbr ?? 'TBD';
+  document.getElementById('sbRT2name').textContent = t2?.abbr ?? 'TBD';
+
+  const r1 = document.getElementById('sbR1');
+  const r2 = document.getElementById('sbR2');
+  if (_isFF) {
+    r1.value = ''; r2.value = '';
+  } else {
+    r1.value = (m.s1 !== null) ? m.s1 : '';
+    r2.value = (m.s2 !== null) ? m.s2 : '';
+  }
+
+  document.getElementById('sbFFBtn').classList.toggle('active', _isFF);
+  const ffDiv = document.getElementById('sbFFWinners');
+  if (_isFF) {
+    ffDiv.style.display = 'block';
+    document.getElementById('sbTeams').innerHTML = ffTeamsHTML(t1, t2);
+  } else {
+    ffDiv.style.display = 'none';
+  }
+
+  updateRoundHighlight();
+  updateConfirmBtn();
+  document.getElementById('scoreOverlay').classList.add('open');
+}
+
+function onRoundInput() {
+  _isFF = false;
+  document.getElementById('sbFFBtn').classList.remove('active');
+  document.getElementById('sbFFWinners').style.display = 'none';
+  const r1 = parseInt(document.getElementById('sbR1').value);
+  const r2 = parseInt(document.getElementById('sbR2').value);
+  _selWinner = (!isNaN(r1) && !isNaN(r2) && r1 !== r2) ? (r1 > r2 ? 1 : 2) : null;
+  updateRoundHighlight();
+  updateConfirmBtn();
+}
+
+function updateRoundHighlight() {
+  const r1El = document.getElementById('sbR1');
+  const r2El = document.getElementById('sbR2');
+  const n1 = document.getElementById('sbRT1name');
+  const n2 = document.getElementById('sbRT2name');
+  r1El.classList.toggle('win', _selWinner === 1 && !_isFF);
+  r2El.classList.toggle('win', _selWinner === 2 && !_isFF);
+  n1.classList.toggle('win', _selWinner === 1);
+  n2.classList.toggle('win', _selWinner === 2);
+}
+
+function toggleFF() {
+  _isFF = !_isFF;
+  document.getElementById('sbFFBtn').classList.toggle('active', _isFF);
+  const ffDiv = document.getElementById('sbFFWinners');
+  if (_isFF) {
+    document.getElementById('sbR1').value = '';
+    document.getElementById('sbR2').value = '';
+    _selWinner = null;
+    ffDiv.style.display = 'block';
+    const {grp, rnd, idx} = _modalCtx;
+    const m = MATCHES[grp][rnd][idx];
+    document.getElementById('sbTeams').innerHTML = ffTeamsHTML(m.t1, m.t2);
+  } else {
+    _selWinner = null;
+    ffDiv.style.display = 'none';
+  }
+  updateRoundHighlight();
+  updateConfirmBtn();
+}
+
+function ffTeamsHTML(t1, t2) {
+  const sel1 = _selWinner===1?' selected':'';
+  const sel2 = _selWinner===2?' selected':'';
+  const img = (t, fb) => t?.logo
+    ? `<img src="${t.logo}" onerror="this.onerror=null;this.src='${fb}'">`
+    : '?';
+  const fb = '../assets/teams/VCT 2027/Base_Logo.png';
+  return `
+    <button class="sb-team${sel1}" onclick="pickFFWinner(1)">
+      <div class="sb-team-logo">${img(t1,fb)}</div>
+      <div><span class="sb-team-abbr">${t1?.abbr??'TBD'}</span><span class="sb-team-name">${t1?.name??'미정'}</span></div>
+    </button>
+    <button class="sb-team${sel2}" onclick="pickFFWinner(2)">
+      <div class="sb-team-logo">${img(t2,fb)}</div>
+      <div><span class="sb-team-abbr">${t2?.abbr??'TBD'}</span><span class="sb-team-name">${t2?.name??'미정'}</span></div>
+    </button>`;
+}
+
+function pickFFWinner(side) {
+  _selWinner = side;
+  document.querySelectorAll('#sbTeams .sb-team').forEach((el,i) =>
+    el.classList.toggle('selected', i+1 === side));
+  updateRoundHighlight();
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn() {
+  let ok = false;
+  if (_isFF) {
+    ok = !!_selWinner;
+  } else {
+    const r1 = parseInt(document.getElementById('sbR1').value);
+    const r2 = parseInt(document.getElementById('sbR2').value);
+    ok = !isNaN(r1) && !isNaN(r2) && r1 !== r2;
+  }
+  document.getElementById('sbConfirm').disabled = !ok;
+}
+
+function confirmScore() {
+  const {grp, rnd, idx} = _modalCtx;
+  const m = MATCHES[grp][rnd][idx];
+  if (_isFF) {
+    if (!_selWinner) return;
+    m.w = _selWinner;
+    m.s1 = _selWinner === 1 ? 'W' : 'FF';
+    m.s2 = _selWinner === 2 ? 'W' : 'FF';
+  } else {
+    const r1 = parseInt(document.getElementById('sbR1').value);
+    const r2 = parseInt(document.getElementById('sbR2').value);
+    if (isNaN(r1) || isNaN(r2) || r1 === r2) return;
+    m.w = r1 > r2 ? 1 : 2;
+    m.s1 = r1;
+    m.s2 = r2;
+  }
+  propagateWinner(grp, rnd, idx);
+  if (rnd === 'r2') {
+    const winner = m.w === 1 ? m.t1 : m.t2;
+    if (winner) MATCHES[grp].winner = {...winner};
+  }
+  saveScores();
+  closeScoreModal();
+  renderContent();
+}
+
+function resetMatch(grp, rnd, idx) {
+  const m = MATCHES[grp][rnd][idx];
+  m.s1 = null; m.s2 = null; m.w = null;
+  clearPropagated(grp, rnd, idx);
+  if (rnd === 'r2') MATCHES[grp].winner = null;
+  saveScores();
+  renderContent();
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreOverlay').classList.remove('open');
+  document.getElementById('sbFFBtn').classList.remove('active');
+  document.getElementById('sbFFWinners').style.display = 'none';
+  _modalCtx = null; _selWinner = null; _isFF = false;
+}
+
+document.getElementById('scoreOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('scoreOverlay')) closeScoreModal();
+});
+
+function triggerCrtOff(e) {
+  e.preventDefault();
+  const href = e.currentTarget.href;
+  document.getElementById('screen').style.animation = 'crtOff .4s ease forwards';
+  setTimeout(() => { window.location.href = href; }, 420);
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeScoreModal(); });
+
+/* ── Team seed data ── */
+function initTeams() {
+  const LP = '../assets/teams/VCT 2027/VCT Pacific/Pacific_OQ/Korea/';
+  const t = (abbr, name, logo) => ({abbr, name, logo: logo ? LP+logo : null});
+
+  const seed = {
+    A: { r32: [
+      [t('SPD','SPD'),                      t('BORN','Born Hater')],
+      [t('CLAY','CLAY'),                    t('XOX','XoX')],
+      [t('BIG','BIG BANANA'),               t('CUTE','Cute Gorilla')],
+      [t('SIMB','SIMB'),                    t('인생패배','인생패배자')],
+      [t('NERD','Nerd Family'),             t('CELE','Celestia Comet')],
+      [t('PRON','Pronus E-Sports'),         t('미자','미자')],
+      [t('KAWA','Kawaii Heroes'),           t('ZEST','Zest Academy')],
+      [t('PROJ','Project_Lagrange'),        t('WGS','WGS X','WGS.png')],
+      [t('서른어택','서른어택','서른어택.png'), t('NOPR','NOPROBLEM')],
+      [t('X1P','X1 Project'),               t('DK','Dplus Esports','DK.png')],
+      [t('PROV','Provit'),                  t('FENR','FENRIR')],
+      [t('정권으로','정권으로 세계정복'),     t('HERM','Hermanos')],
+      [t('ARCH','Team ARCHE'),              t('오합지졸','오합지졸')],
+      [t('IMCO','IMCOOKIE'),                 t('CNE','CNEsports','CNE.png')],
+      [t('EOS','EOS','EOS.png'),            t('711','For a 711')],
+      [t('APA','APA'),                      t('NOPL','NoPlan')],
+    ]},
+    B: { r32: [
+      [t('HUNT','hunters'),                 t('PB','PB')],
+      [t('HAMS','Hamster SU'),              t('WSE','WSE')],
+      [t('VEX','Vex E-Sports','VEX.png'),   t('1STG','1steneration')],
+      [t('INNA','Innate'),                  t('FRAN','FrankBurger')],
+      [t('AXE','Axe'),                      t('SILE','Silent Nova','SILE.png')],
+      [t('EZ4U','ez4us'),                   t('SGA','SGA','SGA.png')],
+      [t('BBIR','bbiribbiri'),              t('RETU','RETURNS')],
+      [t('BLUE','Blue Jeans'),              t('ANI','Team ANI')],
+      [t('SRP','SHERPA','SRP.png'),         t('QQ','TEAM QQ')],
+      [t('VM','VM'),                        t('HP','HP')],
+      [t('BOXB','BoxBox'),                  t('NURI','NURI E-Sports Academy','NURI.png')],
+      [t('PSIM','PSIM E-SPORTS'),           t('DB','db')],
+      [t('NIRV','Nirvana'),                 t('FRON','Frontier')],
+      [t('4KB','4kb'),                      t('NOT','Not Outdone Anywhere','NOT.png')],
+      [t('IDES','IDesports','IDES.png'),     t('HAIL','HAIL MARY','HAIL.png')],
+      [t('GOOD','Good Game'),               null],  // bye
+    ]},
+  };
+
+  ['A','B'].forEach(g => {
+    seed[g].r32.forEach(([s1,s2],i) => {
+      const m = MATCHES[g]['r32'][i];
+      if (!m.t1 && s1) m.t1 = {...s1};
+      if (!m.t2 && s2) m.t2 = s2 ? {...s2} : null;
+    });
+  });
+
+  /* Auto-advance Good Game (bye: B r32 match index 15) */
+  const bye = MATCHES['B']['r32'][15];
+  if (bye.t1 && !bye.t2 && bye.w === null) {
+    bye.w = 1; bye.s1 = 'W'; bye.s2 = 'FF';
+    propagateWinner('B', 'r32', 15);
+  }
+}
+
+function _findLogoByName(name) {
+  for (const g of ['A','B']) for (const rnd of ALL_RNDS) for (const m of MATCHES[g][rnd]) {
+    if (m.t1?.name === name && m.t1.logo) return m.t1.logo;
+    if (m.t2?.name === name && m.t2.logo) return m.t2.logo;
+  }
+  return null;
+}
+function _findLogoByAbbr(abbr) {
+  for (const g of ['A','B']) for (const rnd of ALL_RNDS) for (const m of MATCHES[g][rnd]) {
+    if (m.t1?.abbr === abbr && m.t1.logo) return m.t1.logo;
+    if (m.t2?.abbr === abbr && m.t2.logo) return m.t2.logo;
+  }
+  return null;
+}
+
+/* ── init ── */
+initTeams();
+(function restoreGroupFromHash() {
+  const h = location.hash.replace('#','');
+  if (h === 'grp-B') { curGroup = 'B'; selectGroup('B', null, true); }
+})();
+loadScores();
+renderContent();
+</script>
+<script src="../auth.js"></script>
+</body>
+</html>
