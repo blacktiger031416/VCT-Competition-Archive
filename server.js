@@ -3281,6 +3281,106 @@ async function pollAutoMatches(allEventMatches) {
   }
 }
 
+/* ── API: GRID 경기 데이터 프록시 (admin) ────── */
+const GRID_API_KEY = "fuR5MabVCM9003VJIkXrswctfjL09EGXjaU6MVYC";
+const GRID_LIVE_URL = "https://api-op.grid.gg/live-data-feed/series-state/graphql";
+
+async function gridQuery(query) {
+  const r = await fetch(GRID_LIVE_URL, {
+    method: "POST",
+    headers: {
+      "x-api-key": GRID_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query }),
+  });
+  if (!r.ok) throw new Error(`GRID API ${r.status}`);
+  const data = await r.json();
+  if (data.errors) throw new Error(data.errors[0].message);
+  return data.data;
+}
+
+app.get("/api/grid-match/:seriesId", requireAdmin, async (req, res) => {
+  const { seriesId } = req.params;
+  const teamA = (req.query.teamA || "").trim();
+  const teamB = (req.query.teamB || "").trim();
+
+  try {
+    const data = await gridQuery(`{
+      seriesState(id: "${seriesId}") {
+        id
+        games {
+          id
+          sequenceNumber
+          teams {
+            id
+            name
+            players {
+              id
+              name
+              character { id name }
+              kills
+              deaths
+              killAssistsGiven
+            }
+          }
+        }
+      }
+    }`);
+
+    const ss = data.seriesState;
+    if (!ss) return res.status(404).json({ error: "seriesState not found" });
+
+    const result = ss.games.map((game) => {
+      const rawTeams = game.teams || [];
+
+      /* teamA/B 힌트 기반으로 팀 순서 결정 */
+      let sideA = rawTeams[0];
+      let sideB = rawTeams[1];
+      if (teamA && rawTeams.length === 2) {
+        const matched = rawTeams.find(t => teamFuzzyMatch(t.name, teamA));
+        if (matched) {
+          sideA = matched;
+          sideB = rawTeams.find(t => t !== matched) || rawTeams[1];
+        }
+      }
+
+      function mapPlayers(team, prefix) {
+        if (!team) return {};
+        const out = {};
+        (team.players || []).slice(0, 5).forEach((p, i) => {
+          const rawName = p.name || "";
+          /* GRID는 "TEAM nickname" 형식일 수 있으므로 마지막 단어만 추출 */
+          const name = rawName.includes(" ") ? rawName.split(" ").pop() : rawName;
+          const agentRaw = p.character?.name || "";
+          const agent = AGENT_EN_TO_KO[agentRaw] || _AGENT_LOWER[agentRaw.toLowerCase()] || agentRaw;
+          out[`${prefix}${i}`] = {
+            name,
+            agent,
+            acs: null,   /* GRID는 ACS 미제공 — 수동 입력 필요 */
+            kda: `${p.kills}/${p.deaths}/${p.killAssistsGiven}`,
+          };
+        });
+        return out;
+      }
+
+      return {
+        map: game.sequenceNumber,
+        players: {
+          ...mapPlayers(sideA, "a"),
+          ...mapPlayers(sideB, "b"),
+        },
+        teamAName: sideA?.name || "",
+        teamBName: sideB?.name || "",
+      };
+    });
+
+    res.json({ seriesId, maps: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── SPA fallback (반드시 모든 API 라우트 아래에 위치) ── */
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

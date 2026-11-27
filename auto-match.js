@@ -86,6 +86,46 @@
     '  margin-left: 4px;',
     '  flex: 1; min-width: 0;',
     '}',
+    '#am-grid-panel {',
+    '  display: none;',
+    '  align-items: center;',
+    '  gap: 8px;',
+    '  padding: 7px 20px;',
+    '  background: rgba(255,255,255,.018);',
+    '  border-bottom: 1px solid rgba(255,255,255,.06);',
+    '  flex-wrap: wrap;',
+    '}',
+    '#am-grid-input {',
+    '  font-family: "Barlow Condensed", monospace;',
+    '  font-size: 13px;',
+    '  padding: 5px 10px;',
+    '  background: rgba(255,255,255,.07);',
+    '  border: 1px solid rgba(255,255,255,.14);',
+    '  border-radius: 5px;',
+    '  color: #fff;',
+    '  width: 130px;',
+    '  outline: none;',
+    '  transition: border-color .15s;',
+    '}',
+    '#am-grid-input::placeholder { color: rgba(255,255,255,.3); }',
+    '#am-grid-input:focus { border-color: rgba(255,255,255,.35); }',
+    '#am-grid-btn {',
+    '  background: rgba(80,230,120,.12);',
+    '  border-color: rgba(80,230,120,.4);',
+    '  color: #50e678;',
+    '}',
+    '#am-grid-btn:hover {',
+    '  background: rgba(80,230,120,.26);',
+    '  border-color: rgba(80,230,120,.7);',
+    '}',
+    '#am-grid-btn:disabled { opacity: .45; cursor: default; }',
+    '#am-grid-status {',
+    '  font-size: 11px;',
+    '  font-family: "Barlow Condensed", sans-serif;',
+    '  color: rgba(255,255,255,.45);',
+    '  margin-left: 4px;',
+    '  flex: 1; min-width: 0;',
+    '}',
   ].join('\n');
   document.head.appendChild(_s);
 
@@ -109,6 +149,18 @@
     }
     document.getElementById('am-now-btn').addEventListener('click', applyNow);
     document.getElementById('am-live-btn').addEventListener('click', toggleLive);
+
+    /* GRID 패널 삽입 */
+    var gridPanel = document.createElement('div');
+    gridPanel.id = 'am-grid-panel';
+    gridPanel.innerHTML = [
+      '<span class="am-label">GRID Series ID</span>',
+      '<input type="text" id="am-grid-input" placeholder="예: 3006384" inputmode="numeric" />',
+      '<button class="am-btn" id="am-grid-btn">🟢 GRID 적용</button>',
+      '<span id="am-grid-status">ACS 제외 — 닉/에이전트/KDA 자동 입력</span>',
+    ].join('');
+    panel.parentNode.insertBefore(gridPanel, panel.nextSibling);
+    document.getElementById('am-grid-btn').addEventListener('click', applyGrid);
 
     /* 입력 지우면 localStorage에서도 제거 */
     var idInput = document.getElementById('am-id-input');
@@ -220,6 +272,68 @@
       .catch(function (err) {
         if (nowBtn) { nowBtn.disabled = false; nowBtn.textContent = '⚡ 바로 적용'; }
         setStatus('❌ 네트워크 오류: ' + err.message);
+      });
+  }
+
+  /* ── 🟢 GRID 적용 ── */
+  function applyGrid() {
+    var input = document.getElementById('am-grid-input');
+    var seriesId = (input ? input.value : '').trim();
+    if (!seriesId) { alert('GRID Series ID를 입력하세요.'); return; }
+    if (!mk())     { alert('경기 키(MATCH_KEY)를 찾을 수 없습니다.'); return; }
+
+    var btn = document.getElementById('am-grid-btn');
+    var statusEl = document.getElementById('am-grid-status');
+    function gs(txt) { if (statusEl) statusEl.textContent = txt; }
+
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ 처리 중...'; }
+    gs('GRID에서 데이터를 가져오는 중...');
+
+    var url = '/api/grid-match/' + encodeURIComponent(seriesId)
+            + '?teamA=' + encodeURIComponent(t1())
+            + '&teamB=' + encodeURIComponent(t2());
+
+    fetch(url, { headers: { Authorization: 'Bearer ' + tok() } })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (btn) { btn.disabled = false; btn.textContent = '🟢 GRID 적용'; }
+        if (d.error) { gs('❌ ' + d.error); return; }
+
+        var maps = d.maps || [];
+        if (!maps.length) { gs('⚠️ 맵 데이터 없음'); return; }
+
+        /* match 페이지의 window.maps 에 직접 병합 */
+        maps.forEach(function (mapData) {
+          var idx = (mapData.map || 1) - 1;
+          if (!window.maps || !window.maps[idx]) return;
+          var m = window.maps[idx];
+          if (!m.players) m.players = {};
+          Object.keys(mapData.players).forEach(function (slot) {
+            var src = mapData.players[slot];
+            if (!m.players[slot]) m.players[slot] = {};
+            m.players[slot].name  = src.name;
+            m.players[slot].agent = src.agent;
+            m.players[slot].kda   = src.kda;
+            /* acs는 null이므로 기존 값 유지 */
+            if (src.acs !== null && src.acs !== undefined) {
+              m.players[slot].acs = src.acs;
+            }
+          });
+        });
+
+        /* 서버 DB 저장 */
+        fetch('/api/data/' + encodeURIComponent(mk()), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok() },
+          body: JSON.stringify({ maps: window.maps }),
+        }).catch(function () {});
+
+        refreshAllMaps();
+        gs('✅ ' + maps.length + '맵 적용 완료 (ACS 수동 입력 필요)');
+      })
+      .catch(function (err) {
+        if (btn) { btn.disabled = false; btn.textContent = '🟢 GRID 적용'; }
+        gs('❌ 네트워크 오류: ' + err.message);
       });
   }
 
@@ -337,6 +451,9 @@
     var panel = document.getElementById('am-panel');
     if (!panel) return;
     panel.style.display = 'flex';
+
+    var gridPanel = document.getElementById('am-grid-panel');
+    if (gridPanel) gridPanel.style.display = 'flex';
 
     /* localStorage에서 thespike ID 복원 */
     var savedId = '';
