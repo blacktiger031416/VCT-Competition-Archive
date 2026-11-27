@@ -2997,12 +2997,11 @@ function shrinkLongNames(root) {
       if (len <= threshold) return;
       ruler.textContent = text;
       var textW = ruler.offsetWidth;
-      var cellW = el.offsetWidth;
-      if (cellW <= 0) cellW = (function() {
-        var pcText = el.parentElement;
-        var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
-        return pcText ? (pcText.offsetWidth - (statsEl ? statsEl.offsetWidth : 0) - 38) : el.offsetWidth;
-      })();
+      var pcText = el.closest('.pc-text') || el.parentElement;
+      var statsEl = pcText ? pcText.querySelector('.pc-stats') : null;
+      var style = pcText ? window.getComputedStyle(pcText) : null;
+      var padH = style ? (parseFloat(style.paddingLeft||0) + parseFloat(style.paddingRight||0)) : 28;
+      var cellW = pcText ? (pcText.offsetWidth - padH - (statsEl ? statsEl.offsetWidth : 0) - 10) : el.offsetWidth;
       if (textW <= cellW - 4) return;
       var ratio = (cellW - 25) / textW;
       var base  = isKorean ? (len > 12 ? 11 : len > 10 ? 13 : 15) : 16;
