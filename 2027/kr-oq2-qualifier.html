@@ -924,59 +924,8 @@ function initTeams() {
   const LP = '../assets/teams/VCT 2027/VCT Pacific/Pacific_OQ/Korea/';
   const t = (abbr, name, logo) => ({abbr, name, logo: logo ? LP+logo : null});
 
-  const seed = {
-    A: { r32: [
-      [t('SPD','SPD'),                      t('BORN','Born Hater')],
-      [t('CLAY','CLAY'),                    t('XOX','XoX')],
-      [t('BIG','BIG BANANA'),               t('CUTE','Cute Gorilla')],
-      [t('SIMB','SIMB'),                    t('인생패배','인생패배자')],
-      [t('NERD','Nerd Family'),             t('CELE','Celestia Comet')],
-      [t('PRON','Pronus E-Sports'),         t('미자','미자')],
-      [t('KAWA','Kawaii Heroes'),           t('ZEST','Zest Academy')],
-      [t('PROJ','Project_Lagrange'),        t('WGS','WGS X','WGS.png')],
-      [t('서른어택','서른어택','서른어택.png'), t('NOPR','NOPROBLEM')],
-      [t('X1P','X1 Project'),               t('DK','Dplus Esports','DK.png')],
-      [t('PROV','Provit'),                  t('FENR','FENRIR')],
-      [t('정권으로','정권으로 세계정복'),     t('HERM','Hermanos')],
-      [t('ARCH','Team ARCHE'),              t('오합지졸','오합지졸')],
-      [t('IMCO','IMCOOKIE'),                 t('CNE','CNEsports','CNE.png')],
-      [t('EOS','EOS','EOS.png'),            t('711','For a 711')],
-      [t('APA','APA'),                      t('NOPL','NoPlan')],
-    ]},
-    B: { r32: [
-      [t('HUNT','hunters'),                 t('PB','PB')],
-      [t('HAMS','Hamster SU'),              t('WSE','WSE')],
-      [t('VEX','Vex E-Sports','VEX.png'),   t('1STG','1steneration')],
-      [t('INNA','Innate'),                  t('FRAN','FrankBurger')],
-      [t('AXE','Axe'),                      t('SILE','Silent Nova','SILE.png')],
-      [t('EZ4U','ez4us'),                   t('SGA','SGA','SGA.png')],
-      [t('BBIR','bbiribbiri'),              t('RETU','RETURNS')],
-      [t('BLUE','Blue Jeans'),              t('ANI','Team ANI')],
-      [t('SRP','SHERPA','SRP.png'),         t('QQ','TEAM QQ')],
-      [t('VM','VM'),                        t('HP','HP')],
-      [t('BOXB','BoxBox'),                  t('NURI','NURI E-Sports Academy','NURI.png')],
-      [t('PSIM','PSIM E-SPORTS'),           t('DB','db')],
-      [t('NIRV','Nirvana'),                 t('FRON','Frontier')],
-      [t('4KB','4kb'),                      t('NOT','Not Outdone Anywhere','NOT.png')],
-      [t('IDES','IDesports','IDES.png'),     t('HAIL','HAIL MARY','HAIL.png')],
-      [t('GOOD','Good Game'),               null],  // bye
-    ]},
-  };
-
-  ['A','B'].forEach(g => {
-    seed[g].r32.forEach(([s1,s2],i) => {
-      const m = MATCHES[g]['r32'][i];
-      if (!m.t1 && s1) m.t1 = {...s1};
-      if (!m.t2 && s2) m.t2 = s2 ? {...s2} : null;
-    });
-  });
-
-  /* Auto-advance Good Game (bye: B r32 match index 15) */
-  const bye = MATCHES['B']['r32'][15];
-  if (bye.t1 && !bye.t2 && bye.w === null) {
-    bye.w = 1; bye.s1 = 'W'; bye.s2 = 'FF';
-    propagateWinner('B', 'r32', 15);
-  }
+  // OQ2 팀 미정 — 추후 입력
+  void t;
 }
 
 function _findLogoByName(name) {
