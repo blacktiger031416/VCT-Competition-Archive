@@ -387,7 +387,7 @@
       overflow: hidden;
     }
     /* 왼팀: 이름이 남은 공간을 차지, stats는 오른쪽 고정 */
-    .player-cell-l .player-name { flex: 1; min-width: 0; }
+    .player-cell-l .pc-stats { margin-left: auto; }
     /* 오른팀: 이름 오른쪽으로 밀고, 이미지 오른쪽 끝 */
     .player-cell-r .pc-name { margin-left: auto; }
 
@@ -630,9 +630,7 @@
       font-weight: 700;
       letter-spacing: 0.03em;
       color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-all;
       display: block;
       min-width: 0;
     }
@@ -2973,7 +2971,7 @@ function renderMap(mapData, mapIdx) {
     </tr>`;
   }
   tbody.innerHTML = html;
-  shrinkLongNames(tbody);
+  // shrinkLongNames disabled — names wrap to next line instead
 }
 
 function shrinkLongNames(root) {
